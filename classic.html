@@ -1,0 +1,1351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- served at /classic (serve.py + vercel.json rewrite) -->
+<base href="/">
+<title>Your dashboard — StudyVault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Young+Serif&display=swap" rel="stylesheet">
+<style>
+  /* ============ CLASSIC: the desk's contents, filed neatly ============
+     Same data, same painted objects, same subject cloth-tabs as the cosy
+     desk — laid out as a clean planner page. This is the professional
+     front door (and the mobile answer); the desk is the cosy mode. */
+  :root{--paper:#f6f1e7;--card:#fffdf8;--ink:#26231e;--sec:#57534a;--mut:#84806f;
+    --line:#e4dfd2;--linel:#efeadf;--anchor:#5b4632;
+    --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif;--hand:'Caveat',cursive;
+    --ease:cubic-bezier(.22,1,.36,1)}
+  *{box-sizing:border-box}
+  html{background:var(--paper)}
+  body{margin:0;font-family:var(--head);color:var(--ink);background:var(--paper);
+    opacity:0;transition:opacity .3s ease}
+  body.ready{opacity:1}
+
+  .top{max-width:1180px;margin:0 auto;padding:18px clamp(16px,4vw,32px) 6px;display:flex;align-items:center;gap:14px}
+  .brand{font-family:'Young Serif',serif;font-size:1.22rem;font-weight:400;color:#1d1c1a}
+  .brandlock{height:.30em;width:auto;margin-left:.5px;vertical-align:baseline}   /* the padlock is the full stop */
+  .brandlogo{height:30px;display:block}
+  .datestamp{font-family:var(--hand);font-size:1.35rem;color:var(--mut);margin-left:6px;margin-top:2px}
+  .top .sp{flex:1}
+  .cosy{font-family:var(--head);font-size:.88rem;font-weight:600;color:var(--sec);text-decoration:none;
+    border:1px solid var(--line);border-radius:4px;padding:.45rem .8rem;background:var(--card);transition:border-color .15s,color .15s}
+  .cosy:hover{border-color:#b9a98c;color:var(--ink)}
+  .avatar{width:32px;height:32px;border-radius:50%;background:#221E19;color:#faf8f5;
+    display:grid;place-items:center;font-weight:700;font-size:.8rem}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:10px clamp(16px,4vw,32px) 56px;
+    display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:34px}
+  @media (max-width:980px){ .wrap{grid-template-columns:minmax(0,1fr)} }
+  .cosy{white-space:nowrap}
+  @media (max-width:560px){ .datestamp{display:none} .scard h3,.scard .meta{padding-right:86px} }
+
+  .h1row{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin:.2rem 0 .55rem}
+  h1{font-size:clamp(1.5rem,2.6vw,1.9rem);font-weight:800;letter-spacing:-.02em;margin:0}
+  .momentum{font-family:var(--read);font-size:.92rem;color:var(--sec);margin:0}
+  /* LAW 1: the home surface fits the viewport on desktop */
+  @media (min-width:981px) and (min-height:640px){
+    html,body{height:100%;overflow:hidden}
+    .wrap{height:calc(100% - 64px);overflow:hidden;align-content:start}
+    .rail{overflow:hidden}
+  }
+  .hl{background:linear-gradient(101deg,transparent 1.5%,rgba(255,222,84,.5) 7%,rgba(255,226,96,.4) 93%,transparent 98.5%);
+    border-radius:6px;padding:1px 7px;margin:0 -3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:none}
+
+  /* ---- today's plan ---- */
+  .plan{padding:.7rem 1.2rem .8rem}
+  .plan ol{list-style:none;margin:0;padding:0}
+  .plan li{display:grid;grid-template-columns:28px minmax(0,1fr) 58px;gap:0 12px;align-items:center;
+    padding:.36rem .4rem;border-radius:3px;cursor:pointer;transition:background .14s}
+  .plan li.inert{cursor:default}
+  .plan li:hover:not(.inert){background:rgba(112,90,50,.06)}
+  .plan li+li{border-top:1px solid var(--linel)}
+  .plan .n{font-family:var(--read);font-weight:700;font-size:1.05rem;color:var(--mut);padding-top:.05rem}
+  .plan b{font-family:var(--read);font-weight:600;font-size:.98rem;line-height:1.25;display:block}
+  .plan small{font-size:.8rem;color:var(--mut);display:block;margin-top:.1rem}
+  .plan .mins{font-size:.83rem;font-weight:600;color:var(--mut);text-align:right;padding-top:.2rem;font-variant-numeric:tabular-nums}
+  .startrow{display:flex;align-items:center;gap:14px;margin-top:.55rem}
+  .start{display:inline-flex;align-items:center;gap:10px;padding:.6rem 1.35rem;border:none;border-radius:4px;
+    background:var(--anchor);color:#fff;font-family:var(--head);font-weight:700;font-size:.95rem;cursor:pointer;
+    box-shadow:inset 0 -2px 0 rgba(0,0,0,.22);transition:filter .15s}
+  .start:focus-visible{outline:3px solid color-mix(in srgb,var(--anchor) 40%,#fff);outline-offset:2px}
+  .start:hover{filter:brightness(1.06)}
+  .start:active{box-shadow:inset 0 1px 2px rgba(0,0,0,.3)}
+  .start svg{width:14px;height:14px;fill:#fff}
+  .startnote{font-family:var(--hand);font-size:1.15rem;color:var(--mut)}
+
+  /* ---- subjects ---- */
+  .sechead{display:flex;align-items:baseline;gap:12px;margin:.6rem 0 .35rem}
+  .sechead h2{font-size:1.15rem;font-weight:700;letter-spacing:-.01em;margin:0}
+  .sechead span{font-size:.85rem;color:var(--mut)}
+  /* THE SHELF: nine spines, progress as ink filling each book from the
+     bottom. Whole GCSE at a glance, no words doing the work. Width is
+     honest (proportional to lesson count). Stale books grow an amber
+     bookmark. Selected spine pulls forward; the fixed-height panel below
+     shows that subject with every unit selectable. */
+  /* THE PAINTED SHELF: each spine is line-and-wash art. Two stacked copies
+     of the same painting — the lower layer knocked back to a pencil-sketch
+     state, the colour layer clipped to progress — so every book literally
+     colours in from the bottom as its subject gets studied. */
+  /* THE SHELF: static per-subject books (one image each, reused for every
+     student — zero per-student cost) on a shared walnut ledge. Pale = not
+     studied; the colour fills up AND deepens from the shelf as it is learned. */
+  .shelfstage{position:relative;margin-top:34px;   /* clearance so a lifted/selected spine never covers the heading + metrics above */
+    --bkshadow:drop-shadow(0 3px 3px rgba(28,18,8,.15))}                 /* lamp off: soft neutral shadow */
+  .shelfstage.lit{--bkshadow:drop-shadow(-6px 2px 3px rgba(28,18,8,.30))}  /* lamp on: shadow cast left */
+  .shelf{display:flex;align-items:flex-end;justify-content:flex-start;gap:3px;height:212px;padding:0 6px 0 10px;position:relative;z-index:2}
+  .bookend{height:var(--beh,210px);width:auto;align-self:flex-end;margin-right:-6px;pointer-events:none;
+    filter:drop-shadow(-7px 5px 4px rgba(40,28,12,.30))}
+  /* lamp on the right, arm reaching left; its shade is the light source for the scene */
+  .lamp{position:absolute;right:14px;bottom:20px;height:250px;width:auto;z-index:5;pointer-events:none;
+    filter:drop-shadow(-10px 8px 8px rgba(40,28,12,.22));transition:filter .2s ease}
+  .lamp.hot{filter:drop-shadow(-10px 8px 8px rgba(40,28,12,.22)) brightness(1.06)}
+  /* invisible click-target over the lamp, kept in the gap (right of the books) so it
+     never steals a spine's click */
+  .lampbtn{position:absolute;right:12px;bottom:18px;width:132px;height:240px;z-index:7;
+    border:none;background:transparent;cursor:pointer;padding:0}
+  .lampbtn:focus-visible{outline:3px solid var(--anchor);outline-offset:2px;border-radius:8px}
+  /* pull-cord — the visible 'you can click me' affordance hanging from the shade */
+  .pullcord{position:absolute;left:82.5%;top:21.3%;width:2px;height:68px;z-index:6;pointer-events:none;
+    background:linear-gradient(#7c6848,#57492f);border-radius:1px;transform-origin:top center}
+  .pullcord::after{content:"";position:absolute;left:50%;bottom:-12px;transform:translateX(-50%);
+    width:10px;height:14px;border-radius:46% 46% 50% 50%/36% 36% 64% 64%;
+    background:radial-gradient(46% 38% at 38% 28%, #e6d29c 0%, #d9b978 30%, #a2814f 62%, #6f5733 100%);
+    box-shadow:0 1px 2px rgba(40,28,12,.45)}
+  @keyframes cord-tug{0%{transform:translateY(0)}26%{transform:translateY(9px)}62%{transform:translateY(-2px)}100%{transform:translateY(0)}}
+  .pullcord.tug{animation:cord-tug .42s cubic-bezier(.3,1.25,.5,1)}
+  .lampbtn:hover ~ .pullcord{filter:brightness(1.08)}
+  /* ---- ?place : drag-to-position workbench for the cord + light origin ---- */
+  .ph{position:absolute;z-index:60;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;
+    background:transparent;border:3px solid currentColor;color:#fff;cursor:grab;touch-action:none;
+    box-shadow:0 0 0 1.5px rgba(255,255,255,.9),0 1px 4px rgba(0,0,0,.45)}
+  .ph::before{content:"";position:absolute;left:50%;top:50%;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;
+    border-radius:50%;background:currentColor;box-shadow:0 0 0 1px rgba(255,255,255,.9)}
+  .ph.grab{cursor:grabbing;transform:scale(1.12)}
+  .ph-top{color:#2563eb}.ph-knob{color:#f59e0b}.ph-glow{color:#ef4444}.ph-aim{color:#a855f7}
+  .ph b{position:absolute;left:22px;top:-3px;white-space:nowrap;font:600 11px/1.4 system-ui,sans-serif;
+    color:#fff;background:rgba(20,15,8,.7);padding:1px 6px;border-radius:5px}
+  .placepanel{position:fixed;top:14px;right:14px;z-index:9999;background:#211d17;color:#f3ead4;border-radius:13px;
+    padding:15px 17px;font:12.5px/1.55 ui-monospace,Consolas,monospace;box-shadow:0 14px 44px rgba(0,0,0,.45);width:308px}
+  .placepanel h4{margin:0 0 3px;font:700 14px/1.2 Georgia,serif;color:#fff}
+  .placepanel .sub{font:400 11px/1.4 system-ui,sans-serif;color:#a89b82;margin:0 0 11px}
+  .placepanel .row{margin:4px 0}.placepanel .k{color:#c9b891}
+  .placepanel .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+  .placepanel button{margin-top:12px;font:600 12px/1 system-ui,sans-serif;background:#8a6d3b;color:#fff;
+    border:0;border-radius:8px;padding:7px 13px;cursor:pointer}
+  .placepanel .ok{color:#8fce9b;font-family:system-ui,sans-serif;font-size:11px;margin-left:8px;opacity:0;transition:opacity .2s}
+  .placepanel .ok.on{opacity:1}
+  .placepanel input[type=range]{width:120px;vertical-align:middle;accent-color:#e0a86a;margin-left:6px}
+  .placepanel .cbtn{margin:0 5px 0 0;background:#4a4235;color:#e8ddc8}
+  .placepanel .cbtn[aria-pressed=true]{background:#c98a3a;color:#fff}
+  /* ?lean bench */
+  body.leaning .bk{cursor:grab}
+  .bk.tilting{transition:none;cursor:grabbing;z-index:30}
+  .leanlbl{position:absolute;top:-22px;left:50%;transform:translateX(-50%) rotate(calc(-1*var(--lean,0deg)));
+    font:600 11px/1 system-ui,sans-serif;color:#fff;background:rgba(20,15,8,.72);padding:1px 5px;border-radius:4px;
+    white-space:nowrap;pointer-events:none;z-index:40}
+  /* soft shadow falling to the LEFT, away from the lamp (over spines AND shelf) */
+  .lightwash{position:absolute;left:0;right:0;top:-6px;bottom:2px;z-index:3;pointer-events:none;
+    background:linear-gradient(to right, rgba(24,16,7,.38), rgba(24,16,7,.13) 34%, transparent 58%);
+    mix-blend-mode:multiply;opacity:0;transition:opacity .55s ease}
+  /* the light itself: a conical beam fanning down-left from the shade onto the books */
+  .lampglow{position:absolute;inset:0;z-index:4;pointer-events:none;
+    clip-path:polygon(75.6% 18.2%, 84.3% 32.4%, 79.0% 138.8%, 46.8% 86.2%);
+    background:linear-gradient(to bottom,
+      rgba(255,170,86,.60) 22%, rgba(255,158,74,.48) 40%, rgba(252,146,64,.24) 66%, rgba(252,146,64,.08) 86%, transparent 97%);
+    mix-blend-mode:screen;filter:blur(2.5px);opacity:0;transition:opacity .55s ease}
+  /* a warm bulb behind the shade, glowing only when lit */
+  .bulb{position:absolute;left:80.0%;top:25.3%;width:66px;height:66px;transform:translate(-50%,-50%);z-index:6;
+    pointer-events:none;border-radius:50%;opacity:0;transition:opacity .55s ease;
+    background:radial-gradient(circle, rgba(255,198,124,.92), rgba(255,168,84,.48) 42%, transparent 72%);
+    mix-blend-mode:screen}
+  .shelfstage.lit .lightwash,.shelfstage.lit .lampglow,.shelfstage.lit .bulb{opacity:1}
+  .bk{position:relative;height:var(--bkh,204px);border:none;background:none;padding:0;cursor:grab;touch-action:none;
+    transform:translateX(calc(var(--shift,0px)*var(--fit,1))) rotate(var(--lean,0deg));filter:var(--bkshadow);
+    transition:transform .28s cubic-bezier(.34,1.4,.5,1),filter .55s ease;transform-origin:bottom center}
+  .bk img{display:block}
+  .bk img.cold{height:var(--bkh,204px);width:auto;filter:var(--coldf, saturate(1.20) brightness(0.92) contrast(1.30) sepia(0.10) hue-rotate(-8deg))}
+  .bk img.warm{position:absolute;inset:0;height:100%;width:100%;filter:var(--warmf, saturate(1.64) brightness(1.15) contrast(0.93))}
+  .bk::before{content:"";position:absolute;left:4%;right:4%;bottom:1px;height:15px;z-index:-1;
+    background:radial-gradient(52% 120% at 50% 0%,rgba(34,22,8,.55),rgba(34,22,8,.18) 55%,transparent 78%);filter:blur(2.5px)}
+  .bk:hover{transform:translateX(calc(var(--shift,0px)*var(--fit,1))) rotate(var(--lean,0deg)) translateY(-5px)}
+  /* taken off the shelf, in stages: slide DOWN out of the slot → turn 90° while sliding to the frame
+     centre → draw closer (enlarge). --pull-dx (set per-book in JS) is the x-shift to the frame centre,
+     so every book ends in the same central spot regardless of which slot it came from. */
+  .bk[aria-selected="true"]{transform:translateX(var(--pull-dx,0px)) translateY(20px) rotate(-90deg) scale(1.5);
+    transform-origin:center center;z-index:20;animation:book-pull 1s cubic-bezier(.4,0,.2,1) forwards}
+  .bk[aria-selected="true"]::before{opacity:0}
+  @keyframes book-pull{
+    0%   {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(0)    rotate(var(--lean,0deg)) scale(1)}
+    34%  {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(30px) rotate(0deg)             scale(1.02)}  /* pulled straight down out of its slot */
+    66%  {transform:translateX(var(--pull-dx,0px))                  translateY(30px) rotate(-90deg)          scale(1.04)}  /* turned, slid to centre */
+    100% {transform:translateX(var(--pull-dx,0px))                  translateY(20px) rotate(-90deg)          scale(1.5)}   /* centred + drawn closer */
+  }
+  /* click again -> slot back in. Needs its OWN @keyframes (not book-pull with reverse): reusing
+     book-pull's name leaves the resolved animation-name unchanged, so the browser never restarts
+     it and the book just snaps. book-return is book-pull with the keyframes mirrored. */
+  .bk.returning{transform-origin:center center;z-index:20;animation:book-return 1s cubic-bezier(.4,0,.2,1) both}
+  @keyframes book-return{
+    0%   {transform:translateX(var(--pull-dx,0px))                  translateY(20px) rotate(-90deg)          scale(1.5)}   /* centred, in the hand */
+    34%  {transform:translateX(var(--pull-dx,0px))                  translateY(30px) rotate(-90deg)          scale(1.04)}  /* drawn back, still turned */
+    66%  {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(30px) rotate(0deg)             scale(1.02)}  /* turned upright, slid back to its slot */
+    100% {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(0)    rotate(var(--lean,0deg)) scale(1)}     /* slotted back into the shelf */
+  }
+  @media (prefers-reduced-motion:reduce){ .bk[aria-selected="true"],.bk.returning{animation:none} }
+  .bk:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:6px}
+  /* drag to reorder; drop with a little physics */
+  .bk.dragging{z-index:50;transition:none;cursor:grabbing;
+    filter:drop-shadow(0 16px 14px rgba(40,28,12,.38))}
+  body.dragging-book{cursor:grabbing;user-select:none}
+  @keyframes drop-settle{
+    0%{transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(-15px) rotate(var(--lean,0deg))}
+    45%{transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(0) rotate(calc(var(--lean,0deg) - 4deg))}
+    72%{transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(-3px) rotate(calc(var(--lean,0deg) + 2.2deg))}
+    100%{transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(0) rotate(var(--lean,0deg))}}
+  .bk.settling{animation:drop-settle .55s cubic-bezier(.3,1.2,.5,1)}
+  @media (prefers-reduced-motion:reduce){ .bk.settling{animation:none} }
+  .ledge{display:block;width:100%;height:46px;object-fit:cover;object-position:center 18%;margin-top:-8px;position:relative;z-index:1}
+  /* hover card — the book's own name + progress, in-style (replaces the OS tooltip) */
+  .booktip{position:absolute;z-index:20;pointer-events:none;opacity:0;transform:translate(-50%,-94%);
+    background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.4rem .62rem;
+    box-shadow:0 10px 26px rgba(40,28,12,.16);white-space:nowrap;font-family:var(--head);
+    transition:opacity .16s ease,transform .16s cubic-bezier(.16,1,.3,1)}
+  .booktip.on{opacity:1;transform:translate(-50%,-100%)}
+  .booktip b{font-weight:700;font-size:.86rem;color:var(--ink)}
+  .booktip .c{display:block;font-size:.73rem;color:var(--mut);margin-top:1px}
+  .booktip::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);
+    border:6px solid transparent;border-top-color:var(--card)}
+  /* prompt shown under the shelf when nothing is selected */
+  .selprompt{text-align:center;padding:16px 0 6px;color:var(--mut);font-family:var(--hand);font-size:1.2rem;line-height:1.1}
+  .selprompt .uparrow{display:block;font-size:1.5rem;color:var(--anchor);margin-bottom:2px;animation:sp-bob 1.7s ease-in-out infinite}
+  @keyframes sp-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  @media (prefers-reduced-motion:reduce){ .selprompt .uparrow{animation:none} }
+  /* the open book: a ledger page; sizes to its content so nothing is ever clipped */
+  .sdetail{min-height:100px;padding:.6rem 1rem .7rem;position:relative;overflow:visible;display:flex;flex-direction:column;gap:.4rem;
+    background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:none}
+  .sdetail[hidden]{display:none}
+  .sdetail .top{display:flex;align-items:baseline;gap:10px;flex:none;flex-wrap:nowrap}
+  .sdetail h3{font-family:var(--read);font-size:1.1rem;font-weight:600;margin:0;white-space:nowrap;color:var(--ink)}
+  .sdetail .sub{font-size:.76rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sdetail .sp{flex:1}
+  /* crafted button — a pressable slab, not a pill */
+  .sdetail .cont,.sdetail .go{font-family:var(--head);font-weight:600;font-size:.82rem;color:#fff;background:var(--tc);
+    border:none;border-radius:3px;padding:.32rem .75rem;cursor:pointer;white-space:nowrap;
+    box-shadow:inset 0 -2px 0 rgba(0,0,0,.2);transition:filter .15s}
+  .sdetail .cont:hover,.sdetail .go:hover{filter:brightness(1.07)}
+  .sdetail .cont:active,.sdetail .go:active{box-shadow:inset 0 1px 2px rgba(0,0,0,.28)}
+  /* choose-your-options prompt (History/Lit/RS/Drama before the student sculpts) */
+  .optprompt{display:flex;flex-direction:column;gap:.75rem;align-items:flex-start;padding:.15rem 0 .2rem}
+  .optprompt p{margin:0;font-family:var(--read);font-size:.9rem;line-height:1.45;color:var(--sec);max-width:54ch}
+  .optprompt .cont{position:static}
+  /* topics — hairline-divided ledger cells, not floating cards */
+  .units{display:flex;gap:0;flex:none}
+  .ublock{flex:1 1 0;min-width:0;border:none;border-left:1px solid var(--line);background:none;cursor:pointer;
+    text-align:left;font-family:var(--head);color:inherit;padding:.2rem .75rem;transition:background .15s}
+  .ublock:first-child{border-left:none;padding-left:0}
+  .ublock:hover{background:color-mix(in srgb,var(--tc) 9%,transparent)}
+  .ublock .un{font-family:var(--read);font-size:.84rem;font-weight:600;line-height:1.2;color:var(--ink);
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.1em}
+  .ublock .utrack{display:block;height:3px;background:var(--linel);margin:.5rem 0 .3rem;overflow:hidden}
+  .ublock .utrack i{display:block;height:100%;background:var(--tc)}
+  .ublock .ud{display:block;font-size:.7rem;color:var(--mut);font-variant-numeric:tabular-nums}
+  /* drill into a topic -> pick any lesson (select, then confirm) */
+  .sdetail .back{flex:none;width:24px;height:24px;border:1px solid var(--line);background:var(--card);border-radius:3px;
+    cursor:pointer;font-size:1.05rem;line-height:1;color:var(--sec)}
+  .sdetail .back:hover{border-color:var(--tc);color:var(--ink)}
+  .lessons{display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;flex:none;max-height:71px;overflow-y:auto}
+  .ltile{flex:none;width:30px;height:30px;border:1px solid var(--line);border-radius:3px;background:var(--card);cursor:pointer;
+    font:600 .78rem/1 var(--head);color:var(--sec);display:grid;place-items:center;transition:border-color .12s,background .12s,color .12s}
+  .ltile:hover{border-color:var(--tc);color:var(--ink)}
+  .ltile.done{background:color-mix(in srgb,var(--tc) 16%,var(--card));color:var(--tc);border-color:transparent}
+  .ltile.next:not(.sel){box-shadow:inset 0 0 0 1.5px var(--tc);color:var(--tc)}
+  .ltile.sel{background:var(--tc);color:#fff;border-color:var(--tc)}
+  .lpick{display:flex;align-items:baseline;gap:8px;border-top:1px solid var(--line);padding-top:.32rem;flex:none}
+  .lpn{flex:none;font-size:.7rem;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  .lpt{flex:1;min-width:0;font-family:var(--read);font-size:.92rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lpick .go{align-self:center}
+  /* ---- rail ---- */
+  .rail{display:flex;flex-direction:column;gap:14px}
+  .exam{padding:.65rem 1rem .7rem;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center}
+  .exam .big{font-size:2rem;font-weight:800;letter-spacing:-.02em;line-height:1}
+  .exam .lbl{font-size:.82rem;color:var(--mut)}
+  .cal{grid-column:1 / -1;margin-top:.45rem;border-top:1px solid var(--linel);padding-top:.7rem}
+  .cal .mon{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:.4rem}
+  .cal .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:.72rem;color:var(--sec)}
+  .cal .d{position:relative;text-align:center;padding:.18rem 0;font-variant-numeric:tabular-nums}
+  .cal .d.gone{color:var(--mut)}
+  .cal .d.gone::after{content:"✕";position:absolute;inset:0;display:grid;place-items:center;
+    color:rgba(184,68,47,.38);font-size:.82rem;transform:rotate(-4deg)}
+  .cal .d.today{color:#fff;isolation:isolate}
+  .cal .d.today::before{content:"";position:absolute;inset:-1px 18%;background:var(--anchor);border-radius:3px;z-index:-1}
+
+  .week{padding:.6rem 1rem .65rem}
+  .week h3{font-size:.78rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--mut);margin:0 0 .5rem}
+  .week .ln{display:flex;justify-content:space-between;gap:12px;font-family:var(--read);font-size:.85rem;
+    color:var(--sec);padding:.26rem 0;border-top:1px solid var(--linel)}
+  .week .ln:first-of-type{border-top:none}
+  .week .ln b{color:var(--ink);font-weight:600;text-align:right}
+
+  .door{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:11px;align-items:center;
+    padding:.45rem .85rem .45rem .55rem;cursor:pointer;text-align:left;width:100%;font-family:var(--head);color:inherit;
+    transition:border-color .2s,background .2s}
+  .door:hover{border-color:#c9ba9e;background:color-mix(in srgb,var(--anchor) 4%,transparent)}
+  .door img{width:48px;height:38px;object-fit:contain;display:block}
+  .door h3{font-size:.98rem;font-weight:700;margin:0 0 .1rem}
+  .door p{font-size:.8rem;color:var(--mut);margin:0}
+  .door .go{color:var(--mut);font-size:1.1rem}
+  /* podcast door grows a mini player when playing */
+  .podrow{display:flex;align-items:center;gap:10px;margin-top:.45rem}
+  .podrow button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--card);
+    cursor:pointer;display:grid;place-items:center;color:var(--anchor)}
+  .podrow button:hover{border-color:var(--anchor)}
+  .podrow svg{width:12px;height:12px;fill:currentColor}
+  .podtitle{font-size:.78rem;color:var(--sec);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+
+  .signoff{font-family:var(--hand);font-size:1.15rem;color:var(--mut);text-align:right;padding:0 .3rem}
+  @media (max-height:780px){ .signoff{display:none} }
+
+  /* ---- flashcards modal (same deck as the desk) ---- */
+  .fcmodal{position:fixed;inset:0;background:rgba(38,30,18,.55);display:none;place-items:center;z-index:60}
+  .fcmodal.open{display:grid}
+  .fcmodal .x{position:absolute;top:18px;right:22px;width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
+    background:#fffdf8;color:#26231e;font-size:19px;font-weight:700}
+  .bigcard{width:min(92vw,560px);aspect-ratio:8/5;border:none;background:none;cursor:pointer;perspective:1400px;padding:0}
+  .bigcard .flip{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s var(--ease)}
+  .bigcard.showa .flip{transform:rotateY(180deg)}
+  .bigcard .face{position:absolute;inset:0;backface-visibility:hidden;background:#fffdf8;border-radius:8px;
+    box-shadow:0 30px 70px -25px rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:safe center;
+    gap:14px;padding:2rem;overflow:auto}
+  .bigcard .back{transform:rotateY(180deg)}
+  .bigcard .tag{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+  .bigcard .utag{font-family:var(--read);font-style:italic;font-size:.85rem;color:var(--sec);margin-top:-.4rem}
+  .bigcard .qq{font-family:var(--hand);font-size:clamp(1.85rem,5.4vw,3rem);color:#3e3a31;text-align:center;line-height:1.2;max-width:100%;overflow-wrap:anywhere;hyphens:auto}
+  .bigcard .qq.long{font-size:clamp(1.45rem,4.2vw,2.25rem);line-height:1.3}
+  .bigcard .qq.xlong{font-size:clamp(1.1rem,3.2vw,1.65rem);line-height:1.4}
+  .fcbtns{display:flex;gap:10px;margin-top:.5rem;opacity:0;pointer-events:none;transition:opacity .2s .25s}
+  .bigcard.showa .fcbtns{opacity:1;pointer-events:auto}
+  .fcbtns .fb{font-family:var(--head);font-weight:600;font-size:.88rem;border:1px solid var(--line);
+    border-radius:9px;background:#fff;padding:.5rem 1rem;cursor:pointer;color:var(--sec)}
+  .fcbtns .fb.ok:hover{border-color:#2f7d57;color:#1e5b3e;background:#edf6f0}
+  .fcbtns .fb.no:hover{border-color:#c0533a;color:#9a3a25;background:#fbeee9}
+  .fcbtns .fb.waiting{opacity:.4;pointer-events:none;cursor:default}
+  /* reading-pace underline (same as the in-lesson deck): fills over --read-duration */
+  .bigcard .face.back .qq{position:relative;display:block;padding-bottom:8px}
+  .bigcard .face.back .qq::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:0;
+    background:var(--anchor);opacity:.35;border-radius:1px}
+  .bigcard.showa .face.back .qq::after{width:100%;transition:width var(--read-duration,2s) linear}
+  .fcmeta{position:fixed;left:0;right:0;bottom:26px;color:#f1e8d8;font-size:.85rem;
+    display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 16px}
+  .fcmeta .hint{opacity:.82;font-style:italic}
+  .fcmeta .cnt{font-variant-numeric:tabular-nums;font-weight:700}
+  /* per-card mastery (Leitner box), written on the card like a teacher's pen
+     mark — angled top-left, ink colour by level. NOT a pill. */
+  .bigcard .face .fcmark{position:absolute;top:22px;left:34px;font-family:var(--hand);font-size:1.4rem;
+    font-weight:600;line-height:1;letter-spacing:.01em;transform:rotate(-8deg);transform-origin:left center;pointer-events:none}
+  .bigcard .face .fcmark:empty{display:none}
+  .fcmark.m-emerging{color:#c0392b}
+  .fcmark.m-developing{color:#c9781f}
+  .fcmark.m-secure{color:#2a6f97}
+  .fcmark.m-mastered{color:#2e7d4f}
+
+  /* ---- shorts modal ---- */
+  .phonemodal{position:fixed;inset:0;background:rgba(38,30,18,.6);display:none;place-items:center;z-index:60}
+  .phonemodal.open{display:grid}
+  .phonemodal .dev{position:relative;height:min(92vh,860px);aspect-ratio:9/18.2;background:#26231e;border-radius:30px;padding:10px;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.6)}
+  .phonemodal iframe{width:100%;height:100%;border:0;border-radius:20px;background:#f2efe9}
+  .phonemodal .x{position:absolute;top:-14px;right:-14px;width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;
+    background:#fffdf8;color:#26231e;font-size:18px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;animation:none !important}
+  }
+  /* ---- the planner: click the exam card, the plan opens on a real calendar ---- */
+  .card.exam{cursor:pointer;transition:border-color .15s}
+  .card.exam:hover{border-color:#c9bda4}
+  .cal .d.hasplan{cursor:pointer}
+  .cal .d.hasplan::after{content:"";position:absolute;left:50%;bottom:-1px;width:4px;height:4px;
+    margin-left:-2px;border-radius:50%;background:var(--dot,#8a5a44)}
+  .cal .d.hol2{color:#a3873a}
+  /* planner modal + day-tooltip styles live in planner.js (shared with the desk) */
+  /* a finished plan step: the number becomes a quiet green tick and the text
+     steps back — no strikethrough, no fade, no boxes */
+  .card.plan li.done .n{color:#4e6e5d;font-weight:800}
+  .card.plan li.done>div>b{color:var(--sec);font-weight:600}
+  .card.plan li.done>div>small{color:var(--mut)}
+  .card.plan li.done .mins{color:var(--mut)}
+
+  /* wizard hand-off: quiet save-it bar (account creation is opt-in, never a gate) */
+  .savebar{max-width:1116px;width:calc(100% - 32px);margin:12px auto 0;display:flex;align-items:center;
+    gap:14px;justify-content:space-between;background:var(--card);border:1px solid var(--line);
+    border-radius:6px;padding:.7rem 1rem .7rem 1.2rem}
+  .savebar>span{font-family:var(--read);font-size:.93rem;color:var(--sec)}
+  .savecta{flex:none;background:var(--anchor);color:#faf6ec;font-weight:600;font-size:.9rem;
+    padding:.55rem 1.2rem;border-radius:4px;text-decoration:none}
+  .savecta:hover{filter:brightness(1.08)}
+  .weekempty{font-family:var(--read);font-size:.92rem;color:var(--sec);line-height:1.55;margin:.4rem 0 0}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span class="brand">StudyVault<img class="brandlock" src="assets/studyvault-lock-rust.svg" alt=""></span>
+  <span class="datestamp" id="today"></span>
+  <span class="sp"></span>
+  <a class="cosy" href="/desk">Cosy desk ↗</a>
+  <span class="avatar" title="Sam">S</span>
+</div>
+
+<div class="wrap">
+  <main>
+    <div class="h1row"><h1>Here’s your plan.</h1>
+    <p class="momentum"><span class="hl">4-day streak · 23 topics this week — your best yet.</span></p></div>
+
+    <div class="card plan">
+      <ol>
+        <li class="inert"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled</small></div><span class="mins">2 min</span></li>
+        <li onclick="nav('/lesson/english-literature-aqa/a-christmas-carol/4')"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — nearest exam</small></div><span class="mins">15 min</span></li>
+        <li onclick="nav('/lesson/computer-science/computer-systems/3')"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — 3 weeks stale</small></div><span class="mins">8 min</span></li>
+      </ol>
+      <div class="startrow">
+        <button class="start" id="startbtn" autofocus onclick="nav('/lesson/english-literature-aqa/a-christmas-carol/4')"><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg>Start · 25 min</button>
+        <span class="startnote">the one thing to actually do today</span>
+      </div>
+    </div>
+
+    <div class="sechead"><h2>Your subjects</h2><span id="subcount"></span></div>
+    <div class="shelfstage">
+      <div class="shelf" id="shelf" role="tablist" aria-label="Your subjects"></div>
+      <img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt="">
+      <div class="lightwash"></div>
+      <div class="lampglow"></div>
+      <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
+      <div class="bulb"></div>
+      <button class="lampbtn" type="button"></button>
+      <div class="pullcord"></div>
+    </div>
+    <div class="card sdetail" id="sdetail"></div>
+    <div class="selprompt" id="selprompt" hidden><span class="uparrow">↑</span>Select a subject</div>
+  </main>
+
+  <aside class="rail">
+    <div class="card exam">
+      <div>
+        <div class="big" id="examdays">—</div>
+        <div class="lbl">days to your first exam · May 2027</div>
+      </div>
+      <div class="cal">
+        <div class="mon" id="calmon"></div>
+        <div class="grid" id="calgrid"></div>
+      </div>
+    </div>
+
+    <div class="card week">
+      <h3>This week</h3>
+      <div class="ln"><span>Best subject</span><b>Geography — 9 topics</b></div>
+      <div class="ln"><span>Needs a look</span><b>Macbeth — 3 wks ago</b></div>
+      <div class="ln"><span>Warm-up accuracy</span><b>78% and climbing</b></div>
+      <div class="ln"><span>Shorts watched</span><b>41 · checks 7/8</b></div>
+      <div class="ln lndue" id="duerow" style="cursor:pointer" title="Open flashcard review">
+        <span>Cards due today</span><b id="duecount">0</b></div>
+    </div>
+
+    <button class="card door" id="fcdoor">
+      <img src="assets/lw/desk4-cards-a-cut.webp" alt="">
+      <span><h3>Flashcards</h3><p>mixed deck · tap to flip</p></span>
+      <span class="go">→</span>
+    </button>
+
+    <button class="card door" id="shortsdoor">
+      <img src="assets/lw/desk4-phone-c-cut.webp" alt="">
+      <span><h3>Shorts</h3><p>today’s 20 · one-minute videos</p></span>
+      <span class="go">→</span>
+    </button>
+
+    <div class="card door" id="poddoor" role="group" aria-label="Podcasts">
+      <img src="assets/lw/desk4-radio-a-cut.webp" alt="">
+      <span style="min-width:0">
+        <h3>Podcasts</h3><p>episodes for the bus</p>
+        <span class="podrow">
+          <button id="podplay" aria-label="Play"><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></button>
+          <button id="podnext" aria-label="Next episode"><svg viewBox="0 0 16 16"><path d="M3 2l8 6-8 6zM12 2h2v12h-2z"/></svg></button>
+          <span class="podtitle" id="podtitle">tap play for an episode</span>
+        </span>
+      </span>
+      <span class="go"></span>
+    </div>
+
+  </aside>
+</div>
+
+<div class="fcmodal" id="fcmodal" aria-modal="true" role="dialog" aria-label="Flashcards">
+  <button class="x" id="closefc" aria-label="Close">×</button>
+  <button class="bigcard" id="bigcard" aria-label="Flip the card">
+    <span class="flip">
+      <span class="face front"><span class="fcmark" id="fcMarkF"></span><span class="tag" id="bqTag"></span><span class="utag" id="bqUnit"></span><span class="qq" id="bqQ"></span></span>
+      <span class="face back"><span class="fcmark" id="fcMarkB"></span><span class="tag" id="baTag"></span><span class="qq" id="baA"></span>
+        <span class="fcbtns"><span class="fb no" id="fbno" role="button" tabindex="0">✗ Not yet</span><span class="fb ok" id="fbok" role="button" tabindex="0">✓ Got it</span></span>
+      </span>
+    </span>
+  </button>
+  <div class="fcmeta"><span class="cnt" id="fcCnt"></span><span class="hint">tap to flip · read the answer, then mark it — the line shows when</span></div>
+</div>
+
+<div class="phonemodal" id="phonemodal" aria-modal="true" role="dialog" aria-label="Shorts">
+  <div class="dev">
+    <button class="x" id="closephone" aria-label="Close">×</button>
+    <iframe id="feedframe" title="Shorts feed" loading="lazy"></iframe>
+  </div>
+</div>
+
+<!-- planner modal + day tooltip are injected by planner.js (shared with the desk) -->
+
+<script src="dash-data.js"></script>
+<script src="sync.js"></script>
+<script src="warmup.js"></script>
+<script src="planner.js"></script>
+<script>
+/* Sam's subjects — same real free-tier wiring as the desk */
+const SUBJECTS=[
+ {tab:'Maths',slug:'maths',sub:'maths-aqa',mode:'p',name:'Mathematics',c:'#4e5f66',units:[['Number',7,3,'number'],['Algebra',14,5,'algebra'],['Geometry & Measures',8,2,'geometry']]},
+ {tab:'English',slug:'lang',sub:'english-language-aqa',mode:'p',name:'English Language',c:'#5b7285',units:[['Paper 1: Reading',8,2,'paper-1-reading'],['Paper 1: Writing',7,1,'paper-1-writing'],['Paper 2: Reading',8,1,'paper-2-reading'],['Paper 2: Writing',7,0,'paper-2-writing']]},
+ {tab:'Lit',slug:'lit',sub:'english-literature-aqa',mode:'l',name:'English Literature',c:'#7d5a78',units:[['Macbeth',10,4,'macbeth'],['A Christmas Carol',8,5,'a-christmas-carol'],['Power & Conflict',10,3,'power-and-conflict']]},
+ {tab:'Science',slug:'science',sub:'science-aqa',mode:'l',name:'Combined Science',c:'#4e6e5d',units:[['Biology Paper 1',10,4,'biology-paper-1'],['Biology Paper 2',13,2,'biology-paper-2'],['Chemistry Paper 1',12,2,'chemistry-paper-1'],['Chemistry Paper 2',11,1,'chemistry-paper-2'],['Physics Paper 1',11,1,'physics-paper-1'],['Physics Paper 2',13,0,'physics-paper-2']]},
+ {tab:'History',slug:'history',sub:'history-aqa',mode:'l',name:'History',c:'#8a5a44',units:[['Germany 1890–1945',14,4,'germany-democracy-dictatorship'],['Conflict & Tension',13,2,'conflict-tension-first-world-war'],['Britain: Health & the People',14,1,'britain-health-people'],['Elizabethan England',12,1,'elizabethan-england']]},
+ {tab:'Geog',slug:'geog',sub:'geography-aqa',mode:'l',name:'Geography',c:'#6d7a4e',units:[['Paper 1: Physical Geography',20,5,'paper-1'],['Paper 2: Human Geography',20,4,'paper-2']]},
+ {tab:'Spanish',slug:'spanish',sub:'spanish-aqa',mode:'p',name:'Spanish',c:'#a2643f',units:[['People & Lifestyle',10,3,'people-and-lifestyle'],['Popular Culture',8,2,'popular-culture'],['Communication & the World',8,1,'communication-and-world']]},
+ {tab:'CS',slug:'cs',sub:'computer-science',mode:'l',name:'Computer Science',c:'#54606e',units:[['Computer Systems',12,3,'computer-systems'],['Computational Thinking',11,2,'computational-thinking']]},
+ {tab:'RS',slug:'rs',sub:'religious-studies-ocr',mode:'l',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: Beliefs',4,2,'christianity-beliefs-and-teachings'],['Islam: Beliefs',4,1,'islam-beliefs-and-teachings'],['Relationships & Families',3,0,'theme-relationships-and-families']]},
+];
+/* shared data layer: dash-data.js (SVDash) — wizard state, catalogs,
+   progress rollup and the live unit fetch live there, once, for both views */
+const OPEN_STAGE=_dq.get('open');
+if(window.svProgressSync) svProgressSync();   /* signed in: pull-merge account progress */
+svDashInit(SUBJECTS,{view:'classic',onUnits:function(){
+  if(OPEN_STAGE&&!selSlug) selSlug=OPEN_STAGE;
+  renderSubjects();
+  if(selSlug){ const cur=SUBJECTS.find(x=>x.slug===selSlug);
+    if(cur){ renderSubjectPanel(cur);
+      const ou=_dq.get('openunit'), uu=ou&&cur.units.find(x=>x[3]===ou);
+      if(uu) showLessons(cur,uu); } }
+  refreshDayOnePlan();
+  /* swap the demo podcasts for this student's own current-unit episodes */
+  svUnitMedia(SUBJECTS,m=>{
+    if(m.pods.length){ PODCASTS.length=0; m.pods.forEach(x=>PODCASTS.push(x));
+      if(!podOn){ podQ=null; podPos=-1; } }
+  });
+  /* today's spaced-repetition sitting: due cards first, then new, capped ~20 */
+  if(window.svFlashDeck) svFlashDeck(SUBJECTS,deck=>{
+    if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0;
+      if(_dq.get('fc')){ fcDeal();   /* staging: re-deal so the real card shows */
+        if(_dq.get('fc')==='2'){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } } }
+  });
+  document.body.dataset.unitsLoaded='1';
+}});
+/* once real progress exists, the plan says Continue, not Start-at-the-start.
+   The continue target comes from the shared layer so the desk view agrees. */
+function refreshDayOnePlan(){
+  if(!DAYONE) return;
+  const t=svContinueTarget(SUBJECTS);
+  const target=t?t.url:dayOneUrl(SUBJECTS[0]);
+  wireWarmupRow(target);
+  refreshWeekCard();
+  if(t){
+    const lis=document.querySelectorAll('.card.plan ol li');
+    if(lis[1]){
+      lis[1].innerHTML='<span class="n">2</span><div><b>Continue: '+t.unitName+'</b>'
+        +'<small>'+t.su.name+' · lesson '+t.num+' of '+t.total+'</small></div><span class="mins">15 min</span>';
+      lis[1].classList.remove('inert'); lis[1].style.cursor='pointer';
+      lis[1].onclick=()=>nav(t.url);
+    }
+  }
+  const sb=document.getElementById('startbtn');
+  if(sb&&target) sb.onclick=()=>startWithWarmup(target);
+  /* the highlight line tells the truth about where you are, not "day one" forever */
+  const hl=document.querySelector('.momentum .hl'), st0=svDoneStats();
+  if(hl) hl.textContent = !st0.total ? 'day one — your first session is ready.'
+    : (svPlanState().lesson ? 'today’s lesson is done — anything more is a bonus.'
+    : st0.total+' lesson'+(st0.total===1?'':'s')+' in — picking up where you left off.');
+  /* tick off what's already done today; Start becomes Keep going */
+  const ps=svPlanState(), rows=document.querySelectorAll('.card.plan ol li');
+  [ps.warm,ps.lesson,ps.cards].forEach((done,i)=>{
+    if(!rows[i]) return;
+    rows[i].classList.toggle('done',done);
+    const n=rows[i].querySelector('.n'); if(n) n.textContent=done?'✓':String(i+1);
+  });
+  if(sb) sb.innerHTML='<svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg>'
+    +(ps.any?(ps.mins?'Keep going · '+ps.mins+' min':'One more? · 15 min'):'Start · 19 min');
+  if(_dq.get('warmup')&&!window._wuOpened&&target){ window._wuOpened=1; svWarmup.open({subjects:SUBJECTS,target,nav}); }
+}
+/* Start = warm-up first (once a day), then straight into the lesson */
+function startWithWarmup(url){
+  if(window.svWarmup && !svWarmup.doneToday()) svWarmup.open({subjects:SUBJECTS,target:url,nav});
+  else nav(url);
+}
+function wireWarmupRow(url){
+  const li=document.querySelector('.card.plan ol li');
+  if(!li||!url) return;
+  const w=svWarmup.doneToday(), small=li.querySelector('small');
+  if(w){ /* once it's done, it's done — the score is the record */
+    li.classList.add('inert'); li.style.cursor='default'; li.onclick=null;
+    if(small) small.textContent='done today · '+w.correct+' of '+w.total;
+    return;
+  }
+  li.classList.remove('inert'); li.style.cursor='pointer';
+  li.onclick=()=>svWarmup.open({subjects:SUBJECTS,target:url,nav});
+}
+window.svWarmupDone=()=>refreshDayOnePlan();
+/* the week card trades its empty copy for real numbers once anything's done */
+function refreshWeekCard(){
+  const st=svDoneStats(); if(!st.total) return;
+  const wc=document.querySelector('.card.week'); if(!wc) return;
+  const w=svWarmup.doneToday();
+  wc.innerHTML='<h3>This week</h3>'
+    +'<div class="ln"><span>Lessons this week</span><b>'+st.week+'</b></div>'
+    +'<div class="ln"><span>Finished so far</span><b>'+st.total+' '+(st.total===1?'lesson':'lessons')+'</b></div>'
+    +(w?'<div class="ln"><span>Warm-up today</span><b>'+w.correct+' / '+w.total+'</b></div>':'')
+    +'<p class="weekempty">Best subject and cards due join in as the week builds.</p>';
+}
+function urlFor(s,u){ return '/'+(window.svIsPracticeUnit&&window.svIsPracticeUnit(s,u[3])?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/'+Math.min(u[2]+1,u[1]); }
+function nav(u){ document.body.classList.remove('ready'); setTimeout(()=>{ location.href=u; },180); }
+addEventListener('pageshow',e=>{ document.body.classList.add('ready');
+  if(e.persisted) location.reload();   /* back-cache: progress may be stale */ });
+
+/* day one: no history to summarise, nothing to refresh — say so gracefully */
+if(DAYONE){
+  document.querySelector('.momentum .hl').textContent='day one — your first session is ready.';
+  document.querySelector('.card.plan ol').innerHTML=
+    '<li class="inert"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · finds your level</small></div><span class="mins">2 min</span></li>'+
+    '<li class="inert"><span class="n">2</span><div><b>First lesson</b><small>'+(WIZ.picked[0]&&NAMEC[WIZ.picked[0]]?NAMEC[WIZ.picked[0]][0]:'your first subject')+' · start at the beginning</small></div><span class="mins">15 min</span></li>'+
+    '<li class="inert"><span class="n">3</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>';
+  const _sb=document.getElementById('startbtn');
+  if(_sb){ const _u=dayOneUrl(SUBJECTS[0]);
+    _sb.onclick=_u?()=>startWithWarmup(_u):()=>false;
+    _sb.innerHTML=_sb.innerHTML.replace('25 min','19 min'); }
+  const _lis=document.querySelectorAll('.card.plan ol li');
+  if(_lis[1]){ const _u2=dayOneUrl(SUBJECTS[0]);
+    if(_u2){ _lis[1].classList.remove('inert'); _lis[1].style.cursor='pointer';
+      _lis[1].onclick=()=>nav(_u2); } }
+  wireWarmupRow(dayOneUrl(SUBJECTS[0]));
+  document.querySelector('.card.week').innerHTML='<h3>This week</h3>'+
+    '<p class="weekempty">Nothing here yet — it fills in as you revise. Warm-up accuracy, your best subject, cards due: all of it lands on this card.</p>';
+  refreshDayOnePlan();   /* ticks + Keep-going label apply before units land too */
+  if(SVUSER&&SVUSER.email){
+    /* signed in: the avatar is you — click it for edit-subjects / sign out */
+    const _av=document.querySelector('.top .avatar');
+    if(_av){ _av.textContent=SVUSER.email[0].toUpperCase(); _av.title=SVUSER.email; svAvatarMenu(_av); }
+  }else{
+    const bar=document.createElement('div'); bar.className='savebar';
+    bar.innerHTML='<span>Nothing is saved yet. Sign up to save your progress.</span>'+
+      '<a class="savecta" href="home-study.html?view=save">Sign up — free</a>';
+    const _av=document.querySelector('.top .avatar');
+    if(_av){ const a=document.createElement('a'); a.className='savecta';
+      a.href='home-study.html?view=save'; a.textContent='Sign up and save your progress';
+      _av.replaceWith(a); }
+    document.querySelector('.wrap').before(bar);
+  }
+}
+
+/* date + exam countdown + mini month */
+const now=new Date();
+document.getElementById('today').textContent=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+/* exam timetable lives in dash-data.js (EXAMS) so both dashboard views count
+   down from the SAME dates. examsFor stays as the planner's local name. */
+function examsFor(s){ return svExamsFor(s); }
+const _fl=svFirstLast(SUBJECTS);
+const FIRST_EXAM=_fl.first, LASTX=_fl.last;
+document.getElementById('examdays').textContent=Math.max(0,Math.round((FIRST_EXAM-now)/864e5));
+document.querySelector('.card.exam .lbl').textContent='days to your first exam · '
+  +FIRST_EXAM.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+/* plan engine + modal + day tooltip live in planner.js (shared with the desk) */
+function buildMini(){
+  const m=new Date(now.getFullYear(),now.getMonth(),1);
+  document.getElementById('calmon').textContent=m.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  const g=document.getElementById('calgrid'); g.innerHTML='';
+  const days=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const lead=(m.getDay()+6)%7;
+  for(let i=0;i<lead;i++){ const d=document.createElement('span'); g.appendChild(d); }
+  for(let d=1;d<=days;d++){ const el=document.createElement('span'); el.className='d'; el.textContent=d;
+    const dt=new Date(now.getFullYear(),now.getMonth(),d);
+    if(d<now.getDate()) el.classList.add('gone');
+    if(d===now.getDate()) el.classList.add('today');
+    const p=planFor(dt);
+    if(p&&p.sessions){ el.classList.add('hasplan'); el.style.setProperty('--dot',p.sessions[0].s.c); }
+    if(p&&p.exams.length){ el.classList.add('hasplan'); el.style.setProperty('--dot','#a3542f'); }
+    if(p&&p.off==='holiday') el.classList.add('hol2');
+    if(d>=now.getDate()){ el.classList.add('hasplan');
+      el.onclick=ev=>{ ev.stopPropagation(); showDayTip(el,dt); } }
+    g.appendChild(el); } }
+svPlannerBoot(SUBJECTS,{onChange:buildMini});   /* rest/holiday edits redraw the mini month */
+buildMini();
+
+/* subjects: cloth-tab nub + progress + the subject's ladder sketch as a
+   small vignette (same three-stage art the notebook uses) */
+let LADDERS={};
+let LESSON_TITLES={};   // {subjectSlug:{unitSlug:[title,...]}} from _lesson_titles.json
+function stageOf(s){ const done=s.units.reduce((t,u)=>t+u[2],0), tot=s.units.reduce((t,u)=>t+u[1],0);
+  const pct=tot?done/tot*100:0; return pct>=66?3:pct>=33?2:1; }
+const REC={maths:2,lang:5,lit:21,science:4,history:1,geog:0,spanish:9,cs:23,rs:12};
+/* per-position lean (deg); tuned on the ?lean bench. First rests on the bookend,
+   each leans on the next, last is most severe. Index = shelf position. */
+const LEANS=[-4.2,-5.4,-6.4,-7.5,-8.8,-9.3,-10.3,-11.6,-23.6];
+/* horizontal base offset per position (px); pairs with LEANS so a book can kick
+   its foot out as well as tilt. Tuned on the ?lean bench. */
+const SHIFTS=[5,6,3,0,1,-1,-1,0,38];
+/* For any subject count other than the tuned length, derive lean/shift so the
+   cascade + end-flop still work: gentle ramp toward the end, last book flopped. */
+function leanFor(i,n){ if(n<=1) return -3; if(i===n-1) return -23; return -4.2-(i/Math.max(1,n-2))*7.4; }
+function shiftFor(i,n){ return i===n-1?38:0; }
+let selSlug=null;
+const _tip=document.createElement('div'); _tip.className='booktip';
+function showTip(bk,s,d,t,pct){
+  if(drag&&drag.moved) return;              // no tooltips mid-drag
+  _tip.innerHTML='<b>'+s.name+'</b><span class="c">'+(t?d+' of '+t+' lessons · '+pct+'%':'not started yet')+'</span>';
+  const stage=bk.closest('.shelfstage'); if(_tip.parentElement!==stage) stage.appendChild(_tip);
+  _tip.style.left=(bk.offsetLeft+bk.offsetWidth/2)+'px';
+  _tip.style.top=(bk.offsetTop-4)+'px';
+  _tip.classList.add('on');
+}
+function hideTip(){ _tip.classList.remove('on'); }
+function renderSubjects(){
+  const shelf=document.getElementById('shelf'); shelf.innerHTML='';
+  const be=document.createElement('img'); be.className='bookend';
+  be.src='assets/lw/shelf/bookend2.webp'; be.alt=''; shelf.appendChild(be);
+  let done=0,tot=0;
+  SUBJECTS.forEach((s,i)=>{
+    const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
+    done+=d; tot+=t;
+    const pct=t?Math.max(3,Math.round(d/t*100)):0;
+    const n=SUBJECTS.length;                      // tuned arrays when count matches, else procedural
+    const lean=(n===LEANS.length?LEANS[i]:leanFor(i,n));
+    const src='assets/lw/shelf/book_'+s.slug+'.webp';
+    const b=document.createElement('button');
+    b.className='bk'; b.setAttribute('role','tab'); b.dataset.slug=s.slug;
+    b.style.setProperty('--lean',lean+'deg');
+    b.style.setProperty('--shift',(n===SHIFTS.length?SHIFTS[i]:shiftFor(i,n))+'px');
+    b.setAttribute('aria-label',s.name+' — '+d+' of '+t+' lessons');
+    b.innerHTML='<img class="cold" draggable="false" src="'+src+'" alt="">'+
+      '<img class="warm" draggable="false" src="'+src+'" style="clip-path:inset('+(100-pct)+'% 0 0 0)" alt="">';
+    b.addEventListener('pointerdown',e=>onBookDown(e,b,s.slug));
+    b.addEventListener('dragstart',e=>e.preventDefault());
+    b.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectSubject(s.slug); } });
+    b.addEventListener('mouseenter',()=>showTip(b,s,d,t,pct));
+    b.addEventListener('mouseleave',hideTip);
+    shelf.appendChild(b);
+  });
+  document.getElementById('subcount').textContent=tot?done+' of '+tot+' lessons · '+Math.round(done/tot*100)+'% complete'
+    :SUBJECTS.length+' subjects · nothing started yet — pick a book to begin';
+  if(selSlug) selectSubject(selSlug,true);      // rest with none selected -> the shelf invites a pick
+  else deselectSubject();
+  fitShelf();
+}
+/* shrink the book row (books + bookend) to fit the space left of the lamp, so any
+   subject count fits; full size up to ~9, gently smaller beyond. */
+function fitShelf(){
+  const shelf=document.getElementById('shelf'), lamp=document.querySelector('.lamp');
+  if(!shelf) return;
+  shelf.style.removeProperty('--bkh'); shelf.style.removeProperty('--beh'); shelf.style.setProperty('--fit',1);  // full size to measure
+  const bks=shelf.querySelectorAll('.bk'); if(!bks.length){ shelf.style.removeProperty('--fit'); return; }
+  const shelfLeft=shelf.getBoundingClientRect().left;
+  const last=bks[bks.length-1], footShift=Math.max(0,parseFloat(last.style.getPropertyValue('--shift'))||0);
+  const natural=last.offsetLeft+last.offsetWidth+footShift;   // rightmost extent: layout + kicked-out foot
+  const avail=(lamp?lamp.getBoundingClientRect().left-shelfLeft:shelf.clientWidth)+72;   // +margin for the lamp's transparent left / space under the shade
+  const f=Math.min(1, avail/natural);
+  shelf.style.setProperty('--bkh',(204*f).toFixed(1)+'px');
+  shelf.style.setProperty('--beh',(210*f).toFixed(1)+'px');
+  shelf.style.setProperty('--fit',f.toFixed(4));   // scales the foot-shift with the books
+}
+function deselectSubject(){                 // click a selected spine again -> it slots back into the shelf
+  const cur=document.querySelector('.bk[aria-selected="true"]');
+  selSlug=null;
+  document.querySelectorAll('.bk').forEach(sp=>sp.setAttribute('aria-selected','false'));
+  if(cur && !matchMedia('(prefers-reduced-motion:reduce)').matches){   // replay the pull-out in reverse
+    cur.classList.add('returning');
+    cur.addEventListener('animationend',()=>cur.classList.remove('returning'),{once:true});
+  }
+  const el=document.getElementById('sdetail'); el.hidden=true; el.innerHTML='';
+  const p=document.getElementById('selprompt'); if(p) p.hidden=false;
+}
+function selectSubject(slug,silent){
+  if(!silent && slug===selSlug){ deselectSubject(); return; }   // toggle off (same spine)
+  const prev=document.querySelector('.bk[aria-selected="true"]');
+  selSlug=slug;
+  // switching from a different open book: slot the old one back in FIRST, then pull the new one out
+  if(prev && prev.dataset.slug!==slug && !silent && !matchMedia('(prefers-reduced-motion:reduce)').matches){
+    prev.setAttribute('aria-selected','false');
+    prev.classList.add('returning');
+    const el=document.getElementById('sdetail'); el.hidden=true; el.innerHTML='';   // close the panel while it returns
+    prev.addEventListener('animationend',()=>{ prev.classList.remove('returning'); _pullOut(slug); },{once:true});
+    return;
+  }
+  _pullOut(slug);
+}
+function _pullOut(slug){
+  if(slug!==selSlug) return;                    // a later click superseded this one — don't pull the wrong book
+  const bk=[...document.querySelectorAll('.bk')].find(sp=>sp.dataset.slug===slug);
+  const applySel=()=>{ if(slug!==selSlug) return;   // set aria-selected -> starts the pull-out animation
+    document.querySelectorAll('.bk').forEach(sp=>sp.setAttribute('aria-selected',String(sp.dataset.slug===slug))); };
+  if(bk){
+    // measure the x-shift to the frame centre FIRST (once the painted spine has a width), THEN start
+    // the animation — a running CSS animation won't reliably pick up a --pull-dx set after it began.
+    const shelf=bk.parentElement; let tries=0;
+    const measure=()=>{
+      if(slug!==selSlug || !bk.isConnected) return;   // superseded, or a re-render replaced this element — abandon
+      if(bk.offsetWidth){
+        bk.style.setProperty('--pull-dx',Math.round(shelf.clientWidth/2-(bk.offsetLeft+bk.offsetWidth/2))+'px');
+        applySel(); return;
+      }
+      if(tries++<30){ requestAnimationFrame(measure); return; }
+      applySel();                               // art never sized — pull out anyway (uncentred fallback)
+    };
+    measure();
+  } else applySel();
+  renderSubjectPanel(SUBJECTS.find(x=>x.slug===slug));
+}
+/* default panel: resume button + the subject's topics (click one to pick a lesson) */
+function renderSubjectPanel(s){
+  if(window.svNeedsOptionPick && svNeedsOptionPick(s)){   /* choose-your-options subject, none picked -> sculpt first */
+    const pp=document.getElementById('selprompt'); if(pp) pp.hidden=true;
+    const ep=document.getElementById('sdetail');
+    ep.hidden=false; ep.style.setProperty('--tc',s.c);
+    ep.innerHTML='<div class="top"><h3>'+s.name+'</h3>'+
+      '<span class="sub">'+(s.board?s.board+' · ':'')+'options not chosen yet</span></div>'+
+      '<div class="optprompt"><p>'+s.name+' has options your exam board offers — most students sit about four. '+
+      'Choose yours and this shows your course, not the whole catalogue.</p>'+
+      '<button class="cont">Choose your '+s.name+' options →</button></div>';
+    ep.querySelector('.cont').onclick=()=>nav('home-study.html?view=topics');
+    return;
+  }
+  if(!s.units.length){                      /* day one: nothing started yet */
+    const p0=document.getElementById('selprompt'); if(p0) p0.hidden=true;
+    const el0=document.getElementById('sdetail');
+    el0.hidden=false; el0.style.setProperty('--tc',s.c);
+    const _tr=s.topicsRaw||[];
+    const rows=(s.topics&&s.topics.length?s.topics:['Full course'])
+      .map((tn,ti)=>{ const u=(s.sub&&_tr[ti])?('/lesson/'+s.sub+'/'+_tr[ti]+'/1'):null;
+        return '<'+(u?'button':'div')+' class="ublock"'
+          +(u?' onclick="nav(\''+u+'\')" title="Start '+tn.replace(/"/g,'&quot;')+' at lesson 1"':' style="cursor:default"')+'>'
+          +'<span class="un">'+tn+'</span><span class="utrack"><i style="width:0%"></i></span>'
+          +'<span class="ud">'+(u?'start here':'not started')+'</span></'+(u?'button':'div')+'>'; }).join('');
+    el0.innerHTML='<div class="top"><h3>'+s.name+'</h3>'+
+      '<span class="sub">'+(s.board?s.board+' · ':'')+'ready when you are</span>'+
+      '<span class="sp"></span><button class="cont">Start lesson 1 →</button></div>'+
+      '<div class="units">'+rows+'</div>';
+    const _cu=dayOneUrl(s);
+    el0.querySelector('.cont').onclick=_cu?()=>nav(_cu):()=>false;
+    return;
+  }
+  const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
+  const nxt=s.units.find(u=>u[2]<u[1])||s.units[0];
+  const rec=REC[s.slug]||0;
+  const p=document.getElementById('selprompt'); if(p) p.hidden=true;
+  const el=document.getElementById('sdetail');
+  el.hidden=false;
+  el.style.setProperty('--tc',s.c);
+  el.innerHTML='<div class="top"><h3>'+s.name+'</h3>'+
+    '<span class="sub">'+d+' of '+t+' lessons · '+Math.round(d/t*100)+'%'+
+    (DAYONE?'':(rec>=14?' · <span style="color:#a3542f;font-weight:600">'+Math.round(rec/7)+'w untouched</span>':rec>0?' · '+rec+'d ago':' · studied today'))+'</span>'+
+    '<span class="sp"></span>'+
+    '<button class="cont">Where you left off →</button></div>'+
+    '<div class="units">'+
+      s.units.map((u,ui)=>'<button class="ublock" data-u="'+ui+'" title="'+u[0]+' — pick a lesson">'+
+        '<span class="un">'+u[0]+'</span>'+
+        '<span class="utrack"><i style="width:'+Math.round(u[2]/u[1]*100)+'%"></i></span>'+
+        '<span class="ud">'+u[2]+' / '+u[1]+' lessons</span></button>').join('')+
+    '</div>';
+  el.querySelector('.cont').onclick=()=>nav(urlFor(s,nxt));
+  el.querySelectorAll('.ublock').forEach(x=>x.onclick=()=>showLessons(s,s.units[+x.dataset.u]));
+}
+/* topic drilled open: pick a lesson tile to see its title, then confirm with the button */
+const TITLE_FETCHED={};
+function fetchTitles(s,u){
+  const fk=s.sub+'/'+u[3];
+  if(TITLE_FETCHED[fk]) return; TITLE_FETCHED[fk]=1;
+  fetch(SUPA+'/rest/v1/units?select=lessons(lesson_number,title),subjects!inner(slug)'
+    +'&slug=eq.'+u[3]+'&subjects.slug=eq.'+s.sub,{headers:{apikey:ANON}})
+  .then(r=>r.json()).then(rows=>{
+    const ls=(rows[0]&&rows[0].lessons)||[]; if(!ls.length) return;
+    const t=[]; ls.forEach(l=>{ if(l.lesson_number>=1) t[l.lesson_number-1]=l.title; });
+    (LESSON_TITLES[s.sub]=LESSON_TITLES[s.sub]||{})[u[3]]=t;
+    const el=document.getElementById('sdetail');
+    if(el&&!el.hidden&&el.querySelector('.lessons')) showLessons(s,u);
+  }).catch(()=>{});
+}
+function showLessons(s,u){
+  const el=document.getElementById('sdetail');
+  el.style.setProperty('--tc',s.c);
+  const titles=((LESSON_TITLES[s.sub]||{})[u[3]])||[];
+  if(!titles.length) fetchTitles(s,u);
+  const n=titles.length||u[1];
+  const base='/'+(window.svIsPracticeUnit&&window.svIsPracticeUnit(s,u[3])?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/';
+  const dset=u[4]||null;                     /* day-one: exact done set from the rollup */
+  let nextK=Math.min(u[2]+1,n);
+  if(dset){ let k=1; while(k<=n&&dset.includes(k)) k++; nextK=Math.min(k,n); }
+  let tiles='';
+  for(let k=1;k<=n;k++){ const done=dset?dset.includes(k):k<=u[2], next=k===nextK;
+    tiles+='<button class="ltile'+(done?' done':'')+(next?' next':'')+'" data-n="'+k+'">'+k+'</button>'; }
+  el.innerHTML='<div class="top"><button class="back" title="Back to topics">‹</button>'+
+    '<h3>'+u[0]+'</h3><span class="sub">'+u[2]+' of '+n+' lessons</span></div>'+
+    '<div class="lessons">'+tiles+'</div>'+
+    '<div class="lpick"><span class="lpn"></span><span class="lpt"></span>'+
+      '<button class="go">Let’s learn →</button></div>';
+  const tileEls=[...el.querySelectorAll('.ltile')];
+  function sel(k){
+    tileEls.forEach(t=>t.classList.toggle('sel',+t.dataset.n===k));
+    el.querySelector('.lpn').textContent='Lesson '+k;
+    const lpt=el.querySelector('.lpt'); lpt.textContent=titles[k-1]||('Lesson '+k); lpt.title=lpt.textContent;
+    el.querySelector('.go').onclick=()=>nav(base+k);
+  }
+  el.querySelector('.back').onclick=()=>renderSubjectPanel(s);
+  tileEls.forEach(x=>x.onclick=()=>sel(+x.dataset.n));
+  sel(nextK);   // pre-select the next-up lesson so its title + button show on entry
+}
+/* ---- drag a spine to reorder; drop it in with a little physics ---- */
+const ORDER_KEY='sv-shelf-order';
+function applySavedOrder(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(ORDER_KEY)||'null');
+    if(!Array.isArray(saved)) return;
+    const bySlug=Object.fromEntries(SUBJECTS.map(s=>[s.slug,s]));
+    const ordered=saved.map(sl=>bySlug[sl]).filter(Boolean);
+    SUBJECTS.forEach(s=>{ if(!saved.includes(s.slug)) ordered.push(s); });   // any new subjects go last
+    if(ordered.length===SUBJECTS.length) SUBJECTS.splice(0,SUBJECTS.length,...ordered);
+  }catch(e){}
+}
+function saveOrder(){ try{ localStorage.setItem(ORDER_KEY,JSON.stringify(SUBJECTS.map(s=>s.slug))); }catch(e){} }
+
+let drag=null;
+function onBookDown(e,bk,slug){
+  if(e.pointerType==='mouse'&&e.button!==0) return;
+  drag={bk,slug,startX:e.clientX,startY:e.clientY,moved:false};
+  window.addEventListener('pointermove',onBookMove);
+  window.addEventListener('pointerup',onBookUp,{once:true});
+}
+function onBookMove(e){
+  if(!drag) return;
+  const dx=e.clientX-drag.startX, dy=e.clientY-drag.startY;
+  if(!drag.moved){ if(Math.hypot(dx,dy)<8) return; beginDrag(); }
+  drag.bk.style.transform='translate('+dx+'px,'+(dy-8)+'px) rotate(3deg) scale(1.05)';
+  layoutGap(e.clientX);
+}
+function beginDrag(){
+  drag.moved=true; hideTip();
+  const shelf=document.getElementById('shelf');
+  drag.bks=[...shelf.querySelectorAll('.bk')];
+  drag.fromIdx=drag.bks.indexOf(drag.bk);
+  drag.lefts=drag.bks.map(b=>b.getBoundingClientRect().left);
+  drag.centers=drag.bks.map(b=>{const r=b.getBoundingClientRect(); return r.left+r.width/2;});
+  drag.to=drag.fromIdx;
+  document.body.classList.add('dragging-book');
+  drag.bk.classList.add('dragging');
+}
+function orderFor(d,to){                      // original indices in their new on-shelf order
+  const o=d.bks.map((b,i)=>i).filter(i=>i!==d.fromIdx);
+  o.splice(to,0,d.fromIdx); return o;
+}
+function layoutGap(clientX){
+  let cnt=0; drag.bks.forEach((b,i)=>{ if(i!==drag.fromIdx&&drag.centers[i]<clientX) cnt++; });
+  drag.to=cnt;
+  const order=orderFor(drag,drag.to);
+  drag.bks.forEach((b,oi)=>{                 // FLIP: slide each other spine to its new slot
+    if(oi===drag.fromIdx) return;
+    const shift=drag.lefts[order.indexOf(oi)]-drag.lefts[oi];
+    b.style.transform='translateX('+shift+'px) rotate(var(--lean,0deg))';
+  });
+}
+function onBookUp(){
+  window.removeEventListener('pointermove',onBookMove);
+  const d=drag; drag=null;
+  if(!d) return;
+  if(!d.moved){ selectSubject(d.slug); return; }        // a tap, not a drag -> select/deselect
+  document.body.classList.remove('dragging-book');
+  const newSubs=orderFor(d,d.to).map(oi=>SUBJECTS[oi]);
+  SUBJECTS.splice(0,SUBJECTS.length,...newSubs);
+  saveOrder();
+  renderSubjects();
+  if(d.slug!==selSlug){                                  // physics settle on the dropped spine
+    const dropped=document.querySelector('.bk[data-slug="'+d.slug+'"]');
+    if(dropped){ dropped.classList.add('settling');
+      dropped.addEventListener('animationend',()=>dropped.classList.remove('settling'),{once:true}); }
+  }
+}
+/* game-menu grammar: arrows walk the shelf */
+addEventListener('keydown',e=>{
+  if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight') return;
+  if(/INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  const idx=SUBJECTS.findIndex(x=>x.slug===selSlug);
+  const n=SUBJECTS.length;
+  const next=SUBJECTS[(idx+(e.key==='ArrowRight'?1:n-1))%n];
+  selectSubject(next.slug);
+});
+applySavedOrder();
+const _pick=new URLSearchParams(location.search).get('pick');   // deep-link a subject's panel (+ ?open=<unit index> for its lessons)
+const _open=new URLSearchParams(location.search).get('open');
+if(_pick&&SUBJECTS.some(x=>x.slug===_pick)) selSlug=_pick;
+function _applyOpen(){ if(_pick&&_open!=null){ const s=SUBJECTS.find(x=>x.slug===_pick); if(s&&s.units[+_open]) showLessons(s,s.units[+_open]); } }
+renderSubjects(); _applyOpen();
+fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{ LADDERS=j||{}; renderSubjects(); _applyOpen(); }).catch(()=>{});
+fetch('_lesson_titles.json').then(r=>r.json()).then(j=>{ LESSON_TITLES=j||{}; _applyOpen(); }).catch(()=>{});
+
+/* the reading lamp: click it to turn the light on/off (off by default) */
+(function(){
+  const stage=document.querySelector('.shelfstage'), lamp=document.querySelector('.lamp'),
+        btn=document.querySelector('.lampbtn'), cord=document.querySelector('.pullcord');
+  if(!stage||!lamp||!btn) return;
+  const KEY='sv-lamp-on';
+  let on=false; try{ on=localStorage.getItem(KEY)==='1'; }catch(e){}
+  const q=new URLSearchParams(location.search).get('lamp');   // ?lamp=on|off overrides
+  if(q==='on') on=true; else if(q==='off') on=false;
+  const apply=()=>{ stage.classList.toggle('lit',on);
+    btn.setAttribute('aria-pressed',String(on));
+    btn.setAttribute('aria-label', on?'Reading lamp — on. Click to turn off':'Reading lamp — off. Click to turn on'); };
+  apply();
+  const toggle=()=>{ on=!on; apply(); try{ localStorage.setItem(KEY, on?'1':'0'); }catch(e){}
+    if(cord){ cord.classList.remove('tug'); void cord.offsetWidth; cord.classList.add('tug'); } };  // tug the cord
+  btn.addEventListener('click',toggle);
+  btn.addEventListener('mouseenter',()=>lamp.classList.add('hot'));
+  btn.addEventListener('mouseleave',()=>lamp.classList.remove('hot'));
+})();
+
+/* ---- ?place : drag the cord + light origin, read off the coordinates ---- */
+if(new URLSearchParams(location.search).has('place')){(function(){
+  const stage=document.querySelector('.shelfstage'), cord=document.querySelector('.pullcord'),
+        bulb=document.querySelector('.bulb'), glow=document.querySelector('.lampglow'),
+        btn=document.querySelector('.lampbtn');
+  if(!stage||!cord||!bulb||!glow) return;
+  stage.classList.add('lit');                 // light on so the glow is visible while placing
+  if(btn) btn.style.pointerEvents='none';      // don't let the toggle fire while placing
+  const sr=()=>stage.getBoundingClientRect();
+  // cord seeded from current render; the light cone is origin + aim + two widths (all shelfstage %)
+  const cr=cord.getBoundingClientRect(), s0=sr();
+  let cordLeft=(cr.left-s0.left)/s0.width*100, cordTop=(cr.top-s0.top)/s0.height*100, cordLen=cord.offsetHeight;
+  let oX=78, oY=25, aX=55, aY=94, topW=9, baseW=26;
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const toX=x=>clamp((x-sr().left)/sr().width*100,0,100), toY=y=>clamp((y-sr().top)/sr().height*100,-12,114);
+  function coneClip(){                                   // clip-path in shelfstage % (lampglow is inset:0)
+    const r=sr(), ox=oX/100*r.width, oy=oY/100*r.height, ax=aX/100*r.width, ay=aY/100*r.height;
+    let dx=ax-ox, dy=ay-oy; const L=Math.hypot(dx,dy)||1; dx/=L; dy/=L;
+    const nx=-dy, ny=dx, tw=topW/100*r.width/2, bw=baseW/100*r.width/2;
+    const P=(x,y)=>(x/r.width*100).toFixed(1)+'% '+(y/r.height*100).toFixed(1)+'%';
+    return 'polygon('+P(ox+nx*tw,oy+ny*tw)+', '+P(ox-nx*tw,oy-ny*tw)+', '+P(ax-nx*bw,ay-ny*bw)+', '+P(ax+nx*bw,ay+ny*bw)+')';
+  }
+  const mk=(cls,label)=>{ const h=document.createElement('div'); h.className='ph '+cls; h.innerHTML='<b>'+label+'</b>'; stage.appendChild(h); return h; };
+  const hTop=mk('ph-top','cord top'), hKnob=mk('ph-knob','length'), hOrig=mk('ph-glow','light origin'), hAim=mk('ph-aim','aim');
+  const put=(el,l,t)=>{ el.style.left=l+'%'; el.style.top=t+'%'; };
+  const g=id=>document.getElementById(id);
+  function apply(){
+    cord.style.left=cordLeft+'%'; cord.style.top=cordTop+'%'; cord.style.height=Math.round(cordLen)+'px';
+    bulb.style.left=oX+'%'; bulb.style.top=oY+'%'; glow.style.clipPath=coneClip();
+    const H=sr().height;
+    put(hTop,cordLeft,cordTop); put(hKnob,cordLeft,cordTop+cordLen/H*100); put(hOrig,oX,oY); put(hAim,aX,aY);
+    g('ro-cord').textContent=cordLeft.toFixed(1)+'% / '+cordTop.toFixed(1)+'% / '+Math.round(cordLen)+'px';
+    g('ro-orig').textContent=oX.toFixed(1)+'% / '+oY.toFixed(1)+'%';
+    g('ro-cone').textContent=coneClip();
+  }
+  function drag(h,onMove){ h.addEventListener('pointerdown',e=>{ e.preventDefault(); h.classList.add('grab');
+    const mv=ev=>{ onMove(ev.clientX,ev.clientY); apply(); };
+    const up=()=>{ h.classList.remove('grab'); window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up); };
+    window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up); }); }
+  drag(hTop,(x,y)=>{ cordLeft=toX(x); cordTop=toY(y); });
+  drag(hKnob,(x,y)=>{ cordLen=Math.max(12,(toY(y)-cordTop)/100*sr().height); });
+  drag(hOrig,(x,y)=>{ oX=toX(x); oY=toY(y); });
+  drag(hAim,(x,y)=>{ aX=toX(x); aY=toY(y); });
+  const panel=document.createElement('div'); panel.className='placepanel';
+  panel.innerHTML='<h4>Light bench</h4><p class="sub">Drag the dots; the sliders set the beam width at each end. Then Copy or read me the values.</p>'+
+    '<div class="row"><span class="dot" style="background:#2563eb"></span><span class="k">cord</span>: <span id="ro-cord"></span> <span style="color:#a89b82">(orange = length)</span></div>'+
+    '<div class="row"><span class="dot" style="background:#ef4444"></span><span class="k">light origin</span> (beam top): <span id="ro-orig"></span></div>'+
+    '<div class="row"><span class="dot" style="background:#a855f7"></span><span class="k">aim</span> — beam direction &amp; reach</div>'+
+    '<div class="row"><span class="k">top width</span> <input id="sw-top" type="range" min="0" max="34" step="0.5"></div>'+
+    '<div class="row"><span class="k">base width</span> <input id="sw-base" type="range" min="4" max="80" step="0.5"></div>'+
+    '<div class="row" style="margin-top:7px"><span class="k">cone</span>: <span id="ro-cone" style="font-size:10px;word-break:break-all"></span></div>'+
+    '<button id="ro-copy">Copy values</button><span class="ok" id="ro-ok">copied ✓</span>';
+  document.body.appendChild(panel);
+  g('sw-top').value=topW; g('sw-base').value=baseW;
+  g('sw-top').addEventListener('input',e=>{ topW=+e.target.value; apply(); });
+  g('sw-base').addEventListener('input',e=>{ baseW=+e.target.value; apply(); });
+  g('ro-copy').onclick=async()=>{ const txt='.pullcord{left:'+cordLeft.toFixed(1)+'%;top:'+cordTop.toFixed(1)+'%;height:'+Math.round(cordLen)+'px}\n'+
+    '.bulb{left:'+oX.toFixed(1)+'%;top:'+oY.toFixed(1)+'%}\n.lampglow clip-path:'+coneClip();
+    try{await navigator.clipboard.writeText(txt);}catch(e){} const ok=g('ro-ok'); ok.classList.add('on'); setTimeout(()=>ok.classList.remove('on'),1300); };
+  apply();
+})();}
+
+/* ---- ?lean : tilt each book to taste; read off the per-position leans ---- */
+if(new URLSearchParams(location.search).has('lean')){(function(){
+  const shelf=document.getElementById('shelf');
+  if(!shelf) return;
+  document.body.classList.add('leaning');
+  const g=id=>document.getElementById(id);
+  const clampA=a=>Math.max(-25,Math.min(8,a)), clampS=s=>Math.max(-70,Math.min(70,s));
+  const label=bk=>{ let l=bk.querySelector('.leanlbl'); if(!l){ l=document.createElement('div'); l.className='leanlbl'; bk.appendChild(l); } return l; };
+  const leanOf=bk=>parseFloat(bk.style.getPropertyValue('--lean'))||0;
+  const shiftOf=bk=>parseFloat(bk.style.getPropertyValue('--shift'))||0;
+  function relbl(bk){ const sh=shiftOf(bk); label(bk).textContent=leanOf(bk).toFixed(1)+'°'+(sh?' '+(sh>0?'+':'')+sh.toFixed(0):''); }
+  function setLean(bk,a){ bk.style.setProperty('--lean',clampA(a).toFixed(1)+'deg'); relbl(bk); }
+  function setShift(bk,s){ bk.style.setProperty('--shift',clampS(s).toFixed(0)+'px'); relbl(bk); }
+  function readout(){ const bks=[...shelf.querySelectorAll('.bk')];
+    if(g('ro-leans')) g('ro-leans').textContent='['+bks.map(b=>leanOf(b).toFixed(1)).join(', ')+']';
+    if(g('ro-shifts')) g('ro-shifts').textContent='['+bks.map(b=>shiftOf(b).toFixed(0)).join(', ')+']';
+    return bks; }
+  shelf.addEventListener('pointerdown',e=>{                 // capture: intercept before reorder/select
+    const bk=e.target.closest('.bk'); if(!bk) return;
+    e.stopPropagation(); e.preventDefault(); bk.classList.add('tilting');
+    const r=bk.getBoundingClientRect(), topGrab=(e.clientY-r.top)<r.height*0.55;
+    const s=shelf.getBoundingClientRect(), py=s.top+bk.offsetTop+bk.offsetHeight;
+    const baseX=s.left+bk.offsetLeft+bk.offsetWidth/2, startX=e.clientX, s0=shiftOf(bk);
+    const mv=ev=>{
+      if(topGrab) setLean(bk, Math.atan2(ev.clientX-(baseX+shiftOf(bk)), py-ev.clientY)*180/Math.PI);
+      else setShift(bk, s0+(ev.clientX-startX));
+      readout();
+    };
+    const up=()=>{ bk.classList.remove('tilting'); window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up); };
+    window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up);
+  }, true);
+  const panel=document.createElement('div'); panel.className='placepanel';
+  panel.innerHTML='<h4>Lean bench</h4><p class="sub">Grab the <b>top</b> of a book to tilt it, the <b>bottom</b> to slide its foot. First rests on the bookend, each leans on the next, the last most severe. Then Copy.</p>'+
+    '<div class="row"><span class="k">leans</span>: <span id="ro-leans" style="font-size:11px;word-break:break-all"></span></div>'+
+    '<div class="row"><span class="k">shifts</span>: <span id="ro-shifts" style="font-size:11px;word-break:break-all"></span></div>'+
+    '<button id="ro-copy">Copy leans + shifts</button><span class="ok" id="ro-ok">copied ✓</span>';
+  document.body.appendChild(panel);
+  const relabel=()=>{ [...shelf.querySelectorAll('.bk')].forEach(relbl); readout(); };
+  relabel();
+  new MutationObserver(relabel).observe(shelf,{childList:true});   // survive the ladder re-render
+  g('ro-copy').onclick=async()=>{ const bks=readout();
+    const txt='const LEANS=['+bks.map(b=>leanOf(b).toFixed(1)).join(',')+'];\nconst SHIFTS=['+bks.map(b=>shiftOf(b).toFixed(0)).join(',')+'];';
+    try{await navigator.clipboard.writeText(txt);}catch(e){} const ok=g('ro-ok'); ok.classList.add('on'); setTimeout(()=>ok.classList.remove('on'),1300); };
+})();}
+
+/* ---- ?counts : preview random subject sets 7-11 (scale-to-fit + leaning apply) ---- */
+if(new URLSearchParams(location.search).has('counts')){(function(){
+  const orig=SUBJECTS.slice();
+  let cur=9;
+  function show(n){
+    cur=n;
+    const pool=orig.slice();
+    for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=pool[i]; pool[i]=pool[j]; pool[j]=t; }
+    const sel=[]; for(let i=0;i<n;i++) sel.push(Object.assign({},pool[i%pool.length]));   // repeats only if n>pool
+    SUBJECTS.length=0; SUBJECTS.push(...sel);
+    renderSubjects();
+    [...document.querySelectorAll('#cbtns button')].forEach(b=>b.setAttribute('aria-pressed',String(+b.textContent===n)));
+  }
+  const panel=document.createElement('div'); panel.className='placepanel';
+  panel.innerHTML='<h4>Shelf counts</h4><p class="sub">Preview random subject sets from 7 to 11 — the shelf scales to fit the lamp and the leaning cascade adapts.</p>'+
+    '<div class="row" id="cbtns"></div><button id="shuf" style="margin-top:10px">Shuffle</button>';
+  document.body.appendChild(panel);
+  const cb=document.getElementById('cbtns');
+  [7,8,9,10,11].forEach(n=>{ const b=document.createElement('button'); b.type='button'; b.textContent=n; b.className='cbtn'; b.onclick=()=>show(n); cb.appendChild(b); });
+  document.getElementById('shuf').onclick=()=>show(cur);
+  show(9);
+})();}
+
+/* flashcards — same mixed deck as the desk */
+const FC=[
+  {slug:'history', q:'When was the NHS founded?', a:'1948'},
+  {slug:'science', q:'Speed = ?', a:'distance ÷ time'},
+  {slug:'lit', q:'Who was Scrooge’s business partner?', a:'Jacob Marley'},
+  {slug:'geog', q:'The three types of rainfall?', a:'Relief · frontal · convectional'},
+  {slug:'maths', q:'In y = mx + c, what is m?', a:'The gradient'},
+];
+const fcmodal=document.getElementById('fcmodal'), bigcard=document.getElementById('bigcard');
+let fci=0, fcShowA=false;
+function fcDeal(){
+  const f=FC[fci], sub=SUBJECTS.find(x=>x.slug===f.slug);
+  document.getElementById('bqTag').textContent=f.name||(sub?sub.name:'');
+  document.getElementById('bqUnit').textContent=f.uname||'';
+  const q=document.getElementById('bqQ'), a=document.getElementById('baA');
+  q.textContent=f.q; a.textContent=f.a;
+  q.classList.toggle('long',f.q.length>70); a.classList.toggle('long',f.a.length>70);
+  q.classList.toggle('xlong',f.q.length>150); a.classList.toggle('xlong',f.a.length>150);
+  document.getElementById('baTag').textContent='Answer';
+  const lvl=f.level||'Emerging', mkCls='fcmark m-'+lvl.toLowerCase();
+  ['fcMarkF','fcMarkB'].forEach(id=>{ const e=document.getElementById(id); if(e){ e.textContent=lvl; e.className=mkCls; } });
+  const _cn=document.getElementById('fcCnt'); if(_cn) _cn.textContent=(fci+1)+' / '+FC.length;
+  fcShowA=false; bigcard.classList.remove('showa');
+}
+document.getElementById('fcdoor').onclick=()=>{ fci=0; fcDeal(); fcmodal.classList.add('open');
+  try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
+  if(window.svProgressPushSoon) svProgressPushSoon();
+  if(DAYONE) refreshDayOnePlan(); };
+bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } };
+/* no tap-to-skip: the only way to the next card is an honest Not yet / Got it */
+/* same read-gate as the in-lesson deck: marks unlock only after there's been
+   time to actually read the answer (words/4s, clamped 1.5–6s) */
+let fcCanMark=false, fcUnlockT=null;
+function fcReadGate(){
+  const a=document.getElementById('baA').textContent||'';
+  const secs=Math.max(1.5,Math.min(a.trim().split(/\s+/).length/4,6));
+  bigcard.style.setProperty('--read-duration',secs+'s');
+  fcCanMark=false; clearTimeout(fcUnlockT);
+  document.querySelectorAll('.fcbtns .fb').forEach(b=>b.classList.add('waiting'));
+  fcUnlockT=setTimeout(()=>{ fcCanMark=true;
+    document.querySelectorAll('.fcbtns .fb').forEach(b=>b.classList.remove('waiting')); },secs*1000);
+}
+/* self-marking: the record that feeds the teacher view + spaced repetition */
+function fcMark(ok){
+  if(!fcCanMark) return;
+  const f=FC[fci];
+  try{ const lg=JSON.parse(localStorage.getItem('sv-flash-log'))||[];
+    lg.unshift({t:Date.now(),d:new Date().toISOString().slice(0,10),sub:f.sub||null,unit:f.unit||null,
+      n:f.n||null,ok:ok,q:(f.q||'').slice(0,120)});
+    localStorage.setItem('sv-flash-log',JSON.stringify(lg.slice(0,400))); }catch(e){}
+  /* move the card through the spaced-repetition boxes (shared with lessons) */
+  if(window.svFlashMark && f.key) f.level=svFlashMark(f.key,ok);
+  if(window.svProgressPushSoon) svProgressPushSoon();
+  if(fci+1<FC.length){ fci++; fcDeal(); }
+  else { fcmodal.classList.remove('open'); if(DAYONE) refreshDayOnePlan(); }   /* sitting done for today */
+}
+['ok','no'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
+  e.stopPropagation(); if(fcShowA) fcMark(k==='ok'); }); });
+document.getElementById('closefc').onclick=()=>fcmodal.classList.remove('open');
+fcmodal.addEventListener('click',e=>{ if(e.target===fcmodal) fcmodal.classList.remove('open'); });
+if(_dq.get('fc')){ fcDeal(); fcmodal.classList.add('open');   /* staging: ?fc=1 open, ?fc=2 flipped */
+  if(_dq.get('fc')==='2'){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } }
+
+/* shorts — same feed, in a phone frame; scoped to THIS student's subjects so
+   the feed interleaves only across what they study */
+const pm=document.getElementById('phonemodal'), frame=document.getElementById('feedframe');
+document.getElementById('shortsdoor').onclick=()=>{
+  /* scope the feed to each subject's SCULPTED units (History options etc.), not
+     the whole subject — {subjectSlug:[unitSlug,...]} */
+  const scope={};
+  SUBJECTS.forEach(s=>{ if(s.sub && s.units && s.units.length) scope[s.sub]=s.units.map(u=>u[3]); });
+  frame.src='/design-lab/shorts.html?scope='+encodeURIComponent(JSON.stringify(scope)); pm.classList.add('open'); };
+document.getElementById('closephone').onclick=()=>{ pm.classList.remove('open'); frame.src=''; };
+pm.addEventListener('click',e=>{ if(e.target===pm){ pm.classList.remove('open'); frame.src=''; } });
+addEventListener('keydown',e=>{ if(e.key!=='Escape') return;
+  fcmodal.classList.remove('open'); pm.classList.remove('open'); frame.src=''; });
+
+/* podcasts — the demo lessons' own episodes (R2) */
+const PODCASTS=[
+ {t:'Weimar democracy and political unrest, 1919-1923',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/germany-democracy-dictatorship/podcast_l05.mp3'},
+ {t:'Anglo-German Rivalry: Weltpolitik and the Naval Race',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/conflict-tension-first-world-war/podcast_l03.mp3'},
+ {t:'The Church, the Monastery and Islamic Medicine',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/britain-health-people/podcast_l02.mp3'},
+ {t:'Key ministers: Cecil, Walsingham and the Privy Council',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/elizabethan-england/podcast_l02.mp3'},
+ {t:'Guilt & Consequences',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/macbeth/podcast_l05.mp3'},
+ {t:'Stave 3: Poverty & Generosity',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/a-christmas-carol/podcast_l04.mp3'},
+ {t:'Stave 5: Transformation & Redemption',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/a-christmas-carol/podcast_l06.mp3'},
+ {t:'My Last Duchess — Power & Control',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/power-and-conflict/podcast_l04.mp3'},
+ {t:'Health, Non-Communicable Diseases and Plant Tissues',s:'Combined Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science/biology-paper-1/podcast_l05.mp3'},
+ {t:'Ionic, Covalent and Metallic Bonding',s:'Combined Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science/chemistry-paper-1/podcast_l03.mp3'},
+ {t:'Conservation of Energy, Efficiency and Energy Resources',s:'Combined Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science/physics-paper-1/podcast_l02.mp3'},
+ {t:'Tropical Storm Effects & Management: Hurricane Ida',s:'Geography',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-1/podcast_l06.mp3'},
+ {t:'UK Population Distribution & a Major UK City',s:'Geography',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-2/podcast_l05.mp3'},
+ {t:'Primary Storage (RAM, ROM & Virtual Memory)',s:'Computer Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science/computer-systems/podcast_l04.mp3'},
+ {t:'Embedded Systems',s:'Computer Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science/computer-systems/podcast_l03.mp3'},
+ {t:'Searching Algorithms',s:'Computer Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science/computational-thinking/podcast_l03.mp3'},
+ {t:'Jesus Christ: Incarnation, the Cross and Salvation',s:'Religious Studies',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/religious-studies-ocr/christianity-beliefs-and-teachings/podcast_l03.mp3'},
+ {t:'The Nature of Allah',s:'Religious Studies',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/religious-studies-ocr/islam-beliefs-and-teachings/podcast_l02.mp3'},
+ {t:'Marriage, the Family and Sexuality',s:'Religious Studies',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/religious-studies-ocr/theme-relationships-and-families/podcast_l01.mp3'},
+];
+const player=new Audio(); player.volume=.65;
+let podQ=null,podPos=-1,podOn=false;
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const podplay=document.getElementById('podplay'), podtitle=document.getElementById('podtitle');
+const ICOPLAY='<svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg>';
+const ICOPAUSE='<svg viewBox="0 0 16 16"><path d="M3 2h4v12H3zM9 2h4v12H9z"/></svg>';
+function playPod(next){
+  if(!podQ) podQ=shuffle([...PODCASTS.keys()]);
+  if(next||podPos<0) podPos=(podPos+1)%podQ.length;
+  const p=PODCASTS[podQ[podPos]];
+  player.src=p.u; player.play().catch(()=>{}); podOn=true;
+  podplay.innerHTML=ICOPAUSE;
+  podtitle.textContent=p.t+' · '+p.s;
+}
+podplay.onclick=()=>{ if(!podOn){ playPod(podPos<0); } else if(player.paused){ player.play(); podplay.innerHTML=ICOPAUSE; } else { player.pause(); podplay.innerHTML=ICOPLAY; } };
+document.getElementById('podnext').onclick=()=>playPod(true);
+player.addEventListener('ended',()=>playPod(true));
+
+/* cards due today — read the real Leitner store (sv-flashcard-progress,
+   shared with the lesson flashcards and /revise) */
+{ let n=0;
+  try{ const p=JSON.parse(localStorage.getItem('sv-flashcard-progress')||'{}');
+    const t=new Date().toISOString().slice(0,10);
+    for(const k in (p.cards||{})) if((p.cards[k].nextReview||'9999')<=t) n++;
+  }catch(e){}
+  const _dc=document.getElementById('duecount');   /* absent on day one (empty week card) */
+  if(_dc){ _dc.textContent=String(n);
+    document.getElementById('duerow').onclick=()=>nav('/revise'); }
+}
+requestAnimationFrame(()=>{ document.body.classList.add('ready');
+  const sb=document.getElementById('startbtn'); if(sb) sb.focus({preventScroll:true}); });
+
+/* ---- ?tune : live gold tuner docked over the right column ---- */
+if(/(?:^|[?&])tune(?:=|&|$)/.test(location.search)){(function(){
+  const R=document.documentElement;
+  const D={cb:1.07,cs:0.55,cc:1.00,cse:0.00,ch:0,wb:0.78,ws:1.30,wc:1.00};
+  const P={
+    current:{cb:1.24,cs:0.34,cc:1.00,cse:0.00,ch:0,wb:0.82,ws:1.22,wc:1.00},
+    warm:{cb:0.98,cs:0.70,cc:1.10,cse:0.30,ch:6,wb:0.80,ws:1.45,wc:1.08},
+    contrast:{cb:1.02,cs:0.60,cc:1.40,cse:0.12,ch:0,wb:0.76,ws:1.35,wc:1.25},
+  };
+  const st=document.createElement('style'); st.textContent=`
+    #tuner{position:fixed;top:14px;right:14px;width:300px;max-height:calc(100vh - 28px);overflow:auto;
+      background:rgba(255,253,248,.94);backdrop-filter:blur(6px);border:1px solid #e4dfd2;border-radius:14px;
+      box-shadow:0 12px 40px rgba(40,28,12,.22);padding:14px 16px 16px;z-index:9999;
+      font:13px/1.45 -apple-system,Segoe UI,system-ui,sans-serif;color:#2d2a26}
+    #tuner h4{font:600 .98rem/1.2 Georgia,serif;margin:0 0 2px}
+    #tuner .lede{color:#84806f;font-size:.78rem;margin:0 0 10px}
+    #tuner fieldset{border:1px solid #e4dfd2;border-radius:10px;margin:0 0 11px;padding:8px 11px 10px}
+    #tuner legend{font:600 .72rem/1 sans-serif;letter-spacing:.03em;text-transform:uppercase;color:#8a6d3b;padding:0 5px}
+    #tuner .c{margin:7px 0}
+    #tuner .c label{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:2px}
+    #tuner .c .v{color:#84806f;font-variant-numeric:tabular-nums}
+    #tuner input[type=range]{width:100%;accent-color:#8a6d3b;margin:0}
+    #tuner .presets{display:flex;gap:5px;flex-wrap:wrap;margin:0 0 11px}
+    #tuner button{font:inherit;font-size:.76rem;border:1px solid #e4dfd2;background:#fff;border-radius:8px;padding:4px 9px;cursor:pointer;color:#2d2a26}
+    #tuner button:hover{border-color:#8a6d3b}
+    #tuner .out{background:#2d2a26;color:#f3ead4;border-radius:9px;padding:9px 10px;
+      font:11.5px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-word;margin:2px 0 8px}
+    #tuner .out .k{color:#c9b891}
+    #tuner .tools{display:flex;gap:7px;align-items:center}
+    #tuner .ok{color:#4a7a4a;font-size:.75rem;opacity:0;transition:opacity .2s}
+    #tuner .ok.on{opacity:1}
+    #tunerToggle{position:fixed;top:14px;right:14px;z-index:9999;display:none;
+      background:#8a6d3b;color:#fff;border:0;border-radius:20px;padding:8px 15px;cursor:pointer;
+      font:600 13px/1 sans-serif;box-shadow:0 6px 20px rgba(40,28,12,.25)}
+    #tuner .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+    #tuner .hd .x{border:0;background:none;font-size:1.1rem;line-height:1;padding:2px 4px;color:#84806f}`;
+  document.head.appendChild(st);
+
+  const row=(id,lab,mn,mx,sp)=>`<div class="c"><label><b>${lab}</b><span class="v" id="v_${id}"></span></label>`+
+    `<input type="range" id="t_${id}" min="${mn}" max="${mx}" step="${sp}"></div>`;
+  const box=document.createElement('div'); box.id='tuner'; box.innerHTML=
+    `<div class="hd"><div><h4>Gold tuner</h4><p class="lede">Live on the real shelf. Send me the values below.</p></div>`+
+    `<button class="x" id="t_hide" title="Hide">–</button></div>`+
+    `<div class="presets"><button data-p="current">Current</button><button data-p="warm">Warmer gold</button><button data-p="contrast">High contrast</button></div>`+
+    `<fieldset><legend>Unstudied</legend>`+row('cb','Brightness',0.70,1.40,0.01)+row('cs','Saturation',0,2,0.01)+
+      row('cc','Contrast',0.60,1.80,0.01)+row('cse','Warmth',0,1,0.01)+row('ch','Hue',-40,40,1)+`</fieldset>`+
+    `<fieldset><legend>Studied fill</legend>`+row('wb','Brightness',0.60,1.15,0.01)+row('ws','Saturation',0.80,2.20,0.01)+
+      row('wc','Contrast',0.60,1.80,0.01)+`</fieldset>`+
+    `<div class="out" id="t_out"></div>`+
+    `<div class="tools"><button id="t_copy">Copy CSS</button><button id="t_reset">Reset</button><span class="ok" id="t_ok">copied ✓</span></div>`;
+  document.body.appendChild(box);
+  const tog=document.createElement('button'); tog.id='tunerToggle'; tog.textContent='Gold tuner'; document.body.appendChild(tog);
+  const g=id=>document.getElementById(id);
+  const cold=()=>`saturate(${(+g('t_cs').value).toFixed(2)}) brightness(${(+g('t_cb').value).toFixed(2)}) contrast(${(+g('t_cc').value).toFixed(2)}) sepia(${(+g('t_cse').value).toFixed(2)}) hue-rotate(${g('t_ch').value}deg)`;
+  const warm=()=>`saturate(${(+g('t_ws').value).toFixed(2)}) brightness(${(+g('t_wb').value).toFixed(2)}) contrast(${(+g('t_wc').value).toFixed(2)})`;
+  const IDS=['cb','cs','cc','cse','ch','wb','ws','wc'];
+  function apply(){
+    R.style.setProperty('--coldf',cold()); R.style.setProperty('--warmf',warm());
+    IDS.forEach(k=>{const el=g('v_'+k); if(el) el.textContent=(k==='ch')?g('t_ch').value+'°':(+g('t_'+k).value).toFixed(2);});
+    g('t_out').innerHTML=`<span class="k">.bk img.cold</span>{filter:${cold()}}\n\n<span class="k">.bk img.warm</span>{filter:${warm()}}`;
+  }
+  const setv=o=>{for(const k in o) g('t_'+k).value=o[k]; apply();};
+  IDS.forEach(k=>g('t_'+k).addEventListener('input',apply));
+  box.querySelectorAll('.presets button').forEach(b=>b.onclick=()=>setv(P[b.dataset.p]));
+  g('t_reset').onclick=()=>setv(D);
+  g('t_copy').onclick=async()=>{try{await navigator.clipboard.writeText(`.bk img.cold{filter:${cold()}}\n.bk img.warm{filter:${warm()}}`);}catch(e){}
+    g('t_ok').classList.add('on'); setTimeout(()=>g('t_ok').classList.remove('on'),1200);};
+  g('t_hide').onclick=()=>{box.style.display='none'; tog.style.display='block';};
+  tog.onclick=()=>{box.style.display='block'; tog.style.display='none';};
+  const q=(location.search.match(/[?&]tune=([a-z]+)/)||[])[1];
+  setv(P[q]||D);
+})();}
+
+/* the planner modal (planner.js): the exam card is its door */
+document.querySelector('.card.exam').onclick=()=>svPlannerOpen();
+</script>
+</body>
+</html>

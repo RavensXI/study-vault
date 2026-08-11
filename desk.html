@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- served at /desk (vercel.json + serve.py rewrite) — base keeps the
+     relative asset paths resolving into design-lab/ -->
+<base href="/">
+<title>Your desk — StudyVault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Young+Serif&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#fffdf8;--ink:#26231e;--sec:#57534a;--mut:#84806f;--line:#e4dfd2;
+    --r:8px;--anchor:#4e5f66;--ease:cubic-bezier(.22,1,.36,1);
+    --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif;
+    --hand:'Caveat',cursive}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:var(--head);color:var(--ink);overflow:hidden}
+  body{background:#e9dfc9}
+
+  /* ============ the stage: one coordinate system for paint AND ui ============
+     Everything lives in 2752x1536 stage units (the background plate's pixels)
+     and the whole stage scales as one object — so painted props and live
+     overlays can never drift apart. */
+  #stage{position:absolute;left:0;top:0;width:2752px;height:1536px;transform-origin:0 0;opacity:0}
+  #stage.ready{opacity:1;transition:opacity .5s ease}
+  #stage.exit{opacity:0 !important;transition:opacity .22s ease}
+  #stage>.bg{position:absolute;inset:0;width:100%;height:100%}
+  /* two desk states: the clean plate sits under the messy one. 'clean desk'
+     fades the mess away; after a week the mess comes back on its own. */
+  #stage>.bg.mess{transition:opacity 1s ease .15s}
+  #stage>.bg.mess.gone{opacity:0}
+  /* the clean shimmer: one soft band of light sweeps the desk */
+  .shine{position:absolute;left:-60%;top:0;width:220%;height:100%;pointer-events:none;opacity:0;z-index:6;
+    background:linear-gradient(105deg,transparent 40%,rgba(255,252,238,.5) 50%,transparent 60%)}
+  .shine.go{animation:sweep4 1.25s ease}
+  @keyframes sweep4{from{opacity:1;transform:translateX(-28%)}to{opacity:1;transform:translateX(28%)}}
+  /* sparkles pop where the mess just vanished, timed to the passing band */
+  #sparks{position:absolute;inset:0;pointer-events:none;z-index:7}
+  #sparks .spark{position:absolute;width:90px;height:90px;opacity:0}
+  #sparks .spark svg{width:100%;height:100%;fill:#fffdf2;filter:drop-shadow(0 0 16px rgba(255,250,225,.95))}
+  #sparks.go .spark{animation:spark4 .6s ease both}
+  #sparks .k1{left:400px;top:830px;animation-delay:.35s}
+  #sparks .k2{left:2040px;top:520px;width:110px;height:110px;animation-delay:.85s}
+  #sparks .k3{left:2090px;top:1130px;animation-delay:1s}
+  #sparks .k4{left:2260px;top:700px;width:70px;height:70px;animation-delay:1.12s}
+  @keyframes spark4{0%{opacity:0;transform:scale(0) rotate(0deg)}35%{opacity:1;transform:scale(1) rotate(18deg)}
+    100%{opacity:0;transform:scale(.15) rotate(50deg)}}
+
+  .top{position:fixed;left:0;right:0;top:0;z-index:10;height:52px;display:flex;align-items:center;
+    justify-content:space-between;padding:0 clamp(1rem,4vw,2.2rem);pointer-events:none}
+  .top>*{pointer-events:auto}
+  .brand{font-family:'Young Serif',serif;font-size:1.05rem;font-weight:400;color:#1d1c1a}
+  .brandlock{height:.30em;width:auto;margin-left:1px;vertical-align:baseline}
+  .brandlogo{height:34px;display:block}
+  .avatar{width:30px;height:30px;border-radius:50%;background:#221E19;color:#faf8f5;
+    display:grid;place-items:center;font-weight:700;font-size:.78rem}
+
+  /* ============ the notebook: painted plate + live pages ============ */
+  /* container boxes are click-transparent — only live children take hits
+     (a transparent div still swallows clicks across its whole box) */
+  /* the book's desk-level wash splash, split from the plate so the card pile
+     can slide UNDER the book but OVER its splash (paint on the desk surface) */
+  .bookwash{position:absolute;left:505px;top:475px;width:2184px;height:1443px;
+    transform:rotate(-1.2deg) scale(.64);transform-origin:0 0;pointer-events:none}
+  #book{position:absolute;left:505px;top:475px;width:2184px;height:1443px;
+    transform:rotate(-1.2deg) scale(.64);transform-origin:0 0;pointer-events:none}
+  #book .pg4,#book .tab4{pointer-events:auto}
+  #book>.plate{position:absolute;left:0;top:0;width:2184px;display:block;pointer-events:none}
+  /* content layers are homography-mapped onto the painted pages
+     (matrices from scripts/_desk4_homography.py — plate-pixel space) */
+  .pg4{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;flex-direction:column;
+    transition:opacity .22s ease}
+  .pg4.fade{opacity:0}
+  .pl{width:640px;height:915px;transform:matrix3d(0.997807,-0.023817,0.000000,-0.000002,-0.074615,0.906528,0.000000,-0.000094,0.000000,0.000000,1.000000,0.000000,370.000000,190.000000,0.000000,1.000000)}
+  .pr{width:685px;height:920px;transform:matrix3d(0.985680,0.012212,0.000000,0.000028,-0.230161,0.823772,0.000000,-0.000174,0.000000,0.000000,1.000000,0.000000,1190.000000,170.000000,0.000000,1.000000)}
+
+  /* page typography (plate px; ~0.48x on screen at the reference viewport) */
+  .pg4 .datestamp{font-family:var(--hand);font-size:48px;color:var(--mut);line-height:1.2;margin-bottom:6px}
+  .pg4 h2{font-family:var(--hand);font-size:78px;font-weight:700;letter-spacing:0;margin:0 0 14px;line-height:1.05}
+  .plan{list-style:none;margin:0;padding:0}
+  .plan li{display:grid;grid-template-columns:52px 1fr 92px;gap:0 14px;padding:17px 6px 17px 0;
+    cursor:pointer;border-radius:8px;transition:background .14s}
+  .plan li:hover{background:rgba(112,90,50,.07)}
+  .plan li:focus-visible{outline:2px solid var(--anchor);outline-offset:-2px}
+  .plan .n{font-family:var(--hand);font-weight:600;font-size:46px;color:var(--mut)}
+  .plan li>div{min-width:0}
+  .plan b{font-family:var(--hand);font-weight:600;font-size:50px;line-height:1.05;display:block}
+  .plan small{font-family:var(--hand);font-size:34px;color:var(--mut);display:block;margin-top:6px}
+  .plan .mins{font-family:var(--hand);font-size:34px;color:var(--mut);text-align:right}
+  /* a finished plan step: handwritten tick, text steps back — no strikethrough */
+  .plan li.done .n{color:#4e6e5d}
+  .plan li.done b,.plan li.done .mins{color:var(--mut)}
+  .plan li.done{cursor:default}
+  .momentum{font-family:var(--hand);font-size:36px;font-weight:500;color:var(--sec);margin:22px 0 0}
+  .hl{background:linear-gradient(101deg,transparent 1.5%,rgba(255,222,84,.5) 7%,rgba(255,226,96,.42) 93%,transparent 98.5%);
+    border-radius:8px;padding:1px 10px;margin:0 -4px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+  .startrow{margin-top:auto;padding-bottom:6px}
+  /* the call-to-action is written and RINGED in ink, the way you'd mark
+     the one thing on the page you must actually do */
+  .start{position:relative;display:inline-block;padding:18px 46px 20px;border:none;background:none;
+    color:#2e2a22;font-family:var(--hand);font-weight:700;font-size:56px;cursor:pointer;transition:transform .16s}
+  .start:hover{transform:rotate(-1deg) scale(1.03)}
+  .start .ring{position:absolute;inset:-6px -10px;width:calc(100% + 20px);height:calc(100% + 12px);
+    fill:none;stroke:#8a4f42;stroke-width:5;stroke-linecap:round;opacity:.85}
+  .pg4 h3{font-family:var(--hand);font-weight:600;font-size:56px;color:var(--sec);margin:0 0 16px}
+  .noteline{font-family:var(--hand);font-size:44px;color:var(--sec);line-height:1.75;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .noteline b{color:var(--ink);font-weight:600}
+  .pg4 .doable{margin-top:auto;font-family:var(--hand);font-size:41px;color:var(--mut);text-align:right}
+  .subjpg .unit{display:grid;grid-template-columns:1fr 90px;gap:10px;padding:9px 6px;cursor:pointer;
+    border-radius:8px;transition:background .14s}
+  .subjpg .unit:hover{background:rgba(112,90,50,.07)}
+  .subjpg .unit b{font-family:var(--hand);font-weight:600;font-size:44px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .subjpg .unit small{font-family:var(--hand);font-size:34px;color:var(--mut);text-align:right}
+  .splate{flex:none;height:400px;background-size:contain;background-position:center;background-repeat:no-repeat}
+  .scap{font-family:var(--hand);font-size:40px;color:var(--mut);text-align:center;line-height:1.3;margin:6px 0 12px}
+  .open4{position:relative;margin-top:auto;align-self:flex-start;display:inline-block;
+    font-family:var(--hand);font-size:46px;font-weight:700;color:#2e2a22;border:none;
+    padding:6px 4px 14px;background:none;cursor:pointer;transition:transform .16s}
+  .open4:hover{transform:rotate(-.8deg) scale(1.02)}
+  .open4::after{content:"";position:absolute;left:2px;right:6px;bottom:6px;height:7px;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 10' preserveAspectRatio='none'%3E%3Cpath d='M2 6 C40 2, 90 9, 130 5 S 190 4, 198 6' fill='none' stroke='%238a4f42' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") 0 0/100% 100% no-repeat;opacity:.8}
+  .backlink{background:none;border:none;padding:12px 0 0;font-family:var(--hand);
+    font-size:38px;color:var(--mut);cursor:pointer;text-align:left}
+  .backlink:hover{color:var(--ink)}
+
+  /* ============ the wireless: painted plate, live glass + knobs ============ */
+  #radio{position:absolute;left:30px;top:170px;width:2008px;height:1430px;
+    transform:scale(.30);transform-origin:0 0;pointer-events:none}
+  #radio .knob4{pointer-events:auto}
+  #radio>.plate{position:absolute;left:0;top:0;width:2008px;display:block;pointer-events:none}
+  /* the marquee lives ON the painted glass: transparent layer mapped to the
+     window quad (matrix from _desk4_homography pattern), glow text only */
+  .lcd4{position:absolute;left:0;top:0;width:640px;height:210px;transform-origin:0 0;
+    /* left end dropped ~18px (pivot: right edge) to sit true on the painted
+       glass — the text ran ~1.4° shallower than the glass (27 Jul) */
+    transform:matrix3d(1.155570,-0.122439,0.000000,0.000097,0.032717,1.024790,0.000000,0.000014,0.000000,0.000000,1.000000,0.000000,972.000000,896.000000,0.000000,1.000000);
+    overflow:hidden;display:flex;align-items:center;pointer-events:none}
+  .lcd4 .mq{white-space:nowrap;font-family:ui-monospace,Consolas,monospace;font-size:57px;letter-spacing:.09em;
+    color:#e6c17c;text-shadow:0 0 18px rgba(230,193,124,.6);animation:mq4 11s linear infinite;animation-delay:-4s;padding-left:100%}
+  @keyframes mq4{to{transform:translateX(-100%)}}
+  .lcd4.lofi .mq{color:#a8d8b0;text-shadow:0 0 18px rgba(168,216,176,.6)}
+  .knob4{position:absolute;border:none;border-radius:50%;background:transparent;cursor:pointer;padding:0;
+    border:6px solid transparent;transition:border-color .15s}
+  .knob4:hover,.knob4:focus-visible{border-color:rgba(230,193,124,.7);outline:none}
+  .knob4.k1{left:698px;top:940px;width:240px;height:240px}
+  .knob4.k2{left:1666px;top:744px;width:210px;height:210px}
+  /* the radio's label lives on a sticky note at the set's base — not the
+     drag/edit .sticky class, purely decorative. Bottom corner carries THE S. */
+  .rnote{position:absolute;left:44px;top:596px;width:316px;padding:22px 24px 24px;color:#4d4425;
+    background:linear-gradient(168deg,#f9edb4 0%,#f4e49c 70%,#eeda8d 100%);
+    font-family:var(--hand);box-shadow:9px 16px 28px -9px rgba(56,40,18,.38);
+    transform:rotate(-3.5deg);cursor:pointer}
+  .rnote b{display:block;font-size:36px;font-weight:600;color:#33301c;padding-right:44px}
+  .rnote .rlines{display:block;font-family:var(--read);font-style:italic;font-size:23px;line-height:1.3;
+    color:#5d5342;margin-top:6px;padding-right:66px}
+  .rnote .rlines .ln{display:block}
+  .rnote .rlines .ln+.ln{margin-top:9px}
+  .rnote .rarrow{position:absolute;right:16px;top:12px;width:34px;opacity:.7;transform:rotate(6deg)}
+  .rnote .cools{position:absolute;right:16px;bottom:14px;width:52px;opacity:.7;transform:rotate(7deg)}
+
+  /* ============ paper objects: stickies, pad, postcard, flashcards ============
+     These ARE paper, so they stay crisp HTML — they pop because they're live. */
+  .sticky{position:absolute;width:264px;padding:20px 24px 26px;color:#4d4425;
+    transition:translate .25s var(--ease)}
+  .sticky:hover{translate:0 -8px}
+  .sticky{
+    background:linear-gradient(168deg,#f9edb4 0%,#f4e49c 70%,#eeda8d 100%);
+    font-family:var(--hand);font-size:36px;line-height:1.3;
+    box-shadow:9px 16px 28px -9px rgba(56,40,18,.38);z-index:3;cursor:grab}
+  .sticky:focus-within{outline:3px solid rgba(78,95,102,.45);outline-offset:3px}
+  .sticky .txt{outline:none;min-height:1.2em}
+  .sticky b{font-weight:600;color:#33301c}
+  .sticky .del{position:absolute;top:-16px;left:-16px;width:40px;height:40px;border-radius:50%;border:2px solid var(--line);
+    background:var(--paper);color:var(--sec);font-size:26px;line-height:1;cursor:pointer;display:none;place-items:center;
+    box-shadow:0 3px 9px rgba(56,40,18,.25)}
+  .sticky:hover .del{display:grid}
+  .sticky.s1{left:660px;top:150px;width:240px;transform:rotate(-3deg)}
+  .pad{position:absolute;left:924px;top:168px;width:200px;height:150px;cursor:pointer;
+    transition:translate .25s var(--ease),box-shadow .25s var(--ease)}
+  .pad:hover{translate:0 -8px}
+  .pad{
+    background:linear-gradient(168deg,#f9edb4,#f0df95);border:none;padding:0;z-index:3;
+    box-shadow:0 4px 0 #e8d78a,0 8px 0 #decd80,11px 18px 28px -9px rgba(56,40,18,.4)}
+  .pad span{font-family:var(--hand);font-size:38px;color:#8a7d45}
+  .pad:hover span{color:#4d4425}
+  .pad:focus-visible{outline:3px solid var(--anchor);outline-offset:4px}
+
+  /* the desk calendar: painted wire-bound plate, live page. The doodle,
+     month grid and the caption 'back' are homography-mapped onto the painted
+     page; clicking crossfades front/back like the book's page turns. */
+  .postcard{position:absolute;left:2120px;top:64px;width:1455px;height:1555px;cursor:pointer;
+    background:none;border:none;padding:0;z-index:3;transform:scale(.37);transform-origin:0 0;
+    transition:translate .25s var(--ease);pointer-events:none}
+  .postcard:hover{translate:0 -12px}
+  .postcard>.plate{position:absolute;left:0;top:0;width:1455px;display:block;pointer-events:none}
+  .postcard .chit{position:absolute;left:115px;top:100px;width:1250px;height:1300px;pointer-events:auto;cursor:grab}
+  .postcard:focus-visible .chit{outline:16px solid var(--anchor);outline-offset:20px}
+  .calpage{position:absolute;left:0;top:0;width:640px;height:700px;transform-origin:0 0;pointer-events:none;
+    transform:matrix3d(1.983801,-0.111068,0,0.00016624,0.147150,1.696613,0,-0.00001267,0,0,1,0,120.000000,195.000000,0,1);
+    display:flex;flex-direction:column;padding:30px 34px 22px;transition:opacity .25s ease}
+  .postcard .calart{flex:none;height:258px;margin:10px 14px 0;opacity:.96;
+    background:var(--gart,linear-gradient(120deg,#e8e2d2,#d9d2be)) center/cover no-repeat;
+    -webkit-mask-image:linear-gradient(to right,transparent 0,#000 20px,#000 calc(100% - 20px),transparent 100%),
+      linear-gradient(to bottom,transparent 0,#000 20px,#000 calc(100% - 20px),transparent 100%);
+    -webkit-mask-composite:source-in;
+    mask-image:linear-gradient(to right,transparent 0,#000 20px,#000 calc(100% - 20px),transparent 100%),
+      linear-gradient(to bottom,transparent 0,#000 20px,#000 calc(100% - 20px),transparent 100%);
+    mask-composite:intersect}
+  .postcard .calmonth{font-family:var(--hand);font-size:48px;color:#33301c;line-height:1.05;padding:6px 6px 2px;text-align:center}
+  .postcard .calgrid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:minmax(0,1fr)}
+  .postcard .wd{font-size:24px;font-weight:700;letter-spacing:.04em;color:var(--mut);text-align:center;align-self:center}
+  .postcard .dy{position:relative;font-family:var(--read);font-size:28px;line-height:1;color:#57534a;
+    display:flex;align-items:center;justify-content:center;min-height:0}
+  .postcard .dy .x{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:var(--hand);font-style:normal;font-size:44px;color:#b8442f;opacity:.82;pointer-events:none}
+  .postcard .dy.td::after{content:"";position:absolute;left:14%;right:14%;top:8%;bottom:8%;
+    border:3px solid #b8442f;border-radius:50%;transform:rotate(-5deg);opacity:.7}
+  /* planner session dot on days ahead (today keeps its red circle instead) */
+  .postcard .dy.pd:not(.td)::after{content:"";position:absolute;left:50%;bottom:3px;translate:-50%;
+    width:14px;height:14px;border-radius:50%;background:var(--dot,#8a5a44);opacity:.85}
+  .postcard .dy.hol{color:#a3873a}
+  /* hover: the picture's caption appears handwritten on the desk below */
+  .postcard .calcap{position:absolute;left:190px;top:1478px;width:1140px;font-family:var(--hand);font-size:54px;
+    color:#6b5c41;line-height:1.15;text-align:center;opacity:0;transition:opacity .3s ease;transform:rotate(-8deg);pointer-events:none}
+  .postcard:hover .calcap{opacity:1}
+
+  /* ============ the wristwatch: painted plate, live hands ============
+     Taken off and dropped on the desk. Hands show the real time; clicking
+     the face opens the revision-timer note; the countdown draws as a red
+     arc on the dial. Container pe:none, only the face circle takes clicks. */
+  #watch{position:absolute;left:1150px;top:170px;width:1362px;height:1227px;background:none;border:none;padding:0;
+    transform:scale(.22);transform-origin:0 0;transition:translate .25s var(--ease);pointer-events:none;z-index:2}
+  #watch:hover{translate:0 -10px}
+  #watch>.plate{position:absolute;left:0;top:0;width:1362px;display:block;pointer-events:none}
+  #watch .whit{position:absolute;left:400px;top:250px;width:580px;height:580px;border-radius:50%;
+    pointer-events:auto;cursor:pointer}
+  #watch:focus-visible .whit{outline:16px solid var(--anchor);outline-offset:20px}
+  #watch .hands{position:absolute;left:690px;top:539px;pointer-events:none}
+  #watch .hand{position:absolute;transform-origin:50% 100%;background:#3a3428;border-radius:8px}
+  #watch .hh{left:-8px;top:-150px;width:16px;height:150px}
+  #watch .mh{left:-6px;top:-205px;width:12px;height:205px}
+  #watch .sh{left:-2.5px;top:-215px;width:5px;height:215px;background:#b8442f}
+  #watch .wcap{position:absolute;left:-11px;top:-11px;width:22px;height:22px;border-radius:50%;background:#3a3428}
+  #watch .tarc{position:absolute;left:0;top:0;width:1362px;height:1227px;pointer-events:none}
+  #watch .tarc circle{opacity:.75}
+  #watch .tarc.wflash circle{animation:wblink 1.9s linear}
+  @keyframes wblink{0%,30%,62%{opacity:.85}15%,46%,80%{opacity:0}100%{opacity:0}}
+  /* the timer note */
+  .wpop{position:absolute;left:1040px;top:466px;width:330px;padding:20px 24px 22px;z-index:4;display:none;
+    background:linear-gradient(168deg,#f9edb4 0%,#f4e49c 70%,#eeda8d 100%);
+    font-family:var(--hand);box-shadow:9px 16px 28px -9px rgba(56,40,18,.38);transform:rotate(1.6deg)}
+  .wpop.open{display:block}
+  .wpop b{display:block;font-size:34px;font-weight:600;color:#33301c;margin-bottom:6px}
+  .wpop .opts{display:flex;gap:10px;flex-wrap:wrap}
+  .wpop button{background:none;border:2.5px solid rgba(77,68,37,.35);border-radius:12px;padding:6px 16px;
+    font-family:var(--hand);font-size:30px;color:#4d4425;cursor:pointer}
+  .wpop button:hover{border-color:#4d4425}
+
+  /* flashcards: a painted scatter — the DOOR to flashcard mode (like the
+     phone is the door to shorts). Anchored off the bottom-left corner so only
+     the top few cards show; the rest of the pile reads as running off-screen.
+     No z-index: sits before #book in the DOM, so the pile tucks UNDER the
+     book's lower-left corner. Click target is the .hit span (the visible
+     cards only) — the full plate box would swallow clicks under the book. */
+  .cards{position:absolute;left:-75px;top:975px;width:2210px;height:1489px;background:none;border:none;padding:0;
+    pointer-events:none;transform:scale(.42);transform-origin:0 0;transition:translate .25s var(--ease)}
+  .cards:hover{translate:0 -16px}
+  .cards .hit{position:absolute;left:560px;top:300px;width:1000px;height:1189px;pointer-events:auto;cursor:pointer}
+  .cards:focus-visible .hit{outline:20px solid var(--anchor);outline-offset:24px}
+  .cards>.plate{position:absolute;left:0;top:0;width:2210px;display:block;pointer-events:none}
+  /* live question handwritten on the clean top card */
+  .fcq{position:absolute;left:0;top:0;width:660px;height:480px;transform-origin:0 0;pointer-events:none;
+    transform:matrix3d(1.014860,-0.193432,0.000000,0.000009,0.266914,0.981730,0.000000,-0.000018,0.000000,0.000000,1.000000,0.000000,652.000000,523.000000,0.000000,1.000000);
+    display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:14px;padding:30px 44px;overflow:hidden}
+  /* preview question steps down + clamps for longer cards so it stays on the card */
+  .fcq .q{font-family:var(--hand);font-size:96px;line-height:1.12;color:#3e3a31;overflow-wrap:anywhere;
+    display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+  .fcq .q.long{font-size:72px;-webkit-line-clamp:5}
+  .fcq .q.xlong{font-size:56px;-webkit-line-clamp:6}
+  .fcq .subj{font-family:var(--hand);font-size:54px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb,var(--fcc,#8a5a44) 75%,#84806f);overflow-wrap:anywhere}
+
+  /* flashcard mode: the card table */
+  .fcmodal{position:fixed;inset:0;z-index:50;display:none;place-items:center;background:rgba(30,24,14,.55);backdrop-filter:blur(3px)}
+  .fcmodal.open{display:grid}
+  .fcmodal .table{position:relative;width:min(92vw,640px)}
+  .fcmodal .bigcard{position:relative;width:100%;aspect-ratio:8/5;perspective:1400px;cursor:pointer;background:none;border:none;padding:0;display:block}
+  .fcmodal .bigcard .flip{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .5s var(--ease)}
+  .fcmodal .bigcard.showa .flip{transform:rotateX(180deg)}
+  .fcmodal .face{position:absolute;inset:0;backface-visibility:hidden;background:#fffcf4;border:1px solid #ddd3bc;border-radius:12px;
+    box-shadow:0 30px 70px -25px rgba(0,0,0,.55);display:flex;flex-direction:column;justify-content:safe center;align-items:center;gap:.8rem;padding:2rem 2.6rem;overflow:auto;
+    background-image:repeating-linear-gradient(to bottom,transparent 0 44px,rgba(112,140,170,.14) 44px 45px)}
+  .fcmodal .face.back{transform:rotateX(180deg)}
+  /* left accent stripe removed — it read as the AI "index-card strip" tell */
+  /* font scales with the card and steps down for longer text so nothing spills
+     over the edge; long words wrap instead of overflowing */
+  .fcmodal .face .qq{font-family:var(--hand);font-size:clamp(1.9rem,5.8vw,3.1rem);line-height:1.2;color:#33301c;text-align:center;max-width:100%;overflow-wrap:anywhere;hyphens:auto}
+  .fcmodal .face .qq.long{font-size:clamp(1.45rem,4.4vw,2.35rem)}
+  .fcmodal .face .qq.xlong{font-size:clamp(1.1rem,3.3vw,1.8rem);line-height:1.3}
+  .fcmodal .face .tag{font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mut)}
+  .fcmodal .face .utag{font-family:var(--read);font-style:italic;font-size:.85rem;color:var(--sec);margin-top:-.35rem}
+  .fcbtns{display:flex;gap:12px;margin-top:.4rem;opacity:0;pointer-events:none;transition:opacity .2s .25s}
+  .fcmodal .showa .fcbtns,.bigcard.showa .fcbtns{opacity:1;pointer-events:auto}
+  .fcbtns .fb{font-family:var(--head);font-weight:600;font-size:.92rem;border:1px solid #ddd3bc;
+    border-radius:9px;background:#fff;padding:.55rem 1.1rem;cursor:pointer;color:#57534a}
+  .fcbtns .fb.ok:hover{border-color:#2f7d57;color:#1e5b3e;background:#edf6f0}
+  .fcbtns .fb.no:hover{border-color:#c0533a;color:#9a3a25;background:#fbeee9}
+  .fcbtns .fb.waiting{opacity:.4;pointer-events:none;cursor:default}
+  /* reading-pace underline (same as the in-lesson deck): fills over --read-duration */
+  .fcmodal .face.back .qq{position:relative;display:block;padding-bottom:10px}
+  .fcmodal .face.back .qq::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:0;
+    background:#8a5a44;opacity:.35;border-radius:2px}
+  .fcmodal .showa .face.back .qq::after,.bigcard.showa .face.back .qq::after{width:100%;transition:width var(--read-duration,2s) linear}
+  .fcmodal .meta{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;color:#efe9da}
+  .fcmodal .meta small{font-family:var(--read);font-style:italic;font-size:.95rem;opacity:.85}
+  .fcmodal .meta .metaR{display:flex;align-items:center;gap:12px}
+  .fcmodal .meta .cnt{font-variant-numeric:tabular-nums;font-weight:700;font-size:.9rem}
+  /* per-card mastery (Leitner box), written on the card like a teacher's pen
+     mark — angled top-left, ink colour by level. NOT a pill. */
+  .fcmodal .face .fcmark{position:absolute;top:22px;left:38px;font-family:var(--hand);font-size:1.55rem;
+    font-weight:600;line-height:1;letter-spacing:.01em;transform:rotate(-8deg);transform-origin:left center;pointer-events:none}
+  .fcmodal .face .fcmark:empty{display:none}
+  .fcmark.m-emerging{color:#c0392b}
+  .fcmark.m-developing{color:#c9781f}
+  .fcmark.m-secure{color:#2a6f97}
+  .fcmark.m-mastered{color:#2e7d4f}
+  .fcmodal .x{position:absolute;top:-16px;right:-16px;width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;
+    background:#fffdf8;color:#26231e;font-size:19px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+
+  /* ============ the phone: painted plate, live glass ============ */
+  #phonewrap{position:absolute;left:2260px;top:830px;width:1067px;height:1736px;z-index:4;
+    transform:scale(.37);transform-origin:0 0;pointer-events:none;transition:translate .25s var(--ease)}
+  #phonewrap:has(.screen4:hover){translate:0 -12px}
+  #phonewrap>.plate{position:absolute;left:0;top:0;width:1067px;display:block;pointer-events:none}
+  .screen4{position:absolute;left:0;top:0;width:660px;height:1400px;transform-origin:0 0;border-radius:46px;
+    transform:translate(566px,845px) rotate(1.2deg) translate(-566px,-845px)
+      matrix3d(1.110768,0.104752,0.000000,-0.000005,-0.144490,1.087730,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,299.244979,47.353862,0.000000,1.000000);
+    overflow:hidden;border:none;padding:0;cursor:pointer;pointer-events:auto;transition:filter .2s;
+    background:#14120e;
+    /* punch-hole: let the plate's painted camera show through the live screen */
+    -webkit-mask-image:radial-gradient(circle at 321px 48px, transparent 20px, #000 23px);
+    mask-image:radial-gradient(circle at 321px 48px, transparent 20px, #000 23px)}
+  .screen4 .pshot{position:absolute;inset:0;background:var(--pshot,none) center/cover no-repeat;
+    filter:saturate(.78) sepia(.1) contrast(.93) brightness(.96)}
+  /* the glass: warm tint + the diagonal reflection the painted phones carry */
+  .screen4::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(107deg,rgba(255,250,238,.16) 6%,rgba(255,250,238,.05) 26%,transparent 44%),
+               linear-gradient(rgba(236,222,198,.05),rgba(236,222,198,.05))}
+  .screen4:hover{filter:brightness(1.08)}
+  .screen4:focus-visible{outline:6px solid var(--anchor);outline-offset:6px}
+  .screen4 .pscrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,7,5,.8),transparent 44%)}
+  .screen4 .plab{position:absolute;left:0;right:0;bottom:60px;text-align:center;color:#fff}
+  .screen4 .plab b{display:block;font-size:70px;font-weight:800}
+  .screen4 .plab small{display:block;font-family:var(--read);font-style:italic;font-size:48px;color:rgba(255,255,255,.85);margin-top:8px}
+  .dot4{position:absolute;left:930px;top:118px;width:58px;height:58px;border-radius:50%;
+    background:#b3402f;border:8px solid #f7f3ea;box-shadow:0 4px 12px rgba(56,40,18,.3);
+    animation:dotpulse4 2.8s ease-in-out infinite}
+  @keyframes dotpulse4{0%,100%{transform:scale(1)}50%{transform:scale(1.22)}}
+  @media (prefers-reduced-motion:reduce){.dot4{animation:none}}
+
+  /* ============ the phone modal: the REAL feed ============ */
+  .phonemodal{position:fixed;inset:0;z-index:50;display:none;place-items:center;background:rgba(30,24,14,.55);backdrop-filter:blur(3px)}
+  .phonemodal.open{display:grid}
+  .phonemodal .dev{position:relative;height:min(92vh,860px);aspect-ratio:9/18.2;background:#26231e;border-radius:30px;padding:10px;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.6)}
+  .phonemodal iframe{width:100%;height:100%;border:0;border-radius:20px;background:#f2efe9}
+  .phonemodal .x{position:absolute;top:-14px;right:-14px;width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;
+    background:#fffdf8;color:#26231e;font-size:18px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+
+  .tidy{background:none;border:none;font-family:var(--hand);font-size:1.2rem;color:#5d5342;cursor:pointer}
+  .tidy:hover{color:#26231e}
+
+  /* subject tabs: cloth page-markers slotted BETWEEN the painted pages.
+     #tabs renders UNDER the book plate (plate is pe:none, so clicks still
+     land) — each tab's root vanishes beneath the painted fore-edge and only
+     the tip shows, like a real tabbed notebook. Width fits the word; each
+     tab wobbles a touch (--jit) so they read glued-in, not generated. */
+  .tab4{position:absolute;height:60px;border:none;cursor:pointer;padding:0 20px 2px 26px;
+    border-radius:4px 15px 13px 5px / 8px 12px 15px 6px;
+    transform:translate(var(--outx,86px),-30px) rotate(calc(-7.2deg + var(--jit,0deg)));transform-origin:left center;
+    background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 80%,#fffdf8) 0,var(--tc) 52%,color-mix(in srgb,var(--tc) 84%,#3a2f1d) 100%);
+    color:#fffdf8;font-family:var(--hand);font-weight:600;font-size:35px;letter-spacing:.03em;
+    box-shadow:4px 6px 11px -5px rgba(56,40,18,.45), inset 0 0 0 1px color-mix(in srgb,var(--tc) 72%,#4a3b24),
+      inset 14px 0 12px -10px rgba(40,28,12,.55);
+    transition:transform .16s}
+  /* the slit it slides out of: a soft dark pocket at the insertion */
+  .tab4::before{content:"";position:absolute;left:-7px;top:8%;bottom:10%;width:14px;border-radius:50%;
+    background:radial-gradient(55% 50% at 30% 50%,rgba(38,26,12,.55),transparent 72%)}
+  .tab4:hover,.tab4[aria-current="true"]{transform:translate(calc(var(--outx,86px) + 15px),-30px) rotate(calc(-7.2deg + var(--jit,0deg)))}
+  .tab4:focus-visible{outline:3px solid var(--anchor);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span style="display:flex;align-items:center;gap:1rem">
+    <span class="brand">StudyVault<img class="brandlock" src="assets/studyvault-lock-rust.svg" alt=""></span>
+    <a class="tidy" href="/classic" style="text-decoration:none">classic view</a>
+    <button class="tidy" id="tidy" title="Wipe it all down — stains, shavings, the lot">clean desk</button>
+  </span>
+  <span style="display:flex;align-items:center;gap:.9rem"><span class="avatar">S</span></span>
+</div>
+
+<div id="stage">
+  <img class="bg" id="bgclean" data-src="assets/lw/desk4-scene-clean.webp" alt="">
+  <img class="bg mess" id="bgmess" src="assets/lw/desk4-scene-a.webp" alt="">
+  <div class="shine" id="shine"></div>
+  <div id="sparks">
+    <span class="spark k1"><svg viewBox="0 0 100 100"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z"/></svg></span>
+    <span class="spark k2"><svg viewBox="0 0 100 100"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z"/></svg></span>
+    <span class="spark k3"><svg viewBox="0 0 100 100"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z"/></svg></span>
+    <span class="spark k4"><svg viewBox="0 0 100 100"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z"/></svg></span>
+  </div>
+
+  <div id="radio" role="group" aria-label="Revision Radio">
+    <img class="plate" src="assets/lw/desk4-radio-a-cut.webp" alt="">
+    <span class="lcd4" id="lcd"><span class="mq" id="mq">NOW PLAYING · STAVE 3 — POVERTY &amp; GENEROSITY · ENGLISH LITERATURE · 10 MIN ·&nbsp;</span></span>
+    <button class="knob4 k1" id="knob" role="switch" aria-checked="false" aria-label="Tune: next station" title="stations"></button>
+    <button class="knob4 k2" id="knob2" aria-label="Skip to the next song" title="skip song"></button>
+  </div>
+  <div class="rnote"><b>Revision Radio</b>
+    <small class="rlines"><span class="ln">left dial = change station</span><span class="ln">right dial = change track</span></small>
+    <small id="rmode" hidden></small>
+    <svg class="rarrow" viewBox="0 0 26 38" fill="none" stroke="#40382b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 35 C 16 25, 11 15, 13 5"/>
+      <path d="M6 13 L13 3 L20 12"/>
+    </svg>
+    <svg class="cools" viewBox="0 0 40 74" fill="none" stroke="#40382b" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 16 V30"/><path d="M20 16 V30"/><path d="M38 16 V30"/>
+      <path d="M2 44 V58"/><path d="M20 44 V58"/><path d="M38 44 V58"/>
+      <path d="M2 30 L20 44"/><path d="M20 30 L38 44"/>
+      <path d="M2 16 L20 2 L38 16"/>
+      <path d="M2 58 L20 72 L38 58"/>
+      <path d="M2 44 L11 37"/><path d="M38 30 L29 37"/>
+    </svg></div>
+
+  <div class="sticky s1" data-sid="s1"><span class="txt"><b>312 days</b> to your first exam.</span></div>
+  <button class="pad" id="pad" aria-label="New sticky note"><span>＋ new note</span></button>
+
+  <button id="watch" aria-label="Wristwatch — set a revision timer">
+    <img class="plate" src="assets/lw/desk4-watch-a-cut.webp" alt="">
+    <svg class="tarc" id="tarc" viewBox="0 0 1362 1227"><circle id="tcirc" cx="690" cy="539" r="238"
+      fill="none" stroke="#b8442f" stroke-width="18" stroke-linecap="round"
+      transform="rotate(-45 690 539)" stroke-dasharray="1495" stroke-dashoffset="1495"/></svg>
+    <span class="hands"><span class="hand hh" id="hh"></span><span class="hand mh" id="mh"></span><span class="hand sh" id="sh"></span><span class="wcap"></span></span>
+    <span class="whit"></span>
+  </button>
+  <div class="wpop" id="wpop"><b>revision timer</b>
+    <span class="opts">
+      <button data-min="25">25 min</button><button data-min="15">15 min</button><button data-min="5">5 min</button>
+      <button data-min="0" id="wstop" style="display:none">stop</button>
+    </span>
+  </div>
+
+  <div class="postcard" id="postcard" role="img" aria-label="This month’s calendar">
+    <img class="plate" src="assets/lw/desk4-calendar-b-cut.webp" alt="">
+    <span class="calpage front">
+      <span class="calart"></span>
+      <span class="calmonth" id="calMonth">—</span>
+      <span class="calgrid" id="calGrid"></span>
+    </span>
+    <span class="calcap" id="doodleCap"></span>
+    <span class="chit"></span>
+  </div>
+
+  <div id="phonewrap" role="group" aria-label="Shorts phone">
+    <img class="plate" src="assets/lw/desk4-phone-c-cut.webp" alt="">
+    <button class="screen4" id="phone" aria-label="Open Shorts — today’s 20">
+      <span class="pshot"></span>
+      <span class="pscrim"></span>
+      <span class="plab"><b>Shorts</b><small id="shortsSub">today’s 20</small></span>
+    </button>
+  </div>
+
+  <img class="bookwash" src="assets/lw/desk4-book-d-wash.webp" alt="">
+
+  <button class="cards" id="cards" aria-label="Flashcards — start a mixed deck">
+    <img class="plate" src="assets/lw/desk4-cards-a-cut.webp" alt="">
+    <span class="hit"></span>
+    <span class="fcq"><span class="q" id="fcText"></span><span class="subj" id="fcSubj"></span></span>
+  </button>
+
+  <div id="book">
+    <img class="plate" src="assets/lw/desk4-book-d-solid.webp" alt="">
+    <section class="pg4 pl" id="pgL"></section>
+    <section class="pg4 pr" id="pgR"></section>
+    <nav id="tabs" aria-label="Your subjects"></nav>
+  </div>
+</div>
+
+<div class="fcmodal" id="fcmodal" aria-modal="true" role="dialog" aria-label="Flashcards — mixed deck">
+  <div class="table">
+    <button class="x" id="closefc" aria-label="Close">&times;</button>
+    <button class="bigcard" id="bigcard" aria-label="Flip the card">
+      <span class="flip">
+        <span class="face front"><span class="fcmark" id="fcMarkF"></span><span class="tag" id="bqTag"></span><span class="utag" id="bqUnit"></span><span class="qq" id="bqQ"></span></span>
+        <span class="face back"><span class="fcmark" id="fcMarkB"></span><span class="tag" id="baTag"></span><span class="qq" id="baA"></span>
+          <span class="fcbtns"><span class="fb no" id="fbno" role="button" tabindex="0">✗ Not yet</span><span class="fb ok" id="fbok" role="button" tabindex="0">✓ Got it</span></span>
+        </span>
+      </span>
+    </button>
+    <div class="meta"><small>tap to flip &middot; read the answer, then mark it &mdash; the line shows when</small><span class="metaR"><span class="cnt" id="fcCnt"></span></span></div>
+  </div>
+</div>
+
+<div class="phonemodal" id="phonemodal" aria-modal="true" role="dialog" aria-label="Shorts">
+  <div class="dev">
+    <button class="x" id="closephone" aria-label="Close">×</button>
+    <iframe id="feedframe" title="Shorts feed" loading="lazy"></iframe>
+  </div>
+</div>
+
+<script src="dash-data.js"></script>
+<script src="sync.js"></script>
+<script src="warmup.js"></script>
+<script src="planner.js"></script>
+<script>
+/* ---------- data: Sam's subjects, wired to REAL free-tier content ----------
+   `sub` = live subject slug, unit rows are [label, real lesson count, Sam's
+   fictional done count, real unit slug]. mode 'p' = practice-first URLs.
+   Every row opens the actual lesson/practice page ("next" = done+1). */
+const SUBJECTS=[
+ {tab:'Maths',slug:'maths',sub:'maths-aqa',mode:'p',name:'Mathematics',c:'#4e5f66',units:[['Number',7,3,'number'],['Algebra',14,5,'algebra'],['Geometry & Measures',8,2,'geometry']]},
+ {tab:'English',slug:'lang',sub:'english-language-aqa',mode:'p',name:'English Language',c:'#5b7285',units:[['Paper 1: Reading',8,2,'paper-1-reading'],['Paper 1: Writing',7,1,'paper-1-writing'],['Paper 2: Reading',8,1,'paper-2-reading'],['Paper 2: Writing',7,0,'paper-2-writing']]},
+ {tab:'Lit',slug:'lit',sub:'english-literature-aqa',mode:'l',name:'English Literature',c:'#7d5a78',units:[['Macbeth',10,4,'macbeth'],['A Christmas Carol',8,5,'a-christmas-carol'],['Power & Conflict',10,3,'power-and-conflict']]},
+ {tab:'Science',slug:'science',sub:'science-aqa',mode:'l',name:'Combined Science',c:'#4e6e5d',units:[['Biology Paper 1',10,4,'biology-paper-1'],['Chemistry Paper 1',12,2,'chemistry-paper-1'],['Physics Paper 1',11,1,'physics-paper-1']]},
+ {tab:'History',slug:'history',sub:'history-aqa',mode:'l',name:'History',c:'#8a5a44',units:[['Germany 1890–1945',14,4,'germany-democracy-dictatorship'],['Conflict & Tension',13,2,'conflict-tension-first-world-war'],['Britain: Health & the People',14,1,'britain-health-people'],['Elizabethan England',12,1,'elizabethan-england']]},
+ {tab:'Geog',slug:'geog',sub:'geography-aqa',mode:'l',name:'Geography',c:'#6d7a4e',units:[['Paper 1: Physical Geography',20,5,'paper-1'],['Paper 2: Human Geography',20,4,'paper-2']]},
+ {tab:'Spanish',slug:'spanish',sub:'spanish-aqa',mode:'p',name:'Spanish',c:'#a2643f',units:[['People & Lifestyle',10,3,'people-and-lifestyle'],['Popular Culture',8,2,'popular-culture'],['Communication & the World',8,1,'communication-and-world']]},
+ {tab:'CS',slug:'cs',sub:'computer-science',mode:'l',name:'Computer Science',c:'#54606e',units:[['Computer Systems',12,3,'computer-systems'],['Computational Thinking',11,2,'computational-thinking']]},
+ {tab:'RS',slug:'rs',sub:'religious-studies-ocr',mode:'l',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: Beliefs',4,2,'christianity-beliefs-and-teachings'],['Islam: Beliefs',4,1,'islam-beliefs-and-teachings'],['Relationships & Families',3,0,'theme-relationships-and-families']]},
+];
+function urlFor(s,u){ return '/'+(window.svIsPracticeUnit&&window.svIsPracticeUnit(s,u[3])?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/'+Math.min(u[2]+1,u[1]); }
+/* shared data layer: dash-data.js (SVDash) — same contract as classic.
+   Once live units land, the day-one spread swaps "start at the beginning"
+   for the same Continue target the classic view shows. */
+if(window.svProgressSync) svProgressSync();   /* signed in: pull-merge account progress */
+svDashInit(SUBJECTS,{view:'desk',onUnits:function(){
+  if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); }
+  /* today's spaced-repetition sitting: due cards first, then new, capped ~20 */
+  if(window.svFlashDeck) svFlashDeck(SUBJECTS,deck=>{
+    if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0; fcPreview();
+      /* if the modal is already open (fast fingers / staging), swap the
+         fallback card for the real deck's first card */
+      const m=document.getElementById('fcmodal');
+      if(m&&m.classList.contains('open')&&typeof fcDeal==='function') fcDeal(); }
+  });
+  if(_dq.get('warmup')&&!window._wuOpened){
+    const t=svContinueTarget(SUBJECTS), u=t?t.url:dayOneUrl(SUBJECTS[0]);
+    if(u){ window._wuOpened=1; svWarmup.open({subjects:SUBJECTS,target:u,nav}); }
+  }
+}});
+/* the wall sticky counts down to the student's OWN first exam — same shared
+   dates as the classic card. A hand-edited sticky keeps its text (it's theirs). */
+(function(){
+  const b=document.querySelector('.sticky.s1 .txt b'); if(!b) return;
+  b.textContent=Math.max(0,Math.round((svFirstLast(SUBJECTS).first-new Date())/864e5))+' days';
+})();
+/* leave the desk with a quick dip through the curtain; coming Back restores a
+   bfcached faded frame, so pageshow always clears it */
+function nav(u){ stage.classList.add('exit'); setTimeout(()=>{ location.href=u; },230); }
+addEventListener('pageshow',e=>{ stage.classList.remove('exit');
+  if(e.persisted) location.reload();   /* back-cache: progress may be stale */ });
+let TODAY_L=`
+  <div class="datestamp" id="today"></div>
+  <h2>Here’s your plan.</h2>
+  <ol class="plan">
+    <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled</small></div><span class="mins">2 min</span></li>
+    <li tabindex="0" onclick="nav('/lesson/english-literature-aqa/a-christmas-carol/4')"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — nearest exam</small></div><span class="mins">15 min</span></li>
+    <li tabindex="0" onclick="nav('/lesson/computer-science/computer-systems/3')"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — 3 weeks stale</small></div><span class="mins">8 min</span></li>
+  </ol>
+  <p class="momentum"><span class="hl">4-day streak · 23 topics this week — your best yet.</span></p>
+  <div class="startrow"><button class="start" onclick="nav('/lesson/english-literature-aqa/a-christmas-carol/4')"><svg class="ring" viewBox="0 0 260 96" preserveAspectRatio="none"><path d="M18 52 C14 22, 74 8, 132 10 C 196 12, 250 22, 246 50 C 242 80, 180 90, 118 88 C 58 86, 20 76, 22 46"/></svg>Start · 25 min</button></div>`;
+let TODAY_R=`
+  <h3>This week</h3>
+  <div class="noteline">Best subject: <b>Geography</b> — 9 topics</div>
+  <div class="noteline">Needs a look: <b>Macbeth</b> — 3 wks ago</div>
+  <div class="noteline">Warm-up accuracy: <b>78%</b> and climbing</div>
+  <div class="noteline">Shorts watched: <b>41</b> · checks passed: <b>7/8</b></div>
+  <div class="noteline">Radio: <b>3 episodes</b> on the bus</div>
+  <div class="noteline">Next mock: <b>none booked</b></div>`;
+
+/* day one: no history to summarise — the desk says so instead of faking it.
+   Rebuilt whenever live units/warm-up state change, so the plan here always
+   matches the classic view's (same svContinueTarget, same svDoneStats). */
+function buildDayOneToday(){
+  const t=svContinueTarget(SUBJECTS);
+  const url=t?t.url:dayOneUrl(SUBJECTS[0]);
+  const w=window.svWarmup?svWarmup.doneToday():null;
+  const ps=svPlanState();
+  const row2=t
+    ?`<li tabindex="0" class="${ps.lesson?'done':''}" onclick="nav('${t.url}')"><span class="n">${ps.lesson?'✓':'2'}</span><div><b>Continue: ${t.unitName}</b><small>${t.su.name} · lesson ${t.num} of ${t.total}</small></div><span class="mins">15 min</span></li>`
+    :`<li tabindex="0" class="${ps.lesson?'done':''}" ${url?`onclick="nav('${url}')"`:''}><span class="n">${ps.lesson?'✓':'2'}</span><div><b>First lesson</b><small>${SUBJECTS[0]?SUBJECTS[0].name:'your first subject'} · start at the beginning</small></div><span class="mins">15 min</span></li>`;
+  const startLbl=ps.any?(ps.mins?`Keep going · ${ps.mins} min`:'One more? · 15 min'):'Start · 19 min';
+  TODAY_L=`
+  <div class="datestamp" id="today"></div>
+  <h2>Here’s your plan.</h2>
+  <ol class="plan">
+    <li tabindex="0" class="${ps.warm?'done':''}" ${url&&!w?`onclick="openWarmup('${url}')"`:''}><span class="n">${ps.warm?'✓':'1'}</span><div><b>Warm up</b><small>${w?`done today · ${w.correct} of ${w.total}`:'10 quick questions · finds your level'}</small></div><span class="mins">2 min</span></li>
+    ${row2}
+    <li tabindex="0" class="${ps.cards?'done':''}"><span class="n">${ps.cards?'✓':'3'}</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>
+  </ol>
+  <p class="momentum"><span class="hl">${(function(){ const st=svDoneStats();
+    return !st.total ? 'day one — your first session is ready.'
+      : ps.lesson ? 'today’s lesson is done — anything more is a bonus.'
+      : st.total+' lesson'+(st.total===1?'':'s')+' in — picking up where you left off.'; })()}</span></p>
+  <div class="startrow"><button class="start" ${url?`onclick="startWithWarmup('${url}')"`:''}><svg class="ring" viewBox="0 0 260 96" preserveAspectRatio="none"><path d="M18 52 C14 22, 74 8, 132 10 C 196 12, 250 22, 246 50 C 242 80, 180 90, 118 88 C 58 86, 20 76, 22 46"/></svg>${startLbl}</button></div>`;
+  const st=svDoneStats();
+  TODAY_R=`
+  <h3>This week</h3>
+  ${st.total?`<div class="noteline">Lessons this week: <b>${st.week}</b></div>
+  <div class="noteline">Finished so far: <b>${st.total} ${st.total===1?'lesson':'lessons'}</b></div>
+  ${w?`<div class="noteline">Warm-up today: <b>${w.correct}/${w.total}</b></div>`:''}`
+ :`<div class="noteline">Nothing here yet — it fills in as you revise.</div>
+  <div class="noteline">Warm-ups, your best subject, radio episodes: all of it lands on this page.</div>`}
+  <p class="doable">${SVUSER&&SVUSER.email?('Signed in as '+SVUSER.email+'.')
+    :'<a href="home-study.html?view=save" style="color:inherit">Nothing saved yet — sign up to save your progress.</a>'}</p>`;
+}
+function startWithWarmup(url){
+  if(window.svWarmup && !svWarmup.doneToday()) svWarmup.open({subjects:SUBJECTS,target:url,nav});
+  else nav(url);
+}
+function openWarmup(url){ if(window.svWarmup) svWarmup.open({subjects:SUBJECTS,target:url,nav}); }
+/* warm up on ONE subject: its own knowledge-checks, then into its next lesson.
+   (Practice subjects have no KCs, so svWarmup just goes straight to the lesson.) */
+function warmupSubject(slug){
+  const s=SUBJECTS.find(x=>x.slug===slug); if(!s||!window.svWarmup) return;
+  let target=dayOneUrl(s);
+  if(s.units&&s.units.length){ const nx=s.units.find(u=>u[2]<u[1])||s.units[0]; target=urlFor(s,nx); }
+  svWarmup.open({subjects:[s],target:target,nav});
+}
+window.svWarmupDone=()=>{ if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } };
+if(DAYONE){
+  buildDayOneToday();
+  const _av=document.querySelector('.avatar');
+  if(_av){
+    if(SVUSER&&SVUSER.email){ _av.textContent=SVUSER.email[0].toUpperCase(); _av.title=SVUSER.email; svAvatarMenu(_av); }
+    else{ const a=document.createElement('a'); a.className='tidy'; a.style.textDecoration='none';
+      a.href='home-study.html?view=save'; a.textContent='Sign up & save your progress'; _av.replaceWith(a); }
+  }
+}
+
+let LADDERS={};
+function subjSpread(s){
+  if(!s.units.length){                       /* day one: nothing started yet */
+    const _du=dayOneUrl(s);
+    const rows=(s.topics&&s.topics.length?s.topics:['Full course'])
+      .map(tn=>`<div class="unit" tabindex="0"><b>${tn}</b><small>not started</small></div>`).join('');
+    const L=`
+    <div class="datestamp">${s.name}${s.board?' · '+s.board:''}</div>
+    <h2>Where you stand.</h2>
+    <div class="subjpg">${rows}</div>
+    <p class="momentum" style="margin-top:auto">day one — nothing started yet</p>`;
+    const R=`
+    <h3>Start here</h3>
+    <div class="subjpg" style="display:flex;flex-direction:column;flex:1">
+      <div class="unit" tabindex="0" ${_du?`onclick="nav('${_du}')"`:''}><b><span class="hl">Lesson 1 — begin ${s.name}</span></b><small>${_du?'start here':'coming soon'}</small></div>
+      <div class="unit" tabindex="0" role="button" onclick="warmupSubject('${s.slug}')"><b>Warm up on ${s.name}</b><small>5 min</small></div>
+      <button class="backlink" onclick="goToday()">⟵ back to today</button>
+    </div>`;
+    return [L,R];
+  }
+  const nxt=s.units.find(u=>u[2]<u[1])||s.units[0];
+  const done=s.units.reduce((t,u)=>t+u[2],0), total=s.units.reduce((t,u)=>t+u[1],0);
+  const pct=Math.round(done/total*100);
+  const stage= pct>=66?3 : pct>=33?2 : 1;
+  const lad=LADDERS[s.slug];
+  const stageWord=['a pencil sketch','inked, not yet painted','almost fully painted'][stage-1];
+  const L=`
+    <div class="datestamp">${s.name}</div>
+    <h2>Where you stand.</h2>
+    <div class="subjpg">
+      ${s.units.map(u=>`<div class="unit" tabindex="0" onclick="nav('${urlFor(s,u)}')"><b>${u[0]}</b><small>${u[2]} / ${u[1]}</small></div>`).join('')}
+    </div>
+    <p class="momentum" style="margin-top:auto">${done} of ${total} topics · ${pct}% complete</p>`;
+  const R=(lad?`
+    <div class="splate" style="background-image:url('${lad[stage-1].replace('.png','-page.png')}')"></div>
+    <p class="scap">${stageWord[0].toUpperCase()+stageWord.slice(1)} — ${pct}% drawn.<br>The picture finishes as you do.</p>`:`
+    <h3>Pick up where you left off</h3>`)+`
+    <div class="subjpg" style="display:flex;flex-direction:column;flex:1">
+      <div class="unit" tabindex="0" onclick="nav('${urlFor(s,nxt)}')"><b><span class="hl">${nxt[0]} — next lesson</span></b><small>continue</small></div>
+      <div class="unit" tabindex="0" role="button" onclick="warmupSubject('${s.slug}')"><b>Warm up on ${s.name}</b><small>5 min</small></div>
+      <button class="open4" onclick="nav('/browse/${s.sub}')">Open ${s.name} →</button>
+      <button class="backlink" onclick="goToday()">⟵ back to today</button>
+    </div>`;
+  return [L,R];
+}
+
+/* ---------- spreads (v1 page change: soft crossfade) ---------- */
+const pgL=document.getElementById('pgL'), pgR=document.getElementById('pgR');
+let current='today';
+function setSpread(l,r){ pgL.innerHTML=l; pgR.innerHTML=r; const t=document.getElementById('today');
+  if(t) t.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}); }
+function turnTo(l,r){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ setSpread(l,r); return; }
+  pgL.classList.add('fade'); pgR.classList.add('fade');
+  setTimeout(()=>{ setSpread(l,r); pgL.classList.remove('fade'); pgR.classList.remove('fade'); },230);
+}
+function goToday(){ current='today'; turnTo(TODAY_L,TODAY_R); markTabs(); }
+function goSubject(i){ current=i; const [l,r]=subjSpread(SUBJECTS[i]); turnTo(l,r); markTabs(); }
+function markTabs(){ [...document.querySelectorAll('.tab4')].forEach((t,i)=>t.setAttribute('aria-current',String(current===i))); }
+
+/* tabs along the painted fore-edge (positions from _desk4_homography.py) */
+const TABPTS=[[1948,194],[1963,312],[1978,430],[1993,547],[2008,665],[2022,783],[2037,900],[2052,1018],[2067,1136]];
+const tabs=document.getElementById('tabs');
+SUBJECTS.forEach((s,i)=>{ const b=document.createElement('button'); b.className='tab4'; b.title=s.name;
+  b.style.setProperty('--tc',s.c); b.style.left=TABPTS[i][0]+'px'; b.style.top=(TABPTS[i][1]+50)+'px';
+  b.style.setProperty('--jit',(((i*37)%5)-2)*0.7+'deg');
+  /* stagger the tabs THROUGH the painted page stack: each tab belongs to
+     a page deeper in the pile, so its base emerges from a line further
+     across the fore-edge band — Maths from the topmost pages by the open
+     spread, RS from down by the cover. S = measured outer silhouette at
+     each tab height (plate alpha); label always starts past the edge. */
+  const S=[76,77,80,81,83,86,88,92,96][i];
+  /* min depth 26px: even the first tab sits behind a few pages, never on
+     the open page itself */
+  const base=26+Math.round((i/(SUBJECTS.length-1))*(S-48));
+  b.style.setProperty('--outx',base+'px');
+  b.style.paddingLeft=(S-base+12)+'px';
+  b.textContent=s.tab; b.onclick=()=>goSubject(i); tabs.appendChild(b); });
+
+setSpread(TODAY_L,TODAY_R); markTabs();
+fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{LADDERS=j||{};
+  if(current!=='today'){ const [l,r2]=subjSpread(SUBJECTS[current]); setSpread(l,r2); }
+}).catch(()=>{});
+/* QA hook: ?s=slug opens that subject spread directly */
+{ const qs=new URLSearchParams(location.search).get('s');
+  const qi=SUBJECTS.findIndex(x=>x.slug===qs);
+  if(qi>=0){ current=qi; const [l,r2]=subjSpread(SUBJECTS[qi]); setSpread(l,r2); markTabs(); } }
+
+/* ---------- the wireless: LCD marquee + two dials (ported from desk3) ---------- */
+const PODCAST_TXT='PODCASTS · TAP THE RIGHT DIAL TO PLAY ONE OF SAM’S EPISODES · ';
+/* the podcast station is REAL: these are the demo lessons' own episodes on R2 */
+const PODCASTS=[
+ {t:'Weimar democracy and political unrest, 1919-1923',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/germany-democracy-dictatorship/podcast_l05.mp3'},
+ {t:'Anglo-German Rivalry: Weltpolitik and the Naval Race',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/conflict-tension-first-world-war/podcast_l03.mp3'},
+ {t:'The Church, the Monastery and Islamic Medicine',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/britain-health-people/podcast_l02.mp3'},
+ {t:'Key ministers: Cecil, Walsingham and the Privy Council',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/elizabethan-england/podcast_l02.mp3'},
+ {t:'Guilt & Consequences',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/macbeth/podcast_l05.mp3'},
+ {t:'Stave 3: Poverty & Generosity',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/a-christmas-carol/podcast_l04.mp3'},
+ {t:'Stave 5: Transformation & Redemption',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/a-christmas-carol/podcast_l06.mp3'},
+ {t:'My Last Duchess — Power & Control',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/power-and-conflict/podcast_l04.mp3'},
+ {t:'Health, Non-Communicable Diseases and Plant Tissues',s:'Combined Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science/biology-paper-1/podcast_l05.mp3'},
+ {t:'Ionic, Covalent and Metallic Bonding',s:'Combined Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science/chemistry-paper-1/podcast_l03.mp3'},
+ {t:'Conservation of Energy, Efficiency and Energy Resources',s:'Combined Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science/physics-paper-1/podcast_l02.mp3'},
+ {t:'Tropical Storm Effects & Management: Hurricane Ida',s:'Geography',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-1/podcast_l06.mp3'},
+ {t:'UK Population Distribution & a Major UK City',s:'Geography',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-2/podcast_l05.mp3'},
+ {t:'Primary Storage (RAM, ROM & Virtual Memory)',s:'Computer Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science/computer-systems/podcast_l04.mp3'},
+ {t:'Embedded Systems',s:'Computer Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science/computer-systems/podcast_l03.mp3'},
+ {t:'Searching Algorithms',s:'Computer Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science/computational-thinking/podcast_l03.mp3'},
+ {t:'Jesus Christ: Incarnation, the Cross and Salvation',s:'Religious Studies',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/religious-studies-ocr/christianity-beliefs-and-teachings/podcast_l03.mp3'},
+ {t:'The Nature of Allah',s:'Religious Studies',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/religious-studies-ocr/islam-beliefs-and-teachings/podcast_l02.mp3'},
+ {t:'Marriage, the Family and Sexuality',s:'Religious Studies',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/religious-studies-ocr/theme-relationships-and-families/podcast_l01.mp3'},
+];
+let podOn=false, podQ=null, podPos=-1;
+function playPod(){
+  if(!podQ) podQ=shuffle([...PODCASTS.keys()]);
+  podPos=(podPos+1)%podQ.length; const pd=PODCASTS[podQ[podPos]];
+  podOn=true; lcd.classList.add('lofi');
+  player.src=pd.u; player.play().catch(()=>{});
+  mq.textContent='NOW PLAYING · '+pd.t.toUpperCase()+' · '+pd.s.toUpperCase()+' · ';
+}
+const STATION_ORDER=['morning','library','rain','midnight','steady','bossa','season'];
+const SEASON_BY_MONTH=['winter','winter','spring','spring','spring','summer','summer','summer','autumn','autumn','autumn','winter'];
+const lcd=document.getElementById('lcd'), mq=document.getElementById('mq'), rmode=document.getElementById('rmode'),
+      knob=document.getElementById('knob'), knob2=document.getElementById('knob2');
+let stations=[], mode=-1;                      // -1 = podcasts
+const player=new Audio(); player.volume=.55;
+player.addEventListener('ended',()=>{ if(mode>=0) nextTrack(); else if(podOn) playPod(); });
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function pretty(u){ return decodeURIComponent(u.split('/').pop()).replace(/\.(mp3|m4a|wav)$/i,'').replace(/[_-]+/g,' ').toUpperCase(); }
+async function listDir(url){
+  try{ const html=await (await fetch(url)).text();
+    return [...html.matchAll(/href="([^"?]+)"/g)].map(m=>m[1]).filter(h=>h!=='../' && !h.startsWith('_')); }
+  catch(e){ return []; }
+}
+async function discover(){
+  const base='/assets/radio/';
+  let found=[];
+  /* the stations manifest points at our R2 copies — works deployed, where the
+     server gives no directory listings (tracks are ours: TPE1=StudyVault) */
+  try{
+    const m=await (await fetch(base+'_stations.json')).json();
+    for(const [name,val] of Object.entries(m)){
+      let label=name, tracks=val;
+      if(name==='season'){ const s=SEASON_BY_MONTH[new Date().getMonth()]; tracks=val[s]||[]; label=s; }
+      if(Array.isArray(tracks)&&tracks.length) found.push({name,label,tracks});
+    }
+  }catch(e){}
+  if(!found.length){ /* dev fallback: scrape the dir index for fresh drops */
+  const dirs=(await listDir(base)).filter(e=>e.endsWith('/')).map(e=>e.replace(/\/$/,'').split('/').pop());
+  for(const d of dirs){
+    let dir=base+d+'/', label=d;
+    if(d==='season'){ const s=SEASON_BY_MONTH[new Date().getMonth()]; dir+= s+'/'; label=s; }
+    const files=(await listDir(dir)).filter(f=>/\.mp3$/i.test(f));
+    if(files.length) found.push({name:d, label, tracks:files.map(f=>dir+f)});
+  }
+  }
+  found.sort((a,b)=>{ const ia=STATION_ORDER.indexOf(a.name), ib=STATION_ORDER.indexOf(b.name);
+    return (ia<0?99:ia)-(ib<0?99:ib) || a.name.localeCompare(b.name); });
+  stations=found.map(s=>({...s, queue:shuffle([...s.tracks.keys()]), qpos:0}));
+  setMode(-1,{init:true});
+  const want=new URLSearchParams(location.search).get('station');   // QA preset
+  if(want){ const i=stations.findIndex(s=>s.name===want||s.label===want); if(i>=0) setMode(i,{silent:true}); }
+}
+function playCurrent(){
+  const s=stations[mode], url=s.tracks[s.queue[s.qpos]];
+  player.src=url; player.play().catch(()=>{});
+  mq.textContent='TUNED: '+s.label.toUpperCase()+' · STATION '+(mode+1)+'/'+stations.length+' · '+pretty(url)+' · ';
+}
+function nextTrack(){
+  const s=stations[mode]; if(!s) return;
+  s.qpos++; if(s.qpos>=s.queue.length){ s.queue=shuffle([...s.tracks.keys()]); s.qpos=0; }
+  playCurrent();
+}
+function setMode(i,opts={}){
+  mode=i;
+  lcd.classList.toggle('lofi',mode>=0||podOn);
+  knob.setAttribute('aria-checked',String(mode>=0));
+  if(mode<0){
+    player.pause(); podOn=false; lcd.classList.remove('lofi');
+    mq.textContent=PODCAST_TXT;
+    rmode.textContent= stations.length
+      ? 'podcasts · right dial plays · left dial for '+stations[0].label
+      : 'podcasts · right dial plays an episode';
+  } else if(opts.silent){
+    const s=stations[mode];
+    mq.textContent='TUNED: '+s.label.toUpperCase()+' · STATION '+(mode+1)+'/'+stations.length+' · ';
+    rmode.textContent=s.label+' · right dial skips the song';
+  } else {
+    const s=stations[mode];
+    rmode.textContent=s.label+' · right dial skips the song';
+    playCurrent();
+  }
+}
+knob.onclick=e=>{ e.stopPropagation(); setMode(mode+1>=stations.length ? -1 : mode+1); };
+let lcdNudge=null;
+knob2.onclick=e=>{ e.stopPropagation(); if(mode<0){ playPod(); return; } nextTrack(); };
+discover();
+
+/* ---------- stage-aware dragging: pointer deltas are screen px, positions
+   are STAGE px — divide by the current scale k. ---------- */
+const LKEY='sv_desk4_layout', SKEY='sv_desk4_stickies';
+/* ?fresh=1 — factory reset: forget moved notes, edits and the last clean,
+   so the desk loads exactly as designed (clutter and all) */
+if(new URLSearchParams(location.search).get('fresh')==='1'){
+  try{ localStorage.removeItem(LKEY); localStorage.removeItem(SKEY); localStorage.removeItem('sv_desk4_cleaned'); }catch(e){} }
+let layout={}; try{ layout=JSON.parse(localStorage.getItem(LKEY))||{}; }catch(e){}
+function saveLayout(){ try{ localStorage.setItem(LKEY,JSON.stringify(layout)); }catch(e){} }
+let dragBlockClick=false, kNow=.53;
+function makeDraggable(el,id){
+  if(!el) return;
+  el.querySelectorAll('img').forEach(im=>im.draggable=false);
+  const saved=layout[id];
+  if(saved){ el.style.left=saved.x+'px'; el.style.top=saved.y+'px'; el.style.right='auto'; el.style.bottom='auto'; }
+  let sx,sy,ox,oy,moved=false,pid=null;
+  el.addEventListener('pointerdown',e=>{
+    const t=el.querySelector('.txt');
+    if(t && e.target.closest('.txt') && document.activeElement===t) return;
+    pid=e.pointerId;
+    sx=e.clientX; sy=e.clientY;
+    ox=parseFloat(getComputedStyle(el).left); oy=parseFloat(getComputedStyle(el).top); moved=false;
+  });
+  el.addEventListener('pointermove',e=>{
+    if(pid===null) return;
+    const dx=(e.clientX-sx)/kNow, dy=(e.clientY-sy)/kNow;
+    if(!moved){ if(Math.hypot(dx,dy)<6/kNow) return;
+      moved=true;
+      try{ el.setPointerCapture(pid); }catch(_){}
+      e.preventDefault();
+    }
+    el.style.left=(ox+dx)+'px'; el.style.top=(oy+dy)+'px'; el.style.right='auto'; el.style.bottom='auto';
+  });
+  function up(){ if(pid===null) return; try{ el.releasePointerCapture(pid); }catch(_){} pid=null;
+    if(moved){ layout[id]={x:parseFloat(el.style.left),y:parseFloat(el.style.top)}; saveLayout();
+      dragBlockClick=true; setTimeout(()=>dragBlockClick=false,0); } }
+  el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up);
+}
+
+/* ---------- the desk calendar: doodle on top, the month below with the
+   gone days X'd off in red, today circled. Caption shows on hover. ---------- */
+const pc=document.getElementById('postcard');
+function buildCal(){
+  const now=new Date(), y=now.getFullYear(), m=now.getMonth();
+  document.getElementById('calMonth').textContent=now.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  const off=(new Date(y,m,1).getDay()+6)%7, dim=new Date(y,m+1,0).getDate();
+  let h='';
+  for(const w of ['M','T','W','T','F','S','S']) h+='<span class="wd">'+w+'</span>';
+  for(let i=0;i<off;i++) h+='<span></span>';
+  for(let d=1;d<=dim;d++){
+    const past=d<now.getDate(), today=d===now.getDate();
+    h+='<span class="dy'+(today?' td':'')+'" data-d="'+d+'">'+d
+      +(past?'<i class="x" style="transform:rotate('+(((d*37)%15)-7)+'deg)">✕</i>':'')
+      +'</span>';
+  }
+  const grid=document.getElementById('calGrid'); grid.innerHTML=h;
+  /* the shared planner lays session dots on the days ahead; hovering a day
+     shows what's planned (same tooltip as the classic view), clicking opens
+     the full planner */
+  grid.querySelectorAll('.dy').forEach(el=>{
+    const d=+el.dataset.d; if(!d||d<now.getDate()) return;
+    const dt=new Date(y,m,d), p=planFor(dt);
+    if(p&&(p.exams.length||p.sessions)){ el.classList.add('pd');
+      el.style.setProperty('--dot', p.exams.length?'#a3542f':p.sessions[0].s.c); }
+    if(p&&p.off==='holiday') el.classList.add('hol');
+    el.addEventListener('mouseenter',()=>showDayTip(el,dt));
+    el.addEventListener('mouseleave',()=>{ const t=document.getElementById('daytip'); if(t) t.classList.remove('on'); });
+    el.addEventListener('click',ev=>{ ev.stopPropagation(); svPlannerOpen(new Date(y,m,1)); });
+  });
+}
+svPlannerBoot(SUBJECTS,{onChange:buildCal});
+buildCal();
+/* the calendar postcard is the planner's door (same modal as classic) */
+pc.style.cursor='pointer';
+pc.addEventListener('click',()=>{ if(typeof dragBlockClick!=='undefined'&&dragBlockClick) return; svPlannerOpen(); });
+fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
+  const d=new Date(),m=new Date(d);m.setDate(d.getDate()-((d.getDay()+6)%7));
+  const k=m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0');
+  const w=cal[k];if(!w)return;
+  document.documentElement.style.setProperty('--gart',"url('assets/lw/"+w.art+"')");
+  document.getElementById('doodleCap').textContent=w.cap;
+}).catch(()=>{});
+
+/* ---------- stickies: edit in place, peel new ones, bin them ---------- */
+let stickyStore={}; try{ stickyStore=JSON.parse(localStorage.getItem(SKEY))||{}; }catch(e){}
+function saveStickies(){ try{ localStorage.setItem(SKEY,JSON.stringify(stickyStore)); }catch(e){} }
+function wireSticky(el){
+  const sid=el.dataset.sid, txt=el.querySelector('.txt');
+  const rec=stickyStore[sid];
+  if(rec){ if(rec.del){ el.remove(); return; } if(rec.html!=null) txt.innerHTML=rec.html; }
+  txt.contentEditable='true'; txt.spellcheck=false;
+  txt.addEventListener('input',()=>{ stickyStore[sid]={...(stickyStore[sid]||{}),html:txt.innerHTML}; saveStickies(); });
+  const del=document.createElement('button'); del.className='del'; del.textContent='×'; del.title='Bin this note';
+  del.onclick=e=>{ e.stopPropagation(); stickyStore[sid]={...(stickyStore[sid]||{}),del:true}; saveStickies(); el.remove(); };
+  el.appendChild(del);
+  makeDraggable(el,sid);
+}
+/* pristine copies, captured before wiring mutates them — clean desk rebuilds from these */
+const STICKY_DEFAULTS=[...document.querySelectorAll('.sticky')].map(el=>el.outerHTML);
+document.querySelectorAll('.sticky').forEach(wireSticky);
+function spawnSticky(sid,html,focus){
+  const el=document.createElement('div'); el.className='sticky'; el.dataset.sid=sid;
+  el.style.left=(980+Math.round(Math.random()*160))+'px'; el.style.top=(280+Math.round(Math.random()*80))+'px';
+  el.style.transform='rotate('+(Math.random()*6-3).toFixed(1)+'deg)';
+  el.innerHTML='<span class="txt">'+html+'</span>';
+  document.getElementById('stage').appendChild(el); wireSticky(el);
+  if(focus){ const t=el.querySelector('.txt'); t.focus(); }
+}
+Object.keys(stickyStore).filter(k=>k.startsWith('u')&&!stickyStore[k].del)
+  .forEach(k=>spawnSticky(k,stickyStore[k].html||''));
+document.getElementById('pad').onclick=()=>{ if(dragBlockClick) return;
+  const sid='u'+Math.random().toString(36).slice(2,9); stickyStore[sid]={html:''}; saveStickies(); spawnSticky(sid,'',true); };
+/* clean desk: reset the layout AND actually clean — stains and clutter fade
+   under a light sweep. The desk stays clean for a week, then the mess is back. */
+const CKEY='sv_desk4_cleaned', CLEAN_MS=7*24*3600*1000;
+const bgmess=document.getElementById('bgmess'), bgclean=document.getElementById('bgclean');
+function loadClean(){ if(!bgclean.src) bgclean.src=bgclean.dataset.src; }
+{ const q=new URLSearchParams(location.search).get('desk');   // QA: ?desk=clean|mess
+  const cleanedAt=+localStorage.getItem(CKEY)||0;
+  if(q==='clean' || (q!=='mess' && Date.now()-cleanedAt<CLEAN_MS)){ bgmess.style.display='none'; loadClean(); }
+  else (window.requestIdleCallback||(f=>setTimeout(f,2500)))(loadClean); }
+/* everything back to its pristine spot, no page reload (the reload flashed) */
+function resetDeskInPlace(){
+  document.querySelectorAll('.sticky').forEach(el=>el.remove());
+  STICKY_DEFAULTS.forEach(html=>{
+    const t=document.createElement('div'); t.innerHTML=html;
+    const el=t.firstElementChild;
+    document.getElementById('stage').appendChild(el);
+    wireSticky(el);
+  });
+  pc.style.left=pc.style.top=pc.style.right=pc.style.bottom='';
+}
+document.getElementById('tidy').onclick=()=>{
+  loadClean();
+  localStorage.removeItem(LKEY); localStorage.removeItem(SKEY);
+  layout={}; stickyStore={};
+  try{ localStorage.setItem(CKEY, String(Date.now())); }catch(e){}
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){
+    bgmess.classList.add('gone'); resetDeskInPlace(); return; }
+  /* the wipe performs every time — even on an already-clean desk it resets
+     the layout, so it should still feel like something happened */
+  const sh=document.getElementById('shine'), sp=document.getElementById('sparks');
+  sh.classList.remove('go'); sp.classList.remove('go'); void sh.offsetWidth;
+  sh.classList.add('go'); sp.classList.add('go');
+  bgmess.classList.add('gone');
+  setTimeout(resetDeskInPlace, 650);   // props snap home as the band passes them
+};
+if(new URLSearchParams(location.search).get('shineqa')==='1') setTimeout(()=>document.getElementById('tidy').click(),500);
+
+/* ---------- flashcards: painted scatter -> flashcard mode ---------- */
+const FC=[
+  {slug:'history', q:'When was the NHS founded?', a:'1948'},
+  {slug:'science', q:'Speed = ?', a:'distance \u00f7 time'},
+  {slug:'lit', q:'Who was Scrooge\u2019s business partner?', a:'Jacob Marley'},
+  {slug:'geog', q:'The three types of rainfall?', a:'Relief \u00b7 frontal \u00b7 convectional'},
+  {slug:'maths', q:'In y = mx + c, what is m?', a:'The gradient'},
+];
+const cardsEl=document.getElementById('cards');
+const fcmodal=document.getElementById('fcmodal'), bigcard=document.getElementById('bigcard');
+let fci=0, fcShowA=false;
+/* the top card is the door into today's deck: a label + how far through it you
+   are (0 / 20 at the start, or where you stopped). No question text — it does
+   not have to sit on the drawn rules, so it never looks wrong. */
+function fcPreview(){
+  cardsEl.style.setProperty('--fcc','#8a5a44');
+  const _t=document.getElementById('fcText'); _t.textContent='Flashcards'; _t.className='q';
+  document.getElementById('fcSubj').textContent=fci+' / '+FC.length; }
+fcPreview();
+/* step the card font down for longer Q/A so it never spills past the edge */
+function fcFit(el,s){ s=String(s||''); el.classList.toggle('long', s.length>70); el.classList.toggle('xlong', s.length>150); }
+function fcDeal(){
+  const f=FC[fci], sub=SUBJECTS.find(x=>x.slug===f.slug);
+  fcmodal.style.setProperty('--fcc', sub?sub.c:'#8a5a44');
+  document.getElementById('bqTag').textContent=f.name||(sub?sub.name:f.slug);
+  document.getElementById('bqUnit').textContent=f.uname||'';
+  document.getElementById('baTag').textContent=(sub?sub.name:f.slug)+' \u2014 answer';
+  const _q=document.getElementById('bqQ'), _a=document.getElementById('baA');
+  _q.textContent=f.q; _a.textContent=f.a;
+  fcFit(_q,f.q); fcFit(_a,f.a);
+  const lvl=f.level||'Emerging', mkCls='fcmark m-'+lvl.toLowerCase();
+  ['fcMarkF','fcMarkB'].forEach(id=>{ const e=document.getElementById(id); if(e){ e.textContent=lvl; e.className=mkCls; } });
+  document.getElementById('fcCnt').textContent=(fci+1)+' / '+FC.length;
+  fcShowA=false; bigcard.classList.remove('showa');
+}
+cardsEl.onclick=()=>{ if(dragBlockClick) return; if(fci>=FC.length) fci=0; fcDeal(); fcmodal.classList.add('open');
+  try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
+  if(window.svProgressPushSoon) svProgressPushSoon();
+  if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } };
+if(new URLSearchParams(location.search).get('fc')==='1'){ fcDeal(); fcmodal.classList.add('open'); }
+/* same read-gate as the in-lesson deck: marks unlock only after there's been
+   time to actually read the answer (words/4s, clamped 1.5–6s) */
+let fcCanMark=false, fcUnlockT=null;
+function fcReadGate(){
+  const a=document.getElementById('baA').textContent||'';
+  const secs=Math.max(1.5,Math.min(a.trim().split(/\s+/).length/4,6));
+  bigcard.style.setProperty('--read-duration',secs+'s');
+  fcCanMark=false; clearTimeout(fcUnlockT);
+  document.querySelectorAll('.fcbtns .fb').forEach(b=>b.classList.add('waiting'));
+  fcUnlockT=setTimeout(()=>{ fcCanMark=true;
+    document.querySelectorAll('.fcbtns .fb').forEach(b=>b.classList.remove('waiting')); },secs*1000);
+}
+/* self-marking: the record that feeds the teacher view + spaced repetition */
+function fcMark(ok){
+  if(!fcCanMark) return;
+  const f=FC[fci];
+  try{ const lg=JSON.parse(localStorage.getItem('sv-flash-log'))||[];
+    lg.unshift({t:Date.now(),d:new Date().toISOString().slice(0,10),sub:f.sub||null,unit:f.unit||null,
+      n:f.n||null,ok:ok,q:(f.q||'').slice(0,120)});
+    localStorage.setItem('sv-flash-log',JSON.stringify(lg.slice(0,400))); }catch(e){}
+  /* move the card through the spaced-repetition boxes (shared with lessons) */
+  if(window.svFlashMark && f.key) f.level=svFlashMark(f.key,ok);
+  if(window.svProgressPushSoon) svProgressPushSoon();
+  if(fci+1<FC.length){ fci++; fcDeal(); }
+  else { fci++; fcmodal.classList.remove('open'); fcPreview();   /* whole sitting done: N / N */
+    if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } }
+}
+['ok','no'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
+  e.stopPropagation(); if(fcShowA) fcMark(k==='ok'); }); });
+bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } };
+/* no tap-to-skip: the only way to the next card is an honest Not yet / Got it */
+function fcClose(){ fcmodal.classList.remove('open'); fcPreview(); }   /* refresh the desk's "N / total" */
+document.getElementById('closefc').onclick=fcClose;
+fcmodal.addEventListener('click',e=>{ if(e.target===fcmodal) fcClose(); });
+addEventListener('keydown',e=>{ if(e.key==='Escape'&&fcmodal.classList.contains('open')) fcClose(); });
+makeDraggable(pc,'postcard');
+
+/* ---------- the phone: live poster on screen; opens the REAL feed ---------- */
+fetch('/data/_shorts_manifest.json').then(r=>r.json()).then(m=>{
+  for(const s of m){ const p=(s.url||'').split('.r2.dev/');
+    if(p.length>1){ document.documentElement.style.setProperty('--pshot',
+      "url('/design-lab/_posters/"+p[1].replace(/\.mp4$/,'.jpg')+"')"); break; } }
+}).catch(()=>{});
+const modal=document.getElementById('phonemodal'), frame=document.getElementById('feedframe');
+document.getElementById('phone').onclick=()=>{ if(dragBlockClick) return;
+  /* scoped to each subject's SCULPTED units (History options etc.), not the
+     whole subject — {subjectSlug:[unitSlug,...]} */
+  const scope={};
+  SUBJECTS.forEach(s=>{ if(s.sub && s.units && s.units.length) scope[s.sub]=s.units.map(u=>u[3]); });
+  frame.src='/design-lab/shorts.html?scope='+encodeURIComponent(JSON.stringify(scope)); modal.classList.add('open'); };
+document.getElementById('closephone').onclick=()=>{ modal.classList.remove('open'); frame.src=''; };
+modal.addEventListener('click',e=>{ if(e.target===modal){ modal.classList.remove('open'); frame.src=''; } });
+addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('open')){ modal.classList.remove('open'); frame.src=''; } });
+
+/* ---------- the wristwatch: real time on the dial + revision timer ---------- */
+{ const hh=document.getElementById('hh'), mh=document.getElementById('mh'), sh=document.getElementById('sh');
+  const tarc=document.getElementById('tarc'), tcirc=document.getElementById('tcirc');
+  const wpop=document.getElementById('wpop'), wstop=document.getElementById('wstop');
+  const C=1495;
+  let tEnd=0, tTotal=0;
+  /* a soft two-note chime when the timer runs out — the flash alone was silent.
+     The AudioContext is unlocked on the start tap (a user gesture) so the
+     autoplay policy lets it sound minutes later. */
+  let actx=null;
+  function unlockChime(){ try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); }catch(e){} }
+  function chime(){
+    if(!actx) return;
+    var t0=actx.currentTime;
+    [587.33,783.99].forEach(function(freq,i){        /* D5 → G5, gentle */
+      var o=actx.createOscillator(), g=actx.createGain(); var off=i*0.22;
+      o.type='sine'; o.frequency.value=freq; o.connect(g); g.connect(actx.destination);
+      g.gain.setValueAtTime(0.0001,t0+off);
+      g.gain.exponentialRampToValueAtTime(0.16,t0+off+0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+off+1.0);
+      o.start(t0+off); o.stop(t0+off+1.05);
+    });
+  }
+  /* the painted watch lies at an angle on the desk — its dial's 12 sits 45°
+     clockwise of screen-up (measured from the hour ticks; the crown agrees).
+     Hands (and the timer arc's rotate(-45) above) carry that tilt so the
+     time reads true against the PAINTED dial, not the screen. */
+  const TILT=45;
+  function tickWatch(){
+    const n=new Date();
+    const s=n.getSeconds(), m=n.getMinutes()+s/60, h=(n.getHours()%12)+m/60;
+    sh.style.transform='rotate('+(s*6+TILT)+'deg)';
+    mh.style.transform='rotate('+(m*6+TILT)+'deg)';
+    hh.style.transform='rotate('+(h*30+TILT)+'deg)';
+    if(tEnd){
+      const left=tEnd-Date.now();
+      if(left<=0){ tEnd=0; wstop.style.display='none';
+        tarc.classList.add('wflash'); chime();
+        setTimeout(()=>{ tarc.classList.remove('wflash'); tcirc.style.strokeDashoffset=C; },1900);
+      } else tcirc.style.strokeDashoffset=C*(1-left/tTotal);
+    }
+  }
+  setInterval(tickWatch,1000); tickWatch();
+  document.getElementById('watch').onclick=()=>{ wpop.classList.toggle('open'); };
+  wpop.querySelectorAll('button').forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    const min=+b.dataset.min;
+    if(min){ unlockChime(); tTotal=min*60000; tEnd=Date.now()+tTotal; tcirc.style.strokeDashoffset=0; wstop.style.display=''; }
+    else { tEnd=0; tcirc.style.strokeDashoffset=C; wstop.style.display='none'; }
+    wpop.classList.remove('open'); tickWatch();
+  });
+  addEventListener('keydown',e=>{ if(e.key==='Escape') wpop.classList.remove('open'); });
+}
+
+/* ---------- easter egg: click the radio sticky, the S draws itself ---------- */
+{ const rnote=document.querySelector('.rnote');
+  const sPaths=[...rnote.querySelectorAll('.cools path')];
+  let drawing=false;
+  rnote.addEventListener('click',()=>{
+    if(drawing || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    drawing=true;
+    sPaths.forEach(p=>{ const L=p.getTotalLength();
+      p.style.transition='none'; p.style.strokeDasharray=L+' '+L; p.style.strokeDashoffset=L; });
+    rnote.getBoundingClientRect();
+    let t=.05;
+    sPaths.forEach(p=>{ const L=p.getTotalLength(); const dur=Math.max(.14, L/110);
+      p.style.transition=`stroke-dashoffset ${dur}s cubic-bezier(.4,0,.6,1) ${t}s`;
+      p.style.strokeDashoffset='0'; t+=dur+.05; });
+    setTimeout(()=>{ drawing=false; }, t*1000+300);
+  });
+  if(new URLSearchParams(location.search).get('segg')==='1') setTimeout(()=>rnote.click(),600);
+}
+
+/* QA: ?hit=x,y (screen px) paints a red dot and reports the topmost element there */
+{ const hitq=new URLSearchParams(location.search).get('hit');
+  if(hitq){ const [hx,hy]=hitq.split(',').map(Number);
+    setTimeout(()=>{ const el=document.elementFromPoint(hx,hy);
+      const d=document.createElement('div');
+      d.style.cssText='position:fixed;left:8px;bottom:8px;background:#000;color:#0f0;font:14px monospace;padding:6px 10px;z-index:99';
+      const r=x=>{const b=x.getBoundingClientRect();return Math.round(b.left)+','+Math.round(b.top)+' '+Math.round(b.width)+'x'+Math.round(b.height)};
+      d.textContent=innerWidth+'x'+innerHeight+' ('+hx+','+hy+') -> '+(el? el.tagName+' #'+(el.id||'-')+' .'+(String(el.className).split(' ')[0]||'-'):'null')
+        +' | k2 '+r(document.getElementById('knob2'))+' | cards '+r(document.getElementById('cards'));
+      document.body.appendChild(d);
+      const m=document.createElement('div');
+      m.style.cssText='position:fixed;left:'+(hx-6)+'px;top:'+(hy-6)+'px;width:12px;height:12px;border-radius:50%;background:red;z-index:99;pointer-events:none';
+      document.body.appendChild(m); },900); } }
+
+/* ---------- stage scaling: cover the viewport, one uniform scale ---------- */
+const stage=document.getElementById('stage');
+function fit(){
+  /* wide screens: cover (edge-to-edge desk). Squarish screens (tablets,
+     4:3 laptops): contain — the whole desk, warm bars above and below. */
+  const cover = innerWidth/innerHeight >= 1.6;
+  const k = cover ? Math.max(innerWidth/2752, innerHeight/1536)
+                  : Math.min(innerWidth/2752, innerHeight/1536);
+  kNow=k;
+  stage.style.transform=`translate(${(innerWidth-2752*k)/2}px, ${(innerHeight-1536*k)/2}px) scale(${k})`;
+}
+addEventListener('resize', fit); fit();
+/* hold the curtain until fonts + plates are decoded (4s cap), then fade in
+   as one — no popcorn loading */
+Promise.race([
+  Promise.all([document.fonts.ready,
+    ...[...document.images].map(i=>i.decode? i.decode().catch(()=>{}) : Promise.resolve())]),
+  new Promise(r=>setTimeout(r,4000))
+]).then(()=>stage.classList.add('ready'));
+</script>
+</body>
+</html>
