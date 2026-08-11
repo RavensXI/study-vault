@@ -16,8 +16,21 @@
  * If both tier and marks are omitted, defaults to "quick".
  *
  * Rate limited per student session. API keys stored in env vars.
- * Supports Groq as optional fallback for quick tier (set GROQ_API_KEY).
+ *
+ * NOTE ON GROQ: despite the name below, Groq is NOT a fallback — when
+ * GROQ_API_KEY is set it is tried FIRST on the quick tier and Anthropic
+ * catches its failures. Groq is US-served and cannot be pinned to its EU
+ * region without an Enterprise plan, so unset GROQ_API_KEY to keep pupil work
+ * inside Europe. Anthropic calls route via api/_lib/claude.js.
  */
+
+const { callClaudeDetailed } = require('./_lib/claude');
+
+// Extended responses (>8 marks) need judgement, not fact-spotting, and Haiku
+// is measurably too generous there — in the bake-off it gave 5/6 to invented
+// quotations and 2/4 to a conservation-of-energy error. Keep this tier on the
+// largest model the account can actually reach; api/_lib/claude.js maps it.
+const EXAM_MODEL = 'claude-sonnet-5';
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -56,12 +69,16 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'System prompt too long' });
   }
 
-  // Determine tier: explicit > auto (from marks) > default quick
-  // Free tier users always get Haiku (quick) regardless of marks
+  // Determine tier: explicit > auto (from marks) > default quick.
+  //
+  // Free-tier users are NOT pinned to the quick tier. They used to be, which
+  // meant a free pupil's 30-mark essay got the short-answer model and 400
+  // tokens of feedback — the exact failure this tier split exists to prevent.
+  // The daily cap (5 marks) is the cost control; a second, invisible limit
+  // inside it bought roughly 6p a day per maxed-out user and made the offer
+  // impossible to describe in one sentence.
   let tier;
-  if (free_tier) {
-    tier = 'quick';
-  } else if (requestedTier === 'quick' || requestedTier === 'exam') {
+  if (requestedTier === 'quick' || requestedTier === 'exam') {
     tier = requestedTier;
   } else if (typeof marks === 'number') {
     tier = marks > 8 ? 'exam' : 'quick';
@@ -91,10 +108,16 @@ module.exports = async function handler(req, res) {
   try {
     let result;
     let model;
+    let served = 'groq';
 
     if (tier === 'exam') {
-      result = await callAnthropic(system, prompt, 'claude-sonnet-4-6', 800);
-      model = 'claude-sonnet-4-6';
+      // 2000, not 800. The bake-off (scripts/model-eval/) found Sonnet hit an
+      // 800-token ceiling on HALF its calls even on short answers — it scored
+      // 69% truncated against 98% untruncated, so the old budget was measuring
+      // the cap rather than the model. A 16- or 30-mark essay needs the room.
+      const r = await callAnthropic(system, prompt, EXAM_MODEL, 2000);
+      result = r.text; served = r.servedBy;
+      model = EXAM_MODEL;
     } else {
       // Quick tier: try Groq first (cheaper), fall back to Haiku
       if (process.env.GROQ_API_KEY) {
@@ -103,16 +126,18 @@ module.exports = async function handler(req, res) {
           model = 'groq/gpt-oss-120b';
         } catch (groqErr) {
           // Groq failed — fall back to Haiku
-          result = await callAnthropic(system, prompt, 'claude-haiku-4-5-20251001', 400);
+          const r = await callAnthropic(system, prompt, 'claude-haiku-4-5-20251001', 400);
+          result = r.text; served = r.servedBy;
           model = 'claude-haiku-4-5-20251001';
         }
       } else {
-        result = await callAnthropic(system, prompt, 'claude-haiku-4-5-20251001', 400);
+        const r = await callAnthropic(system, prompt, 'claude-haiku-4-5-20251001', 400);
+        result = r.text; served = r.servedBy;
         model = 'claude-haiku-4-5-20251001';
       }
     }
 
-    return res.status(200).json({ result, model, tier });
+    return res.status(200).json({ result, model, tier, servedBy: served });
   } catch (err) {
     console.error('AI marking error:', err.message);
     return res.status(502).json({ error: 'AI marking failed', detail: err.message });
@@ -152,31 +177,17 @@ async function callGroq(system, prompt) {
 
 
 async function callAnthropic(system, prompt, model, maxTokens) {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new Error('ANTHROPIC_API_KEY not configured');
-
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: model,
-      max_tokens: maxTokens || 600,
-      system: system || 'You are a GCSE examiner. Mark the student response against the provided mark scheme.',
-      messages: [
-        { role: 'user', content: prompt },
-      ],
-    }),
+  // callClaudeText joins EVERY text block. Reading content[0].text breaks on
+  // any model that thinks: Sonnet 5 has adaptive thinking on by default, so it
+  // returns [thinking, text] and content[0] is the thinking block, which has no
+  // .text at all. That shipped as an exam tier returning empty feedback while
+  // happily billing for 1,230 output tokens of perfectly good marking.
+  return callClaudeDetailed({
+    model: model,
+    max_tokens: maxTokens || 600,
+    system: system || 'You are a GCSE examiner. Mark the student response against the provided mark scheme.',
+    messages: [
+      { role: 'user', content: prompt },
+    ],
   });
-
-  if (!resp.ok) {
-    const err = await resp.text();
-    throw new Error('Anthropic API error: ' + resp.status + ' ' + err);
-  }
-
-  const data = await resp.json();
-  return data.content[0].text;
 }

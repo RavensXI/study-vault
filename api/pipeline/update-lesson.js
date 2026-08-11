@@ -1,4 +1,5 @@
 const { requireTeacher } = require('./_lib/auth');
+const { requireOwnership } = require('./_lib/scope');
 const { supabase } = require('./_lib/supabase');
 
 module.exports = async function handler(req, res) {
@@ -28,6 +29,9 @@ module.exports = async function handler(req, res) {
   if (Object.keys(updates).length === 0) {
     return res.status(400).json({ error: 'No fields to update' });
   }
+
+  // requireTeacher says who is calling; this says what they may touch.
+  if (!(await requireOwnership(auth, res, 'lesson', lesson_id))) return;
 
   const { error } = await supabase
     .from('lessons')

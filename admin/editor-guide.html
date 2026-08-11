@@ -353,8 +353,10 @@
       if (auth.is_admin) {
         // Admin sees everything — no filter
       } else if (auth.school_id) {
-        // Teacher sees their school's subjects + generic (school_id NULL)
-        query = query.or('school_id.eq.' + auth.school_id + ',school_id.is.null');
+        // Own school only. Generic subjects (school_id NULL) are the shared
+        // free-tier corpus — one copy behind every school and the public site —
+        // and the API now refuses school-account writes to them.
+        query = query.eq('school_id', auth.school_id);
       }
 
       // If teacher has specific subject assignments, further restrict

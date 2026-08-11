@@ -628,7 +628,11 @@ function initPracticeQuestions() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          tier: 'quick',
+          // No `tier` here on purpose. Hardcoding 'quick' sent 30-mark English
+          // Literature essays to the short-answer model with 400 tokens of
+          // feedback, which is why longer answers came back over-marked and
+          // thin. Omitting it lets /api/ai-mark route on `marks`:
+          // <=8 -> quick, >8 -> exam.
           marks: parseInt(marksMatch, 10),
           system: systemPrompt,
           prompt: userPrompt,

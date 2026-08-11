@@ -332,6 +332,16 @@ body[data-skin="reader"] .lesson-masthead:hover .lesson-header,
 body[data-skin="reader"] .lesson-masthead.show-title .lesson-header{ opacity:1; }
 body[data-skin="reader"] .lesson-masthead:hover #hero-caption,
 body[data-skin="reader"] .lesson-masthead.show-title #hero-caption{ opacity:1; }
+/* A phone cannot hover. Without this the .show-title flash fades after a few
+   seconds and the lesson has NO VISIBLE TITLE for the rest of the session — on
+   the device most students revise with. Measured at 390px before this rule:
+   .lesson-header sat at opacity 0 with no way to bring it back.
+   The reveal is a desktop refinement; on touch the title simply stays. */
+@media (hover: none){
+  body[data-skin="reader"] #hero-figure::after,
+  body[data-skin="reader"] .lesson-masthead .lesson-header,
+  body[data-skin="reader"] #hero-caption{ opacity:1; }
+}
 /* drop the inline lesson-progress bar — the sidebar checklist already shows progress */
 body[data-skin="reader"] .lesson-progress-inline-wrap{ display:none; }
 body[data-skin="reader"] .lesson-header .lesson-number{

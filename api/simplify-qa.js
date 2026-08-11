@@ -20,6 +20,8 @@
 
 const { supabase } = require('./pipeline/_lib/supabase');
 
+const { callClaudeText } = require('./_lib/claude');
+
 const QA_MODEL = 'claude-sonnet-4-6';
 const SIMPLE_MODEL = 'claude-haiku-4-5-20251001';
 const EXPLAIN_MODEL = 'claude-sonnet-4-6';
@@ -261,29 +263,15 @@ async function generate(text, presentTerms, level) {
 }
 
 async function callAnthropic(system, prompt, model, maxTokens, temperature) {
-  var key = process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new Error('ANTHROPIC_API_KEY not configured');
-
-  var resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: model,
-      max_tokens: maxTokens || 600,
-      temperature: typeof temperature === 'number' ? temperature : 0.2,
-      system: system,
-      messages: [{ role: 'user', content: prompt }]
-    })
+  // temperature is dropped automatically for models that reject it (Sonnet 5).
+  // Joins every text block — a thinking-enabled model returns [thinking, text]
+  // and content[0].text would be undefined. temperature is dropped
+  // automatically for models that reject it (Sonnet 5).
+  return callClaudeText({
+    model: model,
+    max_tokens: maxTokens || 600,
+    temperature: typeof temperature === 'number' ? temperature : 0.2,
+    system: system,
+    messages: [{ role: 'user', content: prompt }]
   });
-
-  if (!resp.ok) {
-    var err = await resp.text();
-    throw new Error('Anthropic API error: ' + resp.status + ' ' + err);
-  }
-  var data = await resp.json();
-  return data.content[0].text;
 }
