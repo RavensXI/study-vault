@@ -110,6 +110,10 @@ if (_dq.get('done')) {                      /* staging: ?done=sub/unit:1.2,... *
 }
 function doneIn(sub, unit) { return DONE[sub + '/' + unit] || []; }
 
+/* the three areas of study a Music student chooses BETWEEN; AoS1 is
+   compulsory and never listed here, so it is always kept */
+var MUSIC_OPTIONAL_AOS = ['aos2-popular-music', 'aos3-traditional-music', 'aos4-since-1910'];
+
 /* which units belong to THIS student (their topic choices scope the course) */
 function keepUnit(su, uslug) {
   var raw = su.topicsRaw || [];
@@ -119,6 +123,16 @@ function keepUnit(su, uslug) {
     return !raw.length || raw.indexOf(uslug) >= 0 || doneIn(su.sub, uslug).length > 0;
   if (su.slug === 'drama')                   /* core units always; plays = the chosen one */
     return DRAMA_PLAYS.indexOf(uslug) < 0 || !raw.length || raw.indexOf(uslug) >= 0 || doneIn(su.sub, uslug).length > 0;
+  /* Music scopes the STUDY PIECES and nothing else. AQA 8271 sets study pieces
+     for two areas of study — AoS1, which is compulsory, plus one of 2-4. But
+     Section A is unfamiliar listening drawn from ANY area and carries 68 of the
+     paper's 96 marks, so the listening-practice, listening-skills and
+     score-reading units belong to every music student regardless of their pick.
+     Only the three optional study-piece units come and go. Uses allRaw, not
+     `raw`: topicsRaw is populated for history, lit and drama only. */
+  if (su.slug === 'music')
+    return MUSIC_OPTIONAL_AOS.indexOf(uslug) < 0 || !allRaw.length
+      || allRaw.indexOf(uslug) >= 0 || doneIn(su.sub, uslug).length > 0;
   if (su.slug === 'rs' && allRaw.length)
     return allRaw.some(function (r) { return uslug === r || uslug.indexOf(r + '-') === 0; })
       || doneIn(su.sub, uslug).length > 0;
