@@ -1497,10 +1497,27 @@ if(sibtn) sibtn.onclick=async()=>{
     if(res.error){ say(res.error.message); }
     else{
       const u=res.data&&res.data.user;
+      /* MERGE, never overwrite. This used to replace the shelf on this device
+         with the account's copy outright, so a thin copy on the account
+         silently destroyed a shelf the student had just built — and rebuilding
+         did not help, because the next sign-in wiped it again. Union the
+         subjects; fill board and topic gaps from whichever side has them. */
       const sv=u&&u.user_metadata&&u.user_metadata.sv_welcome;
-      if(sv&&Array.isArray(sv.picked)&&sv.picked.length){
-        try{ localStorage.setItem('sv-welcome',JSON.stringify(sv)); }catch(e){}
-      }
+      try{
+        let loc={}; try{ loc=JSON.parse(localStorage.getItem('sv-welcome')||'{}'); }catch(e){}
+        const acct=(sv&&Array.isArray(sv.picked))?sv:{};
+        const merged={
+          picked:[...new Set([...(acct.picked||[]),...(loc.picked||[])])],
+          boards:Object.assign({},loc.boards||{},acct.boards||{}),
+          topics:Object.assign({},loc.topics||{},acct.topics||{}),
+          meta:Object.assign({},loc.meta||{},acct.meta||{})
+        };
+        if(merged.picked.length){
+          localStorage.setItem('sv-welcome',JSON.stringify(merged));
+          /* if this device knew more than the account did, teach the account */
+          if(JSON.stringify(merged)!==JSON.stringify(acct)) SBC.auth.updateUser({data:{sv_welcome:merged}});
+        }
+      }catch(e){}
       /* progress comes home with the account — from the progress TABLE
          (sync.js merges it in additively; metadata never carries it) */
       try{ if(window.svProgressFetch) svProgressFetch(res.data&&res.data.session&&res.data.session.access_token)
