@@ -185,7 +185,7 @@ function svSignOut() {
       });
       sessionStorage.removeItem('sv-sync-reloaded');
     } catch (e) {}
-    location.href = 'home-study.html';
+    location.href = '/welcome';
   };
   svProgressPush().then(wipe, wipe);
 }

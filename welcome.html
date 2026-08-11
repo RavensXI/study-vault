@@ -845,7 +845,7 @@
       <p class="tiny"><a href="#" onclick="go('signin');return false">Already have an account? Sign in</a></p>
     </div>
     <div class="picker-foot">
-      <button class="backlink" onclick="location.href='dash-classic.html'">&larr; Back to my StudyVault</button>
+      <button class="backlink" onclick="location.href='/classic'">&larr; Back to my StudyVault</button>
     </div>
   </div>
 
@@ -1321,7 +1321,7 @@ function renderTopics(){
   }
 }
 /* the wizard ends INSIDE the product: the real dashboard, no sign-up gate */
-function dashUrl(){ try{ return localStorage.getItem('sv-dash-view')==='desk'?'dash-desk4.html':'dash-classic.html'; }catch(e){ return 'dash-classic.html'; } }
+function dashUrl(){ try{ return localStorage.getItem('sv-dash-view')==='desk'?'/desk':'/classic'; }catch(e){ return '/classic'; } }
 /* Back from the picker: if we arrived here to EDIT (from the dashboard, via
    ?view=picker), return to the dashboard the student was using. On the fresh
    onboarding path, go back to the landing view. */
@@ -1508,7 +1508,7 @@ if(sibtn) sibtn.onclick=async()=>{
       try{ localStorage.setItem('sv-user',JSON.stringify({email:u?u.email:em})); }catch(e){}
       say('Signed in — opening your StudyVault…');
       document.body.classList.remove('ready');
-      setTimeout(()=>{ location.href='dash-classic.html'; },250);
+      setTimeout(()=>{ location.href='/classic'; },250);
       return;
     }
   }catch(e){ say('Something went wrong — try again.'); }
