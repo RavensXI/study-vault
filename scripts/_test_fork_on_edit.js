@@ -55,12 +55,20 @@ function fakeRes() {
   }
 
   // ---- a shared free-tier lesson to edit ------------------------------------
-  const gen = (await sb.from('subjects').select('id, slug, school_id').eq('status', 'live'))
-    .data.find(s => !s.school_id);
-  const unit = (await sb.from('units').select('id, slug').eq('subject_id', gen.id).limit(1)).data[0];
+  // Deliberately an ARTICLE lesson with real knowledge checks. The first pass
+  // of this test grabbed maths-aqa, which is practice-format: the override was
+  // written correctly and rendered nowhere, because practice-first subjects
+  // display no knowledge checks. A green test on a page no student can see is
+  // not a green test.
+  const gen = (await sb.from('subjects').select('id, slug, school_id, settings').eq('status', 'live'))
+    .data.filter(s => !s.school_id)
+    .find(s => ['history-aqa', 'psychology-aqa', 'business-aqa'].includes(s.slug));
+  const units = (await sb.from('units').select('id, slug').eq('subject_id', gen.id)).data;
   const lesson = (await sb.from('lessons')
-    .select(['id', 'title', 'lesson_number'].concat(ALL_FIELDS).join(', '))
-    .eq('unit_id', unit.id).order('lesson_number').limit(1)).data[0];
+    .select(['id', 'title', 'lesson_number', 'unit_id', 'status'].concat(ALL_FIELDS).join(', '))
+    .in('unit_id', units.map(u => u.id)).eq('status', 'live').order('lesson_number').limit(40))
+    .data.find(l => l.content_html && (l.knowledge_checks || []).length > 0);
+  const unit = units.find(u => u.id === lesson.unit_id);
   console.log('target lesson: %s / %s / %s  (%s)\n', gen.slug, unit.slug, lesson.lesson_number, lesson.id);
 
   if (process.argv.includes('--clean')) {
@@ -81,8 +89,13 @@ function fakeRes() {
     rAdmin && rAdmin.mode === 'direct', JSON.stringify(rAdmin));
 
   // ---- the edit ------------------------------------------------------------
-  const EDITED = [{ question: 'FORK TEST — school-specific knowledge check',
-                    correct: 0, options: ['a', 'b', 'c', 'd'] }];
+  // Canonical knowledge-check shape is {q, type, correct, options}. The first
+  // version of this test wrote `question:` instead of `q:` — every data check
+  // passed and the Quick Quiz modal rendered blank, because main.js reads q.q.
+  // Hence the shape assertion below: an override that the page cannot render
+  // must not be allowed to pass.
+  const EDITED = [{ q: 'FORK TEST — school-specific knowledge check', type: 'mcq',
+                    correct: 0, options: ['First', 'Second', 'Third', 'Fourth'] }];
   const w = await writeOverride(lesson.id, school.id, { knowledge_checks: EDITED }, teacher);
   check('override written', w.ok, w.error || ('created=' + w.created));
   if (!w.ok) { console.log('\nIs the table there? Run scripts/_create_lesson_overrides.sql first.'); process.exit(1); }
@@ -106,7 +119,12 @@ function fakeRes() {
   // ---- what each viewer sees ------------------------------------------------
   const merged = applyOverride(after, ovr);
   check('school sees its own knowledge checks',
-    merged.knowledge_checks[0].question.startsWith('FORK TEST'));
+    merged.knowledge_checks[0].q.startsWith('FORK TEST'));
+  // An override the renderer cannot use is not a working override.
+  const baseKeys = Object.keys(before.knowledge_checks[0]).sort().join(',');
+  const ovrKeys = Object.keys(merged.knowledge_checks[0]).sort().join(',');
+  check('override keeps the shape the page renders', baseKeys === ovrKeys,
+    'base {' + baseKeys + '} vs override {' + ovrKeys + '}');
   check('school still inherits the untouched article body',
     JSON.stringify(merged.content_html) === JSON.stringify(before.content_html));
   check('free user (no override applied) sees the original',
