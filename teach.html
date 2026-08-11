@@ -1,0 +1,1260 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StudyVault — Teacher</title>
+<base href="/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..600&family=Caveat:wght@400..600&family=Young+Serif&display=swap" rel="stylesheet">
+<style>
+  /* Teacher view, reader skin. Everything on this page is computed from the
+     SAME sv_progress objects students sync to their accounts — the demo class
+     is synthetic (seeded), the aggregation code is the real thing. */
+  :root{--paper:#f6f1e7;--card:#fffdf8;--ink:#26231e;--sec:#57534a;--mut:#84806f;
+    --line:#e4dfd2;--linel:#efeadf;--anchor:#5b4632;--good:#4e6e5d;--warn:#a3542f;--gold:#a3873a;
+    --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif;--hand:'Caveat',cursive}
+  *{box-sizing:border-box}
+  html{background:var(--paper);
+    /* the type scale follows the screen: every rem in the app grows on a
+       big monitor and shrinks on a laptop, so each tab keeps filling one
+       screen instead of leaving dead space or spilling into card scroll.
+       Height is in the formula because vertical fit is the binding edge. */
+    font-size:clamp(13px, min(.62vw, 1.05vh) + 7px, 19px)}
+  html,body{height:100%}
+  /* the dashboard is an APP: one screen, no page scroll. Each tab's view
+     fills the viewport; long content scrolls INSIDE its card, never the page. */
+  body{margin:0;font-family:var(--head);color:var(--ink);background:var(--paper);
+    display:flex;flex-direction:column;overflow:hidden}
+  body.packmode{display:block;overflow:auto}
+  a{color:inherit}
+  .top{max-width:87.5rem;width:100%;margin:0 auto;padding:20px 18px 0;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;flex:none}
+  .brand{font-family:'Young Serif',serif;font-size:1.18rem;color:#1d1c1a}
+  .brand img{height:.30em;margin-left:1px;vertical-align:baseline}
+  .who{font-family:var(--hand);font-size:1.25rem;color:var(--mut)}
+  .classpick{margin-left:auto;font-size:.85rem;color:var(--sec);background:var(--card);border:1px solid var(--line);
+    border-radius:10px;padding:.5rem .9rem}
+  .classpick b{color:var(--ink)}
+  .demo{max-width:87.5rem;width:100%;margin:6px auto 0;padding:0 18px;font-size:.7rem;font-weight:600;
+    letter-spacing:.09em;text-transform:uppercase;color:#a89a7a;flex:none}
+  .demo a{color:#8a7a54;text-decoration:none}
+  .demo a:hover{color:var(--ink);text-decoration:underline}
+  /* the tab rail: quiet text, ink underline on the active view — no pills */
+  .tabs{max-width:87.5rem;width:100%;margin:14px auto 0;padding:0 18px;display:flex;gap:28px;border-bottom:1px solid var(--line);flex:none}
+  .tabs button{font-family:var(--head);font-weight:600;font-size:1rem;color:var(--mut);background:none;border:none;
+    padding:.6rem 2px .7rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:.01em}
+  .tabs button:hover{color:var(--ink)}
+  .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+  .tabs button:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
+
+  /* each view = a symmetric grid that fills the remaining viewport exactly */
+  .wrap{flex:1;min-height:0;max-width:87.5rem;width:100%;margin:16px auto 18px;padding:0 18px;
+    display:grid;gap:16px;grid-template-columns:1fr 1fr}
+  .wrap[hidden]{display:none}
+  #view-topics,#view-pace{grid-template-columns:1fr}
+  #view-class{grid-template-columns:1.2fr .8fr}
+  .col{min-width:0;min-height:0;display:flex;flex-direction:column;gap:16px}
+  .col>.card{flex:1;min-height:0}
+  /* cards are flex columns; the .scroll region takes the slack and scrolls
+     internally when content is longer than the screen */
+  .card{display:flex;flex-direction:column}
+  .card .scroll{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;padding-right:4px}
+  .col{min-width:0;display:flex;flex-direction:column;gap:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1.45rem 1.6rem 1.35rem;
+    box-shadow:0 1px 2px rgba(45,35,18,.04), 0 14px 34px -24px rgba(45,35,18,.25)}
+  .card h2{font-family:var(--read);font-size:1.28rem;font-weight:600;letter-spacing:-.01em;margin:0 0 .95rem}
+  .card h2 small{display:block;font-family:var(--head);font-weight:600;font-size:.7rem;color:var(--mut);
+    letter-spacing:.1em;text-transform:uppercase;margin-top:.3rem}
+
+  /* triage — findings first. Every line states an implication; the evidence
+     link jumps to the panel that shows the working. NO prescriptions. */
+  .tri{display:flex;gap:10px;align-items:flex-start;padding:.55rem 0;border-top:1px solid var(--linel);font-size:.92rem;line-height:1.45}
+  .tri:first-of-type{border-top:none}
+  .tri .dot{flex:none;width:9px;height:9px;border-radius:50%;margin-top:.42rem}
+  .tri b{font-weight:700}
+  .tri .names{color:var(--sec)}
+  .evlink{font-size:.78rem;font-weight:600;color:var(--mut);text-decoration:none;white-space:nowrap;margin-left:.35rem}
+  .evlink:hover{color:var(--ink);text-decoration:underline}
+  /* the evidence drawer: how a conclusion was reached, one click away */
+  details.ev{margin-top:1rem;border-top:1px solid var(--linel);padding-top:.6rem}
+  details.ev summary{cursor:pointer;font-size:.78rem;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--mut);list-style:none;user-select:none}
+  details.ev summary::before{content:'▸ ';font-size:.7rem}
+  details.ev[open] summary::before{content:'▾ '}
+  details.ev summary:hover{color:var(--ink)}
+  .evfree{font-size:.86rem;color:var(--sec);line-height:1.65;margin:.15rem 0 .4rem}
+  .mc .belief{font-family:var(--read);font-weight:600;color:#8a3a25}
+  .mc .qq{color:var(--sec);font-size:.84rem}
+  .imp{font-size:.95rem;line-height:1.5;margin:.1rem 0 .6rem}
+  .imp b{font-weight:700}
+
+  /* topic grid */
+  .topics table{width:100%;border-collapse:collapse;font-size:.86rem}
+  .topics th{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-align:left;padding:.3rem .4rem}
+  .topics td{padding:.5rem .4rem;border-top:1px solid var(--linel);vertical-align:middle}
+  .topics .u{font-weight:600;max-width:260px}
+  .bar{position:relative;height:9px;border-radius:5px;background:var(--linel);min-width:110px}
+  .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--good)}
+  .bar.low i{background:var(--warn)}
+  .bar.mid i{background:var(--gold)}
+  .pct{font-variant-numeric:tabular-nums;color:var(--sec);width:44px;display:inline-block}
+  .att{color:var(--mut);font-size:.78rem;white-space:nowrap}
+  tr.worst .u::after{content:" · reteach candidate";font-size:.72rem;font-weight:700;color:var(--warn)}
+
+  /* roster */
+  .roster table{width:100%;border-collapse:collapse;font-size:.88rem}
+  .roster th{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-align:left;padding:.3rem .45rem;cursor:default}
+  .roster td{padding:.42rem .45rem;border-top:1px solid var(--linel);white-space:nowrap}
+  .roster tr.r{cursor:pointer}
+  .roster tr.r:hover td{background:#faf6ec}
+  .roster tr.sel td{background:#f4ecd9}
+  .nm{font-weight:600}
+  .spark{display:inline-block;vertical-align:middle}
+  .spark rect{fill:#c9bda2}
+  .spark rect.hot{fill:var(--anchor)}
+  .flag{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.04em;border-radius:5px;padding:.14rem .42rem}
+  .flag.quiet{background:#fbeee9;color:#9a3a25}
+  .flag.slip{background:#f6ecd2;color:#8a6d1f}
+  .flag.fly{background:#edf6f0;color:#1e5b3e}
+  .flag.grind{background:#efe9f4;color:#5b4370}
+
+  /* pen colours for the Leitner boxes (match the flashcard pen marks) —
+     doubled selectors so they outrank .wf i / .mkey i element rules */
+  .wf i.m1,.mkey i.m1{background:#c0392b} .wf i.m2,.mkey i.m2{background:#c9781f}
+  .wf i.m3,.mkey i.m3{background:#2a6f97} .wf i.m4,.mkey i.m4{background:#2e7d4f}
+  .mkey{font-size:.7rem;color:var(--mut);margin-top:.8rem}
+  .mkey i{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:-1px;margin:0 4px 0 12px}
+  .mkey i:first-child{margin-left:0}
+
+  /* ---- topic cards: recall curve + card-mastery waffle, per unit.
+     The 2x2 grid fills the whole view; each card flexes to its cell. ---- */
+  .unitgrid{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:14px;margin-top:.2rem}
+  .ucard{border:1px solid var(--linel);border-radius:12px;padding:.95rem 1.15rem .85rem;background:#fffefb;
+    min-height:0;display:flex;flex-direction:column}
+  .ucard .curvebox{flex:1;min-height:0;display:flex;align-items:center}
+  .ucard .curvebox svg{width:100%;height:100%;max-height:190px}
+  .ucard h3{font-family:var(--read);font-size:1.04rem;font-weight:600;margin:0}
+  .ucard .re{font-size:.7rem;color:var(--warn);font-weight:700;letter-spacing:.03em}
+  .ucard .toprow{display:flex;align-items:baseline;gap:10px;margin:.15rem 0 .3rem}
+  .ucard .big{font-size:1.75rem;font-weight:800;font-family:var(--head);font-variant-numeric:tabular-nums}
+  .ucard .ann{font-family:var(--hand);font-size:1.08rem;color:#a3542f}
+  .ucard .ann.up{color:var(--good)}
+  .ucard svg{display:block;width:100%;height:auto}
+  .ucard .fn{font-size:.73rem;color:var(--mut);margin-top:.55rem}
+  .wf{display:grid;grid-template-columns:repeat(50,1fr);gap:2px;margin-top:.6rem;flex:none}
+  .wf i{aspect-ratio:1;border-radius:1.5px;background:var(--linel)}
+  .wf .wlab{grid-column:1/-1;font-size:.7rem;color:var(--mut);margin-top:2px}
+
+  /* ---- answer-split strips: where the wrong answers went ---- */
+  .mc{padding:.7rem 0 .75rem;border-top:1px solid var(--linel);font-size:.88rem;line-height:1.5}
+  .mc:first-of-type{border-top:none}
+  .mc b{font-weight:600}
+  .mc .u{color:var(--mut);font-size:.76rem}
+  .mc .pick{color:#8a3a25;font-family:var(--read)}
+  .mc .n{float:right;color:var(--sec);font-variant-numeric:tabular-nums;font-size:.8rem;padding-left:10px}
+  .mc .strip{display:flex;height:14px;border-radius:4px;overflow:hidden;margin:.45rem 0 .35rem}
+  .mc .strip i{height:100%;min-width:2px}
+  .mc .strip i.dom{background:#a3542f}
+  .mc .strip i.oth1{background:#cfa984}
+  .mc .strip i.oth2{background:#ddc4a4}
+  .mc .strip i.oth3{background:#e8d8bd}
+  .mc .ans{color:var(--good)}
+
+  /* ---- pace: per-unit skyline of lessons finished ---- */
+  .pace{display:grid;grid-template-columns:230px 1fr 210px;gap:18px;align-items:center;
+    padding:.75rem 0;border-top:1px solid var(--linel)}
+  .pace:first-child{border-top:none}
+  .pace .pn{font-family:var(--read);font-weight:600;font-size:.95rem}
+  .pace .pm{font-size:.76rem;color:var(--mut)}
+  .pace svg{display:block;width:100%;height:auto}
+  .behind{margin-top:.9rem;padding-top:.8rem;border-top:1px solid var(--linel);font-size:.88rem;line-height:1.6}
+  .behind b{font-weight:700}
+  .behind .names{color:var(--sec)}
+
+  /* ---- the quadrant: effort x retention, one dot per student ---- */
+  #quadsvg{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+  .quad svg{width:100%;height:100%}
+  .quad text{font-family:var(--head)}
+  .quad .axis{font-size:11px;fill:var(--mut)}
+  .quad .qlab{font-family:var(--hand);font-size:17px;fill:#a89e88}
+  .quad .dot{cursor:pointer}
+  .quad .dot:hover circle{stroke:#26231e;stroke-width:2}
+  .quad .ini{font-size:9.5px;font-weight:700;fill:#fff;pointer-events:none}
+  .acc{font-variant-numeric:tabular-nums}
+  .tr-up{color:var(--good)} .tr-dn{color:var(--warn)} .tr-fl{color:var(--mut)}
+
+  /* drill-in */
+  #dbody{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;padding-right:4px}
+  .drill .sub{color:var(--sec);font-size:.85rem;margin:-.4rem 0 .8rem}
+  .kv{display:flex;gap:1.8rem;flex-wrap:wrap;margin-bottom:1rem}
+  .kv div b{display:block;font-size:1.55rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .kv div small{font-size:.7rem;color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
+  /* quiet action row in the drill-in: real buttons, side by side */
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:1.1rem}
+  .btnrow a,.btnrow button{font-family:var(--head);font-weight:600;font-size:.88rem;color:var(--ink);
+    border:1px solid var(--line);border-radius:10px;background:#fff;padding:.6rem 1.05rem;cursor:pointer;
+    text-decoration:none;transition:border-color .15s}
+  .btnrow a:hover,.btnrow button:hover{border-color:#c9bda4}
+
+  /* ---- the practice-answers reader: a sheet over the page ---- */
+  .pmodal{position:fixed;inset:0;background:rgba(38,30,16,.42);display:flex;align-items:flex-start;
+    justify-content:center;padding:5vh 16px;z-index:60;overflow:auto}
+  .pmodal[hidden]{display:none}
+  .pmodal .sheet{background:var(--card);border:1px solid var(--line);border-radius:18px;max-width:49rem;width:100%;
+    padding:1.7rem 2rem 1.9rem;box-shadow:0 34px 90px -24px rgba(28,18,6,.5);position:relative;margin-bottom:5vh}
+  .pmodal .x{position:absolute;top:14px;right:18px;font-size:1.5rem;line-height:1;border:none;background:none;
+    color:var(--mut);cursor:pointer;padding:.2rem .4rem}
+  .pmodal .x:hover{color:var(--ink)}
+  .pmodal h2{font-family:var(--read);font-size:1.35rem;margin:0}
+  .pmodal .sub{font-size:.82rem;color:var(--mut);margin:.35rem 0 1.2rem}
+  .pmodal .paper{margin:1rem 0}
+  .sect{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:1rem 0 .35rem}
+  .miss{font-size:.86rem;line-height:1.5;padding:.35rem 0;border-top:1px solid var(--linel)}
+  .miss b{font-weight:600}
+  .miss .q{color:var(--sec);font-family:var(--read);font-size:.83rem;display:block}
+  .ok{color:var(--good);font-size:.86rem;line-height:1.6}
+  .wubars{display:flex;align-items:flex-end;gap:5px;height:52px;margin:.3rem 0 .1rem}
+  .wubars i{width:20px;background:var(--linel);border-radius:3px 3px 0 0;position:relative}
+  .wubars i b{position:absolute;left:0;right:0;bottom:0;background:var(--anchor);border-radius:3px 3px 0 0}
+  .wubars i small{position:absolute;top:100%;left:50%;translate:-50%;font-size:.6rem;color:var(--mut);padding-top:3px}
+  .paper{border:1px solid var(--line);border-radius:12px;background:#fff;padding:1.05rem 1.2rem;margin:.6rem 0;font-size:.88rem}
+  .paper .pq{font-family:var(--read);font-weight:600;font-size:1rem;margin:0 0 .55rem;line-height:1.45}
+  /* the student's answer, on faintly ruled paper */
+  .paper .pa{white-space:pre-wrap;color:#413c33;font-family:var(--read);margin:.5rem 0 .7rem;line-height:26px;
+    background:repeating-linear-gradient(to bottom,transparent 0,transparent 25px,#efe9dc 25px,#efe9dc 26px);
+    padding:0 .2rem .2rem}
+  .paper .pr{background:#f8f4ea;border:1px solid #eee5cf;border-radius:9px;padding:.75rem .9rem;line-height:1.55;color:#4a4438}
+  .paper .pr b{color:var(--ink)}
+  .paper .meta{font-size:.72rem;color:var(--mut);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.45rem}
+
+  /* AI digest */
+  .digest .body{font-family:var(--read);font-size:.9rem;line-height:1.62;color:#3d3931}
+  .digest .body b{color:var(--ink)}
+  .digest .stamp{font-size:.74rem;color:var(--mut);margin-top:.7rem}
+  .digest ul{margin:.4rem 0 .2rem;padding-left:1.1rem}
+  .digest li{margin:.25rem 0}
+
+  .foot{max-width:1240px;margin:0 auto;padding:0 16px 40px;font-size:.78rem;color:var(--mut);line-height:1.6}
+  .foot b{color:var(--sec)}
+
+  /* ---- the parents'-evening / report pack: one printable page per student ---- */
+  body.packmode .top,body.packmode .demo,body.packmode .wrap,body.packmode .foot,body.packmode .tabs{display:none}
+  .pack{max-width:840px;margin:26px auto 60px;background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:2.2rem 2.4rem;box-shadow:0 18px 50px rgba(20,14,6,.10)}
+  .pack .phead{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:.7rem}
+  .pack .phead h1{font-family:var(--read);font-size:1.65rem;margin:0}
+  .pack .phead .pclass{color:var(--sec);font-size:.9rem;text-align:right;line-height:1.5}
+  .pack .pbrand{font-family:'Young Serif',serif;font-size:.95rem;color:#1d1c1a}
+  .pack .pbrand img{height:.3em;margin-left:1px}
+  .pack .kv{margin:1.1rem 0 .4rem}
+  .pack h3{font-size:.74rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mut);margin:1.4rem 0 .5rem}
+  .pack table{width:100%;border-collapse:collapse;font-size:.86rem}
+  .pack td{padding:.45rem .3rem;border-top:1px solid var(--linel);vertical-align:middle}
+  .pack .ubar{position:relative;display:block;height:10px;border-radius:5px;background:var(--linel);min-width:180px}
+  .pack .ubar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--good)}
+  .pack .ubar.low i{background:var(--warn)} .pack .ubar.mid i{background:var(--gold)}
+  .pack .ubar .cls{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.45}
+  .pack .legend{font-size:.72rem;color:var(--mut);margin-top:.3rem}
+  .pack .two{display:grid;grid-template-columns:1fr 1fr;gap:0 2rem}
+  @media (max-width:700px){ .pack .two{grid-template-columns:1fr} }
+  .pack .aidraft{border:1px solid #e6dcc0;background:#faf6ea;border-radius:9px;
+    padding:.9rem 1.1rem;font-family:var(--read);font-size:.92rem;line-height:1.62;color:#3d3931}
+  .pack .aidraft b{color:var(--ink)}
+  .pack .aistamp{font-size:.72rem;color:var(--mut);margin-top:.45rem}
+  .pack .pfoot{margin-top:1.6rem;padding-top:.8rem;border-top:1px solid var(--linel);font-size:.72rem;color:var(--mut);line-height:1.55}
+  .pack .wubars i{position:relative}
+  .pack .wubars i em{position:absolute;bottom:100%;left:50%;translate:-50%;font-style:normal;font-size:.62rem;font-weight:700;color:var(--sec);padding-bottom:2px}
+  .pack .wubars{margin-top:16px}
+  .packbar{max-width:840px;margin:18px auto 0;display:flex;gap:10px;justify-content:flex-end;padding:0 4px}
+  .packbar button,.packbar a{font-family:var(--head);font-weight:600;font-size:.88rem;border:1px solid var(--line);
+    border-radius:9px;background:var(--card);padding:.55rem 1.05rem;cursor:pointer;color:var(--ink);text-decoration:none}
+  .packbar .prim{background:#221E19;color:#faf8f5;border-color:#221E19}
+  /* one A4 page, guaranteed: tighter type + spacing under print, no page 2 */
+  @page{size:A4;margin:11mm}
+  @media print{
+    body{background:#fff}
+    .packbar{display:none}
+    .pack{box-shadow:none;border:none;margin:0;max-width:none;padding:0;font-size:.78rem}
+    .pack .phead h1{font-size:1.35rem}
+    .pack .kv div b{font-size:1.05rem}
+    .pack h3{margin:.85rem 0 .3rem}
+    .pack td{padding:.28rem .3rem}
+    .pack .aidraft{font-size:.8rem;line-height:1.5;padding:.65rem .85rem}
+    .pack .miss{padding:.22rem 0;font-size:.78rem}
+    .pack .wubars{height:36px;margin-top:20px} .pack .wubars i{width:16px}
+    .pack .pfoot{margin-top:.8rem;font-size:.62rem}
+    .pack table{font-size:.76rem}
+  }
+</style>
+</head>
+<body>
+<div class="top">
+  <span class="brand">StudyVault<img src="assets/studyvault-lock-rust.svg" alt=""></span>
+  <span class="who">the teacher's side of the desk</span>
+  <span class="classpick" id="classpick"></span>
+</div>
+<div class="demo">Synthetic demo class · the real pipeline reads the same progress objects students already sync
+  · <a href="#" onclick="document.getElementById('howmodal').hidden=false;return false">how this is calculated</a></div>
+
+<nav class="tabs" role="tablist" aria-label="Dashboard views">
+  <button role="tab" data-view="week" aria-selected="true">This week</button>
+  <button role="tab" data-view="topics" aria-selected="false">Topics</button>
+  <button role="tab" data-view="miscon" aria-selected="false">Misconceptions</button>
+  <button role="tab" data-view="pace" aria-selected="false">Pace</button>
+  <button role="tab" data-view="class" aria-selected="false">The class</button>
+</nav>
+
+<div class="wrap" id="view-week">
+  <div class="col">
+    <div class="card triage">
+      <h2>Needs your eyes <small>computed, no AI</small></h2>
+      <div class="scroll" id="triagebody"></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card digest">
+      <h2>This week, in brief <small>AI · written weekly, not per view</small></h2>
+      <div class="scroll">
+        <div class="body" id="digestbody"></div>
+        <div class="stamp" id="digeststamp"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="view-topics" hidden>
+  <div class="col">
+    <div class="card topics" id="topics">
+      <h2>What's sticking, by topic <small>the line = recall accuracy, week by week · the squares = flashcards</small></h2>
+      <div class="unitgrid" id="unitgrid"></div>
+      <div class="mkey"><b>The squares:</b> every student's flashcards for the unit, pooled — one square ≈ 1% of them,
+        coloured by how well its owner knows that card right now:
+        <i class="m1"></i>Emerging <i class="m2"></i>Developing <i class="m3"></i>Secure <i class="m4"></i>Mastered</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="view-miscon" hidden>
+  <div class="col">
+    <div class="card" id="misconc">
+      <h2>Misconceptions <small>much of the class is choosing the same wrong answer</small></h2>
+      <div class="scroll" id="mcrows"></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card" id="missedc">
+      <h2>Answered wrong most often <small>the lessons these questions come from</small></h2>
+      <div class="scroll" id="missrows"></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="view-pace" hidden>
+  <div class="col">
+    <div class="card" id="pacec">
+      <h2>Where the class is up to <small>lessons finished, inferred pace — and who has fallen behind the group</small></h2>
+      <div class="scroll" id="pacerows"></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="view-class" hidden>
+  <div class="col">
+    <div class="card quad" id="quadc">
+      <h2>Effort &times; retention <small>last fortnight · click a dot to open a student</small></h2>
+      <div id="quadsvg"></div>
+      <div class="btnrow" style="margin-top:.8rem"><button onclick="document.getElementById('regmodal').hidden=false">Open the register →</button></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card drill" id="drill">
+      <h2 id="dname">Pick a student</h2>
+      <div id="dbody" class="sub">Click a dot on the chart — or open the register. Their findings, evidence and marked practice answers land here.</div>
+    </div>
+  </div>
+</div>
+
+<div class="pmodal" id="regmodal" aria-modal="true" role="dialog" aria-label="The register" hidden>
+  <div class="sheet" style="max-width:56rem">
+    <button class="x" onclick="document.getElementById('regmodal').hidden=true" aria-label="Close">&times;</button>
+    <h2>The register</h2>
+    <div class="sub">Every student, sorted needs-first · click a row to open their drill-in</div>
+    <div class="roster">
+      <table><thead><tr><th>Student</th><th>Last 14 days</th><th>Lessons</th><th>Recall</th><th></th><th>Last seen</th></tr></thead>
+      <tbody id="roster"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div class="pmodal" id="howmodal" aria-modal="true" role="dialog" aria-label="How this is calculated" hidden>
+  <div class="sheet" style="max-width:40rem">
+    <button class="x" onclick="document.getElementById('howmodal').hidden=true" aria-label="Close">&times;</button>
+    <h2>How this is calculated</h2>
+    <div class="sub"></div>
+    <p style="font-size:.9rem;line-height:1.65;color:var(--sec)">Every number here is aggregated from retrieval-practice
+    evidence students already generate while revising — warm-up answers, lesson quiz scores, shorts
+    recall checks, flashcard self-marks — each one tied to a lesson and unit. Recall accuracy is a
+    <b>retention signal, not an ability judgement</b>: low numbers mean "this hasn't stuck yet", and clusters across the
+    class are reteach signals. The only AI on the page is the weekly brief (one small-model call per
+    class per week, ≈1p) and the stored practice-marking feedback, which was already generated when
+    each student pressed "mark" — nothing reasons per student per page-view.</p>
+  </div>
+</div>
+
+<div class="pmodal" id="pmodal" aria-modal="true" role="dialog" aria-label="Practice answers" hidden>
+  <div class="sheet">
+    <button class="x" id="pmclose" aria-label="Close">&times;</button>
+    <h2 id="pmname">—</h2>
+    <div class="sub" id="pmsub"></div>
+    <div id="pmbody"></div>
+  </div>
+</div>
+
+<script src="teach-digest.js"></script>
+<script src="teach-pack-demo.js"></script>
+<script>
+/* ---------- seeded synthetic class over the REAL history-aqa structure ------- */
+function rng(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; var t=Math.imul(seed^seed>>>15,1|seed);
+  t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function iso(d){ return d.toISOString().slice(0,10); }
+const TODAY=new Date(); TODAY.setHours(0,0,0,0);
+function daysAgo(n){ const d=new Date(TODAY); d.setDate(d.getDate()-n); return d; }
+
+/* ================= THE SYNTHETIC CLASS (demo fallback) =================
+   Used when nobody is signed in as a teacher (or with ?synthetic=1). The
+   REAL path is liveClass() below — same shapes, read from the events pipe. */
+function synthClass(){
+const R=rng(20260714);
+const UNITS=[            /* the class's taught options (mirrors a real 10H) */
+  {slug:'america-opportunity-inequality', name:'America, 1920–1973', lessons:14},
+  {slug:'conflict-tension-inter-war',     name:'Conflict & Tension, 1918–39', lessons:13},
+  {slug:'britain-health-people',          name:'Britain: Health & the People', lessons:14},
+  {slug:'elizabethan-england',            name:'Elizabethan England', lessons:12},
+];
+const LTITLES={ 'america-opportunity-inequality':['The Boom','Wall Street Boom & the Inequalities Beneath It','Race & Immigration in the 1920s','Prohibition & Organised Crime','The Wall Street Crash','Hoover & the Depression','FDR & the New Deal','Opposition to the New Deal','WW2 & the American Economy','Post-war Prosperity','McCarthyism','Civil Rights: Education','Civil Rights: Protest','The Great Society'],
+ 'conflict-tension-inter-war':['The Armistice','Versailles: Aims of the Big Three','Versailles: Terms','Reactions to Versailles','The League: Structure','The League in the 1920s','Manchuria','Abyssinia','Hitler’s Foreign Policy Aims','Rhineland & Rearmament','Anschluss','Munich & the Sudetenland','The Road to War'],
+ 'britain-health-people':['Medieval Medicine','The Church, the Monastery & Islamic Medicine','The Black Death','Renaissance Anatomy','Vesalius, Paré & Harvey','The Great Plague','Jenner & Vaccination','Germ Theory','Anaesthetics & Antiseptics','Public Health in Industrial Britain','The Liberal Reforms','War & Medicine','Penicillin','The NHS'],
+ 'elizabethan-england':['Elizabeth’s Court & Government','Key Ministers: Cecil & Walsingham','Marriage & Succession','Mary, Queen of Scots','Catholic Plots','The Spanish Armada','Puritans & the Church','Poverty & Vagabonds','The Golden Age','Voyages & Exploration','Essex’s Rebellion','Hardwick Hall'],
+};
+const FIRSTNAMES='Amelia Oliver Ava Noah Isla Leo Freya Arthur Mia Oscar Grace Archie Sofia Theo Evie Finley Poppy Jude Alice Felix Ruby Louie Esme Albie Willow Ronnie Ivy Hugo'.split(' ');
+const SURNAMES='Khan Booth Ahmed Riley Clarke Osei Nowak Doyle Patel Grant Bibi Walsh Singh Moore Iqbal Fox Kaur Webb Ali Dunn Shah Cole Hart Reid Amin Page Rose Todd'.split(' ');
+const ARCH=[ {k:'steady',p:.74,days:.62,n:6},{k:'crammer',p:.66,days:.28,n:5},{k:'quiet',p:.62,days:.10,n:4},
+             {k:'struggling',p:.44,days:.5,n:4},{k:'grafter',p:.47,days:.78,n:3},{k:'flying',p:.88,days:.7,n:6} ];
+/* one class-wide sore topic so the reteach signal is visible: Versailles terms */
+const SORE={unit:'conflict-tension-inter-war', dip:.30};
+/* one FADING topic: America was sticking, but recall on it decays over the
+   last 12 days — the dashboard's forgetting signal has something to find */
+const FADE={unit:'america-opportunity-inequality', from:12, mult:.72};
+/* canned distractor sets so wrong answers CLUSTER the way real ones do —
+   one dominant wrong idea per unit, exactly what the misconception panel
+   exists to surface (chosen text rides on each miss, like live capture) */
+const DISTRACT={
+ 'conflict-tension-inter-war':{q:'Which was a term of the Treaty of Versailles?',
+   right:'Germany’s army was limited to 100,000 men',
+   wrong:['Germany lost the Ruhr to France permanently','Austria joined with Germany','The Rhineland was given to Belgium'],bias:.62},
+ 'america-opportunity-inequality':{q:'What did the Wall Street Crash immediately cause?',
+   right:'A collapse in share prices and bank failures',
+   wrong:['The New Deal began that same year','Prohibition was repealed','Hoover nationalised the banks'],bias:.55},
+ 'britain-health-people':{q:'What did Jenner use to vaccinate against smallpox?',
+   right:'Cowpox matter','wrong':['Weakened smallpox itself','Penicillin','Carbolic acid'],bias:.58},
+ 'elizabethan-england':{q:'Who ran Elizabeth’s spy network?',
+   right:'Sir Francis Walsingham','wrong':['William Cecil','The Earl of Essex','Sir Walter Raleigh'],bias:.5},
+};
+
+
+function makeStudent(ix,arch){
+  const name=FIRSTNAMES[ix]+' '+SURNAMES[ix];
+  const p={done:{},when:{},warmlog:{},kc:{},practice:[],shortschecks:[],flashlog:[]};
+  const ability={}; UNITS.forEach(u=>{ ability[u.slug]=Math.min(.96,Math.max(.2,arch.p+(R()-.5)*.24
+     - (u.slug===SORE.unit?SORE.dip*(0.6+R()*.8):0))); });
+  /* prior-term progress: the class has been going since September — walk each
+     student partway through the course before the 4-week window opens */
+  const prior=Math.round((arch.k==='flying'?30:arch.k==='steady'?22:12)+R()*10);
+  let cursor={u:0,n:0};
+  for(let i=0;i<prior;i++){ cursor.n++;
+    if(cursor.n>UNITS[cursor.u].lessons&&cursor.u<UNITS.length-1){cursor.u++;cursor.n=1;}
+    const u=UNITS[cursor.u], key='history-aqa/'+u.slug;
+    (p.done[key]=p.done[key]||[]).push(Math.min(cursor.n,u.lessons)); }
+  const startedUnit=()=>UNITS[R()<.55?cursor.u:Math.floor(R()*(cursor.u+1))];  /* only studied units */
+  for(let d=27;d>=0;d--){
+    const active=R()<arch.days*(arch.k==='crammer'&&d>6?.3:1)*(arch.k==='crammer'&&d<=4?2.4:1);
+    if(!active) continue;
+    const date=iso(daysAgo(d));
+    /* a lesson done */
+    if(R()<.8){ cursor.n++; if(cursor.n>UNITS[cursor.u].lessons&&cursor.u<UNITS.length-1){cursor.u++;cursor.n=1;}
+      const u=UNITS[cursor.u];
+      const key='history-aqa/'+u.slug; (p.done[key]=p.done[key]||[]).push(Math.min(cursor.n,u.lessons));
+      p.when[key+'/'+Math.min(cursor.n,u.lessons)]=date;
+      if(R()<.75){ const sc=Math.round(5*Math.min(1,ability[u.slug]+(R()-.5)*.3));
+        p.kc[key+'/'+Math.min(cursor.n,u.lessons)]={s:Math.max(0,sc),t:5,d:date}; }
+    }
+    /* warm-up — questions come only from units this student has studied,
+       and the log records per-unit attempts exactly like warmup.js does.
+       Ability DECAYS on the fading unit in recent days, and each miss
+       carries the chosen distractor (clustered, like real wrong answers). */
+    if(R()<.7){ const total=10; let ok=0; const misses=[], ua={};
+      for(let q=0;q<total;q++){ const u=startedUnit();
+        let ab=ability[u.slug];
+        if(u.slug===FADE.unit && d<=FADE.from) ab*=FADE.mult;
+        const hit=R()<ab;
+        const uk='history-aqa/'+u.slug; ua[uk]=ua[uk]||{a:0,m:0}; ua[uk].a++;
+        if(hit) ok++; else { ua[uk].m++; const ln=1+Math.floor(R()*Math.min(8,u.lessons));
+          const ds=DISTRACT[u.slug];
+          const chose=ds ? (R()<ds.bias ? ds.wrong[0] : ds.wrong[1+Math.floor(R()*2)]) : '';
+          misses.push({sub:'history-aqa',unit:u.slug,n:ln,title:(LTITLES[u.slug]||[])[ln-1]||('Lesson '+ln),
+            q:ds?ds.q:'',chose:chose,right:ds?ds.right:''}); } }
+      p.warmlog[date]={correct:ok,total:total,misses:misses,units:ua}; }
+    /* shorts checks */
+    if(R()<.4){ const u=startedUnit();
+      p.shortschecks.push({d:date,sub:'history-aqa',unit:u.slug,ok:R()<ability[u.slug]}); }
+    /* a flashcard run, self-marked */
+    if(R()<.35){ const u=startedUnit(), nn=6+Math.floor(R()*8);
+      for(let c=0;c<nn;c++){ const ln=1+Math.floor(R()*Math.min(8,u.lessons));
+        p.flashlog.push({d:date,unit:u.slug,ok:R()<ability[u.slug],
+          q:((LTITLES[u.slug]||[])[ln-1]||('Lesson '+ln))}); } }
+  }
+  /* Leitner flashcard boxes — the durability layer. Box level tracks
+     ability; the fading unit's cards have slipped back down. */
+  p.flashsr={cards:{},streak:Math.floor(R()*9)};
+  UNITS.slice(0,cursor.u+1).forEach(u=>{
+    const ncards=6+Math.floor(R()*10);
+    for(let c=0;c<ncards;c++){
+      let ab=ability[u.slug];
+      if(u.slug===FADE.unit) ab*=.75;   /* decay shows as regressed boxes */
+      const roll=ab+(R()-.5)*.5;
+      const box=roll>.85?5:roll>.7?4:roll>.5?3:roll>.32?2:1;
+      p.flashsr.cards[u.slug+':q'+c]={box:box,attempts:1+Math.floor(R()*6),correct:Math.floor(R()*4)};
+    } });
+
+  /* one practice answer for some students */
+  if(R()<.5){ const u=UNITS[Math.floor(R()*UNITS.length)]; const good=ability[u.slug]>.6;
+    p.practice.push({d:iso(daysAgo(Math.floor(R()*6))),k:'history-aqa/'+u.slug+'/3',m:8,
+      q:'Explain two consequences of '+(u.slug==='conflict-tension-inter-war'?'the Treaty of Versailles for Germany':'the Wall Street Crash')+'. (8 marks)',
+      a: good?'One consequence was economic collapse. Germany had to pay £6.6 billion in reparations which crippled the economy and led to hyperinflation in 1923 when France occupied the Ruhr after missed payments. This meant savings became worthless and the middle classes lost faith in Weimar. A second consequence was political extremism...':'It made Germany poor and angry. They had to pay money and lost land. This meant people did not like the government and some joined the Nazis later on because Hitler said he would cancel the treaty.',
+      r: good?'**Mark: 7/8**\n\n**What worked:** Two clearly separated consequences, each developed with specific evidence — the £6.6bn figure, the Ruhr occupation and 1923 hyperinflation chain is exactly the causal detail examiners reward.\n\n**What to develop:** The second consequence needs the same depth as the first — name a specific example of extremism (the Munich Putsch, 1923).\n\n**One suggestion:** End each consequence with "This mattered because..." to force the final link.':'**Mark: 3/8**\n\n**What worked:** You know the treaty caused both economic hardship and anger — the right two ideas are here.\n\n**What to develop:** Each point needs specific evidence: HOW much money (£6.6bn), WHICH land (the Polish Corridor, Saar). "Poor and angry" needs dates and names to become an explained consequence.\n\n**One suggestion:** Use the sentence frame "One consequence was X. For example... This meant..."'});
+  }
+  return {name,arch:arch.k,p};
+}
+const STUDENTS=[]; let ai=0;
+ARCH.forEach(a=>{ for(let i=0;i<a.n;i++) STUDENTS.push(makeStudent(ai++,a)); });
+return {units:UNITS, students:STUDENTS, className:'10H · History (AQA)', live:false};
+}
+
+/* ================= THE LIVE CLASS (the real pipe) =================
+   Signed-in teacher -> their classes -> members -> events (RLS enforces
+   scope end to end). Events transform into the same per-student shape the
+   synthetic generator produces, so every aggregation below is identical. */
+async function liveClass(){
+  const qs=new URLSearchParams(location.search);
+  if(qs.get('synthetic')) return null;
+  let tok=null;
+  try{ tok=JSON.parse(localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token')).access_token; }catch(e){}
+  if(!tok) return null;
+  const SUPA='https://baipckgywpnwapobwtsy.supabase.co';
+  const ANON='sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
+  const H={apikey:ANON, Authorization:'Bearer '+tok};
+  const j=async p=>{ const r=await fetch(SUPA+p,{headers:H}); if(!r.ok) throw new Error(p.split('?')[0]+' '+r.status); return r.json(); };
+  const me=await j('/auth/v1/user');
+  const classes=await j('/rest/v1/classes?teacher_id=eq.'+me.id+'&select=id,name,year_group,subject_id&order=name');
+  if(!classes.length) return null;
+  const subsAll=await j('/rest/v1/subjects?select=id,slug,name&limit=400');
+  const smap={}; subsAll.forEach(s=>smap[s.id]=s);
+  classes.forEach(c=>{ c.sname=(smap[c.subject_id]||{}).name||''; });
+  const cls=classes.find(c=>c.id===sessionStorage.getItem('sv-teach-class'))||classes[0];
+  const subj=smap[cls.subject_id]||{};
+  const mems=await j('/rest/v1/class_members?class_id=eq.'+cls.id+'&select=student_id');
+  const ids=mems.map(m=>m.student_id);
+  if(!ids.length) return null;
+  const profs=await j('/rest/v1/profiles?id=in.('+ids.join(',')+')&select=id,full_name');
+  const units=await j('/rest/v1/units?subject_id=eq.'+cls.subject_id+'&select=id,slug,name,sort_order&order=sort_order');
+  const les=await j('/rest/v1/lessons?unit_id=in.('+units.map(u=>u.id).join(',')+')&select=unit_id,lesson_number,title&order=lesson_number&limit=3000');
+  const uById={}; units.forEach(u=>uById[u.id]=u);
+  const titles={}, counts={};
+  les.forEach(l=>{ const us=(uById[l.unit_id]||{}).slug; if(!us) return;
+    (titles[us]=titles[us]||{})[l.lesson_number]=l.title;
+    counts[us]=Math.max(counts[us]||0,l.lesson_number); });
+  let UNITS=units.filter(u=>counts[u.slug]).map(u=>({slug:u.slug,name:u.name,lessons:counts[u.slug]}));
+  const since=new Date(Date.now()-42*864e5).toISOString();
+  let evs=[], page=0;
+  for(;;){ const chunk=await j('/rest/v1/events?person_id=in.('+ids.join(',')+')&subject=eq.'+subj.slug
+      +'&at=gte.'+since+'&select=person_id,unit,lesson,kind,ok,q,chose,answer,box,meta,at&order=at&limit=1000&offset='+(page*1000));
+    evs=evs.concat(chunk); if(chunk.length<1000||++page>60) break; }
+  const dones=await j('/rest/v1/events?person_id=in.('+ids.join(',')+')&subject=eq.'+subj.slug
+      +'&kind=eq.lesson_done&select=person_id,unit,lesson,at&limit=30000');
+  const byS={};
+  profs.forEach(p=>byS[p.id]={name:p.full_name||'Student', arch:null,
+    p:{done:{},when:{},warmlog:{},kc:{},practice:[],shortschecks:[],flashlog:[],miscon:[],practlog:[],flashsr:{cards:{}}}});
+  evs.forEach(e=>{
+    const S=byS[e.person_id]; if(!S) return;
+    const P=S.p, d=e.at.slice(0,10);
+    const ttl=(titles[e.unit]||{})[e.lesson]||('Lesson '+e.lesson);
+    if(e.kind==='warmup'){
+      const wl=P.warmlog[d]=P.warmlog[d]||{correct:0,total:0,misses:[],units:{}};
+      wl.total++; const uk=subj.slug+'/'+e.unit;
+      const ua=wl.units[uk]=wl.units[uk]||{a:0,m:0}; ua.a++;
+      if(e.ok) wl.correct++;
+      else{ ua.m++; wl.misses.push({sub:subj.slug,unit:e.unit,n:e.lesson,title:ttl,
+        q:e.q||'',chose:e.chose||'',right:e.answer||''}); }
+    } else if(e.kind==='quiz'){
+      const k=subj.slug+'/'+e.unit+'/'+e.lesson;
+      const r=P.kc[k]=P.kc[k]||{s:0,t:0,d:d,miss:[]};
+      r.t++; r.d=d; if(e.ok) r.s++;
+      else if(e.q) r.miss.push({q:e.q,chose:e.chose||'',right:e.answer||''});
+    } else if(e.kind==='shorts'){
+      P.shortschecks.push({d:d,sub:subj.slug,unit:e.unit,n:e.lesson,ok:!!e.ok,q:e.q,chose:e.chose,right:e.answer});
+    } else if(e.kind==='flash'){
+      /* key cards under the unit slug so the MASTERY waffle can match them */
+      const ck=e.unit+':'+((e.meta&&e.meta.card)||e.lesson);
+      const c=P.flashsr.cards[ck]=P.flashsr.cards[ck]||{box:1,attempts:0,correct:0};
+      c.attempts++; if(e.ok) c.correct++; if(e.box) c.box=e.box;
+      P.flashlog.push({t:Date.parse(e.at),unit:e.unit,ok:!!e.ok});
+    } else if(e.kind==='practice'){
+      P.practlog.push({d:d,unit:e.unit,ok:!!e.ok});
+    } else if(e.kind==='miscon'){
+      P.miscon.push({d:d,sub:subj.slug,unit:e.unit,n:e.lesson,tag:e.tag});
+    }
+  });
+  dones.forEach(e=>{ const S=byS[e.person_id]; if(!S) return;
+    const key=subj.slug+'/'+e.unit;
+    const arr=(S.p.done[key]=S.p.done[key]||[]);
+    if(arr.indexOf(e.lesson)<0) arr.push(e.lesson);
+    S.p.when[key+'/'+e.lesson]=e.at.slice(0,10); });
+  /* the SUBJECT carries every unit we offer; the CLASS studies the ones its
+     department chose. Evidence tells us which those are — show only them,
+     capped to the 6 most practised so the topic grid stays one screen. */
+  const evCount={};
+  evs.forEach(e=>{ if(e.unit) evCount[e.unit]=(evCount[e.unit]||0)+1; });
+  dones.forEach(e=>{ if(e.unit) evCount[e.unit]=(evCount[e.unit]||0)+1; });
+  UNITS=UNITS.filter(u=>evCount[u.slug]);
+  if(UNITS.length>6) UNITS=UNITS.slice().sort((a,b)=>(evCount[b.slug]||0)-(evCount[a.slug]||0)).slice(0,6)
+    .sort((a,b)=>units.findIndex(x=>x.slug===a.slug)-units.findIndex(x=>x.slug===b.slug));
+  return {units:UNITS, students:Object.values(byS), live:true, classes, cls, subj,
+          teacher:(me.user_metadata||{}).full_name||me.email,
+          className:cls.name+' · '+(subj.name||'')};
+}
+
+/* boot: live pipe when a signed-in teacher has classes, else the demo class */
+(async function(){
+  let D=null;
+  try{ D=await liveClass(); }catch(e){ console.warn('[teach] live load failed:', e.message); }
+  initDash(D||synthClass());
+})();
+
+function initDash(D){
+const UNITS=D.units, STUDENTS=D.students;
+const SLUG=D.subj?D.subj.slug:'history-aqa';
+const CLASSNAME=D.className;
+{ const cp=document.getElementById('classpick');
+  if(D.live){
+    cp.innerHTML='Class: <select id="clsel">'+D.classes.map(c=>
+      '<option value="'+c.id+'"'+(c.id===D.cls.id?' selected':'')+'>'+esc(c.name)+' · '+esc(c.sname)+'</option>').join('')
+      +'</select> · '+STUDENTS.length+' students';
+    document.getElementById('clsel').onchange=e=>{ sessionStorage.setItem('sv-teach-class',e.target.value); location.reload(); };
+    document.querySelector('.demo').textContent='Demo High School · live data from the events pipe · signed in as '+(D.teacher||'teacher');
+  } else {
+    cp.innerHTML='Class: <b>'+esc(CLASSNAME)+'</b> · '+STUDENTS.length+' students · this week';
+  }
+}
+
+/* ---------------- aggregation (this is the real code, demo data) ------------- */
+function recallEvents(p){ /* every attributable right/wrong this student produced */
+  const ev=[];
+  Object.keys(p.warmlog||{}).forEach(d=>{ const w=p.warmlog[d];
+    if(w.units){ Object.keys(w.units).forEach(uk=>{ const u=w.units[uk], unit=uk.split('/')[1]||uk;
+      for(let i=0;i<u.a-u.m;i++) ev.push({d,unit,ok:true,src:'warm-up'}); }); }
+    else for(let i=0;i<w.correct;i++) ev.push({d,unit:null,ok:true});   /* legacy entries */
+    (w.misses||[]).forEach(m=>ev.push({d,unit:m.unit,n:m.n,title:m.title,q:m.q,chose:m.chose,right:m.right,ok:false,src:'warm-up'}));
+  });
+  Object.keys(p.kc||{}).forEach(k=>{ const r=p.kc[k]; const unit=k.split('/')[1];
+    for(let i=0;i<r.s;i++) ev.push({d:r.d,unit,ok:true,src:'quiz'});
+    for(let i=0;i<r.t-r.s;i++) ev.push({d:r.d,unit,ok:false,src:'quiz',title:'Lesson '+k.split('/')[2]+' quiz'});
+  });
+  (p.shortschecks||[]).forEach(c=>ev.push({d:c.d,unit:c.unit,ok:c.ok,src:'shorts',title:c.topic,q:c.q,chose:c.chose,right:c.right}));
+  (p.flashlog||[]).forEach(f=>ev.push({d:f.d,unit:f.unit,ok:f.ok,src:'flashcards',title:f.q?('Card · '+f.q):null}));
+  (p.practlog||[]).forEach(x=>ev.push({d:x.d,unit:x.unit,ok:x.ok,src:'practice'}));   /* practice-first subjects */
+  return ev;
+}
+function studentStats(s){
+  const p=s.p, ev=recallEvents(p);
+  const days={}; Object.keys(p.when||{}).forEach(k=>days[p.when[k]]=1);
+  Object.keys(p.warmlog||{}).forEach(d=>days[d]=1);
+  (p.shortschecks||[]).forEach(c=>days[c.d]=1);
+  const activeDays=Object.keys(days).sort();
+  const last=activeDays[activeDays.length-1]||null;
+  const lastGap=last?Math.round((TODAY-new Date(last))/864e5):99;
+  const lessons=Object.values(p.done||{}).reduce((a,x)=>a+x.length,0);
+  const wk=x=>{ const c=ev.filter(e=>e.d>=iso(daysAgo(x+6))&&e.d<=iso(daysAgo(x)));
+    return c.length?c.filter(e=>e.ok).length/c.length:null; };
+  const accNow=wk(0), accPrev=wk(7);
+  const acc=ev.length?ev.filter(e=>e.ok).length/ev.length:null;
+  const spark=[]; for(let d=13;d>=0;d--) spark.push(days[iso(daysAgo(d))]?1:0);
+  let flag=null;
+  const active14=spark.reduce((a,b)=>a+b,0);
+  if(lastGap>=5) flag='quiet';
+  else if(accNow!==null&&accPrev!==null&&accNow<accPrev-.12) flag='slip';
+  /* the re-reader: revising most days, recall flat and low — the student
+     whose PROBLEM is technique, not effort. The intervention is a
+     how-to-revise conversation, not "do more". */
+  else if(acc!==null&&acc<.55&&active14>=8) flag='grind';
+  else if(accNow!==null&&accNow>=.85&&active14>=8) flag='fly';
+  return {ev,activeDays,lastGap,lessons,acc,accNow,accPrev,spark,flag};
+}
+const STATS=STUDENTS.map(s=>({s,st:studentStats(s)}));
+const UNITAGG=UNITS.map(u=>{
+  let ok=0,no=0,who={},okN=0,noN=0,okP=0,noP=0;
+  const d14=iso(daysAgo(13)), d28=iso(daysAgo(27));
+  STATS.forEach(({s,st})=>st.ev.forEach(e=>{ if(e.unit===u.slug){
+    e.ok?ok++:no++; if(!e.ok)(who[s.name]=who[s.name]||0)? who[s.name]++ : who[s.name]=1;
+    if(e.d>=d14){ e.ok?okN++:noN++; } else if(e.d>=d28){ e.ok?okP++:noP++; } } }));
+  const covered=STATS.filter(({s})=>(s.p.done[SLUG+'/'+u.slug]||[]).length>0).length;
+  const accNow=(okN+noN)>=25?okN/(okN+noN):null, accPrev=(okP+noP)>=25?okP/(okP+noP):null;
+  return {u,ok,no,att:ok+no,acc:(ok+no)?ok/(ok+no):null,covered,who,accNow,accPrev,
+          fading:accNow!==null&&accPrev!==null&&accNow<accPrev-.08,
+          rising:accNow!==null&&accPrev!==null&&accNow>accPrev+.08};
+});
+/* mastery distribution per unit: every student's Leitner boxes, pooled.
+   Thresholds mirror svFlashLevel in dash-data.js. */
+const MASTERY=UNITS.map(u=>{
+  const dist={e:0,d:0,s:0,m:0};
+  STUDENTS.forEach(s=>{ const cards=(s.p.flashsr||{}).cards||{};
+    Object.keys(cards).forEach(k=>{ if(k.indexOf(u.slug+':')!==0) return;
+      const b=cards[k].box||1;
+      dist[b>=5?'m':b>=4?'s':b>=2?'d':'e']++; }); });
+  return {u,dist,total:dist.e+dist.d+dist.s+dist.m};
+});
+/* shared misconceptions: cluster wrong answers by WHAT WAS CHOSEN.
+   Real capture puts chose/right on warm-up + quiz misses; a named
+   misconception stream (sv-misconception-log) joins in for practice
+   subjects — same shape, tag instead of chose. */
+const MISCON=(function(){
+  /* one line per QUESTION: total wrong answers + the dominant wrong choice —
+     "352 of 585 wrong answers chose X" is the teachable unit, not each variant.
+     Sources: warm-up misses, lesson-quiz misses, shorts-check misses (all now
+     carry the chosen option) + NAMED diagnoses from guided practice. */
+  const byQ={};
+  function add(name,unit,q,chose,right){
+    if(!chose) return;
+    const k=unit+'|'+(q||'');
+    const e=(byQ[k]=byQ[k]||{unit:unit,q:q,right:right,total:0,who:{},choices:{}});
+    e.total++; e.who[name]=1; e.choices[chose]=(e.choices[chose]||0)+1;
+  }
+  STATS.forEach(({s})=>{
+    Object.keys(s.p.warmlog||{}).forEach(d=>{ (s.p.warmlog[d].misses||[]).forEach(m=>add(s.name,m.unit,m.q,m.chose,m.right)); });
+    Object.keys(s.p.kc||{}).forEach(k=>{ ((s.p.kc[k]||{}).miss||[]).forEach(m=>add(s.name,k.split('/')[1],m.q,m.chose,m.right)); });
+    (s.p.shortschecks||[]).forEach(c=>{ if(!c.ok) add(s.name,c.unit,c.q,c.chose,c.right); });
+    /* named guided-practice diagnoses cluster by their tag directly */
+    (s.p.miscon||[]).forEach(m=>add(s.name,m.unit,'While practising (diagnosed)',m.tag,''));
+  });
+  return Object.values(byQ).map(e=>{
+    const top=Object.entries(e.choices).sort((a,b)=>b[1]-a[1])[0];
+    return {unit:e.unit,q:e.q,right:e.right,total:e.total,
+            names:Object.keys(e.who),students:Object.keys(e.who).length,
+            chose:top[0],n:top[1],choices:e.choices};
+  /* a MISCONCEPTION needs the wrong answers to AGREE (dominant choice
+     >= 40%); scattered wrong answers are difficulty, not a shared wrong
+     idea — they surface in "Answered wrong most often" instead */
+  }).filter(e=>e.total>=8&&e.n/e.total>=.4).sort((a,b)=>b.total-a.total).slice(0,8);
+})();
+/* weekly recall series per unit (oldest week first) for the topic curves */
+function unitSeries(slug){
+  const buckets=[[27,21],[20,14],[13,7],[6,0]];
+  return buckets.map(([a,b])=>{
+    const da=iso(daysAgo(a)), db=iso(daysAgo(b));
+    let ok=0,no=0;
+    STATS.forEach(({st})=>st.ev.forEach(e=>{ if(e.unit===slug&&e.d>=da&&e.d<=db){ e.ok?ok++:no++; } }));
+    return (ok+no)>=15 ? ok/(ok+no) : null;
+  });
+}
+/* the lessons whose questions get answered wrong most, whole class */
+const MISSED=(function(){
+  const by={};
+  STATS.forEach(({s,st})=>st.ev.filter(e=>!e.ok&&e.unit&&e.title).forEach(e=>{
+    const k=e.unit+'|'+e.title;
+    const r=(by[k]=by[k]||{unit:e.unit,title:e.title,n:0,who:{}});
+    r.n++; r.who[s.name]=1; }));
+  return Object.values(by).map(r=>({...r,students:Object.keys(r.who).length}))
+    .sort((a,b)=>b.n-a.n).slice(0,7);
+})();
+/* pace: how far through each unit the class has got, and who's behind the
+   GROUP (we never know the teacher's intended pace — the class median is
+   the honest stand-in) */
+const PACE=(function(){
+  const units=UNITS.map(u=>{
+    const per=[]; for(let i=0;i<u.lessons;i++) per.push(0);
+    const tops=[];
+    STUDENTS.forEach(s=>{ const arr=s.p.done[SLUG+'/'+u.slug]||[];
+      arr.forEach(n=>{ if(n>=1&&n<=u.lessons) per[n-1]++; });
+      if(arr.length) tops.push(Math.max.apply(null,arr)); });
+    tops.sort((a,b)=>a-b);
+    const med=tops.length?tops[Math.floor(tops.length/2)]:0;
+    return {u,per,started:tops.length,median:med};
+  });
+  const totals=STUDENTS.map(s=>({name:s.name,
+    total:Object.values(s.p.done||{}).reduce((a,x)=>a+x.length,0)}));
+  const sorted=[...totals].sort((a,b)=>a.total-b.total);
+  const medTotal=sorted[Math.floor(sorted.length/2)].total;
+  const behind=totals.filter(t=>medTotal-t.total>=8).sort((a,b)=>a.total-b.total);
+  return {units,medTotal,behind};
+})();
+
+/* ---------------- render ---------------------------------------------------- */
+const $=s=>document.querySelector(s);
+function pct(x){ return x===null?'—':Math.round(x*100)+'%'; }
+function esc(t){ return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+/* jump from a finding to its evidence (tab + panel, optionally a student) */
+function goto(tab,sel,ix){
+  document.querySelector('.tabs button[data-view="'+tab+'"]').click();
+  if(ix!==undefined){
+    document.querySelectorAll('#roster tr').forEach(r=>r.classList.remove('sel'));
+    const tr=document.querySelector('#roster tr[data-i="'+ix+'"]'); if(tr) tr.classList.add('sel');
+    drill(ix);
+  }
+  if(sel) setTimeout(()=>{ const el=document.querySelector(sel); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },80);
+  return false;
+}
+
+/* triage — findings, not instructions. What to DO with each is the
+   teacher's call; every line links to the evidence behind it. */
+(function(){
+  const quiet=STATS.filter(x=>x.st.flag==='quiet').map(x=>x.s.name);
+  const slip=STATS.filter(x=>x.st.flag==='slip').map(x=>x.s.name);
+  const grind=STATS.filter(x=>x.st.flag==='grind').map(x=>x.s.name);
+  const fly=STATS.filter(x=>x.st.flag==='fly').map(x=>x.s.name);
+  const worst=[...UNITAGG].filter(x=>x.att>=30).sort((a,b)=>a.acc-b.acc)[0];
+  const missed=worst?Object.keys(worst.who).length:0;
+  const fading=UNITAGG.filter(x=>x.fading&&x!==worst);
+  const topmc=MISCON[0];
+  const ev=(tab,sel)=>' <a class="evlink" href="#" onclick="return goto(\''+tab+'\',\''+sel+'\')">evidence →</a>';
+  let h='';
+  if(worst) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+esc(worst.u.name)+' hasn’t stuck</b> — '+pct(worst.acc)+' recall across '+worst.att+' answers from '+missed+' students, and it’s the class’s most-practised unit.'+ev('topics','#unitgrid')+'</div></div>';
+  if(topmc) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>Most wrong answers share one idea:</b> “'+esc(topmc.chose)+'” — '+Math.round(topmc.n/topmc.total*100)+'% of the '+topmc.total+' wrong answers on the '+esc((UNITS.find(u=>u.slug===topmc.unit)||{}).name||topmc.unit)+' question, from '+topmc.students+' students.'+ev('miscon','#misconc')+'</div></div>';
+  fading.forEach(x=>{ h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>'+esc(x.u.name)+' is being forgotten</b> — '+pct(x.accPrev)+' a fortnight ago, '+pct(x.accNow)+' now.'+ev('topics','#unitgrid')+'</div></div>'; });
+  if(PACE.behind.length){ const b3=PACE.behind.slice(0,3).map(b=>b.name.split(' ')[0]+' ('+b.total+')').join(', ');
+    h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>'+PACE.behind.length+' students are well behind the class’s pace:</b> <span class="names">'+esc(b3)+(PACE.behind.length>3?' +'+(PACE.behind.length-3)+' more':'')+'</span> — class median is '+PACE.medTotal+' lessons.'+ev('pace','#pacec')+'</div></div>'; }
+  if(quiet.length) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+quiet.length+' students, no revision for 5+ days:</b> <span class="names">'+esc(quiet.join(', '))+'</span>'+ev('class','#quadc')+'</div></div>';
+  if(slip.length) h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>Recall fell 12%+ this week:</b> <span class="names">'+esc(slip.join(', '))+'</span>'+ev('class','#quadc')+'</div></div>';
+  if(grind.length) h+='<div class="tri"><span class="dot" style="background:#5b4370"></span><div><b>Revising most days, little sticking:</b> <span class="names">'+esc(grind.join(', '))+'</span> — effort isn’t the gap.'+ev('class','#quadc')+'</div></div>';
+  if(fly.length) h+='<div class="tri"><span class="dot" style="background:var(--good)"></span><div><b>Flying:</b> <span class="names">'+esc(fly.join(', '))+'</span> — high recall, revising most days.'+ev('class','#quadc')+'</div></div>';
+  $('#triagebody').innerHTML=h;
+})();
+
+/* topic cards — a recall curve on faint grid paper + a mastery waffle each */
+(function(){
+  const worst=[...UNITAGG].filter(x=>x.att>=30).sort((a,b)=>a.acc-b.acc)[0];
+  function curve(x){
+    const s=unitSeries(x.u.slug);
+    const W=270,H=88,L=10,Rr=34,T=10,B=12;
+    const xs=i=>L+i*((W-L-Rr)/3), ys=v=>T+(1-v)*(H-T-B);
+    let h='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMinYMid meet" aria-hidden="true">';
+    [.25,.5,.75].forEach(g=>{ h+='<line x1="'+L+'" y1="'+ys(g)+'" x2="'+(W-Rr+16)+'" y2="'+ys(g)+'" stroke="#efe9dc" stroke-width="1"/>'; });
+    const pts=s.map((v,i)=>v===null?null:[xs(i),ys(v)]).filter(Boolean);
+    if(pts.length>=2){
+      const col=x.fading?'#a3542f':'#5b7263';
+      /* soft wash under the line, then the line itself */
+      h+='<path d="M'+pts.map(p=>p[0]+' '+p[1]).join(' L ')+' L '+pts[pts.length-1][0]+' '+ys(0)+' L '+pts[0][0]+' '+ys(0)+' Z" fill="'+col+'" opacity=".08"/>';
+      h+='<path d="M'+pts.map(p=>p[0]+' '+p[1]).join(' L ')+'" fill="none" stroke="'+col+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>';
+      pts.forEach((p,i)=>{ h+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+(i===pts.length-1?3.6:2.6)+'" fill="'+col+'"/>'; });
+      const lp=pts[pts.length-1], lv=s.filter(v=>v!==null).pop();
+      h+='<text x="'+(lp[0]+7)+'" y="'+(lp[1]+4)+'" font-size="12" font-weight="700" fill="'+col+'">'+Math.round(lv*100)+'%</text>';
+    } else {
+      h+='<text x="'+L+'" y="'+(H/2)+'" font-size="11" fill="#84806f">not enough evidence for a curve yet</text>';
+    }
+    h+='<text x="'+L+'" y="'+(H-1)+'" font-size="9.5" fill="#b0a892">4 weeks ago</text>'
+      +'<text x="'+(W-Rr+16)+'" y="'+(H-1)+'" font-size="9.5" fill="#b0a892" text-anchor="end">now</text>';
+    return h+'</svg>';
+  }
+  function waffle(slug){
+    const ms=MASTERY.find(m=>m.u.slug===slug);
+    if(!ms||!ms.total) return '<div class="wf"><span class="wlab">no flashcards in play yet</span></div>';
+    const p=k=>ms.dist[k]/ms.total*100;
+    let cells='', acc=0;
+    [['m4','m'],['m3','s'],['m2','d'],['m1','e']].forEach(([cls,k])=>{
+      const n=Math.round(p(k)); for(let i=0;i<n&&acc<100;i++,acc++) cells+='<i class="'+cls+'"></i>';
+    });
+    while(acc<100){ cells+='<i></i>'; acc++; }
+    return '<div class="wf" title="Mastered '+Math.round(p('m'))+'% · Secure '+Math.round(p('s'))+'% · Developing '+Math.round(p('d'))+'% · Emerging '+Math.round(p('e'))+'%">'+cells+'</div>';
+  }
+  $('#unitgrid').innerHTML=UNITAGG.map(x=>{
+    const ann=x.fading?'<span class="ann">was '+pct(x.accPrev)+' a fortnight ago</span>'
+            :x.rising?'<span class="ann up">up from '+pct(x.accPrev)+'</span>':'';
+    return '<div class="ucard">'
+      +'<h3>'+esc(x.u.name)+(x===worst?' <span class="re">· WEAKEST RECALL</span>':'')+'</h3>'
+      +'<div class="toprow"><span class="big">'+pct(x.acc)+'</span>'+ann+'</div>'
+      +'<div class="curvebox">'+curve(x)+'</div>'
+      +waffle(x.u.slug)
+      +'<div class="fn">'+x.att+' answers · '+x.covered+'/'+STUDENTS.length+' started</div>'
+      +'</div>';
+  }).join('');
+})();
+
+/* misconceptions — proportional split of the wrong answers, per question */
+(function(){
+  $('#mcrows').innerHTML=MISCON.length?MISCON.map(m=>{
+    const un=UNITS.find(u=>u.slug===m.unit);
+    const parts=Object.entries(m.choices).sort((a,b)=>b[1]-a[1]);
+    const strip=parts.map(([txt,n],i)=>
+      '<i class="'+(i===0?'dom':'oth'+Math.min(i,3))+'" style="width:'+(n/m.total*100)+'%" title="'+esc(txt)+' — '+n+'"></i>').join('');
+    const who=m.names.slice(0,3).join(', ')+(m.students>3?' +'+(m.students-3)+' more':'');
+    /* the false belief leads; the question it came from is the detail */
+    return '<div class="mc"><span class="n">'+Math.round(m.n/m.total*100)+'% of '+m.total+' wrong answers</span>'
+      +'<span class="belief">“'+esc(m.chose)+'”</span>'
+      +(m.right?'<br>The answer: <span class="ans">'+esc(m.right)+'</span>':'')
+      +'<div class="strip">'+strip+'</div>'
+      +'<span class="qq">Asked as: '+esc(m.q)+'</span>'
+      +'<br><span class="u" title="'+esc(m.names.join(', '))+'">'+esc(un?un.name:m.unit)+' · '+m.students+' students: '+esc(who)+'</span></div>';
+  }).join('')
+  :'<div class="mc att">Nothing clustered yet — this fills as warm-up and quiz answers accumulate. For maths and science classes, named diagnoses ("adds the denominators") from guided practice appear here too.</div>';
+  $('#missrows').innerHTML=MISSED.map(m=>{
+    const un=UNITS.find(u=>u.slug===m.unit);
+    return '<div class="mc"><span class="n">'+m.n+' wrong answers · '+m.students+' students</span><b>'+esc(m.title)+'</b><br><span class="u">a lesson in '+esc(un?un.name:m.unit)+'</span></div>';
+  }).join('');
+})();
+
+/* where the class is up to — a skyline per unit + who's behind the group */
+(function(){
+  function sky(p){
+    const N=p.per.length,W=460,H=64,gap=3,bw=(W-gap*(N-1))/N;
+    let h='<svg viewBox="0 0 '+W+' '+(H+16)+'" aria-hidden="true">';
+    for(let i=0;i<N;i++){
+      const x=i*(bw+gap), frac=p.per[i]/STUDENTS.length, bh=Math.max(2,frac*H);
+      const done=i+1<=p.median;
+      h+='<rect x="'+x+'" y="'+(H-bh)+'" width="'+bw+'" height="'+bh+'" rx="1.5" fill="'
+        +(done?'#7d8f7f':'#d8cdb6')+'"><title>Lesson '+(i+1)+' — finished by '+p.per[i]+' of '+STUDENTS.length+'</title></rect>';
+      if((i+1)%5===0||i===0||i===N-1) h+='<text x="'+(x+bw/2)+'" y="'+(H+13)+'" font-size="9.5" fill="#b0a892" text-anchor="middle">L'+(i+1)+'</text>';
+    }
+    if(p.median) { const mx=(p.median-1)*(bw+gap)+bw/2;
+      h+='<line x1="'+mx+'" y1="0" x2="'+mx+'" y2="'+H+'" stroke="#a3542f" stroke-width="1.6" stroke-dasharray="4 4"/>'; }
+    return h+'</svg>';
+  }
+  const paceImp=PACE.behind.length
+    ? '<div class="imp"><b>'+PACE.behind.length+' students are well behind the group</b> — '
+      +PACE.behind.slice(0,3).map(b=>esc(b.name)).join(', ')+(PACE.behind.length>3?' and '+(PACE.behind.length-3)+' more':'')
+      +', each 8+ lessons behind the class median of '+PACE.medTotal+'.</div>'
+    : '<div class="imp"><b>The class is moving together</b> — nobody is significantly behind the group’s pace.</div>';
+  $('#pacerows').innerHTML=paceImp+PACE.units.map(p=>
+    '<div class="pace"><div><div class="pn">'+esc(p.u.name)+'</div>'
+    +'<div class="pm">'+p.started+'/'+STUDENTS.length+' started</div></div>'
+    +sky(p)
+    +'<div class="pm">'+(p.started?('typical student is at <b>L'+p.median+'</b> of '+p.u.lessons+' <span style="color:#a3542f">- - -</span>'):'not started as a class')+'<br>bar height = how many have finished that lesson</div>'
+    +'</div>').join('')
+   +'<div class="behind">'+(PACE.behind.length
+     ? '<b>Behind the group:</b> <span class="names">'
+       +PACE.behind.slice(0,6).map(b=>esc(b.name)+' ('+b.total+' lessons)').join(' · ')
+       +'</span> — class median is '+PACE.medTotal+' lessons finished. Pace is yours to judge; this only compares students with their own class.'
+     : 'Nobody is significantly behind the group’s pace.')+'</div>';
+})();
+
+/* the quadrant — effort (days revised) x retention (recall), a dot each */
+(function(){
+  const W=780,H=420,L=52,Rr=20,T=18,B=44;
+  const xs=d=>L+(d/14)*(W-L-Rr), ys=a=>T+(1-a)*(H-T-B);
+  const col={quiet:'#9a3a25',slip:'#8a6d1f',grind:'#5b4370',fly:'#1e5b3e'};
+  let h='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Effort against retention, one dot per student">';
+  for(let d=0;d<=14;d+=2) h+='<line x1="'+xs(d)+'" y1="'+T+'" x2="'+xs(d)+'" y2="'+(H-B)+'" stroke="#f2ecdf" stroke-width="1"/>';
+  for(let a=0;a<=1;a+=.25) h+='<line x1="'+L+'" y1="'+ys(a)+'" x2="'+(W-Rr)+'" y2="'+ys(a)+'" stroke="#f2ecdf" stroke-width="1"/>';
+  /* quadrant guides: the effort line sits at the CLASS MEDIAN of days
+     revised — effort is subject-scoped (a student juggles 9 subjects), so a
+     fixed threshold misreads every class; the class defines its own normal */
+  const _days=STATS.map(x=>x.st.spark.reduce((a,b)=>a+b,0)).sort((a,b)=>a-b);
+  const gx=Math.max(2,_days.length?_days[Math.floor(_days.length/2)]:7);
+  h+='<line x1="'+xs(gx)+'" y1="'+T+'" x2="'+xs(gx)+'" y2="'+(H-B)+'" stroke="#d9cfba" stroke-width="1.4" stroke-dasharray="5 5"/>';
+  h+='<line x1="'+L+'" y1="'+ys(.6)+'" x2="'+(W-Rr)+'" y2="'+ys(.6)+'" stroke="#d9cfba" stroke-width="1.4" stroke-dasharray="5 5"/>';
+  h+='<text class="qlab" x="'+(W-Rr-8)+'" y="'+(T+22)+'" text-anchor="end">flying</text>'
+    +'<text class="qlab" x="'+(W-Rr-8)+'" y="'+(H-B-12)+'" text-anchor="end">working hard — not sticking yet</text>'
+    +'<text class="qlab" x="'+(L+8)+'" y="'+(H-B-12)+'">gone quiet</text>'
+    +'<text class="qlab" x="'+(L+8)+'" y="'+(T+22)+'">sticking — barely revising</text>';
+  for(let a=0;a<=1;a+=.25) h+='<text class="axis" x="'+(L-8)+'" y="'+(ys(a)+4)+'" text-anchor="end">'+(a*100)+'%</text>';
+  [0,7,14].forEach(d=>{ h+='<text class="axis" x="'+xs(d)+'" y="'+(H-B+18)+'" text-anchor="middle">'+d+'</text>'; });
+  h+='<text class="axis" x="'+((L+W-Rr)/2)+'" y="'+(H-6)+'" text-anchor="middle">days revised, last fortnight</text>'
+    +'<text class="axis" transform="translate(14 '+((T+H-B)/2)+') rotate(-90)" text-anchor="middle">recall accuracy</text>';
+  STATS.forEach((x,ix)=>{
+    if(x.st.acc===null) return;
+    const days=x.st.spark.reduce((a,b)=>a+b,0);
+    const cx=xs(days)+((ix%3)-1)*7, cy=ys(x.st.acc)+((ix%5)-2)*4;
+    const c=col[x.st.flag]||'#5b4632';
+    const ini=x.s.name.split(' ').map(w=>w[0]).join('');
+    h+='<g class="dot" data-i="'+ix+'"><title>'+esc(x.s.name)+' — '+days+' days · '+pct(x.st.acc)+' recall</title>'
+      +'<circle cx="'+cx+'" cy="'+cy+'" r="11.5" fill="'+c+'" opacity=".92"/>'
+      +'<text class="ini" x="'+cx+'" y="'+(cy+3.4)+'" text-anchor="middle">'+ini+'</text></g>';
+  });
+  h+='</svg>';
+  document.getElementById('quadsvg').innerHTML=h;
+  document.getElementById('quadsvg').addEventListener('click',e=>{
+    const g=e.target.closest('.dot'); if(!g) return;
+    const tr=document.querySelector('#roster tr[data-i="'+g.dataset.i+'"]');
+    document.querySelectorAll('#roster tr').forEach(r=>r.classList.remove('sel'));
+    if(tr) tr.classList.add('sel');
+    drill(+g.dataset.i);
+    document.getElementById('drill').scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+})();
+
+/* tab rail */
+(function(){
+  const views={week:'view-week',topics:'view-topics',miscon:'view-miscon',pace:'view-pace','class':'view-class'};
+  document.querySelectorAll('.tabs button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected', x===b?'true':'false'));
+      Object.keys(views).forEach(k=>{ document.getElementById(views[k]).hidden = k!==b.dataset.view; });
+      try{ sessionStorage.setItem('sv-teach-tab',b.dataset.view); }catch(e){}
+    });
+  });
+  let t=null; try{ t=sessionStorage.getItem('sv-teach-tab'); }catch(e){}
+  const q=new URLSearchParams(location.search);
+  if(q.get('student')!==null) t='class';
+  if(q.get('tab')) t=q.get('tab');
+  if(t&&views[t]) document.querySelector('.tabs button[data-view="'+t+'"]').click();
+})();
+
+/* roster */
+function sparkSvg(sp){
+  return '<svg class="spark" width="98" height="18">'+sp.map((v,i)=>
+    '<rect class="'+(v?'hot':'')+'" x="'+(i*7)+'" y="'+(v?3:12)+'" width="5" height="'+(v?12:3)+'" rx="1"></rect>').join('')+'</svg>';
+}
+const order=[...STATS].sort((a,b)=>{
+  const w=x=>x.st.flag==='quiet'?0:x.st.flag==='slip'?1:x.st.flag==='grind'?2:x.st.flag==='fly'?4:3;
+  return w(a)-w(b)||a.s.name.localeCompare(b.s.name);
+});
+$('#roster').innerHTML=order.map((x,i)=>{
+  const {s,st}=x;
+  const trend=st.accNow===null||st.accPrev===null?'<span class="tr-fl">·</span>'
+    :st.accNow>st.accPrev+.04?'<span class="tr-up">▲</span>'
+    :st.accNow<st.accPrev-.04?'<span class="tr-dn">▼</span>':'<span class="tr-fl">—</span>';
+  const fcls={quiet:'quiet',slip:'slip',grind:'grind',fly:'fly'}[st.flag];
+  const flab={quiet:'quiet',slip:'slipping',grind:'not sticking',fly:'flying'}[st.flag];
+  return '<tr class="r" data-i="'+STATS.indexOf(x)+'"><td class="nm">'+esc(s.name)+(st.flag?' <span class="flag '+fcls+'">'+flab+'</span>':'')+'</td>'
+    +'<td>'+sparkSvg(st.spark)+'</td><td>'+st.lessons+'</td>'
+    +'<td class="acc">'+pct(st.acc)+' '+trend+'</td><td></td>'
+    +'<td class="att">'+(st.lastGap===0?'today':st.lastGap===1?'yesterday':st.lastGap>27?'—':st.lastGap+'d ago')+'</td></tr>';
+}).join('');
+
+/* drill-in */
+document.getElementById('roster').addEventListener('click',e=>{
+  const tr=e.target.closest('tr.r'); if(!tr) return;
+  document.querySelectorAll('#roster tr').forEach(r=>r.classList.remove('sel'));
+  tr.classList.add('sel');
+  drill(+tr.dataset.i);
+  document.getElementById('regmodal').hidden=true;   /* back to the drill-in */
+});
+function drill(ix){
+  const {s,st}=STATS[ix], p=s.p;
+  const first=s.name.split(' ')[0];
+  $('#dname').textContent=s.name;
+  const days14=st.spark.reduce((a,b)=>a+b,0);
+  /* ---- findings first: what the data says about THIS student, including
+     the actual wrong answers they keep giving. No advice — the teacher
+     decides what to do with it. Evidence sits in the drawer below. ---- */
+  /* each finding is [colour, text, evidence-label, evidence-html] — the
+     drawer below shows, PER FINDING, exactly the working that produced it */
+  const lines=[];
+  const fmtD=d=>{ const t=new Date(d); return t.getDate()+' '+t.toLocaleDateString('en-GB',{month:'short'}); };
+  const wkC=off=>{ const evs=st.ev.filter(e=>e.d>=iso(daysAgo(off+6))&&e.d<=iso(daysAgo(off)));
+    return {n:evs.length, ok:evs.filter(e=>e.ok).length}; };
+  const wNow=wkC(0), wPrev=wkC(7);
+  const wl=Object.keys(p.warmlog||{}).sort().slice(-7);
+  const wub=wl.length?'<div class="wubars">'+wl.map(d=>{ const w=p.warmlog[d];
+    return '<i style="height:100%"><b style="height:'+Math.round(w.correct/w.total*100)+'%"></b><small>'+d.slice(8)+'</small></i>'; }).join('')+'</div>':'';
+  const wkEv='Last week: '+wPrev.ok+' of '+wPrev.n+' answers right'+(wPrev.n?' ('+pct(wPrev.n?wPrev.ok/wPrev.n:null)+')':'')
+    +' · this week: '+wNow.ok+' of '+wNow.n+(wNow.n?' ('+pct(wNow.n?wNow.ok/wNow.n:null)+')':'')
+    +'. Counted across warm-ups, quizzes, shorts checks and flashcards.'+(wub?'<br>Daily warm-up scores:'+wub:'');
+  if(st.flag==='quiet'){ const act=st.activeDays.slice(-5).map(fmtD).join(' · ');
+    lines.push(['var(--warn)','<b>No revision for '+st.lastGap+' days.</b>','No revision for '+st.lastGap+' days',
+      'Most recent active days: '+(act||'none recorded')+'.']); }
+  if(st.flag==='slip') lines.push(['var(--gold)','<b>Recall fell this week:</b> '+pct(st.accPrev)+' → '+pct(st.accNow)+'.',
+    'The fall in recall',wkEv]);
+  if(st.flag==='grind') lines.push(['#5b4370','<b>Revised '+days14+' of the last 14 days; recall sits at '+pct(st.acc)+'.</b> Effort isn’t the gap.',
+    'Effort vs retention','Active on '+days14+' of the last 14 days. '+wkEv]);
+  if(st.flag==='fly') lines.push(['var(--good)','<b>Flying:</b> '+pct(st.acc)+' recall, revising most days.',
+    'Flying','Active on '+days14+' of the last 14 days. '+wkEv]);
+  const bymc={};
+  st.ev.filter(e=>!e.ok&&e.chose).forEach(e=>{ const k=e.unit+'|'+(e.q||'');
+    const r=(bymc[k]=bymc[k]||{unit:e.unit,q:e.q,right:e.right,n:0,choices:{}});
+    r.n++; r.choices[e.chose]=(r.choices[e.chose]||0)+1; });
+  /* two DIFFERENT findings hide in repeated misses: the same wrong answer
+     every time = a settled wrong idea (mislearned); different wrong answers
+     each time = guessing (not learned at all). Say which one it is. */
+  Object.values(bymc).map(r=>{ const ents=Object.entries(r.choices).sort((a,b)=>b[1]-a[1]);
+      return Object.assign(r,{chose:ents[0][0],cn:ents[0][1],kinds:ents.length}); })
+    .filter(r=>r.n>=3).sort((a,b)=>b.n-a.n).slice(0,3)
+    .forEach(r=>{ const un=UNITS.find(u=>u.slug===r.unit);
+      /* the QUESTION is the finding — lead with it, no interpretation lecture */
+      const qtxt=r.q?'“'+esc(r.q)+'”':'the '+esc(un?un.name:r.unit)+' question';
+      /* the working = the actual attempts, dated, answer by answer */
+      const tries=st.ev.filter(e=>!e.ok&&e.chose&&e.unit===r.unit&&(e.q||'')===(r.q||''))
+        .sort((a,b)=>a.d<b.d?-1:1).slice(-8)
+        .map(e=>fmtD(e.d)+' — answered “'+esc(e.chose)+'”').join('<br>');
+      const evtxt=tries+(r.n>8?'<br>(+'+(r.n-8)+' earlier)':'')
+        +(r.right?'<br>The answer: '+esc(r.right)+'.':'');
+      if(r.cn/r.n>=.6)
+        lines.push(['var(--warn)','<b>Keeps answering “'+esc(r.chose)+'”</b> to '+qtxt+' — '+r.cn+' of '+r.n+' wrong tries.',
+          'The attempts, in order',evtxt]);
+      else if(r.kinds>=2)
+        lines.push(['var(--gold)','<b>Doesn’t know '+qtxt+'</b> — wrong '+r.n+' times, '+r.kinds+' different answers.',
+          'The attempts, in order',evtxt]);
+    });
+  if(PACE.medTotal-st.lessons>=8){
+    const rows=PACE.units.map(pu=>{ const done=(p.done[SLUG+'/'+pu.u.slug]||[]).length;
+      return esc(pu.u.name)+': '+done+' of '+pu.u.lessons+' (typical student: L'+pu.median+')'; }).join('<br>');
+    lines.push(['var(--gold)','<b>'+(PACE.medTotal-st.lessons)+' lessons behind the class median</b> ('+st.lessons+' vs '+PACE.medTotal+').',
+      'Lessons finished, unit by unit',rows]); }
+  const cards=Object.values((p.flashsr||{}).cards||{});
+  if(cards.length>=8){ const em=cards.filter(c=>(c.box||1)<=1).length/cards.length, sec=cards.filter(c=>(c.box||1)>=4).length/cards.length;
+    const dist=[0,0,0,0]; cards.forEach(c=>{ const b=c.box||1; dist[b>=5?3:b>=4?2:b>=2?1:0]++; });
+    const cardEv='Emerging '+dist[0]+' · Developing '+dist[1]+' · Secure '+dist[2]+' · Mastered '+dist[3]+' — of '+cards.length+' cards '+first+' has revised.';
+    if(em>=.4) lines.push(['var(--warn)','<b>'+Math.round(em*100)+'% of '+first+'’s flashcards are still Emerging</b> ('+cards.length+' in play).',
+      'The flashcard boxes',cardEv]);
+    else if(sec>=.6) lines.push(['var(--good)','<b>'+Math.round(sec*100)+'% of the flashcards are Secure or Mastered.</b>',
+      'The flashcard boxes',cardEv]); }
+  const strong=UNITAGG.map(u=>{ const evs=st.ev.filter(e=>e.unit===u.u.slug); const ok=evs.filter(e=>e.ok).length;
+    return {name:u.u.name,acc:evs.length>=6?ok/evs.length:null,n:evs.length,ok:ok}; })
+    .filter(x=>x.acc!==null&&x.acc>=.8).sort((a,b)=>b.acc-a.acc);
+  if(strong.length) lines.push(['var(--good)','<b>Strongest: '+esc(strong[0].name)+'</b> — '+pct(strong[0].acc)+' recall.',
+    'The strongest topic',''+strong[0].ok+' of '+strong[0].n+' answers right on '+esc(strong[0].name)+'.']);
+  if(!lines.length) lines.push(['var(--mut)','Nothing stands out this week — steady.',null,null]);
+
+  let h='<div class="kv">'
+    +'<div><b>'+st.lessons+'</b><small>lessons</small></div>'
+    +'<div><b>'+pct(st.acc)+'</b><small>recall</small></div>'
+    +'<div><b>'+(st.lastGap===0?'today':st.lastGap+'d')+'</b><small>last seen</small></div></div>'
+    +lines.map(l=>'<div class="tri"><span class="dot" style="background:'+l[0]+'"></span><div>'+l[1]+'</div></div>').join('');
+
+  /* ---- the evidence drawer: one block PER FINDING, same order — exactly
+     the working that produced the sentence above it ---- */
+  const evh=lines.filter(l=>l[3]).map(l=>'<div class="sect">'+l[2]+'</div><div class="evfree">'+l[3]+'</div>').join('');
+  if(evh) h+='<details class="ev"'+(new URLSearchParams(location.search).get('evopen')?' open':'')+'><summary>The evidence — how we know</summary>'+evh+'</details>';
+  h+='<div class="btnrow">'
+    +((p.practice||[]).length?'<button onclick="openPractice('+ix+')">Read '+first+'’s practice answers · '+p.practice.length+'</button>':'')
+    +'<a href="teach.html?pack='+ix+'">Parents’ evening pack →</a></div>';
+  $('#dbody').innerHTML=h; $('#dbody').classList.remove('sub');
+}
+
+/* ---- the practice reader: the student's marked answers, full width ---- */
+function openPractice(ix){
+  const {s}=STATS[ix], p=s.p, n=(p.practice||[]).length;
+  document.getElementById('pmname').textContent=s.name;
+  document.getElementById('pmsub').textContent=n+' marked practice answer'+(n===1?'':'s')+' · exactly as written, with the AI marker’s feedback the student already received';
+  document.getElementById('pmbody').innerHTML=(p.practice||[]).map(pr=>
+    '<div class="paper"><div class="meta">'+esc(pr.d)+' · '+esc(pr.k)+' · '+pr.m+' marks</div>'
+    +'<p class="pq">'+esc(pr.q)+'</p><div class="pa">'+esc(pr.a)+'</div>'
+    +'<div class="pr">'+esc(pr.r).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n\n/g,'<br><br>')+'</div></div>').join('');
+  document.getElementById('pmodal').hidden=false;
+}
+{ const pm=document.getElementById('pmodal');
+  document.getElementById('pmclose').onclick=()=>pm.hidden=true;
+  ['pmodal','regmodal','howmodal'].forEach(id=>{ const m=document.getElementById(id);
+    m.addEventListener('click',e=>{ if(e.target===m) m.hidden=true; }); });
+  addEventListener('keydown',e=>{ if(e.key==='Escape')
+    ['pmodal','regmodal','howmodal'].forEach(id=>document.getElementById(id).hidden=true); });
+}
+
+/* AI digest — injected by the weekly generator (scripts/_teach_digest.py runs
+   claude -p over THE AGGREGATES ONLY and rewrites the block below). */
+const AI_DIGEST=D.live?null:(window.SV_TEACH_DIGEST||null);
+if(AI_DIGEST){ $('#digestbody').innerHTML=AI_DIGEST.html; $('#digeststamp').textContent=AI_DIGEST.stamp; }
+else{ $('#digestbody').innerHTML='<i style="color:var(--mut)">'+(D.live?'The weekly brief generates per class — one small-model call over this page’s aggregates. Not yet scheduled for Demo High.':'No digest generated yet — run scripts/_teach_digest.py (one small-model call per class per week).')+'</i>'; }
+
+/* ---- the pack: template + visuals + the AI draft, per student ------------- */
+function renderPack(ix){
+  const {s,st}=STATS[ix], p=s.p;
+  document.body.classList.add('packmode');
+  const win=st.activeDays.filter(d=>d>=iso(daysAgo(27))).length;
+  const unitRows=UNITS.map(u=>{
+    const evs=st.ev.filter(e=>e.unit===u.slug), ok=evs.filter(e=>e.ok).length;
+    const acc=evs.length>=5?ok/evs.length:null;
+    const clsAcc=(UNITAGG.find(x=>x.u.slug===u.slug)||{}).acc;
+    const doneN=(p.done[SLUG+'/'+u.slug]||[]).length;
+    const cls=acc===null?'':acc<.55?'low':acc<.72?'mid':'';
+    return '<tr><td style="font-weight:600;max-width:230px">'+esc(u.name)+'</td>'
+      +'<td><span class="ubar '+cls+'"><i style="width:'+(acc?Math.round(acc*100):0)+'%"></i>'
+      +(clsAcc?'<span class="cls" style="left:'+Math.round(clsAcc*100)+'%"></span>':'')+'</span></td>'
+      +'<td class="att" style="white-space:nowrap">'+(acc===null?'not enough evidence yet':'<b>'+pct(acc)+'</b> of '+evs.length+' questions right')+'</td>'
+      +'<td class="att" style="white-space:nowrap">'+doneN+' of '+u.lessons+' lessons done</td></tr>';
+  }).join('');
+  const by={};
+  st.ev.filter(e=>!e.ok&&e.unit).forEach(e=>{ const k=e.unit+'|'+(e.title||''); (by[k]=by[k]||{unit:e.unit,title:e.title,n:0}).n++; });
+  const weak=Object.values(by).sort((a,b)=>b.n-a.n).slice(0,4);
+  const strong=UNITS.map(u=>{ const evs=st.ev.filter(e=>e.unit===u.slug); const ok=evs.filter(e=>e.ok).length;
+    return {name:u.name,acc:evs.length>=6?ok/evs.length:null}; }).filter(x=>x.acc!==null&&x.acc>=.75);
+  const wl=Object.keys(p.warmlog||{}).sort().slice(-10);
+  const pr=(p.practice||[])[0];
+  const ai=(window.SV_PACK_DEMO||{})[ix];
+  const el=document.createElement('div');
+  el.innerHTML='<div class="packbar"><a href="teach.html?student='+ix+'">← back to the class</a>'
+    +'<button class="prim" onclick="print()">Print</button></div>'
+    +'<div class="pack">'
+    +'<div class="phead"><div><h1>'+esc(s.name)+'</h1></div>'
+    +'<div class="pclass"><span class="pbrand">StudyVault<img src="assets/studyvault-lock-rust.svg" alt=""></span><br>'+esc(CLASSNAME)+' · 4 weeks to '+TODAY.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+'</div></div>'
+    +'<div class="kv"><div><b>'+st.lessons+'</b><small>lessons finished</small></div>'
+    +'<div><b>'+win+'</b><small>days revised</small></div>'
+    +'<div><b>'+pct(st.acc)+'</b><small>recall accuracy</small></div>'
+    +'<div><b>'+(st.lastGap===0?'today':st.lastGap+'d ago')+'</b><small>last revised</small></div></div>'
+    +'<h3>Topics — how much is sticking when '+esc(s.name.split(' ')[0])+' is quizzed</h3><table>'+unitRows+'</table>'
+    +'<div class="legend">Every figure counts real quiz questions '+esc(s.name.split(' ')[0])+' has answered while revising — in daily warm-ups, lesson quizzes, video recall checks and flashcards. Bar = share answered correctly · thin line = class average.</div>'
+    +'<div class="two"><div><h3>Strongest topics</h3>'
+    +(strong.length?'<div class="ok">'+strong.map(x=>esc(x.name)+' — '+pct(x.acc)+' right').join('<br>')+'</div>':'<div class="att">Not enough evidence yet.</div>')
+    +'</div><div><h3>Keeps getting questions wrong on</h3>'
+    +(weak.length?weak.slice(0,3).map(w=>{ const un=UNITS.find(u=>u.slug===w.unit);
+      return '<div class="miss"><b>'+esc(w.title||'')+'</b><span class="q">answered wrong '+w.n+' times · a lesson in '+esc(un?un.name:'')+'</span></div>'; }).join(''):'<div class="att">No repeated misses.</div>')
+    +'</div></div>'
+    +(wl.length?'<h3>Daily warm-up quiz — score out of 10</h3><div class="wubars">'
+      +wl.map(d=>{ const w=p.warmlog[d]; return '<i style="height:52px"><em>'+w.correct+'</em><b style="height:'+Math.round(w.correct/w.total*100)+'%"></b><small>'+d.slice(8)+'</small></i>'; }).join('')
+      +'</div><div class="legend" style="margin-top:14px">10 quick recall questions at the start of each revision session · number = questions right that day · dates along the bottom</div>':'')
+    +'<h3>Teacher summary — draft</h3>'
+    +(ai?'<div class="aidraft">'+ai+'</div><div class="aistamp">AI-drafted from the evidence above · edit before sharing · ≈ 1p per pack</div>'
+       :'<div class="aidraft" style="color:var(--mut)"><i>Drafts generate when the teacher clicks "Generate packs" — one small-model call per student, batched, ≈ 1p each. (Demo has one pre-generated: Oscar Grant.)</i></div>')
+    +'<div class="pfoot">Every figure on this page is aggregated from '+esc(s.name.split(' ')[0])
+    +'’s own revision activity on StudyVault — warm-up answers, lesson quizzes, shorts recall checks and self-marked flashcards, each tied to a lesson. '
+    +'Recall accuracy is a measure of what has stuck so far, not of ability. The teacher summary is a draft written from this evidence and reviewed by the teacher.</div>'
+    +'</div>';
+  document.body.appendChild(el);
+}
+
+/* staging: ?student=N opens a drill-in for screenshots */
+const _sq=new URLSearchParams(location.search).get('student');
+if(_sq!==null&&STATS[+_sq]) drill(+_sq);
+/* &practice=1 opens the practice reader for ?student=N */
+if(new URLSearchParams(location.search).get('practice')&&_sq!==null&&STATS[+_sq]&&(STATS[+_sq].s.p.practice||[]).length) openPractice(+_sq);
+const _pq=new URLSearchParams(location.search).get('pack');
+if(_pq!==null&&STATS[+_pq]) renderPack(+_pq);
+/* ?packagg=N dumps one student's pack aggregates for the draft generator */
+if(new URLSearchParams(location.search).get('packagg')!==null){
+  const ix=+new URLSearchParams(location.search).get('packagg');
+  const {s,st}=STATS[ix], p=s.p;
+  const by2={}; st.ev.filter(e=>!e.ok&&e.unit).forEach(e=>{ const k=(e.title||''); by2[k]=(by2[k]||0)+1; });
+  const agg={name:s.name, class:CLASSNAME,
+    lessons:st.lessons, recall:st.acc===null?null:Math.round(st.acc*100),
+    daysRevised:st.activeDays.filter(d=>d>=iso(daysAgo(27))).length, lastSeenDaysAgo:st.lastGap,
+    units:UNITS.map(u=>{ const evs=st.ev.filter(e=>e.unit===u.slug), ok=evs.filter(e=>e.ok).length;
+      return {name:u.name, recall:evs.length>=5?Math.round(ok/evs.length*100):null, answers:evs.length,
+        classAvg:Math.round(((UNITAGG.find(x=>x.u.slug===u.slug)||{}).acc||0)*100)}; }),
+    keepsMissing:Object.entries(by2).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([t,n])=>({lesson:t,misses:n})),
+    practiceFeedback:(p.practice||[]).map(x=>x.r.slice(0,400))};
+  const pre=document.createElement('pre'); pre.id='packagg'; pre.textContent=JSON.stringify(agg);
+  pre.style.cssText='position:fixed;left:0;top:0;background:#fff;z-index:999;max-width:100%;overflow:auto';
+  document.body.appendChild(pre);
+}
+
+/* expose aggregates for the digest generator (?agg=1 dumps JSON) */
+if(new URLSearchParams(location.search).get('agg')){
+  const agg={class:CLASSNAME,students:STATS.length,
+    week:{active:STATS.filter(x=>x.st.spark.slice(7).some(v=>v)).length,
+      quiet:STATS.filter(x=>x.st.flag==='quiet').map(x=>x.s.name),
+      slipping:STATS.filter(x=>x.st.flag==='slip').map(x=>x.s.name),
+      revisingLotsButNotSticking:STATS.filter(x=>x.st.flag==='grind').map(x=>x.s.name),
+      flying:STATS.filter(x=>x.st.flag==='fly').map(x=>x.s.name)},
+    sharedMisconceptions:MISCON.slice(0,4).map(m=>({question:m.q,mostChose:m.chose,answer:m.right,wrongAnswers:m.n,students:m.students})),
+    fadingTopics:UNITAGG.filter(x=>x.fading).map(x=>({name:x.u.name,recallPrev:Math.round(x.accPrev*100),recallNow:Math.round(x.accNow*100)})),
+    units:UNITAGG.map(x=>({name:x.u.name,recall:x.acc===null?null:Math.round(x.acc*100),answers:x.att,started:x.covered})),
+    topMisses:(function(){ const by={}; STATS.forEach(({st})=>st.ev.filter(e=>!e.ok&&e.title).forEach(e=>{
+      const k=e.title; by[k]=(by[k]||0)+1; }));
+      return Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([t,n])=>({lesson:t,misses:n})); })()};
+  const pre=document.createElement('pre'); pre.id='aggjson'; pre.textContent=JSON.stringify(agg);
+  pre.style.cssText='position:fixed;left:0;top:0;background:#fff;z-index:999;max-width:100%;overflow:auto';
+  document.body.appendChild(pre);
+}
+window.goto=goto; window.openPractice=openPractice;
+}  /* end initDash */
+</script>
+</body>
+</html>

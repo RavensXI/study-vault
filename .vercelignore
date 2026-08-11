@@ -1,0 +1,26 @@
+# Keep the workshop off the public server.
+#
+# design-lab/ is where the redesign is made: prototypes, working notes, the
+# design brief and constitution, hero caption ledgers, and ~850MB of master
+# artwork. None of it is linked from the site, but anything uploaded to the
+# host is fetchable by anyone who knows the address — "not linked" is not
+# "not published".
+#
+# The two pages that ARE public were promoted out of it and now live at the
+# site root: welcome.html (the front door) and teach.html, together with the
+# 58 assets they actually request (3.3MB) under assets/. Nothing left in
+# design-lab/ is needed to serve them — verified by recording every request
+# the pages make at desktop and phone widths.
+design-lab/
+
+# Python content pipeline — server-side tooling, never served to a browser.
+# Verified: no api/ function and no client-side fetch reads from it.
+scripts/
+
+# Local scratch
+scratchpad/
+
+# NOT excluded, deliberately:
+#   specs/  — admin/build-status.html fetches /specs/index.json at runtime.
+#   data/   — js/exam-countdown.js fetches /data/exam-dates-*.json.
+# Both are read by the live site. Excluding either breaks a working page.
