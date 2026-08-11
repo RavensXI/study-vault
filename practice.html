@@ -1646,6 +1646,19 @@
       color: var(--text-secondary, #5a5651);
     }
 
+    /* Why the answer is the answer. Neutral, not amber: it is teaching, not a
+       warning, and it appears on correct answers too. */
+    .feedback-why {
+      margin-top: 0.5rem;
+      padding: 0.5rem 0.7rem;
+      background: rgba(0, 0, 0, 0.035);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      line-height: 1.55;
+      color: var(--text-secondary, #5a5651);
+    }
+    .feedback-why strong { color: var(--text-primary, #2d2a26); }
+
     /* Next button (appears after checking) */
     .problem-next-area {
       text-align: center;
@@ -3565,6 +3578,7 @@
     body.dark-mode .misconception-tip { background: #332d1f; border-left-color: #d97706; }
     body.dark-mode .misconception-tip strong { color: #fbbf24; }
     body.dark-mode .feedback-simplify { background: #332d1f; border-left-color: #d97706; }
+    body.dark-mode .feedback-why { background: rgba(255,255,255,0.055); }
     body.dark-mode .problem-chart-container { background: #2a2826; border-color: #3a3836; }
     body.dark-mode .practice-tooltip { background: #2a2826; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
     body.dark-mode .practice-tooltip-arrow { background: #2a2826; }
@@ -4598,6 +4612,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
   <script src="/js/practice-loader.js"></script>
   <script src="/js/exam-countdown.js"></script>
+  <script src="/js/score-player.js"></script>
   <script src="/js/practice-audio.js"></script>
   <script defer src="/js/anon-welcome.js"></script>
 
@@ -5440,6 +5455,14 @@
       var walkLinkDone = document.getElementById('problem-walk-link');
       if (walkLinkDone) walkLinkDone.style.display = 'none';
 
+      // The question's own reason for its answer. Every listening, comprehension
+      // and score-reading drill carries one and it was being stored and never
+      // shown — on those formats the reason IS the teaching, so show it on both
+      // outcomes, not only when the student is wrong.
+      var whyHtml = problem.explanation
+        ? '<div class="feedback-why"><strong>Why:</strong> ' + problem.explanation + '</div>'
+        : '';
+
       if (isCorrect) {
         practiceState[tier].correct++;
         practiceState[tier].streak++;
@@ -5470,6 +5493,7 @@
               '<div class="feedback-title">Correct!</div>' +
               '<div class="feedback-text">The answer is ' + correctText + unitSuffix(problem) + '.</div>' +
               simplifyNote +
+              whyHtml +
             '</div>' +
           '</div>';
       } else {
@@ -5493,7 +5517,7 @@
         // expected result; otherwise honest guidance, never a guessed diagnosis.
         practiceState.wrongRun = (practiceState.wrongRun || 0) + 1;
         var matched = matchMisconception(problem, inputType, given);
-        var diagnosisHtml, misTag = null;
+        var diagnosisHtml = '', misTag = null;
         if (matched) {
           misTag = matched.id || String(matched.message || '').replace(/<[^>]*>/g, '').slice(0, 110);
           diagnosisHtml = '<div class="misconception-tip"><strong>It looks like what happened:</strong> ' + matched.message + '</div>';
@@ -5505,12 +5529,21 @@
           diagnosisHtml = '<div class="misconception-tip"><strong>It looks like what happened:</strong> Your two values are right but swapped. The first box is \\(x\\), the second is \\(y\\). Match each value to the letter you solved for.</div>';
         } else if (inputType === 'two_solutions') {
           var det = detectMisconception(given, problem.solutions, problem);
-          if (det.type !== 'unknown') misTag = String(det.message || det.type).replace(/<[^>]*>/g, '').slice(0, 110);
-          diagnosisHtml = det.type !== 'unknown'
-            ? '<div class="misconception-tip"><strong>It looks like what happened:</strong> ' + det.message + '</div>'
-            : '<div class="misconception-tip"><strong>Where to look:</strong> Compare your working with the method steps above, line by line, and find the first line where yours differs.</div>';
-        } else {
-          diagnosisHtml = '<div class="misconception-tip"><strong>Where to look:</strong> Compare your working with the method steps above, line by line, and find the first line where yours differs.</div>';
+          if (det.type !== 'unknown') {
+            misTag = String(det.message || det.type).replace(/<[^>]*>/g, '').slice(0, 110);
+            diagnosisHtml = '<div class="misconception-tip"><strong>It looks like what happened:</strong> ' + det.message + '</div>';
+          }
+        }
+        // Nothing named. Only offer generic guidance where there is nothing
+        // better to say — and say something TRUE of this question. "Compare your
+        // working, line by line" assumes a written method, which a listening or
+        // score-reading drill has not got; it read as nonsense in Music. The
+        // question's own explanation, where it has one, is always the better
+        // answer and is rendered below as whyHtml.
+        if (!diagnosisHtml && !problem.explanation) {
+          diagnosisHtml = (window._workedExamples || []).length
+            ? '<div class="misconception-tip"><strong>Where to look:</strong> Compare your working with the method steps above, line by line, and find the first line where yours differs.</div>'
+            : '<div class="misconception-tip"><strong>Where to look:</strong> Read the correct answer below, then go back to the question and find the detail that decides it.</div>';
         }
         // teacher-facing record: a diagnosis only ever fires when the wrong
         // answer MATCHED a known error, so each entry is a NAMED, evidenced
@@ -5541,6 +5574,7 @@
               '<div class="feedback-title">Not quite</div>' +
               diagnosisHtml +
               '<div class="correct-answer-text">Correct answer: ' + correctText + '</div>' +
+              whyHtml +
               nudgeHtml +
             '</div>' +
           '</div>';
