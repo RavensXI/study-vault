@@ -1381,7 +1381,18 @@
   // In the desk world, HOME is Sam's desk: the brand mark and the Home nav
   // link lead back to the dashboard, closing the desk → lesson → desk loop.
   function wireDeskHome() {
-    if (!document.body.classList.contains('desk-world')) return;
+    // Home should return a student to their shelf, not to the front door.
+    // This was gated on desk-world, so under the shipped reader skin it never
+    // ran: from inside a lesson the logo and Home went to '/', which now
+    // redirects to /welcome — the sign-up screen. Rewire whenever there IS a
+    // shelf to go back to; a first-time visitor with no subjects picked still
+    // belongs on the welcome screen.
+    var hasShelf = false;
+    try {
+      hasShelf = (typeof FreeUser !== 'undefined' && FreeUser.isActive && FreeUser.isActive())
+             || (typeof SchoolSession !== 'undefined' && SchoolSession.isActive && SchoolSession.isActive());
+    } catch (e) {}
+    if (!hasShelf) return;
     // home = the dashboard view the student last used (classic is the default)
     var pref = '/classic';
     try { if (localStorage.getItem('sv-dash-view') === 'desk') pref = '/desk'; } catch (e) {}

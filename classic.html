@@ -718,7 +718,11 @@ function renderSubjects(){
   SUBJECTS.forEach((s,i)=>{
     const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
     done+=d; tot+=t;
-    const pct=t?Math.max(3,Math.round(d/t*100)):0;
+    // Two values on purpose. `fill` keeps a visible sliver of warm colour on
+    // the spine at zero, so an untouched book still reads as a book. `pct` is
+    // the truth, and it is what the tooltip says — the floor used to leak into
+    // the label, so '0 of 54 lessons' announced itself as 3%.
+    const pct=t?Math.round(d/t*100):0, fill=t?Math.max(3,pct):0;
     const n=SUBJECTS.length;                      // tuned arrays when count matches, else procedural
     const lean=(n===LEANS.length?LEANS[i]:leanFor(i,n));
     const src='assets/lw/shelf/book_'+s.slug+'.webp';
@@ -728,7 +732,7 @@ function renderSubjects(){
     b.style.setProperty('--shift',(n===SHIFTS.length?SHIFTS[i]:shiftFor(i,n))+'px');
     b.setAttribute('aria-label',s.name+' — '+d+' of '+t+' lessons');
     b.innerHTML='<img class="cold" draggable="false" src="'+src+'" alt="">'+
-      '<img class="warm" draggable="false" src="'+src+'" style="clip-path:inset('+(100-pct)+'% 0 0 0)" alt="">';
+      '<img class="warm" draggable="false" src="'+src+'" style="clip-path:inset('+(100-fill)+'% 0 0 0)" alt="">';
     b.addEventListener('pointerdown',e=>onBookDown(e,b,s.slug));
     b.addEventListener('dragstart',e=>e.preventDefault());
     b.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectSubject(s.slug); } });
