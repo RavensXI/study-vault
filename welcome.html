@@ -1506,11 +1506,28 @@ if(sibtn) sibtn.onclick=async()=>{
       try{
         let loc={}; try{ loc=JSON.parse(localStorage.getItem('sv-welcome')||'{}'); }catch(e){}
         const acct=(sv&&Array.isArray(sv.picked))?sv:{};
+        /* Deep by one more level. A flat Object.assign replaced the whole
+           per-subject object, so an account missing the LAST question of a
+           subject (History question 4, the British depth study) dropped that
+           answer even though the device had it. Merge group by group. */
+        const twoDeep=(a,b)=>{ const o=Object.assign({},a||{});
+          Object.keys(b||{}).forEach(k=>{
+            const av=(a||{})[k], bv=b[k];
+            o[k]=(av&&bv&&typeof av==='object'&&!Array.isArray(av)
+                  &&typeof bv==='object'&&!Array.isArray(bv))
+                 ? Object.assign({},av,bv) : bv;
+          }); return o; };
+        /* meta carries display names as arrays — keep whichever side lists more */
+        const richerMeta=(a,b)=>{ const o=Object.assign({},a||{});
+          Object.keys(b||{}).forEach(k=>{
+            const at=((a||{})[k]||{}).topics||[], bt=(b[k]||{}).topics||[];
+            o[k]=bt.length>=at.length?b[k]:a[k];
+          }); return o; };
         const merged={
           picked:[...new Set([...(acct.picked||[]),...(loc.picked||[])])],
           boards:Object.assign({},loc.boards||{},acct.boards||{}),
-          topics:Object.assign({},loc.topics||{},acct.topics||{}),
-          meta:Object.assign({},loc.meta||{},acct.meta||{})
+          topics:twoDeep(loc.topics,acct.topics),
+          meta:richerMeta(loc.meta,acct.meta)
         };
         if(merged.picked.length){
           localStorage.setItem('sv-welcome',JSON.stringify(merged));
