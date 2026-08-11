@@ -1,5 +1,6 @@
 const { requireTeacher } = require('./_lib/auth');
-const { requireOwnership } = require('./_lib/scope');
+const { resolveLessonWrite } = require('./_lib/scope');
+const { writeOverride } = require('./_lib/overrides');
 const { supabase } = require('./_lib/supabase');
 
 module.exports = async function handler(req, res) {
@@ -26,7 +27,17 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'No fields to update' });
   }
 
-  if (!(await requireOwnership(auth, res, 'lesson', lesson_id))) return;
+  const write = await resolveLessonWrite(auth, res, lesson_id);
+  if (!write) return;
+
+  if (write.mode === 'override') {
+    const r = await writeOverride(lesson_id, write.schoolId, updates, auth);
+    if (!r.ok) return res.status(500).json({ error: 'Failed to save', detail: r.error });
+    return res.status(200).json({
+      status: 'ok', lesson_id, scope: 'school',
+      school_id: write.schoolId, created: r.created
+    });
+  }
 
   const { error } = await supabase
     .from('lessons')

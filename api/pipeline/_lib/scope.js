@@ -80,4 +80,42 @@ async function requireOwnership(auth, res, kind, id) {
   return true;
 }
 
-module.exports = { requireOwnership, isPlatformAdmin };
+/**
+ * Decide HOW a lesson write should land, rather than just whether it may.
+ *
+ * Returns null when refused (the response has already been sent), otherwise:
+ *   { mode: 'direct' }              — write the lessons row itself. Admin, or a
+ *                                     school editing content it owns outright.
+ *   { mode: 'override', schoolId }  — a school editing shared free-tier
+ *                                     content: copy-on-edit into
+ *                                     lesson_overrides, base row untouched.
+ *
+ * This is where the refusal added on 11 Aug turns into a fork. Nothing else
+ * about the ownership rules moved.
+ */
+async function resolveLessonWrite(auth, res, lessonId) {
+  if (isPlatformAdmin(auth)) return { mode: 'direct' };
+
+  const owner = await lessonSchoolId(lessonId);
+  if (!owner.found) {
+    res.status(404).json({ error: 'Not found' });
+    return null;
+  }
+
+  const callerSchool = auth.profile && auth.profile.school_id;
+  if (!callerSchool) {
+    res.status(403).json({ error: 'Your account is not attached to a school.' });
+    return null;
+  }
+
+  // Shared free-tier content: the school gets its own layer over the top.
+  if (owner.schoolId === null) return { mode: 'override', schoolId: callerSchool };
+
+  // The school's own bespoke content: edit it directly, as before.
+  if (owner.schoolId === callerSchool) return { mode: 'direct' };
+
+  res.status(403).json({ error: 'This content belongs to another school.' });
+  return null;
+}
+
+module.exports = { requireOwnership, isPlatformAdmin, resolveLessonWrite };

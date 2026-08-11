@@ -177,6 +177,44 @@
       return { error: 'Lesson not found' };
     }
 
+    // ---- School edits layered over shared free-tier content -----------------
+    // Copy-on-edit: a school never edits the generic row, it writes a row in
+    // lesson_overrides holding only the fields it changed. Merge those in for
+    // a logged-in school session. A free user has no school, so this query
+    // never runs and the public site is untouched by construction — which is
+    // the reason overrides live in their own table rather than as forked rows
+    // in `lessons`, where every one of the forty lesson queries would have had
+    // to learn to filter them out.
+    var overrideSchoolId = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive
+      && SchoolSession.isActive()) ? SchoolSession.getSchoolId() : staffSchoolId;
+    if (overrideSchoolId && unit.subjects && unit.subjects.school_id === null) {
+      try {
+        var ovr = await sb
+          .from('lesson_overrides')
+          .select('*')
+          .eq('lesson_id', lessonResult.data.id)
+          .eq('school_id', overrideSchoolId)
+          .maybeSingle();
+        if (ovr && ovr.data) {
+          var OVERRIDABLE = ['content_html', 'exam_tip_html', 'conclusion_html',
+            'practice_questions', 'knowledge_checks', 'flashcard_questions',
+            'glossary_terms', 'hero_image_url', 'hero_image_alt',
+            'hero_image_caption', 'hero_image_position'];
+          var applied = [];
+          OVERRIDABLE.forEach(function (f) {
+            if (ovr.data[f] !== null && ovr.data[f] !== undefined) {
+              lessonResult.data[f] = ovr.data[f];
+              applied.push(f);
+            }
+          });
+          lessonResult.data._override = { fields: applied, updated_at: ovr.data.updated_at };
+        }
+      } catch (e) {
+        // An override lookup must never take the lesson down with it: the
+        // student still gets the StudyVault version.
+      }
+    }
+
     // Block tier-mismatched lessons reached via direct URL (bookmark, search).
     // The browse-loader filters them from lists; this is the safety net.
     if (lessonResult.data.tier === 'higher' || lessonResult.data.tier === 'foundation') {
