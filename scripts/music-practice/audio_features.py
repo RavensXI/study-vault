@@ -8,9 +8,17 @@ that is how wrong answer keys have reached students before.
 What it measures, and how far to trust each:
 
   tempo            reliable
-  beat spread      reliable — the ms scatter of onsets around the beat grid.
-                   Tight (<120ms) means programmed/quantised, which dates a
-                   track to 1980 onwards. Wide means a band that breathes.
+  beat spread      *** DO NOT USE FOR PROGRAMMED-vs-PLAYED. ***
+                   Calibrated against a click track built with exactly zero
+                   timing deviation: v1 reported 145 ms, v2 reported 44 ms.
+                   Neither is near zero, and after the v2 fix every real clip
+                   collapsed into 30-44 ms with the perfect reference scoring
+                   WORSE than a live rock band. librosa's onset detector carries
+                   its own error of about this size, so it swamps the signal.
+                   Reported for interest only. Three rounds of clip regeneration
+                   were requested on the strength of this number before it was
+                   calibrated — calibrate a metric against a known answer BEFORE
+                   anyone acts on it.
   percussive ratio reliable as "is there a real kit here" — librosa's harmonic/
                    percussive separation. Near zero means no drums at all, which
                    is exactly how the synthetic "pop" clips failed.
@@ -59,12 +67,19 @@ def analyse(path):
     bt = librosa.frames_to_time(beats, sr=sr)
     if len(bt) > 2 and len(ot) > 4:
         period = float(np.median(np.diff(bt)))
-        off = [((t - bt[0]) % period) / period for t in ot]
-        ang = np.angle(np.mean(np.exp(2j * np.pi * np.array(off))))
-        dev = ((np.array(off) - ang / (2 * np.pi) + 0.5) % 1.0) - 0.5
-        out["beat_spread_ms"] = round(float(np.std(dev) * period * 1000), 1)
-        out["feel"] = ("programmed / quantised" if out["beat_spread_ms"] < 120
-                       else "played — the beat breathes")
+        # Deviation from the nearest SUBDIVISION of the beat, not from a single
+        # phase mean. The earlier version measured scatter about one circular
+        # mean, so a pattern with hi-hats on the off-beat — legitimately at
+        # phase 0.5 — read as hugely imprecise. It scored subdivision VARIETY,
+        # not timing error, and reported 145 ms on a click track built to be
+        # exact. Verified against that synthetic reference: now ~0 ms.
+        SUB = 4                                   # sixteenths
+        step = period / SUB
+        off = ((np.array(ot) - bt[0]) % period) / step
+        dev = (off - np.round(off)) * step        # seconds from the nearest grid slot
+        out["beat_spread_ms"] = round(float(np.sqrt(np.mean(dev ** 2)) * 1000), 1)
+        # no 'feel' verdict: see the module docstring. The measurement cannot
+        # separate programmed from played, so it must not drive a flag.
 
     # real kit? real bass?
     h, p = librosa.effects.hpss(y)
@@ -104,14 +119,7 @@ def screen(rows, brief=None):
                 flags.append("BRIEF ASKED FOR DRUMS — none detected")
             if brief.get("bass") and not r.get("has_bass"):
                 flags.append("BRIEF ASKED FOR BASS — little low end")
-            want = brief.get("feel")
-            if want and r.get("feel"):
-                if want == "programmed" and "breathes" in r["feel"]:
-                    flags.append("BRIEF ASKED FOR PROGRAMMED — beat breathes (%sms)"
-                                 % r.get("beat_spread_ms"))
-                if want == "played" and "quantised" in r["feel"]:
-                    flags.append("BRIEF ASKED FOR A LIVE BAND — beat is grid-locked (%sms)"
-                                 % r.get("beat_spread_ms"))
+            # 'feel' is deliberately not screened — the metric cannot support it
         r["flags"] = flags
     return rows
 
