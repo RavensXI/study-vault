@@ -484,7 +484,12 @@
       if (auth.is_admin) {
         // Admin sees everything
       } else if (auth.school_id) {
-        query = query.or('school_id.eq.' + auth.school_id + ',school_id.is.null');
+        // Own school only. This used to include generic subjects
+        // (school_id IS NULL) as well, which offered a teacher the shared
+        // free-tier corpus to edit — one copy, used by every school and by the
+        // public site. The API now refuses those writes; do not show the door
+        // it refuses to open.
+        query = query.eq('school_id', auth.school_id);
       }
 
       if (!auth.is_admin && auth.subject_ids.length > 0) {
