@@ -153,7 +153,7 @@
     <div class="top-in">
       <a class="brand" href="/">StudyVault</a>
       <nav>
-        <a href="/teacher/dashboard">Dashboard</a>
+        <a href="/teach">Dashboard</a>
         <a href="/teacher/classes" aria-current="page">Classes</a>
         <a href="/teacher/review">Review</a>
         <a href="/teacher/editor">Editor</a>
@@ -212,9 +212,18 @@
     });
   }
 
-  /* Credentials work the same way as admin/pipeline.html: an individually
-     signed-in teacher sends their Supabase token; the shared TEACHER_PASSWORD
-     login sends the password instead. Both reach requireTeacher. */
+  /* Credentials. There are three ways to be signed in to this site as staff and
+     the first version of this page only looked for two, so an older admin
+     session rendered the page and then failed every fetch on it — a page that
+     looks signed in but can load nothing.
+
+       1. Supabase Auth session, via a fresh client
+       2. the same token straight out of localStorage, for when the client has
+          not rehydrated yet
+       3. the shared password, which the gate stores as `pw` on the session
+
+     If none is present the page must SAY so and offer the way in, rather than
+     reporting "not authenticated" against an interface that looks logged in. */
   var token = null, pw = null;
   async function credentials() {
     try {
@@ -222,10 +231,18 @@
       var s = await sb.auth.getSession();
       if (s && s.data && s.data.session) token = s.data.session.access_token;
     } catch (e) {}
+    if (!token) {
+      try {
+        var raw = localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token');
+        if (raw) token = JSON.parse(raw).access_token || null;
+      } catch (e) {}
+    }
     try {
-      var saved = JSON.parse(sessionStorage.getItem('studyvault-auth') || 'null');
+      var saved = JSON.parse(sessionStorage.getItem('studyvault-auth') ||
+                             localStorage.getItem('studyvault-auth') || 'null');
       if (saved && saved.pw) pw = saved.pw;
     } catch (e) {}
+    return !!(token || pw);
   }
 
   async function api(path, body) {
@@ -431,7 +448,22 @@
     }).catch(function () { b.textContent = code; });
   });
 
-  credentials().then(load);
+  credentials().then(function (haveCredential) {
+    if (!haveCredential) {
+      /* Be honest about WHICH sign-in is missing. "Not authenticated" against a
+         page you are evidently looking at is the least useful thing we could
+         say: it reads as a bug rather than as "you are signed in as the wrong
+         kind of user". */
+      listEl.className = '';
+      listEl.innerHTML = '<div class="empty">This page needs a teacher sign-in. ' +
+        'You are on the site, but not with a teacher account — an admin password ' +
+        'session cannot load classes, because classes belong to a teacher.<br><br>' +
+        '<a class="open-link" href="/teacher/login">Sign in as a teacher &rarr;</a></div>';
+      subjEl.innerHTML = '<option value="">Sign in to choose a subject</option>';
+      return;
+    }
+    load();
+  });
 })();
 </script>
 </body>
