@@ -1094,6 +1094,23 @@
     }
 
     /* ── Fetch lesson topics from Supabase ── */
+    /* Hoisted out of init() so fetchTopicPools can use it too. The subjects
+       TABLE keys on the board-suffixed slug ("maths-aqa"); the exam-dates JSON
+       keys on the BASE subject ("maths"). Both are needed, in different places,
+       and having one definition means they cannot drift apart. */
+    function normaliseSubjectSlug(slug) {
+      var base = slug.replace(/-(aqa|edexcel|ocr|eduqas|wjec|ncfe)$/, '');
+      var aliases = {
+        'mathematics': 'maths',
+        'combined-science': 'science',
+        'religious-studies': 'religious-education',
+        'food-preparation-and-nutrition': 'food-technology',
+        'food': 'food-technology',
+        'gcse-music': 'music'
+      };
+      return aliases[base] || base;
+    }
+
     async function fetchTopicPools(examList) {
       var SUPABASE_URL = 'https://baipckgywpnwapobwtsy.supabase.co';
       var SUPABASE_KEY = 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
@@ -1166,8 +1183,13 @@
         var topics = lessonsByUnit[unit.id];
         if (!topics || topics.length === 0) return;
 
-        var examSlug = subject.slug;
-        if (subject.slug === 'science' && selectedSubjects['separate-sciences']) {
+        /* subject.slug is the table's slug ("maths-aqa"); the exam-date file is
+           keyed by base subject ("maths"). Using the table slug here silently
+           dropped EVERY unit — subjectPapers came back empty and the unit was
+           skipped, so the planner rendered "No live lessons found" while having
+           the lessons in hand. */
+        var examSlug = normaliseSubjectSlug(subject.slug);
+        if (examSlug === 'science' && selectedSubjects['separate-sciences']) {
           examSlug = 'separate-sciences';
         }
         var board = boardForSubject(examSlug);
@@ -1553,18 +1575,6 @@
         subjectBoards = allDates.unity_boards;
       }
 
-      function normaliseSubjectSlug(slug) {
-        var base = slug.replace(/-(aqa|edexcel|ocr|eduqas|wjec|ncfe)$/, '');
-        var aliases = {
-          'mathematics': 'maths',
-          'combined-science': 'science',
-          'religious-studies': 'religious-education',
-          'food-preparation-and-nutrition': 'food-technology',
-          'food': 'food-technology',
-          'gcse-music': 'music'
-        };
-        return aliases[base] || base;
-      }
 
       /* Read student's personal subject picks from homepage picker */
       var HOMEPAGE_PICKS_KEY = 'studyvault-subjects';
