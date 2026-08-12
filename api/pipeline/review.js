@@ -8,9 +8,52 @@ module.exports = async function handler(req, res) {
   const isAdmin = auth.profile.role === 'platform_admin';
   const isTeacher = auth.profile.role === 'teacher' || auth.profile.role === 'school_admin';
 
+  /**
+   * The subjects this person may see. null = unrestricted (platform_admin).
+   *
+   * This used to be computed inline, INSIDE the block that builds the filter
+   * dropdown — so the dropdown was scoped and the lesson list underneath it was
+   * not. A history teacher at Unity opening the review queue with no filter set
+   * saw Music AQA's pending lessons, and a teacher at one school would equally
+   * have seen another school's bespoke content. Scoping the control and not the
+   * data is the whole bug in one sentence.
+   *
+   * Now computed once and applied to both, so the list cannot show anything the
+   * dropdown would not offer.
+   */
+  async function permittedSubjectIds() {
+    if (isAdmin) return null;
+
+    const { data: ts } = await supabase
+      .from('teacher_subjects')
+      .select('subject_id')
+      .eq('teacher_id', auth.profile.id || auth.user.id);
+
+    const assigned = (ts || []).map(function (t) { return t.subject_id; });
+    if (assigned.length) return assigned;
+
+    /* No explicit assignment: fall back to their school's own subjects. Note
+       this deliberately excludes generic (school_id NULL) content, matching
+       what the dropdown has always done — the comment above it claimed
+       "+ generic", but the query never included it. Kept as-is rather than
+       widened, because widening access is not a thing to do as a side effect of
+       fixing a leak. */
+    if (auth.profile.school_id) {
+      const { data: own } = await supabase
+        .from('subjects').select('id').eq('school_id', auth.profile.school_id);
+      return (own || []).map(function (s) { return s.id; });
+    }
+    return [];      // a teacher with no subjects and no school sees nothing
+  }
+
   // GET — fetch review queue, counts, and subject summary
   if (req.method === 'GET') {
     const { status, subject_id, lessons_only } = req.query;
+
+    /* Computed BEFORE the lessons_only fast path, because the fast path is
+       exactly the request the review page makes when it refreshes the list —
+       and it previously skipped every line of scoping. */
+    const allowedSubjectIds = await permittedSubjectIds();
 
     // Fast path: if lessons_only=1, skip the expensive summary queries
     let subjects = [];
@@ -27,20 +70,10 @@ module.exports = async function handler(req, res) {
         .neq('status', 'archived')
         .order('name');
 
-      // Teachers only see their school's subjects + generic
-      if (isTeacher && !isAdmin) {
-        const { data: teacherSubjects } = await supabase
-          .from('teacher_subjects')
-          .select('subject_id')
-          .eq('teacher_id', auth.profile.id || auth.user.id);
-
-        const teacherSubjectIds = (teacherSubjects || []).map(ts => ts.subject_id);
-
-        if (teacherSubjectIds.length > 0) {
-          subjectsQuery = subjectsQuery.in('id', teacherSubjectIds);
-        } else if (auth.profile.school_id) {
-          subjectsQuery = subjectsQuery.eq('school_id', auth.profile.school_id);
-        }
+      // Same permitted set the lesson list below is constrained to.
+      if (allowedSubjectIds) {
+        subjectsQuery = subjectsQuery.in('id', allowedSubjectIds.length ? allowedSubjectIds
+                                                                        : ['00000000-0000-0000-0000-000000000000']);
       }
 
       const subjectsResult = await subjectsQuery;
@@ -116,12 +149,34 @@ module.exports = async function handler(req, res) {
       query = query.eq('status', status);
     }
 
+    /* THE FIX. Constrain the list to the permitted subjects before any
+       user-supplied filter is considered. A filter the client chooses is a
+       convenience; this is the boundary. */
+    if (allowedSubjectIds) {
+      if (!allowedSubjectIds.length) {
+        return res.status(200).json({ lessons: [], counts, subjects: subjects || [], subjectSummary });
+      }
+      const { data: allowedUnits } = await supabase
+        .from('units').select('id').in('subject_id', allowedSubjectIds);
+      const allowedUnitIds = (allowedUnits || []).map(function (u) { return u.id; });
+      if (!allowedUnitIds.length) {
+        return res.status(200).json({ lessons: [], counts, subjects: subjects || [], subjectSummary });
+      }
+      query = query.in('unit_id', allowedUnitIds);
+    }
+
     // Apply subject filter
     if (subject_id) {
       const { data: filteredUnits } = await supabase
         .from('units')
         .select('id')
         .eq('subject_id', subject_id);
+
+      /* and the subject they asked for must be one they may see, or the
+         filter becomes the way round the boundary */
+      if (allowedSubjectIds && allowedSubjectIds.indexOf(subject_id) === -1) {
+        return res.status(403).json({ error: 'That subject is not yours to review.' });
+      }
 
       const filteredUnitIds = (filteredUnits || []).map(u => u.id);
       if (filteredUnitIds.length > 0) {
