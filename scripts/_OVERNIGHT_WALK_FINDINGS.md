@@ -16,8 +16,45 @@ Scope agreed with Tom: desktop only (mobile is separate work), Music excluded
 
 ## Findings
 
+### F0 — The cohort gate is live in code but unreachable: nothing writes the year any more
+`welcome.html` vs `index.html` · Severity: **HIGH, does not self-heal**
+
+Tom noticed he was never asked what year he is in during sign-up. He was right,
+and it is the root cause of F1 below.
+
+`studyvault-exam-year` is:
+
+- **written by exactly one page — `index.html`**, the OLD front door ("Which
+  year are you in?", Year 10 / Year 11, ten references)
+- **read by four live surfaces** — `js/browse-loader.js`, `js/exam-countdown.js`,
+  `js/lesson-loader.js`, `exams.html`
+
+`welcome.html`, the new front door that went live on 11 Aug, contains **zero**
+references to it. So since the redesign shipped, nothing sets the value and all
+four consumers read an empty string.
+
+What each loses while it is unset:
+
+| Surface | Behaviour with no cohort year |
+|---|---|
+| `exams.html` | `_yearsAhead` stays 0, so the plan paces to the 2026 season — which is over. Hence F1. |
+| `js/exam-countdown.js` | cohort guard inert |
+| `js/lesson-loader.js` | nav cohort guard inert |
+| `js/browse-loader.js` | year-specific lesson filtering skipped, so students are shown lessons for exam years they will not sit |
+
+The work itself is fine and fully merged — `cohort-gate` and `exam-dates-2027`
+are both 0 commits ahead of platform. It was not lost in a branch; it was left
+behind on a page that is no longer the homepage. The planner's own comment
+states the intent plainly: *"so the countdowns and revision plan pace to THEIR
+exams, not a series they will never sit."*
+
+The fix is to ask the year in the new picker and write the same key. Not
+attempted tonight — it is a question in a flow Tom is actively reviewing, and it
+needs deciding where in the journey it belongs.
+
 ### F1 — Revision planner is on the 2026 cohort while the dashboard is on 2027
-`/exams` · Severity: **HIGH until 21 Aug, then self-healing**
+`/exams` · Severity: **HIGH until 21 Aug** — but see F0: it does **not**
+fully self-heal, because the cohort value it needs is never written
 
 On the same day, for the same student:
 
