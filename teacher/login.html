@@ -224,6 +224,26 @@
       <h1 class="card-title">Teacher Sign In</h1>
       <p class="card-subtitle">Sign in to your teacher account</p>
 
+      <!-- Shown only when arriving from a password-reset email. Until now the
+           "Forgot password?" link sent a real email whose link had nowhere to
+           land: this page had no recovery handling at all, so the reset could
+           never be completed. -->
+      <form id="resetForm" style="display:none">
+        <div class="form-group">
+          <label class="form-label" for="newPassword">New password</label>
+          <input class="form-input" id="newPassword" type="password"
+                 placeholder="At least 8 characters" autocomplete="new-password" minlength="8" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newPassword2">Confirm new password</label>
+          <input class="form-input" id="newPassword2" type="password"
+                 placeholder="Type it again" autocomplete="new-password" minlength="8" required>
+        </div>
+        <div class="form-error" id="resetError"></div>
+        <div class="form-success" id="resetSuccess"></div>
+        <button type="submit" class="form-btn" id="resetBtn">Set new password</button>
+      </form>
+
       <form id="loginForm">
         <div class="form-group">
           <label class="form-label" for="email">Email address</label>
@@ -263,6 +283,90 @@
     var successMsg = document.getElementById('successMsg');
     var submitBtn = document.getElementById('submitBtn');
     var forgotLink = document.getElementById('forgotLink');
+
+    /* ---- password recovery ------------------------------------------------
+       Supabase sends the user back with the recovery token in the URL FRAGMENT
+       (#access_token=…&type=recovery). supabase-js consumes that fragment and
+       fires PASSWORD_RECOVERY, so we listen for the event AND read the hash
+       directly — the event can fire before this listener attaches, in which
+       case only the hash tells us why the user is here.
+
+       If the link drops you on the home page instead of this one, that is the
+       Supabase redirect allow-list, not this code: the URL passed as redirectTo
+       must be listed under Authentication -> URL Configuration, or Supabase
+       silently falls back to the Site URL. */
+    var resetForm = document.getElementById('resetForm');
+    var loginFormEl = document.getElementById('loginForm');
+    var resetError = document.getElementById('resetError');
+    var resetSuccess = document.getElementById('resetSuccess');
+    var resetBtn = document.getElementById('resetBtn');
+
+    function enterRecoveryMode() {
+      if (resetForm.style.display === '') return;
+      resetForm.style.display = '';
+      loginFormEl.style.display = 'none';
+      forgotLink.style.display = 'none';
+      document.querySelector('.card-title').textContent = 'Choose a new password';
+      document.querySelector('.card-subtitle').textContent =
+        'You followed a reset link. Set a new password to finish signing in.';
+    }
+
+    if (/type=recovery/.test(location.hash) || /type=recovery/.test(location.search)) {
+      enterRecoveryMode();
+    }
+    sb.auth.onAuthStateChange(function (event) {
+      if (event === 'PASSWORD_RECOVERY') enterRecoveryMode();
+    });
+
+    /* Clear a stale error as soon as they change something. The inputs carry
+       minlength, so the browser can block submission before the handler runs —
+       leaving the PREVIOUS message on screen, contradicting what they just
+       typed ("do not match" under two identical passwords). */
+    ['newPassword', 'newPassword2'].forEach(function (id) {
+      document.getElementById(id).addEventListener('input', function () {
+        resetError.textContent = ''; resetError.style.display = 'none';
+      });
+    });
+
+    resetForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      resetError.textContent = ''; resetError.style.display = 'none';
+      resetSuccess.textContent = ''; resetSuccess.style.display = 'none';
+
+      var a = document.getElementById('newPassword').value;
+      var b = document.getElementById('newPassword2').value;
+
+      if (a.length < 8) {
+        resetError.textContent = 'Use at least 8 characters.';
+        resetError.style.display = 'block'; return;
+      }
+      if (a !== b) {
+        resetError.textContent = 'Those two passwords do not match.';
+        resetError.style.display = 'block'; return;
+      }
+
+      resetBtn.disabled = true; resetBtn.textContent = 'Saving…';
+      try {
+        var out = await sb.auth.updateUser({ password: a });
+        if (out.error) {
+          /* The commonest cause by far is an expired or already-used link. Say
+             that, rather than passing Supabase's wording straight through. */
+          resetError.innerHTML = out.error.message +
+            '<br><br>Reset links expire and can only be used once. ' +
+            'Go back and request a new one.';
+          resetError.style.display = 'block';
+        } else {
+          resetSuccess.textContent = 'Password changed. Taking you to your classes…';
+          resetSuccess.style.display = 'block';
+          history.replaceState(null, '', location.pathname);   // drop the token from the URL
+          setTimeout(function () { window.location.href = '/teacher/classes'; }, 1200);
+        }
+      } catch (err) {
+        resetError.textContent = 'Could not change the password. Request a new link and try again.';
+        resetError.style.display = 'block';
+      }
+      resetBtn.disabled = false; resetBtn.textContent = 'Set new password';
+    });
 
     // Check for signup success message in URL
     var params = new URLSearchParams(window.location.search);
