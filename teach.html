@@ -633,10 +633,20 @@ async function liveClass(){
           className:cls.name+' · '+(subj.name||'')};
 }
 
-/* boot: live pipe when a signed-in teacher has classes, else the demo class */
+/* boot: the SYNTHETIC class, always.
+   This page is linked publicly from the home page as "Try the teacher
+   dashboard", and it carries no auth gate. It used to switch to real student
+   data whenever a signed-in teacher happened to have classes, which meant an
+   ungated, publicly advertised URL was a live view of children's attainment
+   whose only protection was row-level security being exactly right.
+   Real class data now lives at /teacher/classes, behind the gate, and served by
+   /api/teacher/class-progress which enforces the boundary server-side.
+   Pass ?live=1 to opt in deliberately while developing. */
 (async function(){
   let D=null;
-  try{ D=await liveClass(); }catch(e){ console.warn('[teach] live load failed:', e.message); }
+  if(new URLSearchParams(location.search).get('live')){
+    try{ D=await liveClass(); }catch(e){ console.warn('[teach] live load failed:', e.message); }
+  }
   initDash(D||synthClass());
 })();
 
