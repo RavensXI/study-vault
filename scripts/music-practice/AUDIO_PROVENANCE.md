@@ -92,3 +92,15 @@ expo2 = 242.5+135.5) | 406s recapitulation (direct probe: 'first subject
 returns in tonic'; coheres with coda+end arithmetic) | 520s coda (probe
 490+30). Least certain: development 378 (derived, not probed) — staff
 'set to here' exists for exactly this.
+
+## fam_percussion_usaf.mp3 (11 Aug 2026)
+`music-aqa/listening-skills/fam_percussion_usaf.mp3` — 20s trim from 0:08.
+"When Johnny Comes Marching Home — Percussion", United States Air Force Band
+(comp. Patrick Gilmore, arr. MSgt John Bliss). **Public domain**, US federal
+government work, 17 U.S.C. §105. Source: Wikimedia Commons, licence field
+confirmed "Public domain" via the Commons API before download.
+Fills the percussion gap in listening-skills L2 gold. Percussive ratio 0.121 —
+the highest in that lesson, against the existing percussion answer at 0.075 and
+the pitched families at 0.008-0.032. Note the absolute 0.18 threshold in
+audio_features.py is rock-kit calibrated and misfires on orchestral recordings;
+compare against sibling clips instead.

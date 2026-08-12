@@ -484,12 +484,13 @@
       if (auth.is_admin) {
         // Admin sees everything
       } else if (auth.school_id) {
-        // Own school only. This used to include generic subjects
-        // (school_id IS NULL) as well, which offered a teacher the shared
-        // free-tier corpus to edit — one copy, used by every school and by the
-        // public site. The API now refuses those writes; do not show the door
-        // it refuses to open.
-        query = query.eq('school_id', auth.school_id);
+        // Own school, plus the shared free-tier subjects. Editing a generic
+        // lesson no longer overwrites everybody's copy: the API forks it into
+        // this school's own layer (lesson_overrides) and leaves the original
+        // alone. Between 11 Aug and copy-on-edit landing, this was locked to
+        // own-school only, because until then a save here rewrote the lesson
+        // for every school and the public site.
+        query = query.or('school_id.eq.' + auth.school_id + ',school_id.is.null');
       }
 
       if (!auth.is_admin && auth.subject_ids.length > 0) {
@@ -656,6 +657,29 @@
     // ================================================================
     //  LOAD LESSON
     // ================================================================
+    /**
+     * Banner shown when a school account opens shared free-tier content.
+     * Admin never sees it: an admin editing a generic lesson really is editing
+     * the copy everyone reads, which is how the free tier is maintained.
+     */
+    async function showCopyOnEditNote() {
+      var el = document.getElementById('copy-on-edit-note');
+      var auth = await getAuthContext();
+      var isShared = currentSubject && currentSubject.school_id === null;
+      var show = isShared && !auth.is_admin && auth.school_id;
+      if (!show) { if (el) el.remove(); return; }
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'copy-on-edit-note';
+        el.style.cssText = 'margin:0 0 1rem;padding:.7rem .9rem;border-radius:10px;' +
+          'background:#eef4ff;color:#1e3a5f;font-size:.85rem;line-height:1.5;';
+        editorArea.insertBefore(el, editorArea.firstChild);
+      }
+      el.innerHTML = '<strong>This is StudyVault\'s shared lesson.</strong> When you save, ' +
+        'we make your school its own version and leave the original untouched. ' +
+        'Anything you don\'t change keeps updating when we improve it.';
+    }
+
     async function loadLesson() {
       var lessonId = pickLesson.value;
       if (!lessonId) return;
@@ -673,7 +697,7 @@
       });
 
       var result = await sb.from('lessons')
-        .select('*, units!inner(slug, name, body_class, accent, subject_id, subjects!inner(slug, name))')
+        .select('*, units!inner(slug, name, body_class, accent, subject_id, subjects!inner(slug, name, school_id))')
         .eq('id', lessonId)
         .single();
 
@@ -695,6 +719,12 @@
       // Preview link
       previewLink.href = '/lesson/' + currentSubject.slug + '/' + currentUnit.slug + '/' + currentLesson.lesson_number;
       previewLink.style.display = '';
+
+      // Say plainly what saving will do. A teacher opening a free-tier lesson
+      // is not editing "the" lesson — their save forks it into their school's
+      // own layer. Without this they would reasonably assume they had changed
+      // the version everyone sees, which is what actually used to happen.
+      await showCopyOnEditNote();
 
       // Parse and render content blocks
       blockEls = parseBlocks(currentLesson.content_html || '');
@@ -1068,7 +1098,11 @@
         if (!resp.ok) throw new Error(data.error || 'Save failed');
 
         isDirty = false;
-        sidebarStatus.textContent = 'Saved!';
+        // The API tells us where the write landed. Say so, rather than leaving
+        // a teacher to guess whether they just edited the shared lesson.
+        sidebarStatus.textContent = data && data.scope === 'school'
+          ? (data.created ? 'Saved as your school\'s version' : 'Saved to your school\'s version')
+          : 'Saved!';
         sidebarStatus.className = 'sidebar-status saved';
         sidebarDiscardBtn.disabled = true;
         setTimeout(function () {
