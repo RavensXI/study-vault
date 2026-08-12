@@ -1205,9 +1205,37 @@ function renderShelfInto(el,slugs){
   slugs.forEach((slug,i)=>{ const s=SUBJECTS.find(x=>x.slug===slug);
     el.appendChild(bookEl(s,i,slugs.length,false)); });
 }
+/* Which year the student is in, which fixes their exam year.
+   This question existed on the OLD front door (index.html) and was stranded
+   there when welcome.html became the homepage on 11 Aug: nothing has written
+   studyvault-exam-year since, while FOUR live surfaces still read it —
+   exams.html (paces the revision plan), js/exam-countdown.js, js/lesson-loader.js
+   and js/browse-loader.js (hides lessons for years the student will not sit).
+   With it unset, exams.html leaves _yearsAhead at 0 and plans against a season
+   that has already happened, which is why /exams was blank.
+   Base year: July onwards counts as the next exam season, matching
+   svExamYearBase() in index.html so both front doors agree. */
+function examYearBase(){ const n=new Date(); return n.getMonth()>=6?n.getFullYear()+1:n.getFullYear(); }
+function examYear(){ const y=parseInt(localStorage.getItem('studyvault-exam-year')||'',10); return y||null; }
+function renderYearRow(host){
+  const base=examYearBase(), cur=examYear();
+  const row=document.createElement('div'); row.className='brow yrow';
+  row.innerHTML='<span class="bn">Which year are you in?</span><span class="chips"></span>';
+  const chips=row.querySelector('.chips');
+  [{l:'Year 11',y:base},{l:'Year 10',y:base+1}].forEach(o=>{
+    const ch=document.createElement('button'); ch.type='button';
+    ch.className='chip'; ch.setAttribute('aria-pressed',String(cur===o.y));
+    ch.innerHTML=o.l+' <span class="reqtag">exams '+o.y+'</span>';
+    ch.onclick=()=>{ localStorage.setItem('studyvault-exam-year',String(o.y)); persist(); renderBoards(); };
+    chips.appendChild(ch);
+  });
+  host.appendChild(row);
+}
+
 function renderBoards(){
   renderShelfInto(document.getElementById('shelf-boards'),picked);
   const bl=document.getElementById('blist'); bl.innerHTML='';
+  renderYearRow(bl);
   picked.forEach(slug=>{
     const su=SUBJECTS.find(x=>x.slug===slug);
     const row=document.createElement('div'); row.className='brow'; row.style.setProperty('--tc',su.c);
@@ -1243,7 +1271,8 @@ function renderBoards(){
   const found=chosen.filter(hasB);
   const reqs=chosen.filter(sl=>!hasB(sl));
   const v=document.getElementById('verdict');
-  if(!chosen.length) v.innerHTML='Pick a board for each subject.';
+  if(!examYear()) v.innerHTML='Tell us which year you are in, and the board for each subject.';
+  else if(!chosen.length) v.innerHTML='Pick a board for each subject.';
   else if(reqs.length===0 && chosen.length===picked.length)
     v.innerHTML='<b>'+found.length+' of '+picked.length+' covered.</b> Everything you&rsquo;re studying is here.';
   else{
@@ -1255,7 +1284,11 @@ function renderBoards(){
     if(chosen.length<picked.length) t+=' '+(picked.length-chosen.length)+' still to choose.';
     v.innerHTML=t;
   }
-  const nx=document.getElementById('bnext'), ready=chosen.length===picked.length&&picked.length>0;
+  /* The year is required, not optional. Left unanswered it silently breaks the
+     revision planner, the countdown and the cohort filtering — a failure the
+     student cannot see and would not connect to a question they skipped. */
+  const nx=document.getElementById('bnext');
+  const ready=chosen.length===picked.length&&picked.length>0&&!!examYear();
   nx.disabled=!ready; nx.style.opacity=ready?'1':'.45';
   /* some subjects have another level (history options, set texts) — route there.
      Either way the wizard ends INSIDE the product, never at a sign-up gate. */

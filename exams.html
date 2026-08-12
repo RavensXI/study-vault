@@ -646,6 +646,7 @@
     var selectedBoard = 'aqa'; /* default/fallback board */
     var subjectBoards = {};    /* per-subject board override: { 'maths': 'edexcel', ... } */
     var selectedSubjects = {};
+    var rawSubjectSlugs = [];   /* board-suffixed slugs as stored in the subjects table */
     var container = document.getElementById('exams-container');
 
     /* ── Helpers ── */
@@ -1108,6 +1109,8 @@
       if (subjectSlugs.length === 0) return [];
 
       var fetchSlugs = subjectSlugs.slice();
+      /* the generic subjects table keys on the board-suffixed slug */
+      rawSubjectSlugs.forEach(function (s) { if (fetchSlugs.indexOf(s) === -1) fetchSlugs.push(s); });
       if (fetchSlugs.indexOf('separate-sciences') !== -1 && fetchSlugs.indexOf('science') === -1) {
         fetchSlugs.push('science');
       }
@@ -1604,6 +1607,13 @@
         freeSubjects.forEach(function (slug) {
           var norm = normaliseSubjectSlug(slug);
           if (available.indexOf(norm) !== -1) {
+            /* Keep the REAL slug too. Normalising to the base ("maths-aqa" ->
+               "maths") is right for looking up exam dates, which are keyed by
+               base subject — but the subjects TABLE stores free-tier rows WITH
+               the board suffix, so querying it with the base slug matched
+               nothing and the planner reported "No live lessons found" for
+               every free-tier student. */
+            rawSubjectSlugs.push(slug);
             selectedSubjects[norm] = true;
           }
         });
