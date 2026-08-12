@@ -1613,6 +1613,19 @@
         /* Free user — use their homepage subject picks */
         _hasSession = true;
         selectedBoard = 'aqa';
+        /* Per-subject boards for a free-tier student. subjectBoards was only
+           ever filled from Unity's mapping, so everyone else was assumed AQA —
+           and while the JCQ common timetable means the DATES agree for 10 of
+           the 11 multi-board subjects, the PAPER NAMES do not. An Edexcel
+           English Literature student was shown AQA's "Paper 1: Shakespeare &
+           19th Century Novel" instead of their own "Shakespeare & Post-1914".
+           Sport Science is the one subject whose dates genuinely differ
+           (AQA 12 May vs OCR 18 May), so that was six days wrong too.
+           No new lookup needed: the board is already the slug's suffix. */
+        freeSubjects.forEach(function (slug) {
+          var m = slug.match(/-(aqa|edexcel|ocr|eduqas|wjec|ncfe)$/);
+          if (m) subjectBoards[normaliseSubjectSlug(slug)] = m[1];
+        });
         var available = getAvailableSubjects(selectedBoard);
         freeSubjects.forEach(function (slug) {
           var norm = normaliseSubjectSlug(slug);
