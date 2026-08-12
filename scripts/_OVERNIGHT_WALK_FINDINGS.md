@@ -163,25 +163,29 @@ red, suspect the check first; when it goes green, go and look anyway.
 
 ---
 
-## F5 — Planner still empty after both fixes (open)
+## F5 — Planner empty: SOLVED 12 Aug
 
-`/exams` · Severity: **HIGH** · found 12 Aug, **not fixed**
+`/exams` · **fixed and live**
 
-With a cohort year set and the slug mismatch corrected, the planner now:
+Two slug faults, not one — and my first fix only moved the failure downstream,
+which is worth recording because a half-fix that changes the symptom is more
+misleading than no fix.
 
-- says "GCSE revision plan, April–June **2027**" (was 2026)
-- shows the honest banner "Official 2027 timetables are not published yet, so
-  these dates are estimates based on the 2026 papers"
-- successfully queries **subjects → units → lessons**, all returning rows
+The subjects **table** keys on the board-suffixed slug (`maths-aqa`). The
+exam-dates **JSON** keys on the base subject (`maths`). The code needs both, in
+different places, and had only one:
 
-…and still renders "No live lessons found for your selected subjects."
+| stage | what happened |
+|---|---|
+| before | queried the subjects table with the BASE slug → no subjects at all → "No live lessons found" |
+| after fix 1 | queried with the real slug → subjects, units, lessons all returned → then looked up exam dates with `subject.slug`, now board-suffixed → `subjectPapers` empty → every unit dropped → same message, different line |
+| after fix 2 | exam-date lookup uses `normaliseSubjectSlug()`; that function was trapped inside `init()` where `fetchTopicPools` could not see it, so it is hoisted to the outer scope — **one** definition, since a second copy is exactly how this mismatch breeds |
 
-So `fetchTopicPools()` receives lessons and returns an empty pool. The filtering
-between "lessons came back" and "pool is empty" is where the remaining fault
-lives. Candidates not yet tested: a `status` filter, or the pool builder
-requiring topic selections (`WIZ.topics`) that a student who has not answered
-option questions does not have.
+Verified on production: April, May and June 2027 all populate, daily topics
+colour-coded per subject, exam papers on their dates, rest days honoured,
+"Results Day: Thursday, 19 August 2027 (expected)". 8,333 characters of plan
+where there were 462.
 
-Deliberately not guessed at. Two fixes tonight were verified by watching the
-behaviour change; this one would have been a guess, and the planner is the
-feature a revising student leans on hardest.
+With the cohort question restored, `/exams` works for a free-tier student for
+the first time since the redesign — and since the base-slug fault predates that,
+plausibly for the first time at all.
