@@ -52,6 +52,13 @@ The fix is to ask the year in the new picker and write the same key. Not
 attempted tonight — it is a question in a flow Tom is actively reviewing, and it
 needs deciding where in the journey it belongs.
 
+### F0/F1 — FIXED 12 Aug (see below for what remains)
+
+The year question is back on the boards step of the new picker and is required.
+The planner's slug-mismatch is fixed too. What is NOT fixed: the planner still
+reports "No live lessons found" even with subjects, units and lessons all
+returning rows — a third cause, not yet found. See F5.
+
 ### F1 — Revision planner is on the 2026 cohort while the dashboard is on 2027
 `/exams` · Severity: **HIGH until 21 Aug** — but see F0: it does **not**
 fully self-heal, because the cohort value it needs is never written
@@ -152,3 +159,29 @@ Four things looked like site bugs for a few minutes and were mine:
 
 All four produced a plausible-looking failure. The pattern: when a check goes
 red, suspect the check first; when it goes green, go and look anyway.
+
+
+---
+
+## F5 — Planner still empty after both fixes (open)
+
+`/exams` · Severity: **HIGH** · found 12 Aug, **not fixed**
+
+With a cohort year set and the slug mismatch corrected, the planner now:
+
+- says "GCSE revision plan, April–June **2027**" (was 2026)
+- shows the honest banner "Official 2027 timetables are not published yet, so
+  these dates are estimates based on the 2026 papers"
+- successfully queries **subjects → units → lessons**, all returning rows
+
+…and still renders "No live lessons found for your selected subjects."
+
+So `fetchTopicPools()` receives lessons and returns an empty pool. The filtering
+between "lessons came back" and "pool is empty" is where the remaining fault
+lives. Candidates not yet tested: a `status` filter, or the pool builder
+requiring topic selections (`WIZ.topics`) that a student who has not answered
+option questions does not have.
+
+Deliberately not guessed at. Two fixes tonight were verified by watching the
+behaviour change; this one would have been a guess, and the planner is the
+feature a revising student leans on hardest.
