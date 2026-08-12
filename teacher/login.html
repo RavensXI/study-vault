@@ -228,6 +228,20 @@
            "Forgot password?" link sent a real email whose link had nowhere to
            land: this page had no recovery handling at all, so the reset could
            never be completed. -->
+      <!-- Shown when you are ALREADY signed in. This used to redirect instantly
+           instead, which meant a signed-in user could never reach the sign-in
+           page — and since no teacher page carried a Sign out control, there
+           was no way to get out of the account you were in. -->
+      <div id="alreadyIn" style="display:none">
+        <p class="card-subtitle" style="margin-bottom:1.25rem">
+          You are signed in as <strong id="whoami">…</strong>.
+        </p>
+        <button type="button" class="form-btn" id="continueBtn">Go to your classes</button>
+        <a class="forgot-link" id="signOutLink" style="display:block;margin-top:1rem">
+          Sign out and use a different account
+        </a>
+      </div>
+
       <form id="resetForm" style="display:none">
         <div class="form-group">
           <label class="form-label" for="newPassword">New password</label>
@@ -381,19 +395,50 @@
       showSuccess('Account created successfully. Please sign in.');
     }
 
-    // Check if already logged in
-    sb.auth.getSession().then(function (res) {
-      /* NOT during a password reset. The recovery token establishes a real
-         session, so this check would see a signed-in user and bounce them to
-         the dashboard — throwing them out of the reset form a few seconds
-         after it appears, before they can type anything. The session exists
-         precisely so updateUser() can change the password; it is not a signal
-         that the user is finished here. */
-      if (CAME_FROM_RESET || recoveryMode) return;
-      if (res.data.session) {
-        verifyTeacher(res.data.session.user.id);
-      }
+    /* An escape hatch that works even if the page below misbehaves:
+       /teacher/login?signout=1 clears everything and shows the form. */
+    async function signOutFully() {
+      try { sessionStorage.removeItem('studyvault-auth'); } catch (e) {}
+      try { localStorage.removeItem('studyvault-auth'); } catch (e) {}
+      try { await sb.auth.signOut(); } catch (e) {}
+      window.location.href = '/teacher/login';
+    }
+
+    document.getElementById('signOutLink').addEventListener('click', function (e) {
+      e.preventDefault();
+      this.textContent = 'Signing out…';
+      signOutFully();
     });
+    document.getElementById('continueBtn').addEventListener('click', function () {
+      window.location.href = '/teacher/classes';
+    });
+
+    if (new URLSearchParams(window.location.search).get('signout')) {
+      signOutFully();
+    } else {
+      // Check if already logged in
+      sb.auth.getSession().then(function (res) {
+        /* NOT during a password reset. The recovery token establishes a real
+           session, so this check would see a signed-in user and bounce them to
+           the dashboard — throwing them out of the reset form a few seconds
+           after it appears, before they can type anything. The session exists
+           precisely so updateUser() can change the password; it is not a signal
+           that the user is finished here. */
+        if (CAME_FROM_RESET || recoveryMode) return;
+        if (res.data.session) {
+          /* Offer the choice rather than redirecting. Someone who deliberately
+             navigated to the SIGN IN page may well want a different account,
+             and bouncing them to the dashboard makes that impossible. */
+          document.getElementById('whoami').textContent =
+            (res.data.session.user && res.data.session.user.email) || 'another account';
+          document.getElementById('alreadyIn').style.display = '';
+          loginFormEl.style.display = 'none';
+          forgotLink.style.display = 'none';
+          document.querySelector('.card-title').textContent = 'Already signed in';
+          document.querySelector('.card-subtitle').style.display = 'none';
+        }
+      });
+    }
 
     function showError(msg) {
       errorMsg.textContent = msg;

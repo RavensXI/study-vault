@@ -40,6 +40,10 @@
     .top nav { display: flex; gap: 20px; font-size: .88rem; }
     .top nav a { color: #cbd5e1; text-decoration: none; padding: 4px 0; }
     .top nav a:hover, .top nav a[aria-current] { color: #fff; }
+    /* auth-gate injects its Sign out link here with an inline red colour meant
+       for a light background; on the dark bar that is nearly unreadable. */
+    .top nav a.auth-logout-btn { color: #fca5a5 !important; }
+    .top nav a.auth-logout-btn:hover { color: #fecaca !important; }
 
     .wrap { max-width: 1100px; margin: 0 auto; padding: 34px 24px 70px; }
 
@@ -152,7 +156,11 @@
   <header class="top">
     <div class="top-in">
       <a class="brand" href="/">StudyVault</a>
-      <nav>
+      <!-- admin-nav is what js/auth-gate.js looks for when injecting its
+           Sign out control. Without one of its two expected class names the
+           button is never added, and a stale staff session admits you forever
+           with no way to clear it. -->
+      <nav class="admin-nav">
         <a href="/teach">Dashboard</a>
         <a href="/teacher/classes" aria-current="page">Classes</a>
         <a href="/teacher/review">Review</a>
