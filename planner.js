@@ -38,7 +38,13 @@ function buildSchedule() {
   SCHED = {};
   if (!PL_SUBJECTS.length) return;
   var lastSeen = {}; PL_SUBJECTS.forEach(function (su) { lastSeen[su.slug] = -999; });
-  var ACT = ['lesson', 'practice', 'flashcards', 'knowledge check'];
+  /* Per-SUBJECT activities only. 'flashcards' used to sit in this rotation and
+     got bolted onto whichever subject the slot happened to land on, producing
+     "English Literature · flashcards · 15 min". There is no per-subject deck:
+     flashcards are one mixed, interleaved deck by design, which is exactly what
+     both dashboards call them ("mixed deck · tap to flip"). It is now scheduled
+     once per study day, on its own, belonging to no subject. */
+  var ACT = ['lesson', 'practice', 'knowledge check'];
   for (var d = new Date(T0), di = 0; d <= PL_LAST; d = new Date(d.getTime() + 864e5), di++) {
     if (offKind(d)) continue;
     var active = PL_SUBJECTS.filter(function (su) {
@@ -50,10 +56,13 @@ function buildSchedule() {
       var urg = 1 + 8 / ((nxt ? Math.round((nxt.d - d) / 864e5) : 400) + 3);
       return { su: su, score: (di - lastSeen[su.slug]) * urg };
     }).sort(function (a, b) { return b.score - a.score || a.su.slug.localeCompare(b.su.slug); });
-    SCHED[iso(d)] = scored.slice(0, Math.min(2, scored.length)).map(function (p, pi) {
+    var picks = scored.slice(0, Math.min(2, scored.length)).map(function (p, pi) {
       lastSeen[p.su.slug] = di;
-      return { s: p.su, act: ACT[(di + pi * 2) % 4], min: pi ? 15 : 25 };
+      return { s: p.su, act: ACT[(di + pi * 2) % ACT.length], min: pi ? 15 : 25 };
     });
+    /* the mixed deck: one short interleaved session a day, no subject attached */
+    picks.push({ s: null, act: 'flashcards — mixed deck', min: 5, mixed: true });
+    SCHED[iso(d)] = picks;
   }
 }
 function examsOn(d) {
@@ -80,7 +89,9 @@ function showDayTip(anchor, d) {
     if (p.off === 'rest') html += 'Rest day — you don’t revise on ' + DOWNAME[d.getDay()] + '.';
     else if (p.off === 'holiday') html += 'Holiday — enjoy it. The work moved along, it didn’t vanish.';
     else if (p.sessions) html += p.sessions.map(function (x) {
-      return '<span class="row"><span class="sw" style="background:' + x.s.c + '"></span>' + x.s.name + ' · ' + x.act + ' · ' + x.min + ' min</span>'; }).join('');
+      var sw = '<span class="sw" style="background:' + (x.s ? x.s.c : '#9a8f7a') + '"></span>';
+      var label = x.s ? (x.s.name + ' · ' + x.act) : x.act;   /* mixed deck has no subject */
+      return '<span class="row">' + sw + label + ' · ' + x.min + ' min</span>'; }).join('');
     else if (!p.exams.length) html += 'Nothing scheduled.';
   }
   daytip.innerHTML = html;
@@ -197,7 +208,7 @@ function buildPlan() {
       if (p && p.off === 'rest') cell.classList.add('off');
       else if (p && p.off === 'holiday') cell.classList.add('hol');
       else if (p && p.sessions) p.sessions.forEach(function (x) {
-        cell.innerHTML += '<span class="sess"><span class="sw" style="background:' + x.s.c + '"></span>' + x.s.tab + ' · ' + x.act + '</span>'; });
+        cell.innerHTML += '<span class="sess"><span class="sw" style="background:' + (x.s ? x.s.c : '#9a8f7a') + '"></span>' + (x.s ? (x.s.tab + ' · ' + x.act) : x.act) + '</span>'; });
       if (d >= T0 && d <= PL_LAST && !(p && p.off === 'rest')) {
         cell.title = (p && p.off === 'holiday') ? 'Tap to unmark this holiday' : 'Tap to mark as a holiday';
         cell.onclick = function () {

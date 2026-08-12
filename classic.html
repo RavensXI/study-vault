@@ -547,6 +547,28 @@ svDashInit(SUBJECTS,{view:'classic',onUnits:function(){
 }});
 /* once real progress exists, the plan says Continue, not Start-at-the-start.
    The continue target comes from the shared layer so the desk view agrees. */
+/* Which subject to open first on day one.
+   This used to be WIZ.picked[0] — literally the first element of the array.
+   The core four are pre-selected in the order maths, lang, lit, science, so
+   every student on the site was told to start with Mathematics. It was not a
+   recommendation, it was an array index.
+   Now: the subject whose exam comes soonest, which is the same reasoning the
+   plan already shows for returning students ("nearest exam"). Falls back to the
+   first picked subject if no exam dates are known. */
+function dayOneSubjectName(){
+  try{
+    var best=null, bestD=null;
+    (SUBJECTS||[]).forEach(function(su){
+      var ex=(typeof svExamsFor==='function')?svExamsFor(su):[];
+      if(!ex.length) return;
+      var d=ex.map(function(e){return e.d;}).sort(function(a,b){return a-b;})[0];
+      if(!bestD||d<bestD){ bestD=d; best=su; }
+    });
+    if(best&&best.name) return best.name;
+  }catch(e){}
+  return (WIZ.picked[0]&&NAMEC[WIZ.picked[0]])?NAMEC[WIZ.picked[0]][0]:'your first subject';
+}
+
 function refreshDayOnePlan(){
   if(!DAYONE) return;
   const t=svContinueTarget(SUBJECTS);
@@ -619,7 +641,7 @@ if(DAYONE){
   document.querySelector('.momentum .hl').textContent='day one — your first session is ready.';
   document.querySelector('.card.plan ol').innerHTML=
     '<li class="inert"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · finds your level</small></div><span class="mins">2 min</span></li>'+
-    '<li class="inert"><span class="n">2</span><div><b>First lesson</b><small>'+(WIZ.picked[0]&&NAMEC[WIZ.picked[0]]?NAMEC[WIZ.picked[0]][0]:'your first subject')+' · start at the beginning</small></div><span class="mins">15 min</span></li>'+
+    '<li class="inert"><span class="n">2</span><div><b>First lesson</b><small>'+dayOneSubjectName()+' · start at the beginning</small></div><span class="mins">15 min</span></li>'+
     '<li class="inert"><span class="n">3</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>';
   const _sb=document.getElementById('startbtn');
   if(_sb){ const _u=dayOneUrl(SUBJECTS[0]);
