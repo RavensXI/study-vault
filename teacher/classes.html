@@ -127,8 +127,67 @@
     .loading{color:var(--mut);font-size:.9rem;padding:22px 0}
     [hidden]{display:none!important}
 
+    /* ---- parents' evening pack ----
+       A printable page about one pupil. Screen and paper share a layout so a
+       teacher is not surprised by what comes out of the printer. */
+    .packbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:18px 0 12px}
+    .backlink{background:none;border:none;font:inherit;font-size:.9rem;color:var(--anchor);
+              cursor:pointer;font-weight:600;padding:0}
+    .backlink:hover{text-decoration:underline}
+    .pack{background:#fff;border:1px solid var(--line);border-radius:16px;padding:30px 34px;
+          box-shadow:0 1px 2px rgba(38,35,30,.04)}
+    .phead{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;
+           border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:20px}
+    .phead h2{font-family:var(--read);font-size:1.7rem;font-weight:700}
+    .pmeta{text-align:right;font-size:.82rem;color:var(--sec);line-height:1.5}
+    .pbrand{font-weight:700;color:var(--ink)}
+    .kv{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+    .kv div{background:#faf6ec;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+    .kv b{display:block;font-family:var(--read);font-size:1.5rem;font-weight:700;line-height:1.1}
+    .kv small{display:block;font-size:.74rem;color:var(--sec);margin-top:3px}
+    .pack h4{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+             color:var(--mut);margin:22px 0 9px}
+    .ubar{position:relative;display:block;height:9px;background:#ece5d7;border-radius:5px;
+          width:150px;overflow:visible}
+    .ubar i{display:block;height:100%;background:#5b8f6d;border-radius:5px}
+    .ubar.low i{background:#b8624e}
+    .ubar.mid i{background:#c09442}
+    .ubar .cls{position:absolute;top:-3px;width:2px;height:15px;background:var(--ink);opacity:.55}
+    .legend{font-size:.78rem;color:var(--mut);margin-top:8px;line-height:1.5}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:6px}
+    .missrow{border-top:1px solid var(--linel);padding:8px 0}
+    .missrow b{font-weight:600;font-size:.9rem}
+    .missrow span{display:block;font-size:.79rem;color:var(--mut)}
+    .wubars{display:flex;align-items:flex-end;gap:10px;height:74px}
+    .wubars i{flex:0 0 34px;display:flex;flex-direction:column;justify-content:flex-end;
+              align-items:center;height:100%;font-style:normal}
+    .wubars em{font-style:normal;font-size:.74rem;font-weight:700;color:var(--sec)}
+    /* flex:0 0 auto or the bar is a shrinkable flex item and its percentage
+       height is ignored — every day then renders the same height and the chart
+       says nothing, which is worse than no chart because it looks like data. */
+    .wubars b{display:block;width:100%;background:#8aa896;border-radius:4px 4px 0 0;
+              min-height:3px;flex:0 0 auto}
+    .wubars small{font-size:.68rem;color:var(--mut);margin-top:4px}
+    .draft{background:#faf6ec;border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+           font-family:var(--read);font-size:.95rem;line-height:1.65}
+    .draftfoot{font-size:.76rem;color:var(--mut);margin-top:8px}
+    .namebtn{background:none;border:none;font:inherit;color:var(--anchor);font-weight:600;
+             cursor:pointer;padding:0;text-align:left}
+    .namebtn:hover{text-decoration:underline}
+
+    @media print{
+      .top,.classbar,.packbar,.sub,h1,#made,#createPanel{display:none!important}
+      body,html{background:#fff}
+      .wrap{padding:0;max-width:none}
+      .pack{border:none;border-radius:0;box-shadow:none;padding:0}
+      .draft{background:#fff}
+      @page{margin:16mm}
+    }
+
     @media (max-width:660px){
       .fields{grid-template-columns:1fr}
+      .kv{grid-template-columns:repeat(2,1fr)}
+      .two{grid-template-columns:1fr}
       .codewrap{margin-left:0;width:100%}
       .classbar{gap:12px}
     }
@@ -311,11 +370,12 @@
     }
     h += '</div>';
 
-    h += '<div class="section"><h3>Students</h3><div class="sheet"><div class="scroller"><table><thead><tr>' +
+    h += '<div class="section"><h3>Students &mdash; click a name for a parents&rsquo; evening pack</h3><div class="sheet"><div class="scroller"><table><thead><tr>' +
          '<th>Name</th><th class="num">Lessons done</th><th class="num">Quiz accuracy</th>' +
          '<th class="num">Practice</th><th>Last active</th></tr></thead><tbody>';
     (d.students || []).forEach(function (s) {
-      h += '<tr><td>' + esc(s.name) + '</td>' +
+      h += '<tr><td><button class="namebtn" data-pack="' + esc(s.id) + '">' +
+             esc(s.name) + '</button></td>' +
            '<td class="num">' + s.lessonsComplete + '</td>' +
            '<td class="num">' + (s.quizAccuracy == null ? '—' : s.quizAccuracy + '%') + '</td>' +
            '<td class="num">' + s.practiceAnswered + '</td>' +
@@ -458,6 +518,132 @@
     } catch (e) {
       note.className = 'err'; note.textContent = e.message;
     } finally { btn.disabled = false; }
+  });
+
+  /* ---- parents' evening pack ------------------------------------------
+     Per-pupil detail, printable. This is the one screen that shows per-child
+     effort (days revised, a run of warm-up scores) rather than aggregating it.
+     That is a deliberate exception, reasoned out in api/teacher/_lib/pack.js:
+     the pack is printed for that child's own parent, where effort is ordinary
+     report content. None of it appears on the class screen. */
+  function packHtml(p) {
+    var hl = p.headline;
+    var first = String(p.student.name).split(' ')[0];
+
+    var h = '<div class="packbar">' +
+      '<button class="backlink" data-backtoclass>&larr; back to the class</button>' +
+      '<button class="btn" data-print>Print</button></div>' +
+      '<div class="pack"><div class="phead"><div><h2>' + esc(p.student.name) + '</h2></div>' +
+      '<div class="pmeta"><span class="pbrand">StudyVault</span><br>' +
+      esc(p.class.name) + (p.class.subject ? ' &middot; ' + esc(p.class.subject) : '') + '<br>' +
+      new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) +
+      '</div></div>';
+
+    h += '<div class="kv">' +
+      '<div><b>' + hl.lessonsFinished + '</b><small>lessons finished</small></div>' +
+      '<div><b>' + hl.questionsAnswered + '</b><small>questions answered</small></div>' +
+      '<div><b>' + (hl.recallAccuracy == null ? '&mdash;' : hl.recallAccuracy + '%') +
+        '</b><small>recall accuracy</small></div>' +
+      '<div><b>' + hl.daysRevised + '</b><small>days revised, last 4 weeks</small></div></div>';
+
+    h += '<h4>Topics &mdash; how much is sticking when ' + esc(first) + ' is quizzed</h4>';
+    if (!p.units.length) {
+      h += '<p class="thin">No quiz evidence in this subject yet.</p>';
+    } else {
+      h += '<div class="scroller"><table><tbody>';
+      p.units.forEach(function (u) {
+        var cls = u.accuracy == null ? '' : (u.accuracy < 55 ? 'low' : (u.accuracy < 72 ? 'mid' : ''));
+        h += '<tr><td style="font-weight:600;max-width:230px">' + esc(u.unit) + '</td>' +
+          '<td><span class="ubar ' + cls + '"><i style="width:' + (u.accuracy || 0) + '%"></i>' +
+          (u.classAccuracy == null ? '' :
+            '<span class="cls" style="left:' + u.classAccuracy + '%"></span>') +
+          '</span></td>' +
+          '<td class="thin">' + (u.accuracy == null
+            ? 'not enough evidence yet'
+            : '<b>' + u.accuracy + '%</b> of ' + u.answered + ' questions right') + '</td>' +
+          '<td class="thin">' + u.lessonsDone + ' lessons done</td></tr>';
+      });
+      h += '</tbody></table></div>' +
+        '<div class="legend">Every figure counts real quiz questions ' + esc(first) +
+        ' has answered while revising. Bar = share answered correctly &middot; ' +
+        'thin line = class average.</div>';
+    }
+
+    h += '<div class="two"><div><h4>Strongest topics</h4>' +
+      (p.strongest.length
+        ? p.strongest.map(function (x) { return esc(x.unit) + ' &mdash; ' + x.accuracy + '% right'; }).join('<br>')
+        : '<span class="thin">Not enough evidence yet.</span>') +
+      '</div><div><h4>Keeps getting wrong</h4>' +
+      (p.keepsMissing.length
+        ? p.keepsMissing.map(function (m) {
+            return '<div class="missrow"><b>' + esc(m.question) + '</b>' +
+                   '<span>wrong ' + m.times + ' times &middot; ' + esc(m.unit) + '</span></div>';
+          }).join('')
+        : '<span class="thin">No repeated misses.</span>') +
+      '</div></div>';
+
+    if (p.warmups.length) {
+      h += '<h4>Daily warm-up quiz</h4><div class="wubars">' +
+        p.warmups.map(function (w) {
+          return '<i><em>' + w.right + '</em><b style="height:' +
+            Math.round((w.right / w.total) * 100) + '%"></b><small>' +
+            w.date.slice(8) + '</small></i>';
+        }).join('') +
+        '</div><div class="legend">Quick recall questions at the start of a revision ' +
+        'session &middot; number = questions right that day &middot; dates along the bottom</div>';
+    }
+
+    h += '<h4>Teacher summary &mdash; draft</h4>' +
+         '<div id="draftbox" class="draft thin">Drafting from the evidence above&hellip;</div>' +
+         '<div class="draftfoot" id="draftfoot"></div></div>';
+    return h;
+  }
+
+  async function openPack(studentId) {
+    var classId = selEl.value;
+    viewEl.className = 'loading';
+    viewEl.textContent = 'Building the pack...';
+    try {
+      var p = await api('/api/teacher/student-pack?class_id=' + encodeURIComponent(classId) +
+                        '&student_id=' + encodeURIComponent(studentId));
+      viewEl.className = '';
+      viewEl.innerHTML = packHtml(p);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) {
+      viewEl.className = '';
+      viewEl.innerHTML = '<div class="empty">Could not build that pack. ' + esc(e.message) + '</div>';
+      return;
+    }
+
+    /* The draft is a SEPARATE call so the pack is readable straight away. The
+       numbers are the pack; the paragraph is a convenience on top, and it must
+       never be what the teacher waits for. */
+    var box = document.getElementById('draftbox');
+    var foot = document.getElementById('draftfoot');
+    try {
+      var d = await api('/api/teacher/pack-summary', { class_id: classId, student_id: studentId });
+      if (box) {
+        box.classList.remove('thin');
+        box.textContent = d.draft;
+      }
+      if (foot) {
+        foot.textContent = d.generated
+          ? 'AI-drafted from the evidence above \u00b7 check it before you say it \u00b7 processed in the UK (' + d.servedBy + ')'
+          : 'Not enough evidence to draft from.';
+      }
+    } catch (e) {
+      if (box) { box.classList.add('thin'); box.textContent = 'No draft: ' + e.message; }
+      if (foot) {
+        foot.textContent = 'The figures above are unaffected \u2014 they come straight from the work.';
+      }
+    }
+  }
+
+  document.addEventListener('click', function (ev) {
+    var n = ev.target.closest('[data-pack]');
+    if (n) { openPack(n.getAttribute('data-pack')); return; }
+    if (ev.target.closest('[data-print]')) { window.print(); return; }
+    if (ev.target.closest('[data-backtoclass]')) { selectClass(selEl.value); return; }
   });
 
   document.addEventListener('click', function (ev) {

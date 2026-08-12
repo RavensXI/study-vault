@@ -24,37 +24,10 @@ const { supabase } = require('../pipeline/_lib/supabase');
  * who has stopped, not when someone was at their desk.
  */
 
-/* keys on the progress blob that must never leave the server */
-const NEVER_SEND = ['flashsr', 'flashday', 'flashlog', 'plan', 'shortschecks'];
-
-/* SUBJECT SCOPING — a teacher sees their own subject and nothing else.
- *
- * Every key on the progress blob is "subject-slug/unit[/lesson]", so one rule
- * scopes all of them. Without it, opening maths class 10M1 showed me Macbeth
- * quotations and Nazi cabinet misconceptions: useless to a maths teacher, and a
- * child's whole academic profile handed to a member of staff who teaches them
- * one subject. Minimisation is not only about which FIELDS are sent.
- *
- * Match on the base subject, not the exact slug: a class is keyed to the board
- * the school teaches (maths-edexcel) while a pupil's own progress may be logged
- * under whichever board they picked (maths-aqa). Same maths either way.
- */
-function baseSubject(slug) {
-  return String(slug || '').toLowerCase()
-    .replace(/-(aqa|edexcel|eduqas|wjec|ncfe|ocr(-[ab])?)$/, '');
-}
-
-/* true when a "subject/unit/lesson" key belongs to this class's subject */
-function inScope(key, base) {
-  if (!base) return true;                       // no subject on the class: no filter
-  return baseSubject(String(key).split('/')[0]) === base;
-}
-
-function pick(obj, base) {
-  const out = {};
-  Object.keys(obj || {}).forEach(function (k) { if (inScope(k, base)) out[k] = obj[k]; });
-  return out;
-}
+/* Subject scoping and the ownership rule now live in _lib/scope.js, imported
+   here and by the parents'-evening pack. A security filter with two copies
+   eventually grows two behaviours. */
+const { NEVER_SEND, baseSubject, inScope, pick } = require('./_lib/scope');
 
 function bucketLastActive(iso) {
   if (!iso) return 'never';
