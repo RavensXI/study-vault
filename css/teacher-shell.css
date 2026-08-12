@@ -1,0 +1,126 @@
+/* Teacher shell — the admin pages, wearing the teacher platform's clothes.
+ *
+ * Scoped ENTIRELY to body[data-staff="teacher"], set by js/teacher-shell.js.
+ * Nothing here can reach Tom's admin console.
+ *
+ * Deliberately NOT css/reskin.css. That is the student reading skin, and
+ * dropping it over these pages breaks their table layouts — a lesson already
+ * recorded once. This restyles the chrome and the surfaces, and leaves the
+ * tables' own structure alone: their borders and colours are harmonised, their
+ * widths and alignment are not touched.
+ *
+ * Same tokens as teacher/classes.html, so a teacher moving between the class
+ * screen and the review queue does not feel like they changed product.
+ */
+body[data-staff="teacher"] {
+  --t-paper:#f6f1e7; --t-card:#fffdf8; --t-ink:#26231e; --t-sec:#57534a;
+  --t-mut:#84806f; --t-line:#e4dfd2; --t-linel:#efeadf; --t-anchor:#5b4632;
+
+  background: var(--t-paper);
+  color: var(--t-ink);
+  font-family: 'Schibsted Grotesk', system-ui, -apple-system, sans-serif;
+}
+
+/* ---- masthead ---- */
+body[data-staff="teacher"] .admin-header,
+body[data-staff="teacher"] header {
+  background: var(--t-paper) !important;
+  border-bottom: 1px solid var(--t-line) !important;
+  box-shadow: none !important;
+}
+body[data-staff="teacher"] .admin-nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: .87rem;
+}
+body[data-staff="teacher"] .admin-nav a {
+  color: var(--t-sec) !important;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 4px 0;
+  background: none !important;
+  border: none !important;
+}
+body[data-staff="teacher"] .admin-nav a:hover { color: var(--t-ink) !important; }
+body[data-staff="teacher"] .admin-nav a[aria-current="page"] {
+  color: var(--t-ink) !important;
+  font-weight: 700;
+}
+body[data-staff="teacher"] .admin-nav a.auth-logout-btn {
+  color: var(--t-anchor) !important;
+  font-weight: 600;
+}
+body[data-staff="teacher"] .admin-nav-home {
+  font-weight: 600 !important;
+  color: var(--t-ink) !important;
+}
+/* the console's dropdowns have no teacher meaning; the nav is rebuilt without
+   them, but hide the machinery in case a page renders its own */
+body[data-staff="teacher"] .admin-nav-group,
+body[data-staff="teacher"] .admin-nav-trigger,
+body[data-staff="teacher"] .admin-nav-menu { display: none !important; }
+
+/* ---- headings ---- */
+body[data-staff="teacher"] h1,
+body[data-staff="teacher"] h2,
+body[data-staff="teacher"] h3 {
+  font-family: 'Literata', Georgia, serif;
+  color: var(--t-ink);
+  letter-spacing: -.01em;
+}
+
+/* ---- surfaces ---- */
+body[data-staff="teacher"] .card,
+body[data-staff="teacher"] .panel,
+body[data-staff="teacher"] .review-card,
+body[data-staff="teacher"] .lesson-card,
+body[data-staff="teacher"] .subject-card {
+  background: var(--t-card) !important;
+  border: 1px solid var(--t-line) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 2px rgba(38,35,30,.04) !important;
+}
+
+/* ---- tables: colours only, never geometry ---- */
+body[data-staff="teacher"] table { border-color: var(--t-line); }
+body[data-staff="teacher"] th {
+  background: #f4eee2;
+  color: var(--t-mut);
+  border-bottom: 1px solid var(--t-line);
+}
+body[data-staff="teacher"] td { border-top-color: var(--t-linel); }
+
+/* ---- controls ---- */
+body[data-staff="teacher"] select,
+body[data-staff="teacher"] input[type="text"],
+body[data-staff="teacher"] input[type="search"] {
+  background: #fff;
+  border: 1px solid var(--t-line);
+  border-radius: 10px;
+  color: var(--t-ink);
+  font-family: inherit;
+}
+body[data-staff="teacher"] select:focus,
+body[data-staff="teacher"] input:focus {
+  outline: 2px solid var(--t-anchor);
+  outline-offset: -1px;
+}
+body[data-staff="teacher"] .btn-primary,
+body[data-staff="teacher"] button.primary {
+  background: var(--t-anchor) !important;
+  border-color: var(--t-anchor) !important;
+  color: #fdfaf3 !important;
+  border-radius: 11px !important;
+}
+body[data-staff="teacher"] .btn-primary:hover,
+body[data-staff="teacher"] button.primary:hover {
+  background: #4a3829 !important;
+  border-color: #4a3829 !important;
+}
+
+/* Actions a teacher cannot perform are hidden rather than shown-and-refused.
+   The API already rejects them (approve, reject and the completion steps are
+   admin-only); offering a button that always 403s is just a worse way of
+   saying no. */
+body[data-staff="teacher"] [data-admin-only] { display: none !important; }
