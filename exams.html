@@ -1023,6 +1023,12 @@
     /* ── Unit-to-paper mapping ── */
     var SKIP_UNITS = ['physics-calculations', 'chemistry-calculations', 'biology-data-skills', 'higher-calculations'];
 
+    /* the picker stores topic picks under its own short keys */
+    var WIZ_FAMILY = { 'english-literature': 'lit', 'history': 'history', 'drama': 'drama',
+                       'religious-education': 'rs', 'religious-studies': 'rs', 'music': 'music',
+                       'geography': 'geog', 'design-technology': 'dt', 'film-studies': 'film',
+                       'classical-civilisation': 'classics' };
+
     var UNIT_PAPER_MAP = {
       /* Science (Combined) */
       'biology-paper-1': 'Biology Paper 1',
@@ -1159,6 +1165,45 @@
       var units = unitRes.data || [];
 
       units = units.filter(function (u) { return SKIP_UNITS.indexOf(u.slug) === -1; });
+
+      /* Scope to the options the student actually sits.
+         The picker asks which set texts, which History options, which religions
+         — and the planner never read the answers, so it scheduled EVERY unit in
+         the subject. An AQA English Literature student studies four texts and
+         was being given all 29 units: Macbeth, Merchant of Venice, Jane Eyre,
+         Frankenstein, Animal Farm, A Taste of Honey and the rest. History mixed
+         America, Elizabethan England, Russia and Vietnam in one plan. A revision
+         plan full of texts you have never read is worse than no plan.
+
+         Same rule the dashboard uses in dash-data.js keepUnit(): only subjects
+         with real options are scoped, and only once the student has chosen —
+         before that, show everything rather than hide their course. */
+      try {
+        var wiz = JSON.parse(localStorage.getItem('sv-welcome') || 'null');
+        var wizTopics = (wiz && wiz.topics) || {};
+        var chosen = {};
+        Object.keys(wizTopics).forEach(function (fam) {
+          var picks = [];
+          Object.keys(wizTopics[fam] || {}).forEach(function (gi) {
+            var v = wizTopics[fam][gi];
+            (Array.isArray(v) ? v : [v]).forEach(function (x) { if (x) picks.push(x); });
+          });
+          if (picks.length) chosen[fam] = picks;
+        });
+        if (Object.keys(chosen).length) {
+          units = units.filter(function (u) {
+            var subject = subjectById[u.subject_id];
+            if (!subject) return true;
+            var fam = WIZ_FAMILY[normaliseSubjectSlug(subject.slug)];
+            var picks = fam && chosen[fam];
+            if (!picks) return true;                    // no choices for this subject
+            return picks.some(function (p) {
+              return u.slug === p || u.slug.indexOf(p + '-') === 0;
+            });
+          });
+          if (units.length === 0) return [];
+        }
+      } catch (e) { /* a bad wizard blob must not empty the plan */ }
 
       var unitIds = units.map(function (u) { return u.id; });
       if (unitIds.length === 0) return [];
