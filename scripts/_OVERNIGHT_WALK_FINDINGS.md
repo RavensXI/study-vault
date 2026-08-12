@@ -52,6 +52,13 @@ The fix is to ask the year in the new picker and write the same key. Not
 attempted tonight — it is a question in a flow Tom is actively reviewing, and it
 needs deciding where in the journey it belongs.
 
+### F0/F1 — FIXED 12 Aug (see below for what remains)
+
+The year question is back on the boards step of the new picker and is required.
+The planner's slug-mismatch is fixed too. What is NOT fixed: the planner still
+reports "No live lessons found" even with subjects, units and lessons all
+returning rows — a third cause, not yet found. See F5.
+
 ### F1 — Revision planner is on the 2026 cohort while the dashboard is on 2027
 `/exams` · Severity: **HIGH until 21 Aug** — but see F0: it does **not**
 fully self-heal, because the cohort value it needs is never written
@@ -152,3 +159,33 @@ Four things looked like site bugs for a few minutes and were mine:
 
 All four produced a plausible-looking failure. The pattern: when a check goes
 red, suspect the check first; when it goes green, go and look anyway.
+
+
+---
+
+## F5 — Planner empty: SOLVED 12 Aug
+
+`/exams` · **fixed and live**
+
+Two slug faults, not one — and my first fix only moved the failure downstream,
+which is worth recording because a half-fix that changes the symptom is more
+misleading than no fix.
+
+The subjects **table** keys on the board-suffixed slug (`maths-aqa`). The
+exam-dates **JSON** keys on the base subject (`maths`). The code needs both, in
+different places, and had only one:
+
+| stage | what happened |
+|---|---|
+| before | queried the subjects table with the BASE slug → no subjects at all → "No live lessons found" |
+| after fix 1 | queried with the real slug → subjects, units, lessons all returned → then looked up exam dates with `subject.slug`, now board-suffixed → `subjectPapers` empty → every unit dropped → same message, different line |
+| after fix 2 | exam-date lookup uses `normaliseSubjectSlug()`; that function was trapped inside `init()` where `fetchTopicPools` could not see it, so it is hoisted to the outer scope — **one** definition, since a second copy is exactly how this mismatch breeds |
+
+Verified on production: April, May and June 2027 all populate, daily topics
+colour-coded per subject, exam papers on their dates, rest days honoured,
+"Results Day: Thursday, 19 August 2027 (expected)". 8,333 characters of plan
+where there were 462.
+
+With the cohort question restored, `/exams` works for a free-tier student for
+the first time since the redesign — and since the base-slug fault predates that,
+plausibly for the first time at all.
