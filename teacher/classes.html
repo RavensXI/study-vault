@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Classes — StudyVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/js/auth-gate.js" data-role="admin,teacher" data-auth="teacher"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Same tokens as teacher/dashboard.html so this does not read as a
+       different product. The teacher pages are due a redesign before September;
+       matching them now means this gets redesigned WITH them rather than
+       becoming a second thing to reconcile. */
+    :root {
+      --bg: #faf8f5; --bg-card: #ffffff;
+      --text: #2d2a26; --text-muted: #6b6560; --text-light: #9a938c;
+      --border: #e8e4df; --border-light: #f0ece7;
+      --header-bg: #1e293b; --header-text: #f1f5f9;
+      --accent: #7c3aed; --accent-light: #ede9fe;
+      --green: #16a34a; --green-bg: #f0fdf4;
+      --red: #dc2626; --red-bg: #fef2f2;
+      --radius: 12px; --radius-sm: 8px;
+      --shadow: 0 1px 3px rgba(45,42,38,.06), 0 1px 2px rgba(45,42,38,.04);
+      --shadow-md: 0 4px 12px rgba(45,42,38,.08), 0 2px 4px rgba(45,42,38,.04);
+    }
+
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg);
+           color: var(--text); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+
+    .top { background: var(--header-bg); color: var(--header-text); padding: 0 24px; }
+    .top-in { max-width: 1100px; margin: 0 auto; height: 60px;
+              display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { font-family: 'Source Serif 4', serif; font-weight: 700; font-size: 1.15rem;
+             color: var(--header-text); text-decoration: none; }
+    .top nav { display: flex; gap: 20px; font-size: .88rem; }
+    .top nav a { color: #cbd5e1; text-decoration: none; padding: 4px 0; }
+    .top nav a:hover, .top nav a[aria-current] { color: #fff; }
+
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 34px 24px 70px; }
+
+    h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; font-weight: 700; }
+    .sub { color: var(--text-muted); font-size: .95rem; margin: .3rem 0 26px; max-width: 62ch; }
+
+    .row { display: flex; align-items: baseline; justify-content: space-between;
+           gap: 16px; margin: 34px 0 14px; }
+    h2 { font-family: 'Source Serif 4', serif; font-size: 1.15rem; font-weight: 700; }
+
+    /* ---- class cards ---- */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+    .card { background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 18px 18px 16px; box-shadow: var(--shadow); }
+    .card h3 { font-size: 1.02rem; font-weight: 600; }
+    .meta { color: var(--text-muted); font-size: .84rem; margin-top: 2px; }
+
+    /* The code is the thing a teacher is on this page for: it gets read out to
+       a room. Monospaced, wide-tracked, and big enough to see from a desk. */
+    .code-row { display: flex; align-items: center; gap: 10px; margin: 14px 0 12px; }
+    .code { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+            font-size: 1.5rem; font-weight: 700; letter-spacing: .16em;
+            background: var(--accent-light); color: #5b21b6;
+            padding: 8px 14px; border-radius: var(--radius-sm); }
+    .copy { border: 1px solid var(--border); background: #fff; color: var(--text-muted);
+            border-radius: var(--radius-sm); padding: 8px 12px; font: inherit; font-size: .82rem;
+            cursor: pointer; }
+    .copy:hover { border-color: var(--text-light); color: var(--text); }
+    .copy.done { background: var(--green-bg); border-color: #bbf7d0; color: var(--green); }
+
+    .card-foot { display: flex; align-items: center; justify-content: space-between;
+                 gap: 12px; border-top: 1px solid var(--border-light); padding-top: 12px; }
+    .size { font-size: .84rem; color: var(--text-muted); }
+    .open-link { font-size: .86rem; font-weight: 600; color: var(--accent); text-decoration: none; }
+    .open-link:hover { text-decoration: underline; }
+    .shut { font-size: .78rem; color: var(--red); background: var(--red-bg);
+            padding: 2px 8px; border-radius: 20px; }
+
+    /* ---- new class ---- */
+    .panel { background: var(--bg-card); border: 1px solid var(--border);
+             border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); max-width: 620px; }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field.wide { grid-column: 1 / -1; }
+    label { font-size: .82rem; font-weight: 600; color: var(--text-muted); }
+    input, select { font: inherit; font-size: .93rem; color: var(--text); background: #fff;
+                    border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 11px; }
+    input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+    .btn { font: inherit; font-size: .92rem; font-weight: 600; cursor: pointer;
+           background: var(--accent); color: #fff; border: 1px solid var(--accent);
+           border-radius: var(--radius-sm); padding: 10px 20px; }
+    .btn:hover { background: #6d28d9; border-color: #6d28d9; }
+    .btn[disabled] { opacity: .55; cursor: not-allowed; }
+    .actions { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+
+    .note { font-size: .84rem; color: var(--text-muted); }
+    .err { color: var(--red); font-size: .86rem; }
+
+    /* what the teacher reads out after creating one */
+    .made { background: var(--green-bg); border: 1px solid #bbf7d0;
+            border-radius: var(--radius); padding: 18px 20px; margin-bottom: 18px; }
+    .made .code { background: #fff; }
+    .made p { font-size: .9rem; color: #14532d; }
+
+    .empty { color: var(--text-muted); font-size: .93rem; background: var(--bg-card);
+             border: 1px dashed var(--border); border-radius: var(--radius); padding: 26px; text-align: center; }
+    .loading { color: var(--text-light); font-size: .9rem; padding: 20px 0; }
+
+    /* ---- the class view ---- */
+    .look { background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-md); margin-top: 16px;
+            /* It is inserted directly after the card that opened it, which puts
+               it INSIDE the card grid. Without this it becomes a single grid
+               item: one 300px column, seven thousand pixels tall. */
+            grid-column: 1 / -1; }
+    .look h2 { margin-bottom: 2px; }
+    .look .meta { margin-bottom: 16px; }
+    .close-look { float: right; border: 1px solid var(--border); background: #fff; cursor: pointer;
+                  border-radius: var(--radius-sm); padding: 5px 11px; font: inherit; font-size: .82rem;
+                  color: var(--text-muted); }
+    .close-look:hover { color: var(--text); border-color: var(--text-light); }
+
+    .look h4 { font-size: .8rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+               color: var(--text-light); margin: 22px 0 9px; }
+    .look h4:first-of-type { margin-top: 6px; }
+
+    .bars { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill { font-size: .82rem; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 20px; padding: 4px 12px; color: var(--text-muted); }
+    .pill b { color: var(--text); font-weight: 600; }
+
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th { text-align: left; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em;
+         color: var(--text-light); font-weight: 700; padding: 0 10px 7px 0; }
+    td { padding: 7px 10px 7px 0; border-top: 1px solid var(--border-light); vertical-align: top; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .scroller { overflow-x: auto; }
+
+    /* the wrong answer a class shares — the reason a teacher opens this at all */
+    .wrong { color: var(--red); font-weight: 600; }
+    .right { color: var(--green); font-weight: 600; }
+    .qtext { color: var(--text); }
+    .where { color: var(--text-light); font-size: .78rem; }
+    .thin { color: var(--text-muted); font-size: .86rem; }
+
+    @media (max-width: 620px) { .fields { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="top-in">
+      <a class="brand" href="/">StudyVault</a>
+      <nav>
+        <a href="/teacher/dashboard">Dashboard</a>
+        <a href="/teacher/classes" aria-current="page">Classes</a>
+        <a href="/teacher/review">Review</a>
+        <a href="/teacher/editor">Editor</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1>Your classes</h1>
+    <p class="sub">Make a class, read out the code, and your students are in. They sign in as
+      normal StudyVault users — there is nothing for your IT department to set up.</p>
+
+    <div id="made"></div>
+
+    <div class="row"><h2>New class</h2></div>
+    <div class="panel">
+      <div class="fields">
+        <div class="field">
+          <label for="cname">Class name</label>
+          <input id="cname" maxlength="40" placeholder="10 Set 1" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="cyear">Year group</label>
+          <select id="cyear">
+            <option value="">Not set</option>
+            <option value="7">Year 7</option><option value="8">Year 8</option>
+            <option value="9">Year 9</option><option value="10">Year 10</option>
+            <option value="11" selected>Year 11</option>
+          </select>
+        </div>
+        <div class="field wide">
+          <label for="csubject">Subject</label>
+          <select id="csubject"><option value="">Loading…</option></select>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="make">Create class</button>
+        <span class="note" id="makenote"></span>
+      </div>
+    </div>
+
+    <div class="row"><h2>Classes you teach</h2></div>
+    <div id="list" class="loading">Loading your classes…</div>
+  </main>
+
+<script>
+(function () {
+  var SUPA = 'https://baipckgywpnwapobwtsy.supabase.co';
+  var ANON = 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
+  var listEl = document.getElementById('list');
+  var subjEl = document.getElementById('csubject');
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* Credentials work the same way as admin/pipeline.html: an individually
+     signed-in teacher sends their Supabase token; the shared TEACHER_PASSWORD
+     login sends the password instead. Both reach requireTeacher. */
+  var token = null, pw = null;
+  async function credentials() {
+    try {
+      var sb = window.supabase.createClient(SUPA, ANON);
+      var s = await sb.auth.getSession();
+      if (s && s.data && s.data.session) token = s.data.session.access_token;
+    } catch (e) {}
+    try {
+      var saved = JSON.parse(sessionStorage.getItem('studyvault-auth') || 'null');
+      if (saved && saved.pw) pw = saved.pw;
+    } catch (e) {}
+  }
+
+  async function api(path, body) {
+    var headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    else if (pw) headers['X-Admin-Password'] = pw;
+    var opts = { headers: headers };
+    if (body !== undefined) {
+      opts.method = 'POST';
+      if (pw && !token) body._admin_password = pw;
+      opts.body = JSON.stringify(body);
+    }
+    var r = await fetch(path, opts);
+    var d = await r.json();
+    if (!r.ok) throw new Error(d.error || d.detail || ('Request failed (' + r.status + ')'));
+    return d;
+  }
+
+  function classCard(c) {
+    return '<div class="card">' +
+      '<h3>' + esc(c.name) + '</h3>' +
+      '<div class="meta">' + esc(c.subject || 'No subject set') +
+        (c.yearGroup ? ' · Year ' + esc(c.yearGroup) : '') + '</div>' +
+      '<div class="code-row">' +
+        '<span class="code">' + esc(c.joinCode || '——————') + '</span>' +
+        (c.joinCode ? '<button class="copy" data-code="' + esc(c.joinCode) + '">Copy</button>' : '') +
+        (c.joinOpen ? '' : '<span class="shut">Closed</span>') +
+      '</div>' +
+      '<div class="card-foot">' +
+        '<span class="size">' + c.size + (c.size === 1 ? ' student' : ' students') + '</span>' +
+        (c.size
+          ? '<a class="open-link" href="#" data-look="' + esc(c.id) + '">See how they are doing &rarr;</a>'
+          : '<span class="thin">Nobody has joined yet</span>') +
+      '</div></div>';
+  }
+
+  function paintClasses(classes) {
+    if (!classes.length) {
+      listEl.className = '';
+      listEl.innerHTML = '<div class="empty">No classes yet. Make one above, then read the code out to your group.</div>';
+      return;
+    }
+    listEl.className = 'grid';
+    listEl.innerHTML = classes.map(classCard).join('');
+  }
+
+  function paintSubjects(subjects) {
+    var own = subjects.filter(function (s) { return s.own; });
+    var gen = subjects.filter(function (s) { return !s.own; });
+    var html = '<option value="">Choose a subject…</option>';
+    function opts(list) {
+      return list.map(function (s) {
+        return '<option value="' + esc(s.id) + '">' + esc(s.name) + '</option>';
+      }).join('');
+    }
+    if (own.length) html += '<optgroup label="Your school">' + opts(own) + '</optgroup>';
+    html += '<optgroup label="' + (own.length ? 'All subjects' : 'Subjects') + '">' + opts(gen) + '</optgroup>';
+    subjEl.innerHTML = html;
+  }
+
+  async function load() {
+    try {
+      var d = await api('/api/teacher/my-classes');
+      paintClasses(d.classes || []);
+      paintSubjects(d.subjects || []);
+    } catch (e) {
+      listEl.className = '';
+      listEl.innerHTML = '<div class="empty">Could not load your classes. ' + esc(e.message) + '</div>';
+      subjEl.innerHTML = '<option value="">Could not load subjects</option>';
+    }
+  }
+
+  document.getElementById('make').addEventListener('click', async function () {
+    var btn = this;
+    var note = document.getElementById('makenote');
+    var name = document.getElementById('cname').value.trim();
+    var subject = subjEl.value;
+    var year = document.getElementById('cyear').value;
+
+    note.className = 'note'; note.textContent = '';
+    if (!name) { note.className = 'err'; note.textContent = 'Give the class a name.'; return; }
+    if (!subject) { note.className = 'err'; note.textContent = 'Choose a subject.'; return; }
+
+    btn.disabled = true; note.textContent = 'Creating…';
+    try {
+      var d = await api('/api/teacher/create-class',
+        { name: name, subject_id: subject, year_group: year || null });
+      document.getElementById('made').innerHTML =
+        '<div class="made"><h2>' + esc(d.class.name) + ' is ready</h2>' +
+        '<div class="code-row"><span class="code">' + esc(d.class.joinCode) + '</span>' +
+        '<button class="copy" data-code="' + esc(d.class.joinCode) + '">Copy</button></div>' +
+        '<p>Read that out. Your students sign in, open Classes, and enter it.</p></div>';
+      document.getElementById('cname').value = '';
+      note.textContent = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      await load();
+    } catch (e) {
+      note.className = 'err'; note.textContent = e.message;
+    } finally { btn.disabled = false; }
+  });
+
+  /* ---- the class view ----------------------------------------------------
+     Consumes /api/teacher/class-progress, which enforces the data boundary
+     server-side: attainment comes through, "last active" arrives already
+     bucketed, and study habits never leave the server. Nothing here should try
+     to be cleverer than what that endpoint chose to send. */
+  function lookHtml(d) {
+    var act = d.activity || {};
+    var order = ['this week', 'last week', 'this month', 'over a month', 'never'];
+    var pills = order.filter(function (k) { return act[k]; }).map(function (k) {
+      return '<span class="pill"><b>' + act[k] + '</b> ' + esc(k) + '</span>';
+    }).join('');
+
+    var h = '<div class="look" id="look">' +
+      '<button class="close-look" data-close>Close</button>' +
+      '<h2>' + esc(d.class.name) + '</h2>' +
+      '<div class="meta">' + esc(d.class.subject || 'No subject') + ' · ' + d.size +
+        (d.size === 1 ? ' student' : ' students') + '</div>';
+
+    h += '<h4>Last worked on this subject</h4><div class="bars">' +
+         (pills || '<span class="thin">No activity recorded yet.</span>') + '</div>';
+
+    /* The item analysis. A shared wrong answer is a misconception; scattered
+       wrong answers are just a hard question. That is why the endpoint reports
+       the most-picked distractor and how many chose it. */
+    h += '<h4>Questions the class gets wrong</h4>';
+    if (!(d.missedItems || []).length) {
+      h += '<p class="thin">Nothing yet that two or more of them missed. A single wrong answer ' +
+           'is one pupil having an off day, so it is not shown here.</p>';
+    } else {
+      h += '<div class="scroller"><table><thead><tr><th>Question</th><th>They chose</th>' +
+           '<th>Answer</th><th class="num">Students</th></tr></thead><tbody>';
+      d.missedItems.forEach(function (q) {
+        h += '<tr><td><span class="qtext">' + esc(q.question) + '</span><br>' +
+             '<span class="where">' + esc(q.where) + '</span></td>' +
+             '<td class="wrong">' + esc(q.commonWrongAnswer || '—') +
+             (q.commonWrongCount > 1 ? ' <span class="where">×' + q.commonWrongCount + '</span>' : '') + '</td>' +
+             '<td class="right">' + esc(q.right || '—') + '</td>' +
+             '<td class="num">' + q.students + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+
+    h += '<h4>Weakest units</h4>';
+    if (!(d.weakestUnits || []).length) {
+      h += '<p class="thin">Not enough warm-up attempts yet to say.</p>';
+    } else {
+      h += '<div class="scroller"><table><thead><tr><th>Unit</th><th class="num">Accuracy</th>' +
+           '<th class="num">Attempts</th></tr></thead><tbody>';
+      d.weakestUnits.forEach(function (u) {
+        h += '<tr><td>' + esc(u.unit) + '</td><td class="num">' + u.accuracy + '%</td>' +
+             '<td class="num">' + u.attempts + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+
+    h += '<h4>Students</h4><div class="scroller"><table><thead><tr><th>Name</th>' +
+         '<th class="num">Lessons done</th><th class="num">Quiz accuracy</th>' +
+         '<th class="num">Practice</th><th>Last active</th></tr></thead><tbody>';
+    (d.students || []).forEach(function (s) {
+      h += '<tr><td>' + esc(s.name) + '</td>' +
+           '<td class="num">' + s.lessonsComplete + '</td>' +
+           '<td class="num">' + (s.quizAccuracy == null ? '—' : s.quizAccuracy + '%') + '</td>' +
+           '<td class="num">' + s.practiceAnswered + '</td>' +
+           '<td>' + esc(s.lastActive) + '</td></tr>';
+    });
+    h += '</tbody></table></div></div>';
+    return h;
+  }
+
+  document.addEventListener('click', async function (ev) {
+    var a = ev.target.closest('[data-look]');
+    if (a) {
+      ev.preventDefault();
+      var old = document.getElementById('look');
+      if (old) old.remove();
+      /* after the whole grid, not after the card that was clicked: the panel is
+         long, and inserting it mid-grid strands every later class below it */
+      listEl.insertAdjacentHTML('afterend', '<div class="look" id="look">Loading…</div>');
+      try {
+        var d = await api('/api/teacher/class-progress?class_id=' + encodeURIComponent(a.getAttribute('data-look')));
+        document.getElementById('look').outerHTML = lookHtml(d);
+      } catch (e) {
+        document.getElementById('look').innerHTML =
+          '<button class="close-look" data-close>Close</button><p class="err">' + esc(e.message) + '</p>';
+      }
+      return;
+    }
+    if (ev.target.closest('[data-close]')) {
+      var l = document.getElementById('look');
+      if (l) l.remove();
+    }
+  });
+
+  /* one listener for every Copy button, including ones painted later */
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest('.copy');
+    if (!b) return;
+    var code = b.getAttribute('data-code');
+    navigator.clipboard.writeText(code).then(function () {
+      b.textContent = 'Copied'; b.classList.add('done');
+      setTimeout(function () { b.textContent = 'Copy'; b.classList.remove('done'); }, 1600);
+    }).catch(function () { b.textContent = code; });
+  });
+
+  credentials().then(load);
+})();
+</script>
+</body>
+</html>
