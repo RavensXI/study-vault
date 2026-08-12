@@ -119,8 +119,17 @@ module.exports = async function handler(req, res) {
       result = r.text; served = r.servedBy;
       model = EXAM_MODEL;
     } else {
-      // Quick tier: try Groq first (cheaper), fall back to Haiku
-      if (process.env.GROQ_API_KEY) {
+      // Quick tier: Groq is cheaper, but it does NOT go through
+      // api/_lib/claude.js, so none of the UK-region guards apply to it — a
+      // GROQ_API_KEY set by anyone, at any point, silently routes pupils' work
+      // to a US provider with no trace beyond servedBy saying "groq".
+      //
+      // It is currently unset in production (verified: quick-tier marking
+      // reports bedrock:eu-west-2), so this costs nothing today. The guard is
+      // here so that setting the key later is a DECISION rather than an
+      // accident — the same explicit switch that governs the Anthropic
+      // fallback now governs this one.
+      if (process.env.GROQ_API_KEY && process.env.ALLOW_US_FALLBACK) {
         try {
           result = await callGroq(system, prompt);
           model = 'groq/gpt-oss-120b';

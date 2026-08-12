@@ -131,7 +131,32 @@ async function callClaude(body) {
   // would still 400 anyone who moves a caller to Sonnet 5 directly.
   if (REJECTS_TEMPERATURE.has(payload.model)) delete payload.temperature;
 
-  if (!onBedrock) return viaAnthropic(payload);
+  // FAILS CLOSED WHEN BEDROCK IS NOT CONFIGURED AT ALL.
+  //
+  // The path below this line already refuses to fall back once Bedrock IS
+  // configured. This branch was the remaining hole: with the AWS variables
+  // simply absent, every route quietly used api.anthropic.com and said nothing.
+  // That is not a hypothetical — it is what happened the first time the
+  // parents'-evening summary ran, and the only reason anyone noticed was that
+  // the route reports servedBy. A preview deploy, a fresh environment, or one
+  // deleted variable produces the same silence with real pupil work in it.
+  //
+  // "Configured for London" and "actually in London" have to be the same
+  // sentence, and the way to guarantee that is for the unconfigured case to be
+  // an error rather than a destination.
+  if (!onBedrock) {
+    if (!process.env.ALLOW_US_FALLBACK) {
+      throw new Error(
+        'UK AI region is not configured (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, ' +
+        'AWS_REGION), and this deployment will not send content outside the UK. ' +
+        'Set them, or set ALLOW_US_FALLBACK=1 to deliberately accept US processing.');
+    }
+    console.error('[claude] ALLOW_US_FALLBACK is set and Bedrock is NOT configured —',
+      'this request is going to the US. DATA IS LEAVING THE UK. Model:', payload.model);
+    const out = await viaAnthropic(payload);
+    out._servedBy = 'anthropic-direct (US; BEDROCK NOT CONFIGURED)';
+    return out;
+  }
 
   // FAILS CLOSED. Once Bedrock is configured, a Bedrock failure is an error —
   // it does NOT quietly re-run the request against api.anthropic.com.
