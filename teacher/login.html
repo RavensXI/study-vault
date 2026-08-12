@@ -272,6 +272,13 @@
 
   <script>
   (function () {
+    /* Read this BEFORE creating the client. supabase-js has detectSessionInUrl
+       on by default: it consumes the recovery fragment and clears it, so by the
+       time anything below runs the only evidence of why the user is here may
+       already be gone. */
+    var CAME_FROM_RESET = /type=recovery/.test(window.location.hash) ||
+                          /type=recovery/.test(window.location.search);
+
     var SB_URL = 'https://baipckgywpnwapobwtsy.supabase.co';
     var SB_KEY = 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
     var sb = window.supabase.createClient(SB_URL, SB_KEY);
@@ -300,8 +307,10 @@
     var resetError = document.getElementById('resetError');
     var resetSuccess = document.getElementById('resetSuccess');
     var resetBtn = document.getElementById('resetBtn');
+    var recoveryMode = false;
 
     function enterRecoveryMode() {
+      recoveryMode = true;
       if (resetForm.style.display === '') return;
       resetForm.style.display = '';
       loginFormEl.style.display = 'none';
@@ -311,9 +320,7 @@
         'You followed a reset link. Set a new password to finish signing in.';
     }
 
-    if (/type=recovery/.test(location.hash) || /type=recovery/.test(location.search)) {
-      enterRecoveryMode();
-    }
+    if (CAME_FROM_RESET) enterRecoveryMode();
     sb.auth.onAuthStateChange(function (event) {
       if (event === 'PASSWORD_RECOVERY') enterRecoveryMode();
     });
@@ -376,6 +383,13 @@
 
     // Check if already logged in
     sb.auth.getSession().then(function (res) {
+      /* NOT during a password reset. The recovery token establishes a real
+         session, so this check would see a signed-in user and bounce them to
+         the dashboard — throwing them out of the reset form a few seconds
+         after it appears, before they can type anything. The session exists
+         precisely so updateUser() can change the password; it is not a signal
+         that the user is finished here. */
+      if (CAME_FROM_RESET || recoveryMode) return;
       if (res.data.session) {
         verifyTeacher(res.data.session.user.id);
       }
