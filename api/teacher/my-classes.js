@@ -38,7 +38,10 @@ module.exports = async function handler(req, res) {
 
   const { data: classes, error } = await q;
   if (error) return res.status(500).json({ error: 'Could not load your classes.', detail: error.message });
-  if (!classes || !classes.length) return res.status(200).json({ classes: [], subjects: await subjectList(auth) });
+  if (!classes || !classes.length) {
+    return res.status(200).json({ classes: [], canBuild: !!auth.profile.school_id,
+                                  subjects: await subjectList(auth) });
+  }
 
   const ids = classes.map(function (c) { return c.id; });
   const subjectIds = [...new Set(classes.map(function (c) { return c.subject_id; }).filter(Boolean))];
@@ -56,6 +59,11 @@ module.exports = async function handler(req, res) {
   (subjects || []).forEach(function (s) { subjectName[s.id] = s.name; });
 
   return res.status(200).json({
+    /* Whether this person's school may build its own content. A capability of
+       the SCHOOL, never a link handed to a person: a link lives in one
+       teacher's inbox and is lost the moment they leave, which is the failure
+       we designed the class-derived access to avoid. */
+    canBuild: !!auth.profile.school_id,
     classes: classes.map(function (c) {
       return {
         id: c.id,

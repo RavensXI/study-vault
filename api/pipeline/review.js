@@ -1,5 +1,6 @@
 const { requireTeacher } = require('./_lib/auth');
 const { supabase } = require('./_lib/supabase');
+const { forgetSourceIfPublished } = require('./_lib/forget-source');
 
 module.exports = async function handler(req, res) {
   const auth = await requireTeacher(req, res);
@@ -284,6 +285,14 @@ module.exports = async function handler(req, res) {
         });
       }
 
+      /* Source material has done its job once the lessons are live.
+         See _lib/forget-source.js: publish rather than build-complete, because
+         the gap between those two is exactly where re-runs happen.
+         Only freeTierIds went live here — schoolIds moved to
+         ready_for_teacher, which is a step BEFORE the department has seen
+         them, so their source is very much still needed. */
+      await forgetSourceIfPublished(freeTierIds);
+
       return res.status(200).json({ ok: true, updated: updatedCount });
     }
 
@@ -374,6 +383,8 @@ module.exports = async function handler(req, res) {
           }
           total += (data || []).length;
         }
+        await forgetSourceIfPublished(freeIds);
+
         return res.status(200).json({ ok: true, approved: total });
       }
 
@@ -416,6 +427,8 @@ module.exports = async function handler(req, res) {
           notes: notes || (isFreeTierSubject ? 'Free-tier bulk approve → live' : 'Bulk approved via review dashboard')
         });
       }
+
+      await forgetSourceIfPublished((data || []).map(function (r) { return r.id; }));
 
       return res.status(200).json({ ok: true, approved: (data || []).length });
     }
@@ -620,6 +633,8 @@ module.exports = async function handler(req, res) {
           notes: notes || 'QA approved — lesson is now live'
         });
       }
+
+      await forgetSourceIfPublished((data || []).map(function (r) { return r.id; }));
 
       return res.status(200).json({ ok: true, updated: (data || []).length });
     }

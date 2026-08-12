@@ -127,6 +127,12 @@
     .loading{color:var(--mut);font-size:.9rem;padding:22px 0}
     [hidden]{display:none!important}
 
+    .buildbar{margin-top:44px;padding-top:26px;border-top:1px solid var(--line);
+              display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+    .buildbar h3{font-family:var(--read);font-size:1.05rem;font-weight:600;
+                 text-transform:none;letter-spacing:0;color:var(--ink);margin-bottom:4px}
+    .buildbar p{font-size:.85rem;color:var(--sec);max-width:62ch}
+
     /* ---- parents' evening pack ----
        A printable page about one pupil. Screen and paper share a layout so a
        teacher is not surprised by what comes out of the printer. */
@@ -259,6 +265,21 @@
     </section>
 
     <div id="view" class="loading">Loading…</div>
+
+    <!-- Building from your own resources is a different MODE of work from the
+         daily loop above: setup, done when a department joins, not something
+         you do between lessons. It gets its own door rather than a seat in the
+         nav, so the everyday screen never implies a teacher is expected to
+         operate a content factory. -->
+    <section class="buildbar" id="buildbar" hidden>
+      <div>
+        <h3>Build lessons from your own resources</h3>
+        <p>Upload your schemes of work and we build lessons around them. Your files never
+           leave this computer — only the text is read, it is processed in the UK, and it
+           is deleted once your lessons go live.</p>
+      </div>
+      <a class="btn ghost" href="/teacher/upload">Start a build &rarr;</a>
+    </section>
   </main>
 
 <script>
@@ -461,6 +482,12 @@
     try {
       var d = await api('/api/teacher/my-classes');
       CLASSES = d.classes || [];
+      /* Guarded. An earlier version of this line referenced an element whose
+         markup had silently failed to insert, so load() threw here and the
+         class list never populated at all — one optional flourish taking the
+         whole screen down. Nothing in this function should be able to do that. */
+      var bb = document.getElementById('buildbar');
+      if (bb) bb.hidden = !d.canBuild;
       paintSubjects(d.subjects || []);
 
       if (!CLASSES.length) {
