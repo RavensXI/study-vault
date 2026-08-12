@@ -2578,6 +2578,11 @@ function initLessonProgress() {
       if (!complete && ix >= 0) arr.splice(ix, 1);
       roll[key] = arr;
       localStorage.setItem('sv-lessons-done', JSON.stringify(roll));
+      /* Send it to the account now, not on the student's next dashboard visit.
+         sync.js debounces, so ticking several activities in one lesson is one
+         request. Without this the work sat on the device until they happened to
+         open a dashboard again — fine on one machine, invisible on the next. */
+      if (window.svProgressPushSoon) svProgressPushSoon();
       // completion dates power the dashboards' "this week" figures
       try {
         var when = JSON.parse(localStorage.getItem('sv-lessons-when')) || {};
