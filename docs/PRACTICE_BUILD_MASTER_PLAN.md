@@ -223,7 +223,19 @@ are wrong — and it needs a different technique entirely.
 
 ## 7. Recommendation
 
-### Phase 0 — Build the missing validator FIRST *(new; this is the change of order)*
+### Phase 0 — Build the missing validator FIRST *(SHIPPED 14 Aug)*
+
+**Done.** `scripts/_qa_practice_data.py` exists, is in git, and ran over the
+full live corpus (925 non-archived lessons / 18,175 problems). Result: **one
+real error** — a dangling `ai_prompt_key` leaving an AI-marked question with no
+rubric, fixed by copying the rubric from a sibling lesson — plus 65 warnings
+for human triage (35 lesson-size, 19 tier-descriptions, 7 chart-no-question,
+3 board-name, 1 mark-scheme language). Calibration took three rounds: the first
+run reported 961 errors of which 959 were the validator's own rule misfires
+(MFL asks live in type-specific fields; imperative asks need no question mark;
+duplicate identity must hash the whole problem). The corpus is structurally far
+cleaner than the 0.6%-review-coverage fear suggested — which makes Phase 1
+(answer *correctness* via sympy) the remaining unknown, not structure.
 
 Write `scripts/_qa_practice_data.py` as documented but never built. Pure Python,
 no model calls, runs over all 977 existing lessons in minutes:

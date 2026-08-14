@@ -145,6 +145,24 @@
         .maybeSingle();
     }
 
+    // Staff fallback 2: the school HINT can itself be the miss. An admin
+    // following a link into another school's bespoke subject (a Severn Vale
+    // slug while carrying a Unity hint) scoped to the wrong school above, and
+    // for a school-only subject the generic fallback finds nothing either —
+    // so staff got "not found" on content they are allowed to see. Any-school
+    // runs LAST, after generic, so a teacher whose own school simply lacks a
+    // bespoke copy still lands on generic rather than a rival's version.
+    if (isStaff && schoolHint && !unitResult.data) {
+      unitResult = await sb
+        .from('units')
+        .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id, settings)')
+        .eq('slug', params.unitSlug)
+        .eq('subjects.slug', params.subjectSlug)
+        .not('subjects.school_id', 'is', null)
+        .limit(1)
+        .maybeSingle();
+    }
+
     // Fallback: if viewing science and unit not found, try separate-sciences
     if (!unitResult.data && (params.subjectSlug === 'science' || params.subjectSlug.indexOf('science-') === 0)) {
       var sepQuery = sb.from('units')
