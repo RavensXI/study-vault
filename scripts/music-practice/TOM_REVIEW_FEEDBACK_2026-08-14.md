@@ -375,3 +375,43 @@ legato belongs in a score-reading unit.
 AOS1-1 stray passage refs, AOS1-2 examples-without-audio scan, AOS1-4
 classification counts, WC-1 related-media check, WC-4 markup diff, AOS2-2
 duplicate tip, SR-1/4 pairings, LS-3 bank sizes.
+
+---
+
+## Query findings — 15 Aug (all nine ran; several reshape their fixes)
+
+- **LS-1 SOLVED, and it is better than a broken button:** all five L1
+  method-card demos are **byte-identical — 152,684 bytes each**. demo_major,
+  demo_minor, demo_pentatonic, demo_chromatic and demo_wholetone are one audio
+  file uploaded five times. Tom pressed play on "whole-tone" and heard nothing
+  useful because it IS the major demo. Fix: regenerate all five with
+  `build_tonality_demos.py`, re-upload, verify by hash difference.
+  **LS-1b RESOLVED:** the gold classical problems DO have audio — all four
+  passages carry the real PD recordings (Beethoven, Mozart 40, K.622, Verdi).
+  What differs is the player rendering, a front-end check, not missing assets.
+- **AOS1-1 is SYSTEMATIC:** every lesson L1–L8 of the practice unit has the
+  same pattern — vocab_match at bronze[2] and reorder at silver[2], each
+  carrying a passage_id it does not need. 16 problems. Fix: strip the refs
+  (data) + add both types to the renderer's no-panel list (prevents recurrence).
+- **AOS1-2 census:** 8 worked examples promise listening with no audio —
+  score-reading L1–L4 and western-classical L2/L3/L4/L7 (L2 = Tom's Mozart 40).
+- **AOS1-4 reframe:** the heuristic found ZERO named-work facts without audio
+  because the K.622-style questions ARE excerpt-anchored — the defect is that
+  the ASK is unhearable even with audio playing ("what key is it" cannot be
+  heard as a letter name). The classifier must look at what the ANSWER is
+  (key names, opus numbers, dates), not whether audio exists.
+- **WC-1 bigger than reported:** ALL 13 article lessons across all five AoS
+  units lack related media, not just AoS1. One related-media pass covers it.
+- **WC-4 decoded:** L1 wraps listen prompts in `<figure class="sv-listen"
+  data-narration-id>` — the proper component. L2's first listen prompt is
+  plain prose, no figure, no narration id — hence unstyled and unnarrated.
+  Fix: wrap in the component; L2 re-narrates.
+- **AOS2-2 confirmed + a bonus:** L2 carries the don't-guess-the-title
+  guidance TWICE in slightly different words; **L4 doubles its own
+  "don't guess the year" the same way.** Chop one of each pair.
+- **SR-1 root cause:** the 6/8 question is pure THEORY but is anchored to
+  passage `t-metre-1` — the "Simple time" teaching figure — which is why a
+  2/4 score sits beside a 6/8 question. Fix: remove the passage_id; the
+  question is self-contained.
+- **LS-3 recorded:** listening-skills tiers are 4/4/4-5 — confirming
+  unseen-on-retry was never viable there and the cap-at-two decision stands.
