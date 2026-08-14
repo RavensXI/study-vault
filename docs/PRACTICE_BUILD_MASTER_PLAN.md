@@ -259,7 +259,20 @@ across 19,215 existing problems, and it is the acceptance test for anything
 generated later. Building the generator first means having no way to tell whether
 its output is good.
 
-### Phase 1 — Independent answer verification for deterministic types
+### Phase 1 — Independent answer verification *(SHIPPED 14 Aug)*
+
+**Done.** `scripts/_qa_practice_answers.py`: three checks, no model calls —
+scaffold-vs-key (the guided steps must reach the accepted answer; 7,031
+problems), step arithmetic recomputed with sympy (8,373 steps), and bare-LaTeX
+expression evaluation (143). **Result: zero wrong keys.** Every one of the
+4,849 candidate flags raised during calibration was the checker misreading the
+corpus — verification steps that deliberately end on a different number,
+probability scaffolds stating parts and leaving the quotient to the answer box,
+fraction keys encoded as [num, den], answers stated in prose, mixed numbers
+parsing as multiplication, index-law questions read as evaluations, and a
+tolerance bug for integral keys. Six problems are genuinely not
+machine-checkable and say so. The deterministic corpus's answer keys are clean;
+both scripts are the regression gate for any future practice build.
 
 `single_value`, `fraction`, `two_solutions`, `standard_form` and `xy_pair` are
 89% of quantitative problems and are *machine-checkable*. Re-derive the answer
