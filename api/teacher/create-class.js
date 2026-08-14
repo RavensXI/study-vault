@@ -62,20 +62,29 @@ module.exports = async function handler(req, res) {
      anyone with a teacher account could plant a class in another school. */
   const schoolId = auth.profile.school_id || null;
 
-  const code = await uniqueCode();
-
-  const { data: created, error } = await supabase
-    .from('classes')
-    .insert({
-      name: name,
-      subject_id: subject.id,
-      year_group: isNaN(yearGroup) ? null : yearGroup,
-      teacher_id: auth.profile.id,
-      school_id: schoolId,
-      join_code: code
-    })
-    .select('id, name, year_group, join_code')
-    .single();
+  /* The uniqueness check and the insert are two round trips, so two teachers
+     creating classes at the same moment can pass the check with the same code
+     and race to the unique index. The index wins — but the loser used to get a
+     bare 500. Retry with a fresh code instead; only a non-collision error is
+     surfaced. */
+  let created = null, error = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const code = await uniqueCode();
+    ({ data: created, error } = await supabase
+      .from('classes')
+      .insert({
+        name: name,
+        subject_id: subject.id,
+        year_group: isNaN(yearGroup) ? null : yearGroup,
+        teacher_id: auth.profile.id,
+        school_id: schoolId,
+        join_code: code
+      })
+      .select('id, name, year_group, join_code')
+      .single());
+    if (!error) break;
+    if (!/duplicate|unique|23505/i.test(error.message || '')) break;
+  }
 
   if (error) {
     return res.status(500).json({ error: 'Could not create the class.', detail: error.message });
@@ -90,6 +99,6 @@ module.exports = async function handler(req, res) {
       joinCode: created.join_code
     },
     /* what the teacher actually reads out */
-    instructions: 'Students sign in, open Classes, and enter ' + created.join_code
+    instructions: 'Students go to studyvault.co.uk/join and enter ' + created.join_code
   });
 };

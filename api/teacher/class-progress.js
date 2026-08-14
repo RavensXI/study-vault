@@ -38,6 +38,31 @@ function bucketLastActive(iso) {
   return 'over a month';
 }
 
+/* The most recent day this pupil worked on THIS SUBJECT.
+   The first version bucketed progress.updated_at — the whole account — under a
+   heading that names the subject. A pupil who revised only French yesterday
+   showed "this week" to their English teacher: pedagogically misleading, and
+   it quietly reveals more than the subject-scoped view is meant to (that they
+   were on the platform at all). Derived instead from the dates the blob
+   already carries, all subject-scoped: kc entries (d), lesson completion dates
+   (when), and warm-up days whose units are in scope. Dates only — never a
+   time of day. */
+function lastSubjectActivity(blob, base) {
+  let latest = null;
+  const later = function (d) {
+    if (d && typeof d === 'string' && (!latest || d > latest)) latest = d;
+  };
+  const kc = pick(blob.kc, base);
+  Object.keys(kc).forEach(function (k) { later((kc[k] || {}).d); });
+  const when = pick(blob.when, base);
+  Object.keys(when).forEach(function (k) { later(when[k]); });
+  Object.keys(blob.warmlog || {}).forEach(function (day) {
+    const units = (blob.warmlog[day] || {}).units || {};
+    if (Object.keys(units).some(function (u) { return inScope(u, base); })) later(day);
+  });
+  return latest;
+}
+
 function countComplete(done) {
   if (!done || typeof done !== 'object') return 0;
   return Object.keys(done).reduce(function (n, k) {
@@ -168,7 +193,7 @@ module.exports = async function handler(req, res) {
     const blob = (row && row.blob) || {};
     NEVER_SEND.forEach(function (k) { delete blob[k]; });   // belt and braces
 
-    const bucket = bucketLastActive(row && row.updated_at);
+    const bucket = bucketLastActive(lastSubjectActivity(blob, base));
     activity[bucket] = (activity[bucket] || 0) + 1;
 
     const kcScoped = pick(blob.kc, base);

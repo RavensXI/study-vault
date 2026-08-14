@@ -103,6 +103,12 @@ module.exports = async function handler(req, res) {
     const updatedConfig = {
       ...job.subject_config,
       colors: colors || job.subject_config?.colors || {},
+      /* Persisted here, not merely returned: the HTTP response dies with the
+         request, and pipeline_steps has no format column — so without this the
+         format tag existed nowhere a later build step could read it. Whatever
+         creates the subject copies practice_units into subjects.settings. */
+      practice_units: planUnits.filter(u => u.format === 'practice').map(u => u.slug),
+      unit_formats: Object.fromEntries(planUnits.map(u => [u.slug, u.format])),
     };
 
     await supabase.from('upload_jobs').update({

@@ -228,7 +228,10 @@ are wrong — and it needs a different technique entirely.
 Write `scripts/_qa_practice_data.py` as documented but never built. Pure Python,
 no model calls, runs over all 977 existing lessons in minutes:
 
-- 20 problems per lesson, tier distribution 7–8 / 6 / 5–6
+- 20 problems per lesson, tier distribution 7–8 / 6 / 5–6 — **per-family
+  tolerances, not one rule**: Music runs ~15/lesson by design (artisanal), and a
+  validator that mass-flags a family Tom curates by hand drowns its own signal
+  on the first run
 - every problem has the fields its `input_type` requires
 - `solutions` is the right *type* (numeric vs array-of-indices) and is not an
   object stringified into `[object Object]`

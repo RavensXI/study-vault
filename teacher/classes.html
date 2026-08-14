@@ -399,7 +399,7 @@
              esc(s.name) + '</button></td>' +
            '<td class="num">' + s.lessonsComplete + '</td>' +
            '<td class="num">' + (s.quizAccuracy == null ? '—' : s.quizAccuracy + '%') + '</td>' +
-           '<td class="num">' + s.practiceAnswered + '</td>' +
+           '<td class="num">' + (s.practiceAnswered >= 40 ? '40+' : s.practiceAnswered) + '</td>' +
            '<td>' + esc(s.lastActive) + '</td></tr>';
     });
     h += '</tbody></table></div></div></div>';
@@ -438,8 +438,8 @@
     if (!c.size) {
       viewEl.className = '';
       viewEl.innerHTML = '<div class="empty">Nobody has joined <strong>' + esc(c.name) +
-        '</strong> yet. Read out <strong>' + esc(c.joinCode) + '</strong> — they sign in, ' +
-        'open Classes, and enter it.</div>';
+        '</strong> yet. Read out <strong>' + esc(c.joinCode) + '</strong> — they go to ' +
+        '<strong>studyvault.co.uk/join</strong> and enter it.</div>';
       return;
     }
 
@@ -537,7 +537,7 @@
         '<div class="made"><h2>' + esc(d.class.name) + ' is ready</h2>' +
         '<div class="codewrap"><span class="code">' + esc(d.class.joinCode) + '</span>' +
         '<button class="copy" data-code="' + esc(d.class.joinCode) + '">Copy</button></div>' +
-        '<p>Read that out. Your students sign in, open Classes, and enter it.</p></div>';
+        '<p>Read that out. Your students go to <strong>studyvault.co.uk/join</strong> and enter it.</p></div>';
       document.getElementById('cname').value = '';
       note.textContent = '';
       await load(d.class.id);

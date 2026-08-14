@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join your class — StudyVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    /* The page a teacher sends a whole room to at once: one job, no chrome.
+       Same tokens as welcome.html so it is recognisably the same product. */
+    :root{
+      --paper:#f6f1e7; --card:#fffdf8; --ink:#26231e; --sec:#57534a; --mut:#84806f;
+      --line:#e4dfd2; --anchor:#5b4632; --good:#2f6f4f; --bad:#a8412f;
+      --head:'Schibsted Grotesk',system-ui,sans-serif; --read:'Literata',Georgia,serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{background:var(--paper)}
+    body{font-family:var(--head);color:var(--ink);background:var(--paper);line-height:1.55;
+         min-height:100vh;display:flex;flex-direction:column;align-items:center;
+         padding:0 18px;-webkit-font-smoothing:antialiased}
+    .brand{font-size:1.3rem;font-weight:500;color:#3d3428;text-decoration:none;
+           letter-spacing:-.01em;margin:34px 0 0}
+    .brand b{font-weight:800}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+          box-shadow:0 1px 2px rgba(38,35,30,.05);padding:34px 30px;max-width:440px;
+          width:100%;margin:9vh 0 0;text-align:center}
+    h1{font-family:var(--read);font-size:1.6rem;font-weight:600;letter-spacing:-.012em}
+    .sub{color:var(--sec);font-size:.95rem;margin:.5rem 0 1.5rem}
+
+    /* the code box: what they type off the whiteboard */
+    .codebox{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+             font-size:1.7rem;font-weight:700;letter-spacing:.28em;text-align:center;
+             text-transform:uppercase;color:var(--anchor);background:#fff;
+             border:2px solid var(--line);border-radius:14px;padding:.65rem .4rem .65rem .68rem;
+             width:100%;max-width:300px}
+    .codebox:focus{outline:none;border-color:var(--anchor)}
+    .btn{font:inherit;font-size:1rem;font-weight:600;cursor:pointer;background:var(--anchor);
+         color:#fdfaf3;border:1px solid var(--anchor);border-radius:12px;
+         padding:.75rem 2.2rem;margin-top:1.1rem;display:inline-block;text-decoration:none}
+    .btn:hover{background:#4a3829;border-color:#4a3829}
+    .btn[disabled]{opacity:.55;cursor:not-allowed}
+    .err{color:var(--bad);font-size:.9rem;margin-top:1rem;min-height:1.2em}
+
+    .joined{border-color:#cfe1d5;background:#eef4ef}
+    .joined h1{color:#1f4d36}
+    .joined .what{font-size:1.05rem;font-weight:600;margin:.8rem 0 .2rem}
+    .joined .teachername{color:#28553d;font-size:.92rem}
+    /* the trade, stated to the student in plain words — never buried in a policy */
+    .visibility{font-size:.88rem;color:#28553d;background:#fff;border:1px solid #cfe1d5;
+                border-radius:12px;padding:.9rem 1rem;margin-top:1.2rem;text-align:left}
+
+    .signin-note{font-size:.9rem;color:var(--sec);margin-top:1.2rem}
+    .signin-note a{color:var(--anchor);font-weight:600}
+    .foot{color:var(--mut);font-size:.8rem;margin:auto 0 26px;padding-top:30px}
+    [hidden]{display:none!important}
+  </style>
+</head>
+<body>
+  <a class="brand" href="/">Study<b>Vault</b></a>
+
+  <div class="card" id="card">
+    <h1>Join your class</h1>
+    <p class="sub">Type the six-character code your teacher gave you.</p>
+
+    <form id="joinForm">
+      <input class="codebox" id="code" maxlength="8" autocomplete="off" autocapitalize="characters"
+             spellcheck="false" placeholder="ABC123" aria-label="Class code">
+      <br>
+      <button class="btn" id="joinBtn" type="submit">Join</button>
+      <div class="err" id="err"></div>
+    </form>
+
+    <p class="signin-note" id="signinNote" hidden>
+      You need to be signed in first, so your teacher knows whose work is whose.<br>
+      <a href="/?view=signin">Sign in</a> — then come back to
+      <strong>studyvault.co.uk/join</strong>. The code you typed will still be here.
+    </p>
+  </div>
+
+  <p class="foot">Joining a class shows your teacher how you are getting on in their subject —
+     and nothing from the rest of your revision.</p>
+
+<script>
+(function () {
+  var SUPA = 'https://baipckgywpnwapobwtsy.supabase.co';
+  var ANON = 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
+  var sb = window.supabase.createClient(SUPA, ANON);
+
+  var codeEl = document.getElementById('code');
+  var btn = document.getElementById('joinBtn');
+  var errEl = document.getElementById('err');
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
+
+  /* Survive the sign-in round trip: the code they typed (or a ?code= link from
+     the teacher) is kept locally, so signing in does not mean retyping it. */
+  var fromUrl = new URLSearchParams(location.search).get('code');
+  var kept = null;
+  try { kept = localStorage.getItem('sv-join-code'); } catch (e) {}
+  if (fromUrl) codeEl.value = fromUrl.toUpperCase();
+  else if (kept) codeEl.value = kept;
+
+  codeEl.addEventListener('input', function () {
+    this.value = this.value.toUpperCase();
+    try { localStorage.setItem('sv-join-code', this.value); } catch (e) {}
+    errEl.textContent = '';
+  });
+
+  async function token() {
+    try {
+      var s = await sb.auth.getSession();
+      if (s && s.data && s.data.session) return s.data.session.access_token;
+    } catch (e) {}
+    return null;
+  }
+
+  document.getElementById('joinForm').addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    errEl.textContent = '';
+    var code = codeEl.value.trim();
+    if (!code) { errEl.textContent = 'Type the code first.'; return; }
+
+    var tok = await token();
+    if (!tok) {
+      /* not signed in: keep the code, show the way in */
+      try { localStorage.setItem('sv-join-code', code); } catch (e) {}
+      document.getElementById('signinNote').hidden = false;
+      errEl.textContent = '';
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Joining…';
+    try {
+      var r = await fetch('/api/class/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+        body: JSON.stringify({ code: code })
+      });
+      var d = await r.json();
+      if (!r.ok) { errEl.textContent = d.error || 'Could not join. Try again.'; return; }
+
+      try { localStorage.removeItem('sv-join-code'); } catch (e) {}
+      var card = document.getElementById('card');
+      card.className = 'card joined';
+      card.innerHTML =
+        '<h1>' + (d.alreadyIn ? 'You are already in' : 'You are in') + '</h1>' +
+        '<p class="what">' + esc(d.class.name) +
+          (d.class.subject ? ' · ' + esc(d.class.subject) : '') + '</p>' +
+        (d.class.teacher ? '<p class="teachername">with ' + esc(d.class.teacher) + '</p>' : '') +
+        '<div class="visibility">' + esc(d.visibility || '') + '</div>' +
+        '<a class="btn" href="/">Back to your revision</a>';
+    } catch (e) {
+      errEl.textContent = 'Could not reach StudyVault. Check your connection and try again.';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Join';
+    }
+  });
+})();
+</script>
+</body>
+</html>

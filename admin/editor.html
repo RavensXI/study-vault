@@ -610,7 +610,9 @@
       var lessonQuery = sb.from('lessons').select('id, lesson_number, title, slug, status').eq('unit_id', unitId).order('lesson_number');
       // Staff see all statuses, students only see live
       var auth = await getAuthContext();
-      if (!auth.is_admin && !auth.role === 'teacher') {
+      // was `!auth.role === 'teacher'` — JS reads that as (!auth.role) === 'teacher',
+      // which is always false, so the students-see-only-live restriction never fired
+      if (!auth.is_admin && auth.role !== 'teacher') {
         lessonQuery = lessonQuery.eq('status', 'live');
       }
       var result = await lessonQuery;

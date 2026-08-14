@@ -27,10 +27,25 @@ module.exports = async function handler(req, res) {
 
   const body = req.body || {};
   const code = String(body.code || '').toUpperCase().replace(/[\s\-_]/g, '');
-  const studentId = body.student_id;
 
   if (!code) return res.status(400).json({ error: 'Enter the code your teacher gave you.' });
-  if (!studentId) return res.status(401).json({ error: 'Sign in first, then join your class.' });
+
+  /* WHO is joining comes from the session token, never from the request body.
+     The first version accepted a student_id field and only checked it was
+     PRESENT — so anyone who learned a join code could enrol any person_id they
+     could name, and enrolment is precisely the act that makes a child's
+     attainment visible to a teacher. person_id is the Supabase auth user id
+     (the JWT's sub — see sync.js svUid), so the token IS the identity. */
+  const authHeader = req.headers.authorization || '';
+  if (!authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Sign in first, then join your class.' });
+  }
+  const { data: userData, error: authError } =
+    await supabase.auth.getUser(authHeader.slice(7));
+  if (authError || !userData || !userData.user) {
+    return res.status(401).json({ error: 'Your sign-in has expired. Sign in again, then retry the code.' });
+  }
+  const studentId = userData.user.id;
 
   if (AMBIGUOUS.test(code)) {
     return res.status(400).json({

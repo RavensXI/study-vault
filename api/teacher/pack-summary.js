@@ -96,6 +96,21 @@ module.exports = async function handler(req, res) {
     });
   }
 
+  /* Each call bills a model invocation, and nothing stops a page retry loop
+     from spending money in a hurry. Same in-memory pattern as ai-mark's per-IP
+     limiter, keyed per teacher: generous enough for a parents' evening (a full
+     class is ~30 packs), tight enough that a bug cannot run a tab. Resets on
+     redeploy, which is fine for a deterrent. */
+  const now = Date.now();
+  if (!global._packSummaryRates) global._packSummaryRates = {};
+  const rates = global._packSummaryRates;
+  const who = auth.profile.id || 'unknown';
+  rates[who] = (rates[who] || []).filter(function (ts) { return now - ts < 60 * 60 * 1000; });
+  if (rates[who].length >= 80) {
+    return res.status(429).json({ error: 'That is a lot of summaries in one hour. Wait a little and try again.' });
+  }
+  rates[who].push(now);
+
   const b = req.body || {};
   const out = await buildPack(auth, b.class_id, b.student_id);
   if (!out.ok) return res.status(out.status || 400).json({ error: out.error });

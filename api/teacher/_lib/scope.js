@@ -23,7 +23,10 @@ const NEVER_SEND = ['flashsr', 'flashday', 'flashlog', 'plan', 'shortschecks'];
    whichever board they picked (maths-aqa). Same maths either way. */
 function baseSubject(slug) {
   return String(slug || '').toLowerCase()
-    .replace(/-(aqa|edexcel|eduqas|wjec|ncfe|ocr(-[ab])?)$/, '');
+    /* edexcel carries A/B variants exactly as ocr does (geography-edexcel-a,
+       geography-edexcel-b) — without the group they fail to reduce and
+       cross-board matching silently never applies to those subjects */
+    .replace(/-(aqa|edexcel(-[ab])?|eduqas|wjec|ncfe|ocr(-[ab])?)$/, '');
 }
 
 function inScope(key, base) {
