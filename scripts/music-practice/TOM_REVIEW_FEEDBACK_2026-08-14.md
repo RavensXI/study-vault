@@ -135,8 +135,10 @@ ear-answerable / taught-fact / untaught-fact, and rewrite or re-anchor the
 third group. Countable by query; the rewrite itself is authored work that
 lands on Tom's desk per the ear-verification rule.
 
-**Status:** open — classification query queued; direction agreed in principle?
-(Tom to confirm.)
+**DECIDED (Tom, 14 Aug): the principle is the plan.** Every listening question
+about untaught music becomes answerable by ear (or gains a teach-first step);
+fact-recall is reserved for taught pieces. Order: classification query sizes
+the third pile → rewrites authored → Tom ear-checks before anything ships.
 
 ---
 
