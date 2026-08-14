@@ -75,8 +75,8 @@
 
     <p class="signin-note" id="signinNote" hidden>
       You need to be signed in first, so your teacher knows whose work is whose.<br>
-      <a href="/?view=signin">Sign in</a> — then come back to
-      <strong>studyvault.co.uk/join</strong>. The code you typed will still be here.
+      <a href="/?view=signin&next=%2Fjoin">Sign in</a> — you will come straight back
+      here, and the code you typed joins automatically.
     </p>
   </div>
 
@@ -102,10 +102,27 @@
   /* Survive the sign-in round trip: the code they typed (or a ?code= link from
      the teacher) is kept locally, so signing in does not mean retyping it. */
   var fromUrl = new URLSearchParams(location.search).get('code');
-  var kept = null;
-  try { kept = localStorage.getItem('sv-join-code'); } catch (e) {}
+  var kept = null, intent = false;
+  try {
+    kept = localStorage.getItem('sv-join-code');
+    intent = localStorage.getItem('sv-join-intent') === '1';
+  } catch (e) {}
   if (fromUrl) codeEl.value = fromUrl.toUpperCase();
   else if (kept) codeEl.value = kept;
+
+  /* The return leg of the sign-in round trip: they typed the code, we sent
+     them to sign in, welcome brought them back — finish the job they started
+     instead of asking them to press the same button twice. */
+  (async function () {
+    if (!intent || !codeEl.value || codeEl.value.trim().length < 6) return;
+    if (await token()) {
+      try { localStorage.removeItem('sv-join-intent'); } catch (e) {}
+      var f = document.getElementById('joinForm');
+      /* requestSubmit is absent on the older iPads schools actually run */
+      if (f.requestSubmit) f.requestSubmit();
+      else f.dispatchEvent(new Event('submit', { cancelable: true }));
+    }
+  })();
 
   codeEl.addEventListener('input', function () {
     this.value = this.value.toUpperCase();
@@ -129,8 +146,14 @@
 
     var tok = await token();
     if (!tok) {
-      /* not signed in: keep the code, show the way in */
-      try { localStorage.setItem('sv-join-code', code); } catch (e) {}
+      /* Not signed in: keep the code AND the intent. The intent flag is what
+         lets the return trip auto-join — set only here, on a deliberate
+         attempt, never by merely typing, so a half-typed code from last week
+         cannot fire a join on its own. */
+      try {
+        localStorage.setItem('sv-join-code', code);
+        localStorage.setItem('sv-join-intent', '1');
+      } catch (e) {}
       document.getElementById('signinNote').hidden = false;
       errEl.textContent = '';
       return;
@@ -146,7 +169,14 @@
       var d = await r.json();
       if (!r.ok) { errEl.textContent = d.error || 'Could not join. Try again.'; return; }
 
-      try { localStorage.removeItem('sv-join-code'); } catch (e) {}
+      try {
+        localStorage.removeItem('sv-join-code');
+        localStorage.removeItem('sv-join-intent');
+      } catch (e) {}
+      /* land them where their revision actually lives — the same dashboard
+         choice welcome.html's dashUrl() reads */
+      var dash = '/classic';
+      try { if (localStorage.getItem('sv-dash-view') === 'desk') dash = '/desk'; } catch (e) {}
       var card = document.getElementById('card');
       card.className = 'card joined';
       card.innerHTML =
@@ -155,7 +185,11 @@
           (d.class.subject ? ' · ' + esc(d.class.subject) : '') + '</p>' +
         (d.class.teacher ? '<p class="teachername">with ' + esc(d.class.teacher) + '</p>' : '') +
         '<div class="visibility">' + esc(d.visibility || '') + '</div>' +
-        '<a class="btn" href="/">Back to your revision</a>';
+        '<a class="btn" id="dashBtn" href="' + dash + '">Continue to your revision</a>';
+      /* a room of thirty joins at once: carry them onward rather than leaving
+         thirty tabs parked on a confirmation. Long enough to read the
+         visibility statement; the button is there for anyone faster. */
+      setTimeout(function () { location.href = dash; }, d.alreadyIn ? 2500 : 8000);
     } catch (e) {
       errEl.textContent = 'Could not reach StudyVault. Check your connection and try again.';
     } finally {

@@ -1594,7 +1594,13 @@ if(sibtn) sibtn.onclick=async()=>{
       try{ localStorage.setItem('sv-user',JSON.stringify({email:u?u.email:em})); }catch(e){}
       say('Signed in — opening your StudyVault…');
       document.body.classList.remove('ready');
-      setTimeout(()=>{ location.href='/classic'; },250);
+      /* A page that sent the student here to sign in can ask for them back:
+         /?view=signin&next=/join. Same-origin paths only — a single leading
+         slash, so neither https://evil nor //evil can ride the parameter. */
+      let next='/classic';
+      try{ const n=new URLSearchParams(location.search).get('next');
+           if(n&&/^\/(?!\/)/.test(n)) next=n; }catch(e){}
+      setTimeout(()=>{ location.href=next; },250);
       return;
     }
   }catch(e){ say('Something went wrong — try again.'); }
