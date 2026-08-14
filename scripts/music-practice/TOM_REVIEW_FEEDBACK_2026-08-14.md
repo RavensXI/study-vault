@@ -63,8 +63,16 @@ recognising the answers rather than hearing the music. Structural, not a bug.
    and let the lesson complete — resurfacing handles the return visit. Fits
    the recall-resurfacing design already agreed for lesson completion.
 
-**Status:** open — awaiting Tom's steer on direction; bank-size check queued
-for when the DB returns.
+**DECIDED (Tom, 14 Aug): options 4 + 3, cap at TWO attempts.**
+- Fail a tier twice → marked "revisit later", the lesson proceeds, resurfacing
+  brings it back spaced.
+- Between attempt one and two: route through a WORKED EXAMPLE, built in the
+  maths pattern — where a lesson lacks a suitable one, it gets authored (and
+  ear-checked, as all Music content is).
+- RECORD THE ATTEMPT COUNT on the tier pass — a third-attempt pass and a cold
+  pass must not look identical in the data; the attempt count is teacher
+  signal (feeds weakest-units) and keeps completion honest.
+- NOT built yet — waiting for Supabase stability; this note is the record.
 
 ---
 
