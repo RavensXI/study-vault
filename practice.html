@@ -5212,6 +5212,27 @@
     // audit; legacy equals_X check names too). An unmatched misconception is
     // NEVER presented as a diagnosis — a confident wrong "what went wrong" is
     // more confusing than none (it described a mistake the student didn't make).
+    /* AI-marked types (translate, ai_mark, role_play) have no fixed wrong
+       answers, so the MARKER names the error pattern instead — a
+       "misconception" field in its JSON, from a controlled per-family list,
+       only when it can point at the error in the student's answer. A valid
+       tag joins the same log the deterministic matcher writes, so the class
+       table fills from free writing too. The vocabulary check here is the
+       last line of defence against a model inventing prose tags. */
+    function svLogAiMisconception(tag) {
+      if (!tag || typeof tag !== 'string') return;
+      tag = tag.trim().toLowerCase();
+      if (tag === 'none' || !/^[a-z0-9-]{3,40}$/.test(tag)) return;
+      try {
+        var mlg = JSON.parse(localStorage.getItem('sv-misconception-log')) || [];
+        var mpm = location.pathname.match(/\/(lesson|practice)\/([^/]+)\/([^/]+)\/(\d+)/);
+        mlg.unshift({ d: new Date().toISOString().slice(0, 10),
+          sub: mpm ? mpm[2] : '', unit: mpm ? mpm[3] : '', n: mpm ? +mpm[4] : 0, tag: tag });
+        localStorage.setItem('sv-misconception-log', JSON.stringify(mlg.slice(0, 200)));
+        if (window.svProgressPushSoon) svProgressPushSoon();
+      } catch (e) {}
+    }
+
     function matchMisconception(problem, inputType, given) {
       var ms = problem.misconceptions || [];
       function near(a, b) { return typeof a === 'number' && typeof b === 'number' && Math.abs(a - b) < 0.011; }
@@ -8662,6 +8683,7 @@
         var json; try { json = JSON.parse(cleaned.match(/\{[\s\S]*\}/)[0]); } catch (e) { json = { quality: 'good', feedback: cleaned }; }
         if (['excellent', 'good', 'needs_work', 'not_valid'].indexOf(json.quality) === -1) json.quality = 'good';
         var ok = json.quality === 'excellent' || json.quality === 'good';
+        if (!ok) svLogAiMisconception(json.misconception);
         var feedHtml = '<div style="font-size:0.82rem"><p>' + (json.feedback || '') + '</p>';
         if (json.improvement) feedHtml += '<p style="color:var(--accent);font-weight:600">Tip: ' + json.improvement + '</p>';
         feedHtml += '<div class="rp-model-answers" style="margin-top:0.5rem">';
@@ -8941,6 +8963,7 @@
         // Validate quality field
         if(['excellent','good','needs_work','not_valid'].indexOf(json.quality)===-1)json.quality='good';
         var ok=json.quality==='excellent'||json.quality==='good';
+        if(!ok)svLogAiMisconception(json.misconception);
         var feedHtml='<div style="font-size:0.82rem"><p>'+(json.feedback||'')+'</p>';
         if(json.improvement)feedHtml+='<p style="color:var(--accent);font-weight:600">Tip: '+json.improvement+'</p>';
         feedHtml+='</div>';
