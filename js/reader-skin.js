@@ -213,6 +213,7 @@
     buildToolTiles();
     upgradePrimaryIcons();
     buildPracticeTile();
+    addWeightTags();             // completion weights on the activity controls (WC-3)
     buildPanelWrap();
     buildRichVideoThumb();
     buildDemoFigure();
@@ -306,7 +307,7 @@
     { sel: '.key-fact', pad: 8, title: 'Helpers in the text',
       body: 'Key facts are boxed like this, underlined words show a definition when you tap them, and the lightbulbs offer quick revision tips as you read.' },
     { sel: '.sidebar-progress-section', pad: 8, title: 'Track your progress',
-      body: 'This fills in as you work through the lesson, so you can always see how far you have got.' },
+      body: 'Each activity is worth points — practice questions 40, flashcards 15, revision tasks 15, and the quiz, video and podcast 10 each. Reach half of what the lesson offers and it counts as complete.' },
     { sels: ['.sidebar-knowledge-check', '.tile-practice'], pad: 10, title: 'Test yourself',
       body: 'Quick Quiz, Flashcards and exam-style Practice questions are all here — the fastest way to check what has stuck.' },
     { sels: ['.sidebar-media', '.tile-tutor'], pad: 10, title: 'Explore and dig in',
@@ -435,7 +436,16 @@
     // keep the spotlight (and card) glued to the current step's target every
     // frame — rides the element as the page settles, no glide-vs-scroll snap
     function syncSpot() {
-      var s = steps[i], r = tourRect(s); if (!r) return;
+      var s = steps[i], r;
+      // The bubbles step spotlights the DEMO MENU, not the paragraph — the
+      // three helper icons are the thing the step is about, and ringing the
+      // paragraph left them unnoticed bottom-left (Tom's review, WC-2).
+      if (s.trigger === 'bubbles' && demoMenu && demoMenu.style.display !== 'none') {
+        r = demoMenu.getBoundingClientRect();
+      } else {
+        r = tourRect(s);
+      }
+      if (!r) return;
       var pad = s.pad || 8;
       spot.style.left = (r.left - pad) + 'px'; spot.style.top = (r.top - pad) + 'px';
       spot.style.width = (r.width + pad * 2) + 'px'; spot.style.height = (r.height + pad * 2) + 'px';
@@ -1209,6 +1219,28 @@
       var n = t.firstChild;
       n.dataset.duotone = '1';
       el.replaceWith(n);
+    });
+  }
+
+  // WC-3 (Tom, 16 Aug): each activity control carries its completion weight —
+  // quiet type in the site's own style, NOT a pill. Numbers come from
+  // main.js's TASK_WEIGHTS via window.svTaskWeights so the tags can never
+  // drift from the completion maths.
+  function addWeightTags() {
+    var W = window.svTaskWeights;
+    if (!W) return;
+    [['.knowledge-check-btn .knowledge-check-label', W['knowledge-check']],
+     ['#sidebar-flashcard-btn span', W['flashcards']],
+     ['.sv-practice-btn span', W['practice-question']],
+     ['.audio-tab[data-mode="podcast"]', W['podcast']],
+     ['.sv-video-kicker', W['video']]
+    ].forEach(function (d) {
+      var el = document.querySelector(d[0]);
+      if (!el || !d[1] || el.querySelector('.sv-weight-tag')) return;
+      var t = document.createElement('span');
+      t.className = 'sv-weight-tag';
+      t.textContent = '· ' + d[1];
+      el.appendChild(t);
     });
   }
 

@@ -2555,6 +2555,9 @@ function initLessonProgress() {
   // sv-lessons-done = { "subject/unit": [lessonNumbers] }.
   var TASK_WEIGHTS = { 'practice-question': 40, 'flashcards': 15, 'revision-task': 15,
     'knowledge-check': 10, 'video': 10, 'podcast': 10 };
+  // exported so the sidebar weight tags (reader-skin.js) can never drift
+  // from the completion maths
+  window.svTaskWeights = TASK_WEIGHTS;
   function weighted(sd) {
     var avail = 0, got = 0;
     tasks.forEach(function (t) {
