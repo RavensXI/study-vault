@@ -393,6 +393,24 @@
       segments.push({ el: el, id: id });
       wireChunk(el, id);
     }
+    // The exam tip and conclusion live OUTSIDE the article body and carry no
+    // narration ids, so the helpers never reached them (Tom, 16 Aug). Wire
+    // their paragraphs with synthetic ids — same bubbles, same simplify.
+    ['exam-tip', 'conclusion'].forEach(function (boxId) {
+      var box = document.getElementById(boxId);
+      if (!box) return;
+      var ps = box.querySelectorAll('p');
+      for (var j = 0; j < ps.length; j++) {
+        var pEl = ps[j];
+        if (pEl.classList.contains('sv-chunk')) continue;
+        var pText = extractText(pEl);
+        if (pText.length < MIN_LEN) continue;
+        var pId = pEl.getAttribute('data-narration-id') || (boxId + '-p' + j);
+        pristineText[pId] = pText;
+        segments.push({ el: pEl, id: pId });
+        wireChunk(pEl, pId);
+      }
+    });
     if (!segments.length) return; // not an article lesson with prose — no-op
 
     toggleBtn = document.querySelector('.a11y-simplify-toggle');

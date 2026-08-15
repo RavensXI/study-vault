@@ -458,14 +458,15 @@
     // Exam tip
     if (lesson.exam_tip_html) {
       var examTip = document.getElementById('exam-tip');
-      examTip.innerHTML = lesson.exam_tip_html;
+      // identity label first — the box read as anonymous repetition without it
+      examTip.innerHTML = '<div class="sv-box-kicker">Exam tip</div>' + lesson.exam_tip_html;
       examTip.style.display = '';
     }
 
     // Conclusion
     if (lesson.conclusion_html) {
       var conclusion = document.getElementById('conclusion');
-      conclusion.innerHTML = lesson.conclusion_html;
+      conclusion.innerHTML = '<div class="sv-box-kicker">In summary</div>' + lesson.conclusion_html;
       conclusion.style.display = '';
     }
 
