@@ -49,6 +49,21 @@ def _uses(svg, cls):
     return out
 
 
+def _group_extent(svg, cls):
+    """The first <g class="cls"> group's glyphs as (x_min, x_max, y_mid), or
+    None. A two-letter dynamic (mf) is two <use> glyphs; ringing only the
+    first clipped the f and collided with a note stem (Tom's review, 15 Aug)."""
+    m = re.search(r'<g[^>]*class="%s"[^>]*>(.*?)</g>' % cls, svg, re.S)
+    if not m:
+        return None
+    pts = [(float(u.group(1)), float(u.group(2))) for u in
+           re.finditer(r'transform="translate\((-?[\d.]+),\s*(-?[\d.]+)\)', m.group(1))]
+    if not pts:
+        return None
+    xs = [p[0] for p in pts]
+    return min(xs), max(xs), sum(p[1] for p in pts) / len(pts)
+
+
 def _staff_unit(svg):
     ys = sorted(set(float(y) for y in re.findall(r'<path d="M0 ([\d.]+) L\d', svg)))
     return (ys[1] - ys[0]) if len(ys) > 1 else 180.0
@@ -120,13 +135,18 @@ def figure(abc, ring=None, note_labels=None, brackets=None, stagger=False,
         return cx, "middle"
 
     for cls, lbl in (ring or []):
-        pts = _uses(svg, cls)
-        if not pts:
+        ext = _group_extent(svg, cls)
+        if not ext:
             continue
-        x, y = pts[0]
-        # a meter/clef glyph is centred on the middle staff line, ~2 spaces each way
-        cx, cy = x + u * 0.35, y
-        rx, ry = u * 0.95, u * 1.7
+        x0, x1, y = ext
+        # a meter/clef glyph is centred on the middle staff line, ~2 spaces each
+        # way. Dynamics anchor at their left edge and "mf" is one wide <use>
+        # glyph (so extent cannot see its width) — shift and widen empirically,
+        # screenshot-verified against the m and the f both sitting inside.
+        wide = cls == "dynam"
+        cx, cy = (x0 + x1) / 2 + u * (1.0 if wide else 0.35), y
+        rx = max(u * (1.5 if wide else 0.95), (x1 - x0) / 2 + u * 0.9)
+        ry = u * 1.7
         a.append('<ellipse cx="%.0f" cy="%.0f" rx="%.0f" ry="%.0f" fill="none" stroke="%s" '
                  'stroke-width="%.0f"/>' % (cx, cy, rx, ry, ACCENT, u * 0.13))
         # Elements below the stave (dynamics) need the label BELOW them, or it is
@@ -222,10 +242,15 @@ def playable(abc, notes, tempo=100, width=1500, title=None, caption=None,
              hint="Press play and watch the notes light up as they sound."):
     """Engraved notation that plays, with a highlight moving note by note.
 
-    notes: [(midi, beats)] in the same order the notes appear. Passed explicitly
-    rather than parsed out of the ABC — the pairing with the engraved element ids
-    is asserted below, so a mismatch fails loudly instead of drifting silently.
-    Use midi=None for a rest.
+    notes: [(midi, beats)] or [(midi, beats, opts)] in the same order the notes
+    appear. Passed explicitly rather than parsed out of the ABC — the pairing
+    with the engraved element ids is asserted below, so a mismatch fails loudly
+    instead of drifting silently. Use midi=None for a rest.
+
+    opts (dict, optional): {"vel": 0..1, "art": "stac"|"leg"} — performed
+    loudness and articulation. The player's clock always advances by the full
+    printed beats; staccato must NOT be faked by shortening beats (that made
+    staccato bars rush — Tom's Extract F report, 15 Aug).
     """
     svg = figure(abc, width=width)
     ids = re.findall(r'<g id="([^"]+)" class="note"', svg)
@@ -240,14 +265,21 @@ def playable(abc, notes, tempo=100, width=1500, title=None, caption=None,
     # class="rest", so pairing them against note ids silently mis-aligns
     # everything after the first rest.
     seq, k = [], 0
-    for midi, beats in notes:
+    for n in notes:
+        midi, beats = n[0], n[1]
+        opts = n[2] if len(n) > 2 else {}
         if midi is None:                       # rest
             seq.append({"id": None, "midi": None, "beats": beats})
         elif midi is False:                    # printed, never played
             k += 1
             seq.append({"id": None, "midi": None, "beats": beats})
         else:
-            seq.append({"id": ids[k], "midi": midi, "beats": beats})
+            d = {"id": ids[k], "midi": midi, "beats": beats}
+            if "vel" in opts:
+                d["vel"] = opts["vel"]
+            if "art" in opts:
+                d["art"] = opts["art"]
+            seq.append(d)
             k += 1
     payload = json.dumps({"tempo": tempo, "notes": seq}, separators=(",", ":"))
     h = ['<figure class="sv-scoreplay">']

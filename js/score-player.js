@@ -20,6 +20,16 @@
  *     <div class="sv-sp-bar"><button class="sv-sp-play">Play</button>
  *          <span class="sv-sp-hint">Watch the notes light up</span></div>
  *   </figure>
+ *
+ * Optional per-note fields (Tom's review, 15 Aug — dynamics and articulation
+ * were printed but not performed, which teaches students that markings are
+ * decoration):
+ *   vel   0..1  loudness multiplier (p ≈ 0.45, mf ≈ 0.75, f ≈ 1.0)
+ *   art   "stac" sounds ~45% of the beat then silence; "leg" sounds the full
+ *         beat with a soft release so notes join up. Default keeps the old 92%.
+ * The clock ALWAYS advances by the full printed beats — articulation changes
+ * how long a note SOUNDS, never how long it LASTS. (Staccato was previously
+ * faked by shortening beats, which made staccato bars rush.)
  */
 (function () {
   'use strict';
@@ -85,12 +95,21 @@
           o.type = 'triangle';
           o.frequency.value = hz(n.midi);
           var t0 = c.currentTime + t / 1000;
-          var t1 = t0 + Math.max(0.09, dur / 1000 * 0.92);
+          // articulation: how much of the beat SOUNDS (the clock is untouched)
+          var frac = n.art === 'stac' ? 0.45 : (n.art === 'leg' ? 1.0 : 0.92);
+          var t1 = t0 + Math.max(0.09, dur / 1000 * frac);
+          var peak = 0.22 * (typeof n.vel === 'number' ? n.vel : 1);
           g.gain.setValueAtTime(0.0001, t0);
-          g.gain.exponentialRampToValueAtTime(0.22, t0 + 0.015);
-          g.gain.exponentialRampToValueAtTime(0.0001, t1);
+          g.gain.exponentialRampToValueAtTime(Math.max(peak, 0.0002), t0 + 0.015);
+          if (n.art === 'leg') {
+            // hold, then a short release INTO the next note — joined, not gapped
+            g.gain.setValueAtTime(Math.max(peak, 0.0002), t1 - 0.03);
+            g.gain.exponentialRampToValueAtTime(0.0001, t1 + 0.02);
+          } else {
+            g.gain.exponentialRampToValueAtTime(0.0001, t1);
+          }
           o.connect(g); g.connect(c.destination);
-          o.start(t0); o.stop(t1 + 0.02);
+          o.start(t0); o.stop(t1 + 0.04);
         }
         // ...and the highlight on a timer (accurate enough for the eye)
         if (n.id) (function (id, at, len) {
