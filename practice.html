@@ -4644,6 +4644,11 @@
       bronze: { correct: 0, attempted: 0, streak: 0, attemptNumber: 1 },
       silver: { correct: 0, attempted: 0, streak: 0, attemptNumber: 1 },
       gold: { correct: 0, attempted: 0, streak: 0, attemptNumber: 1 },
+      // Tiers failed twice this session — marked to revisit, lesson moved on
+      revisit: {},
+      // Set while the between-attempts worked example is showing; the learn
+      // back-button becomes "Try the tier again" and returns to the retry
+      retryAfterLearn: null,
       streak: 0,
       answered: false,                   // is current problem answered?
       allDone: false,
@@ -6046,42 +6051,112 @@
 
       if (verdict === 'pass') {
         recordTierAttempt(tier, true);
-        showTierCelebration(tier, function() {
-          if (tier === 'bronze') {
-            practiceState.currentTier = 'silver';
-            practiceState.currentIndex = 0;
-          } else if (tier === 'silver') {
-            practiceState.currentTier = 'gold';
-            practiceState.currentIndex = 0;
-          } else {
-            practiceState.allDone = true;
-            showSummary();
-            return;
-          }
-          var newTier = practiceState.currentTier;
-          var tcfg = guidedTeachCfg(newTier);
-          if (tcfg) {
-            // Teach the new rung's one new move by doing it, not reading it
-            updateMethodPanelForTier(newTier);
-            tcfg.doneText = 'Your turn →';
-            tcfg.onDone = animateToNextProblem;
-            tcfg.skip = { text: 'Skip this (I know the move)', onClick: animateToNextProblem };
-            showGuided(tcfg);
-          } else {
-            showTierIntro(newTier, animateToNextProblem);
-          }
-        });
+        showTierCelebration(tier, function() { advanceAfterTier(tier); });
       } else if (verdict === 'fail') {
         recordTierAttempt(tier, false);
-        showTierFailModal(tier, function() {
-          resetTier(tier);
-          animateToNextProblem();
-        });
+        // Two attempts, then move on (Tom, 14 Aug): a third lap at the same
+        // problems tests the memory of the answers, not the skill. Between
+        // the two attempts the student walks a worked example, so attempt 2
+        // follows re-instruction rather than immediate recall.
+        if (practiceState[tier].attemptNumber >= 2) {
+          markTierRevisit(tier);
+          showTierRevisitModal(tier, function() { advanceAfterTier(tier); });
+        } else {
+          showTierFailModal(tier, function() {
+            resetTier(tier);
+            if (!startWorkedInterstitial(tier)) animateToNextProblem();
+          });
+        }
       } else {
         // continue
         practiceState.currentIndex++;
         animateToNextProblem();
       }
+    }
+
+    // Shared tier progression — the celebration path and the revisit path
+    // both land here; only the framing differs.
+    function advanceAfterTier(tier) {
+      if (tier === 'bronze') {
+        practiceState.currentTier = 'silver';
+        practiceState.currentIndex = 0;
+      } else if (tier === 'silver') {
+        practiceState.currentTier = 'gold';
+        practiceState.currentIndex = 0;
+      } else {
+        practiceState.allDone = true;
+        showSummary();
+        return;
+      }
+      var newTier = practiceState.currentTier;
+      var tcfg = guidedTeachCfg(newTier);
+      if (tcfg) {
+        // Teach the new rung's one new move by doing it, not reading it
+        updateMethodPanelForTier(newTier);
+        tcfg.doneText = 'Your turn →';
+        tcfg.onDone = animateToNextProblem;
+        tcfg.skip = { text: 'Skip this (I know the move)', onClick: animateToNextProblem };
+        showGuided(tcfg);
+      } else {
+        showTierIntro(newTier, animateToNextProblem);
+      }
+    }
+
+    // Between the two tier attempts: walk the best-matching worked example in
+    // learn mode, then return straight into the retry. Returns false when the
+    // lesson has no worked examples (caller falls back to a plain retry).
+    function startWorkedInterstitial(tier) {
+      var we = window._workedExamples || [];
+      if (!we.length) return false;
+      var idx = 0;
+      for (var i = 0; i < we.length; i++) {
+        if ((we[i].difficulty || '').toLowerCase() === tier) { idx = i; break; }
+      }
+      practiceState.learnIndex = idx;
+      practiceState.retryAfterLearn = tier;
+      switchMode('learn');
+      renderLearnExample();
+      return true;
+    }
+
+    // Mark a twice-failed tier for a later return. The durable teacher signal
+    // is already in recordTierAttempt (passed:false, attempt 2); this local
+    // list is what resurfacing reads to bring the tier back spaced.
+    function markTierRevisit(tier) {
+      practiceState.revisit[tier] = true;
+      try {
+        var ppm = location.pathname.match(/\/(lesson|practice)\/([^/]+)\/([^/]+)\/(\d+)/);
+        var log = JSON.parse(localStorage.getItem('sv-tier-revisit') || '[]');
+        log.unshift({ d: new Date().toISOString().slice(0, 10),
+                      k: ppm ? ppm[2] + '/' + ppm[3] + '/' + ppm[4] : '',
+                      tier: tier });
+        localStorage.setItem('sv-tier-revisit', JSON.stringify(log.slice(0, 60)));
+      } catch (e) { /* quota — ignore */ }
+    }
+
+    // Second failed attempt: no third lap. Honest framing, lesson moves on.
+    function showTierRevisitModal(tier, onCarryOn) {
+      stopAllPracticeAudio();
+      var overlay = document.getElementById('tier-fail-overlay');
+      var t = practiceState[tier];
+      var counts = getTierCounts();
+      var tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
+      document.getElementById('tier-fail-heading').textContent =
+        tierName + ": we'll come back to this";
+      document.getElementById('tier-fail-correct').textContent = t.correct;
+      document.getElementById('tier-fail-total').textContent = counts[tier];
+      document.getElementById('tier-fail-sub').textContent =
+        'Two solid attempts. Fresh ears beat a third lap — this tier is marked ' +
+        'to revisit, and the lesson carries on.';
+      overlay.classList.add('active');
+      var btn = document.getElementById('tier-fail-retry-btn');
+      var newBtn = btn.cloneNode(true);
+      newBtn.textContent = 'Carry on →';
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.addEventListener('click', function() {
+        overlay.classList.remove('active');
+        if (onCarryOn) onCarryOn();
+      });
     }
 
     function animateToNextProblem() {
@@ -6133,16 +6208,20 @@
       var t = practiceState[tier];
       var counts = getTierCounts();
       var tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
+      var hasWorked = (window._workedExamples || []).length > 0;
       document.getElementById('tier-fail-heading').textContent = tierName + ': not quite';
       document.getElementById('tier-fail-correct').textContent = t.correct;
       document.getElementById('tier-fail-total').textContent = counts[tier];
-      document.getElementById('tier-fail-sub').textContent =
-        'You need 75% to move on. Attempt ' + (t.attemptNumber + 1) + ' coming up.';
+      document.getElementById('tier-fail-sub').textContent = hasWorked
+        ? 'You need 75% to move on. Next: one worked through step by step, then attempt 2.'
+        : 'You need 75% to move on. Attempt ' + (t.attemptNumber + 1) + ' coming up.';
       overlay.classList.add('active');
 
       var btn = document.getElementById('tier-fail-retry-btn');
-      // Replace the button to clear any previous listeners
+      // Replace the button to clear any previous listeners; set the text
+      // explicitly — the revisit modal relabels the same button
       var newBtn = btn.cloneNode(true);
+      newBtn.textContent = hasWorked ? 'See it worked through →' : 'Try This Tier Again';
       btn.parentNode.replaceChild(newBtn, btn);
       newBtn.addEventListener('click', function() {
         overlay.classList.remove('active');
@@ -6167,6 +6246,17 @@
       setTierBar('silver', practiceState.silver.correct, practiceState.silver.attempted);
       setTierBar('gold', practiceState.gold.correct, practiceState.gold.attempted);
 
+      // Tiers that hit the two-attempt cap show honestly as "to revisit"
+      var revisited = ['bronze', 'silver', 'gold'].filter(function(t) {
+        return practiceState.revisit[t];
+      });
+      revisited.forEach(function(t) {
+        var el = document.getElementById('summary-' + t + '-count');
+        if (el && el.textContent.indexOf('revisit') === -1) {
+          el.textContent += ' · to revisit';
+        }
+      });
+
       // Message
       var msgEl = document.getElementById('summary-message');
       var pct = attempted > 0 ? correct / attempted : 0;
@@ -6178,6 +6268,12 @@
         msgEl.innerHTML = '<strong>Good progress.</strong> Try the worked examples in the sidebar for the tricky parts, then have another go.';
       } else {
         msgEl.innerHTML = 'Keep going. Try the <strong>worked examples</strong> from the sidebar to study the method, then try again.';
+      }
+      if (revisited.length) {
+        var names = revisited.map(function(t) { return t.charAt(0).toUpperCase() + t.slice(1); });
+        msgEl.innerHTML += ' <strong>' + names.join(' and ') +
+          (names.length > 1 ? ' are' : ' is') +
+          ' marked to revisit</strong> — come back with fresh ears rather than re-running it now.';
       }
 
       document.getElementById('summary-overlay').classList.add('active');
@@ -6296,6 +6392,8 @@
       revealBtn.textContent = steps.length > 0 ? 'Show Step 1' : 'No steps';
       nextBtn.style.display = 'none';
       backBtn.style.display = '';
+      backBtn.textContent = practiceState.retryAfterLearn
+        ? 'Try the tier again →' : 'Jump ahead to Practice';
 
       if (idx >= we.length - 1) {
         nextBtn.textContent = 'Back to first example';
@@ -6698,8 +6796,17 @@
 
       // Back to practice from learn mode
       document.getElementById('learn-back-practice-btn').addEventListener('click', function() {
+        var retryTier = practiceState.retryAfterLearn;
+        practiceState.retryAfterLearn = null;
+        this.textContent = 'Jump ahead to Practice';
         switchMode('practice');
-        showTierRulesToast();
+        if (retryTier) {
+          // Returning from the between-attempts worked example: the tier was
+          // already reset — straight into attempt 2, no rules toast.
+          animateToNextProblem();
+        } else {
+          showTierRulesToast();
+        }
       });
 
       // Sidebar learn link
