@@ -30,6 +30,19 @@ lesson's best-matching worked example — music lessons each carry one
 (bronze/silver), so a gold fail shows that same example; per-tier examples
 are an authoring option if Tom wants depth later.
 
+**16 Aug evening — Tom's final review round, all fixed same-day:**
+- Audio survived "Jump ahead to Practice" (learn↔practice switch was an
+  uncovered boundary; switchMode now stops both audio systems) — b2c9595f.
+- "Q 1 of 1" badge on extracts hidden when only one question uses the
+  extract (still shows on EngLang multi-question passages) — b2c9595f.
+- The interstitial's topic mismatch (L3 bronze texture fail → cadence
+  example) fixed at the ROOT: per-tier worked examples authored for all
+  18 practice lessons (~$0.36, claims restricted to each lesson's own
+  explanations, excerpts reused from the lessons — no outside sourcing).
+  All 54 verified to embed a real excerpt of their own lesson; one
+  "play the excerpt" without a player patched; QA gate 0 errors —
+  9b620ab6. Tom's review pass covers the new prose like the rest.
+
 **Still open on #53:** Tom's review of the 30 pending lessons → then clear
 the 12 music explainer pins + podcast batch + AoS1 L2 re-narration.
 
