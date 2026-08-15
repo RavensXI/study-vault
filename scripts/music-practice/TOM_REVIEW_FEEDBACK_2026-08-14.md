@@ -380,12 +380,17 @@ duplicate tip, SR-1/4 pairings, LS-3 bank sizes.
 
 ## Query findings — 15 Aug (all nine ran; several reshape their fixes)
 
-- **LS-1 SOLVED, and it is better than a broken button:** all five L1
-  method-card demos are **byte-identical — 152,684 bytes each**. demo_major,
-  demo_minor, demo_pentatonic, demo_chromatic and demo_wholetone are one audio
-  file uploaded five times. Tom pressed play on "whole-tone" and heard nothing
-  useful because it IS the major demo. Fix: regenerate all five with
-  `build_tonality_demos.py`, re-upload, verify by hash difference.
+- **LS-1 CORRECTED then exhaustively tested — not reproducible off-page:**
+  the byte-identical claim was WRONG (Tom: each sounded different; md5s
+  confirm five distinct files — equal LENGTH is not equal content). All five
+  demos then passed every isolated test: healthy loudness (~-28 dB peak),
+  identical correct markup, binder initialises all five, click starts each,
+  and the played-in-sequence handoff is clean — including whole-tone, last in
+  the row. Both page injection paths use innerHTML (no stale init attributes).
+  Remaining suspects are page-state interactions — most plausibly the LS-2
+  rogue audio running in his session. Plan: land the LS-2 transition cleanup,
+  then Tom retries whole-tone on his next review pass; if it still dies, note
+  WHERE (left panel vs the intro modal).
   **LS-1b RESOLVED:** the gold classical problems DO have audio — all four
   passages carry the real PD recordings (Beethoven, Mozart 40, K.622, Verdi).
   What differs is the player rendering, a front-end check, not missing assets.
