@@ -1,0 +1,52 @@
+# Exam-tip overlap report — flag at >=55% of tip words present in the final body section
+
+4280 lessons with tips checked, 48 flagged
+
+- 90%  english-literature-ocr/unseen-poetry/L4
+- 89%  english-literature-aqa/leave-taking/L8
+- 89%  english-literature-ocr/leave-taking/L8
+- 81%  separate-sciences/chemistry-paper-1/L2
+- 81%  science-aqa/chemistry-paper-1/L2
+- 81%  science-severnvale/chemistry-paper-1/L2
+- 75%  english-literature-ocr/unseen-poetry/L6
+- 70%  separate-sciences-edexcel/chemistry-paper-1/L9
+- 70%  english-literature-eduqas/oranges-are-not-the-only-fruit/L4
+- 69%  electronics-eduqas/discovering-electronics/L5
+- 67%  english-literature-aqa/telling-tales/L4
+- 66%  creative-imedia/pre-production/L6
+- 66%  english-literature-eduqas/war-of-the-worlds/L1
+- 65%  geography/paper-2/L7
+- 65%  physical-education-edexcel/health-and-performance/L12
+- 64%  english-literature-ocr/animal-farm/L1
+- 63%  music-aqa/aos4-since-1910/L2
+- 63%  english-literature-eduqas/macbeth/L8
+- 62%  history-edexcel/conflict-middle-east/L11
+- 62%  electronics-eduqas/application-of-electronics/L5
+- 62%  separate-sciences/chemistry-paper-2/L2
+- 62%  science-aqa/chemistry-paper-2/L2
+- 62%  english-literature-aqa/telling-tales/L2
+- 62%  psychology-aqa/brain-neuropsychology/L3
+- 62%  science-severnvale/chemistry-paper-2/L2
+- 61%  history-edexcel/early-elizabethan-england/L6
+- 61%  it-ocr/it-in-the-digital-world/L11
+- 61%  cambridge-nationals-engineering-design/principles-of-engineering-design/L6
+- 61%  physical-education-ocr/physical-factors-affecting-performance/L10
+- 61%  science-ocr/biology-paper-2/L3
+- 61%  english-literature-ocr/poetry-conflict/L5
+- 60%  history/health-people/L10
+- 59%  music-aqa/aos1-western-classical/L2
+- 59%  history-edexcel/early-elizabethan-england/L8
+- 59%  separate-sciences/physics-paper-1/L5
+- 59%  science-aqa/physics-paper-1/L5
+- 59%  creative-imedia/the-media-industry/L1
+- 59%  english-literature-eduqas/poetry-anthology/L11
+- 59%  science-severnvale/physics-paper-1/L5
+- 59%  sociology-aqa/education/L5
+- 57%  engineering-eduqas/engineering-materials-and-properties/L4
+- 57%  geology-eduqas/rocks-and-minerals/L6
+- 57%  history-eduqas/usa-nation-contrasts-1910-1929/L9
+- 56%  astronomy-edexcel/telescopic-astronomy/L13
+- 56%  electronics-eduqas/application-of-electronics/L7
+- 56%  english-literature-eduqas/dr-jekyll-and-mr-hyde/L5
+- 56%  english-literature-eduqas/much-ado-about-nothing/L5
+- 55%  english-literature-eduqas/dr-jekyll-and-mr-hyde/L3
