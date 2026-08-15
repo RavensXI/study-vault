@@ -307,7 +307,7 @@
     { sel: '.key-fact', pad: 8, title: 'Helpers in the text',
       body: 'Key facts are boxed like this, underlined words show a definition when you tap them, and the lightbulbs offer quick revision tips as you read.' },
     { sel: '.sidebar-progress-section', pad: 8, title: 'Track your progress',
-      body: 'Each activity is worth points — practice questions 40, flashcards 15, revision tasks 15, and the quiz, video and podcast 10 each. Reach half of what the lesson offers and it counts as complete.' },
+      body: 'Each activity counts towards completion — practice questions 40%, flashcards 15%, revision tasks 15%, and the quiz, video and podcast 10% each. Reach half of what the lesson offers and it counts as complete.' },
     { sels: ['.sidebar-knowledge-check', '.tile-practice'], pad: 10, title: 'Test yourself',
       body: 'Quick Quiz, Flashcards and exam-style Practice questions are all here — the fastest way to check what has stuck.' },
     { sels: ['.sidebar-media', '.tile-tutor'], pad: 10, title: 'Explore and dig in',
@@ -1239,7 +1239,7 @@
       if (!el || !d[1] || el.querySelector('.sv-weight-tag')) return;
       var t = document.createElement('span');
       t.className = 'sv-weight-tag';
-      t.textContent = '· ' + d[1];
+      t.textContent = '· ' + d[1] + '%';
       el.appendChild(t);
     });
   }
