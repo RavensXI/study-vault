@@ -580,10 +580,12 @@ function initPracticeQuestions() {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
   function formatAiResponse(text) {
-    // Light markdown: **bold**, numbered/bulleted lines, double-newline paragraphs
+    // Light markdown: **bold**, headings, double-newline paragraphs (pre-wrap CSS)
     let h = escapeHtml(text);
     h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    h = h.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
+    // the marker drifts between #, ## and ### — render any of them as the
+    // same small heading rather than leaking hash marks into the feedback
+    h = h.replace(/^#{1,3}\s+(.+)$/gm, '<h3>$1</h3>');
     return h;
   }
 
