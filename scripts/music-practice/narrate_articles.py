@@ -36,7 +36,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--force", action="store_true")
+    ap.add_argument("--only", help="unit-slug:lesson-number, e.g. aos1-western-classical:2")
     args = ap.parse_args()
+    only = None
+    if args.only:
+        u, n = args.only.rsplit(":", 1)
+        only = (u, int(n))
     if not AZURE_KEY:
         print("ERROR: AZURE_SPEECH_KEY not set")
         sys.exit(1)
@@ -53,6 +58,8 @@ def main():
                 "conclusion_html,narration_manifest").eq(
                 "unit_id", unit["id"]).order("lesson_number").execute().data:
             num = lesson["lesson_number"]
+            if only and (uslug, num) != only:
+                continue
             voice_name, voice_label = get_voice_for_lesson(num)
             print("\n%s / L%d (%s)  %s" % (uslug, num, voice_label,
                                            lesson["title"][:52]))
