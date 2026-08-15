@@ -29,6 +29,37 @@ Copyright policy: all content is original. No spec codes, paper codes, component
 
 ---
 
+## The teacher pipeline boundary: base + tweaks, article lessons only
+
+**Decided 16 Aug 2026 (Tom), after the Music AQA build.** What that build
+proved: the expensive work in a practice-format subject is
+*instrument-building* — audio synthesis that performs the markings, notation
+engraving, tier-retry pedagogy, ear-vs-fact question rules, licence-clean
+recordings. That is product development, done once, amortised across every
+school. It cannot be generated from a teacher's resources, and no pipeline
+should try.
+
+The teacher contract is therefore:
+
+1. **Bespoke generation covers ARTICLE lessons only.** A teacher's uploads
+   shape prose lessons — their sequencing, their examples, their emphasis —
+   poured into our fixed template with the same validators and fact-check
+   gates as everything else. (This is exactly what the Severn Vale biology
+   build was.)
+2. **Practice formats ship with the subject as-is.** Maths input types,
+   language practice, science calculations, music listening and score
+   reading are platform features, subscribed, never regenerated. Teachers
+   inherit them; their students get the proven instrument.
+3. **Customisation is the override layer, not regeneration.** A teacher who
+   wants a shared lesson to read differently edits it; the copy-on-edit
+   system lands their version in their school's layer over the common base.
+   The base stays shared, QA'd, and upgradeable underneath.
+
+Nothing reaches students in a format that has not been through the gates —
+that sentence is also the QA story schools are told.
+
+---
+
 ## Phase 1 — Plan
 
 Single Claude call, once per subject+board. Prompt in `PLANNING_PROMPT.md`.
