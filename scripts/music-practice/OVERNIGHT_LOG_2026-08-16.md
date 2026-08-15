@@ -36,6 +36,19 @@ pending_review; podcasts/explainers after Tom's flip.
   forms-devices-listening. TODO (suite): add a board-name check to
   _qa_practice_data.py — it missed the source leak.
 
+- **Phase 4 — 14 article lessons BUILT** (eduqas_build_articles.py,
+  ~$2.80 total incl. retries): validated per lesson (counts, KC shape,
+  plain-text purity, sequential narration ids, board-name ban) and
+  inserted pending_review; drafts in _eduqas_drafts/. Two validator
+  lessons learned en route: the spec slices carried WJEC page furniture
+  the model echoed (slices now sanitised), and "Section A" is legitimate
+  MUSICAL terminology in forms lessons — the ban is now scoped to paper-
+  structure phrasing only. Study-piece embeds woven (Netherlands Bach
+  Society Badinerie; TotoVEVO Africa — both oEmbed-verified). Full
+  verification: 14 articles, all pending_review, zero markers, zero
+  board names, zero paper-structure phrases. Spot-reads (Africa L3,
+  Badinerie L3): factually sound, no lyrics.
+
 ## Next (in order)
 - Phase 4: article content through fact-check gates (Badinerie study with
   synthesised score excerpts; Africa embed-plus-features).
