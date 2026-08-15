@@ -106,11 +106,15 @@ verified recordings and synthesis, worked examples, misconception drafts,
 question banks through the QA gates. What waits for him: anything with a
 NEW recording, and the review flip.
 
-## Open questions for Tom
+## Decisions (Tom, 16 Aug, late)
 
-1. Eduqas first — agreed? (It also feeds the WJEC/Wales plan.)
-2. Rhythms of the World: happy with synthesised rhythm drills as the v1
-   listening material, real recordings later?
-3. Do the free-tier Eduqas Africa lessons stay fully independent of
-   Unity's (porting rule says yes — confirming the fresh-build cost is
-   accepted).
+1. **Eduqas first — agreed.** Build under way.
+2. **No Unity porting, and the flow REVERSES**: once the free-tier Eduqas
+   build is live, Unity subscribes to it and it overrides Unity's old
+   music (`gcse-music`) — the Unity lessons never used Unity resources,
+   so nothing bespoke is lost, and Unity gets the better version. This is
+   the base-plus-overrides model applied to our own first school.
+3. **Rhythms of the World (OCR)** — explained, decision deferred to the
+   OCR build: synthesised rhythm drills (honest by construction, like the
+   metre/cadence bank) + official YouTube embeds in the articles for real
+   performances, vs. sourcing licence-clean world recordings first.
