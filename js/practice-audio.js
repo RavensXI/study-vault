@@ -190,6 +190,15 @@
   }
   window.initPracticeAudio = initAll;
 
+  /* the test suite's window into the closure: how many players are wired,
+     and is anything audibly playing right now */
+  window.svPracticeAudioState = function () {
+    return {
+      registry: registry.length,
+      playing: !!(playing && playing.audio && !playing.audio.paused)
+    };
+  };
+
   // Passage panels, worked examples and the method-card modal each inject their
   // own HTML at different moments. Watching the tree is one hook instead of
   // three, and it picks up any injection site added later.
@@ -197,19 +206,28 @@
     initAll();
     if (window._svPracticeAudioWatcher || !window.MutationObserver) return;
     var queued = false;
+    function touchesPlayer(nodes) {
+      for (var j = 0; j < nodes.length; j++) {
+        var n = nodes[j];
+        if (n.nodeType !== 1) continue;
+        if ((n.classList && n.classList.contains('sv-ap-inline')) ||
+            (n.querySelector && n.querySelector('.sv-ap-inline'))) return true;
+      }
+      return false;
+    }
     var obs = new MutationObserver(function (muts) {
       if (queued) return;
       for (var i = 0; i < muts.length; i++) {
-        var added = muts[i].addedNodes;
-        for (var j = 0; j < added.length; j++) {
-          var n = added[j];
-          if (n.nodeType !== 1) continue;
-          if ((n.classList && n.classList.contains('sv-ap-inline')) ||
-              (n.querySelector && n.querySelector('.sv-ap-inline'))) {
-            queued = true;
-            requestAnimationFrame(function () { queued = false; initAll(); });
-            return;
-          }
+        // REMOVALS matter as much as additions. A player's Audio object is
+        // detached from the DOM, so only stopOrphans() can silence it — and
+        // that ran only when a NEW player appeared. Move from a player
+        // problem to a screen without one (a tier summary — exactly where
+        // Tom caught it) and the removed clip played on with its controls
+        // gone: audible, invisible, unstoppable.
+        if (touchesPlayer(muts[i].addedNodes) || touchesPlayer(muts[i].removedNodes)) {
+          queued = true;
+          requestAnimationFrame(function () { queued = false; initAll(); });
+          return;
         }
       }
     });

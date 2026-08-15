@@ -5709,7 +5709,22 @@
       });
     }
 
+    /* Tier boundaries silence EVERYTHING. The waveform players' observer now
+       reaps removed clips, but a summary screen can also appear over a panel
+       whose player remains in the DOM — still audible under a screen with no
+       controls. One explicit stop at every tier boundary covers both audio
+       systems (the narrated passage element and the drill clips). */
+    function stopAllPracticeAudio() {
+      try { if (_passageAudio) { _passageAudio.pause(); _passageAudio.currentTime = 0; } } catch (e) {}
+      try { document.querySelectorAll('audio').forEach(function (a) { a.pause(); }); } catch (e) {}
+      try { if (window.initPracticeAudio) window.initPracticeAudio(); } catch (e) {}
+      try {
+        document.querySelectorAll('.sv-ap-inline.is-playing .sv-api-play').forEach(function (b) { b.click(); });
+      } catch (e) {}
+    }
+
     function showTierIntro(tier, onStart) {
+      stopAllPracticeAudio();
       var g = tierGuide(tier);
       if (!g) { if (onStart) onStart(); return; }
       updateMethodPanelForTier(tier);
@@ -6083,6 +6098,7 @@
 
     // ===== TIER CELEBRATION =====
     function showTierCelebration(tier, callback) {
+      stopAllPracticeAudio();
       var celebration = document.getElementById('tier-celebration');
       var badge = document.getElementById('celebration-badge');
       var text = document.getElementById('celebration-text');
@@ -6112,6 +6128,7 @@
     // Shown when a student completes all problems in a tier but scores below
     // 75%. Requires click-through — student must retry the tier from problem 1.
     function showTierFailModal(tier, onRetry) {
+      stopAllPracticeAudio();
       var overlay = document.getElementById('tier-fail-overlay');
       var t = practiceState[tier];
       var counts = getTierCounts();
