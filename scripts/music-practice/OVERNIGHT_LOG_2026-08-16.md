@@ -23,10 +23,20 @@ pending_review; podcasts/explainers after Tom's flip.
 - Tooling note: two rounds lost to heredoc/inline-patch quoting again —
   switched to the Edit tool mid-phase. The standing rule stands.
 
+- **Phase 3 — drills copied** (eduqas_copy_drills.py, 55eeca40):
+  forms-devices-listening (8) + ensemble-film-pop-listening (3). The
+  board-name check caught a REAL leak in the music-aqa SOURCE ("directly
+  tested in AQA listening questions") — three source lessons cleaned
+  (western-classical L5, aos-listening L2+L3). Copier made resume-safe
+  after a partial first run. Cross-board AoS numbering in the three
+  listening titles retitled to this spec's structure. QA gate 0 errors;
+  remnant sweep across all 18 practice lessons: zero Section A, zero
+  board names. TODO (Phase-4-adjacent): author the forms-question
+  additions (binary/ternary/rondo asks per work) for
+  forms-devices-listening. TODO (suite): add a board-name check to
+  _qa_practice_data.py — it missed the source leak.
+
 ## Next (in order)
-- Phase 3: drills adaptation — forms-devices-listening (8 lessons from
-  western-classical-1650-1910: same PD works, forms questions added) and
-  ensemble-film-pop-listening (3 from aos-listening).
 - Phase 4: article content through fact-check gates (Badinerie study with
   synthesised score excerpts; Africa embed-plus-features).
 - Phase 5: assets (heroes vision-gated, narration, KCs/flashcards/
