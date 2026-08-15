@@ -169,7 +169,7 @@ def main():
                 lines.append("  index %d: %s%s" % (oi, plain(o), mark))
 
         msg = cl.messages.create(
-            model=MODEL, max_tokens=4000, system=SYSTEM,
+            model=MODEL, max_tokens=8000, system=SYSTEM,
             messages=[{"role": "user", "content": "\n".join(lines)}])
         usage_in += msg.usage.input_tokens
         usage_out += msg.usage.output_tokens
