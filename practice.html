@@ -6450,6 +6450,11 @@
 
     // ===== MODE SWITCHING =====
     function switchMode(mode) {
+      // A playing excerpt must not survive the view switch: the learn-side
+      // players stay in the DOM when the view hides (so the removal-aware
+      // observer never fires), and the practice panel uses a separate audio
+      // system — without this, both sound at once (Tom's review, 16 Aug).
+      stopAllPracticeAudio();
       practiceState.mode = mode;
       var learnView = document.getElementById('learn-view');
       var practiceView = document.getElementById('practice-view');
@@ -7850,7 +7855,9 @@
         if (a11yBar) a11yBar.style.display = '';
         engRestoreA11y();
       }
-      // Update question badge
+      // Update question badge — only meaningful when SEVERAL questions share
+      // this extract (EngLang reading passages). With one question per
+      // extract (music excerpts) "Q 1 of 1" is permanent noise: hide it.
       var badge = document.getElementById('passage-q-badge');
       if (badge) {
         var bank = window._problemBank;
@@ -7860,6 +7867,7 @@
         var total = probs.filter(function(q){return (q.passage_id||q.passage)===pid;}).length;
         var sofar = probs.slice(0,practiceState.currentIndex+1).filter(function(q){return (q.passage_id||q.passage)===pid;}).length;
         badge.textContent = 'Q '+sofar+' of '+total;
+        badge.style.display = total > 1 ? '' : 'none';
       }
       area.style.display = 'flex';
       setTimeout(engFitPassageText,50);
