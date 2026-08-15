@@ -107,17 +107,33 @@ are not trusted (twice bitten today).
   corrected: there were never 15 downloaded-unattached music videos.
   State backup: `scripts/_batch_explainer_state.json.bak-20260815-overnight`.
 
-## In progress
+- **Music MC misconception drafts DONE — desk copy only** (3db4624e).
+  All 211 MC problems across the four practice units carry drafted
+  per-distractor diagnoses in
+  `scripts/music-practice/MC_MISCONCEPTION_DRAFTS_2026-08-15.md`
+  (~$1.15). Same contract as EngLang/MFL; **nothing in the DB** — your
+  approval applies them with the standard script. Side fix: enrich_mc
+  max_tokens 4000→8000 (aos-listening L3's response truncated mid-JSON
+  twice until the bump — deterministic, now clean).
+- **WC-7 Adjust Pins: verified safe, no change needed** (54e4baf9).
+  The button's role check is cosmetic, but the SAVE posts to
+  `/api/pipeline/update-lesson`, which is requireTeacher-gated and
+  scope-checked server-side (override layer for shared content). Live
+  unauthenticated probe → 401. This is the scope-the-data model working.
+- **WC-5 AI-feedback hash marks FIXED** (54e4baf9, pushed). The
+  formatter only handled `###`; the marker drifts between `#`, `##`
+  and `###`, so hashes leaked as raw text. All three now render as the
+  small heading. Proven on the extracted live function + a real render
+  with site CSS (screenshot).
 
-- **Music MC misconception drafts** (desk only, never --apply) running
-  in the background across the four practice units
-  (`scripts/misconceptions/run_music_drafts.py`, fail-loud loop).
-  Next wakeup checks its output file and assembles the desk markdown.
-
-## Queue
-MC drafts assembly (job running) → catalogue items that survive the night
-(WC-2 tour anchoring, WC-3 weight tags, WC-5 markdown-in-feedback,
-WC-6 signpost, WC-7 Adjust Pins gating check).
+## Queue (what's left of the catalogue)
+- WC-2 tour anchoring + WC-3 unit-weight tags — both need YOUR eyes on
+  renders before any change; parked for morning.
+- WC-6 study-piece completion signpost — design call, parked for morning.
+- LS-3 tier retry (4+3 worked-example interstitial, attempt count,
+  cap 2) — decided but "don't build this now"; build queued for after
+  your review.
+- aos1-western-classical L2 re-narration — after you approve content.
 
 ## For Tom's morning
 - whole-tone retest (after LS-2 lands), noting panel vs modal if it recurs
