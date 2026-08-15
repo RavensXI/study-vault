@@ -2459,7 +2459,9 @@ function initRevisionTips() {
   // e.g. 'english-literature-edexcel' → 'english-literature', 'maths-aqa' → 'maths', 'science-ocr' → 'science'
   var tipsSubject = subject;
   if (!subjectTips[tipsSubject]) {
-    var baseSlug = subject.replace(/-(?:aqa|edexcel|ocr|eduqas|wjec)$/, '');
+    // canonical board-suffix reducer — keep in lockstep with exam-countdown.js
+    // and practice-loader.js (unit test u02 pins all three)
+    var baseSlug = subject.replace(/-(?:aqa|edexcel|ocr|eduqas|wjec|ncfe)(?:-[a-z])?$/, '');
     if (subjectTips[baseSlug]) tipsSubject = baseSlug;
   }
   const tips = subjectTips[tipsSubject] || defaultTips;

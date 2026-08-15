@@ -348,7 +348,11 @@
       var isFoundation = false;
       try {
         var tiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}');
-        var subjectBase = params.subjectSlug.replace(/-(?:aqa|edexcel|ocr|eduqas)$/, '');
+        // canonical board-suffix reducer — keep in lockstep with
+        // exam-countdown.js and main.js (unit test u02 pins all three);
+        // the old form missed wjec/ncfe and -a/-b board variants, so a
+        // Foundation student's tier lookup missed on those subjects
+        var subjectBase = params.subjectSlug.replace(/-(?:aqa|edexcel|ocr|eduqas|wjec|ncfe)(?:-[a-z])?$/, '');
         var studentTier = tiers[params.subjectSlug] || tiers[subjectBase] || 'higher';
         isFoundation = studentTier === 'foundation';
       } catch(e) {}

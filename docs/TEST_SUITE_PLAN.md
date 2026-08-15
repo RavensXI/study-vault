@@ -129,7 +129,7 @@ I currently do by hand each time.
 | Phase | Work | Effort |
 |---|---|---|
 | **P0 — rescue** | done today: 30 harnesses + 2 fixtures into `_incoming/` | done |
-| **P1 — wire** | `run_tests.py`; promote the 7 `test_*.js` API harnesses + write the ~6 unit tests from the museum list; skip-on-down-DB probe | an afternoon |
+| **P1 — wire** | DONE 16 Aug: runner + 6 unit tests + 7 promoted API tests, 13/13 green, skip-on-down-DB proven | done |
 | **P2 — journeys** | promote the `shot_*`/journey scripts into ring 3 with fixtures; write the five-journey live smoke | an afternoon |
 | **P3 — habit** | suite runs before every push that touches api/, js/, or the big pages; failures block the push (my discipline, not tooling) | immediate, free |
 | **P4 — CI** | GitHub Action runs `--fast` on every push; graduates to gate once trusted | an hour, later |
