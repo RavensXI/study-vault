@@ -7606,8 +7606,11 @@
       area.classList.remove('passage-area--map');
       var passages = window._practicePassages || [];
       var hasPassage = problem.passage_id || problem.passage;
-      // highlight_evidence renders passage inline
-      if (problem.input_type === 'highlight_evidence') hasPassage = false;
+      // highlight_evidence renders passage inline; vocab_match never needs a
+      // passage (pairs are self-contained — a stray passage_id is data noise,
+      // and NOT reorder: EngLang reorders legitimately use their extract)
+      if (problem.input_type === 'highlight_evidence' ||
+          problem.input_type === 'vocab_match') hasPassage = false;
       var hasChart = !!problem.chart && !hasPassage;
       var hasImage = !!problem.image && !hasPassage && !hasChart;
 
@@ -8175,7 +8178,7 @@
     function renderAI(p){
       var h='';
       // Only show quote inline if there's no passage panel to highlight it in
-      var hasPassagePanel = (p.passage_id || p.passage) && p.input_type !== 'highlight_evidence';
+      var hasPassagePanel = (p.passage_id || p.passage) && p.input_type !== 'highlight_evidence' && p.input_type !== 'vocab_match';
       if(p.quote && !hasPassagePanel) h+='<div class="rs-quote">'+p.quote+'</div>';
       if(p.quote && hasPassagePanel) h+='<div class="problem-question-hint">Refer to the highlighted section in the extract.</div>';
       if(p.brief) h+='<div class="rs-quote" style="border-left-color:#0891b2;background:#f0fdfa">'+p.brief+'</div>';
