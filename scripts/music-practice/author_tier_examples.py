@@ -107,6 +107,13 @@ def validate(examples, want, passage_ids):
             errs.append("%s: board name" % e.get("difficulty"))
         if not plain(e.get("intro")):
             errs.append("%s: empty intro" % e.get("difficulty"))
+        # passage ids are plumbing, never student-facing prose (leaked on the
+        # first run: "Play the excerpt for p-aos2_rock_live_band...")
+        visible = plain(e.get("intro")) + " " + " ".join(
+            plain(s.get("content")) for s in e.get("steps") or [])
+        for pid in passage_ids:
+            if pid in visible:
+                errs.append("%s: passage id %r in visible text" % (e.get("difficulty"), pid))
     return errs
 
 
