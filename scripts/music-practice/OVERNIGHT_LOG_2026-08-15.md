@@ -1,5 +1,30 @@
 # Overnight log — 15 Aug 2026
 
+## 16 Aug — Tom's morning review: every decision applied
+
+Tom ear-checked the score-player work (L4, L2 Extract F, whole-tone) — all
+good. Then, one desk item at a time:
+- **Ear-vs-fact applied** (c2eeb608): 8 rewrites, 9 detaches, L8 dup dropped.
+- **MC diagnoses applied fresh** (2b55eb95): 201/213 music MC problems,
+  373 diagnoses; enrich_mc max_tokens 4000→8000.
+- **Videos: IN THE BODY, not the sidebar** (b1662d5b) — Tom corrected the
+  first wiring; 11 sv-embed figures at the discussing sections; the sidebar
+  slot stays reserved for the explainer. New .sv-embed CSS.
+- **Tour built** (ee8f1127 + e7515e30): step 2 spotlights the helper
+  bubbles; weights on step-4 copy and all five activity controls as
+  percent tags (Tom: numbers alone read as question counts; flashcard tag
+  had inherited the label's bold — countered in reskin.css).
+- **Explainers**: verified none of the 39 stuck lessons has any video
+  live; cleared the 27 psych/history entries (state backup
+  `.bak-20260816-clear27`) so the hourly dispatcher rebuilds them fresh;
+  the 12 music jobs stay PINNED as a deliberate hold until Tom flips the
+  30 pending lessons. Shorts confirmed healthy: 3,982 banked, running
+  nightly.
+
+**Still open on #53:** Tom's review of the 30 pending lessons → then clear
+the 12 music explainer pins + podcast batch + AoS1 L2 re-narration; and the
+tier-retry build (4+3 worked-example interstitial, attempt count, cap 2).
+
 Tom asleep; reviewing in the morning. Working the music fix programme
 (task #53) in catalogue order. Every entry below says what was done, how it
 was verified, and whether it was pushed. Anything audible is drafted for
