@@ -21,9 +21,17 @@ good. Then, one desk item at a time:
   30 pending lessons. Shorts confirmed healthy: 3,982 banked, running
   nightly.
 
+**Tier retry BUILT** (655f3c70, 15 Aug evening): two attempts capped, a
+worked-example interstitial between them, twice-failed tiers marked "to
+revisit" and the lesson moves on; attempt counts + revisit both logged.
+E2E-proven on the real page (double-fail run + pass-on-attempt-2 control).
+Applies to every guided-practice subject. Note: the interstitial shows the
+lesson's best-matching worked example — music lessons each carry one
+(bronze/silver), so a gold fail shows that same example; per-tier examples
+are an authoring option if Tom wants depth later.
+
 **Still open on #53:** Tom's review of the 30 pending lessons → then clear
-the 12 music explainer pins + podcast batch + AoS1 L2 re-narration; and the
-tier-retry build (4+3 worked-example interstitial, attempt count, cap 2).
+the 12 music explainer pins + podcast batch + AoS1 L2 re-narration.
 
 Tom asleep; reviewing in the morning. Working the music fix programme
 (task #53) in catalogue order. Every entry below says what was done, how it
