@@ -127,8 +127,26 @@ are not trusted (twice bitten today).
   with site CSS (screenshot).
 
 ## Queue (what's left of the catalogue)
-- WC-2 tour anchoring + WC-3 unit-weight tags — both need YOUR eyes on
-  renders before any change; parked for morning.
+- **WC-2 / WC-3 morning decision packs ready** — tour screenshots saved
+  as `scripts/music-practice/wc_tour_step1..8.png` (taken on the live
+  psychology lesson; the tour is shared by every article lesson).
+  - **WC-2** (step 2, `wc_tour_step2.png`): the spotlight lights the
+    PARAGRAPH; the three helper icons pop up small at its bottom-left
+    while the card sits far right — nothing points at the icons, which
+    is exactly why you only just noticed them. The tour already has a
+    spotlight mechanism (`sv-tour-spot`), so my recommendation: when
+    step 2 opens, trigger the paragraph popover and move the spotlight
+    to enclose the ICON CLUSTER, card beside it. (Alternatives: pulse
+    ring on the icons; or move the card next to them. The re-anchor is
+    cleanest.)
+  - **WC-3** (step 4, `wc_tour_step4.png`): anchoring is already good —
+    the gap is copy and controls. Draft tour copy: "Each activity is
+    worth points — practice questions 40, flashcards 15, revision task
+    15, quiz, video and podcast 10 each. Reach half of what a lesson
+    offers and it counts as complete." Controls get a quiet type-style
+    tag, no pill: "Quick Quiz · 10", "Flashcards · 15", "Practice
+    Questions · 40", and the same on podcast/video where labelled.
+  - Say the word on either and I build it.
 - WC-6 study-piece completion signpost — design call, parked for morning.
 - LS-3 tier retry (4+3 worked-example interstitial, attempt count,
   cap 2) — decided but "don't build this now"; build queued for after
