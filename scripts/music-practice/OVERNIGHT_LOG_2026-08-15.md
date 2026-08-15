@@ -43,8 +43,13 @@ are an authoring option if Tom wants depth later.
   "play the excerpt" without a player patched; QA gate 0 errors —
   9b620ab6. Tom's review pass covers the new prose like the rest.
 
-**Still open on #53:** Tom's review of the 30 pending lessons → then clear
-the 12 music explainer pins + podcast batch + AoS1 L2 re-narration.
+**#53 CLOSED (16 Aug, late):** Tom reviewed and flipped all 30 lessons
+LIVE. The post-approval chain ran same evening: the 12 explainer pins
+cleared (fresh notebooks queue at the wrapper's next daily launch window,
+~18:00 17 Aug); podcasts 13/13 cooked, downloaded to R2 and wired into
+related media (spot-check HTTP 200); aos1-western-classical L2 re-narrated
+with its two listen boxes given ids n90/n91 (22 clips — WC-4 closed).
+Every catalogue item and every follow-up catch is done.
 
 Tom asleep; reviewing in the morning. Working the music fix programme
 (task #53) in catalogue order. Every entry below says what was done, how it
