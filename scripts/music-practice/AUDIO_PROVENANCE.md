@@ -104,3 +104,26 @@ the highest in that lesson, against the existing percussion answer at 0.075 and
 the pitched families at 0.008-0.032. Note the absolute 0.18 threshold in
 audio_features.py is rock-kit calibrated and misfires on orchestral recordings;
 compare against sibling clips instead.
+
+## Music OCR — Rhythms of the World gold tier (added 16 Aug 2026)
+
+| R2 file (music-ocr/aos3-rhythms-listening/) | Recording | Licence basis | Evidence |
+|---|---|---|---|
+| gold_manyalawi_a.mp3 / _b.mp3 | Cheikh Youssef El-Manyalawi, "Sahil Guefoun" I, Gramophone, Cairo 1909 | Recording 1909: US PD (pre-1923) + UK PD (pre-1963 term); composer-performer d. 1911 | https://archive.org/details/78_sahil-guefoun-i_cheikh-youssef-el-menialawi-caire_gbia0299355a |
+| gold_dengozo_a.mp3 / _b.mp3 | "Dengozo" (Ernesto Nazareth), Argentine Marimba Band, Victor, rec. 26 Oct 1923 | Recording 1923: US PD (MMA 100y, 1 Jan 2024) + UK PD; composition Nazareth d. 1934 | https://archive.org/details/78_dengozo_argentine-marimba-band-ernest-mazareth_gbia0068884a |
+
+Content authenticity verified 16 Aug 2026 by blind Gemini probes:
+Manyalawi = melismatic microtonal solo male voice + plucked accompaniment,
+acoustic-era tech; Dengozo = 3/3 votes struck-wooden-bar (marimba) lead,
+2/3 syncopated duple Latin dance (excerpt A uses the cleanly-voted opening
+strain). Rejected: Belasco 1918/1925 sides (label credits Belasco as
+WRITER, d. 1967 — UK composition copyright to 2038). India/Africa: no
+licence-clean pre-1926 sources found — gold there is hard-synthetic
+pending Tom's generation decision.
+
+The 12 synthesised patterns (chaal, tintal, keherwa, kalamatianos 7/8,
+karsilamas 9/8, dum-tek, 3v2 cross-rhythm, layered build, call-response,
+samba, tresillo, straight march) are authored as grids in
+gen_rotw_rhythms.py and machine-verified by onset detection against their
+own notation on every render. Synth underwrites rhythm/metre questions
+only, per the standing rule.
