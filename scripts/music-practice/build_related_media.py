@@ -27,10 +27,17 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from lib.supabase_client import get_client
 
 APPLY = "--apply" in sys.argv
-BACKUP = os.path.join(HERE, "_backup_related_media_2026-08-16.json")
 MODEL = "claude-sonnet-5"
-UNITS = ["aos1-western-classical", "aos2-popular-music",
-         "aos3-traditional-music", "aos4-since-1910"]
+
+
+def arg(flag, default):
+    return sys.argv[sys.argv.index(flag) + 1] if flag in sys.argv else default
+
+
+SUBJECT = arg("--subject", "music-aqa")
+UNITS = arg("--units", "aos1-western-classical,aos2-popular-music,"
+            "aos3-traditional-music,aos4-since-1910").split(",")
+BACKUP = os.path.join(HERE, "_backup_related_media_%s.json" % SUBJECT)
 
 SYSTEM = """You curate external media for GCSE Music (age 15-16) revision
 lessons. Suggest genuinely good, REAL, currently-available resources a UK
@@ -73,7 +80,7 @@ def main():
     sb = get_client()
     cl = anthropic.Anthropic()
     subj = [s for s in sb.table("subjects").select("id,slug").execute().data
-            if s["slug"] == "music-aqa"][0]["id"]
+            if s["slug"] == SUBJECT][0]["id"]
     units = {u["slug"]: u["id"] for u in sb.table("units").select("id,slug,subject_id")
              .execute().data if u["subject_id"] == subj}
 

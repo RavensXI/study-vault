@@ -49,12 +49,46 @@ pending_review; podcasts/explainers after Tom's flip.
   board names, zero paper-structure phrases. Spot-reads (Africa L3,
   Badinerie L3): factually sound, no lyrics.
 
-## Next (in order)
-- Phase 4: article content through fact-check gates (Badinerie study with
-  synthesised score excerpts; Africa embed-plus-features).
-- Phase 5: assets (heroes vision-gated, narration, KCs/flashcards/
-  questions, related media URL-audited, misconception diagnoses).
-- Phase 6: QA gates (_qa_practice_data, _qa_practice_answers, link audit).
+- **Phase 5 — fact-check APPLIED** (4 parallel agent passes; findings in
+  `scripts/_fact_check/music-eduqas.json` + `.md`): 20 findings — 12 HIGH /
+  7 MEDIUM / 1 LOW; aos3-film-music clean. Headlines: the Badinerie key
+  scheme was REVERSED (Section A ends in F sharp minor, the dominant minor
+  — not D major) across aos1 L3+L4 all fields; Africa is a half-time FEEL
+  with straight sixteenths, not a half-time shuffle (that is Rosanna);
+  kalimba intro = layered Yamaha GS-1 + real marimba; solo synth CS-80 not
+  GX-1; dagga/tilli name the dhol STICKS; Eine kleine 2nd mvt is a rondo —
+  ternary example swapped to Chopin's Raindrop Prelude; So What call,
+  Sweeney Todd menace, A Little Priest corrected. All applied via
+  `eduqas_factcheck_fixes.py` (backup `_backup_factcheck_fixes_2026-08-16
+  .json`); one generic replace briefly produced "groove groove" in the
+  woven caption — repaired, and the weave-script source caption corrected
+  so re-weaves stay clean. Remnant sweep across every content + question
+  field: ZERO.
+- **Phase 5 — heroes DONE** (eduqas_heroes.py): 32/32 set, 0 failed, 145
+  vision calls. Verified: alt + caption on all 32, all 32 MD5-distinct,
+  all download at full size.
+- **Phase 5 — related media DONE** (build_related_media.py, now
+  parameterised --subject/--units): 14/14 article lessons, every URL
+  audited live (oEmbed for YouTube). One stubborn lesson (aos4 L2 Bhangra)
+  needed a strict-JSON retry; its board-safe fallback set is generic
+  (Bitesize/BBC Sounds/Classic FM) — fine, honest, alive.
+- **Phase 5 — narration DONE** (narrate_eduqas_articles.py, post-fact-
+  check per the house rule): 14/14 manifests, 369 clips, 97,946 chars,
+  ~$1.57 Azure. Ollie odd / Ada even. R2 `music-eduqas/{unit}/`. Spot-
+  checked 4 random clips serving from R2 at full size.
+- **Phase 6 — QA gate**: `_qa_practice_data.py` — 0 errors corpus-wide,
+  zero warnings touch music-eduqas.
+- **Final sweep: ZERO issues** — 32 lessons / 8 units: every lesson
+  pending_review with slug + hero; articles all have 6 PQ / 5 KC (correct+
+  options shape) / 5 FC / 8+ glossary / exam tip / conclusion / related
+  media / narration; both study-piece embeds woven; practice lessons all
+  carry practice_data; practice_units setting correct.
+
+## Build totals
+- 32 lessons: 18 practice (copied + neutralised from music-aqa) + 14 new
+  articles. All pending_review awaiting Tom.
+- Cost: articles ~$2.80 + related media ~$0.40 + fact-check agents +
+  narration ~$1.57 + heroes (vision) — well under a tenner all-in.
 
 ## For Tom's morning
 - Review pass over the whole subject when the build completes.

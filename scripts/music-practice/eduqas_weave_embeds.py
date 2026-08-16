@@ -25,7 +25,7 @@ EMBEDS = {
                   "flute leading, strings and harpsichord continuo behind."),
     "africa": ("FTQbiNvZqaY", "Toto — Africa (Official HD Video)",
                "Watch: the official video. Listen for the layered keyboards, "
-               "the half-time shuffle groove and the lifted chorus harmony."),
+               "the half-time drum groove and the lifted chorus harmony."),
 }
 
 
