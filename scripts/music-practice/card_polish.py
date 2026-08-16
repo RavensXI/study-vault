@@ -125,6 +125,50 @@ def main():
                 cur_len += bl
             if cur:
                 chunks.append(cur)
+            # orphan pass: a thin prose chunk (<260 chars) merges into a
+            # prose neighbour — backwards first, forwards otherwise —
+            # rather than sitting alone in the stage. A chunk that starts
+            # with an h2 must not merge backwards (it opens a section).
+            def is_embed_chunk(c):
+                return len(c) == 1 and c[0].startswith("<figure")
+
+            def thin(c):
+                return not is_embed_chunk(c) and txtlen("".join(c)) < 260
+            merged = []
+            for c in chunks:
+                if (thin(c) and not c[0].startswith("<h2") and merged
+                        and not is_embed_chunk(merged[-1])
+                        and txtlen("".join(merged[-1] + c)) < BUDGET * 1.35):
+                    merged[-1] = merged[-1] + c
+                else:
+                    merged.append(c)
+            chunks = []
+            i = 0
+            while i < len(merged):
+                c = merged[i]
+                if (thin(c) and i + 1 < len(merged)
+                        and not is_embed_chunk(merged[i + 1])
+                        and not merged[i + 1][0].startswith("<h2")
+                        and txtlen("".join(c + merged[i + 1])) <
+                        BUDGET * 1.35):
+                    chunks.append(c + merged[i + 1])
+                    i += 2
+                else:
+                    chunks.append(c)
+                    i += 1
+            # cover budget: the cover grid halves the text column, so a
+            # heavy first chunk overflows — spill its tail to card 2
+            if chunks and txtlen("".join(chunks[0])) > 420:
+                head, tail, run = [], [], 0
+                for b in chunks[0]:
+                    if not tail and (run + txtlen(b) <= 420
+                                     or b.startswith("<h2") or not head):
+                        head.append(b)
+                        run += txtlen(b)
+                    else:
+                        tail.append(b)
+                if tail:
+                    chunks = [head, tail] + chunks[1:]
             # titles via one model call
             briefs = []
             for i, c in enumerate(chunks):
@@ -183,9 +227,23 @@ def main():
                     attrs += ' data-track="t1"'
                     if chap[i]:
                         attrs += ' data-chapters="%s"' % ",".join(chap[i])
-                cards.append('<section class="%s"%s>%s'
-                             '<div class="sv-card-body">%s</div></section>'
-                             % (cls, attrs, "".join(h2s), "".join(rest)))
+                # a card that stays light renders as a centred statement
+                # rather than text lost top-left in an empty stage
+                # (inline so it works pre-deploy; sv-card--statement CSS
+                # committed for future builds)
+                if (i > 0 and not h2s and not is_embed_chunk(c)
+                        and txtlen("".join(rest)) < 340):
+                    cls += " sv-card--statement"
+                    attrs += (' style="display:flex;align-items:center;'
+                              'justify-content:center"')
+                    body = ('<div class="sv-card-body" style="max-width:'
+                            '620px;font-size:1.12em;column-count:1">'
+                            "%s</div>" % "".join(rest))
+                else:
+                    body = '<div class="sv-card-body">%s</div>' % \
+                        "".join(rest)
+                cards.append('<section class="%s"%s>%s%s</section>'
+                             % (cls, attrs, "".join(h2s), body))
             new_ch = fig + '<div class="sv-listening">' + "".join(cards) + \
                 "</div>"
             # validation
@@ -195,7 +253,7 @@ def main():
             assert old_ids == new_ids, "%s %s L%d ids" % (slug, uslug, num)
             man = row["narration_manifest"] or []
             new_man = [c for c in man if c["id"] not in dead_ids]
-            over = [txtlen(re.search(r'<div class="sv-card-body">(.*?)'
+            over = [txtlen(re.search(r'<div class="sv-card-body"[^>]*>(.*?)'
                                      r"</div></section>", c, re.S).group(1))
                     for c in cards]
             print("%s %s L%d: %d cards (max %d chars), %d listen boxes "
