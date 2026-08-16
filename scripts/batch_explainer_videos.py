@@ -66,7 +66,12 @@ def nlm_run(args, timeout=120, _retried=False):
         env=NLM_ENV, timeout=timeout,
     )
     output = (result.stdout or "") + (result.stderr or "")
-    if not _retried and ("Authentication expired" in output or "Authentication Error" in output):
+    # "Could not retrieve ..." is how studio/video commands surface expired
+    # cookies (16 Aug: 35 launches no-opped silently behind it — notebooks
+    # created, zero generations fired)
+    if not _retried and ("Authentication expired" in output
+                         or "Authentication Error" in output
+                         or "Could not retrieve" in output):
         if _reauth():
             return nlm_run(args, timeout, _retried=True)
     if result.returncode != 0 and "Error" in (result.stderr or ""):
