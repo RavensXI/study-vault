@@ -159,12 +159,17 @@ def main():
             # cover budget: the cover grid halves the text column, so a
             # heavy first chunk overflows — spill its tail to card 2
             if chunks and txtlen("".join(chunks[0])) > 420:
-                head, tail, run = [], [], 0
+                head, tail, run, prose_kept = [], [], 0, 0
                 for b in chunks[0]:
-                    if not tail and (run + txtlen(b) <= 420
-                                     or b.startswith("<h2") or not head):
+                    is_h2 = b.startswith("<h2")
+                    # the cover must ALWAYS keep its heading and at least
+                    # one prose block (a heading-only cover is broken)
+                    if not tail and (is_h2 or prose_kept == 0
+                                     or run + txtlen(b) <= 420):
                         head.append(b)
                         run += txtlen(b)
+                        if not is_h2:
+                            prose_kept += 1
                     else:
                         tail.append(b)
                 if tail:
@@ -227,23 +232,26 @@ def main():
                     attrs += ' data-track="t1"'
                     if chap[i]:
                         attrs += ' data-chapters="%s"' % ",".join(chap[i])
-                # a card that stays light renders as a centred statement
-                # rather than text lost top-left in an empty stage
-                # (inline so it works pre-deploy; sv-card--statement CSS
-                # committed for future builds)
-                if (i > 0 and not h2s and not is_embed_chunk(c)
-                        and txtlen("".join(rest)) < 340):
+                # ANY single-prose-block card renders as a centred
+                # statement (heading inside the centred group) — a lone
+                # paragraph top-left of an empty stage was the recurring
+                # design failure. Multi-block cards keep the two-column
+                # top-anchored layout.
+                if (i > 0 and not is_embed_chunk(c) and len(rest) == 1
+                        and rest[0].startswith("<p")):
                     cls += " sv-card--statement"
                     attrs += (' style="display:flex;align-items:center;'
                               'justify-content:center"')
                     body = ('<div class="sv-card-body" style="max-width:'
-                            '620px;font-size:1.12em;column-count:1">'
-                            "%s</div>" % "".join(rest))
+                            '640px;font-size:1.08em;column-count:1">'
+                            "%s%s</div>" % ("".join(h2s), "".join(rest)))
+                    cards.append('<section class="%s"%s>%s</section>'
+                                 % (cls, attrs, body))
                 else:
                     body = '<div class="sv-card-body">%s</div>' % \
                         "".join(rest)
-                cards.append('<section class="%s"%s>%s%s</section>'
-                             % (cls, attrs, "".join(h2s), body))
+                    cards.append('<section class="%s"%s>%s%s</section>'
+                                 % (cls, attrs, "".join(h2s), body))
             new_ch = fig + '<div class="sv-listening">' + "".join(cards) + \
                 "</div>"
             # validation
