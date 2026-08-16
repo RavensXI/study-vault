@@ -1,4 +1,45 @@
-# Overnight log — 16 Aug 2026: Music Eduqas + OCR builds (tasks #57, #58)
+# Overnight log — 16 Aug 2026: Music Eduqas + OCR + Edexcel builds (#57, #58, #60)
+
+## Music Edexcel 1MU0 (task #60) — BUILT same evening, Tom's go 16 Aug
+
+Plan: `EDEXCEL_BUILD_PLAN.md`. 31 lessons / 7 units, pending_review,
+subject live. The set-work board: 8 prescribed works, each with two
+study lessons carrying the sv-annotated-player (official videos: DG
+Pathétique + Star Wars/Vienna Phil, Chamber Orchestra of Europe
+Brandenburg mvt 3, Queen Official TOTP Killer Queen, WickedVEVO,
+Helen Watts Purcell, official-audio Release + Samba Em Preludio).
+11 practice copies (era spans corrected; exam_context rebuilt for this
+spec's Component 3 comparison essay). 20 articles ~$2.20 (one network
+death mid-run — the orphan-draft sweep pattern now inserts paid drafts
+before regenerating). 39 embeds wired MAP-FIRST (retro applied: curate
+once, apply from the saved map; two weak picks hand-patched).
+Fact-check: **41 findings, 31 HIGH** — the heaviest of the three
+boards, as predicted for set works (Brandenburg entry order
+violin-first ×4 fields; Purcell ground 3 bars not 8×34; Killer Queen
+first-Top-10 + missing third verse + 12/8 backwards; Spalding's
+"double bass" is Pearson's acoustic bass guitar, string ensemble
+fabricated, my own player pins/credit corrected incl. 2008 not 2010;
+Release vocalist credits untangled; AoS3 CLEAN). All fixed, remnant
+sweep clean (three survivors verified legitimate). Narration 462+22
+clips ~$2.54 post-fact-check. Heroes 31/31 MD5-distinct (two dupe
+rounds fixed — finder dedupes by URL only, note for the pipeline).
+Related media 20/20 (strict-JSON retries for six). QA gate 0 errors.
+
+## Site-wide catches from Tom's Eduqas review pass (same evening)
+
+- **41 dangling "what to listen for" captions** across music-eduqas +
+  music-ocr's film copies — every one completed with a work-specific
+  pointer and its narration clip regenerated in place (shared R2 keys
+  healed both subjects). `fix_dangling_captions.py`.
+- **Music-family revision-tip gap**: the music article pipeline never
+  emitted data-revision-tip, so every lightbulb fell back to generic
+  copy — music-aqa included. Every other subject family checked: fully
+  tipped. 163 boxes across the four music boards now carry specific,
+  box-grounded retrieval tasks. `music_revision_tips.py`. TODO
+  (pipeline): the article builders should emit data-revision-tip at
+  build time.
+
+---
 
 ## Music OCR J536 (task #58) — BUILT same day, Tom's go 16 Aug afternoon
 
