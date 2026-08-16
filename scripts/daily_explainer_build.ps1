@@ -72,6 +72,17 @@ function Run-Py {
 
 Write-Log "=== Hourly heartbeat ==="
 
+# Health probe: if the last launch was 1-4h ago, verify something is
+# actually cooking in the notebooks (catches silent no-op launches like
+# the 13-16 Aug auth expiry; alerts via Resend, max once per day).
+if (Test-Path $lastLaunchFile) {
+    $sinceLaunch = (Get-Date) - [DateTime]::Parse((Get-Content $lastLaunchFile -Raw).Trim())
+    if ($sinceLaunch.TotalHours -ge 1 -and $sinceLaunch.TotalHours -le 4) {
+        Write-Log "Running NLM health probe..."
+        Run-Py -PyArgs @("scripts\nlm_health_probe.py") -TimeoutMin 8 | Out-Null
+    }
+}
+
 # Gate 1: another wrapper still in flight?
 if (Test-Path $lockFile) {
     $lockAge = (Get-Date) - (Get-Item $lockFile).LastWriteTime

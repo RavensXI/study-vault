@@ -233,7 +233,10 @@ def notify(subject, body):
         req = urllib.request.Request(
             "https://api.resend.com/emails",
             data=json.dumps({"from": frm, "to": [to], "subject": subject, "text": body}).encode(),
-            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json",
+                     # Cloudflare 1010-blocks the default Python UA — every
+                     # local send was silently failing until 16 Aug 2026
+                     "User-Agent": "StudyVault-Notify/1.0"},
         )
         urllib.request.urlopen(req, timeout=20)
     except Exception:
