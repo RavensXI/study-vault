@@ -144,3 +144,13 @@ noted in FLOW_PROMPT_PACK_ROTW.md. A/B lesson: density profiles chose
 bhangra take a, but the probes overruled it (a's swing is inconsistent
 across windows; b passes everywhere) — pick by verified checks, not by
 energy.
+
+### Call-and-response regen (Tom's second batch, 16 Aug)
+
+gold_gen_african_callresp.mp3 = regen take b @14-40s. Machine alternation
+check: 53/84 density flips (take a: 30/81 — rejected). 3-vote verdict
+3/3 on order-neutral phrasing ("alternates between full ensemble and
+solo drum phrases") — the clip runs ENSEMBLE-first then solo answer, so
+the original solo-first probe wording failed it; the drill question is
+phrased order-neutrally to match. Verification lesson: probe wording
+must not assume an order the prompt didn't guarantee.
