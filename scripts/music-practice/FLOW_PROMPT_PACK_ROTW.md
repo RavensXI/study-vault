@@ -103,3 +103,18 @@ to `music-ocr/aos3-rhythms-listening/` and swaps the hard-synthetic
 gold questions for real-feature questions wired to the new clips.
 Nothing ships on a failed screen — the AoS2 pack's revision loop
 applies unchanged.
+
+---
+
+## REGEN NEEDED — `rotw_african_callresp` (call-and-response failed 0/3)
+
+Both takes' final thirds verified as continuous ensemble texture, not
+alternation. Stronger prompt for the next batch:
+
+> A West African drum conversation with STRICT alternation: for two
+> seconds a single high hand drum plays a short solo phrase COMPLETELY
+> ALONE with everyone else silent; then the full ensemble of deep drums
+> and bell answers together for two seconds; then silence-backed solo
+> again. Repeat this strict solo-then-ensemble exchange for the whole
+> piece with no overlapping sections. Around 96 beats per minute. Drums
+> and bell only, no melody instruments, no singing, no lyrics.

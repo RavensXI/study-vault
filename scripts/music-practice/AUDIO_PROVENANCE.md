@@ -127,3 +127,20 @@ samba, tresillo, straight march) are authored as grids in
 gen_rotw_rhythms.py and machine-verified by onset detection against their
 own notation on every render. Synth underwrites rhythm/metre questions
 only, per the standing rule.
+
+## RotW generated gold (Flow, Tom's batch 16 Aug 2026)
+
+Five clips shipped, captioned in-product as "AI-generated demonstration
+in the style of the tradition": gold_gen_bhangra (take b@55s — 3-checks
+pass: swung, dhol low/high, no sung words), gold_gen_sitar_alap +
+gold_gen_sitar_cycle (take a — drone/ornament/cycle pass),
+gold_gen_african_build (take b opening — staged build, drums+bell only),
+gold_gen_steelpan (take b@90s — pans lead, 3+3+2, duple). Every check
+ran on the FINAL loudnormed excerpt; contested windows went to 3-vote
+majority. REJECTED: african call-and-response — 0/3 on both takes'
+final thirds (the earlier single-probe passes were the unreliable
+readings); its synthetic question stays and a stronger regen prompt is
+noted in FLOW_PROMPT_PACK_ROTW.md. A/B lesson: density profiles chose
+bhangra take a, but the probes overruled it (a's swing is inconsistent
+across windows; b passes everywhere) — pick by verified checks, not by
+energy.
