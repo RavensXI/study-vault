@@ -1,4 +1,47 @@
-# Overnight log — 16 Aug 2026: Music Eduqas build (task #57)
+# Overnight log — 16 Aug 2026: Music Eduqas + OCR builds (tasks #57, #58)
+
+## Music OCR J536 (task #58) — BUILT same day, Tom's go 16 Aug afternoon
+
+Plan: `OCR_BUILD_PLAN.md`. 33 lessons / 8 units, all pending_review,
+subject live. No set works on this spec — no study-piece players; AoS1
+(My Music) is NEA, so the appraising build covers AoS2–5.
+
+- **Phases 1–2**: activation + 17 practice copies (concerto listening
+  renumbered chronologically Baroque→Romantic; AQA's Broadway problem
+  DROPPED — not an OCR strand; AoS renumbering transformed and asserted).
+- **Phase 3**: 13 fresh articles ~$1.13, ALL first-pass valid; 3 film
+  articles copied wholesale from music-eduqas (content, embeds,
+  narration manifests, heroes, related media — zero cost). Retro
+  applied: NO listen boxes — 34 embed markers wired at build time via
+  search+verify (NBS Brandenburg 4, Berliner Phil, Nintendo's own Zelda
+  concert, O'Donnell's Halo, VEVO pop originals, Mangueira bateria,
+  Mamady Keita live). Retro note: yt search ordering is UNSTABLE between
+  dry-run and apply — two picks drifted (one amateur video, one wrong
+  song version); both caught and replaced. Next board: wire from the
+  dry-run map, don't re-search on apply.
+- **Phase 5 fact-check** (4 agents; `scripts/_fact_check/music-ocr.md`):
+  16 findings, 11 HIGH — Livin' On A Prayer's key change is a minor
+  third not a semitone (content+mark scheme+flashcard), hora is duple
+  not triple (4 places — one found only by the remnant sweep), dunun
+  sizes reversed, K.314 is Flute Concerto No. 2, Halo chant metre +
+  Mjolnir Mix honestly relabelled + Salvatori co-credited, Zarathustra's
+  C major/minor ambiguity restored, Dylan's harmonica removed, a lyric
+  quotation removed. All fixed surgically, zero remnants.
+- **Phase 5 assets**: heroes 30 fresh + 3 carried, all 33 MD5-distinct;
+  related media 13/13 URL-audited (two world-music lessons needed the
+  strict-JSON retry); narration 300 clips ~$1.72 post-fact-check, film
+  manifests reused cross-subject.
+- **Phase 6**: QA gate 0 errors, zero music-ocr warnings. Final sweep
+  across all 33 lessons: ZERO issues (statuses, slugs, heroes+captions,
+  question counts/shapes, embeds, no ghost clips, board-name ban).
+
+**Gate for Tom:** Rhythms of the World has ARTICLES only — its drills
+wait on the synthesised-rhythms vs embeds decision. Plus the usual
+review flip; podcasts after.
+
+---
+
+# Music Eduqas build (task #57) — earlier the same night
 
 Plan: `EDUQAS_BUILD_PLAN.md`. Decisions locked with Tom before bed:
 Eduqas first; no Unity porting (Unity later subscribes to THIS build and
