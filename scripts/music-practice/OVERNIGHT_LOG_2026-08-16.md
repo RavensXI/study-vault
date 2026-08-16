@@ -31,10 +31,19 @@ pending_review; podcasts/explainers after Tom's flip.
   after a partial first run. Cross-board AoS numbering in the three
   listening titles retitled to this spec's structure. QA gate 0 errors;
   remnant sweep across all 18 practice lessons: zero Section A, zero
-  board names. TODO (Phase-4-adjacent): author the forms-question
-  additions (binary/ternary/rondo asks per work) for
-  forms-devices-listening. TODO (suite): add a board-name check to
+  board names. TODO (suite): add a board-name check to
   _qa_practice_data.py — it missed the source leak.
+- **Forms-question additions DONE** (eduqas_forms_questions.py, on Tom's
+  morning go-ahead): 12 questions across the 8 forms-devices-listening
+  drills. The copied AQA banks already named the obvious forms (rondo L3,
+  variations L4, ternary L7), so the additions cover what the Eduqas spec
+  needs on top: minuet and trio (L1), strophic rejection (L5), through-
+  composed (L8), ornamented repetition + coda (L6), rondo-vs-ternary and
+  variations-vs-rondo proof questions (L3/L4), ternary principle +
+  sequence devices (L2/L7), refrain recurrence (L8). Every question
+  carries per-distractor misconception diagnoses. QA gate re-run: 0
+  errors, no new warnings. Backup
+  `_backup_forms_questions_2026-08-16.json`.
 
 - **Phase 4 — 14 article lessons BUILT** (eduqas_build_articles.py,
   ~$2.80 total incl. retries): validated per lesson (counts, KC shape,
