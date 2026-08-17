@@ -113,6 +113,10 @@ def main():
     recent = sorted(
         [j for j in state.get("jobs", [])
          if j.get("status") == "in_progress" and j.get("launched_ts")
+         # a job that burned all 3 re-fires is a known-dead straggler
+         # (the batch flips it to failed on its next pass) - one zombie
+         # must not read as "the whole pipeline is down"
+         and j.get("refires", 0) < 3
          and 0.75 * 3600 < now - j["launched_ts"] < 26 * 3600],
         key=lambda j: -j["launched_ts"])
     if recent and not problems:

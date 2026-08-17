@@ -419,6 +419,37 @@ def cmd_status(args):
     print(f"\n{completed} newly completed, {still_active} still in progress, {failed} failed")
 
 
+def _sweep_exhausted(state, now):
+    """A job that has burned all 3 re-fires and STILL has no artifact 2h
+    after the last attempt is dead: every create was quota-swallowed or
+    no-opped. Without this flip it sits in_progress forever, the wrapper's
+    poll loop never sees "0 still in progress", and the health probe reads
+    one zombie as a systemic outage (psych-edexcel criminal L02, 17 Aug).
+    One last studio check first — an artifact may have appeared silently."""
+    exhausted = [j for j in state["jobs"]
+                 if j.get("status") == "in_progress"
+                 and not j.get("artifact_id") and j.get("refires", 0) >= 3
+                 and now - j.get("last_refire_ts", 0) >= 7200]
+    for job in exhausted:
+        artifact_id = None
+        try:
+            status = nlm_json(["studio", "status", job["notebook_id"]])
+            for s in (status or []):
+                if s.get("type") == "video":
+                    artifact_id = s["id"]
+                    break
+        except Exception as e:
+            print(f"  {job['label']}: exhausted-check failed ({str(e)[:80]}) - leaving")
+            continue
+        if artifact_id:
+            job["artifact_id"] = artifact_id
+            print(f"  {job['label']}: artifact appeared ({artifact_id}) on final check")
+        else:
+            job["status"] = "failed"
+            print(f"  {job['label']}: 3 re-fires exhausted, no artifact - marking failed")
+        save_state(state)
+
+
 def cmd_refire_missing(args):
     """Re-fire video create for in-progress jobs whose notebook has NO video
     artifact. NLM's rolling quota window counts even REJECTED attempts, so a
@@ -434,6 +465,7 @@ def cmd_refire_missing(args):
                   if j.get("status") == "in_progress" and not j.get("artifact_id")
                   and j.get("focus") and j.get("refires", 0) < 3
                   and now - j.get("last_refire_ts", 0) >= 1200]
+    _sweep_exhausted(state, now)
     if not candidates:
         print("No jobs need a re-fire.")
         return
