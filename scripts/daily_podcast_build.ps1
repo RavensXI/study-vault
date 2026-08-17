@@ -25,7 +25,8 @@ $logFile = Join-Path $logDir ("{0}.log" -f (Get-Date -Format "yyyy-MM-dd"))
 $lockFile = Join-Path $logDir "_running.lock"
 $lastLaunchFile = Join-Path $logDir "_last_launch.txt"
 $cooldownHours = 23.9167  # 23h55m - catches the SAME hourly slot daily (24h05m drifted +1h/day)
-$lockStaleHours = 12       # treat lock as orphaned past this (run probably crashed)
+$lockStaleHours = 7.5      # the task's ExecutionTimeLimit is PT7H, so no instance
+                           # can live longer - an older lock is definitionally orphaned
 $dailyCap = 60             # NLM audio quota is ~200/day; 60 keeps the run inside the morning window
 
 function Write-Log {

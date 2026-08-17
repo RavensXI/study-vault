@@ -17,7 +17,10 @@ $logFile = Join-Path $logDir ("{0}.log" -f (Get-Date -Format "yyyy-MM-dd"))
 $lockFile = Join-Path $logDir "_running.lock"
 $lastLaunchFile = Join-Path $logDir "_last_launch.txt"
 $cooldownHours = 23.9167  # 23h55m - catches the SAME hourly slot daily (24h05m drifted +1h/day; shorts wrapper learned this first)
-$lockStaleHours = 12       # treat lock as orphaned past this (run probably crashed)
+$lockStaleHours = 5.5      # the task's ExecutionTimeLimit is PT5H, so no instance
+                           # can live longer - an older lock is definitionally
+                           # orphaned (17 Aug: silent mid-download death held the
+                           # lock 7h and wedged every recovery job behind it)
 
 function Write-Log {
     param([string]$Message)
