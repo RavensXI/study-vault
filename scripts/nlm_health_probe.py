@@ -22,8 +22,11 @@ Alerts via the house Resend pattern (RESEND_API_KEY / NOTIFY_TO /
 NOTIFY_FROM), at most one per day (flag file). Exit 0 healthy or
 nothing-to-check, exit 1 unhealthy.
 
-Run: python scripts/nlm_health_probe.py [--force-alert] [--test-alert]
-Wired into daily_explainer_build.ps1's hourly heartbeat.
+Run: python scripts/nlm_health_probe.py [--stream explainer|podcast]
+     [--force-alert] [--test-alert]
+Wired into daily_explainer_build.ps1's and daily_podcast_build.ps1's
+hourly heartbeats. --stream picks which pipeline's state to probe:
+explainer (video artifacts, the default) or podcast (audio artifacts).
 """
 import io
 import json
@@ -34,14 +37,24 @@ import time
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 HERE = os.path.dirname(os.path.abspath(__file__))
-STATE = os.path.join(HERE, "_batch_explainer_state.json")
-LOGDIR = os.path.join(HERE, "_explainer_daily_logs")
-FLAG = os.path.join(LOGDIR, "_health_alerted_%s.flag"
-                    % time.strftime("%Y-%m-%d"))
+STREAM = "explainer"
+if "--stream" in sys.argv:
+    STREAM = sys.argv[sys.argv.index("--stream") + 1]
+    assert STREAM in ("explainer", "podcast"), "unknown stream: " + STREAM
+if STREAM == "podcast":
+    STATE = os.path.join(HERE, "_batch_podcast_state.json")
+    LOGDIR = os.path.join(HERE, "_podcast_daily_logs")
+    ARTIFACT_TYPE = "audio"
+else:
+    STATE = os.path.join(HERE, "_batch_explainer_state.json")
+    LOGDIR = os.path.join(HERE, "_explainer_daily_logs")
+    ARTIFACT_TYPE = "video"
+FLAG = os.path.join(LOGDIR, "_health_alerted_%s_%s.flag"
+                    % (STREAM, time.strftime("%Y-%m-%d")))
 
 
 def log(msg):
-    line = "%s [health] %s" % (time.strftime("%H:%M:%S"), msg)
+    line = "%s [health:%s] %s" % (time.strftime("%H:%M:%S"), STREAM, msg)
     print(line)
     try:
         io.open(os.path.join(LOGDIR, "health.log"), "a",
@@ -131,17 +144,18 @@ def main():
                     if idx >= 0 else []
             except ValueError:
                 arts = []
-            if any(a.get("type") == "video" for a in arts):
+            if any(a.get("type") == ARTIFACT_TYPE for a in arts):
                 cooking += 1
-        log("cooking check: %d/%d sampled notebooks have a video artifact"
-            % (cooking, checked))
+        log("cooking check: %d/%d sampled notebooks have a %s artifact"
+            % (cooking, checked, ARTIFACT_TYPE))
         if checked and cooking == 0:
             problems.append(
-                "COOKING: %d job(s) were launched in the last 26h but "
-                "none of %d sampled notebook studios contains ANY video "
+                "COOKING: %d %s job(s) were launched in the last 26h but "
+                "none of %d sampled notebook studios contains ANY %s "
                 "artifact. Launches are almost certainly no-opping "
                 "(the 13-16 Aug failure mode). Newest job: %s"
-                % (len(recent), checked, recent[0].get("label", "?")))
+                % (len(recent), STREAM, checked, ARTIFACT_TYPE,
+                   recent[0].get("label", "?")))
     elif not recent:
         log("no recent launches to check")
 
@@ -153,15 +167,15 @@ def main():
         log("%d job(s) in_progress for >48h" % len(stale))
 
     if problems or force:
-        body = ("NLM pipeline health probe failed on %s.\n\n%s\n\n"
+        body = ("NLM %s pipeline health probe failed on %s.\n\n%s\n\n"
                 "%d job(s) stuck in_progress over 48h.\n\n"
-                "State: scripts/_batch_explainer_state.json\n"
-                "Log:   scripts/_explainer_daily_logs/health.log"
-                % (time.strftime("%Y-%m-%d %H:%M"),
+                "State: %s\nLog:   %s"
+                % (STREAM, time.strftime("%Y-%m-%d %H:%M"),
                    "\n\n".join(problems) if problems else
-                   "(forced alert - no problems detected)", len(stale)))
-        if notify("[StudyVault] NLM pipeline UNHEALTHY - explainers not "
-                  "generating", body):
+                   "(forced alert - no problems detected)", len(stale),
+                   STATE, os.path.join(LOGDIR, "health.log")))
+        if notify("[StudyVault] NLM %s pipeline UNHEALTHY - not "
+                  "generating" % STREAM, body):
             io.open(FLAG, "w").write("1")
         sys.exit(1)
     log("HEALTHY")

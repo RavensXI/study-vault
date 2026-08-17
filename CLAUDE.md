@@ -169,7 +169,7 @@ All content served from Supabase. Static HTML files remain as backup.
 - **Exam Countdown LIVE** (`js/exam-countdown.js`) + **Exam Timetable & Revision Planner LIVE** at `/exams` (no AI, deterministic scheduling).
 - **AI Marking API LIVE** at `/api/ai-mark` — Haiku ≤8 marks, Sonnet >8 marks, formative.
 - **Cinematic videos COMPLETE** for Unity (552/552). Free-tier no videos (NotebookLM 20/day doesn't scale).
-- **Podcasts**: 200/day via NotebookLM. Unity 526/526 done. Free-tier coverage growing — Tom runs NLM batches manually per subject.
+- **Podcasts**: AUTOMATED (17 Aug) — `daily_podcast_build.ps1` (scheduled task "StudyVault - Daily Podcast Build", ~06:00) runs `batch_podcasts.py --live-only --unit-complete --all-subjects`: a unit's podcasts generate the morning after its LAST lesson flips live, newest subjects first, cap 60/day (audio quota ~200/day, separate from the video pool). Verified by backlog recount (`_podcast_sweep.py`); health probe `--stream podcast`. Unity 526/526 done; free-tier backlog cleared by the old nightly dispatcher (formerly inside the sandbox shorts wrapper, removed 17 Aug).
 - **Diagrams**: Unity-only — CS (19), D&T (14), 7 data-viz Chart.js, 57 Geography chart problems. Free-tier diagrams stripped 22 Apr; GPT-image-2 replacement under evaluation (parked).
 - **OS Map Skills** (4 Apr) — 28 OS OpenData maps + contour overlays at R2 `geography/os-maps/`.
 

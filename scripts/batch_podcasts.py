@@ -43,6 +43,12 @@ STATE_FILE = os.path.join(SCRIPT_DIR, "_batch_podcast_state.json")
 NLM_ENV = {**os.environ, "NO_COLOR": "1", "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
 
 LIVE_ONLY = False  # set by --live-only: only podcast lessons students can see
+# set by --unit-complete: skip units until EVERY lesson in them is live.
+# The podcast prompt frames the lesson inside the full unit ("3rd of 7",
+# sibling titles, "still to come" teasers) - generating while some siblings
+# are pending_review risks references to lessons students cannot see yet
+# and titles that may still change in review.
+UNIT_COMPLETE = False
 
 SUBJECT_ORDER = [
     "science-edexcel", "science-ocr",
@@ -180,7 +186,11 @@ def _fetch_subject_lessons(sb, slug, subject, limit, all_pending):
             'id, title, lesson_number, status, content_html, related_media'
         ).eq('unit_id', unit['id']).order('lesson_number').execute()
 
-        for lesson in (all_unit_lessons.data or []):
+        rows = all_unit_lessons.data or []
+        if UNIT_COMPLETE and (not rows or any(l.get("status") != "live" for l in rows)):
+            continue
+
+        for lesson in rows:
             if has_podcast(lesson):
                 continue
             # practice-format / stub lessons can't sustain a podcast
@@ -196,14 +206,29 @@ def _fetch_subject_lessons(sb, slug, subject, limit, all_pending):
                 "unit_name": unit["name"],
                 "exam_board": subject.get("exam_board", "AQA"),
                 "unit_lessons": [{"lesson_number": l["lesson_number"], "title": l["title"]}
-                                 for l in (all_unit_lessons.data or [])],
+                                 for l in rows],
             })
         if len(all_pending) >= limit:
             break
 
 
-def get_pending_lessons(sb, limit, subject_filter=None, school_id=None):
+def get_pending_lessons(sb, limit, subject_filter=None, school_id=None,
+                        all_subjects=False):
     all_pending = []
+
+    # --all-subjects (dispatcher mode): every generic subject, newest build
+    # first, so a freshly approved board gets podcasts before the old
+    # backlog. SUBJECT_ORDER below is a frozen snapshot of the 2026 spring
+    # backlog and never learns about new subjects.
+    if all_subjects and not subject_filter:
+        subj_rows = sb.from_('subjects').select(
+            'id, name, exam_board, slug, created_at'
+        ).is_('school_id', 'null').order('created_at', desc=True).execute().data or []
+        for subject in subj_rows:
+            _fetch_subject_lessons(sb, subject["slug"], subject, limit, all_pending)
+            if len(all_pending) >= limit:
+                break
+        return all_pending[:limit]
 
     # If a specific subject is requested that isn't in SUBJECT_ORDER, query directly
     if subject_filter and subject_filter not in SUBJECT_ORDER:
@@ -238,7 +263,8 @@ def cmd_generate(args):
     state = load_state()
     active_ids = {j["lesson_id"] for j in state["jobs"] if j.get("status") == "in_progress"}
 
-    pending = get_pending_lessons(sb, args.limit, args.subject, getattr(args, 'school', None))
+    pending = get_pending_lessons(sb, args.limit, args.subject, getattr(args, 'school', None),
+                                  getattr(args, 'all_subjects', False))
     pending = [p for p in pending if p["lesson"]["id"] not in active_ids]
 
     if not pending:
@@ -329,6 +355,7 @@ def cmd_generate(args):
             "notebook_id": notebook_id,
             "audio_artifact_id": audio_artifact_id,
             "status": "in_progress",
+            "launched_ts": time.time(),  # health probe's recency window
         }
         state["jobs"].append(job)
         save_state(state)
@@ -470,9 +497,14 @@ def main():
     parser.add_argument("--cleanup", action="store_true")
     parser.add_argument("--live-only", action="store_true",
                         help="Only lessons with status=live (dispatcher mode)")
+    parser.add_argument("--unit-complete", action="store_true",
+                        help="Skip units until every lesson in them is live")
+    parser.add_argument("--all-subjects", action="store_true",
+                        help="All generic subjects, newest first (not SUBJECT_ORDER)")
     args = parser.parse_args()
-    global LIVE_ONLY
+    global LIVE_ONLY, UNIT_COMPLETE
     LIVE_ONLY = args.live_only
+    UNIT_COMPLETE = args.unit_complete
 
     if args.status:
         cmd_status(args)
