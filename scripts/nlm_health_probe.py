@@ -107,12 +107,26 @@ def main():
 
     problems = []
 
-    # 1. auth
+    # 1. auth - self-heal first (nlm login auto-completes via the saved
+    # Chrome profile), alert only if the login did not recover it. Cookies
+    # now expire within hours; the hourly heartbeat + this heal keeps the
+    # outage window to ~1h instead of paging Tom (17 Aug: cookies died
+    # 16:00-17:00 mid-afternoon, mid-download).
     out = nlm(["notebook", "list"])
     if "Authentication" in out and "Error" in out:
-        problems.append("AUTH: nlm cookies expired and re-auth has not "
-                        "recovered them. Run 'nlm login'.")
-        log("auth check FAILED")
+        log("auth check failed - attempting nlm login self-heal")
+        try:
+            nlm(["login"], timeout=120)
+        except Exception as e:
+            log("nlm login raised: %s" % str(e)[:80])
+        out = nlm(["notebook", "list"])
+        if "Authentication" in out and "Error" in out:
+            problems.append("AUTH: nlm cookies expired and 'nlm login' "
+                            "did NOT recover them - the saved Google "
+                            "session is dead. Manual login needed.")
+            log("auth check FAILED (self-heal did not recover)")
+        else:
+            log("auth self-heal recovered")
     else:
         log("auth check ok")
 
