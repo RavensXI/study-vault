@@ -1,76 +1,67 @@
-# Generated widget contract
+# What a generated interactive must satisfy
 
-**This contract constrains the SHAPE OF THE CODE, never the kind of
-interaction.** Invent whatever interaction teaches the lesson best —
-dragging cards into groups, ordering events, matching pairs, clicking
-hotspots on a picture, dealing a hand, routing a path, tuning two
-competing dials, dropping items on a scale. There is no menu. If the
-lesson wants something nobody has built before, build that.
+Almost nothing. Build whatever teaches the lesson best.
 
-The only rule is that the widget's *thinking* must be pure and
-separate from its *drawing*, so it can be tested without a browser.
-That is what makes generated interactives trustworthy at scale — not
-sameness.
+Earlier versions of this file prescribed a code shape — pure functions,
+one canvas, sliders — so that tests could run cheaply in Node. That was
+a bad trade: it turned discrete choices into numbered sliders, forced
+paragraphs of text to be laid out by hand in pixel coordinates, and made
+everything look the same. Verification has moved into a real browser
+instead, where it drives the actual thing a student uses. So the design
+is yours.
 
-## The shape
+**Use the whole browser.** Real HTML buttons and labels. CSS grid and
+flexbox, so text lays itself out instead of being positioned by hand.
+SVG for diagrams. Canvas where canvas genuinely wins — graphs,
+simulations, anything continuous or animated. Drag and drop. CSS
+transitions. If the lesson wants a map, draw a map. If it wants cards
+you deal onto a table, deal cards onto a table.
 
-```js
-var W = {
-  meta: { id: 'kebab-slug', title: '...', teaches: '...' },
+Choose the right tool: **text-heavy interactions should be DOM**, not
+text painted into a canvas. Graphs and spatial models should be canvas
+or SVG. Mixing them in one widget is normal and encouraged.
 
-  // PURE. The whole interaction lives in state.
-  initialState: function () { return { /* JSON-serialisable */ }; },
+## The only rules
 
-  // PURE. Every user gesture becomes an action; this is the only way
-  // state ever changes. Must never mutate its input.
-  //   action examples you might invent:
-  //   {t:'set', key:'voltage', v:230}   {t:'pick', card:3}
-  //   {t:'drop', card:3, bin:'catholic'}   {t:'swap', a:2, b:5}
-  //   {t:'hotspot', id:'gatehouse'}    {t:'reset'}
-  apply: function (state, action) { return newState; },
+1. **One self-contained file.** No imports, no CDN, no network of any
+   kind — no `fetch`, no `XMLHttpRequest`, no remote fonts or images.
+   Everything inline. (The site runs under a strict CSP and must work
+   offline.)
+2. **Mount through this entry point**, and nothing else:
 
-  // PURE. Anything worth asserting on or showing: scores, whether the
-  // student is right, computed physics, what is left to do.
-  derive: function (state) { return { /* ... */ }; },
+   ```js
+   window.SVWidget = {
+     meta: { id: 'kebab-slug', title: '...', teaches: '...' },
+     mount: function (root, ctx) { /* build your UI inside root */ }
+   };
+   ```
 
-  // PURE. Where the clickable things ARE, so tests can drive the widget
-  // without a browser and the host can route clicks. Return [] if the
-  // widget is driven only by declared controls.
-  regions: function (state, w, h) {
-    return [{ x: 0, y: 0, w: 40, h: 40, action: { t: 'pick', card: 0 } }];
-  },
+   `root` is an empty `<div>` you own completely. `ctx` gives you
+   `{ accent: '#rrggbb', reducedMotion: true|false }` — use the accent
+   as the widget's highlight colour so it matches its lesson.
+3. **No `eval`, no `new Function`, no writing to `localStorage`** or
+   anything else outside `root`.
+4. **Responsive.** Must work from 320px to 900px wide without
+   horizontal scrolling, and be usable by touch.
+5. **Reachable by keyboard.** Anything clickable must be a real
+   `<button>`/`<a>`/input, or carry `tabindex` and respond to Enter.
+   Respect `ctx.reducedMotion` by not auto-animating.
+6. **Expose state for testing**: set `root.dataset.svState` to a small
+   JSON summary whenever something meaningful changes (score, whether
+   the student is correct, key computed values). The browser-based gate
+   reads this to check behaviour. Keep it to the facts a test would
+   assert on.
+7. **Honest content.** Every number, date, name and unit defensible for
+   GCSE and consistent with the lesson's own figures and vocabulary. No
+   long quotations, no lyrics.
+8. **It must be possible to get it wrong.** An interaction with no wrong
+   answer, or a control that doesn't change what the student sees, is a
+   failure.
 
-  // Optional: sliders/toggles the host should render as real inputs.
-  // Their changes arrive as {t:'set', key, v}.
-  controls: [{ key: 'voltage', label: 'Mains', min: 200, max: 250,
-               step: 1, value: 230, unit: 'V' }],
+## House look (guidance, not constraint)
 
-  // Drawing only. May read state/derived; must not change them.
-  render: function (ctx, state, derived, w, h, acc) { /* ... */ },
-
-  // One sentence of teaching that reacts to where the student is.
-  caption: function (state, derived) { return '...'; }
-};
-if (typeof module !== 'undefined') module.exports = W;
-```
-
-A slider widget is just one where `regions()` is empty and `controls`
-is populated. A drag-to-group widget has no controls and rich regions.
-Both are the same code shape, so both are testable the same way.
-
-## Rules
-
-1. **Purity.** `initialState`, `apply`, `derive`, `regions` must be
-   deterministic — no `Math.random`, no `Date`, no DOM, no network.
-   `apply` must not mutate the state it is given.
-2. **Total.** No throwing, and no `NaN`/`Infinity`/`undefined` fields,
-   for any reachable state or any action `regions()` can emit.
-3. **Reachable.** Every action a student can perform must be emitted by
-   `regions()` or by a declared control, so tests can reach the whole
-   interaction.
-4. **Honest.** Every number, date and name must be defensible for GCSE
-   and consistent with the lesson's own figures and vocabulary.
-5. **It must teach.** An interaction that cannot be got wrong, or whose
-   controls do not change the meaning of the picture, is a failure.
-6. No lyrics, no long quotations, no claims the lesson does not support.
-7. Plain ES5, no imports, no libraries.
+Warm and calm: ink `#2d2a26`, muted `#8d8880`, hairlines `#e8e2d9`,
+paper `#faf8f5`, cards white with `border-radius: 12–16px`. Inter for UI,
+Source Serif 4 for headings. The lesson's accent (`ctx.accent`) for
+highlights and correctness. No drop shadows on small elements, no
+gradients, no emoji. British English.

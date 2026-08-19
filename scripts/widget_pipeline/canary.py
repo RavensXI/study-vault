@@ -284,16 +284,15 @@ def tier2():
 
 
 # ------------------------------------------------------------------ tier 3
-BUILD_SYS = """You write ONE small interactive teaching widget as a single JavaScript file, exactly to the contract below. You are given a design spec and the lesson it belongs to.
+BUILD_SYS = """You write ONE interactive teaching widget for a GCSE lesson as a single self-contained file. You are given a design spec and the lesson.
 
 %s
 
-Additional requirements:
-- Follow the spec's id, kind, controls and derived field names EXACTLY: the widget will be tested against invariants written from that spec before you existed.
-- The drawing must be genuinely illustrative of THIS lesson, not a generic chart. Use the canvas properly: label things, show the quantity that matters, make the change visible.
-- The site is warm and calm: ink #2d2a26, muted #8d8880, grid #e8e2d9, and the lesson's own accent passed in as `acc`. No gradients, no shadows, no emoji.
-- British English.
-- Output ONLY the JavaScript file. No markdown fence, no commentary.""" % CONTRACT
+Build the best possible version of the spec's interaction. Use whatever the browser offers — real buttons for choices, CSS grid so text lays itself out, SVG for diagrams, canvas for graphs and simulations. Do NOT paint paragraphs of text into a canvas; that is what HTML is for. Do NOT represent a discrete choice as a numeric slider.
+
+It should feel like a small, well-made thing a teacher would be pleased to show a class: clear at a glance what to do, obvious feedback when the student is right or wrong, and worth touching more than once.
+
+Output ONLY the JavaScript file contents (it will be loaded as a script and must set window.SVWidget). No markdown fence, no commentary.""" % CONTRACT
 
 
 def tier3(max_n=None, build_model=OPUS):
