@@ -1,0 +1,109 @@
+LESSON 4: Series and Parallel Circuits (Combined Science)
+
+MISCONCEPTION TO ATTACK:
+Students think current 'gets used up' as it flows through series components, or that voltage is consumed equally by all resistors regardless of their resistance.
+
+DESIGN SPEC:
+{
+ "id": "series-voltage-split",
+ "title": "Why the Bigger Resistor Grabs More Voltage",
+ "teaches": "In series, current is identical everywhere but voltage divides in proportion to resistance",
+ "interaction": "Student drags two resistor sliders (R1, R2) and a supply-voltage slider in a single-loop circuit and watches an ammeter reading (same at every point) and a voltage bar (split into two proportional coloured segments) update instantly - this part is pure exploration, no verdict. Then the student hits 'New Challenge' to get a random R1, R2, V, and must drag a single divider along a blank voltage bar to predict how the voltage splits between the two resistors, without any live feedback on correctness. Pressing Check overlays the true proportional split and shows the numeric current, V1, V2. The trap: students often guess a 50/50 split regardless of resistance, or think the smaller resistor 'uses up' voltage first.",
+ "state_shape": {
+  "mode": "'explore' or 'challenge'",
+  "r1": "resistance of resistor 1 in explore mode (1-20 ohm)",
+  "r2": "resistance of resistor 2 in explore mode (1-20 ohm)",
+  "voltage": "supply voltage in explore mode (1-24 V)",
+  "challenge": "null, or {r1,r2,voltage,splitFrac (0-1 fraction of bar given to R1), committed:boolean}"
+ },
+ "actions": [
+  {
+   "t": "setR1",
+   "fields": "value:number",
+   "meaning": "change R1 in explore mode, live update"
+  },
+  {
+   "t": "setR2",
+   "fields": "value:number",
+   "meaning": "change R2 in explore mode, live update"
+  },
+  {
+   "t": "setVoltage",
+   "fields": "value:number",
+   "meaning": "change supply voltage in explore mode, live update"
+  },
+  {
+   "t": "startChallenge",
+   "fields": "none",
+   "meaning": "switch to challenge mode, generate random r1,r2,voltage, reset splitFrac to 0.5, committed=false"
+  },
+  {
+   "t": "dragSplit",
+   "fields": "frac:number(0-1)",
+   "meaning": "move the prediction divider on the blank voltage bar; ignored if challenge.committed is true"
+  },
+  {
+   "t": "check",
+   "fields": "none",
+   "meaning": "lock the challenge, reveal true split and computed values"
+  }
+ ],
+ "controls": [],
+ "derived_fields": [
+  {
+   "key": "totalR",
+   "meaning": "r1+r2 (explore mode)"
+  },
+  {
+   "key": "current",
+   "meaning": "voltage/totalR - the single current value shown flowing at every point of the loop"
+  },
+  {
+   "key": "v1",
+   "meaning": "current*r1, voltage across resistor 1"
+  },
+  {
+   "key": "v2",
+   "meaning": "current*r2, voltage across resistor 2 (v1+v2 = voltage)"
+  },
+  {
+   "key": "challengeActualFrac",
+   "meaning": "challenge.r1/(challenge.r1+challenge.r2), the true fraction of the bar R1 should occupy"
+  },
+  {
+   "key": "challengePredictedV1",
+   "meaning": "challenge.splitFrac * challenge.voltage"
+  },
+  {
+   "key": "challengeErrorVolts",
+   "meaning": "abs(challenge.splitFrac - challengeActualFrac) * challenge.voltage, only meaningful after committed"
+  },
+  {
+   "key": "challengeIsClose",
+   "meaning": "challengeErrorVolts < 0.5, only meaningful/displayed after committed"
+  }
+ ],
+ "visual": "A single wire loop drawn top-to-bottom-to-top: battery symbol on the left with +/- terminals, wire runs right to a resistor block labelled R1 (block width scales with resistance value, e.g. 4\u03a9 is narrower than 12\u03a9), wire continues to a second resistor block labelled R2, then back to the battery. Small dots animate moving around the whole loop at one uniform speed (same current everywhere - explicitly NOT slowing down or fading after R1). Below the circuit, a horizontal bar the width of the supply voltage, divided into two coloured segments (blue for V1, orange for V2) with widths proportional to r1:r2, each labelled with its voltage value. In challenge mode the bar is blank grey with a single vertical draggable divider line the student positions themselves, and their guess is shown as a numeric V1/V2 pair updating as they drag (no correctness colour); after Check, a proportional overlay bar appears beneath showing the true split, plus a green tick or red cross and the actual numbers.",
+ "commit": "Check button (challenge mode only) - reveals the true proportional voltage split as an overlay bar with exact V1/V2 numbers, the actual current, and a tick/cross verdict based on how close the dragged divider was to the true resistance ratio; before pressing Check nothing about correctness is shown, only the student's own dragged numbers.",
+ "invariants": [
+  "for any r1>0,r2>0,voltage>0, derive(s).v1 + derive(s).v2 equals voltage within 1e-9",
+  "for any r1>0,r2>0,voltage>0, derive(s).v1 / r1 equals derive(s).v2 / r2 equals derive(s).current within 1e-9 (same current everywhere)",
+  "apply(s,{t:'setR1',value:x}) followed by derive shows current = voltage/(x+r2) exactly",
+  "if s.challenge.committed is true, apply(s,{t:'dragSplit',frac:f}) returns a state with challenge.splitFrac unchanged from before the action",
+  "apply(s,{t:'check'}) sets challenge.committed to true and does not alter challenge.splitFrac, r1, r2, or voltage",
+  "apply(s,{t:'startChallenge'}) always produces challenge.committed === false and 0 < challenge.splitFrac < 1",
+  "increasing r1 while holding r2 and voltage fixed strictly decreases derive(s).current and strictly increases derive(s).v1 (checkable by comparing derive on two states differing only in r1)",
+  "apply(s,a) never mutates s (deep-equal to a snapshot taken before the call)"
+ ],
+ "facts_used": [
+  "current is the same at every point in a series circuit",
+  "potential differences across series components add up to equal the supply voltage",
+  "total resistance in series: R_total = R1 + R2",
+  "voltage divides between series components in proportion to resistance - larger R gets larger share",
+  "identical resistors in series each get half the supply voltage",
+  "worked example: 12V battery, 4\u03a9 and 8\u03a9 in series gives I=1A, V1=4V, V2=8V, and 4+8=12"
+ ]
+}
+
+LESSON TEXT:
+Series Circuits In a series circuit , all components are connected in a single loop. There is only one path for current to flow, so the current is the same at every point in the circuit. Key Fact In a series circuit: current is the same everywhere, potential differences add up to equal the supply voltage, and total resistance equals the sum of all individual resistances: \(R_{\text{total}} = R_1 + R_2 + R_3\). The potential difference is shared between components in series. The larger the resistance of a component, the greater its share of the total voltage. If two identical resistors are in series, each gets half the supply voltage. Worked Example: Series Circuit A 12 V battery is connected in series with a 4 Ω resistor and an 8 Ω resistor. Calculate the current and the voltage across each resistor. Step 1: Total resistance \(R_{\text{total}} = 4 + 8 = 12 \; \Omega\) Step 2: Current \(I = \frac{V}{R} = \frac{12}{12} = 1\) A (same throughout) Step 3: \(V_1 = IR_1 = 1 \times 4 = 4\) V across the 4 Ω resistor Step 4: \(V_2 = IR_2 = 1 \times 8 = 8\) V across the 8 Ω resistor Check: \(4 + 8 = 12\) V, which equals the supply voltage. Parallel Circuits In a parallel circuit , components are connected on separate branches. Each branch provides a different path for the current to flow through. Key Fact In a parallel circuit: potential difference is the same across each branch, currents in the branches add up to give the total current from the supply, and total resistance is less than the smallest individual resistance. The total resistance of resistors in parallel is found using: $$\frac{1}{R_{\text{total}}} = \frac{1}{R_1} + \frac{1}{R_2}$$ Adding more resistors in parallel decreases the total resistance, because there are more paths for the current. This means the total current from the battery increases. Worked Example: Parallel Circuit Two resistors (6 Ω and 3 Ω) are connected in parallel across a 12 V supply. Calculate the current in each branch and the total current. Branch 1: \(I_1 = \frac{V}{R_1} = \frac{12}{6} = 2\) A Branch 2: \(I_2 = \frac{V}{R_2} = \frac{12}{3} = 4\) A Total current: \(I_{\text{total}} = 2 + 4 = 6\) A Investigating Components You need to know the I-V characteristics of three components: fixed resistors (ohmic conductors), filament lamps , and diodes . A fixed resistor gives a straight line through the origin on an I-V graph — current is directly proportional to voltage (Ohm’s law). A filament lamp gives a curve: as current increases, the wire heats up and resistance increases. A diode only conducts in one direction — it has very high resistance in reverse bias. Required Practical: I-V Characteristics To investigate the I-V characteristics of a component, connect it in series with a variable resistor, ammeter, and power supply. Connect a voltmeter in parallel across the component. Vary the resistance using the variable resistor to change the current and voltage. Record pairs of I and V values, then swap the power supply connections to get negative values. Plot V on the x-axis and I on the y-axis. Two other important components are the thermistor and the LDR (light-dependent resistor). A thermistor’s resistance drops as temperature rises, making it useful in temperature sensors. An LDR’s resistance drops as light intensity increases, making it useful in automatic lighting circuits.

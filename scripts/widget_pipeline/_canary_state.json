@@ -74,6 +74,106 @@
     "why_visual": "A student can read '4V across the 4\u03a9 resistor, 8V across the 8\u03a9 resistor' and still not grasp why the bigger resistor gets the bigger share; seeing current arriving at a junction, flowing through resistors of different widths, and watching voltage drop proportionally makes the relationship visceral.",
     "verb": "adjust\u2014student changes resistor values (or supply voltage) in a series circuit and watches both current remain constant and voltage split change in real time",
     "why_not": null
+   },
+   "spec": {
+    "id": "series-voltage-split",
+    "title": "Why the Bigger Resistor Grabs More Voltage",
+    "teaches": "In series, current is identical everywhere but voltage divides in proportion to resistance",
+    "interaction": "Student drags two resistor sliders (R1, R2) and a supply-voltage slider in a single-loop circuit and watches an ammeter reading (same at every point) and a voltage bar (split into two proportional coloured segments) update instantly - this part is pure exploration, no verdict. Then the student hits 'New Challenge' to get a random R1, R2, V, and must drag a single divider along a blank voltage bar to predict how the voltage splits between the two resistors, without any live feedback on correctness. Pressing Check overlays the true proportional split and shows the numeric current, V1, V2. The trap: students often guess a 50/50 split regardless of resistance, or think the smaller resistor 'uses up' voltage first.",
+    "state_shape": {
+     "mode": "'explore' or 'challenge'",
+     "r1": "resistance of resistor 1 in explore mode (1-20 ohm)",
+     "r2": "resistance of resistor 2 in explore mode (1-20 ohm)",
+     "voltage": "supply voltage in explore mode (1-24 V)",
+     "challenge": "null, or {r1,r2,voltage,splitFrac (0-1 fraction of bar given to R1), committed:boolean}"
+    },
+    "actions": [
+     {
+      "t": "setR1",
+      "fields": "value:number",
+      "meaning": "change R1 in explore mode, live update"
+     },
+     {
+      "t": "setR2",
+      "fields": "value:number",
+      "meaning": "change R2 in explore mode, live update"
+     },
+     {
+      "t": "setVoltage",
+      "fields": "value:number",
+      "meaning": "change supply voltage in explore mode, live update"
+     },
+     {
+      "t": "startChallenge",
+      "fields": "none",
+      "meaning": "switch to challenge mode, generate random r1,r2,voltage, reset splitFrac to 0.5, committed=false"
+     },
+     {
+      "t": "dragSplit",
+      "fields": "frac:number(0-1)",
+      "meaning": "move the prediction divider on the blank voltage bar; ignored if challenge.committed is true"
+     },
+     {
+      "t": "check",
+      "fields": "none",
+      "meaning": "lock the challenge, reveal true split and computed values"
+     }
+    ],
+    "controls": [],
+    "derived_fields": [
+     {
+      "key": "totalR",
+      "meaning": "r1+r2 (explore mode)"
+     },
+     {
+      "key": "current",
+      "meaning": "voltage/totalR - the single current value shown flowing at every point of the loop"
+     },
+     {
+      "key": "v1",
+      "meaning": "current*r1, voltage across resistor 1"
+     },
+     {
+      "key": "v2",
+      "meaning": "current*r2, voltage across resistor 2 (v1+v2 = voltage)"
+     },
+     {
+      "key": "challengeActualFrac",
+      "meaning": "challenge.r1/(challenge.r1+challenge.r2), the true fraction of the bar R1 should occupy"
+     },
+     {
+      "key": "challengePredictedV1",
+      "meaning": "challenge.splitFrac * challenge.voltage"
+     },
+     {
+      "key": "challengeErrorVolts",
+      "meaning": "abs(challenge.splitFrac - challengeActualFrac) * challenge.voltage, only meaningful after committed"
+     },
+     {
+      "key": "challengeIsClose",
+      "meaning": "challengeErrorVolts < 0.5, only meaningful/displayed after committed"
+     }
+    ],
+    "visual": "A single wire loop drawn top-to-bottom-to-top: battery symbol on the left with +/- terminals, wire runs right to a resistor block labelled R1 (block width scales with resistance value, e.g. 4\u03a9 is narrower than 12\u03a9), wire continues to a second resistor block labelled R2, then back to the battery. Small dots animate moving around the whole loop at one uniform speed (same current everywhere - explicitly NOT slowing down or fading after R1). Below the circuit, a horizontal bar the width of the supply voltage, divided into two coloured segments (blue for V1, orange for V2) with widths proportional to r1:r2, each labelled with its voltage value. In challenge mode the bar is blank grey with a single vertical draggable divider line the student positions themselves, and their guess is shown as a numeric V1/V2 pair updating as they drag (no correctness colour); after Check, a proportional overlay bar appears beneath showing the true split, plus a green tick or red cross and the actual numbers.",
+    "commit": "Check button (challenge mode only) - reveals the true proportional voltage split as an overlay bar with exact V1/V2 numbers, the actual current, and a tick/cross verdict based on how close the dragged divider was to the true resistance ratio; before pressing Check nothing about correctness is shown, only the student's own dragged numbers.",
+    "invariants": [
+     "for any r1>0,r2>0,voltage>0, derive(s).v1 + derive(s).v2 equals voltage within 1e-9",
+     "for any r1>0,r2>0,voltage>0, derive(s).v1 / r1 equals derive(s).v2 / r2 equals derive(s).current within 1e-9 (same current everywhere)",
+     "apply(s,{t:'setR1',value:x}) followed by derive shows current = voltage/(x+r2) exactly",
+     "if s.challenge.committed is true, apply(s,{t:'dragSplit',frac:f}) returns a state with challenge.splitFrac unchanged from before the action",
+     "apply(s,{t:'check'}) sets challenge.committed to true and does not alter challenge.splitFrac, r1, r2, or voltage",
+     "apply(s,{t:'startChallenge'}) always produces challenge.committed === false and 0 < challenge.splitFrac < 1",
+     "increasing r1 while holding r2 and voltage fixed strictly decreases derive(s).current and strictly increases derive(s).v1 (checkable by comparing derive on two states differing only in r1)",
+     "apply(s,a) never mutates s (deep-equal to a snapshot taken before the call)"
+    ],
+    "facts_used": [
+     "current is the same at every point in a series circuit",
+     "potential differences across series components add up to equal the supply voltage",
+     "total resistance in series: R_total = R1 + R2",
+     "voltage divides between series components in proportion to resistance - larger R gets larger share",
+     "identical resistors in series each get half the supply voltage",
+     "worked example: 12V battery, 4\u03a9 and 8\u03a9 in series gives I=1A, V1=4V, V2=8V, and 4+8=12"
+    ]
    }
   },
   {
@@ -443,6 +543,109 @@
     "why_visual": "A student can read this sequence and still mentally flatten it into 'Spanish ships fought English ships and lost'\u2014only by seeing the *spatial relationship* between ports, sandbanks, anchorages, wind direction and escape routes, and how each constrains the next, does the causal chain become concrete enough to hold in an exam answer.",
     "verb": "trace or route: the student follows the Armada's path on a map and at each location clicks to reveal what geographic constraint made that choice inevitable, what happened as a result, and what consequence it created downstream.",
     "why_not": ""
+   },
+   "spec": {
+    "id": "armada-chain-of-consequence",
+    "title": "Trace the Armada's Chain of Disaster",
+    "teaches": "The Armada was destroyed by a chain of geographic and logistical consequences, not by English gunfire",
+    "interaction": "The student taps six numbered pins along a map route (Spain, the Channel/beacons, Calais, Gravelines/Zeeland sandbanks, the North Sea turn, and the Scottish-Irish coast) to freely reveal short cards explaining the feature and consequence at each site - this part has no right or wrong answer. Below the map, five shuffled statement chips ('no deep-water port', 'anchored in open roadstead at Calais', 'fireships sent into the anchorage', 'captains cut anchor cables', 'ships wrecked on storm coasts with no anchors') must be tapped and placed into five ordered slots to rebuild the true causal chain. A student can get this wrong by putting the fireships or cut cables before the missing-port cause, or by placing the wreck consequence too early, effectively treating the battle as the ending rather than the anchorage/cable/storm sequence. Only after all five slots are filled can Check be pressed.",
+    "state_shape": {
+     "visited": "map of hotspot id -> boolean, whether its info card has been opened",
+     "slots": "array of 5 entries, each null or a cardId, representing the student's proposed causal chain",
+     "pool": "array of cardIds not currently placed in a slot",
+     "selectedCard": "cardId currently selected from the pool awaiting placement, or null",
+     "checked": "boolean, whether Check has been pressed on the current chain attempt"
+    },
+    "actions": [
+     {
+      "t": "visit",
+      "fields": "{id}",
+      "meaning": "marks a map hotspot as opened so its feature/consequence card is shown; purely informational, no correctness"
+     },
+     {
+      "t": "dismissHotspot",
+      "fields": "{}",
+      "meaning": "closes the currently open hotspot popup"
+     },
+     {
+      "t": "selectCard",
+      "fields": "{cardId}",
+      "meaning": "selects a chip from the pool (or deselects if same chip tapped again), only allowed before checked"
+     },
+     {
+      "t": "placeInSlot",
+      "fields": "{slotIndex}",
+      "meaning": "places the selectedCard into slots[slotIndex]; if that slot already held a card, the old card returns to pool; only allowed before checked"
+     },
+     {
+      "t": "removeFromSlot",
+      "fields": "{slotIndex}",
+      "meaning": "returns the card in that slot to the pool, only allowed before checked"
+     },
+     {
+      "t": "check",
+      "fields": "{}",
+      "meaning": "locks the chain, sets checked true; no further edits until reset"
+     },
+     {
+      "t": "reset",
+      "fields": "{}",
+      "meaning": "clears slots back to empty, returns all cards to a freshly shuffled pool, sets checked false; visited hotspots stay visited"
+     }
+    ],
+    "controls": [],
+    "derived_fields": [
+     {
+      "key": "allVisited",
+      "meaning": "true iff every hotspot id in the fixed set has visited[id]===true"
+     },
+     {
+      "key": "filledCount",
+      "meaning": "number of non-null entries in slots"
+     },
+     {
+      "key": "canCheck",
+      "meaning": "filledCount === 5 && !checked"
+     },
+     {
+      "key": "score",
+      "meaning": "number of i where checked && slots[i] === correctChain[i]"
+     },
+     {
+      "key": "slotVerdicts",
+      "meaning": "array of 5 values, each 'correct'/'incorrect'/'unmarked' - unmarked unless checked, otherwise correct/incorrect by position match against correctChain"
+     },
+     {
+      "key": "chainFullyCorrect",
+      "meaning": "checked && score === 5"
+     }
+    ],
+    "visual": "A stylised map of the Channel, North Sea, and the coasts of Britain and Ireland rendered as a simplified blue-and-tan shape, with a dotted curved route line running from Spain up through the Channel, looping past Calais and Gravelines, out into the North Sea, and round the top of Scotland down past Ireland. Six numbered circular pins sit on this route at Spain, mid-Channel (labelled with a small beacon-fire icon), Calais, Gravelines/Zeeland (drawn with hatched sandbank texture), the North Sea turning point, and the Scottish/Irish coast (drawn jagged with small wreck icons). Tapping a pin pops a small card above the map with a heading, one line on the geographic feature, and one line on its consequence, with an X to close. Below the map is a horizontal strip of 5 boxed slots joined by right-arrows, currently empty or holding placed chips; beneath that a row of remaining shuffled text chips the student taps to select (selected chip gets a highlighted border) then taps an empty or filled slot to place it. A Check button sits below the chip row, greyed out until all 5 slots are filled.",
+    "commit": "Check the chain - button reveals, per slot, a green tick or red cross against the true order (missing port \u2192 open roadstead at Calais \u2192 fireships in the anchorage \u2192 cut anchor cables \u2192 wrecked on storm coasts), plus a one-line note under any wrong slot naming what actually caused what and why the gunfire at Gravelines was not the deciding factor.",
+    "invariants": [
+     "initialState().checked === false and initialState().slots is an array of 5 nulls",
+     "apply(s,{t:'visit',id}) sets derive-visible visited[id] to true and leaves slots, pool, checked unchanged",
+     "apply(s,a) never mutates s; s and the returned state are distinct objects with s's fields unchanged after the call",
+     "apply(s,{t:'placeInSlot',slotIndex}) when selectedCard is null returns a state identical to s",
+     "after apply(s,{t:'placeInSlot',slotIndex:i}) with a valid selectedCard, the total count of cards across slots+pool equals 5, matching before and after",
+     "apply(s,{t:'check'}) when derive(s).filledCount < 5 returns a state with checked still false",
+     "once checked is true, apply(s,{t:'placeInSlot',...}) and apply(s,{t:'removeFromSlot',...}) and apply(s,{t:'selectCard',...}) all return s unchanged",
+     "derive(s).score after checked equals the count of i where s.slots[i] === correctChain[i], and is 0 when checked is false",
+     "apply(s,{t:'reset'}) sets checked to false, slots to all null, pool to contain exactly the 5 cardIds, and leaves visited unchanged",
+     "regions/derive never reports slotVerdicts as correct/incorrect when checked is false; all 5 entries are 'unmarked'"
+    ],
+    "facts_used": [
+     "Spain held no deep-water port on the invasion coast; Parma's ports at Dunkirk and Nieuwpoort were shallow and blockaded by Dutch flyboats",
+     "The Armada anchored in the open, exposed roadstead off Calais on 27 July because there was no harbour to enter",
+     "On the night of 28 July the English sent eight fireships into the anchorage at Calais",
+     "The Spanish captains cut their anchor cables to escape the fireships, abandoning their best anchors on the seabed",
+     "The English fleet held the weather gauge and fought at Plymouth, Portland Bill, and the Isle of Wight without breaking the Spanish crescent",
+     "At Gravelines on 29 July, wind pushed the Armada toward the Zeeland sandbanks before a last-moment wind shift let it escape into the North Sea",
+     "With the wind foul for the Channel, the Armada's only route home was north-about around Scotland and Ireland",
+     "Ships without anchors, storm-damaged and starving, were wrecked in large numbers on Scottish isles and the Irish coast",
+     "Perhaps half the Armada never reached Spain, and far more men died of drowning, disease and starvation than to English gunfire",
+     "Beacon chains along the English coast carried warning of the Armada's approach far faster than Spanish planners could react"
+    ]
    }
   },
   {
