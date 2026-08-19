@@ -464,7 +464,12 @@ def cmd_download(args):
                 podcast_cat = {"emoji": "\U0001f3a7", "category": "Podcasts", "items": []}
                 media.append(podcast_cat)
 
-            # Add lesson podcast at top
+            # Replace-not-append: a re-download (orphan recovery, retry after
+            # a failed Supabase write) previously inserted a second identical
+            # "Lesson Podcast" entry - 489 lessons showed the podcast twice
+            # by 19 Aug (deduped that day, backup _backup_podcast_dedupe_*).
+            podcast_cat["items"] = [i for i in podcast_cat["items"]
+                                    if i.get("title") != "Lesson Podcast"]
             podcast_cat["items"].insert(0, {
                 "url": podcast_url,
                 "title": "Lesson Podcast",
