@@ -261,7 +261,13 @@ def get_pending_lessons(sb, limit, subject_filter=None, school_id=None,
 def cmd_generate(args):
     sb = get_client()
     state = load_state()
-    active_ids = {j["lesson_id"] for j in state["jobs"] if j.get("status") == "in_progress"}
+    # 'completed' counts as active too: a cooked podcast whose DOWNLOAD keeps
+    # failing must be retried by --download, never regenerated. Without this,
+    # the daily wrapper burned one generation per day on the same lesson
+    # (music-eduqas film-music L02, 17-19 Aug: export 502s while the sweep
+    # still counted the lesson as missing).
+    active_ids = {j["lesson_id"] for j in state["jobs"]
+                  if j.get("status") in ("in_progress", "completed")}
 
     pending = get_pending_lessons(sb, args.limit, args.subject, getattr(args, 'school', None),
                                   getattr(args, 'all_subjects', False))
