@@ -94,7 +94,32 @@
     return resize;
   }
 
-  var INK = '#2d2a26', MUT = '#8d8880', ACC = '#8a6a4f', GRID = '#e8e2d9';
+  var INK = '#2d2a26', MUT = '#8d8880', GRID = '#e8e2d9';
+
+  /* Canvas can't use CSS variables, so read the accent at draw time —
+     FROM THE WIDGET ITSELF, not documentElement. Two layers set --accent
+     and they disagree: lesson-loader.js writes the unit's DB colour onto
+     documentElement, while style.css sets one on body.unit-*, which is
+     closer and therefore wins for everything a student sees. Resolving
+     against the widget guarantees the canvas matches its own card
+     whichever layer won. (The DB/CSS disagreement is a pre-existing site
+     inconsistency — geography paper-1 is indigo in the DB, green in the
+     CSS — worth reconciling separately.) */
+  function accOf(node) {
+    var v = getComputedStyle(node || document.documentElement)
+      .getPropertyValue('--accent').trim();
+    return v || '#8a6a4f';
+  }
+  /* a soft tint of the accent for secondary fills (bars, runs) */
+  function accTintOf(node, alpha) {
+    var c = accOf(node);
+    if (c.charAt(0) === '#' && c.length === 7) {
+      return 'rgba(' + parseInt(c.substr(1, 2), 16) + ',' +
+        parseInt(c.substr(3, 2), 16) + ',' + parseInt(c.substr(5, 2), 16) +
+        ',' + alpha + ')';
+    }
+    return 'rgba(138,106,79,' + alpha + ')';
+  }
 
   /* ================= 1. WAVES (physics) =================
      Model: a wave on a rope with FIXED wave speed v = 6 m/s (speed is a
@@ -139,7 +164,7 @@
 
       if (state.mode === 0) {
         // transverse sine, moving right
-        ctx.strokeStyle = ACC; ctx.lineWidth = 2.5;
+        ctx.strokeStyle = accOf(ui.root); ctx.lineWidth = 2.5;
         ctx.beginPath();
         for (var x = 0; x <= w; x += 2) {
           var m = x / px;
@@ -176,7 +201,7 @@
           var disp = (state.ampPct / 100) * 0.42 * (lambda / 4) *
                      Math.sin(2 * Math.PI * (xm / lambda - state.f * state.t));
           var xpx = (xm + disp) * px;
-          ctx.strokeStyle = ACC; ctx.lineWidth = 2;
+          ctx.strokeStyle = accOf(ui.root); ctx.lineWidth = 2;
           ctx.beginPath(); ctx.moveTo(xpx, mid - 46); ctx.lineTo(xpx, mid + 46); ctx.stroke();
           // local density ~ -d(disp)/dx: cos term
           var dens = -Math.cos(2 * Math.PI * (xm / lambda - state.f * state.t));
@@ -275,14 +300,14 @@
       ctx.fillText('discharge (m³/s)  ·  rainfall', 0, 0); ctx.restore();
 
       // rainfall bars
-      ctx.fillStyle = '#c9d4da';
+      ctx.fillStyle = accTintOf(ui.root, 0.22);
       RAIN.forEach(function (mm, i) {
         var bh = (mm / 14) * (ph * 0.42);
         ctx.fillRect(xOf(i) + 1, T + ph - bh, (pw / HOURS) - 2, bh);
       });
 
       // discharge curve
-      ctx.strokeStyle = ACC; ctx.lineWidth = 2.5;
+      ctx.strokeStyle = accOf(ui.root); ctx.lineWidth = 2.5;
       ctx.beginPath();
       for (var t = 0; t <= HOURS; t += 0.25) {
         var y = yOf(discharge(t, m));
@@ -450,7 +475,8 @@
                   (s.type === 'swap' && (i === s.i || i === s.j)) ||
                   ((s.type === 'ins' || s.type === 'shift' || s.type === 'pick') && i === s.i);
         var inRun = s.type === 'runs' && i >= s.lo && i < s.hi;
-        ctx.fillStyle = s.type === 'done' ? '#4f7d63' : hot ? ACC : inRun ? '#c4b49f' : '#d8d0c3';
+        ctx.fillStyle = s.type === 'done' ? '#4f7d63' : hot ? accOf(ui.root)
+          : inRun ? accTintOf(ui.root, 0.34) : '#d8d0c3';
         ctx.beginPath();
         ctx.roundRect(x, H - 28 - bh, bw, bh, 6);
         ctx.fill();
@@ -460,7 +486,7 @@
       // the value currently "in the hand", floating above its gap
       if (s.gap != null && s.hold != null) {
         var hx = gap + s.gap * (bw + gap);
-        ctx.fillStyle = ACC;
+        ctx.fillStyle = accOf(ui.root);
         ctx.beginPath(); ctx.roundRect(hx, 4, bw, 24, 6); ctx.fill();
         ctx.fillStyle = '#fff'; ctx.font = '700 13px Inter, sans-serif'; ctx.textAlign = 'center';
         ctx.fillText(s.hold, hx + bw / 2, 21);
