@@ -216,6 +216,31 @@
      "double glazing reduces conduction and convection losses via a gas layer between panes",
      "increasing efficiency (e.g. via insulation) reduces wasted energy dissipated as heat to surroundings"
     ]
+   },
+   "build": {
+    "file": "insulate-to-target.js",
+    "bytes": 10075
+   },
+   "gate": {
+    "syntax": "ok",
+    "purity": "ok",
+    "tests_exit": 1,
+    "tests_tail": [
+     "    at TracingChannel.traceSync (node:diagnostics_channel:322:14)",
+     "    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)",
+     "    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)",
+     "    at node:internal/main/run_main_module:36:49",
+     "",
+     "Node.js v22.20.0"
+    ],
+    "factcheck": {
+     "verdict": "error",
+     "findings": [
+      {
+       "what": "Expecting ',' delimiter: line 5 column 325 (char 1270)"
+      }
+     ]
+    }
    }
   },
   {
@@ -295,6 +320,40 @@
      "Ammeter measures current, connected in series",
      "P = V \u00d7 I for electrical power"
     ]
+   },
+   "build": {
+    "file": "ohms-law-circuit-lab.js",
+    "bytes": 9791
+   },
+   "gate": {
+    "syntax": "ok",
+    "purity": "ok",
+    "tests_exit": 1,
+    "tests_tail": [
+     "    at TracingChannel.traceSync (node:diagnostics_channel:322:14)",
+     "    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)",
+     "    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)",
+     "    at node:internal/main/run_main_module:36:49",
+     "",
+     "Node.js v22.20.0"
+    ],
+    "factcheck": {
+     "verdict": "fix",
+     "findings": [
+      {
+       "severity": "medium",
+       "what": "The ammeter needle direction is programmed backwards relative to its own labeling. needleAngle runs from \u03c0 (frac=0, no current) to 0 (frac=1, max current) \u2014 the same domain used for the scale arc drawn with ctx.arc(ax,ay,r,Math.PI,0,false), which sweeps left\u2192top\u2192right as angle goes \u03c0\u21920. But the needle tip is computed as nx = ax - Math.cos(needleAngle)*needleLen (note the minus sign), which mirrors it 180\u00b0 from where the scale arc places that angle. The net effect: at zero current the needle points to the RIGHT end of the dial, and as current rises to the maximum it swings LEFT \u2014 the opposite of the comment '// 0..pi sweep, left=0A right=max' and of how a real analogue meter would be drawn. A student watching current increase while the needle swings toward the low/zero end learns the wrong visual association for how ammeters respond to increasing current.",
+       "where": "render(): needleAngle / nx,ny calculation just before 'ctx.lineTo(nx, ny)'",
+       "fix": "Remove the sign flip so the needle uses the same convention as the scale arc, e.g. nx = ax + Math.cos(needleAngle)*needleLen, ny = ay + Math.sin(needleAngle)*needleLen, so the needle sweeps left (0 A) to right (max A), matching the comment and the drawn scale."
+      },
+      {
+       "severity": "low",
+       "what": "The circuit diagram draws two separate series components \u2014 a resistor (zigzag, driven by the 'resistance' slider) and a bulb (circle, driven by derived power) \u2014 but the current/power calculation only ever uses the single slider value as if it were the total circuit resistance. This silently treats the bulb as having zero resistance, which is inconsistent with the lesson's own statement that filament bulbs have (temperature-dependent) resistance and that in series circuits total resistance is the sum of each component's resistance (R_total = R1+R2+R3).",
+       "where": "derive(): 'var current = V / R;' where R is only state.resistance, while render() also draws a bulb as a distinct component in the same loop",
+       "fix": "Either remove the separate resistor symbol and treat the single slider resistance as the bulb's resistance, or explicitly add a small fixed bulb resistance into the total R used for the current calculation so the diagram matches the maths."
+      }
+     ]
+    }
    }
   },
   {
@@ -1002,142 +1061,114 @@
     "idea": "Students internalize the distinct roles and personalities of the three ministers by matching their characteristics, achievements and methods to their names, reinforcing why each was indispensable in a different way.",
     "why_not": ""
    },
+   "build_error": "Streaming is required for operations that may take longer than 10 minutes. See https://github.com/anthropics/anthropic-sdk-python#long-requests for mo",
    "spec": {
     "id": "match-the-minister",
     "title": "Match the Minister to Their Mark",
-    "kind": "explore",
-    "teaches": "Cecil, Walsingham, Robert Cecil and the Privy Council each had a distinct, indispensable role \u2014 and Mary, Queen of Scots is not Mary I.",
-    "interaction": "The student sees six name-cards (William Cecil, Francis Walsingham, Robert Cecil, the Privy Council, Mary Queen of Scots, Mary I) on the left and six shuffled fact-cards on the right. They drag each fact onto the name they think it describes; matched pairs lock together and turn green if correct, red if wrong, so they can keep re-trying until every card is matched.",
-    "controls": [
+    "teaches": "Cecil, Walsingham, Robert Cecil and the Privy Council each had a distinct role, method and personality that made them indispensable in different ways",
+    "interaction": "Four labelled boxes sit on the left \u2014 William Cecil, Francis Walsingham, Robert Cecil, Privy Council \u2014 each with two empty slots. On the right, eight shuffled description tiles float in a jumbled grid (e.g. 'Uncovered the Babington Plot using intercepted ciphers, 1586'). The student clicks a name to highlight it, then clicks a tile to try to slot it there; a correct match animates into the box, a wrong one flashes red, shakes back to the grid and racks up a mistake counter. The trap is mixing up Cecil's financial patience with Walsingham's secrecy, or forgetting the Privy Council only advised while the queen decided.",
+    "state_shape": {
+     "entities": "fixed array of 4 ids/names: cecil, walsingham, robertCecil, privyCouncil",
+     "descriptors": "array of 8 objects {id, text, correctEntity}, shuffled once at init",
+     "matched": "map from descriptorId to entityId, populated only on correct matches",
+     "pool": "array of descriptorIds not yet matched, in current shuffled order",
+     "selectedEntity": "id of the currently highlighted box, or null",
+     "lastResult": "{descriptorId, entityId, correct} for the most recent attempt, or null",
+     "mistakes": "count of incorrect attempts",
+     "attempts": "count of all attempts (correct + incorrect)"
+    },
+    "actions": [
      {
-      "key": "assignment_0",
-      "label": "Fact matched to William Cecil",
-      "min": 0,
-      "max": 5,
-      "step": 1,
-      "value": 3,
-      "unit": ""
+      "t": "selectEntity",
+      "fields": "{entity}",
+      "meaning": "highlight a box as the target for the next descriptor click; no-op if that entity's two slots are already full"
      },
      {
-      "key": "assignment_1",
-      "label": "Fact matched to Francis Walsingham",
-      "min": 0,
-      "max": 5,
-      "step": 1,
-      "value": 4,
-      "unit": ""
+      "t": "attemptMatch",
+      "fields": "{descriptor}",
+      "meaning": "tries to slot the given descriptor under s.selectedEntity; correct moves it into matched and clears selectedEntity, incorrect increments mistakes and leaves descriptor in pool; no-op if selectedEntity is null or descriptor already matched"
      },
      {
-      "key": "assignment_2",
-      "label": "Fact matched to Robert Cecil",
-      "min": 0,
-      "max": 5,
-      "step": 1,
-      "value": 0,
-      "unit": ""
-     },
-     {
-      "key": "assignment_3",
-      "label": "Fact matched to the Privy Council",
-      "min": 0,
-      "max": 5,
-      "step": 1,
-      "value": 5,
-      "unit": ""
-     },
-     {
-      "key": "assignment_4",
-      "label": "Fact matched to Mary, Queen of Scots",
-      "min": 0,
-      "max": 5,
-      "step": 1,
-      "value": 1,
-      "unit": ""
-     },
-     {
-      "key": "assignment_5",
-      "label": "Fact matched to Mary I",
-      "min": 0,
-      "max": 5,
-      "step": 1,
-      "value": 2,
-      "unit": ""
+      "t": "reset",
+      "fields": "{}",
+      "meaning": "returns to initialState, reshuffling pool order"
      }
     ],
+    "controls": [],
     "derived_fields": [
      {
-      "key": "correctCount",
-      "meaning": "number of the six name-cards currently matched to their correct fact-card (index equals position)"
+      "key": "matchedCount",
+      "meaning": "number of keys in s.matched"
      },
      {
-      "key": "allMatched",
-      "meaning": "true when all six cards are correctly matched"
+      "key": "complete",
+      "meaning": "true iff matchedCount equals s.descriptors.length (8)"
      },
      {
-      "key": "maryConfused",
-      "meaning": "true when the two Mary cards have been swapped with each other's fact (the classic exam mix-up)"
+      "key": "entityProgress",
+      "meaning": "map from entity id to count of its descriptors currently matched (0,1,or 2)"
      },
      {
-      "key": "cecilRobertConfused",
-      "meaning": "true when William Cecil's and Robert Cecil's facts have been swapped with each other"
-     },
-     {
-      "key": "isValidPermutation",
-      "meaning": "true when the six assignment values are a permutation of 0-5 with no repeats"
+      "key": "accuracy",
+      "meaning": "matchedCount divided by attempts, or null if attempts is 0"
      }
     ],
-    "visual": "Two columns of cards on a wooden-table background: left column labelled name cards (Cecil, Walsingham, Robert Cecil, Privy Council, Mary QoS, Mary I) in fixed order; right column shows the six fact snippets in shuffled positions with drag handles. A line is drawn between a name and the fact currently assigned to it; correct pairs glow green and lock, incorrect pairs glow red and can be re-dragged. A scoreboard at the top shows correctCount/6.",
+    "visual": "A two-column board. Left column: four portrait-style boxes stacked vertically, each headed with a minister's name/title and containing two empty slots; a matched slot shows the descriptor tile locked in with a green tick. Right column: a jumbled grid of description tiles waiting to be placed. The currently selected left box has a glowing amber border. A wrong attempt makes the clicked tile shake and briefly turn red before returning to the grid. A small counter at the top shows mistakes and progress out of 8.",
     "invariants": [
-     "for any params.assignment, derived.correctCount equals the count of indices i in 0..5 where params.assignment[i] === i",
-     "derived.allMatched is true if and only if derived.correctCount === 6",
-     "when params.assignment is the identity [0,1,2,3,4,5], derived.correctCount === 6 and derived.allMatched === true",
-     "derived.maryConfused is true if and only if params.assignment[4] === 5 and params.assignment[5] === 4",
-     "derived.cecilRobertConfused is true if and only if params.assignment[0] === 2 and params.assignment[2] === 0",
-     "derived.correctCount is always an integer between 0 and 6 inclusive",
-     "derived.isValidPermutation is true if and only if the six values in params.assignment are all distinct and each lies in 0..5",
-     "if derived.isValidPermutation is false, derived.allMatched is false regardless of correctCount",
-     "changing exactly one entry of params.assignment (with the rest fixed) can change derived.correctCount by at most 2"
+     "apply(s,a) does not mutate s; it returns a new state object",
+     "for every key k in s.matched, s.matched[k] equals the correctEntity of the descriptor with id k (no wrong entity is ever recorded as matched)",
+     "derive(s).matchedCount equals the number of keys in s.matched, for any reachable state",
+     "applying attemptMatch with a descriptor whose id is already a key in s.matched leaves state unchanged",
+     "applying attemptMatch when s.selectedEntity is null leaves state unchanged",
+     "a correct attemptMatch removes exactly one id from s.pool and adds exactly one entry to s.matched; an incorrect attemptMatch leaves s.pool and s.matched unchanged",
+     "s.mistakes never decreases except via reset, and only increases by 1 per incorrect attemptMatch",
+     "derive(s).complete is true if and only if derive(s).matchedCount equals 8",
+     "selectEntity never sets s.selectedEntity to an entity whose derive(s).entityProgress value is already 2",
+     "after reset, s equals initialState except possibly for the shuffled order of s.pool and s.descriptors"
     ],
     "facts_used": [
-     "William Cecil served 1558\u20131598, was Principal Secretary 1558\u20131572 then Lord Treasurer 1572\u20131598, and was called 'the indispensable man' by John Guy",
-     "Sir Francis Walsingham became Principal Secretary in 1573 and ran an intelligence network of agents, codebreakers (e.g. Thomas Phelippes) and double agents",
-     "Walsingham's network uncovered the Babington Plot in 1586, leading to Mary, Queen of Scots' execution at Fotheringhay Castle in February 1587",
-     "Robert Cecil, Burghley's son, was nicknamed the queen's 'little elf' and secured the peaceful succession of James VI/I in 1603",
-     "The Privy Council had about 19\u201320 hand-picked men, met two or three times a week, and (per Penry Williams) 'advised; the queen decided'",
-     "Mary, Queen of Scots is Elizabeth's Catholic Stuart cousin, executed 1587 \u2014 distinct from Mary I (Bloody Mary), Elizabeth's half-sister who reigned 1553\u20131558 and died before this depth study begins"
+     "Cecil was Principal Secretary 1558-1572 then Lord Treasurer 1572-1598, almost the whole reign",
+     "Historian John Guy called Cecil 'the indispensable man'",
+     "Cecil trained his son Robert to succeed him",
+     "Walsingham was appointed Principal Secretary in 1573 and ran an intelligence network",
+     "Walsingham personally funded his agents and died in debt in 1590",
+     "Walsingham's network uncovered the Babington Plot in 1586 via intercepted, decrypted letters, leading to Mary Queen of Scots' execution in 1587",
+     "Robert Cecil was nicknamed the queen's 'little elf' and was small and hunchbacked",
+     "Robert Cecil secured the peaceful succession of James VI of Scotland as James I in 1603",
+     "The Privy Council had around 19-20 hand-picked men meeting two or three times a week",
+     "Penry Williams: the Council advised, the queen decided"
     ]
    },
-   "build_error": "Streaming is required for operations that may take longer than 10 minutes. See https://github.com/anthropics/anthropic-sdk-python#long-requests for mo",
    "build": {
     "file": "match-the-minister.js",
-    "bytes": 10534
+    "bytes": 10857
    },
    "gate": {
     "syntax": "ok",
     "purity": "ok",
     "tests_exit": 0,
     "tests_tail": [
-     "PASS: derived.cecilRobertConfused is true if and only if params.assignment[0] === 2 and params.assignment[2] === 0",
-     "PASS: derived.correctCount is always an integer between 0 and 6 inclusive",
-     "PASS: derived.isValidPermutation is true if and only if the six values in params.assignment are all distinct and each lies in 0..5",
-     "PASS: if derived.isValidPermutation is false, derived.allMatched is false regardless of correctCount",
-     "PASS: changing exactly one entry of params.assignment (with the rest fixed) can change derived.correctCount by at most 2",
-     "RESULT ok=409 fail=0"
+     "PASS: a correct attemptMatch removes exactly one id from s.pool and adds exactly one entry to s.matched; an incorrect attemptMatch leaves s.pool and s.matched unchanged",
+     "PASS: s.mistakes never decreases except via reset, and only increases by 1 per incorrect attemptMatch",
+     "PASS: derive(s).complete is true if and only if derive(s).matchedCount equals 8",
+     "PASS: selectEntity never sets s.selectedEntity to an entity whose derive(s).entityProgress value is already 2",
+     "PASS: after reset, s equals initialState except possibly for the shuffled order of s.pool and s.descriptors",
+     "RESULT ok=13 fail=0 harness=0"
     ],
     "factcheck": {
      "verdict": "pass",
      "findings": [
       {
        "severity": "low",
-       "what": "Redundant/dead conditional when drawing the name-card border: `ctx.strokeStyle = ok2 ? GREEN : (a[i] === i ? GREEN : RED);` \u2014 the inner ternary re-tests exactly the condition already captured by `ok2`, so it never changes the outcome. Not a factual bug, just confusing dead code.",
-       "where": "render(): name card border colour, inside the 'name cards' loop",
-       "fix": "Simplify to `ctx.strokeStyle = ok2 ? GREEN : RED;`"
+       "what": "The generic mistake-feedback caption always says 'Cecil's patient finance work is easily confused with Walsingham's secret intelligence work' whenever mistakes>0, even if the actual wrong match involved Robert Cecil or the Privy Council instead. This gives an inaccurate diagnosis of the student's specific error.",
+       "where": "caption(): the `if (state.mistakes > 0)` branch",
+       "fix": "Use state.lastResult (entity + descriptor's correctEntity) to generate a hint that names the two ministers actually confused, rather than a hard-coded Cecil/Walsingham line."
       },
       {
        "severity": "low",
-       "what": "The fact-card 'right' flag only checks `a[f] === f` (i.e. whether the name at row f self-matches), ignoring who actually claims fact f. In the rare invalid-permutation state where two names point at the same fact index, a fact card could be coloured green even though the real claimant is wrong, while the on-screen warning only says 'one fact, two claimants' rather than pinpointing the mismatch.",
-       "where": "render(): fact card loop, `var right = (claims > 0 && a[f] === f);`",
-       "fix": "Compute rightness from the actual claimant, e.g. `right = (claims === 1 && claimedBy === f)`, so the highlight reflects the true assignment even during invalid states."
+       "what": "meta.teaches describes the Privy Council as having a 'personality' and being 'indispensable' alongside the named ministers, which slightly overstates/misapplies language the lesson only used for Cecil ('the indispensable man') and for individuals (personality traits).",
+       "where": "meta.teaches string",
+       "fix": "Rephrase to something like 'each had a distinct role and method, while only Cecil was called indispensable' to avoid over-extending the lesson's specific praise."
       }
      ]
     }
@@ -1236,6 +1267,46 @@
      "After Mary, Queen of Scots was executed in 1587, most ministers favoured her Protestant son James VI of Scotland as heir",
      "Robert Cecil secretly prepared for James VI's succession while Elizabeth stayed publicly silent, and James was proclaimed king within hours of her death in March 1603"
     ]
+   },
+   "build": {
+    "file": "elizabeths-crossroads.js",
+    "bytes": 8507
+   },
+   "gate": {
+    "syntax": "ok",
+    "purity": "ok",
+    "tests_exit": 0,
+    "tests_tail": [
+     "PASS: when params.succession == 1, derived.civilWarRiskSuccession == 1 and derived.plotRisk == 0",
+     "PASS: for every valid params.succession value, derived.plotRisk + derived.civilWarRiskSuccession equals exactly 1, showing the succession dilemma always carries at least one risk",
+     "PASS: derived.totalRiskFlags equals derived.religiousRisk + derived.warRisk + derived.civilWarRiskFaction + derived.plotRisk + derived.civilWarRiskSuccession for every params combination",
+     "PASS: for any fixed params.succession, derived.totalRiskFlags at params.marriage == 2 is strictly less than derived.totalRiskFlags at params.marriage == 0 and strictly less than at params.marriage == 1",
+     "PASS: derived.diplomaticLeverage equals 1 if and only if params.marriage == 2",
+     "RESULT ok=15 fail=0 harness=0"
+    ],
+    "factcheck": {
+     "verdict": "fix",
+     "findings": [
+      {
+       "severity": "high",
+       "what": "The caption logic triggers the message 'this is close to Elizabeth's real strategy of permanent ambiguity' for ANY combination whose totalRiskFlags <= 1, not for the combination that actually matches history. Because 'stay unmarried' (marriage=2) contributes 0 flags and BOTH succession options contribute exactly 1 flag (plotRisk for naming James, civilWarRiskSuccession for staying silent), the combination marriage=2 + succession=0 ('name James now') also scores totalRiskFlags=1 and receives the same 'close to Elizabeth's real strategy' praise as the historically accurate marriage=2 + succession=1 ('stay silent'). This directly contradicts the lesson, which states Elizabeth 'refused to name him publicly' and that this silence (not naming) was her actual, deliberate strategy. The widget therefore teaches students that publicly naming James VI early was just as close to Elizabeth's real approach as her actual policy of silence.",
+       "where": "caption: function(state, derived) { ... if (derived.totalRiskFlags <= 1) { return '... close to Elizabeth\\u2019s real strategy of \"permanent ambiguity\"'; } }",
+       "fix": "Only show the 'close to her real strategy' message when state.marriage === 2 AND state.succession === 1 specifically, since that unique pairing (unmarried + silent) is what the lesson describes as her actual policy; other low-score combinations should get a neutral 'low risk but not what Elizabeth actually did' message."
+      },
+      {
+       "severity": "medium",
+       "what": "meta.teaches claims 'refusing to choose was the strategy that minimised total danger', but the model's own arithmetic does not show this: staying silent on succession (s=1) and naming James now (s=0) both score exactly 1 risk flag, so refusing to name an heir does NOT numerically minimise danger versus naming him \u2014 the two succession choices are risk-equivalent in this model. The overall minimum score (1) is reached via two different combinations, only one of which involves 'refusing to choose' on succession.",
+       "where": "meta.teaches string; derive(): plotRisk = (s===0)?1:0; civilWarRiskSuccession = (s===1)?1:0;",
+       "fix": "Either adjust the succession risk weighting so silence genuinely scores lower than naming (to match the intended teaching point), or soften the teaches statement to reflect that both succession paths carried comparable risk and it was the combination of ambiguity on marriage AND silence on succession, not risk-minimisation alone, that defined her strategy."
+      },
+      {
+       "severity": "low",
+       "what": "The 'diplomaticLeverage' flag (only active when marriage=2) is never included in totalRiskFlags, so choosing to stay unmarried is scored as literally zero risk out of 5, whereas the lesson explicitly says delay was 'almost always safer' (implying non-zero risk), not risk-free \u2014 e.g. it does not capture that suitors like Anjou still posed diplomatic complications before negotiations lapsed.",
+       "where": "derive(): totalRiskFlags = religiousRisk + warRisk + civilWarRiskFaction + plotRisk + civilWarRiskSuccession (diplomaticLeverage excluded)",
+       "fix": "Either add a small residual risk value for staying unmarried (e.g. reflecting the ambiguity itself being a diplomatic gamble) or adjust the caption/scoreboard framing to clarify that 0 flags does not mean literally zero risk, only lowest-modelled risk."
+      }
+     ]
+    }
    }
   },
   {
@@ -1362,108 +1433,71 @@
     "why_not": ""
    },
    "spec": {
-    "id": "sort-the-settlement",
-    "title": "Sort Who the 1559 Settlement Satisfied",
-    "kind": "explore",
-    "teaches": "The 1559 Religious Settlement was a deliberate compromise: it fully satisfied moderates and the Crown, only outwardly satisfied Church Papists and Puritans-within-the-Church, and was rejected outright by Recusants and Separatists at both religious extremes.",
-    "interaction": "The student sees six cards \u2014 Moderate Parishioners, Elizabeth & Government, Church Papists, Puritans-in-the-Church, Recusants, Separatists \u2014 and drags each into one of three labelled bins: 'Needs Met', 'Outwardly Conformed (Grudging)', 'Rejected Outright'. As cards are dropped, the bin fills and a running score shows how many are correctly placed, revealing the symmetrical pattern that both a Catholic group (Recusants) and a Protestant group (Separatists) ended up in the 'Rejected' bin.",
-    "controls": [
+    "id": "sorting-the-settlement",
+    "title": "Sort the 1559 Settlement's Compromises",
+    "teaches": "The 1559 Religious Settlement was a deliberate compromise: some features leaned Catholic, some leaned Protestant, and some were pure state control that applied to everyone regardless of belief",
+    "interaction": "The student drags nine cards describing real features of the 1559 Settlement into three labelled columns: 'Looked Catholic', 'Sounded Protestant', and 'Applied to Everyone'. A card like 'Churches kept their altars' belongs in the Catholic column; '39 Articles rejected the Mass as a sacrifice' belongs in Protestant; '12-pence fine for missing church' belongs in Everyone. Getting it wrong (e.g. putting the oath of loyalty under 'Protestant' instead of 'Everyone') snaps the card back with a red flash, forcing the student to notice that some elements weren't about doctrine at all but about political control. Once all nine are correctly sorted, the board reveals a summary line showing the three-way split, making the compromise visible as a structure rather than a vague description.",
+    "state_shape": {
+     "cards": "fixed array of 9 {id, text, correctBin} objects describing settlement features",
+     "placements": "map from card id to bin id ('catholic'|'protestant'|'enforce') or null if unplaced"
+    },
+    "actions": [
      {
-      "key": "assignment_moderateParishioners",
-      "label": "Moderate Parishioners",
-      "min": 0,
-      "max": 2,
-      "step": 1,
-      "value": 0,
-      "unit": "bin"
+      "t": "place",
+      "fields": "{cardId, binId}",
+      "meaning": "assign the card to a bin; ignored if binId is not one of the three valid bins"
      },
      {
-      "key": "assignment_governmentElizabeth",
-      "label": "Elizabeth & Government",
-      "min": 0,
-      "max": 2,
-      "step": 1,
-      "value": 0,
-      "unit": "bin"
+      "t": "unplace",
+      "fields": "{cardId}",
+      "meaning": "return a placed card to the tray by setting its placement to null"
      },
      {
-      "key": "assignment_churchPapists",
-      "label": "Church Papists",
-      "min": 0,
-      "max": 2,
-      "step": 1,
-      "value": 0,
-      "unit": "bin"
-     },
-     {
-      "key": "assignment_puritansWithin",
-      "label": "Puritans-in-the-Church",
-      "min": 0,
-      "max": 2,
-      "step": 1,
-      "value": 0,
-      "unit": "bin"
-     },
-     {
-      "key": "assignment_recusants",
-      "label": "Recusants",
-      "min": 0,
-      "max": 2,
-      "step": 1,
-      "value": 0,
-      "unit": "bin"
-     },
-     {
-      "key": "assignment_separatists",
-      "label": "Separatists",
-      "min": 0,
-      "max": 2,
-      "step": 1,
-      "value": 0,
-      "unit": "bin"
+      "t": "reset",
+      "fields": "{}",
+      "meaning": "restore all placements to null, returning to initial state"
      }
     ],
+    "controls": [],
     "derived_fields": [
      {
+      "key": "placedCount",
+      "meaning": "number of cards whose placement is not null"
+     },
+     {
       "key": "correctCount",
-      "meaning": "Number of the six cards placed in their historically correct bin (0-6)"
+      "meaning": "number of cards where placements[card.id] === card.correctBin"
+     },
+     {
+      "key": "misplacedIds",
+      "meaning": "ids of placed cards where placements[card.id] !== card.correctBin"
+     },
+     {
+      "key": "isComplete",
+      "meaning": "true when placedCount === 9"
      },
      {
       "key": "allCorrect",
-      "meaning": "True only when all six cards are in their correct bin"
-     },
-     {
-      "key": "binCounts",
-      "meaning": "Array of length 3 giving how many cards are currently placed in bin 0, 1, 2 respectively"
-     },
-     {
-      "key": "isCorrect",
-      "meaning": "Object with one boolean per card, true if that card's current assignment matches its correct bin"
+      "meaning": "true when correctCount === 9"
      }
     ],
-    "visual": "Three vertical bins drawn side by side, headed 'Needs Met' (bin 0), 'Outwardly Conformed \u2014 Grudging' (bin 1), 'Rejected Outright' (bin 2). Six coloured cards sit above the bins or inside them once sorted: Catholic-associated cards (Church Papists, Recusants) shown in gold, Protestant-associated cards (Puritans-in-the-Church, Separatists) shown in green, neutral cards (Moderate Parishioners, Elizabeth & Government) shown in grey. A scoreboard reads 'Correct: correctCount / 6'.",
+    "visual": "A parchment-textured board with three columns topped by hand-lettered banners: a rosary/crucifix icon over 'Looked Catholic', an open Bible icon over 'Sounded Protestant', and a crown-and-gavel icon over 'Applied to Everyone'. Below, a scattered tray holds unplaced cards styled as torn paper scraps in Tudor script. Dragging a card over a column highlights it gold; dropping correctly makes the card slot in flush with a green tick stamp, dropping incorrectly makes it judder and bounce back to the tray with a red X. Once all nine sit correctly, a banner unrolls across the top reading 'Compromise: 3 for tradition, 3 for doctrine, 3 for control.'",
     "invariants": [
-     "for any params, derived.isCorrect.moderateParishioners is true exactly when params.assignment_moderateParishioners === 0",
-     "for any params, derived.isCorrect.governmentElizabeth is true exactly when params.assignment_governmentElizabeth === 0",
-     "for any params, derived.isCorrect.churchPapists is true exactly when params.assignment_churchPapists === 1",
-     "for any params, derived.isCorrect.puritansWithin is true exactly when params.assignment_puritansWithin === 1",
-     "for any params, derived.isCorrect.recusants is true exactly when params.assignment_recusants === 2",
-     "for any params, derived.isCorrect.separatists is true exactly when params.assignment_separatists === 2",
-     "derived.correctCount equals the count of true values in derived.isCorrect, an integer between 0 and 6 inclusive",
-     "derived.allCorrect is true if and only if derived.correctCount === 6",
-     "derived.binCounts[0] + derived.binCounts[1] + derived.binCounts[2] === 6 for any params",
-     "derived.binCounts[b] equals the number of the six assignment params whose value equals b, for each b in {0,1,2}",
-     "when derived.allCorrect is true, bin 2 (Rejected Outright) contains exactly one Catholic-associated card (Recusants) and one Protestant-associated card (Separatists), demonstrating the Settlement rejected extremes on both sides equally"
+     "apply(s,a) never mutates s; it returns a new state object",
+     "for any reachable state s, derive(s).correctCount equals the count of cards where s.placements[card.id] === card.correctBin",
+     "applying {t:'place',cardId,binId} with binId not in ['catholic','protestant','enforce'] returns a state identical to s",
+     "if card c was unplaced in s, applying {t:'place',cardId:c,binId:b} yields s' with derive(s').placedCount === derive(s).placedCount + 1",
+     "applying {t:'unplace',cardId:c} yields s' where s'.placements[c] === null",
+     "applying {t:'reset'} yields a state deep-equal to initialState()",
+     "derive(s).correctCount is always between 0 and 9 inclusive",
+     "regions(s,700,450) returns exactly 3 bin regions plus exactly one region per card with s.placements[card.id] === null"
     ],
     "facts_used": [
-     "The 1559 Settlement was carried by the Act of Supremacy (Elizabeth as Supreme Governor) and the Act of Uniformity (one Prayer Book, compulsory Sunday attendance, 12-pence fine)",
-     "Elizabeth's aim was outward conformity, not inner belief ('no desire to make windows into men's souls')",
-     "Church Papists attended Anglican services to avoid the fine while remaining privately Catholic",
-     "Recusants refused to attend Anglican services at all",
-     "Many Puritans remained inside the Church of England and pressed for reform from within (e.g. over the Prayer Book)",
-     "Separatists left the Church of England entirely to form independent congregations",
-     "Elizabeth and her ministers initially treated Catholics cautiously, prioritising political loyalty over theological purity",
-     "The regime tightened rules over time (e.g. 1581 fine rise, 1585 Act, Whitgift's Three Articles), showing the Settlement's compromise had limits enforced later"
+     "Act of Supremacy made Elizabeth 'Supreme Governor' (not 'Supreme Head'), requiring an oath of loyalty from clergy and officials",
+     "Act of Uniformity imposed the English Book of Common Prayer and compulsory Sunday attendance with a 12-pence fine for absence",
+     "39 Articles of 1563 affirmed salvation by faith and rejected the Catholic Mass as a sacrifice",
+     "Services kept traditional Catholic features: priests wore vestments, churches kept altars, and communion wording was deliberately ambiguous",
+     "Elizabeth's aim was outward conformity, not inner belief ('no windows into men's souls')"
     ]
    }
   },
@@ -1927,160 +1961,87 @@
     "why_not": ""
    },
    "spec": {
-    "id": "sort-the-causes-of-poverty",
+    "id": "poverty-causes-sort",
     "title": "Sort the Causes of Elizabethan Poverty",
-    "kind": "explore",
-    "teaches": "Elizabethan poverty had four distinct structural drivers (demographic, economic, agricultural, political) rather than being a moral failing of the poor",
-    "interaction": "Students see 12 fact-cards drawn straight from the lesson (e.g. 'Population rose from 3m to 4m', 'Landowners enclosed common fields for sheep', 'War sent wounded soldiers home with no wages') and drag each into one of four labelled bins: Demographic, Economic, Agricultural, Political. As cards land, correctly-placed ones snap into a neat row and glow green; wrongly-placed ones wobble red, and a running score counter updates live.",
-    "controls": [
+    "teaches": "Elizabethan poverty had distinct demographic, economic, agricultural and political causes, not moral failings",
+    "interaction": "The student drags nine parchment evidence-cards (e.g. 'Population rose from 3 million to 4 million', 'Landowners enclosed common fields for sheep') from a pile at the bottom of the screen into one of four labelled bins: Demographic, Economic, Agricultural, Political. They can move a card between bins as many times as they like before pressing Check. Pressing Check locks any correctly-placed card in its bin with a green tick and sends any wrongly-placed card back to the pile with a red cross, ready to be tried again. The student can get it wrong by, for instance, filing 'bad harvests' under Economic instead of Agricultural, or 'wounded soldiers returning from war' under Demographic instead of Political, revealing a misunderstanding of structural versus moral/simple causes.",
+    "state_shape": {
+     "cards": "array of {id, text, correctBin} \u2014 the 9 evidence snippets and their true category",
+     "placements": "map cardId -> binId|null, current (unconfirmed) location of each card",
+     "locked": "set of cardIds that have been confirmed correct and can no longer be moved",
+     "checked": "boolean, true if a Check has been run since the last placement change",
+     "attempts": "integer count of times Check has been pressed"
+    },
+    "actions": [
      {
-      "key": "card_pop_growth",
-      "label": "Population rose 3m\u21924m (1551-1601)",
-      "min": 0,
-      "max": 3,
-      "step": 1,
-      "value": -1,
-      "unit": "category index"
+      "t": "place",
+      "fields": "{cardId, bin}",
+      "meaning": "move an unlocked card into the given bin (bin is one of the 4 category ids), overwriting any previous placement for that card and setting checked=false"
      },
      {
-      "key": "card_pop_third",
-      "label": "Population grew by a third overall",
-      "min": 0,
-      "max": 3,
-      "step": 1,
-      "value": -1,
-      "unit": "category index"
+      "t": "check",
+      "fields": "{}",
+      "meaning": "evaluate all currently placed, unlocked cards: those whose placement matches correctBin move into locked; sets checked=true and increments attempts"
      },
      {
-      "key": "card_wages_fell",
-      "label": "Craftsman's real wage fell due to inflation",
-      "min": 0,
-      "max": 3,
-      "step": 1,
-      "value": -1,
-      "unit": "category index"
+      "t": "retry",
+      "fields": "{}",
+      "meaning": "clear placements for every unlocked card (send them back to the tray) and set checked=false; locked cards are untouched"
      },
      {
-      "key": "card_wages_lag",
-      "label": "Wages did not keep pace with prices",
-      "min": 0,
-      "max": 3,
-      "step": 1,
-      "value": -1,
-      "unit": "category index"
-     },
-     {
-      "key": "card_cloth_slump",
-      "label": "Cloth trade slumped in East Anglia",
-      "min": 0,
-      "max": 3,
-      "step": 1,
-      "value": -1,
-      "unit": "category index"
-     },
-     {
-      "key": "card_enclosure",
-      "label": "Landowners enclosed fields for sheep",
-      "min": 0,
-      "max": 3,
-      "step": 1,
-      "value": -1,
-      "unit": "category index"
-     },
-     {
-      "key": "card_sheep_jobs",
-      "label": "Sheep farming needed fewer workers than arable",
-      "min": 0,
-      "max": 3,
-      "step": 1,
-      "value": -1,
-      "unit": "category index"
-     },
-     {
-      "key": "card_harvest_1586",
-      "label": "The 1586 harvest failed",
-      "min": 0,
-      "max": 3,
-      "step": 1,
-      "value": -1,
-      "unit": "category index"
-     },
-     {
-      "key": "card_wet_years",
-      "label": "'Four wet years' 1594-96",
-      "min": 0,
-      "max": 3,
-      "step": 1,
-      "value": -1,
-      "unit": "category index"
-     },
-     {
-      "key": "card_monasteries",
-      "label": "Dissolution of monasteries removed charity",
-      "min": 0,
-      "max": 3,
-      "step": 1,
-      "value": -1,
-      "unit": "category index"
-     },
-     {
-      "key": "card_soldiers",
-      "label": "War with Spain sent wounded soldiers home",
-      "min": 0,
-      "max": 3,
-      "step": 1,
-      "value": -1,
-      "unit": "category index"
-     },
-     {
-      "key": "card_1593_statute",
-      "label": "1593 statute names 'maimed soldiers'",
-      "min": 0,
-      "max": 3,
-      "step": 1,
-      "value": -1,
-      "unit": "category index"
+      "t": "reset",
+      "fields": "{}",
+      "meaning": "return to initialState, clearing all placements, locks and attempts"
      }
     ],
+    "controls": [],
     "derived_fields": [
      {
       "key": "correctCount",
-      "meaning": "number of cards whose assigned category index matches their true category index"
+      "meaning": "size of s.locked"
      },
      {
-      "key": "allCorrect",
-      "meaning": "true when correctCount equals 12 (all cards sorted correctly)"
+      "key": "totalCards",
+      "meaning": "s.cards.length (always 9)"
      },
      {
-      "key": "perCategoryCorrect",
-      "meaning": "object mapping each of the 4 category indices to how many of the 3 true-belonging cards are currently placed there correctly"
+      "key": "unplacedCount",
+      "meaning": "number of cards with placements[cardId] falsy and not in locked"
      },
      {
-      "key": "unsortedCount",
-      "meaning": "number of cards still at value -1 (not yet placed in any bin)"
+      "key": "wrongCount",
+      "meaning": "when s.checked is true, number of unlocked cards whose placements[cardId] is set but !== correctBin"
+     },
+     {
+      "key": "allDone",
+      "meaning": "correctCount === totalCards"
+     },
+     {
+      "key": "binCounts",
+      "meaning": "map binId -> number of cards currently placed (locked or unlocked) in that bin"
      }
     ],
-    "visual": "A canvas with four labelled bins across the top (Demographic, Economic, Agricultural, Political), each with a distinct icon (crowd, coin, sheep, crown/sword). Below, 12 draggable fact-cards sit in a shuffled tray. Cards dragged into the correct bin snap into a tidy stacked column and flash green with a tick; cards in the wrong bin sit crookedly and flash red with a cross until moved. A scoreboard at the top-right shows 'Correct: correctCount / 12'.",
+    "visual": "A Tudor parchment backdrop with four stone archway 'bins' side by side, each topped with a carved label: DEMOGRAPHIC (a crowd icon), ECONOMIC (a coin icon), AGRICULTURAL (a sheep/plough icon), POLITICAL (a crown/sword icon). Below the arches sits a scattered pile of small torn parchment cards, each bearing one line of evidence text in an old-style font. Dragging a card slides it into an archway; pressing the 'Check the Rolls' button (styled as a wax seal) stamps correctly-placed cards with a green tick and locks them in place, while wrong cards visibly tear away and flutter back to the pile with a red cross, ready to be redragged.",
     "invariants": [
-     "for any params, derived.correctCount equals the count of cards whose assigned value equals that card's fixed true category index",
-     "derived.allCorrect is true exactly when derived.correctCount equals 12",
-     "derived.unsortedCount equals the count of cards whose assigned value is -1, and unsorted cards never count toward derived.correctCount",
-     "changing exactly one card's assigned value while holding all others fixed changes derived.correctCount by at most 1",
-     "if every card's assigned value equals its true category index, derived.correctCount equals 12 and every entry of derived.perCategoryCorrect equals 3",
-     "the true category index for each card is fixed and identical across all calls (card_pop_growth=0, card_pop_third=0, card_wages_fell=1, card_wages_lag=1, card_cloth_slump=1, card_enclosure=2, card_sheep_jobs=2, card_harvest_1586=2, card_wet_years=2, card_monasteries=3, card_soldiers=3, card_1593_statute=3), so exactly 2 cards truly belong to Demographic, 3 to Economic, 4 to Agricultural, and 3 to Political",
-     "for any params, the sum over all four category indices of derived.perCategoryCorrect equals derived.correctCount"
+     "apply(s,a) never mutates s; it returns a new state object",
+     "for any reachable state, s.locked is a subset of the ids in s.cards",
+     "applying {t:'place',cardId,bin} to a card already in s.locked leaves placements and locked unchanged",
+     "after apply(s,{t:'check'}), every cardId in the resulting locked set has placements[cardId] === correctBin for that card",
+     "after apply(s,{t:'check'}), no cardId is added to locked unless placements[cardId] === correctBin",
+     "applying {t:'retry'} never removes any cardId already present in s.locked",
+     "derive(s).correctCount + derive(s).unplacedCount + (unlocked cards with a placement) === derive(s).totalCards at all times",
+     "derive(s).allDone is true iff derive(s).correctCount === 9",
+     "regions(s,600,400) always returns exactly 4 bin regions plus exactly one region per card in s.cards (tray or bin position), so every card is represented exactly once"
     ],
     "facts_used": [
-     "Population rose from around 3 million (1551) to around 4 million (1601), a growth of roughly a third",
-     "A craftsman's real wage in 1600 was substantially lower than in 1500 due to inflation outpacing wages",
+     "Population rose from about 3 million (1551) to about 4 million (1601)",
+     "Craftsmen's real wages in 1600 were substantially lower than in 1500 due to inflation",
      "The cloth trade in East Anglia and the West Country suffered repeated slumps",
-     "Landowners enclosed common fields for sheep farming, evicting tenants",
+     "Landowners enclosed common fields for sheep farming, evicting tenants and removing grazing/gleaning rights",
      "Sheep farming needed fewer workers than arable farming, so jobs disappeared",
-     "The 1586 harvest failed",
-     "1594-96 were 'the four wet years' with 1596-97 famine in the north and Cumbria",
-     "Dissolution of the monasteries removed the largest source of rural charity",
-     "War with Spain in the Netherlands and Ireland sent home wounded, unpaid soldiers from the 1580s",
-     "The 1593 statute distinguished 'maimed soldiers' as a deserving category separate from sturdy beggars"
+     "Bad harvests in 1586 and 1594-97 ('the four wet years') caused genuine famine in the north and Cumbria",
+     "War with Spain in the Netherlands and Ireland sent thousands of wounded soldiers home with no pay from the 1580s",
+     "The dissolution of the monasteries removed the largest single source of rural charity"
     ]
    }
   },
@@ -2323,90 +2284,85 @@
     "why_not": ""
    },
    "spec": {
-    "id": "label-kenilworth",
-    "title": "Label Kenilworth: Stone Aimed at the Queen",
-    "kind": "explore",
-    "teaches": "Every feature Leicester added or kept at Kenilworth served the single political purpose of impressing and courting Elizabeth I",
-    "interaction": "A student sees a labelled diagram of Kenilworth Castle with five pinned hotspots \u2014 Leicester's Building, the gatehouse, the keep, the privy garden, the mere \u2014 each with a dropdown of five possible 'political purposes'. They assign a purpose to each hotspot and the picture highlights each pin green or red, with a running score showing how many of the five features are correctly matched to their true purpose.",
-    "controls": [
+    "id": "kenilworth-annotate-purpose",
+    "title": "Label Kenilworth, Then Explain Why",
+    "teaches": "Every feature Leicester added to Kenilworth was chosen to serve one political purpose: winning Elizabeth's favour and hand.",
+    "interaction": "The student sees an illustrated cross-section of Elizabethan Kenilworth with five glowing pins on unlabelled features. They pick a feature-name chip (Leicester's Building, the gatehouse, the keep, the privy garden, the mere) and drop it on the pin they think it names; a wrong drop bounces back and adds a mistake. Once all five are correctly named, a second bank of 'political purpose' chips appears (e.g. 'cost of hosting the queen', 'medieval strength turned into theatre') and the student must drag each purpose onto the feature it explains, again with wrong drops bouncing back. The task is only finished when every feature is both named and chained to its correct historical purpose \u2014 getting the label right but the reasoning wrong still counts as incomplete.",
+    "state_shape": {
+     "placements": "map from hotspotId to the featureId currently placed there, or null",
+     "purposeMatches": "map from featureId to purposeId matched to it, or null",
+     "selectedLabel": "id of the chip currently held, or null",
+     "selectedKind": "'feature' or 'purpose', matching what phase selectedLabel belongs to, or null",
+     "mistakes": "count of wrong drops made so far, never decreases except on reset"
+    },
+    "actions": [
      {
-      "key": "leicestersBuilding",
-      "label": "Purpose of Leicester's Building",
-      "min": 0,
-      "max": 4,
-      "step": 1,
-      "value": 0,
-      "unit": "purpose index"
+      "t": "select",
+      "fields": "{id, kind}",
+      "meaning": "pick up a chip from the feature bank or (once unlocked) the purpose bank"
      },
      {
-      "key": "gatehouse",
-      "label": "Purpose of the gatehouse",
-      "min": 0,
-      "max": 4,
-      "step": 1,
-      "value": 0,
-      "unit": "purpose index"
+      "t": "deselect",
+      "fields": "{}",
+      "meaning": "put the held chip back down without dropping it"
      },
      {
-      "key": "keep",
-      "label": "Purpose of the keep",
-      "min": 0,
-      "max": 4,
-      "step": 1,
-      "value": 0,
-      "unit": "purpose index"
+      "t": "drop",
+      "fields": "{targetId}",
+      "meaning": "attempt to drop the currently selected chip onto a hotspot (feature phase) or onto an already-placed feature (purpose phase)"
      },
      {
-      "key": "privyGarden",
-      "label": "Purpose of the privy garden",
-      "min": 0,
-      "max": 4,
-      "step": 1,
-      "value": 0,
-      "unit": "purpose index"
-     },
-     {
-      "key": "mere",
-      "label": "Purpose of the mere",
-      "min": 0,
-      "max": 4,
-      "step": 1,
-      "value": 0,
-      "unit": "purpose index"
+      "t": "reset",
+      "fields": "{}",
+      "meaning": "clear all placements, matches, selection and mistakes back to initial state"
      }
     ],
+    "controls": [],
     "derived_fields": [
      {
-      "key": "matches",
-      "meaning": "array of 5 booleans, true where the assigned purpose index equals the correct purpose index for that hotspot"
+      "key": "placedCount",
+      "meaning": "number of hotspots whose placements value equals their correct featureId"
      },
      {
-      "key": "correctCount",
-      "meaning": "number of hotspots (0-5) whose assigned purpose matches the correct answer"
+      "key": "matchedCount",
+      "meaning": "number of features whose purposeMatches value equals their correct purposeId"
      },
      {
-      "key": "allCorrect",
-      "meaning": "true exactly when correctCount equals 5, meaning every feature is correctly tied to its political function"
+      "key": "phase",
+      "meaning": "'features' if placedCount<5, else 'purposes' if matchedCount<5, else 'done'"
+     },
+     {
+      "key": "mistakes",
+      "meaning": "total wrong drops made across both phases"
+     },
+     {
+      "key": "complete",
+      "meaning": "true iff placedCount===5 and matchedCount===5"
      }
     ],
-    "visual": "A stylised top-down plan of Kenilworth Castle in 1575: the mere surrounding the walls, the gatehouse at the entrance, the Norman keep with large glazed windows, Leicester's Building as a tall block beside the great hall, and the privy garden with obelisks and a fountain below the walls. Each of the five features has a numbered pin; clicking a pin opens its purpose dropdown, and the pin turns green if correct, red if wrong, with a scoreboard reading 'X of 5 features matched'.",
+    "visual": "A hand-drawn cutaway view of 1575 Kenilworth: the squat Norman keep on a mound punched with large Elizabethan windows; beside it a slender four-storey block (Leicester's Building) with rows of glazed windows; a grand arched gatehouse at the entrance path; below the walls a geometric terraced garden with obelisks, an aviary cage and a marble fountain; and surrounding everything a wide lake (the mere) with a tiny floating pageant boat on it. Five numbered pins sit on these five features. Beneath the picture is a row of feature-name chips, a mistake counter, a progress bar, and (once unlocked) a second row of purpose chips in a different colour. Correctly placed chips snap onto their pins with a small label tag; correctly matched purposes attach underneath as a second tag.",
     "invariants": [
-     "the correct-purpose mapping is a fixed bijection from the 5 hotspot keys to 5 distinct purpose indices, so no two hotspots share the same correct answer",
-     "for any params, derived.matches[i] is true if and only if params[hotspot_i] equals CORRECT[hotspot_i]",
-     "derived.correctCount equals the count of true values in derived.matches, and lies between 0 and 5 inclusive",
-     "derived.allCorrect is true exactly when derived.correctCount equals 5",
-     "changing any single control to its correct value while others are unchanged never decreases derived.correctCount",
-     "changing any single control away from its correct value to an incorrect one, while others are unchanged, never increases derived.correctCount",
-     "setting all five controls to their correct values yields derived.correctCount equal to 5 and derived.allCorrect equal to true"
+     "apply(s,a) never mutates s; it returns a new state object",
+     "derive(s).placedCount is always between 0 and 5 inclusive",
+     "derive(s).matchedCount is always between 0 and 5 inclusive, and is 0 whenever derive(s).placedCount < 5",
+     "applying {t:'drop',targetId} when the selected label is wrong for that target leaves s.placements and s.purposeMatches unchanged and increments mistakes by exactly 1",
+     "applying {t:'drop',targetId} when the selected label is correct for that target sets the corresponding map entry to that labelId, clears selectedLabel, and does not change mistakes",
+     "applying {t:'drop'} with selectedLabel===null leaves the entire state unchanged",
+     "in the 'features' phase, {t:'drop'} can never write into purposeMatches, and in the 'purposes' phase it can never write into placements",
+     "apply(s,{t:'reset'}) always yields a state deep-equal to initialState",
+     "derive(s).complete is true if and only if placedCount===5 and matchedCount===5",
+     "mistakes is monotonically non-decreasing under any sequence of actions other than reset"
     ],
     "facts_used": [
-     "Elizabeth granted Kenilworth to Robert Dudley in 1563, before making him Earl of Leicester in 1564",
-     "Leicester's Building was a four-storey tower of state apartments built for the queen's lodging in modern comfort",
-     "the gatehouse was rebuilt to give arriving courtiers a fashionable first impression and survives intact because later owners turned it into a house",
-     "Leicester kept the twelfth-century Norman keep for its display of antiquity but punched large Elizabethan windows into it",
-     "the privy garden had terraces, obelisks, an aviary of exotic birds and a marble fountain, and was reconstructed by English Heritage in 2009 using the Langham letter",
-     "the mere, originally a medieval defensive lake making the castle nearly siege-proof, was turned into a stage for pageantry such as the floating Lady of the Lake and Arion's mechanical dolphin during the 1575 visit",
-     "the additions at Kenilworth included nothing military, showing defences repurposed as display aimed at influencing the queen's opinion"
+     "Elizabeth granted Kenilworth to Robert Dudley in 1563",
+     "Dudley built Leicester's Building, a four-storey tower of state apartments, for the queen's visits",
+     "Leicester raised a new gatehouse, which survives intact today",
+     "Leicester punched large windows into the medieval Norman keep",
+     "Leicester laid out a privy garden with terraces, obelisks, an aviary and a marble fountain, reconstructed by English Heritage in 2009 using the Langham letter",
+     "The mere (great lake) made Kenilworth defensible and was turned into a stage for pageants in 1575",
+     "The 1575 visit lasted 9-27 July, the longest Elizabeth stayed at any courtier's house",
+     "Contemporaries claimed the entertainment cost around \u00a31000 a day",
+     "Historians read the 1575 visit as Leicester's last bid for Elizabeth's hand in marriage"
     ]
    }
   }

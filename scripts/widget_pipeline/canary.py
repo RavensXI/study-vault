@@ -55,7 +55,10 @@ HAIKU = "claude-haiku-4-5-20251001"
 SONNET = "claude-sonnet-5"
 OPUS = "claude-opus-5"
 
-# USD per million tokens (list price assumptions — reconcile with console)
+# USD per million tokens. CALIBRATION: the first canary computed $7.81
+# from this table while Tom's real balance moved $3.47 — a factor of
+# 0.44. The console is the authority; these are list-price assumptions.
+CALIBRATION = 0.44
 PRICES = {
     HAIKU: (1.00, 5.00),
     SONNET: (3.00, 15.00),
@@ -94,7 +97,7 @@ def cost_report():
     print("\n%-6s %-28s %5s %10s %10s %9s" % ("tier", "model", "calls", "in", "out", "USD"))
     for (tier, model), a in sorted(by.items()):
         pin, pout = PRICES.get(model, (0, 0))
-        usd = a["in"] / 1e6 * pin + a["out"] / 1e6 * pout
+        usd = (a["in"] / 1e6 * pin + a["out"] / 1e6 * pout) * CALIBRATION
         total += usd
         print("%-6s %-28s %5d %10d %10d %9.3f" % (tier, model, a["n"], a["in"], a["out"], usd))
     print("%-6s %-28s %5s %10s %10s %9.3f" % ("", "TOTAL", "", "", "", total))
@@ -216,36 +219,43 @@ def tier1():
 
 
 # ------------------------------------------------------------------ tier 2
-SPEC_SYS = """You design ONE small interactive for a GCSE lesson, and you write the tests it must pass BEFORE anyone writes the code. You are the specification, not the implementation.
+SPEC_SYS = """You design ONE interactive for a GCSE lesson, and you write the tests it must pass BEFORE the code exists. You are the specification, not the implementation.
 
-You will be given the lesson text and the chosen interaction verb.
+INVENT THE INTERACTION. There is no menu and no house style to conform to. Design what would genuinely teach this lesson's idea to a 15-year-old bored of reading: dragging cards into groups, ordering events on a line, matching pairs, clicking hotspots on a drawing, routing a path and living with the consequences, balancing two competing quantities, spotting a planted error, weighing evidence. If sliders are honestly the best fit use sliders, but do not default to them, and never invent a control that changes nothing meaningful.
 
-Design something a 15-year-old would actually enjoy touching, that teaches the stated idea. It must be genuinely specific to THIS lesson — its numbers, its examples, its vocabulary. Avoid generic sliders; make the interaction match the verb.
+The widget will be written to a contract that constrains only the code's SHAPE, never your design: pure initialState/apply(state,action)/derive/regions, plus a render. Any interaction at all fits that shape.
 
-The invariants are the important part. They must be checkable by running the widget's pure model function with different inputs and asserting on the outputs. Write them as precise, mechanical statements about params and derived values. They must come from the LESSON's physics/history/logic, not from any implementation.
+Your invariants are the important part. They must be checkable by calling those pure functions with different states and actions. Derive them from the LESSON's logic, not from any implementation.
 
 Good invariants:
-  "for any params, derived.current equals derived.power / params.voltage within 1e-9"
-  "increasing params.impermeable never increases derived.lagTime"
-  "derived.tripped is true exactly when derived.current > 13"
-  "steps are non-empty and every step's caption is a non-empty string"
-  "the final step's state.sorted array is in ascending order"
+  "derive(s).correctCount equals the number of i where s.assignment[i] === i"
+  "applying {t:'drop',card:c,bin:b} never makes derive(s).placed exceed the number of cards"
+  "for any reachable state, derive(s).current equals derive(s).power / s.voltage within 1e-9"
+  "regions(s,600,300) returns at least one region for every unplaced card"
+  "apply(s,a) does not mutate s"
 
 Reply with ONLY JSON:
 {"id": "<kebab-slug>",
- "title": "<student-facing title, max 8 words>",
- "kind": "explore" | "steps",
+ "title": "<student-facing, max 8 words>",
  "teaches": "<the one idea>",
- "interaction": "<2-3 sentences: what the student does and sees>",
- "controls": [{"key","label","min","max","step","value","unit"}]  // [] for steps
- "derived_fields": [{"key","meaning"}],
- "visual": "<what is drawn on the canvas, concretely>",
- "invariants": ["<mechanical, checkable statement>", ...],
- "facts_used": ["<each factual claim/number taken from the lesson>"]}"""
+ "interaction": "<3-5 sentences: exactly what the student does, sees, and can get wrong>",
+ "state_shape": {"<field>": "<meaning>"},
+ "actions": [{"t": "<name>", "fields": "<...>", "meaning": "<...>"}],
+ "controls": [],
+ "derived_fields": [{"key": "", "meaning": ""}],
+ "visual": "<what is drawn, concretely - this is a picture, describe it>",
+ "invariants": ["<mechanical, checkable>"],
+ "facts_used": ["<each fact/number taken from the lesson>"]}"""
 
 
 def tier2():
     s = state_load()
+    only = sys.argv[sys.argv.index("--only") + 1] if "--only" in sys.argv else None
+    if only:
+        for l in s["lessons"]:
+            if only.lower() in (l.get("triage", {}).get("verb", "") or "").lower():
+                l.pop("spec", None); l.pop("build", None); l.pop("gate", None)
+        state_save(s)
     todo = [l for l in s["lessons"]
             if l.get("triage", {}).get("worth_it") and "spec" not in l]
     for l in todo:
@@ -262,7 +272,9 @@ def tier2():
             # chars) — 13 of 23 specs died that way on the first canary.
             les["spec"] = jparse(call(2, SONNET, les["title"][:40], SPEC_SYS, user, 8000))
             print("  %2d/%d %-46s %s (%d invariants)" %
-                  (i, len(todo), les["spec"]["title"][:46], les["spec"]["kind"],
+                  (i, len(todo), les["spec"]["title"][:46],
+                   (les["spec"].get("actions") and
+                    ",".join(a.get("t", "?") for a in les["spec"]["actions"])[:22]) or "controls",
                    len(les["spec"].get("invariants", []))))
         except Exception as e:
             les["spec_error"] = str(e)[:120]
@@ -284,7 +296,7 @@ Additional requirements:
 - Output ONLY the JavaScript file. No markdown fence, no commentary.""" % CONTRACT
 
 
-def tier3(max_n=None):
+def tier3(max_n=None, build_model=OPUS):
     s = state_load()
     if not os.path.isdir(BUILDS):
         os.makedirs(BUILDS)
@@ -310,7 +322,7 @@ def tier3(max_n=None):
             # 24000, not 8000: at 8k EVERY build hit the cap and returned
             # truncated code (3 of 6 empty, the other 3 cut mid-statement,
             # $4 wasted). Opus needs room to think AND emit a whole file.
-            code = call(3, OPUS, spec["id"], BUILD_SYS, user, 24000)
+            code = call(3, build_model, spec["id"], BUILD_SYS, user, 24000)
             code = re.sub(r"^```(?:javascript|js)?|```$", "", code.strip(), flags=re.M).strip()
             path = os.path.join(BUILDS, spec["id"] + ".js")
             io.open(path, "w", encoding="utf-8").write(code)
@@ -330,19 +342,34 @@ def tier3(max_n=None):
 
 
 # ------------------------------------------------------------------ tier 4
-TESTGEN_SYS = """You write a Node.js test script that checks a widget's PURE model against a list of invariants. You are given the widget's SPEC and the invariants — you are NOT given the widget's code, and you must not assume anything about its internals beyond the contract.
+TESTGEN_SYS = """You write a Node.js test script that checks a widget's PURE model against a list of invariants. You are given the widget's SPEC and its invariants. You are NOT given the widget's code and must not assume anything beyond the contract.
 
-Contract reminder: the module exports an object W with either
-  - W.controls (array of {key,min,max,step,value}) and W.derive(params) -> object
-  - or W.steps(params) -> array of {caption, state}
-plus W.meta, W.render, W.caption.
+Contract — the module exports W with EXACT signatures:
+  W.meta            : {id, title, teaches}
+  W.initialState()  -> state              (pure)
+  W.apply(state, action) -> newState      (pure, must not mutate state)
+  W.derive(state)   -> object             (pure)
+  W.regions(state, w, h) -> [{x,y,w,h,action}]   (pure; may be [])
+  W.controls        : array (may be absent/empty); control changes arrive
+                      as the action {t:'set', key:<key>, v:<value>}
+  W.render(ctx, state, derived, w, h, acc)   -- DO NOT CALL, needs a canvas
+  W.caption(state, derived) -> string      (TWO arguments - always pass both)
 
 Write a script that:
 1. requires the widget from process.argv[2]
-2. builds a parameter sweep from W.controls (min, max, default, and 3 points between; for toggles both booleans) — cap the sweep at 200 combinations by sampling if needed
-3. asserts the contract basics: derive/steps never throws, never returns NaN/Infinity/undefined fields, captions are non-empty strings
-4. asserts EACH invariant, printing PASS/FAIL with the invariant text
-5. exits 0 if all pass, 1 otherwise, and prints a final line "RESULT ok=<n> fail=<n>"
+2. explores the state space: from initialState(), repeatedly take the actions
+   offered by regions(s,600,300) (and {t:'set'} actions across each control's
+   min/mid/max), breadth-first, visiting up to 300 distinct states
+3. asserts the contract basics on every visited state: apply/derive/regions
+   never throw, derive returns no NaN/Infinity/undefined field, caption(s,
+   derive(s)) is a non-empty string, and apply(s,a) leaves s unchanged
+   (deep-compare a JSON snapshot taken before the call)
+4. asserts EACH invariant, printing "PASS: <text>" or "FAIL: <text> [detail]"
+5. distinguishes a BROKEN TEST from a broken widget: if your own harness
+   throws (bad signature, missing field you assumed), print
+   "HARNESS-ERROR: <what>" and do not count it as a widget failure
+6. exits 0 only if there are zero FAILs, and prints a final line
+   "RESULT ok=<n> fail=<n> harness=<n>"
 
 Use only Node built-ins. Output ONLY the JavaScript. No fence, no commentary."""
 
@@ -382,10 +409,11 @@ def tier4():
         if gate["syntax"] == "ok":
             tuser = ("SPEC:\n%s\n\nINVARIANTS:\n%s"
                      % (json.dumps({k: spec[k] for k in spec
-                                    if k in ("id", "kind", "controls", "derived_fields")}, indent=1),
+                                    if k in ("id", "controls", "state_shape", "actions",
+                                             "derived_fields")}, indent=1),
                         json.dumps(spec.get("invariants", []), indent=1)))
             try:
-                tcode = call(4, SONNET, "test:" + spec["id"], TESTGEN_SYS, tuser, 12000)
+                tcode = call(4, SONNET, "test:" + spec["id"], TESTGEN_SYS, tuser, 24000)
                 tcode = re.sub(r"^```(?:javascript|js)?|```$", "", tcode.strip(), flags=re.M).strip()
                 tpath = os.path.join(BUILDS, spec["id"] + ".test.js")
                 io.open(tpath, "w", encoding="utf-8").write(tcode)
@@ -403,7 +431,7 @@ def tier4():
             fuser = ("LESSON %d: %s\n\nLESSON TEXT:\n%s\n\nWIDGET CODE:\n%s"
                      % (les["n"], les["title"], les["text"][:6000], code[:12000]))
             gate["factcheck"] = jparse(call(4, SONNET, "fc:" + spec["id"],
-                                            FACTCHECK_SYS, fuser, 12000))
+                                            FACTCHECK_SYS, fuser, 16000))
         except Exception as e:
             gate["factcheck"] = {"verdict": "error", "findings": [{"what": str(e)[:120]}]}
 
@@ -451,6 +479,6 @@ if __name__ == "__main__":
     elif "--tier" in a:
         t = a[a.index("--tier") + 1]
         mx = int(a[a.index("--max") + 1]) if "--max" in a else None
-        {"1": tier1, "2": tier2, "3": lambda: tier3(mx), "4": tier4}[t]()
+        {"1": tier1, "2": tier2, "3": lambda: tier3(mx, SONNET if "--sonnet" in a else OPUS), "4": tier4}[t]()
     else:
         print(__doc__)

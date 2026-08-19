@@ -2,452 +2,409 @@
 
 const path = require('path');
 
-function fail(msg) {
-  console.log('FAIL: ' + msg);
-  return false;
-}
+let ok = 0, fail = 0, harness = 0;
 
-function isFiniteNumber(x) {
-  return typeof x === 'number' && Number.isFinite(x);
-}
+function jclone(x) { return JSON.parse(JSON.stringify(x)); }
+function jeq(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
 
-function checkNoBadFields(obj, ctx) {
-  if (obj === undefined || obj === null) {
-    return `${ctx}: result is null/undefined`;
-  }
-  for (const k of Object.keys(obj)) {
-    const v = obj[k];
-    if (v === undefined) return `${ctx}: field '${k}' is undefined`;
-    if (typeof v === 'number' && !Number.isFinite(v)) {
-      return `${ctx}: field '${k}' is NaN/Infinity (${v})`;
+function printPass(text) { console.log('PASS: ' + text); ok++; }
+function printFail(text, detail) { console.log('FAIL: ' + text + ' [' + detail + ']'); fail++; }
+function printHarness(text) { console.log('HARNESS-ERROR: ' + text); harness++; }
+
+function runCheck(name, fn) {
+  try {
+    const v = fn();
+    if (v === true || (v && v.pass === true)) {
+      printPass(name);
+    } else {
+      const detail = (v && v.detail) || 'condition false';
+      printFail(name, detail);
     }
+  } catch (e) {
+    printHarness(name + ': ' + (e && e.message ? e.message : String(e)));
   }
-  return null;
 }
 
-let modPath = process.argv[2];
-if (!modPath) {
-  console.error('Usage: node test.js <widget-path>');
-  process.exit(1);
+function finishAndExit() {
+  console.log('RESULT ok=' + ok + ' fail=' + fail + ' harness=' + harness);
+  process.exit(fail > 0 ? 1 : 0);
 }
-modPath = path.resolve(process.cwd(), modPath);
+
+const modPath = process.argv[2];
+if (!modPath) {
+  printHarness('no module path provided as argv[2]');
+  finishAndExit();
+}
 
 let W;
 try {
-  W = require(modPath);
+  W = require(path.resolve(modPath));
 } catch (e) {
-  console.log('FAIL: could not require widget module: ' + e.message);
-  console.log('RESULT ok=0 fail=1');
-  process.exit(1);
+  printHarness('failed to require module: ' + e.message);
+  finishAndExit();
 }
 
-let ok = 0;
-let failCount = 0;
-function pass(msg) {
-  ok++;
-  console.log('PASS: ' + msg);
-}
-function record(cond, msg) {
-  if (cond) {
-    pass(msg);
-  } else {
-    failCount++;
-    fail(msg);
+const requiredFns = ['initialState', 'apply', 'derive', 'regions', 'caption'];
+let missing = false;
+for (const fn of requiredFns) {
+  if (typeof W[fn] !== 'function') {
+    printHarness('W.' + fn + ' is not a function');
+    missing = true;
   }
 }
+if (missing) finishAndExit();
 
-// ---- Build sweep of param combinations from controls ----
-let controls = Array.isArray(W.controls) ? W.controls : [];
-let usesSteps = typeof W.steps === 'function' && controls.length === 0;
-
-function valuesForControl(c) {
-  const vals = new Set();
-  if (typeof c.min === 'number') vals.add(c.min);
-  if (typeof c.max === 'number') vals.add(c.max);
-  if (typeof c.value === 'number') vals.add(c.value);
-  // toggle-like (0/1) get both booleans-as-numbers already covered by min/max
-  if (typeof c.min === 'number' && typeof c.max === 'number' && typeof c.step === 'number' && c.step > 0) {
-    const span = c.max - c.min;
-    if (span > 0) {
-      for (let f of [0.25, 0.5, 0.75]) {
-        let raw = c.min + f * span;
-        // snap to step
-        let snapped = c.min + Math.round((raw - c.min) / c.step) * c.step;
-        if (snapped < c.min) snapped = c.min;
-        if (snapped > c.max) snapped = c.max;
-        vals.add(snapped);
-      }
-    }
-  }
-  return Array.from(vals);
+let initState;
+try {
+  initState = W.initialState();
+} catch (e) {
+  printHarness('initialState() threw: ' + e.message);
+  finishAndExit();
+}
+if (typeof initState !== 'object' || initState === null) {
+  printHarness('initialState() did not return an object');
+  finishAndExit();
 }
 
-let paramCombos = [];
+// ---------- Exploration (BFS) ----------
 
-if (controls.length > 0) {
-  const keys = controls.map(c => c.key);
-  const valueLists = controls.map(valuesForControl);
+const regionsThrew = [];
+const applyThrew = [];
+const deriveThrew = [];
+const captionThrew = [];
+const deriveInvalidField = [];
+const captionInvalid = [];
+const mutationViolations = [];
 
-  // cartesian product size
-  let totalSize = valueLists.reduce((a, l) => a * Math.max(l.length, 1), 1);
+const allStates = [];
+const transitions = [];
 
-  function buildDefault() {
-    const p = {};
-    for (const c of controls) p[c.key] = c.value;
-    return p;
-  }
-
-  const defaultParams = buildDefault();
-  paramCombos.push(defaultParams);
-
-  // Also add identity-like assignment if it looks like assignment_i controls (for invariant coverage)
-  const assignKeys = keys.filter(k => /^assignment_\d+$/.test(k));
-  if (assignKeys.length === controls.length && assignKeys.length > 0) {
-    const n = assignKeys.length;
-    const identity = {};
-    for (let i = 0; i < n; i++) identity[`assignment_${i}`] = i;
-    paramCombos.push(identity);
-
-    // a swapped mary-like and cecil-like combos (best-effort, only meaningful if n>=6)
-    if (n >= 6) {
-      const maryConf = Object.assign({}, identity);
-      maryConf.assignment_4 = 5;
-      maryConf.assignment_5 = 4;
-      paramCombos.push(maryConf);
-
-      const cecilConf = Object.assign({}, identity);
-      cecilConf.assignment_0 = 2;
-      cecilConf.assignment_2 = 0;
-      paramCombos.push(cecilConf);
-
-      // random permutations
-      for (let t = 0; t < 10; t++) {
-        const arr = [0, 1, 2, 3, 4, 5];
-        for (let i = arr.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-        const p = {};
-        for (let i = 0; i < 6; i++) p[`assignment_${i}`] = arr[i];
-        paramCombos.push(p);
-      }
-
-      // random non-permutation (with repeats) combos
-      for (let t = 0; t < 10; t++) {
-        const p = {};
-        for (let i = 0; i < 6; i++) p[`assignment_${i}`] = Math.floor(Math.random() * 6);
-        paramCombos.push(p);
-      }
+function getControlActions() {
+  const acts = [];
+  const controls = Array.isArray(W.controls) ? W.controls : [];
+  for (const c of controls) {
+    if (!c || typeof c.key === 'undefined') continue;
+    const min = (typeof c.min === 'number') ? c.min : 0;
+    const max = (typeof c.max === 'number') ? c.max : 1;
+    const mid = (min + max) / 2;
+    for (const v of [min, mid, max]) {
+      acts.push({ t: 'set', key: c.key, v: v });
     }
   }
-
-  if (totalSize <= 200) {
-    // full cartesian product
-    function rec(idx, cur) {
-      if (idx === keys.length) {
-        paramCombos.push(Object.assign({}, cur));
-        return;
-      }
-      for (const v of valueLists[idx]) {
-        cur[keys[idx]] = v;
-        rec(idx + 1, cur);
-      }
-    }
-    rec(0, {});
-  } else {
-    // random sampling up to 200
-    for (let i = 0; i < 200; i++) {
-      const p = {};
-      for (let j = 0; j < keys.length; j++) {
-        const list = valueLists[j];
-        p[keys[j]] = list[Math.floor(Math.random() * list.length)];
-      }
-      paramCombos.push(p);
-    }
-  }
-
-  // dedupe & cap at 200
-  const seen = new Set();
-  const deduped = [];
-  for (const p of paramCombos) {
-    const s = JSON.stringify(p);
-    if (!seen.has(s)) {
-      seen.add(s);
-      deduped.push(p);
-    }
-  }
-  paramCombos = deduped.slice(0, 200);
-} else {
-  // steps-based widget: no controls sweep possible in same way
-  paramCombos = [{}];
+  return acts;
 }
 
-// ---- Contract basics ----
-let derivedResults = []; // {params, derived}
-let contractOk = true;
+try {
+  const visited = new Map();
+  const startKey = JSON.stringify(initState);
+  visited.set(startKey, initState);
+  allStates.push(initState);
+  const queue = [initState];
 
-if (typeof W.derive === 'function') {
-  for (const params of paramCombos) {
-    let derived;
+  while (queue.length && allStates.length < 300) {
+    const s = queue.shift();
+    let regs;
     try {
-      derived = W.derive(params);
+      regs = W.regions(s, 600, 300);
     } catch (e) {
-      contractOk = false;
-      record(false, `derive() threw for params=${JSON.stringify(params)}: ${e.message}`);
-      continue;
+      regionsThrew.push(e.message);
+      regs = [];
     }
-    const badField = checkNoBadFields(derived, `derive(${JSON.stringify(params)})`);
-    if (badField) {
-      contractOk = false;
-      record(false, badField);
-    } else {
-      record(true, `derive() ok for params=${JSON.stringify(params)}`);
+    if (!Array.isArray(regs)) regs = [];
+    const actions = [];
+    for (const r of regs) {
+      if (r && r.action && typeof r.action.t === 'string') actions.push(r.action);
     }
-    derivedResults.push({ params, derived });
-  }
-} else if (usesSteps) {
-  let steps;
-  try {
-    steps = W.steps({});
-  } catch (e) {
-    record(false, `steps() threw: ${e.message}`);
-    steps = [];
-  }
-  if (!Array.isArray(steps)) {
-    record(false, 'steps() did not return an array');
-  } else {
-    for (const s of steps) {
-      const badField = checkNoBadFields(s.state, 'steps() state');
-      record(!badField, badField || 'steps() state ok');
-      record(
-        typeof s.caption === 'string' && s.caption.length > 0,
-        'steps() caption is non-empty string'
-      );
-    }
-  }
-} else {
-  record(false, 'Widget exposes neither controls+derive nor steps()');
-}
+    actions.push(...getControlActions());
+    actions.push({ t: 'reset' });
 
-// caption check (if present) for derive-based widgets
-if (typeof W.caption === 'function' && derivedResults.length > 0) {
-  for (const { params, derived } of derivedResults) {
-    let cap;
-    try {
-      cap = W.caption(params, derived);
-    } catch (e) {
-      record(false, `caption() threw for params=${JSON.stringify(params)}: ${e.message}`);
-      continue;
-    }
-    record(
-      typeof cap === 'string' && cap.length > 0,
-      `caption() non-empty string for params=${JSON.stringify(params)}`
-    );
-  }
-}
-
-// ---- Helper to extract assignment array from params ----
-function getAssignment(params) {
-  const arr = [];
-  for (let i = 0; i < 6; i++) {
-    arr.push(params[`assignment_${i}`]);
-  }
-  return arr;
-}
-
-// ---- Invariant checks (only meaningful if we have derive-based results) ----
-if (derivedResults.length > 0) {
-  // Invariant 1: correctCount equals count of i where assignment[i]===i
-  {
-    let allPass = true;
-    for (const { params, derived } of derivedResults) {
-      const assignment = getAssignment(params);
-      if (assignment.some(v => v === undefined)) continue;
-      const expected = assignment.reduce((acc, v, i) => acc + (v === i ? 1 : 0), 0);
-      if (derived.correctCount !== expected) {
-        allPass = false;
-        console.log(
-          `  detail: params=${JSON.stringify(params)} expected correctCount=${expected} got=${derived.correctCount}`
-        );
-      }
-    }
-    record(
-      allPass,
-      'for any params.assignment, derived.correctCount equals the count of indices i in 0..5 where params.assignment[i] === i'
-    );
-  }
-
-  // Invariant 2: allMatched iff correctCount === 6
-  {
-    let allPass = true;
-    for (const { params, derived } of derivedResults) {
-      const expected = derived.correctCount === 6;
-      if (Boolean(derived.allMatched) !== expected) {
-        allPass = false;
-        console.log(
-          `  detail: params=${JSON.stringify(params)} correctCount=${derived.correctCount} allMatched=${derived.allMatched}`
-        );
-      }
-    }
-    record(allPass, 'derived.allMatched is true if and only if derived.correctCount === 6');
-  }
-
-  // Invariant 3: identity assignment => correctCount 6, allMatched true
-  {
-    const identity = {};
-    for (let i = 0; i < 6; i++) identity[`assignment_${i}`] = i;
-    let derived;
-    let threw = false;
-    try {
-      derived = W.derive(identity);
-    } catch (e) {
-      threw = true;
-    }
-    const cond =
-      !threw &&
-      derived &&
-      derived.correctCount === 6 &&
-      Boolean(derived.allMatched) === true;
-    record(
-      cond,
-      'when params.assignment is the identity [0,1,2,3,4,5], derived.correctCount === 6 and derived.allMatched === true'
-    );
-  }
-
-  // Invariant 4: maryConfused iff assignment[4]===5 && assignment[5]===4
-  {
-    let allPass = true;
-    for (const { params, derived } of derivedResults) {
-      const assignment = getAssignment(params);
-      if (assignment.some(v => v === undefined)) continue;
-      const expected = assignment[4] === 5 && assignment[5] === 4;
-      if (Boolean(derived.maryConfused) !== expected) {
-        allPass = false;
-        console.log(
-          `  detail: params=${JSON.stringify(params)} expected maryConfused=${expected} got=${derived.maryConfused}`
-        );
-      }
-    }
-    record(
-      allPass,
-      "derived.maryConfused is true if and only if params.assignment[4] === 5 and params.assignment[5] === 4"
-    );
-  }
-
-  // Invariant 5: cecilRobertConfused iff assignment[0]===2 && assignment[2]===0
-  {
-    let allPass = true;
-    for (const { params, derived } of derivedResults) {
-      const assignment = getAssignment(params);
-      if (assignment.some(v => v === undefined)) continue;
-      const expected = assignment[0] === 2 && assignment[2] === 0;
-      if (Boolean(derived.cecilRobertConfused) !== expected) {
-        allPass = false;
-        console.log(
-          `  detail: params=${JSON.stringify(params)} expected cecilRobertConfused=${expected} got=${derived.cecilRobertConfused}`
-        );
-      }
-    }
-    record(
-      allPass,
-      "derived.cecilRobertConfused is true if and only if params.assignment[0] === 2 and params.assignment[2] === 0"
-    );
-  }
-
-  // Invariant 6: correctCount is integer between 0 and 6 inclusive
-  {
-    let allPass = true;
-    for (const { params, derived } of derivedResults) {
-      const v = derived.correctCount;
-      if (!(Number.isInteger(v) && v >= 0 && v <= 6)) {
-        allPass = false;
-        console.log(`  detail: params=${JSON.stringify(params)} correctCount=${v}`);
-      }
-    }
-    record(allPass, 'derived.correctCount is always an integer between 0 and 6 inclusive');
-  }
-
-  // Invariant 7: isValidPermutation iff all distinct and each in 0..5
-  {
-    let allPass = true;
-    for (const { params, derived } of derivedResults) {
-      const assignment = getAssignment(params);
-      if (assignment.some(v => v === undefined)) continue;
-      const inRange = assignment.every(v => Number.isInteger(v) && v >= 0 && v <= 5);
-      const distinct = new Set(assignment).size === assignment.length;
-      const expected = inRange && distinct;
-      if (Boolean(derived.isValidPermutation) !== expected) {
-        allPass = false;
-        console.log(
-          `  detail: params=${JSON.stringify(params)} expected isValidPermutation=${expected} got=${derived.isValidPermutation}`
-        );
-      }
-    }
-    record(
-      allPass,
-      'derived.isValidPermutation is true if and only if the six values in params.assignment are all distinct and each lies in 0..5'
-    );
-  }
-
-  // Invariant 8: if isValidPermutation is false, allMatched is false
-  {
-    let allPass = true;
-    for (const { params, derived } of derivedResults) {
-      if (derived.isValidPermutation === false && Boolean(derived.allMatched) !== false) {
-        allPass = false;
-        console.log(
-          `  detail: params=${JSON.stringify(params)} isValidPermutation=false but allMatched=${derived.allMatched}`
-        );
-      }
-    }
-    record(
-      allPass,
-      'if derived.isValidPermutation is false, derived.allMatched is false regardless of correctCount'
-    );
-  }
-
-  // Invariant 9: changing exactly one entry changes correctCount by at most 2
-  {
-    let allPass = true;
-    const baseSamples = derivedResults.slice(0, Math.min(derivedResults.length, 30));
-    for (const { params: baseParams } of baseSamples) {
-      const baseAssignment = getAssignment(baseParams);
-      if (baseAssignment.some(v => v === undefined)) continue;
-      let baseDerived;
+    for (const a of actions) {
+      if (allStates.length >= 300) break;
+      const before = jclone(s);
+      let ns;
       try {
-        baseDerived = W.derive(baseParams);
+        ns = W.apply(s, a);
       } catch (e) {
+        applyThrew.push('action=' + JSON.stringify(a) + ' err=' + e.message);
         continue;
       }
-      for (let idx = 0; idx < 6; idx++) {
-        for (let newVal = 0; newVal <= 5; newVal++) {
-          if (newVal === baseAssignment[idx]) continue;
-          const newParams = Object.assign({}, baseParams);
-          newParams[`assignment_${idx}`] = newVal;
-          let newDerived;
-          try {
-            newDerived = W.derive(newParams);
-          } catch (e) {
-            continue;
-          }
-          const diff = Math.abs(newDerived.correctCount - baseDerived.correctCount);
-          if (diff > 2) {
-            allPass = false;
-            console.log(
-              `  detail: base=${JSON.stringify(baseParams)} changed idx=${idx} to ${newVal} diff=${diff}`
-            );
-          }
+      if (!jeq(before, s)) {
+        mutationViolations.push('action=' + JSON.stringify(a));
+      }
+      if (typeof ns !== 'object' || ns === null) {
+        applyThrew.push('apply returned non-object for action=' + JSON.stringify(a));
+        continue;
+      }
+      transitions.push({ from: s, action: a, to: ns });
+      const key = JSON.stringify(ns);
+      if (!visited.has(key) && allStates.length < 300) {
+        visited.set(key, ns);
+        allStates.push(ns);
+        queue.push(ns);
+      }
+    }
+  }
+} catch (e) {
+  printHarness('exploration failed: ' + (e && e.message ? e.message : String(e)));
+}
+
+// ---------- Per-state basic contract checks ----------
+
+for (const s of allStates) {
+  let d;
+  try {
+    d = W.derive(s);
+  } catch (e) {
+    deriveThrew.push(e.message);
+    continue;
+  }
+  if (typeof d !== 'object' || d === null) {
+    deriveInvalidField.push('derive did not return an object');
+    continue;
+  }
+  for (const k in d) {
+    const v = d[k];
+    if (v === undefined) {
+      deriveInvalidField.push('field ' + k + ' is undefined');
+    } else if (typeof v === 'number' && (Number.isNaN(v) || !Number.isFinite(v))) {
+      deriveInvalidField.push('field ' + k + ' is NaN/Infinity');
+    }
+  }
+  let cap;
+  try {
+    cap = W.caption(s, d);
+  } catch (e) {
+    captionThrew.push(e.message);
+    continue;
+  }
+  if (typeof cap !== 'string' || cap.length === 0) {
+    captionInvalid.push('caption returned: ' + JSON.stringify(cap));
+  }
+}
+
+// ---------- Generic contract-basics reports ----------
+
+runCheck('apply/derive/regions never throw on visited states', () => {
+  const all = regionsThrew.concat(applyThrew, deriveThrew);
+  if (all.length === 0) return { pass: true };
+  return { pass: false, detail: all.length + ' throws, e.g. ' + all[0] };
+});
+
+runCheck('derive(s) never returns NaN/Infinity/undefined fields', () => {
+  if (deriveInvalidField.length === 0) return { pass: true };
+  return { pass: false, detail: deriveInvalidField.length + ' issues, e.g. ' + deriveInvalidField[0] };
+});
+
+runCheck('caption(s, derive(s)) is always a non-empty string', () => {
+  const all = captionThrew.concat(captionInvalid);
+  if (all.length === 0) return { pass: true };
+  return { pass: false, detail: all.length + ' issues, e.g. ' + all[0] };
+});
+
+// ---------- INVARIANTS ----------
+
+const INV = [
+  "apply(s,a) does not mutate s; it returns a new state object",
+  "for every key k in s.matched, s.matched[k] equals the correctEntity of the descriptor with id k (no wrong entity is ever recorded as matched)",
+  "derive(s).matchedCount equals the number of keys in s.matched, for any reachable state",
+  "applying attemptMatch with a descriptor whose id is already a key in s.matched leaves state unchanged",
+  "applying attemptMatch when s.selectedEntity is null leaves state unchanged",
+  "a correct attemptMatch removes exactly one id from s.pool and adds exactly one entry to s.matched; an incorrect attemptMatch leaves s.pool and s.matched unchanged",
+  "s.mistakes never decreases except via reset, and only increases by 1 per incorrect attemptMatch",
+  "derive(s).complete is true if and only if derive(s).matchedCount equals 8",
+  "selectEntity never sets s.selectedEntity to an entity whose derive(s).entityProgress value is already 2",
+  "after reset, s equals initialState except possibly for the shuffled order of s.pool and s.descriptors"
+];
+
+runCheck(INV[0], () => {
+  if (mutationViolations.length === 0) return { pass: true };
+  return { pass: false, detail: mutationViolations.length + ' mutations detected, e.g. ' + mutationViolations[0] };
+});
+
+runCheck(INV[1], () => {
+  for (const s of allStates) {
+    if (!s || !s.matched) continue;
+    const descs = Array.isArray(s.descriptors) ? s.descriptors : [];
+    for (const k of Object.keys(s.matched)) {
+      const desc = descs.find(dd => dd && dd.id === k);
+      if (!desc) return { pass: false, detail: 'descriptor ' + k + ' not found in s.descriptors' };
+      if (s.matched[k] !== desc.correctEntity) {
+        return { pass: false, detail: 'matched[' + k + ']=' + s.matched[k] + ' but correctEntity=' + desc.correctEntity };
+      }
+    }
+  }
+  return { pass: true };
+});
+
+runCheck(INV[2], () => {
+  for (const s of allStates) {
+    let d;
+    try { d = W.derive(s); } catch (e) { continue; }
+    const cnt = s.matched ? Object.keys(s.matched).length : 0;
+    if (d.matchedCount !== cnt) {
+      return { pass: false, detail: 'state has ' + cnt + ' matched keys but derive.matchedCount=' + d.matchedCount };
+    }
+  }
+  return { pass: true };
+});
+
+runCheck(INV[3], () => {
+  for (const s of allStates) {
+    if (!s.matched) continue;
+    const keys = Object.keys(s.matched);
+    if (keys.length === 0) continue;
+    const descId = keys[0];
+    const before = jclone(s);
+    let ns;
+    try {
+      ns = W.apply(s, { t: 'attemptMatch', descriptor: descId });
+    } catch (e) {
+      return { pass: false, detail: 'apply threw: ' + e.message };
+    }
+    if (!jeq(before, ns)) {
+      return { pass: false, detail: 'state changed when re-matching already-matched descriptor ' + descId };
+    }
+  }
+  return { pass: true };
+});
+
+runCheck(INV[4], () => {
+  for (const s of allStates) {
+    if (s.selectedEntity !== null && s.selectedEntity !== undefined) continue;
+    const pool = Array.isArray(s.pool) ? s.pool : [];
+    if (pool.length === 0) continue;
+    const descId = pool[0];
+    const before = jclone(s);
+    let ns;
+    try {
+      ns = W.apply(s, { t: 'attemptMatch', descriptor: descId });
+    } catch (e) {
+      return { pass: false, detail: 'apply threw: ' + e.message };
+    }
+    if (!jeq(before, ns)) {
+      return { pass: false, detail: 'state changed despite null selectedEntity' };
+    }
+  }
+  return { pass: true };
+});
+
+runCheck(INV[5], () => {
+  for (const s of allStates) {
+    if (s.selectedEntity === null || s.selectedEntity === undefined) continue;
+    const pool = Array.isArray(s.pool) ? s.pool : [];
+    const descs = Array.isArray(s.descriptors) ? s.descriptors : [];
+    for (const descId of pool) {
+      const desc = descs.find(dd => dd && dd.id === descId);
+      if (!desc) continue;
+      const correct = desc.correctEntity === s.selectedEntity;
+      let ns;
+      try {
+        ns = W.apply(s, { t: 'attemptMatch', descriptor: descId });
+      } catch (e) {
+        return { pass: false, detail: 'apply threw: ' + e.message };
+      }
+      const poolBefore = pool.length;
+      const poolAfter = Array.isArray(ns.pool) ? ns.pool.length : -1;
+      const matchedBefore = s.matched ? Object.keys(s.matched).length : 0;
+      const matchedAfter = ns.matched ? Object.keys(ns.matched).length : 0;
+      if (correct) {
+        if (!(poolAfter === poolBefore - 1 && matchedAfter === matchedBefore + 1 && ns.matched && ns.matched[descId] === s.selectedEntity)) {
+          return { pass: false, detail: 'correct match for ' + descId + ' did not update pool/matched as expected' };
+        }
+      } else {
+        if (!(poolAfter === poolBefore && matchedAfter === matchedBefore)) {
+          return { pass: false, detail: 'incorrect match for ' + descId + ' changed pool/matched' };
         }
       }
     }
-    record(
-      allPass,
-      'changing exactly one entry of params.assignment (with the rest fixed) can change derived.correctCount by at most 2'
-    );
   }
-} else {
-  console.log('SKIP: no derive-based results available to check invariants against.');
-}
+  return { pass: true };
+});
 
-console.log(`RESULT ok=${ok} fail=${failCount}`);
-process.exit(failCount === 0 ? 0 : 1);
+runCheck(INV[6], () => {
+  for (const tr of transitions) {
+    const before = tr.from.mistakes;
+    const after = tr.to.mistakes;
+    if (typeof before !== 'number' || typeof after !== 'number') continue;
+    if (tr.action.t === 'reset') continue;
+    if (after < before) {
+      return { pass: false, detail: 'mistakes decreased from ' + before + ' to ' + after + ' via action ' + JSON.stringify(tr.action) };
+    }
+    if (after > before && after !== before + 1) {
+      return { pass: false, detail: 'mistakes jumped from ' + before + ' to ' + after + ' via action ' + JSON.stringify(tr.action) };
+    }
+  }
+  return { pass: true };
+});
+
+runCheck(INV[7], () => {
+  for (const s of allStates) {
+    let d;
+    try { d = W.derive(s); } catch (e) { continue; }
+    const shouldBeComplete = d.matchedCount === 8;
+    if (Boolean(d.complete) !== shouldBeComplete) {
+      return { pass: false, detail: 'complete=' + d.complete + ' but matchedCount=' + d.matchedCount };
+    }
+  }
+  return { pass: true };
+});
+
+runCheck(INV[8], () => {
+  for (const s of allStates) {
+    let d;
+    try { d = W.derive(s); } catch (e) { continue; }
+    const entities = Array.isArray(s.entities) ? s.entities : [];
+    for (const ent of entities) {
+      const progress = d.entityProgress ? d.entityProgress[ent] : undefined;
+      if (progress === 2) {
+        let ns;
+        try {
+          ns = W.apply(s, { t: 'selectEntity', entity: ent });
+        } catch (e) {
+          return { pass: false, detail: 'apply threw: ' + e.message };
+        }
+        if (ns.selectedEntity === ent) {
+          return { pass: false, detail: 'selectedEntity was set to full entity ' + ent };
+        }
+      }
+    }
+  }
+  return { pass: true };
+});
+
+runCheck(INV[9], () => {
+  let init0;
+  try {
+    init0 = W.initialState();
+  } catch (e) {
+    return { pass: false, detail: 'initialState() threw: ' + e.message };
+  }
+  const normalize = (obj) => {
+    const copy = Object.assign({}, obj);
+    if (Array.isArray(copy.pool)) copy.pool = copy.pool.slice().sort();
+    if (Array.isArray(copy.descriptors)) {
+      copy.descriptors = copy.descriptors.slice().sort((x, y) => {
+        if (x.id < y.id) return -1;
+        if (x.id > y.id) return 1;
+        return 0;
+      });
+    }
+    return copy;
+  };
+  const bn = normalize(jclone(init0));
+  for (const s of allStates) {
+    let ns;
+    try {
+      ns = W.apply(s, { t: 'reset' });
+    } catch (e) {
+      return { pass: false, detail: 'apply reset threw: ' + e.message };
+    }
+    const an = normalize(jclone(ns));
+    if (!jeq(an, bn)) {
+      return { pass: false, detail: 'reset() result differs from initialState() beyond pool/descriptors ordering' };
+    }
+  }
+  return { pass: true };
+});
+
+finishAndExit();
