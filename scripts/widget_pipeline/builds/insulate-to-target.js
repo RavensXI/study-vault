@@ -2,387 +2,365 @@ window.SVWidget = {
   meta: {
     id: 'insulate-to-target',
     title: 'Insulate the House to Hit 85% Efficiency',
-    teaches: 'Thicker insulation and better materials cut wasted thermal energy, raising efficiency towards (but never reaching) 100% — at a cost.'
+    teaches: 'Increasing insulation thickness and choosing better materials reduces wasted thermal energy, raising efficiency toward (but never above) 100%, at a cost trade-off.'
   },
-
   mount: function (root, ctx) {
-    var accent = (ctx && ctx.accent) || '#b4653a';
-    var reduced = !!(ctx && ctx.reducedMotion);
+    const accent = (ctx && ctx.accent) || '#b5502f';
+    const reduced = !!(ctx && ctx.reducedMotion);
 
-    /* ---------------- physics model ---------------- */
-    var INPUT = 2000;            // W delivered by the heater
-    var TARGET = 0.85;           // target efficiency
-    var BASE = 20;               // W always lost through floor and draughts
-
-    var WALLS = [
-      { label: 'None',        sub: 'bare cavity',      loss: 360, cost: 0 },
-      { label: 'Cavity',      sub: 'trapped air',      loss: 130, cost: 600 },
-      { label: 'Solid + board', sub: 'insulated solid', loss: 70,  cost: 2400 }
-    ];
-    var GLAZE = [
-      { label: 'Single', sub: 'one pane',    loss: 220, cost: 0 },
-      { label: 'Double', sub: 'gas between', loss: 80,  cost: 1800 }
-    ];
-    var LOFT_COST_PER_50 = 200;
-    var CHEAPEST = 3600;         // loft 300 mm + cavity walls + double glazing
-
-    function loftLoss(t) { return 30 + 280 * (50 / (50 + t)); }
-
-    function derive(p) {
-      var lo = loftLoss(p.loftThickness);
-      var wa = WALLS[p.wallChoice].loss;
-      var gl = GLAZE[p.glazingChoice].loss;
-      var heatLossRate = lo + wa + gl + BASE;
-      var efficiency = (INPUT - heatLossRate) / INPUT;
-      var cost = (p.loftThickness / 50) * LOFT_COST_PER_50 +
-                 WALLS[p.wallChoice].cost + GLAZE[p.glazingChoice].cost;
-      return {
-        loft: lo, wall: wa, glass: gl,
-        heatLossRate: heatLossRate,
-        efficiency: efficiency,
-        cost: cost,
-        hitTarget: efficiency >= TARGET
-      };
-    }
-
-    /* ---------------- helpers ---------------- */
-    function rgba(hex, a) {
-      var h = hex.replace('#', '');
-      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-      var n = parseInt(h, 16);
-      return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
-    }
-    function money(v) { return '£' + v.toLocaleString('en-GB'); }
-
-    var uid = 'itw' + Math.random().toString(36).slice(2, 7);
-    var LOSS_COL = '#c2562f';
-
-    /* ---------------- styles ---------------- */
-    var css = '' +
-'.itw-w{--ac:' + accent + ';--acs:' + rgba(accent, 0.14) + ';--acm:' + rgba(accent, 0.35) + ';' +
-'font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#2d2a26;' +
-'background:#faf8f5;padding:14px;border-radius:16px;box-sizing:border-box;line-height:1.45;}' +
-'.itw-w *,.itw-w *::before{box-sizing:border-box;}' +
-'.itw-w h2{font-family:"Source Serif 4",Georgia,serif;font-size:20px;margin:0 0 6px;font-weight:600;}' +
-'.itw-w p{margin:0;}' +
-'.itw-hd p{font-size:14px;color:#5b554d;max-width:62ch;}' +
-'.itw-card{background:#fff;border:1px solid #e8e2d9;border-radius:14px;padding:12px;}' +
-'.itw-stage{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px;margin-top:12px;}' +
-'@media (max-width:640px){.itw-stage{grid-template-columns:1fr;}}' +
-'.itw-house{display:block;width:100%;height:auto;}' +
-'.itw-side{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;}' +
-'.itw-meter{display:block;width:104px;height:auto;}' +
-'@media (max-width:360px){.itw-meter{width:86px;}}' +
-'.itw-stats{display:grid;gap:8px;align-content:start;}' +
-'.itw-stat .k{display:block;font-size:11px;letter-spacing:.03em;text-transform:uppercase;color:#8d8880;}' +
-'.itw-stat .v{display:block;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;}' +
-'.itw-stat .v.big{font-size:26px;font-family:"Source Serif 4",Georgia,serif;}' +
-'.itw-coins{display:block;width:100%;max-width:150px;height:auto;margin-top:2px;}' +
-'.itw-badge{display:inline-block;margin-top:6px;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px;' +
-'border:1px solid #e8e2d9;color:#8d8880;}' +
-'.itw-badge.on{border-color:var(--ac);background:var(--acs);color:var(--ac);}' +
-'.itw-ctl{margin-top:12px;display:grid;gap:14px;}' +
-'.itw-row .lab{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;font-weight:600;margin-bottom:6px;}' +
-'.itw-row .lab .now{font-weight:600;color:var(--ac);font-variant-numeric:tabular-nums;}' +
-'.itw-row .hint{font-weight:400;font-size:12px;color:#8d8880;}' +
-'.itw-w input[type=range]{width:100%;accent-color:var(--ac);margin:0;height:26px;}' +
-'.itw-ticks{display:flex;justify-content:space-between;font-size:11px;color:#8d8880;margin-top:-2px;}' +
-'.itw-seg{display:flex;gap:8px;flex-wrap:wrap;}' +
-'.itw-seg button{flex:1 1 96px;min-width:92px;text-align:left;font:inherit;font-size:13px;font-weight:600;' +
-'padding:8px 10px;border:1px solid #e8e2d9;background:#fff;border-radius:11px;color:#2d2a26;cursor:pointer;}' +
-'.itw-seg button .s{display:block;font-size:11px;font-weight:400;color:#8d8880;}' +
-'.itw-seg button:hover{border-color:var(--acm);}' +
-'.itw-seg button[aria-pressed="true"]{border-color:var(--ac);background:var(--acs);}' +
-'.itw-seg button[aria-pressed="true"] .s{color:#5b554d;}' +
-'.itw-seg button:focus-visible,.itw-w input:focus-visible,.itw-acts button:focus-visible{outline:2px solid var(--ac);outline-offset:2px;}' +
-'.itw-fb{margin-top:12px;}' +
-'.itw-calc{font-size:14px;font-variant-numeric:tabular-nums;padding-bottom:8px;border-bottom:1px solid #e8e2d9;}' +
-'.itw-msg{font-size:14px;margin-top:8px !important;color:#5b554d;}' +
-'.itw-msg b{color:#2d2a26;}' +
-'.itw-msg.good b{color:var(--ac);}' +
-'.itw-note{font-size:12px;color:#8d8880;margin-top:8px !important;}' +
-'.itw-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}' +
-'.itw-acts button{font:inherit;font-size:13px;padding:7px 12px;border-radius:10px;border:1px solid #e8e2d9;' +
-'background:#fff;color:#2d2a26;cursor:pointer;}' +
-'.itw-acts button:hover{border-color:var(--acm);}';
-
-    /* ---------------- markup ---------------- */
-    var houseSVG =
-'<svg class="itw-house" viewBox="0 0 360 280" role="img" aria-labelledby="' + uid + 't">' +
-  '<title id="' + uid + 't">House cross-section with heat-loss arrows</title>' +
-  '<defs>' +
-    '<pattern id="' + uid + 'h" width="7" height="7" patternUnits="userSpaceOnUse">' +
-      '<path d="M0,7 L7,0" stroke="' + rgba(accent, 0.55) + '" stroke-width="1.1"/></pattern>' +
-  '</defs>' +
-  '<line x1="8" y1="240.5" x2="352" y2="240.5" stroke="#e8e2d9" stroke-width="2"/>' +
-  '<polygon points="76,140 180,76 284,140" fill="#f3efe8" stroke="#2d2a26" stroke-width="1.6" stroke-linejoin="round"/>' +
-  '<rect x="90" y="140" width="180" height="100" fill="#ffffff" stroke="#2d2a26" stroke-width="1.6"/>' +
-  /* loft insulation */
-  '<rect data-ref="loftIns" x="96" y="137" width="168" height="3" fill="#f3efe8" stroke="#c9bfae" stroke-width="1"/>' +
-  '<rect data-ref="loftInsP" x="96" y="137" width="168" height="3" fill="url(#' + uid + 'h)" stroke="none"/>' +
-  /* wall insulation */
-  '<rect data-ref="wallL" x="90" y="140" width="3" height="100" fill="#f3efe8" stroke="none"/>' +
-  '<rect data-ref="wallLP" x="90" y="140" width="3" height="100" fill="url(#' + uid + 'h)" stroke="none"/>' +
-  '<rect data-ref="wallR" x="267" y="140" width="3" height="100" fill="#f3efe8" stroke="none"/>' +
-  '<rect data-ref="wallRP" x="267" y="140" width="3" height="100" fill="url(#' + uid + 'h)" stroke="none"/>' +
-  /* door */
-  '<rect x="112" y="192" width="32" height="48" fill="#f3efe8" stroke="#2d2a26" stroke-width="1.2"/>' +
-  '<circle cx="138" cy="216" r="1.8" fill="#2d2a26"/>' +
-  /* window */
-  '<rect x="196" y="160" width="52" height="40" fill="#e4edf1" stroke="#2d2a26" stroke-width="1.6"/>' +
-  '<rect data-ref="pane2" x="202" y="166" width="40" height="28" fill="none" stroke="#2d2a26" stroke-width="1.2" opacity="0"/>' +
-  '<line x1="222" y1="160" x2="222" y2="200" stroke="#2d2a26" stroke-width="0.8" opacity="0.5"/>' +
-  /* arrows */
-  '<g data-ref="aLoft" transform="translate(180,70) rotate(-90)" fill="none" stroke="' + LOSS_COL + '" stroke-width="2.2" stroke-linecap="round">' +
-    '<path data-ref="pLoft" d=""/><path data-ref="hLoft" d="M-9,-5 L0,0 L-9,5" stroke-linejoin="round"/></g>' +
-  '<g data-ref="aWall" transform="translate(88,206) rotate(180)" fill="none" stroke="' + LOSS_COL + '" stroke-width="2.2" stroke-linecap="round">' +
-    '<path data-ref="pWall" d=""/><path data-ref="hWall" d="M-9,-5 L0,0 L-9,5" stroke-linejoin="round"/></g>' +
-  '<g data-ref="aGlass" transform="translate(250,180)" fill="none" stroke="' + LOSS_COL + '" stroke-width="2.2" stroke-linecap="round">' +
-    '<path data-ref="pGlass" d=""/><path data-ref="hGlass" d="M-9,-5 L0,0 L-9,5" stroke-linejoin="round"/></g>' +
-  /* labels */
-  '<text data-ref="tLoft" x="180" y="18" text-anchor="middle" font-size="12" font-weight="600" fill="' + LOSS_COL + '">roof 310 W</text>' +
-  '<text data-ref="tWall" x="8" y="196" text-anchor="start" font-size="12" font-weight="600" fill="' + LOSS_COL + '">walls 360 W</text>' +
-  '<text data-ref="tGlass" x="352" y="168" text-anchor="end" font-size="12" font-weight="600" fill="' + LOSS_COL + '">window 220 W</text>' +
-  '<text x="180" y="262" text-anchor="middle" font-size="11.5" fill="#8d8880">heater input 2000 W &#183; floor &amp; draughts 20 W always lost</text>' +
-'</svg>';
-
-    var meterSVG =
-'<svg class="itw-meter" viewBox="0 0 112 250" role="img" aria-labelledby="' + uid + 'm">' +
-  '<title id="' + uid + 'm">Efficiency meter</title>' +
-  '<rect x="34" y="20" width="34" height="200" fill="#f3efe8" stroke="#e8e2d9" stroke-width="1"/>' +
-  '<rect data-ref="fill" x="34" y="120" width="34" height="100" fill="' + LOSS_COL + '"/>' +
-  '<line x1="34" y1="20" x2="68" y2="20" stroke="#e8e2d9"/>' +
-  '<line x1="34" y1="120" x2="68" y2="120" stroke="#e8e2d9"/>' +
-  '<text x="30" y="24" text-anchor="end" font-size="10" fill="#8d8880">100</text>' +
-  '<text x="30" y="124" text-anchor="end" font-size="10" fill="#8d8880">50</text>' +
-  '<text x="30" y="224" text-anchor="end" font-size="10" fill="#8d8880">0</text>' +
-  '<line x1="28" y1="50" x2="74" y2="50" stroke="' + accent + '" stroke-width="1.6" stroke-dasharray="4 3"/>' +
-  '<text x="78" y="47" font-size="10.5" font-weight="600" fill="' + accent + '">85%</text>' +
-  '<text x="78" y="59" font-size="9.5" fill="#8d8880">target</text>' +
-  '<text x="51" y="242" text-anchor="middle" font-size="10" fill="#8d8880">efficiency</text>' +
-'</svg>';
-
-    var segWall = WALLS.map(function (w, i) {
-      return '<button type="button" data-wall="' + i + '" aria-pressed="false">' + w.label +
-             '<span class="s">' + w.sub + ' &#183; ' + (w.cost ? money(w.cost) : 'free') + '</span></button>';
-    }).join('');
-    var segGlaze = GLAZE.map(function (g, i) {
-      return '<button type="button" data-glaze="' + i + '" aria-pressed="false">' + g.label +
-             '<span class="s">' + g.sub + ' &#183; ' + (g.cost ? money(g.cost) : 'free') + '</span></button>';
-    }).join('');
-
-    root.innerHTML =
-'<style>' + css + '</style>' +
-'<div class="itw-w">' +
-  '<div class="itw-hd">' +
-    '<h2>Insulate the house to hit 85%</h2>' +
-    '<p>The heater puts <strong>2000 W</strong> into the house. Everything that leaks out through the roof, walls and windows is wasted energy. Reach <strong>85% efficiency</strong> &mdash; then see how cheaply you can do it.</p>' +
-  '</div>' +
-  '<div class="itw-stage">' +
-    '<div class="itw-card">' + houseSVG + '</div>' +
-    '<div class="itw-card itw-side">' + meterSVG +
-      '<div class="itw-stats">' +
-        '<div class="itw-stat"><span class="k">Efficiency</span><span class="v big" data-ref="eff">&mdash;</span>' +
-          '<span class="itw-badge" data-ref="badge">below target</span></div>' +
-        '<div class="itw-stat"><span class="k">Wasted (heat loss)</span><span class="v" data-ref="loss"></span></div>' +
-        '<div class="itw-stat"><span class="k">Useful heat kept</span><span class="v" data-ref="useful"></span></div>' +
-        '<div class="itw-stat"><span class="k">Total spent</span><span class="v" data-ref="cost"></span>' +
-          '<svg class="itw-coins" viewBox="0 0 150 78" role="img" aria-hidden="true"><g data-ref="coins"></g></svg></div>' +
-      '</div>' +
-    '</div>' +
-  '</div>' +
-  '<div class="itw-card itw-ctl">' +
-    '<div class="itw-row">' +
-      '<div class="lab"><label for="' + uid + 'loft">Loft insulation thickness <span class="hint">&pound;200 per 50&nbsp;mm</span></label>' +
-        '<span class="now" data-ref="loftVal">100 mm</span></div>' +
-      '<input id="' + uid + 'loft" type="range" min="0" max="300" step="50" value="100">' +
-      '<div class="itw-ticks"><span>0</span><span>150 mm</span><span>300</span></div>' +
-    '</div>' +
-    '<div class="itw-row"><div class="lab"><span>Wall type</span><span class="hint">thicker &amp; trapped air = slower conduction</span></div>' +
-      '<div class="itw-seg" role="group" aria-label="Wall type">' + segWall + '</div></div>' +
-    '<div class="itw-row"><div class="lab"><span>Glazing</span><span class="hint">a gas layer cuts conduction and convection</span></div>' +
-      '<div class="itw-seg" role="group" aria-label="Glazing">' + segGlaze + '</div></div>' +
-  '</div>' +
-  '<div class="itw-card itw-fb" aria-live="polite">' +
-    '<div class="itw-calc" data-ref="calc"></div>' +
-    '<p class="itw-msg" data-ref="msg"></p>' +
-    '<p class="itw-note">Some energy always escapes, so efficiency can get close to 100% but never reach it.</p>' +
-    '<div class="itw-acts">' +
-      '<button type="button" data-ref="reset">Strip it all out</button>' +
-      '<button type="button" data-ref="reveal">Show the cheapest way</button>' +
-    '</div>' +
-  '</div>' +
-'</div>';
-
-    var R = {};
-    Array.prototype.forEach.call(root.querySelectorAll('[data-ref]'), function (el) {
-      R[el.getAttribute('data-ref')] = el;
-    });
-    var slider = root.querySelector('#' + uid + 'loft');
-    var wallBtns = Array.prototype.slice.call(root.querySelectorAll('[data-wall]'));
-    var glazeBtns = Array.prototype.slice.call(root.querySelectorAll('[data-glaze]'));
-
-    /* ---------------- state ---------------- */
-    var state = { loftThickness: 100, wallChoice: 0, glazingChoice: 0 };
-    var bestCost = null, foundCheapest = false, revealed = false;
-    var phase = 0;
-    var last = null;
-
-    function wavy(len, amp, ph) {
-      var n = Math.max(3, Math.round(len / 3)), d = '', i, x, y;
-      for (i = 0; i <= n; i++) {
-        x = len * i / n;
-        y = amp * Math.sin(x / 7 + ph) * Math.sin(Math.PI * i / n);
-        d += (i ? 'L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+    const style = document.createElement('style');
+    style.textContent = `
+      .iw-root { font-family: Inter, Arial, sans-serif; color: #2d2a26; background: #faf8f5;
+        padding: 16px; border-radius: 14px; box-sizing: border-box; max-width: 900px; margin: 0 auto; }
+      .iw-root * { box-sizing: border-box; }
+      .iw-h { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.3rem; margin: 0 0 4px 0; }
+      .iw-sub { color: #8d8880; font-size: 0.9rem; margin: 0 0 14px 0; line-height:1.4; }
+      .iw-layout { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+      .iw-controls { flex: 1 1 260px; min-width: 240px; display: flex; flex-direction: column; gap: 14px; }
+      .iw-diagram-col { flex: 1 1 320px; min-width: 280px; display:flex; flex-direction:column; align-items:center; gap:10px;}
+      .iw-card { background: #fff; border: 1px solid #e8e2d9; border-radius: 12px; padding: 12px; }
+      .iw-label { font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display:block; }
+      .iw-row { display:flex; justify-content: space-between; align-items:center; margin-bottom:4px;}
+      .iw-val { font-variant-numeric: tabular-nums; color:#555; font-size:0.85rem; }
+      input[type=range] { width: 100%; accent-color: ${accent}; }
+      .iw-btngroup { display:flex; gap:6px; flex-wrap:wrap; }
+      .iw-btn { flex:1 1 auto; padding: 8px 6px; border-radius: 10px; border: 1px solid #e8e2d9;
+        background:#fff; cursor:pointer; font-size: 0.78rem; color:#2d2a26; text-align:center; line-height:1.2; }
+      .iw-btn[aria-pressed="true"] { background: ${accent}; color:#fff; border-color: ${accent}; font-weight:600; }
+      .iw-btn:focus-visible { outline: 2px solid ${accent}; outline-offset:1px; }
+      .iw-meterwrap { display:flex; gap:14px; align-items:flex-end; }
+      .iw-meter { position:relative; width: 46px; height: 200px; background:#efe9df; border-radius:8px; overflow:hidden; border:1px solid #e8e2d9;}
+      .iw-meterfill { position:absolute; bottom:0; left:0; width:100%; background:${accent}; transition: ${reduced ? 'none' : 'height 0.35s ease, background 0.35s ease'}; }
+      .iw-target-line { position:absolute; left:-4px; right:-4px; height:2px; background:#2d2a26; }
+      .iw-target-label { position:absolute; left:52px; font-size:0.7rem; color:#2d2a26; white-space:nowrap; transform: translateY(-50%); }
+      .iw-metertext { text-align:center; font-size:0.85rem; margin-top:6px; font-weight:600; }
+      .iw-feedback { border-radius: 10px; padding: 10px 12px; font-size: 0.85rem; line-height:1.4; margin-top: 6px; }
+      .iw-feedback.ok { background: #eef7ee; border: 1px solid #bfe3bf; color:#245c24; }
+      .iw-feedback.no { background: #fbeeee; border: 1px solid #eec6c6; color:#7a2626; }
+      .iw-coins { display:flex; flex-wrap:wrap; gap:3px; max-width:180px; justify-content:center; }
+      .iw-coin { width:16px; height:16px; border-radius:50%; background: #d8a63f; border: 1px solid #a97e1f;
+        display:flex; align-items:center; justify-content:center; font-size:9px; color:#5c4415; font-weight:700; }
+      .iw-costline { font-size:0.85rem; text-align:center; }
+      .iw-reset { margin-top: 4px; align-self:flex-start; background:#fff; border:1px solid #e8e2d9; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:0.8rem;}
+      .iw-reset:hover { border-color: ${accent}; }
+      .iw-footnote { font-size: 0.75rem; color:#8d8880; margin-top:8px; line-height:1.4; }
+      svg.iw-house { max-width: 100%; height: auto; }
+      @media (max-width: 480px) {
+        .iw-meterwrap { gap: 8px; }
+        .iw-meter { width: 36px; }
       }
-      return d;
+    `;
+    root.appendChild(style);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'iw-root';
+    root.appendChild(wrap);
+
+    wrap.innerHTML += `
+      <h2 class="iw-h">Insulate the house — hit 85% efficiency</h2>
+      <p class="iw-sub">The heater always delivers <strong>2000 W</strong> of input power — that energy is never lost, but it can be wasted as heat escaping through the loft, walls and windows. Adjust the insulation to raise efficiency to at least <strong>85%</strong>, for the lowest total cost.</p>
+    `;
+
+    const layout = document.createElement('div');
+    layout.className = 'iw-layout';
+    wrap.appendChild(layout);
+
+    // ---- Controls column ----
+    const controls = document.createElement('div');
+    controls.className = 'iw-controls';
+    layout.appendChild(controls);
+
+    const loftCard = document.createElement('div');
+    loftCard.className = 'iw-card';
+    loftCard.innerHTML = `
+      <span class="iw-label">Loft insulation thickness</span>
+      <div class="iw-row"><span class="iw-val" id="iw-loft-val">100 mm</span></div>
+      <input type="range" min="0" max="300" step="50" value="100" id="iw-loft-slider" aria-label="Loft insulation thickness in millimetres">
+    `;
+    controls.appendChild(loftCard);
+
+    const wallCard = document.createElement('div');
+    wallCard.className = 'iw-card';
+    wallCard.innerHTML = `<span class="iw-label">Wall type</span>
+      <div class="iw-btngroup" id="iw-wall-group">
+        <button class="iw-btn" data-val="0" aria-pressed="true">None (bare wall)</button>
+        <button class="iw-btn" data-val="1" aria-pressed="false">Cavity wall + insulation</button>
+        <button class="iw-btn" data-val="2" aria-pressed="false">Solid wall, insulated</button>
+      </div>`;
+    controls.appendChild(wallCard);
+
+    const glazeCard = document.createElement('div');
+    glazeCard.className = 'iw-card';
+    glazeCard.innerHTML = `<span class="iw-label">Glazing</span>
+      <div class="iw-btngroup" id="iw-glaze-group">
+        <button class="iw-btn" data-val="0" aria-pressed="true">Single glazing</button>
+        <button class="iw-btn" data-val="1" aria-pressed="false">Double glazing</button>
+      </div>`;
+    controls.appendChild(glazeCard);
+
+    const feedback = document.createElement('div');
+    feedback.className = 'iw-feedback no';
+    controls.appendChild(feedback);
+
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'iw-reset';
+    resetBtn.textContent = 'Reset to defaults';
+    controls.appendChild(resetBtn);
+
+    const footnote = document.createElement('p');
+    footnote.className = 'iw-footnote';
+    footnote.textContent = 'Best £ cost found so far while meeting the 85% target: none yet.';
+    controls.appendChild(footnote);
+
+    // ---- Diagram column ----
+    const diagCol = document.createElement('div');
+    diagCol.className = 'iw-diagram-col';
+    layout.appendChild(diagCol);
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', '0 0 300 230');
+    svg.setAttribute('class', 'iw-house');
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', 'Cross-section of a house showing heat loss arrows from the loft, walls and window');
+
+    svg.innerHTML = `
+      <defs>
+        <marker id="iw-arrowhead" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#c0392b"/>
+        </marker>
+      </defs>
+      <!-- sky -->
+      <rect x="0" y="0" width="300" height="230" fill="#f5f1ea"/>
+      <!-- roof -->
+      <polygon id="iw-roof" points="150,20 60,90 240,90" fill="#8b5e3c" stroke="#5c3d26" stroke-width="2"/>
+      <!-- loft insulation band -->
+      <rect id="iw-loft-band" x="75" y="80" width="150" height="10" fill="${accent}" opacity="0.75"/>
+      <!-- house body -->
+      <rect x="70" y="90" width="160" height="100" fill="#efe6d8" stroke="#c9bfae" stroke-width="1"/>
+      <!-- left wall insulation block -->
+      <rect id="iw-wall-left" x="64" y="90" width="6" height="100" fill="#c9c2b8"/>
+      <!-- right wall insulation block -->
+      <rect id="iw-wall-right" x="230" y="90" width="6" height="100" fill="#c9c2b8"/>
+      <!-- window -->
+      <rect x="130" y="120" width="40" height="40" fill="#dcefff" stroke="#7fa8c9" stroke-width="2"/>
+      <g id="iw-panes"></g>
+      <!-- ground -->
+      <rect x="0" y="190" width="300" height="40" fill="#e3ddce"/>
+      <!-- arrows -->
+      <line id="iw-arrow-roof" x1="150" y1="15" x2="150" y2="15" stroke="#c0392b" stroke-width="3" marker-end="url(#iw-arrowhead)"/>
+      <line id="iw-arrow-left" x1="64" y1="140" x2="64" y2="140" stroke="#c0392b" stroke-width="3" marker-end="url(#iw-arrowhead)"/>
+      <line id="iw-arrow-right" x1="236" y1="140" x2="236" y2="140" stroke="#c0392b" stroke-width="3" marker-end="url(#iw-arrowhead)"/>
+      <line id="iw-arrow-window" x1="170" y1="140" x2="170" y2="140" stroke="#c0392b" stroke-width="3" marker-end="url(#iw-arrowhead)"/>
+    `;
+    diagCol.appendChild(svg);
+
+    const meterWrap = document.createElement('div');
+    meterWrap.className = 'iw-meterwrap';
+    meterWrap.innerHTML = `
+      <div>
+        <div class="iw-meter" id="iw-meter">
+          <div class="iw-target-line" style="bottom:85%;"></div>
+          <div class="iw-target-label" style="bottom:85%;">85% target</div>
+          <div class="iw-meterfill" id="iw-meterfill" style="height:0%;"></div>
+        </div>
+        <div class="iw-metertext" id="iw-metertext">0%</div>
+      </div>
+      <div>
+        <div class="iw-coins" id="iw-coins"></div>
+        <div class="iw-costline" id="iw-costline">£0</div>
+      </div>
+    `;
+    diagCol.appendChild(meterWrap);
+
+    // ---- State ----
+    const params = { loftThickness: 100, wallChoice: 0, glazingChoice: 0 };
+    let bestCostAtTarget = null;
+    const INPUT_POWER = 2000;
+
+    function computeDerived(p) {
+      const loftLoss = 400 / (1 + p.loftThickness / 50);
+      const wallLossArr = [400, 150, 50];
+      const glazeLossArr = [300, 80];
+      const wallLoss = wallLossArr[p.wallChoice];
+      const glazeLoss = glazeLossArr[p.glazingChoice];
+      const heatLossRate = loftLoss + wallLoss + glazeLoss;
+      const efficiency = (INPUT_POWER - heatLossRate) / INPUT_POWER;
+      const costLoft = p.loftThickness * 0.5;
+      const costWallArr = [0, 400, 900];
+      const costGlazeArr = [0, 600];
+      const cost = costLoft + costWallArr[p.wallChoice] + costGlazeArr[p.glazingChoice];
+      const hitTarget = efficiency >= 0.85;
+      return { loftLoss, wallLoss, glazeLoss, heatLossRate, efficiency, cost, hitTarget };
     }
 
-    function drawArrows(d) {
-      var scale = function (w) { return 10 + 62 * (w / 360); };
-      var set = function (pk, hk, w) {
-        var L = scale(w);
-        R[pk].setAttribute('d', wavy(L, 3.4, phase));
-        R[hk].setAttribute('transform', 'translate(' + L.toFixed(1) + ',0)');
-      };
-      set('pLoft', 'hLoft', d.loft);
-      set('pWall', 'hWall', d.wall);
-      set('pGlass', 'hGlass', d.glass);
-    }
+    const els = {
+      loftVal: wrap.querySelector('#iw-loft-val'),
+      loftSlider: wrap.querySelector('#iw-loft-slider'),
+      wallGroup: wrap.querySelector('#iw-wall-group'),
+      glazeGroup: wrap.querySelector('#iw-glaze-group'),
+      loftBand: svg.querySelector('#iw-loft-band'),
+      wallLeft: svg.querySelector('#iw-wall-left'),
+      wallRight: svg.querySelector('#iw-wall-right'),
+      panes: svg.querySelector('#iw-panes'),
+      arrowRoof: svg.querySelector('#iw-arrow-roof'),
+      arrowLeft: svg.querySelector('#iw-arrow-left'),
+      arrowRight: svg.querySelector('#iw-arrow-right'),
+      arrowWindow: svg.querySelector('#iw-arrow-window'),
+      meterFill: wrap.querySelector('#iw-meterfill'),
+      meterText: wrap.querySelector('#iw-metertext'),
+      coins: wrap.querySelector('#iw-coins'),
+      costLine: wrap.querySelector('#iw-costline'),
+      feedback: feedback,
+      footnote: footnote
+    };
 
-    function drawCoins(cost) {
-      var n = Math.round(cost / 200), i, s = '', perCol = 7;
-      for (i = 0; i < n; i++) {
-        var col = Math.floor(i / perCol), row = i % perCol;
-        var cx = 16 + col * 32, cy = 70 - row * 5;
-        s += '<ellipse cx="' + cx + '" cy="' + cy + '" rx="12" ry="4.6" fill="' + rgba(accent, 0.18) +
-             '" stroke="' + accent + '" stroke-width="1"/>';
-      }
-      if (!n) s = '<text x="16" y="72" font-size="11" fill="#8d8880">nothing spent yet</text>';
-      R.coins.innerHTML = s;
-    }
-
-    function update() {
-      var d = derive(state);
-      last = d;
-
-      /* house */
-      var h = 3 + (state.loftThickness / 300) * 24;
-      R.loftIns.setAttribute('y', (140 - h).toFixed(1)); R.loftIns.setAttribute('height', h.toFixed(1));
-      R.loftInsP.setAttribute('y', (140 - h).toFixed(1)); R.loftInsP.setAttribute('height', h.toFixed(1));
-      R.loftInsP.setAttribute('opacity', state.loftThickness ? 1 : 0);
-
-      var ww = [3, 10, 16][state.wallChoice];
-      R.wallL.setAttribute('width', ww); R.wallLP.setAttribute('width', ww);
-      R.wallR.setAttribute('width', ww); R.wallR.setAttribute('x', 270 - ww);
-      R.wallRP.setAttribute('width', ww); R.wallRP.setAttribute('x', 270 - ww);
-      R.wallLP.setAttribute('opacity', state.wallChoice ? 1 : 0);
-      R.wallRP.setAttribute('opacity', state.wallChoice ? 1 : 0);
-
-      R.pane2.setAttribute('opacity', state.glazingChoice ? 1 : 0);
-
-      drawArrows(d);
-      R.tLoft.textContent = 'roof ' + Math.round(d.loft) + ' W';
-      R.tWall.textContent = 'walls ' + Math.round(d.wall) + ' W';
-      R.tGlass.textContent = 'window ' + Math.round(d.glass) + ' W';
-
-      /* meter */
-      var hgt = d.efficiency * 200;
-      R.fill.setAttribute('y', (220 - hgt).toFixed(1));
-      R.fill.setAttribute('height', hgt.toFixed(1));
-      R.fill.setAttribute('fill', d.hitTarget ? accent : LOSS_COL);
-
-      /* stats */
-      var pct = d.efficiency * 100;
-      R.eff.textContent = pct.toFixed(1) + '%';
-      R.loss.textContent = Math.round(d.heatLossRate) + ' W';
-      R.useful.textContent = Math.round(INPUT - d.heatLossRate) + ' W';
-      R.cost.textContent = money(d.cost);
-      R.badge.textContent = d.hitTarget ? 'target reached' : 'below target';
-      R.badge.className = 'itw-badge' + (d.hitTarget ? ' on' : '');
-      drawCoins(d.cost);
-
-      /* controls */
-      R.loftVal.textContent = state.loftThickness === 0 ? 'none' : state.loftThickness + ' mm';
-      wallBtns.forEach(function (b) {
-        b.setAttribute('aria-pressed', String(+b.dataset.wall === state.wallChoice));
-      });
-      glazeBtns.forEach(function (b) {
-        b.setAttribute('aria-pressed', String(+b.dataset.glaze === state.glazingChoice));
-      });
-
-      /* feedback */
-      R.calc.innerHTML = 'efficiency = (2000 W &minus; <b>' + Math.round(d.heatLossRate) +
-        ' W</b>) &divide; 2000 W = <b>' + d.efficiency.toFixed(3) + '</b> = <b>' + pct.toFixed(1) + '%</b>';
-
-      if (d.hitTarget) {
-        if (bestCost === null || d.cost < bestCost) bestCost = d.cost;
-        if (d.cost <= CHEAPEST) foundCheapest = true;
-      }
-
-      var msg;
-      if (!d.hitTarget) {
-        var need = d.heatLossRate - INPUT * (1 - TARGET);
-        msg = 'Not there yet: <b>' + Math.round(d.heatLossRate) + ' W</b> is still escaping. Cut about <b>' +
-              Math.ceil(need) + ' W</b> more to reach 85%.';
-      } else if (d.cost <= CHEAPEST) {
-        msg = '<b>Cheapest solution found</b> &mdash; 85% for ' + money(d.cost) +
-              '. Deep loft insulation plus cavity walls beats paying ' + money(WALLS[2].cost) +
-              ' for insulated solid walls.';
+    function drawPanes() {
+      els.panes.innerHTML = '';
+      if (params.glazingChoice === 0) {
+        const l = document.createElementNS(svgNS, 'line');
+        l.setAttribute('x1', '150'); l.setAttribute('y1', '120');
+        l.setAttribute('x2', '150'); l.setAttribute('y2', '160');
+        l.setAttribute('stroke', '#7fa8c9'); l.setAttribute('stroke-width', '2');
+        els.panes.appendChild(l);
       } else {
-        msg = '<b>Target reached</b> at ' + pct.toFixed(1) + '% for ' + money(d.cost) +
-              '. There is a cheaper combination that still hits 85% &mdash; which measure gives you the most watts per pound?';
+        [147, 153].forEach(x => {
+          const l = document.createElementNS(svgNS, 'line');
+          l.setAttribute('x1', String(x)); l.setAttribute('y1', '120');
+          l.setAttribute('x2', String(x)); l.setAttribute('y2', '160');
+          l.setAttribute('stroke', '#3f7aa8'); l.setAttribute('stroke-width', '2');
+          els.panes.appendChild(l);
+        });
       }
-      if (revealed && !foundCheapest) {
-        msg += ' The cheapest possible is ' + money(CHEAPEST) + ': 300 mm loft, cavity walls, double glazing.';
+    }
+
+    function setArrow(el, x, y, len, dir) {
+      // dir: 'up','left','right'
+      let x2 = x, y2 = y;
+      if (dir === 'up') y2 = y - len;
+      if (dir === 'left') x2 = x - len;
+      if (dir === 'right') x2 = x + len;
+      el.setAttribute('x1', x); el.setAttribute('y1', y);
+      el.setAttribute('x2', x2); el.setAttribute('y2', y2);
+      el.style.opacity = len < 2 ? '0.15' : '1';
+    }
+
+    function render() {
+      const d = computeDerived(params);
+
+      // loft slider display
+      els.loftVal.textContent = params.loftThickness + ' mm';
+      els.loftSlider.value = params.loftThickness;
+
+      // wall/glaze buttons
+      Array.from(els.wallGroup.children).forEach(btn => {
+        btn.setAttribute('aria-pressed', String(Number(btn.dataset.val) === params.wallChoice));
+      });
+      Array.from(els.glazeGroup.children).forEach(btn => {
+        btn.setAttribute('aria-pressed', String(Number(btn.dataset.val) === params.glazingChoice));
+      });
+
+      // loft band thickness (0-300mm -> 4-40 svg units), sits just above ceiling y=90
+      const bandH = 4 + (params.loftThickness / 300) * 36;
+      els.loftBand.setAttribute('height', bandH.toFixed(1));
+      els.loftBand.setAttribute('y', (90 - bandH).toFixed(1));
+
+      // wall thickness/colour
+      const wallWidths = [6, 12, 20];
+      const wallColors = ['#c9c2b8', '#a9c9d6', '#7a5a3a'];
+      const ww = wallWidths[params.wallChoice];
+      els.wallLeft.setAttribute('width', ww);
+      els.wallLeft.setAttribute('x', 70 - ww);
+      els.wallLeft.setAttribute('fill', wallColors[params.wallChoice]);
+      els.wallRight.setAttribute('width', ww);
+      els.wallRight.setAttribute('x', 230);
+      els.wallRight.setAttribute('fill', wallColors[params.wallChoice]);
+
+      drawPanes();
+
+      // arrows: scale losses to lengths (max ~55 svg units)
+      setArrow(els.arrowRoof, 150, 90 - bandH - 4, (d.loftLoss / 400) * 55, 'up');
+      const leftX = 70 - ww;
+      const rightX = 230 + ww;
+      setArrow(els.arrowLeft, leftX, 140, (d.wallLoss / 400) * 45, 'left');
+      setArrow(els.arrowRight, rightX, 140, (d.wallLoss / 400) * 45, 'right');
+      setArrow(els.arrowWindow, 170, 140, (d.glazeLoss / 300) * 45, 'right');
+
+      // meter
+      const pct = Math.max(0, Math.min(100, d.efficiency * 100));
+      els.meterFill.style.height = pct.toFixed(1) + '%';
+      els.meterFill.style.background = d.hitTarget ? accent : '#c0392b';
+      els.meterText.textContent = pct.toFixed(1) + '%';
+
+      // coins / cost
+      const coinCount = Math.min(20, Math.round(d.cost / 100));
+      els.coins.innerHTML = '';
+      for (let i = 0; i < coinCount; i++) {
+        const c = document.createElement('div');
+        c.className = 'iw-coin';
+        c.textContent = '£';
+        els.coins.appendChild(c);
       }
-      R.msg.innerHTML = msg;
-      R.msg.className = 'itw-msg' + (d.hitTarget ? ' good' : '');
+      els.costLine.textContent = '£' + Math.round(d.cost) + ' total spend';
+
+      // feedback
+      if (d.hitTarget) {
+        if (bestCostAtTarget === null || d.cost < bestCostAtTarget) {
+          bestCostAtTarget = d.cost;
+        }
+        els.feedback.className = 'iw-feedback ok';
+        let verdict;
+        if (d.cost <= 1150) verdict = 'Excellent — target met at low cost. This is close to the cheapest way to do it.';
+        else if (d.cost <= 1600) verdict = 'Target met — but you may be able to reach 85% for less money. Try a cheaper combination.';
+        else verdict = 'Target met, but at high cost. Some of this spending is not needed to reach 85%.';
+        els.feedback.textContent = `Efficiency ${pct.toFixed(1)}% ≥ 85% target. ${verdict}`;
+      } else {
+        els.feedback.className = 'iw-feedback no';
+        const needed = (2000 * 0.15) - d.heatLossRate + 2000 * 0.15; // just for phrasing, not shown numerically
+        els.feedback.textContent = `Efficiency ${pct.toFixed(1)}% — below the 85% target. Too much energy (${Math.round(d.heatLossRate)} W) is still escaping. Try thicker loft insulation, a better wall type, or double glazing.`;
+      }
+
+      els.footnote.textContent = bestCostAtTarget === null
+        ? 'Best £ cost found so far while meeting the 85% target: none yet.'
+        : 'Best £ cost found so far while meeting the 85% target: £' + Math.round(bestCostAtTarget) + '.';
 
       root.dataset.svState = JSON.stringify({
-        loftThickness: state.loftThickness,
-        wallChoice: state.wallChoice,
-        glazingChoice: state.glazingChoice,
-        heatLossRate: d.heatLossRate,
-        efficiency: d.efficiency,
-        efficiencyPercent: +pct.toFixed(2),
-        cost: d.cost,
+        loftThickness: params.loftThickness,
+        wallChoice: params.wallChoice,
+        glazingChoice: params.glazingChoice,
+        heatLossRate: Math.round(d.heatLossRate * 100) / 100,
+        efficiency: Math.round(d.efficiency * 10000) / 10000,
+        cost: Math.round(d.cost * 100) / 100,
         hitTarget: d.hitTarget,
-        bestCost: bestCost,
-        foundCheapest: foundCheapest
+        bestCostAtTarget: bestCostAtTarget === null ? null : Math.round(bestCostAtTarget * 100) / 100
       });
     }
 
-    /* ---------------- events ---------------- */
-    slider.addEventListener('input', function () {
-      state.loftThickness = +slider.value;
-      update();
-    });
-    wallBtns.forEach(function (b) {
-      b.addEventListener('click', function () { state.wallChoice = +b.dataset.wall; update(); });
-    });
-    glazeBtns.forEach(function (b) {
-      b.addEventListener('click', function () { state.glazingChoice = +b.dataset.glaze; update(); });
-    });
-    R.reset.addEventListener('click', function () {
-      state.loftThickness = 0; state.wallChoice = 0; state.glazingChoice = 0;
-      slider.value = '0'; revealed = false; update();
-    });
-    R.reveal.addEventListener('click', function () {
-      revealed = true;
-      state.loftThickness = 300; state.wallChoice = 1; state.glazingChoice = 1;
-      slider.value = '300'; update();
+    els.loftSlider.addEventListener('input', (e) => {
+      params.loftThickness = Number(e.target.value);
+      render();
     });
 
-    /* ---------------- animation ---------------- */
-    if (!reduced) {
-      var timer = setInterval(function () {
-        if (!root.isConnected) { clearInterval(timer); return; }
-        phase += 0.35;
-        if (last) drawArrows(last);
-      }, 90);
-    }
+    Array.from(els.wallGroup.children).forEach(btn => {
+      btn.addEventListener('click', () => {
+        params.wallChoice = Number(btn.dataset.val);
+        render();
+      });
+    });
+    Array.from(els.glazeGroup.children).forEach(btn => {
+      btn.addEventListener('click', () => {
+        params.glazingChoice = Number(btn.dataset.val);
+        render();
+      });
+    });
 
-    update();
+    resetBtn.addEventListener('click', () => {
+      params.loftThickness = 100;
+      params.wallChoice = 0;
+      params.glazingChoice = 0;
+      render();
+    });
+
+    render();
   }
 };
