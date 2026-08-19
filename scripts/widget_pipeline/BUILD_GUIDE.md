@@ -10,10 +10,80 @@ That file is the bar. Open it before you start.
 
 ---
 
+## 0. What deserves a widget at all
+
+These exist for two reasons, and only two: to **break up the reading**, and to
+make a **hard, abstract idea concrete**. They are not assessment, they are not
+data collection, and they are not decoration for its own sake. They ship on the
+free tier, to every student.
+
+The test for whether a lesson deserves one:
+
+> **Can a student read this passage correctly and still picture it wrongly?**
+
+If yes, build. That catches:
+
+- **invisible mechanisms** — electron flow, osmosis, how a synapse fires, what
+  is actually moving in a sound wave;
+- **counterintuitive relationships** — frequency up, wavelength down; a steeper
+  basin giving a *shorter* lag time;
+- **interacting variables**, where changing one shifts another and the student
+  cannot hold both in their head at once;
+- **things prose has to flatten** — a trench cross-section, a castle's
+  approach, plate movement, anything spatial or simultaneous.
+
+If no, do not build. Narrative history, definitions, quotation analysis and
+anything already concrete in text get nothing. A widget that merely restates
+the prose is worse than no widget: it costs the student time and teaches them
+that these are skippable.
+
+**Roughly one lesson in three or four should qualify.** That is the rhythm that
+keeps them feeling fresh. Saturation is the failure mode — if every lesson has
+one, they become furniture and get scrolled past.
+
+---
+
+## 0b. Commit before feedback
+
+**This is the most important pedagogical rule here, and the current widgets all
+break it.**
+
+A student who drags a slider and watches numbers move learns much less than one
+who first commits to an answer, is wrong, and sees why. Continuous live feedback
+lets them fiddle until it goes green — optimising the widget instead of thinking
+about the physics.
+
+So: **let the student assemble a whole answer, then have them commit it.**
+
+> The insulation widget should let you choose loft, walls and glazing, then
+> press **Check** — and only then find out whether the build reaches 85%, what
+> it cost, and which measure was carrying its weight. Not a number that ticks
+> up live as you drag.
+
+- The commit control is a real button, labelled with the action: **Check**,
+  **Run it**, **Test the design**, **See what happened**. Never "Submit".
+- Before commit, show the consequences the student can *reason* about — the
+  price of each option, what it physically does — but not the verdict.
+- After commit, the reveal is the teaching moment: what happened, **why**, and
+  what to change. Then let them adjust and go again.
+- Where an interaction is genuinely exploratory and has no answer — a wave you
+  are getting a feel for — live feedback is right. Know which kind you are
+  building. If there is a correct answer anywhere in it, make them commit.
+
+For a matching or sorting task, the equivalent is: place everything, then
+**Check**, rather than lighting each tile green or red as it lands.
+
+---
+
 ## 1. The size budget
 
-A widget opens in a **modal**. It gets about **560px of usable height** on a
-laptop and a **360px minimum width** on a phone.
+A widget opens in a **modal**, reached from a compact button inline in the
+lesson. **Design it for the phone first** — most revision happens on one, and a
+layout that works at 360px nearly always works on a laptop, while the reverse is
+almost never true. Start narrow, then let it breathe.
+
+It gets about **560px of usable height** on a laptop and a **360px minimum
+width** on a phone.
 
 - At 900px wide: the whole widget is **560px tall or less**.
 - At 360px wide: **640px tall or less**.
@@ -287,27 +357,32 @@ fill (`#2d2a26`, white text).
 
 Answer all of these. Any "no" means edit before you output.
 
-1. Measured height ≤ 560px at 900px wide and ≤ 640px at 360px wide, with no
-   internal scrollbar?
-2. Four zones or fewer, one stage, no placeholder boxes for unearned answers?
-3. Would a student know what to do with the instructions deleted? (Now delete
+1. Could a student read this lesson correctly and still picture the idea
+   wrongly? (If not, this widget should not exist.)
+4. If there is a right answer anywhere in it, does the student **commit** — a
+   Check button — before any verdict appears, rather than getting live feedback
+   they can fiddle towards?
+5. Designed at 360px first, and measured height ≤ 560px at 900px wide and
+   ≤ 640px at 360px wide, with no internal scrollbar?
+6. Four zones or fewer, one stage, no placeholder boxes for unearned answers?
+7. Would a student know what to do with the instructions deleted? (Now delete
    them.)
-4. Does the most likely first click do something useful rather than scold?
-5. Do the title and framing avoid giving away any answer?
-6. Is every discrete choice a button whose label carries its trade-off, and every
+8. Does the most likely first click do something useful rather than scold?
+9. Do the title and framing avoid giving away any answer?
+10. Is every discrete choice a button whose label carries its trade-off, and every
    slider a genuinely continuous quantity with worded ends?
-7. Does every control change something visible immediately?
-8. Does every box of prose get 32+ characters per line at 360px?
-9. Have you enumerated the state space, and is there a real decision in it — more
+11. Does every control change something visible immediately?
+12. Does every box of prose get 32+ characters per line at 360px?
+13. Have you enumerated the state space, and is there a real decision in it — more
    than one route to success, and a way to be wrong that costs something?
-10. Is every claim in the text true of the reachable range? (State the actual
+14. Is every claim in the text true of the reachable range? (State the actual
     ceiling; do not say "approaches 100%".)
-11. Is success decided on integers or an explicit epsilon, with the intended
+15. Is success decided on integers or an explicit epsilon, with the intended
     solution clear of the boundary by at least one step?
-12. Does the caption name a mechanism and its consequence, in the lesson's own
+16. Does the caption name a mechanism and its consequence, in the lesson's own
     vocabulary — rather than report a score?
-13. Does a wrong answer explain what distinguishes it from the right one?
-14. White card on warm ground, house colours and type, accent used sparingly,
+17. Does a wrong answer explain what distinguishes it from the right one?
+18. White card on warm ground, house colours and type, accent used sparingly,
     every selector scoped, no invented alert palette?
-15. No timer running for decoration; DOM built once and mutated; keyboard focus
+19. No timer running for decoration; DOM built once and mutated; keyboard focus
     stays where the student left it?

@@ -50,6 +50,7 @@ STATE = os.path.join(HERE, "_canary_state.json")
 LEDGER = os.path.join(HERE, "_canary_ledger.json")
 BUILDS = os.path.join(HERE, "builds")
 CONTRACT = io.open(os.path.join(HERE, "CONTRACT.md"), encoding="utf-8").read()
+GUIDE = io.open(os.path.join(HERE, "BUILD_GUIDE.md"), encoding="utf-8").read()
 
 HAIKU = "claude-haiku-4-5-20251001"
 SONNET = "claude-sonnet-5"
@@ -161,22 +162,34 @@ def strip(html):
 
 
 # ------------------------------------------------------------------ tier 1
-TRIAGE_SYS = """You decide whether a GCSE revision lesson would genuinely teach better with a small interactive, and if so what KIND of interaction fits.
+TRIAGE_SYS = """You decide whether a GCSE lesson contains an idea that is genuinely HARD OR ABSTRACT IN PROSE, and would become clear if the student could see and touch it.
 
-The bar is high. Say yes ONLY if a student doing something with their hands would teach a specific idea in this lesson better than the prose already does. Say no for lessons that are pure narrative, pure recall, or where an interactive would just be decoration.
+The test, and the only test:
 
-Variety matters enormously: the site must not feel like the same slider over and over. Pick the interaction verb that genuinely suits THIS lesson's idea, from (or beyond) this palette:
-  adjust-to-see-relationship, adjust-to-hit-a-target, order-the-sequence,
-  match-pairs, sort-into-groups, spot-the-deliberate-error,
-  predict-then-reveal, step-through-a-process, build-to-a-spec,
-  choose-a-path-and-see-consequences, compare-two-cases-side-by-side,
-  annotate-the-picture, balance-two-competing-quantities
+  CAN A STUDENT READ THIS PASSAGE CORRECTLY AND STILL PICTURE THE IDEA WRONGLY?
+
+Say YES for:
+- invisible mechanisms (electron flow, osmosis, what actually moves in a sound wave, how a synapse fires)
+- counterintuitive relationships (frequency up means wavelength down; a steeper basin gives a SHORTER lag time)
+- interacting variables the student cannot hold in their head at once
+- things prose has to flatten (a cross-section, a castle approach, plate movement, anything spatial or simultaneous)
+- a specific, nameable misconception the lesson is trying to prevent
+
+Say NO for:
+- narrative, chronology and cause-lists that text already handles well
+- definitions, terminology, quotation analysis
+- anything already concrete in the prose
+- anything where the interactive would only restate what the text says
+
+BE HARSH. Roughly one lesson in three should qualify; a widget in every lesson becomes furniture and gets scrolled past. A weak interactive is worse than none, because it teaches the student these are skippable. If you are unsure, say no.
 
 Reply with ONLY JSON:
 {"worth_it": true|false,
  "confidence": 0-1,
- "verb": "<one from the palette, or your own if better>",
- "idea": "<the ONE idea the interactive would teach, in a sentence>",
+ "misconception": "<the specific wrong mental picture a student is likely to hold, in one sentence>",
+ "idea": "<the ONE idea the interactive must make concrete>",
+ "why_visual": "<why seeing/touching beats reading, in one sentence>",
+ "verb": "<what the student physically does: adjust, sort, order, match, route, annotate, build, choose...>",
  "why_not": "<only if worth_it is false>"}"""
 
 
@@ -221,6 +234,10 @@ def tier1():
 # ------------------------------------------------------------------ tier 2
 SPEC_SYS = """You design ONE interactive for a GCSE lesson, and you write the tests it must pass BEFORE the code exists. You are the specification, not the implementation.
 
+DESIGN FOR COMMIT-THEN-CHECK. If the interaction has a right answer anywhere in it, the student must assemble a whole response and press a Check button before ANY verdict appears - never live feedback they can fiddle towards. Only genuinely exploratory widgets (getting a feel for a wave) give continuous feedback.
+
+DESIGN FOR A 360px PHONE FIRST.
+
 INVENT THE INTERACTION. There is no menu and no house style to conform to. Design what would genuinely teach this lesson's idea to a 15-year-old bored of reading: dragging cards into groups, ordering events on a line, matching pairs, clicking hotspots on a drawing, routing a path and living with the consequences, balancing two competing quantities, spotting a planted error, weighing evidence. If sliders are honestly the best fit use sliders, but do not default to them, and never invent a control that changes nothing meaningful.
 
 The widget will be written to a contract that constrains only the code's SHAPE, never your design: pure initialState/apply(state,action)/derive/regions, plus a render. Any interaction at all fits that shape.
@@ -244,6 +261,7 @@ Reply with ONLY JSON:
  "controls": [],
  "derived_fields": [{"key": "", "meaning": ""}],
  "visual": "<what is drawn, concretely - this is a picture, describe it>",
+ "commit": "<the Check button label and exactly what is revealed only after it is pressed; 'n/a - exploratory' if there is no right answer>",
  "invariants": ["<mechanical, checkable>"],
  "facts_used": ["<each fact/number taken from the lesson>"]}"""
 
@@ -292,7 +310,7 @@ Build the best possible version of the spec's interaction. Use whatever the brow
 
 It should feel like a small, well-made thing a teacher would be pleased to show a class: clear at a glance what to do, obvious feedback when the student is right or wrong, and worth touching more than once.
 
-Output ONLY the JavaScript file contents (it will be loaded as a script and must set window.SVWidget). No markdown fence, no commentary.""" % CONTRACT
+Output ONLY the JavaScript file contents (it will be loaded as a script and must set window.SVWidget). No markdown fence, no commentary.""" % (CONTRACT + chr(10)*2 + GUIDE)
 
 
 def tier3(max_n=None, build_model=OPUS):
