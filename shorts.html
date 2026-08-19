@@ -101,11 +101,36 @@
   .done button{font-family:var(--font-head);font-weight:600;font-size:.92rem;background:transparent;color:var(--sec);border:1px solid var(--line);border-radius:10px;padding:.7rem 1.3rem;cursor:pointer}
   .done button:hover:not(:disabled){border-color:color-mix(in srgb,var(--acc) 45%,var(--line))}
   .done button:disabled{opacity:.55;cursor:default}
+
+  /* ---- fullscreen toggle (desktop + Android; hidden on phones, which are
+     edge-to-edge automatically) ---- */
+  .fsbtn{position:fixed;right:18px;bottom:18px;z-index:30;width:44px;height:44px;border-radius:12px;
+    background:var(--card);border:1px solid var(--line);color:var(--sec);display:grid;place-items:center;
+    cursor:pointer;box-shadow:0 1px 2px rgba(29,28,26,.06);transition:border-color .15s,transform .1s}
+  .fsbtn:hover{border-color:color-mix(in srgb,var(--acc) 45%,var(--line))}
+  .fsbtn:active{transform:scale(.95)}
+  .fsbtn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  body.imm .fsbtn{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.22);color:#fff;backdrop-filter:blur(7px);
+    right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+
+  /* ---- immersive: the card becomes the screen. Applied on phones via
+     media query and everywhere via the fullscreen API (body.imm). ---- */
+  body.imm .brand{display:none}
+  body.imm .slide{padding:0}
+  body.imm .short,body.imm .check,body.imm .done{
+    width:100vw;max-width:none;height:100dvh;aspect-ratio:auto;border-radius:0;border:none}
+  body.imm .short .prog{top:env(safe-area-inset-top,0px)}
+  body.imm .short .meta{top:calc(1.1rem + env(safe-area-inset-top,0px));left:calc(1rem + env(safe-area-inset-left,0px))}
+  body.imm .short .rail{top:calc(1.1rem + env(safe-area-inset-top,0px));right:calc(.7rem + env(safe-area-inset-right,0px))}
+  body.imm .check{padding:calc(2.2rem + env(safe-area-inset-top,0px)) 1.5rem calc(1.9rem + env(safe-area-inset-bottom,0px));
+    max-width:520px;margin:0 auto}
+  body.imm .swipe{bottom:calc(.7rem + env(safe-area-inset-bottom,0px))}
 </style>
 </head>
 <body>
   <div class="brand">StudyVault<img class="brandlock" src="assets/studyvault-lock-rust.svg" alt=""></div>
   <div class="feed" id="feed"></div>
+  <button class="fsbtn" id="fsbtn" title="Fullscreen" style="display:none"></button>
 
 <script src="/js/free-user.js"></script>
 <script src="/js/school-session.js"></script>
@@ -133,6 +158,8 @@ const ICON = {
   mute:'<svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>',
   vol:'<svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg>',
   play:'<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
+  expand:'<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>',
+  compress:'<svg viewBox="0 0 24 24"><path d="M3 8h3a2 2 0 0 0 2-2V3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M21 16h-3a2 2 0 0 0-2 2v3"/></svg>',
 };
 
 const SUBJ_NAMES={ 'ict':'ICT','it':'IT','construction-built-environment':'Construction',
@@ -556,6 +583,30 @@ Promise.all([
   }
   render(pool);
 }).catch(err=>{ document.getElementById('feed').innerHTML='<div class="slide"><div class="check"><div class="q">Could not load shorts.</div></div></div>'; });
+
+// ── fullscreen / immersive ─────────────────────────────────────────────
+// Phones get the edge-to-edge layout automatically (media query drives
+// body.imm). The button covers desktop and Android via the fullscreen API.
+// iOS Safari has no element fullscreen — and needs none, the narrow layout
+// is already immersive, so the button simply stays hidden there.
+const fsBtn=document.getElementById('fsbtn');
+const mqImm=matchMedia('(max-width:640px)');
+function syncImm(){
+  const fs=!!document.fullscreenElement;
+  document.body.classList.toggle('imm', mqImm.matches||fs);
+  fsBtn.style.display=(document.fullscreenEnabled&&!mqImm.matches)?'grid':'none';
+  fsBtn.innerHTML=fs?ICON.compress:ICON.expand;
+  fsBtn.title=fs?'Exit fullscreen':'Fullscreen';
+}
+fsBtn.addEventListener('click',()=>{
+  // fullscreen the whole document, not the feed: only the fullscreened
+  // element renders, and this button must survive to toggle back out
+  if(document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>{});
+});
+mqImm.addEventListener('change',syncImm);
+document.addEventListener('fullscreenchange',syncImm);
+syncImm();
 </script>
 </body>
 </html>
