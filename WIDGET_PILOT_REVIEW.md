@@ -65,6 +65,43 @@ Supabase content is untouched, so nothing to un-pick if you say no.
 - Canvas-only state is mirrored to a screen-reader live region.
   `prefers-reduced-motion` starts the wave paused.
 
+## Site-wide audit — what to build next
+
+`scripts/_widget_audit.md` (full list) ranks nine archetypes by how many
+of the 4,063 live article lessons **one component** would serve:
+
+| Widget | Lessons | Shape of the win |
+|---|---|---|
+| Sort-into-categories drill | 265 | Widest — 73 subjects. D&T 35, science 27, geography 17 |
+| Interactive timeline | 214 | Most concentrated — **169 are history**, all four boards |
+| Process stepper | 174 | Science 39, separate sciences 29, CS 20, geography 19 |
+| Equation explorer | 172 | **146 are science** — one component, per-lesson equation data |
+| Labelled structure explorer | 91 | Biology and geography landforms |
+| Graph shape explorer | 80 | The pilot hydrograph generalised |
+| System model | 59 | Ecosystems, market equilibrium, homeostasis |
+| Map / spatial explorer | 39 | Geography + geology |
+| Build-it-right builder | 31 | Music — chords and cadences |
+
+**My recommended build order**, on coverage-per-unit-of-effort:
+
+1. **Equation explorer** — highest leverage on the site. One component;
+   each lesson supplies only an equation, variable names, units and
+   ranges, so 172 lessons come from roughly one build plus data entry.
+   It also directly serves the subject students find hardest.
+2. **Interactive timeline** — history has *no* interactive content at all
+   today, and 169 lessons want the same component. Biggest single-subject
+   transformation available.
+3. **Process stepper** — the sorting widget generalised (it is already a
+   stepper); moderate extra work, 174 lessons.
+4. **Sort-into-categories** — widest reach but the shallowest teaching
+   value per lesson; worth doing once the three above land.
+
+Caveats worth knowing: a lesson can match several archetypes (1,125
+matches over 4,063 lessons); school copies of generic lessons appear
+separately, so a few counts are inflated by Unity duplicates; and the
+scan finds lessons whose *text* signals the archetype — a human still
+picks the exemplars, which is what Phase 2 triage is for.
+
 ## Open questions for you
 
 1. **Are these worth building more of?** My shortlist next: circuits
