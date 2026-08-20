@@ -75,6 +75,37 @@ For a matching or sorting task, the equivalent is: place everything, then
 
 ---
 
+## 0c. Know when to stop
+
+A widget with a bank of questions must have an **end**, and the end must be
+mastery, not exhaustion.
+
+**Exit on a run of correct answers — three is a good default.** A student who
+has understood it should be released after three; a student who is guessing
+keeps going. Never make anyone grind through a fixed ten to prove a point they
+made at question three.
+
+- A wrong answer **resets the run to zero**. That is the cost of guessing:
+  you have to show it twice more.
+- Show the run *while they are working*, quietly: "2 right in a row — one more
+  and you have it." It gives the pile a bottom and it is the only counter worth
+  displaying (see rule 6 on not scoring).
+- When they get there, say what they now KNOW, not what they scored. "Three in
+  a row — you have it. The current is the same everywhere, and V = I x R gives
+  the bigger resistor the bigger share." Not "3/3, 100%".
+- Let them carry on if they want: the button becomes **Another anyway**, never
+  a dead end.
+- Report it in `root.dataset.svState` as `{streak, mastered, attempted}` so a
+  lesson can credit completion on *achieving* the thing rather than on opening
+  the widget.
+
+This does not apply to one-shot interactions — a single chain to order, one
+diagram to label, a wave to get a feel for. Those end when they are done. It
+applies wherever you have built a pool the student could otherwise loop
+through forever.
+
+---
+
 ## 1. The size budget
 
 A widget opens in a **modal**, reached from a compact button inline in the
@@ -362,27 +393,30 @@ Answer all of these. Any "no" means edit before you output.
 4. If there is a right answer anywhere in it, does the student **commit** — a
    Check button — before any verdict appears, rather than getting live feedback
    they can fiddle towards?
-5. Designed at 360px first, and measured height ≤ 560px at 900px wide and
+5. If there is a pool of questions, does it **end on a run of correct answers**
+   (three is the default), reset that run on a wrong one, show the run while
+   working, and still allow "Another anyway"?
+6. Designed at 360px first, and measured height ≤ 560px at 900px wide and
    ≤ 640px at 360px wide, with no internal scrollbar?
-6. Four zones or fewer, one stage, no placeholder boxes for unearned answers?
-7. Would a student know what to do with the instructions deleted? (Now delete
+7. Four zones or fewer, one stage, no placeholder boxes for unearned answers?
+8. Would a student know what to do with the instructions deleted? (Now delete
    them.)
-8. Does the most likely first click do something useful rather than scold?
-9. Do the title and framing avoid giving away any answer?
-10. Is every discrete choice a button whose label carries its trade-off, and every
+9. Does the most likely first click do something useful rather than scold?
+10. Do the title and framing avoid giving away any answer?
+11. Is every discrete choice a button whose label carries its trade-off, and every
    slider a genuinely continuous quantity with worded ends?
-11. Does every control change something visible immediately?
-12. Does every box of prose get 32+ characters per line at 360px?
-13. Have you enumerated the state space, and is there a real decision in it — more
+12. Does every control change something visible immediately?
+13. Does every box of prose get 32+ characters per line at 360px?
+14. Have you enumerated the state space, and is there a real decision in it — more
    than one route to success, and a way to be wrong that costs something?
-14. Is every claim in the text true of the reachable range? (State the actual
+15. Is every claim in the text true of the reachable range? (State the actual
     ceiling; do not say "approaches 100%".)
-15. Is success decided on integers or an explicit epsilon, with the intended
+16. Is success decided on integers or an explicit epsilon, with the intended
     solution clear of the boundary by at least one step?
-16. Does the caption name a mechanism and its consequence, in the lesson's own
+17. Does the caption name a mechanism and its consequence, in the lesson's own
     vocabulary — rather than report a score?
-17. Does a wrong answer explain what distinguishes it from the right one?
-18. White card on warm ground, house colours and type, accent used sparingly,
+18. Does a wrong answer explain what distinguishes it from the right one?
+19. White card on warm ground, house colours and type, accent used sparingly,
     every selector scoped, no invented alert palette?
-19. No timer running for decoration; DOM built once and mutated; keyboard focus
+20. No timer running for decoration; DOM built once and mutated; keyboard focus
     stays where the student left it?

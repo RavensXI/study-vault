@@ -158,6 +158,11 @@
         challenge: null
       };
       var order = [], orderAt = 0;
+      /* Mastery exit: three right in a row and the student has it — stop
+         asking. A wrong answer resets the run, so the cost of guessing is
+         having to show it twice more. Nobody is made to grind ten. */
+      var STREAK_TARGET = 3;
+      var streak = 0, mastered = false, seen = 0;
 
       function reshuffle() {
         var rest = [];
@@ -461,7 +466,8 @@
         show(el.sliders, explore);
         show(el.actions, !explore);
         if (!explore) {
-          el.go.textContent = c.committed ? 'Next challenge' : 'Check';
+          el.go.textContent = c.committed
+            ? (mastered ? 'Another anyway' : 'Next challenge') : 'Check';
           el.go.dataset.act = c.committed ? 'next' : 'check';
           show(el.fresh, !c.committed);
         }
@@ -484,14 +490,22 @@
           pill(1, 'Your V₂', f1(dC.predV2) + ' V');
           pill(2, null); pill(3, null);
           el.caption.innerHTML = 'How does <b>' + V + ' V</b> divide between a ' + r1 +
-            ' Ω and a ' + r2 + ' Ω resistor in one series loop?';
+            ' Ω and a ' + r2 + ' Ω resistor in one series loop?' +
+            (streak > 0 && !mastered
+              ? ' <span style="color:#8d8880">' + streak + ' right in a row — ' +
+                (STREAK_TARGET - streak) + ' more and you have it.</span>' : '');
         } else {
           var close = dC.errH <= 1;               /* integer half-volts, never a float compare */
           pill(0, 'Current I everywhere', f1(dC.i) + ' A');
           pill(1, 'V₁ across ' + r1 + ' Ω', d1 + ' V');
           pill(2, 'V₂ across ' + r2 + ' Ω', d2 + ' V');
           pill(3, 'Your split', f1(dC.predV1) + ' / ' + f1(dC.predV2) + ' V', close);
-          el.caption.innerHTML = verdict(c, dC, close);
+          el.caption.innerHTML = verdict(c, dC, close) +
+            (mastered && close
+              ? ' <b>Three in a row — you have it.</b> The current is the same everywhere, ' +
+                'and V = I × R gives the bigger resistor the bigger share.'
+              : (close && streak > 0
+                  ? ' <span style="color:#8d8880">' + streak + ' in a row.</span>' : ''));
         }
 
         /* explore slider read-outs */
@@ -546,7 +560,8 @@
             predictedV1: dC.predV1, actualV1: dC.v1, actualV2: dC.v2,
             current: dC.i, actualFrac: r3(dC.frac),
             errorVolts: c.committed ? dC.errH / 2 : null,
-            isClose: c.committed ? dC.errH <= 1 : null
+            isClose: c.committed ? dC.errH <= 1 : null,
+            streak: streak, mastered: mastered, attempted: seen
           }
         });
       }
@@ -569,6 +584,9 @@
         if (!c.committed) {
           c.committed = true;
           var d = deriveChallenge();
+          seen++;
+          if (d.errH <= 1) { streak++; if (streak >= STREAK_TARGET) mastered = true; }
+          else { streak = 0; }
           el.sr.textContent = 'Checked. You predicted ' + f1(d.predV1) + ' volts and ' +
             f1(d.predV2) + ' volts. The true split is ' + f1(d.v1) + ' volts across ' + c.r1 +
             ' ohms and ' + f1(d.v2) + ' volts across ' + c.r2 + ' ohms, with ' + f1(d.i) +
