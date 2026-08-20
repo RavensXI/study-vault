@@ -60,7 +60,7 @@
       }
     }
     /* prose lines too narrow to read */
-    var narrow = 0;
+    var narrow = 0, narrowSamples = [];
     var textish = stage.querySelectorAll('p,li,div,span,button');
     for (var j = 0; j < textish.length; j++) {
       var t = textish[j];
@@ -68,12 +68,21 @@
       var txt = (t.textContent || '').trim();
       if (txt.length < 45) continue;
       var box = t.getBoundingClientRect();
-      var fs = parseFloat(getComputedStyle(t).fontSize) || 14;
-      if (box.width / (fs * 0.5) < 32) narrow++;   /* < ~32 chars per line */
+      var tcs = getComputedStyle(t);
+      /* skip screen-reader-only text (1px clip pattern) and hidden nodes -
+         their boxes are deliberately tiny */
+      if (box.width <= 2 || box.height <= 2 || tcs.visibility === 'hidden' ||
+          tcs.display === 'none') continue;
+      var fs = parseFloat(tcs.fontSize) || 14;
+      if (box.width / (fs * 0.5) < 32) {   /* < ~32 chars per line */
+        narrow++;
+        narrowSamples.push('"' + txt.slice(0, 38) + '..."');
+      }
     }
     return { height: h, budget: BUDGET[w], over: h > BUDGET[w],
              overflowX: overflowX, innerScrollers: scrollers,
-             narrowProse: narrow, mountError: err };
+             narrowProse: narrow, narrowSamples: narrowSamples.slice(0, 3),
+             mountError: err };
   }
 
   /* Real page furniture lives outside the widget in this harness. If the
@@ -105,7 +114,7 @@
       if (m.over) fail('height ' + m.height + 'px exceeds ' + m.budget + 'px budget at ' + w + 'px');
       if (m.overflowX) fail('horizontal overflow at ' + w + 'px');
       if (m.innerScrollers.length) fail('internal scrolling at ' + w + 'px: ' + m.innerScrollers.join(', '));
-      if (m.narrowProse) fail(m.narrowProse + ' text block(s) under ~32 characters per line at ' + w + 'px');
+      if (m.narrowProse) fail(m.narrowProse + ' text block(s) under ~32 characters per line at ' + w + 'px: ' + m.narrowSamples.join(' '));
     });
 
     /* remount at a normal width for the interaction checks */

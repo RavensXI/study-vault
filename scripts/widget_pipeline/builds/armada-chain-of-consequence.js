@@ -43,48 +43,48 @@ window.SVWidget = {
     var LINKS = [
       {
         id: 'port',
-        text: 'No deep-water port to shelter in',
+        text: 'No deep-water port for the fleet to wait in',
         brief: 'the missing port',
-        note: 'Parma’s ports at Dunkirk and Nieuwpoort were shallow, sandbanked and watched by Dutch flyboats.',
-        why: 'so the fleet had to wait in the open',
-        reason: 'The missing deep-water port starts the chain: the fleet had nowhere safe to wait for Parma.'
+        note: 'Parma’s invasion army was ready in Flanders — but his ports at Dunkirk and Nieuwpoort were too shallow for the Armada’s great ships, and Dutch gunboats patrolled outside.',
+        why: 'so the fleet had to wait in open water',
+        reason: 'The missing port starts the chain: the Armada had nowhere safe to wait for Parma’s army.'
       },
       {
         id: 'roadstead',
-        text: 'Anchored in the open off Calais',
+        text: 'Forced to anchor in open water off Calais',
         brief: 'the open roadstead',
-        note: 'On 27 July the fleet anchored in an open roadstead — not a harbour — exposed to wind and enemy alike.',
-        why: 'so fireships had a packed target',
-        reason: 'The open roadstead comes next: the fleet lay there only because no harbour would take it.'
+        note: 'On 27 July the Armada anchored off Calais in open water — not a harbour. No shelter from wind or attack; it was simply the only place left to wait for Parma.',
+        why: 'so the packed fleet was an easy target for fireships',
+        reason: 'The open anchorage comes next: the fleet only lay there because no harbour could take it.'
       },
       {
         id: 'fireships',
-        text: 'Fireships sent into the anchorage',
+        text: 'Fireships sent into the crowded anchorage',
         brief: 'the fireships',
-        note: 'On the night of 28 July eight fireships came down the wind, their guns loaded to fire as they burned.',
-        why: 'so cables were cut in the dark',
-        reason: 'Fireships worked only because the fleet already lay at anchor in the open, packed close.'
+        note: 'On the night of 28 July the English set eight ships ablaze and let the wind carry them into the anchored fleet, their loaded guns firing as they burned.',
+        why: 'so captains cut their anchor cables to escape',
+        reason: 'The fireships only worked because the fleet was already anchored close together in open water.'
       },
       {
         id: 'cables',
         text: 'Anchor cables cut to escape',
         brief: 'the cut cables',
-        note: 'Captains cut their cables to get clear, abandoning their best anchors on the seabed off Calais.',
-        why: 'so nothing could hold it off a storm coast',
+        note: 'No time to raise the anchors: captains cut the cables and left their best anchors on the seabed — the very anchors they would need to survive a storm.',
+        why: 'so the fleet had no anchors to hold it off a rocky coast',
         reason: 'The cables were cut to escape the fireships, so the fireships come before them.'
       },
       {
         id: 'wrecks',
         text: 'Wrecked on Scottish and Irish coasts',
         brief: 'the wrecks',
-        note: 'Autumn gales caught a battered fleet on some of the most dangerous coasts in Europe.',
+        note: 'Sailing home the long way round, autumn gales drove the battered, anchorless ships onto some of the most dangerous coasts in Europe.',
         why: '',
-        reason: 'The wrecks come last: a fleet that left its anchors off Calais could not hold off a storm coast.'
+        reason: 'The wrecks come last: without anchors, ships caught in gales had no way to keep themselves off the rocks.'
       }
     ];
     var N = LINKS.length;
 
-    var GUNS = 'English gunfire never broke the crescent — the fireships did, in one night.';
+    var GUNS = 'English gunfire never broke the crescent formation — one night of fireships did.';
 
     var SITES = [
       { name: 'The Lizard', head: 'The Lizard, 19 July',
@@ -92,23 +92,23 @@ window.SVWidget = {
         result: 'The alarm crossed southern England in hours; Philip’s planners worked on months-old news.',
         x: 61, y: 167 },
       { name: 'Plymouth to Wight', head: 'Plymouth to the Isle of Wight',
-        feature: 'English home ports lay a day astern — powder, shot, food, repairs — and the English held the weather gauge.',
+        feature: 'English home ports lay close behind — powder, shot, food, repairs — and the wind mostly favoured the English.',
         result: 'A week of running battle never broke the crescent, but every Spanish mile led further from help.',
         x: 88, y: 159 },
-      { name: 'Calais roadstead', head: 'Calais roadstead, 27 July',
-        feature: 'Not a harbour: an open roadstead, exposed to wind and enemy, because there was nowhere else to go.',
-        result: 'Ships at anchor in the dark, packed close — the one target fireships could not miss.',
+      { name: 'Calais anchorage', head: 'Calais anchorage, 27 July',
+        feature: 'Not a harbour — open water, exposed to wind and attack, because there was nowhere else to go.',
+        result: 'Ships anchored close together in the dark — the one target fireships could not miss.',
         x: 126, y: 142 },
       { name: 'Gravelines', head: 'Gravelines, 29 July',
-        feature: 'Close-range English guns at last, then wind pushing the scattered fleet at the Zeeland sandbanks.',
-        result: 'A last-moment wind shift let the Armada claw off — into the North Sea, the Channel now foul for home.',
+        feature: 'The English finally closed to point-blank range, and the wind drove the scattered fleet towards the Zeeland sandbanks.',
+        result: 'A last-minute wind change let the Armada escape north into the North Sea — but the way home through the Channel was now closed.',
         x: 133, y: 140 },
       { name: 'Parma’s ports', head: 'Dunkirk and Nieuwpoort',
         feature: 'Parma’s embarkation ports were shallow, fringed by sandbanks and blockaded by Dutch flyboats.',
         result: 'No deep-water port on the invasion coast: the Armada could reach Parma but never wait for him.',
         x: 141, y: 138 },
       { name: 'Scotland & Ireland', head: 'Scotland and Ireland',
-        feature: 'Autumn gales, no anchors, storm-damaged hulls and starving crews on Europe’s worst coasts.',
+        feature: 'Autumn gales, no anchors, storm-damaged hulls and starving crews on Europe’s most dangerous coasts.',
         result: 'Perhaps half the fleet never reached Spain; far more men died of drowning, disease and hunger than to guns.',
         x: 17, y: 92 }
     ];
@@ -157,7 +157,7 @@ window.SVWidget = {
       '.svw-arm .a-title{font-family:"Source Serif 4",Georgia,serif;font-size:1.2rem;font-weight:600;',
         'line-height:1.2;margin:0 0 .5rem}',
       '.svw-arm .a-main{display:grid;gap:.6rem;align-items:start}',
-      '.svw-arm.is-wide .a-main{grid-template-columns:minmax(230px,1fr) minmax(255px,1fr);gap:.9rem}',
+      '.svw-arm.is-wide .a-main{grid-template-columns:minmax(205px,1fr) minmax(240px,1fr);gap:.8rem}',
       /* --- map panel --- */
       '.svw-arm .a-map{position:relative;background:#faf8f5;border:1px solid #efe9e0;border-radius:12px;',
         'padding:.35rem;display:flex;gap:.4rem;align-items:stretch}',
@@ -538,9 +538,11 @@ window.SVWidget = {
        measured on the card itself, not the viewport */
     function syncWide() {
       var w = root.clientWidth || 0;
-      /* 580 is the width at which two columns still leave the statements a
-         readable line (about 34 characters), so it is where the layout turns */
-      var wide = w >= 580;
+      /* Two columns from 500px of card: below that the statement column
+         drops under ~30 characters a line; above it, staying single-column
+         costs more than it saves - at a 560px stage the one-column card ran
+         619px, over the 600px budget (found by the check harness). */
+      var wide = w >= 500;
       root.classList.toggle('is-wide', wide);
       svg.style.flexBasis = wide ? '50%' : '46%';
       svg.style.width = wide ? '50%' : '46%';

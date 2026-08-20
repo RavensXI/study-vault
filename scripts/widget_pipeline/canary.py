@@ -39,6 +39,8 @@ import subprocess
 import sys
 import time
 
+import threading
+
 import anthropic
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -72,6 +74,13 @@ cl = anthropic.Anthropic()
 
 
 # ------------------------------------------------------------------ ledger
+# The corpus audit calls this from 8 threads. Without a lock the
+# read-modify-write races and two writers interleave, leaving two JSON
+# documents in one file - which is exactly what killed the overnight run
+# at lesson 519 of 3,571.
+_ledger_lock = threading.Lock()
+
+
 def ledger_load():
     if os.path.exists(LEDGER):
         return json.load(io.open(LEDGER, encoding="utf-8"))
@@ -79,12 +88,15 @@ def ledger_load():
 
 
 def ledger_add(tier, model, label, usage):
-    led = ledger_load()
-    led["calls"].append({
-        "tier": tier, "model": model, "label": label,
-        "in": usage.input_tokens, "out": usage.output_tokens,
-    })
-    io.open(LEDGER, "w", encoding="utf-8").write(json.dumps(led, indent=1))
+    with _ledger_lock:
+        led = ledger_load()
+        led["calls"].append({
+            "tier": tier, "model": model, "label": label,
+            "in": usage.input_tokens, "out": usage.output_tokens,
+        })
+        tmp = LEDGER + ".tmp"
+        io.open(tmp, "w", encoding="utf-8").write(json.dumps(led, indent=1))
+        os.replace(tmp, LEDGER)          # atomic: never a half-written file
 
 
 def cost_report():
@@ -96,7 +108,7 @@ def cost_report():
         agg["in"] += c["in"]; agg["out"] += c["out"]; agg["n"] += 1
     total = 0.0
     print("\n%-6s %-28s %5s %10s %10s %9s" % ("tier", "model", "calls", "in", "out", "USD"))
-    for (tier, model), a in sorted(by.items()):
+    for (tier, model), a in sorted(by.items(), key=lambda kv: (str(kv[0][0]), str(kv[0][1]))):
         pin, pout = PRICES.get(model, (0, 0))
         usd = (a["in"] / 1e6 * pin + a["out"] / 1e6 * pout) * CALIBRATION
         total += usd

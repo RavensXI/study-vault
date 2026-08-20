@@ -48,14 +48,49 @@ WORKERS = 8
 # Budget is a DELTA for THIS run, not cumulative — the ledger already
 # carries the day's earlier spend, so a cumulative cap would halt at once.
 RUN_BUDGET_USD = 9.0
-START_SPEND = canary.cost_so_far()
-
-
-def spent_this_run():
-    return canary.cost_so_far() - START_SPEND
 SAVE_EVERY = 25
 
 _lock = threading.Lock()
+
+# The ledger is a shared FILE that canary.call() rewrites on every call.
+# Eight threads racing it corrupted it overnight; a per-process lock fixed
+# that, and then two processes racing it corrupted it again. So this run
+# does not touch the file at all: an in-memory token accumulator replaces
+# ledger_add, and the totals are folded in once at the end. No contention,
+# no partial writes, and the cost figures are still real token counts.
+_tok = {"calls": 0, "in": 0, "out": 0, "model": {}}
+
+
+def _accumulate(tier, model, label, usage):
+    with _lock:
+        _tok["calls"] += 1
+        _tok["in"] += usage.input_tokens
+        _tok["out"] += usage.output_tokens
+        m = _tok["model"].setdefault(model, {"in": 0, "out": 0, "n": 0})
+        m["in"] += usage.input_tokens
+        m["out"] += usage.output_tokens
+        m["n"] += 1
+
+
+canary.ledger_add = _accumulate
+
+
+def spent_this_run():
+    total = 0.0
+    for model, m in _tok["model"].items():
+        pin, pout = canary.PRICES.get(model, (0, 0))
+        total += (m["in"] / 1e6 * pin + m["out"] / 1e6 * pout) * canary.CALIBRATION
+    return total
+
+
+def flush_ledger():
+    """Fold this run's usage into the shared ledger, once, at the end."""
+    led = canary.ledger_load()
+    for model, m in _tok["model"].items():
+        led["calls"].append({"tier": "corpus", "model": model,
+                             "label": "corpus-audit-total",
+                             "in": m["in"], "out": m["out"]})
+    io.open(canary.LEDGER, "w", encoding="utf-8").write(json.dumps(led, indent=1))
 
 
 def load():
@@ -148,7 +183,7 @@ def phase_a():
                 save(s)
                 rate = done[0] / max(1e-9, time.time() - start)
                 print("  %d/%d  (%.1f/s, ~$%.2f, %d min left)"
-                      % (done[0], len(todo), rate, canary.cost_so_far(),
+                      % (done[0], len(todo), rate, spent_this_run(),
                          int((len(todo) - done[0]) / max(rate, 1e-9) / 60)), flush=True)
 
     with ThreadPoolExecutor(max_workers=WORKERS) as ex:
@@ -323,4 +358,5 @@ if __name__ == "__main__":
             phase_a()
         if ph in ("b", "all"):
             phase_b()
+        flush_ledger()
         report()
