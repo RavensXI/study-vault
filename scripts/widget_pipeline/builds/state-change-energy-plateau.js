@@ -75,6 +75,27 @@
     return 'Not quite — you said ' + t + ', ' + e + '.';
   }
 
+  /* What the energy is doing at the plateau, and what ends it. */
+  var PLATEAU = {
+    melt:     { give: 'particles breaking free',
+                after: 'Only when it has all melted does the line climb again.' },
+    boil:     { give: 'molecules breaking away as gas',
+                after: 'Only when it has all boiled away does the line climb.' },
+    freeze:   { give: 'particles locking together',
+                after: 'Only when it has all frozen does the line fall.' },
+    condense: { give: 'molecules binding together',
+                after: 'Only when all the steam has condensed does the line fall.' }
+  };
+
+  function plateauBridge(r) {
+    var pl = PLATEAU[r.changing];
+    return 'The line stays flat. Energy is still ' +
+      (r.dir === 'heat'
+        ? 'going in — but into ' + pl.give + ', not into making them faster. '
+        : 'leaving — but it comes from ' + pl.give + ', not from them slowing down. ') +
+      'Temperature measures speed, and it has not changed. ' + pl.after;
+  }
+
   function feedback(r, pt, pe) {
     var tr = truthOf(r), J = fmt(r.pow * SECS), heat = r.dir === 'heat';
 
@@ -88,18 +109,22 @@
               : r.changing === 'condense'
               ? 'It comes from the potential store as the molecules pull together — they were never broken up.'
               : heat
-              ? 'It goes to the potential store, pulling particles apart. Average kinetic energy is unchanged: latent heat.'
-              : 'It comes from the potential store as particles pull together and the forces re-form: latent heat.' };
+              ? 'It goes to the potential store, pulling particles apart. Their speed is unchanged: that is latent heat.'
+              : 'It comes from the potential store as particles pull together. Their speed is unchanged: latent heat.' };
       }
       if (tr.t === 'rise') {
         return { ok: true, v: 'Right — it rises, no state change.',
-          b: 'All of the energy goes to the kinetic store. The particles speed up, and that is what the thermometer reads.' };
+          b: 'All of it goes to the kinetic store, so the particles speed up — and that is what the thermometer reads.' };
       }
       return { ok: true, v: 'Right — it falls, no state change.',
-        b: 'The energy leaving comes out of the kinetic store. The particles slow down, and the thermometer follows.' };
+        b: 'It comes out of the kinetic store, so the particles slow down — and the thermometer follows them.' };
     }
 
     var v = echoPick(pt, pe, heat);
+
+    /* Any wrong answer on a plateau gets the full causal bridge: this is
+       where the misconception lives, so it never gets trimmed for height. */
+    if (tr.t === 'flat') return { ok: false, v: v, b: plateauBridge(r) };
 
     if (pe === 'none') {
       return { ok: false, v: v,
@@ -132,34 +157,33 @@
   }
 
   /* --------------------------------------------------------- particle art */
-  var SLOT_S = [], SLOT_L = [], SLOT_G = [], PHASE = [];
+  var LATY = [], LIQ = [], GASY = [], PHASE = [];
   (function () {
-    var i, c, rw;
-    for (i = 0; i < 12; i++) {
-      c = i % 4; rw = Math.floor(i / 4);
-      SLOT_S.push({ x: 0.045 + c * 0.072, y: 0.20 + rw * 0.30 });
-    }
-    var lx = [0.05, 0.14, 0.235, 0.10, 0.20, 0.29, 0.06, 0.16, 0.26, 0.12, 0.22, 0.31];
-    var ly = [0.30, 0.22, 0.33, 0.55, 0.48, 0.60, 0.80, 0.74, 0.84, 0.98, 0.92, 0.99];
-    for (i = 0; i < 12; i++) SLOT_L.push({ x: lx[i], y: Math.min(0.92, ly[i] * 0.9) });
-    var gx = [0.04, 0.17, 0.30, 0.43, 0.56, 0.69, 0.82, 0.95, 0.11, 0.37, 0.63, 0.89];
+    var i;
+    for (i = 0; i < 12; i++) LATY.push(0.18 + Math.floor(i / 4) * 0.30);
+    var jx = [0.02, 0.13, 0.24, 0.07, 0.18, 0.28, 0.03, 0.15, 0.26, 0.10, 0.21, 0.30];
+    var jy = [0.28, 0.20, 0.34, 0.52, 0.44, 0.58, 0.76, 0.68, 0.80, 0.92, 0.86, 0.95];
+    for (i = 0; i < 12; i++) LIQ.push({ x: jx[i], y: jy[i] });
     var gy = [0.55, 0.15, 0.78, 0.32, 0.90, 0.20, 0.62, 0.40, 0.95, 0.06, 0.48, 0.85];
-    for (i = 0; i < 12; i++) SLOT_G.push({ x: gx[i], y: gy[i] });
+    for (i = 0; i < 12; i++) GASY.push(gy[i]);
     for (i = 0; i < 12; i++) PHASE.push((i * 2.399963) % 6.2831853);
   })();
 
+  /* Ordered phase keeps the left zone, free phase the right, so a coexistence
+     round reads as two phases side by side instead of a pile. */
   function slotFor(mode, i, frac) {
-    var n, s;
-    if (mode === 's') return SLOT_S[i];
-    if (mode === 'l') return SLOT_L[i];
-    if (mode === 'g') return SLOT_G[i];
+    var n, m, k;
+    if (mode === 's') return { x: 0.04 + (i % 4) * 0.105, y: LATY[i] };
+    if (mode === 'l') return { x: 0.04 + LIQ[i].x * 1.6, y: LIQ[i].y };
+    if (mode === 'g') return { x: 0.04 + (i / 11) * 0.92, y: GASY[i] };
     n = Math.round(12 * frac);
+    m = i - n; k = Math.max(1, 11 - n);
     if (mode === 'sl') {
-      if (i < n) return SLOT_S[i];
-      s = SLOT_L[i]; return { x: s.x + 0.60, y: s.y };
+      if (i < n) return { x: 0.03 + (i % 4) * 0.095, y: LATY[i] };
+      return { x: 0.56 + (m / k) * 0.40, y: LIQ[i].y };
     }
-    if (i < n) { s = SLOT_L[i]; return { x: s.x + 0.02, y: 0.45 + s.y * 0.5 }; }
-    return SLOT_G[i];
+    if (i < n) return { x: 0.03 + LIQ[i].x * 1.1, y: 0.55 + LIQ[i].y * 0.40 };
+    return { x: 0.48 + (m / k) * 0.50, y: GASY[i] * 0.85 };
   }
 
   function lerp(a, b, t) { return a + (b - a) * t; }
@@ -352,7 +376,7 @@
       side.appendChild(sr);
 
       /* ---- svg scaffolding, built once ---- */
-      var PH = 102, GAPY = 12, BH = 32, SVGH = PH + GAPY + BH;
+      var PH = 96, GAPY = 18, BH = 32, SVGH = PH + GAPY + BH;
       var padL = 36, padR = 12, padT = 18, padB = 16;
 
       var gBg = sv('rect', { fill: '#fff', stroke: '#efe9e0', rx: 8, x: 0, y: 0, width: 10, height: PH });
@@ -391,18 +415,40 @@
       var marker = sv('circle', { r: 4.2, fill: accent, stroke: '#fff', 'stroke-width': 1.5 });
       svg.appendChild(marker);
 
-      var legend = sv('text', { 'font-size': 11, fill: '#a49d92' });
-      legend.textContent = 'the marks show speed';
+      var legend = sv('text', { 'font-size': 11.5, fill: '#5b564e', 'font-weight': 600 });
       svg.appendChild(legend);
-      var speedTag = sv('text', { 'font-size': 11, fill: accent, 'text-anchor': 'end', 'font-weight': 600 });
-      svg.appendChild(speedTag);
+
+      /* A worked key, so the glyph never has to be guessed at. */
+      function glyph(r) {
+        var g = sv('g', {});
+        var a = sv('line', { stroke: '#c9c1b4', 'stroke-width': 2, 'stroke-linecap': 'round' });
+        var b = sv('line', { stroke: '#c9c1b4', 'stroke-width': 2, 'stroke-linecap': 'round' });
+        var c = sv('circle', { r: r, fill: '#8d8880' });
+        g.appendChild(a); g.appendChild(b); g.appendChild(c);
+        return { g: g, a: a, b: b, c: c };
+      }
+      function setMarks(o, cx, cy, s, r) {
+        var gap = r + 2, L = 2 + 10 * s;
+        o.a.setAttribute('x1', cx - gap - L); o.a.setAttribute('x2', cx - gap);
+        o.a.setAttribute('y1', cy); o.a.setAttribute('y2', cy);
+        o.b.setAttribute('x1', cx + gap); o.b.setAttribute('x2', cx + gap + L);
+        o.b.setAttribute('y1', cy); o.b.setAttribute('y2', cy);
+        o.c.setAttribute('cx', cx); o.c.setAttribute('cy', cy);
+      }
+      var keyG = sv('g', {});
+      var keySlow = glyph(3.5), keyFast = glyph(3.5);
+      var keySlowT = sv('text', { 'font-size': 11, fill: '#8d8880' });
+      var keyFastT = sv('text', { 'font-size': 11, fill: '#8d8880' });
+      keySlowT.textContent = 'slow'; keyFastT.textContent = 'fast';
+      keyG.appendChild(keySlow.g); keyG.appendChild(keySlowT);
+      keyG.appendChild(keyFast.g); keyG.appendChild(keyFastT);
+      svg.appendChild(keyG);
 
       var parts = [];
       for (var pi = 0; pi < 12; pi++) {
-        var ln2 = sv('line', { stroke: '#c9c1b4', 'stroke-width': 2, 'stroke-linecap': 'round' });
-        var c2 = sv('circle', { r: 4, fill: '#8d8880' });
-        svg.appendChild(ln2); svg.appendChild(c2);
-        parts.push({ l: ln2, c: c2 });
+        var pg = glyph(4);
+        svg.appendChild(pg.g);
+        parts.push(pg);
       }
 
       /* ---- state ---- */
@@ -506,11 +552,19 @@
         marker.setAttribute('cx', g.x0);
         marker.setAttribute('cy', yOf(round.now));
 
-        legend.setAttribute('visibility', revealed ? 'hidden' : 'visible');
+        var wide = (g.pr - g.pl) >= 245;
         legend.setAttribute('x', g.pl);
-        legend.setAttribute('y', PH + 12);
-        speedTag.setAttribute('x', g.pr);
-        speedTag.setAttribute('y', PH + 12);
+        legend.setAttribute('y', PH + 13);
+        legend.textContent = revealed
+          ? (wide ? 'Particle speed: ' : 'Speed: ') + speedWord()
+          : (wide ? 'Particle speed:' : 'Speed:');
+        legend.setAttribute('fill', revealed ? accent : '#5b564e');
+        keyG.setAttribute('visibility', revealed ? 'hidden' : 'visible');
+        var kx = g.pl + (wide ? 100 : 46), ky = PH + 9;
+        setMarks(keySlow, kx + 14, ky, 0.55, 3.5);
+        keySlowT.setAttribute('x', kx + 32); keySlowT.setAttribute('y', ky + 4);
+        setMarks(keyFast, kx + 90, ky, 1.62, 3.5);
+        keyFastT.setAttribute('x', kx + 118); keyFastT.setAttribute('y', ky + 4);
       }
 
       function endY(kind) {
@@ -562,7 +616,6 @@
         if (round.mode === 'sl' || round.mode === 'lg') {
           frac = revealed ? lerp(round.f0, round.f1, t) : round.f0;
         }
-        var L = 2 + 12 * s;
         for (var i = 0; i < 12; i++) {
           var p = slotFor(round.mode, i, frac);
           var cx = bx + Math.min(0.985, Math.max(0.015, p.x)) * bw;
@@ -571,19 +624,14 @@
             cx += 1.9 * s * Math.sin(PHASE[i] + jig * 0.013);
             cy += 1.6 * s * Math.cos(PHASE[i] * 1.7 + jig * 0.017);
           }
-          parts[i].c.setAttribute('cx', cx);
-          parts[i].c.setAttribute('cy', cy);
-          parts[i].l.setAttribute('x1', cx - L / 2);
-          parts[i].l.setAttribute('x2', cx + L / 2);
-          parts[i].l.setAttribute('y1', cy);
-          parts[i].l.setAttribute('y2', cy);
+          setMarks(parts[i], cx, cy, s, 4);
         }
       }
 
       function speedWord() {
         var tr = truthOf(round);
-        if (tr.t === 'flat') return 'same average speed';
-        return tr.t === 'rise' ? 'faster on average' : 'slower on average';
+        if (tr.t === 'flat') return 'unchanged';
+        return tr.t === 'rise' ? 'faster' : 'slower';
       }
 
       /* ---- interaction ---- */
@@ -688,16 +736,15 @@
 
         if (fb.ok && streak === 3) {
           setCap('Right — three in a row. You have it.',
-            ' The energy still flows during a change of state — into the potential store, not the kinetic one — so the temperature holds flat. That is latent heat.', true);
+            ' The energy still flows — into the potential store, not the kinetic one — so particle speed, and the temperature, hold steady. That is latent heat.', true);
         } else {
           setCap(fb.v, ' ' + fb.b, fb.ok);
         }
 
-        speedTag.textContent = speedWord();
-        legend.setAttribute('visibility', 'hidden');
         go.textContent = mastered ? 'Another anyway' : 'Next';
         updateStreak();
-        say(fb.v + ' ' + fb.b);
+        say(fb.v + ' ' + fb.b + ' Particle speed: ' + speedWord() + '.');
+        drawFrame();
         state();
         playReveal();
       }
@@ -758,8 +805,6 @@
         step1.className = 'step now';
         step2.className = 'step';
         go.textContent = 'Check';
-        speedTag.textContent = '';
-        legend.setAttribute('visibility', 'visible');
         openingCap();
         updateStreak();
 
