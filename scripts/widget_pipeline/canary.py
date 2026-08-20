@@ -105,6 +105,17 @@ def cost_report():
     return total
 
 
+def cost_so_far():
+    """Running calibrated spend, so a long unattended run can stop itself
+    before it eats the whole balance."""
+    led = ledger_load()
+    total = 0.0
+    for c in led["calls"]:
+        pin, pout = PRICES.get(c["model"], (0, 0))
+        total += (c["in"] / 1e6 * pin + c["out"] / 1e6 * pout) * CALIBRATION
+    return total
+
+
 def call(tier, model, label, system, user, max_tokens, temperature=None):
     kw = dict(model=model, max_tokens=max_tokens, system=system,
               messages=[{"role": "user", "content": user}])
