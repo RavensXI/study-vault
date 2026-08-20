@@ -14,17 +14,316 @@
   'use strict';
 
   var MAP = {
-    'science-aqa/physics-paper-1/4': {
-      file: 'series-voltage-split',
-      label: 'Predict the voltmeter',
-      line: 'Two resistors, one loop. Say where the volts go before you find out.',
-      after: 'Parallel Circuits'
+    "astronomy-edexcel/telescopic-astronomy/11": {
+      file: "greenhouse-effect-reemission-not-blanket",
+      label: "Follow the infrared out",
+      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      after: "Radio Telescopes"
     },
-    'history-aqa/elizabethan-england/13': {
-      file: 'armada-chain-of-consequence',
-      label: 'Put the disaster in order',
-      line: 'Five links, shuffled. Commit to the chain, then see what forced what.',
-      after: 'The Long Way Home'
+    "cambridge-nationals-engineering-programmable-systems/principles-of-electronic-and-programmable-systems/2": {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "Ohm's Law: V = I × R"
+    },
+    "electronics-eduqas/discovering-electronics/2": {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "Test Equipment"
+    },
+    "geography-aqa/paper-1/8": {
+      file: "greenhouse-effect-reemission-not-blanket",
+      label: "Follow the infrared out",
+      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      after: "Effects on People and the Environment"
+    },
+    "history-aqa/elizabethan-england/13": {
+      file: "armada-chain-of-consequence",
+      label: "Put the disaster in order",
+      line: "Five links, shuffled. Commit to the chain, then see what forced what.",
+      after: "The Long Way Home"
+    },
+    "psychology-aqa/brain-neuropsychology/2": {
+      file: "synapse-electrical-to-chemical",
+      label: "Find where the signal stops",
+      line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
+      after: "Neurotransmitters and Behaviour"
+    },
+    "psychology-edexcel/brain-neuropsychology/3": {
+      file: "synapse-electrical-to-chemical",
+      label: "Find where the signal stops",
+      line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
+      after: "Neurotransmitters and Behaviour"
+    },
+    "science-aqa/biology-paper-2/1": {
+      file: "synapse-electrical-to-chemical",
+      label: "Find where the signal stops",
+      line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
+      after: "Reflex Actions"
+    },
+    "science-aqa/chemistry-paper-2/5": {
+      file: "greenhouse-effect-reemission-not-blanket",
+      label: "Follow the infrared out",
+      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      after: "The Greenhouse Effect"
+    },
+    "science-aqa/physics-paper-1/1": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "Work Done and Power"
+    },
+    "science-aqa/physics-paper-1/2": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "Efficiency"
+    },
+    "science-aqa/physics-paper-1/3": {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "Electrical Power"
+    },
+    "science-aqa/physics-paper-1/4": [{
+      file: "series-voltage-split",
+      label: "Predict the voltmeter",
+      line: "Two resistors, one loop. Say where the volts go before you find out.",
+      after: "Parallel Circuits"
+    }, {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "Parallel Circuits"
+    }],
+    "science-aqa/physics-paper-1/6": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Density Changes During State Changes"
+    },
+    "science-aqa/physics-paper-1/7": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Particle Model Explanation"
+    },
+    "science-edexcel/biology-paper-2/1": {
+      file: "synapse-electrical-to-chemical",
+      label: "Find where the signal stops",
+      line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
+      after: "The Reflex Arc"
+    },
+    "science-edexcel/chemistry-paper-2/7": {
+      file: "greenhouse-effect-reemission-not-blanket",
+      label: "Follow the infrared out",
+      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      after: "Climate Change"
+    },
+    "science-edexcel/physics-paper-1/1": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "Drawing Energy Transfer Diagrams"
+    },
+    "science-edexcel/physics-paper-1/2": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "Energy Resources"
+    },
+    "science-edexcel/physics-paper-1/4": {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "Parallel Circuits"
+    },
+    "science-edexcel/physics-paper-1/8": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Specific Heat Capacity"
+    },
+    "science-ocr-b/biology-paper-2/5": {
+      file: "synapse-electrical-to-chemical",
+      label: "Find where the signal stops",
+      line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
+      after: "The Endocrine System"
+    },
+    "science-ocr-b/chemistry-paper-1/3": {
+      file: "greenhouse-effect-reemission-not-blanket",
+      label: "Follow the infrared out",
+      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      after: "Key Greenhouse Gases and Their Sources"
+    },
+    "science-ocr-b/physics-paper-1/2": {
+      file: "greenhouse-effect-reemission-not-blanket",
+      label: "Follow the infrared out",
+      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      after: "The Electromagnetic Spectrum and Climate"
+    },
+    "science-ocr-b/physics-paper-1/6": {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "Series and Parallel Circuits"
+    },
+    "science-ocr-b/physics-paper-2/4": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "Work Done"
+    },
+    "science-ocr-b/physics-paper-2/7": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Changes of State and Specific Latent Heat"
+    },
+    "science-ocr/biology-paper-1/6": {
+      file: "synapse-electrical-to-chemical",
+      label: "Find where the signal stops",
+      line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
+      after: "Synapses"
+    },
+    "science-ocr/biology-paper-2/1": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "Biotic and Abiotic Factors"
+    },
+    "science-ocr/chemistry-paper-2/7": {
+      file: "greenhouse-effect-reemission-not-blanket",
+      label: "Follow the infrared out",
+      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      after: "Climate Change"
+    },
+    "science-ocr/physics-paper-1/2": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Specific Heat Capacity"
+    },
+    "science-ocr/physics-paper-1/6": {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "Resistance and Ohm’s Law"
+    },
+    "separate-sciences-edexcel/biology-paper-1/4": {
+      file: "synapse-electrical-to-chemical",
+      label: "Find where the signal stops",
+      line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
+      after: "The Eye (Triple Only)"
+    },
+    "separate-sciences-edexcel/chemistry-paper-2/5": {
+      file: "greenhouse-effect-reemission-not-blanket",
+      label: "Follow the infrared out",
+      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      after: "Human Impact and Climate Change"
+    },
+    "separate-sciences-ocr-b/biology-human-body/4": {
+      file: "synapse-electrical-to-chemical",
+      label: "Find where the signal stops",
+      line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
+      after: "Reflex Actions"
+    },
+    "separate-sciences-ocr-b/chemistry-earth-air-water/3": {
+      file: "greenhouse-effect-reemission-not-blanket",
+      label: "Follow the infrared out",
+      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      after: "The Evidence for Climate Change"
+    },
+    "separate-sciences-ocr-b/physics-energy-electricity/3": {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "I-V Graphs and Non-Ohmic Components"
+    },
+    "separate-sciences-ocr-b/physics-particle-models-universe/1": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Density and Changes of State"
+    },
+    "separate-sciences-ocr-b/physics-radiation-waves/2": {
+      file: "greenhouse-effect-reemission-not-blanket",
+      label: "Follow the infrared out",
+      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      after: "Climate Models and the Role of Evidence"
+    },
+    "separate-sciences-ocr/biology-paper-1/7": {
+      file: "synapse-electrical-to-chemical",
+      label: "Find where the signal stops",
+      line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
+      after: "The Brain"
+    },
+    "separate-sciences-ocr/chemistry-paper-1/1": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Heating and Cooling Curves"
+    },
+    "separate-sciences-ocr/chemistry-paper-2/8": {
+      file: "greenhouse-effect-reemission-not-blanket",
+      label: "Follow the infrared out",
+      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      after: "Climate Change"
+    },
+    "separate-sciences-ocr/physics-paper-1/2": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Specific Heat Capacity"
+    },
+    "separate-sciences-ocr/physics-paper-1/6": {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "Resistance and Ohm’s Law"
+    },
+    "separate-sciences-ocr/physics-paper-1/7": {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "AC and DC"
+    },
+    "separate-sciences/chemistry-paper-2/5": {
+      file: "greenhouse-effect-reemission-not-blanket",
+      label: "Follow the infrared out",
+      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      after: "The Greenhouse Effect"
+    },
+    "separate-sciences/physics-paper-1/1": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "Work Done and Power"
+    },
+    "separate-sciences/physics-paper-1/2": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "Efficiency"
+    },
+    "separate-sciences/physics-paper-1/3": {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "Resistance and Ohm's Law"
+    },
+    "separate-sciences/physics-paper-1/4": {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "Parallel Circuits"
+    },
+    "separate-sciences/physics-paper-1/7": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Particle Model Explanation"
     }
   };
 
@@ -126,10 +425,7 @@
       });
   }
 
-  function inject() {
-    var m = location.pathname.match(/\/lesson\/([^/]+)\/([^/]+)\/(\d+)/);
-    var cfg = m && MAP[m[1] + '/' + m[2] + '/' + m[3]];
-    if (!cfg || document.querySelector('.sv-embed-strip')) return;
+  function placeStrip(cfg) {
     var heads = document.querySelectorAll('#lesson-content h2, .lesson-content h2, article h2');
     var target = null;
     for (var i = 0; i < heads.length; i++) {
@@ -150,7 +446,20 @@
     go.textContent = 'Try it';
     go.addEventListener('click', function () { openModal(cfg, strip); });
     strip.appendChild(go);
-    target.parentNode.insertBefore(strip, target);
+    /* never trap the strip inside a tier-gated block - a widget for a
+       core idea must be visible to Foundation students too */
+    var gate = target.closest && target.closest('.higher-only, .foundation-only');
+    var anchor = gate || target;
+    anchor.parentNode.insertBefore(strip, anchor);
+  }
+
+  function inject() {
+    var m = location.pathname.match(/\/lesson\/([^/]+)\/([^/]+)\/(\d+)/);
+    var cfg = m && MAP[m[1] + '/' + m[2] + '/' + m[3]];
+    if (!cfg || document.querySelector('.sv-embed-strip')) return;
+    /* a lesson can carry more than one interactive (different sections) */
+    var list = Array.isArray(cfg) ? cfg : [cfg];
+    for (var wi = 0; wi < list.length; wi++) placeStrip(list[wi]);
   }
 
   /* Hook the loader's post-render callback.
