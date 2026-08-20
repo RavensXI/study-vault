@@ -17,7 +17,7 @@
     "astronomy-edexcel/telescopic-astronomy/11": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
-      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Radio Telescopes"
     },
     "cambridge-nationals-engineering-programmable-systems/principles-of-electronic-and-programmable-systems/2": {
@@ -35,7 +35,7 @@
     "geography-aqa/paper-1/8": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
-      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Effects on People and the Environment"
     },
     "history-aqa/elizabethan-england/13": {
@@ -65,7 +65,7 @@
     "science-aqa/chemistry-paper-2/5": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
-      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "The Greenhouse Effect"
     },
     "science-aqa/physics-paper-1/1": {
@@ -118,7 +118,7 @@
     "science-edexcel/chemistry-paper-2/7": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
-      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Climate Change"
     },
     "science-edexcel/physics-paper-1/1": {
@@ -154,13 +154,13 @@
     "science-ocr-b/chemistry-paper-1/3": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
-      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Key Greenhouse Gases and Their Sources"
     },
     "science-ocr-b/physics-paper-1/2": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
-      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "The Electromagnetic Spectrum and Climate"
     },
     "science-ocr-b/physics-paper-1/6": {
@@ -196,7 +196,7 @@
     "science-ocr/chemistry-paper-2/7": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
-      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Climate Change"
     },
     "science-ocr/physics-paper-1/2": {
@@ -220,7 +220,7 @@
     "separate-sciences-edexcel/chemistry-paper-2/5": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
-      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Human Impact and Climate Change"
     },
     "separate-sciences-ocr-b/biology-human-body/4": {
@@ -232,7 +232,7 @@
     "separate-sciences-ocr-b/chemistry-earth-air-water/3": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
-      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "The Evidence for Climate Change"
     },
     "separate-sciences-ocr-b/physics-energy-electricity/3": {
@@ -250,7 +250,7 @@
     "separate-sciences-ocr-b/physics-radiation-waves/2": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
-      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Climate Models and the Role of Evidence"
     },
     "separate-sciences-ocr/biology-paper-1/7": {
@@ -268,7 +268,7 @@
     "separate-sciences-ocr/chemistry-paper-2/8": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
-      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Climate Change"
     },
     "separate-sciences-ocr/physics-paper-1/2": {
@@ -292,7 +292,7 @@
     "separate-sciences/chemistry-paper-2/5": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
-      line: "Predict where twelve packets of infrared end up, then run it and see how much comes back down.",
+      line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "The Greenhouse Effect"
     },
     "separate-sciences/physics-paper-1/1": {

@@ -45,6 +45,19 @@ one, they become furniture and get scrolled past.
 
 ## 0b. Commit before feedback
 
+**But commit only where a real prediction exists.** Tom's field ruling on
+the greenhouse widget (20 Aug): its "how many stay trapped?" answer was 0
+in every round, and its "how many return?" answer was "about half" with a
+tolerance - so after round one the student was re-typing a constant, and
+mastery measured arithmetic, not understanding. A question whose answer
+never changes is not a question. When the target idea has no fair,
+variable, checkable question, build a STEP-THROUGH DEMONSTRATION instead:
+the student advances the mechanism stage by stage (and flips any real
+variable, like the CO2 level) rather than answering. Demonstration
+widgets have no verdict and no mastery streak; svState carries
+{step, completed} so achievement is still creditable. The commit-check
+doctrine below applies to every widget that DOES pose a question.
+
 **This is the most important pedagogical rule here, and the current widgets all
 break it.**
 
