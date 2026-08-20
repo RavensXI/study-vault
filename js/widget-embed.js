@@ -32,11 +32,23 @@
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
       after: "Test Equipment"
     },
+    "engineering-aqa/engineering-systems/4": {
+      file: "transformer-voltage-current-tradeoff",
+      label: "Predict the secondary side",
+      line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
+      after: "Input Control Devices: Switches"
+    },
     "geography-aqa/paper-1/8": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Effects on People and the Environment"
+    },
+    "geology-eduqas/geological-time-and-life/3": {
+      file: "half-life-exponential-decay",
+      label: "Predict what is left",
+      line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
+      after: "What Radiometric Dating Actually Dates"
     },
     "history-aqa/elizabethan-england/13": {
       file: "armada-chain-of-consequence",
@@ -56,11 +68,59 @@
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "Neurotransmitters and Behaviour"
     },
+    "religious-studies-aqa/catholic-christianity-beliefs/1": {
+      file: "trinity-three-persons",
+      label: "Sort the Trinity claims",
+      line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
+      after: "Scriptural Origins of the Trinity"
+    },
+    "religious-studies-aqa/christianity-beliefs/1": {
+      file: "trinity-three-persons",
+      label: "Sort the Trinity claims",
+      line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
+      after: "The Oneness of God and the Trinity"
+    },
+    "religious-studies-edexcel/paper-1-catholic-christianity/1": {
+      file: "trinity-three-persons",
+      label: "Sort the Trinity claims",
+      line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
+      after: "Creation and Genesis"
+    },
+    "religious-studies-edexcel/paper-2-catholic-christianity/1": {
+      file: "trinity-three-persons",
+      label: "Sort the Trinity claims",
+      line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
+      after: "Creation: The World as God’s Gift"
+    },
+    "religious-studies-edexcel/paper-2-christianity/1": {
+      file: "trinity-three-persons",
+      label: "Sort the Trinity claims",
+      line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
+      after: "Creation: God and the Universe"
+    },
+    "religious-studies-eduqas/christianity/1": {
+      file: "trinity-three-persons",
+      label: "Sort the Trinity claims",
+      line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
+      after: "Why the Trinity Matters in Practice"
+    },
+    "religious-studies-ocr/christianity-beliefs-and-teachings/1": {
+      file: "trinity-three-persons",
+      label: "Sort the Trinity claims",
+      line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
+      after: "Unitarians and Rejection of the Trinity"
+    },
     "science-aqa/biology-paper-2/1": {
       file: "synapse-electrical-to-chemical",
       label: "Find where the signal stops",
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "Reflex Actions"
+    },
+    "science-aqa/chemistry-paper-1/8": {
+      file: "ion-migration-electrolysis",
+      label: "Predict where the ions go",
+      line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
+      after: "Electrolysis of Molten Compounds"
     },
     "science-aqa/chemistry-paper-2/5": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -109,11 +169,29 @@
       line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
       after: "Particle Model Explanation"
     },
+    "science-aqa/physics-paper-1/8": {
+      file: "half-life-exponential-decay",
+      label: "Predict what is left",
+      line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
+      after: "Uses and Hazards of Radiation"
+    },
+    "science-aqa/physics-paper-2/12": {
+      file: "transformer-voltage-current-tradeoff",
+      label: "Predict the secondary side",
+      line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
+      after: "The National Grid"
+    },
     "science-edexcel/biology-paper-2/1": {
       file: "synapse-electrical-to-chemical",
       label: "Find where the signal stops",
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "The Reflex Arc"
+    },
+    "science-edexcel/chemistry-paper-1/8": {
+      file: "ion-migration-electrolysis",
+      label: "Predict where the ions go",
+      line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
+      after: "Electrolysis of Specific Substances"
     },
     "science-edexcel/chemistry-paper-2/7": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -157,11 +235,29 @@
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Key Greenhouse Gases and Their Sources"
     },
+    "science-ocr-b/chemistry-paper-2/2": {
+      file: "reactivity-series-electron-transfer",
+      label: "Predict the displacement",
+      line: "Decide whether one metal will displace another from its solution, and which metal ends up as the ions.",
+      after: "Reactions with Water and Dilute Acid"
+    },
+    "science-ocr-b/chemistry-paper-2/3": {
+      file: "ion-migration-electrolysis",
+      label: "Predict where the ions go",
+      line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
+      after: "Extracting Aluminium by Electrolysis"
+    },
     "science-ocr-b/physics-paper-1/2": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "The Electromagnetic Spectrum and Climate"
+    },
+    "science-ocr-b/physics-paper-1/5": {
+      file: "transformer-voltage-current-tradeoff",
+      label: "Predict the secondary side",
+      line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
+      after: "Why Transmit at High Voltage?"
     },
     "science-ocr-b/physics-paper-1/6": {
       file: "current-not-used-up",
@@ -174,6 +270,12 @@
       label: "Account for every joule",
       line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
       after: "Work Done"
+    },
+    "science-ocr-b/physics-paper-2/5": {
+      file: "half-life-exponential-decay",
+      label: "Predict what is left",
+      line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
+      after: "Half-Life"
     },
     "science-ocr-b/physics-paper-2/7": {
       file: "state-change-energy-plateau",
@@ -192,6 +294,12 @@
       label: "Account for every joule",
       line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
       after: "Biotic and Abiotic Factors"
+    },
+    "science-ocr/chemistry-paper-2/1": {
+      file: "reactivity-series-electron-transfer",
+      label: "Predict the displacement",
+      line: "Decide whether one metal will displace another from its solution, and which metal ends up as the ions.",
+      after: "Extracting Metals"
     },
     "science-ocr/chemistry-paper-2/7": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -217,11 +325,41 @@
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "The Eye (Triple Only)"
     },
+    "separate-sciences-edexcel/chemistry-paper-1/6": {
+      file: "reactivity-series-electron-transfer",
+      label: "Predict the displacement",
+      line: "Decide whether one metal will displace another from its solution, and which metal ends up as the ions.",
+      after: "Extracting Metals from Their Ores"
+    },
+    "separate-sciences-edexcel/chemistry-paper-1/8": {
+      file: "ion-migration-electrolysis",
+      label: "Predict where the ions go",
+      line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
+      after: "Electrolysis of Molten Ionic Compounds"
+    },
     "separate-sciences-edexcel/chemistry-paper-2/5": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Human Impact and Climate Change"
+    },
+    "separate-sciences-edexcel/physics-paper-1/7": {
+      file: "half-life-exponential-decay",
+      label: "Predict what is left",
+      line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
+      after: "Background Radiation"
+    },
+    "separate-sciences-edexcel/physics-paper-2/4": {
+      file: "transformer-voltage-current-tradeoff",
+      label: "Predict the secondary side",
+      line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
+      after: "The National Grid and Transformers"
+    },
+    "separate-sciences-edexcel/physics-paper-2/7": {
+      file: "transformer-voltage-current-tradeoff",
+      label: "Predict the secondary side",
+      line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
+      after: "Power and Efficiency in Transformers"
     },
     "separate-sciences-ocr-b/biology-human-body/4": {
       file: "synapse-electrical-to-chemical",
@@ -235,11 +373,23 @@
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "The Evidence for Climate Change"
     },
+    "separate-sciences-ocr-b/chemistry-materials-reactions/1": {
+      file: "reactivity-series-electron-transfer",
+      label: "Predict the displacement",
+      line: "Decide whether one metal will displace another from its solution, and which metal ends up as the ions.",
+      after: "Extracting Metals from Their Ores"
+    },
     "separate-sciences-ocr-b/physics-energy-electricity/3": {
       file: "current-not-used-up",
       label: "Predict all three ammeters",
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
       after: "I-V Graphs and Non-Ohmic Components"
+    },
+    "separate-sciences-ocr-b/physics-forces-motion-radioactivity/4": {
+      file: "half-life-exponential-decay",
+      label: "Predict what is left",
+      line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
+      after: "Contamination and Irradiation"
     },
     "separate-sciences-ocr-b/physics-particle-models-universe/1": {
       file: "state-change-energy-plateau",
@@ -265,6 +415,12 @@
       line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
       after: "Heating and Cooling Curves"
     },
+    "separate-sciences-ocr/chemistry-paper-2/2": {
+      file: "ion-migration-electrolysis",
+      label: "Predict where the ions go",
+      line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
+      after: "Electrolysis of Aqueous Solutions"
+    },
     "separate-sciences-ocr/chemistry-paper-2/8": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
@@ -288,6 +444,24 @@
       label: "Predict all three ammeters",
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
       after: "AC and DC"
+    },
+    "separate-sciences-ocr/physics-paper-2/4": {
+      file: "half-life-exponential-decay",
+      label: "Predict what is left",
+      line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
+      after: "Contamination and Irradiation"
+    },
+    "separate-sciences/chemistry-paper-1/6": {
+      file: "reactivity-series-electron-transfer",
+      label: "Predict the displacement",
+      line: "Decide whether one metal will displace another from its solution, and which metal ends up as the ions.",
+      after: "Extraction of Metals"
+    },
+    "separate-sciences/chemistry-paper-1/8": {
+      file: "ion-migration-electrolysis",
+      label: "Predict where the ions go",
+      line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
+      after: "Electrolysis of Molten Compounds"
     },
     "separate-sciences/chemistry-paper-2/5": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -324,6 +498,12 @@
       label: "Predict the next two minutes",
       line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
       after: "Particle Model Explanation"
+    },
+    "separate-sciences/physics-paper-1/8": {
+      file: "half-life-exponential-decay",
+      label: "Predict what is left",
+      line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
+      after: "Uses and Hazards of Radiation"
     }
   };
 

@@ -64,3 +64,15 @@ silently and the test passes vacuously. Use
 `el.dispatchEvent(new MouseEvent('click', {bubbles: true}))` for any
 scripted interaction with SVG controls. (Real pointer and keyboard
 events are unaffected.)
+
+## Two more driver gotchas (found in the field)
+
+- **Namespace your temp files.** Builders run in parallel in the same
+  `builds/` directory; a generically named screenshot or test page WILL
+  be overwritten by a sibling mid-run, and you may verify someone else's
+  widget. Prefix throwaways with your widget id, or use a private temp
+  directory.
+- **`--window-size=420` does not give a 420px layout.** Headless Chrome
+  lays out at a minimum width (~500px) and crops the capture, so narrow
+  screenshots report false clipping. Pin the stage width in CSS on your
+  test page instead of shrinking the window.

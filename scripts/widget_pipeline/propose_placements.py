@@ -8,13 +8,15 @@ where the misconception lives ends... the embed inserts BEFORE the matched
 h2, so we anchor on the heading FOLLOWING the best section where one
 exists, else the best-matching heading itself).
 
-Output: _placements_stage1.json  {cluster_id: [{key, after, title, score}]}
+Output: _placements_%s.json  {cluster_id: [{key, after, title, score}]}
 """
 import json, io, os, re, urllib.request
 
-CLUSTERS = ["greenhouse-effect-reemission-not-blanket", "current-not-used-up",
-            "state-change-energy-plateau", "synapse-electrical-to-chemical",
-            "conservation-of-energy-dispersal"]
+import sys
+CLUSTERS = sys.argv[1:] or [
+    "greenhouse-effect-reemission-not-blanket", "current-not-used-up",
+    "state-change-energy-plateau", "synapse-electrical-to-chemical",
+    "conservation-of-energy-dispersal"]
 
 SB = os.environ["SUPABASE_URL"].rstrip("/")
 KEY = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ["SUPABASE_ANON_KEY"]
@@ -83,6 +85,7 @@ for cid in CLUSTERS:
     ok = sum(1 for r in rows if r.get("after"))
     print("%s: %d/%d placed" % (cid, ok, len(rows)), flush=True)
 
-io.open("_placements_stage1.json", "w", encoding="utf-8").write(
+OUT = "_placements_stage1.json" if not sys.argv[1:] else "_placements_stage2.json"
+io.open(OUT, "w", encoding="utf-8").write(
     json.dumps(out, indent=1, ensure_ascii=False))
-print("wrote _placements_stage1.json")
+print("wrote " + OUT)
