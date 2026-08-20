@@ -71,51 +71,51 @@
       if (tr.t === 'flat') {
         return { ok: true,
           v: heat ? 'Flat — and ' + J + ' J still went in.'
-                  : 'Flat — and about ' + J + ' J still came out.',
+                  : 'Flat — and ' + J + ' J still came out.',
           b: r.changing === 'boil'
-              ? 'It went to the potential store, pulling the molecules apart from each other; the molecules themselves stay whole. Average kinetic energy, and the temperature, holds.'
+              ? 'It went to the potential store, pulling the molecules apart — they are not broken up themselves. Average kinetic energy is unchanged.'
               : r.changing === 'condense'
-              ? 'It came out of the potential store as the molecules pulled back together; they were never broken apart themselves. Average kinetic energy, and the temperature, holds.'
+              ? 'It came from the potential store as the molecules pulled together — they were never broken up. Average kinetic energy is unchanged.'
               : heat
-              ? 'It went to the potential store, pulling particles apart against the forces holding them. Average kinetic energy is unchanged, so the thermometer holds — that is latent heat.'
-              : 'It came out of the potential store as particles pulled together and the forces re-formed. Average kinetic energy is unchanged, so the thermometer holds — that is latent heat.' };
+              ? 'It went to the potential store, pulling particles apart against the forces holding them. Average kinetic energy is unchanged: latent heat.'
+              : 'It came from the potential store as particles pulled together and the forces re-formed. Average kinetic energy is unchanged: latent heat.' };
       }
       if (tr.t === 'rise') {
-        return { ok: true, v: 'Rising — and nothing here is changing state.',
-          b: 'So all of the energy goes to the kinetic store. The particles speed up, and a higher average kinetic energy is exactly what the thermometer reads.' };
+        return { ok: true, v: 'Rising — nothing is changing state.',
+          b: 'So all of the energy goes to the kinetic store. The particles speed up, and that is what the thermometer reads.' };
       }
-      return { ok: true, v: 'Falling — and nothing here is changing state.',
-        b: 'So the energy leaving comes out of the kinetic store. The particles slow down, and the thermometer follows them down.' };
+      return { ok: true, v: 'Falling — nothing is changing state.',
+        b: 'So the energy leaving comes out of the kinetic store. The particles slow down, and the thermometer follows.' };
     }
 
     if (pe === 'none') {
       return { ok: false,
         v: heat ? 'The heater has not stopped.' : 'It has not stopped losing energy.',
         b: heat
-            ? J + ' J still arrived over those two minutes. It is not lost — it is held in the pulled-apart arrangement of the particles, and you get it back on freezing.'
-            : 'About ' + J + ' J still left over those two minutes. It comes out of the store held in the arrangement of the particles as they pull back together.' };
+            ? 'The energy is not lost: ' + J + ' J still arrived, and it is now held in the pulled-apart arrangement of the particles.'
+            : 'About ' + J + ' J still left, and it came out of the store held in the arrangement of the particles as they pulled together.' };
     }
 
     if (pt !== tr.t) {
       if (tr.t === 'flat') {
         return { ok: false, v: 'Not quite — the line stays flat.',
-          b: (heat ? 'The heater has not changed: ' + J + ' J still arrived. ' : 'About ' + J + ' J still left. ') +
-             'While two states sit together at ' + degC(r.now) + ', every joule is spent on the forces between particles, so the temperature cannot move.' };
+          b: (heat ? J + ' J still arrived. ' : 'About ' + J + ' J still left. ') +
+             'While two states sit together at ' + degC(r.now) + ', every joule goes to the forces between particles, not to speed.' };
       }
       if (tr.t === 'rise') {
         return { ok: false, v: 'Not quite — the line rises.',
-          b: 'Nothing here is changing state, so there are no forces to overcome. All of the energy goes to the kinetic store, the particles speed up, and the thermometer climbs.' };
+          b: 'Nothing is changing state, so there are no forces to overcome. All of the energy goes to the kinetic store and particles speed up.' };
       }
       return { ok: false, v: 'Not quite — the line falls.',
-        b: 'Nothing here is changing state, so the energy leaving comes straight out of the kinetic store. The particles slow down and the thermometer drops.' };
+        b: 'Nothing is changing state, so the energy leaving comes straight out of the kinetic store. The particles slow down.' };
     }
 
     if (tr.e === 'pot') {
-      return { ok: false, v: 'The flat line was right — the energy was not.',
-        b: 'If the energy were changing how fast the particles move, the thermometer would move too. A flat line is the signature of energy going to the potential store instead.' };
+      return { ok: false, v: 'The flat line was right.',
+        b: 'If the energy were changing how fast the particles move, the thermometer would move too. A flat line means the potential store.' };
     }
-    return { ok: false, v: 'The direction was right — the energy was not.',
-      b: 'Nothing here is changing state, so no forces are being overcome and none are re-forming. Every joule goes to the kinetic store instead.' };
+    return { ok: false, v: 'The direction was right.',
+      b: 'Nothing is changing state, so no forces are being overcome and none are re-forming. Every joule goes to the kinetic store.' };
   }
 
   /* --------------------------------------------------------- particle art */
@@ -155,22 +155,25 @@
   var CSS = [
     '.' + RC + '{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#2d2a26;line-height:1.4}',
     '.' + RC + ' *{box-sizing:border-box}',
-    '.' + RC + ' .k{font-size:.66rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--svw-a);margin:0 0 3px}',
-    '.' + RC + ' .t{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:1.2rem;line-height:1.2;margin:0 0 9px}',
+    '.' + RC + ' .k{font-size:.66rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--svw-a);margin:0 0 2px}',
+    '.' + RC + ' .t{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:1.2rem;line-height:1.2;margin:0 0 8px}',
+    '.' + RC + ' .frame{margin:0 0 10px}',
+    '.' + RC + ' .sample{font-size:.82rem;font-weight:600;color:#2d2a26;margin:0 0 3px;font-variant-numeric:tabular-nums}',
+    '.' + RC + ' .ask{font-size:.82rem;line-height:1.45;color:#5b564e;margin:0}',
+    '.' + RC + ' .step{display:inline-block;min-width:17px;height:17px;line-height:17px;text-align:center;border-radius:5px;background:#efe9e0;color:#8d8880;font-size:.68rem;font-weight:700;margin-right:7px;vertical-align:1px}',
+    '.' + RC + ' .step.now{background:#2d2a26;color:#fff}',
+    '.' + RC + ' .step.done{background:var(--svw-a-soft);color:#2d2a26}',
     '.' + RC + ' .wrap{display:grid;gap:12px;align-items:start}',
     '.' + RC + ' .wrap>*{min-width:0}',
     '.' + RC + '.is-wide .wrap{grid-template-columns:1.08fr 1fr;gap:18px}',
-    '.' + RC + ' .stage{min-width:0;background:#faf8f5;border:1px solid #e8e2d9;border-radius:12px;padding:9px 11px 7px}',
-    '.' + RC + ' .chip{display:inline-block;font-size:.71rem;font-weight:600;border-radius:999px;padding:3px 9px;background:var(--svw-a-soft);color:#2d2a26}',
-    '.' + RC + ' .now{font-size:.79rem;color:#5b564e;margin:6px 0 1px;font-variant-numeric:tabular-nums}',
-    '.' + RC + ' .now b{color:#2d2a26;font-weight:600}',
+    '.' + RC + ' .stage{min-width:0;background:#faf8f5;border:1px solid #e8e2d9;border-radius:12px;padding:8px 11px 6px}',
     '.' + RC + ' .plot{position:relative;width:100%;min-width:0;overflow:hidden}',
     '.' + RC + ' .plot svg{position:absolute;left:0;top:0;width:100%;height:100%;display:block}',
     '.' + RC + ' svg text{font-family:Inter,system-ui,sans-serif}',
-    '.' + RC + ' .lab{font-size:.74rem;font-weight:600;color:#8d8880;margin:0 0 5px}',
+    '.' + RC + ' .lab{font-size:.74rem;font-weight:600;color:#8d8880;margin:0 0 4px}',
     '.' + RC + ' .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}',
     '.' + RC + ' .row3 .b{min-width:0;overflow:hidden;text-overflow:ellipsis}',
-    '.' + RC + ' .col{display:grid;gap:5px;margin:0 0 9px}',
+    '.' + RC + ' .col{display:grid;gap:5px;margin:0 0 7px}',
     '.' + RC + ' .b{font-family:inherit;font-size:.8rem;font-weight:600;line-height:1.25;color:#2d2a26;background:#faf8f5;border:1px solid #ddd7cd;border-radius:10px;padding:.44rem .55rem;cursor:pointer;text-align:left;-webkit-appearance:none;appearance:none}',
     '.' + RC + ' .row3 .b{text-align:center;padding:.48rem .25rem;font-size:.78rem}',
     '.' + RC + ' .b:hover{border-color:#c9c1b4}',
@@ -178,14 +181,14 @@
     '.' + RC + ' .b:disabled{cursor:default;color:#a49d92}',
     '.' + RC + ' .b.true{background:var(--svw-a-soft);border-color:var(--svw-a);color:#2d2a26;box-shadow:inset 0 0 0 1px var(--svw-a)}',
     '.' + RC + ' .b.miss{background:#fff;border:1px dashed #c9c1b4;color:#8d8880;box-shadow:none}',
-    '.' + RC + ' .picked{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;font-size:.79rem;color:#5b564e;margin:0 0 9px}',
+    '.' + RC + ' .picked{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;font-size:.79rem;color:#5b564e;margin:0 0 6px}',
     '.' + RC + ' .picked b{color:#2d2a26;font-weight:600}',
     '.' + RC + ' .lk{font-family:inherit;font-size:.75rem;font-weight:600;color:#5b564e;background:none;border:0;border-bottom:1px solid #c9c1b4;padding:0;cursor:pointer}',
     '.' + RC + ' .act{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:2px 0 0}',
     '.' + RC + ' .go{font-family:inherit;font-size:.82rem;font-weight:600;color:#fff;background:#2d2a26;border:1px solid #2d2a26;border-radius:10px;padding:.5rem 1.05rem;cursor:pointer}',
     '.' + RC + ' .streak{font-size:.75rem;color:#8d8880;flex:1 1 8ch;min-width:0}',
     '.' + RC + ' .streak.m{color:#4f7d63;font-weight:600}',
-    '.' + RC + ' .cap{font-size:.84rem;line-height:1.45;color:#5b564e;margin:8px 0 0;min-height:64px}',
+    '.' + RC + ' .cap{font-size:.84rem;line-height:1.45;color:#5b564e;margin:6px 0 0;min-height:44px}',
     '.' + RC + ' .cap b{display:block;color:#2d2a26;font-weight:600;margin:0 0 2px}',
     '.' + RC + ' .cap b.g{color:#4f7d63}',
     '.' + RC + ' .sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}',
@@ -231,17 +234,17 @@
       root.appendChild(mk('p', 'k', 'Heating and cooling curves'));
       root.appendChild(mk('h3', 't', 'Where does the energy go?'));
 
+      var frame = mk('div', 'frame');
+      var sampleEl = mk('p', 'sample', '');
+      var askEl = mk('p', 'ask', '');
+      frame.appendChild(sampleEl);
+      frame.appendChild(askEl);
+      root.appendChild(frame);
+
       var wrap = mk('div', 'wrap');
       root.appendChild(wrap);
 
       var stage = mk('div', 'stage');
-      var chip = mk('span', 'chip', '');
-      stage.appendChild(chip);
-      var nowLine = mk('p', 'now');
-      var nowLbl = mk('b', null, '');
-      nowLine.appendChild(document.createTextNode('Now: '));
-      nowLine.appendChild(nowLbl);
-      stage.appendChild(nowLine);
 
       var plotWrap = mk('div', 'plot');
       var svg = sv('svg', { xmlns: NS, role: 'img', preserveAspectRatio: 'none' });
@@ -257,7 +260,10 @@
 
       /* question 1 */
       var q1 = mk('div', 'q1');
-      var q1lab = mk('p', 'lab', 'What does the thermometer do next?');
+      var q1lab = mk('p', 'lab');
+      var step1 = mk('span', 'step', '1');
+      q1lab.appendChild(step1);
+      q1lab.appendChild(document.createTextNode('What does the thermometer do next?'));
       q1.appendChild(q1lab);
       var q1row = mk('div', 'row3');
       var TOPTS = [
@@ -278,6 +284,8 @@
 
       /* collapsed summary of question 1 */
       var picked = mk('div', 'picked hide');
+      var step1b = mk('span', 'step done', '1');
+      picked.appendChild(step1b);
       picked.appendChild(mk('span', null, 'Thermometer:'));
       var pickedVal = mk('b', null, '');
       picked.appendChild(pickedVal);
@@ -289,7 +297,11 @@
 
       /* question 2 */
       var q2 = mk('div', 'q2 hide');
-      var q2lab = mk('p', 'lab', '');
+      var q2lab = mk('p', 'lab');
+      var step2 = mk('span', 'step', '2');
+      var q2labText = document.createTextNode('');
+      q2lab.appendChild(step2);
+      q2lab.appendChild(q2labText);
       q2.appendChild(q2lab);
       var q2col = mk('div', 'col');
       var eKeys = ['kin', 'pot', 'none'];
@@ -327,7 +339,7 @@
       side.appendChild(sr);
 
       /* ---- svg scaffolding, built once ---- */
-      var PH = 118, GAPY = 16, BH = 36, SVGH = PH + GAPY + BH;
+      var PH = 102, GAPY = 12, BH = 32, SVGH = PH + GAPY + BH;
       var padL = 36, padR = 12, padT = 18, padB = 16;
 
       var gBg = sv('rect', { fill: '#fff', stroke: '#efe9e0', rx: 8, x: 0, y: 0, width: 10, height: PH });
@@ -574,6 +586,8 @@
         picked.classList.remove('hide');
         q1.classList.add('hide');
         q2.classList.remove('hide');
+        step1.className = 'step done';
+        step2.className = 'step now';
         drawLines();
         state();
         say('Prediction sketched on the graph: ' + pickedVal.textContent + '. Now choose where the energy goes.');
@@ -584,6 +598,7 @@
         if (revealed) return;
         q1.classList.remove('hide');
         picked.classList.add('hide');
+        step1.className = 'step now';
         state();
         tBtns[0].focus();
       }
@@ -607,12 +622,7 @@
       }
       function say(s) { sr.textContent = s; }
 
-      function openingCap() {
-        var heat = round.dir === 'heat';
-        setCap(heat ? 'The heater stays on throughout.' : 'The cooling carries on throughout.',
-          heat ? ' It delivers the same energy every second for the whole two minutes — nothing about it changes.'
-               : ' The same energy leaves every second for the whole two minutes — nothing about it changes.', false);
-      }
+      function openingCap() { setCap('', '', false); }
 
       function onGo() {
         if (!revealed) {
@@ -658,13 +668,14 @@
           b.classList.toggle('miss', eKeys[i] === pickE && pickE !== tr.e);
         });
         changeBtn.disabled = true;
+        step2.className = 'step done';
         q1.classList.add('hide');
         picked.classList.remove('hide');
         q2.classList.remove('hide');
 
         if (fb.ok && streak === 3) {
           setCap('Three in a row — you have it.',
-            ' Energy keeps flowing during a change of state, but into the potential store, not the kinetic one. The forces between particles give way, so the temperature holds flat: latent heat.', true);
+            ' During a change of state the energy still flows — into the potential store, not the kinetic one. The temperature holds flat: latent heat.', true);
         } else {
           setCap(fb.v, ' ' + fb.b, fb.ok);
         }
@@ -680,14 +691,14 @@
 
       function updateStreak() {
         if (mastered) {
-          streakEl.textContent = 'You have shown it three times running.';
+          streakEl.textContent = 'Three in a row.';
           streakEl.className = 'streak m';
           return;
         }
         streakEl.className = 'streak';
-        if (streak === 0) streakEl.textContent = revealed ? 'Run reset — three in a row ends it.' : '';
-        else if (streak === 1) streakEl.textContent = '1 right in a row — two more.';
-        else streakEl.textContent = '2 right in a row — one more and you have it.';
+        if (streak === 0) streakEl.textContent = revealed ? 'Back to zero — you need three.' : '';
+        else if (streak === 1) streakEl.textContent = '1 in a row — two more.';
+        else streakEl.textContent = '2 in a row — one more.';
       }
 
       function playReveal() {
@@ -713,10 +724,10 @@
         if (raf) { cancelAnimationFrame(raf); raf = 0; }
         round = r; pickT = null; pickE = null; revealed = false; animT = 0;
 
-        chip.textContent = r.sub + (r.dir === 'heat'
-          ? ' · heater on, ' + fmt(r.pow) + ' J each second'
-          : ' · losing about ' + fmt(r.pow) + ' J each second');
-        nowLbl.textContent = r.ctx;
+        sampleEl.textContent = r.sub + ' at ' + r.ctx;
+        askEl.textContent = (r.dir === 'heat'
+          ? 'A heater puts ' + fmt(r.pow) + ' J into it every second for two minutes. Predict what the thermometer does — and where that energy goes.'
+          : 'It gives out about ' + fmt(r.pow) + ' J every second for two minutes. Predict what the thermometer does — and where it comes from.');
 
         q1.classList.remove('hide');
         picked.classList.add('hide');
@@ -726,11 +737,13 @@
         eBtns.forEach(function (b) { b.disabled = false; b.classList.remove('on', 'true', 'miss'); b.setAttribute('aria-pressed', 'false'); });
 
         var heat = r.dir === 'heat';
-        q2lab.textContent = heat ? 'Where does that energy go?' : 'Where does that energy come from?';
+        q2labText.nodeValue = heat ? 'Where does that energy go?' : 'Where does that energy come from?';
         eBtns[0].textContent = heat ? 'Kinetic store — particles speed up' : 'Kinetic store — particles slow down';
         eBtns[1].textContent = heat ? 'Potential store — pulling particles apart' : 'Potential store — forces re-forming';
         eBtns[2].textContent = heat ? 'Nowhere — the heater has stopped' : 'Nowhere — it has stopped losing energy';
 
+        step1.className = 'step now';
+        step2.className = 'step';
         go.textContent = 'Check';
         speedTag.textContent = '';
         legend.setAttribute('visibility', 'visible');
@@ -748,6 +761,7 @@
           tBtns.forEach(function (b) { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); });
           eBtns.forEach(function (b) { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); });
           q1.classList.remove('hide'); picked.classList.add('hide'); q2.classList.add('hide');
+          step1.className = 'step now'; step2.className = 'step';
           drawLines();
           openingCap();
           say('Prediction cleared.');

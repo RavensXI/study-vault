@@ -3,9 +3,14 @@
 
    Twelve packets of infrared leave the warm surface. Some meet a greenhouse
    gas molecule on the way up. The student commits to a prediction — how many
-   come BACK DOWN, and how many STAY STUCK in the atmosphere — then runs it.
+   come BACK DOWN, and how many STAY TRAPPED in the air — then runs it.
 
-   The "stuck" row is the blanket picture written as a number. It comes out
+   A task frame under the title states the scenario and the ask; the three
+   control groups are numbered 1-2-3 so the setting, the prediction and the
+   commit do not read as equal siblings; and every dot in the picture is
+   named by a legend, so nothing on the stage is decoration.
+
+   The "trapped" row is the blanket picture written as a number. It comes out
    zero every single time, because a molecule that absorbs infrared re-emits
    it within a fraction of a second, in a direction it cannot choose. Half of
    what it absorbs therefore heads back towards the ground.
@@ -32,26 +37,30 @@
     '.svw-ghg{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#2d2a26;line-height:1.4}',
     '.svw-ghg *{box-sizing:border-box}',
     '.svw-ghg .ghg-kick{font-size:.66rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--ghg-accent);margin:0 0 .16rem}',
-    '.svw-ghg .ghg-ttl{font-family:"Source Serif 4",Georgia,serif;font-size:1.2rem;font-weight:600;line-height:1.2;margin:0 0 .55rem;color:#2d2a26}',
-    '.svw-ghg .ghg-stage{background:#faf8f5;border:1px solid #e8e2d9;border-radius:12px;overflow:hidden;margin:0 0 .6rem}',
+    '.svw-ghg .ghg-ttl{font-family:"Source Serif 4",Georgia,serif;font-size:1.2rem;font-weight:600;line-height:1.2;margin:0 0 .3rem;color:#2d2a26}',
+    '.svw-ghg .ghg-frame{font-size:.82rem;line-height:1.45;color:#5b564e;margin:0 0 .55rem}',
+    '.svw-ghg .ghg-frame b{font-weight:600;color:#2d2a26}',
+    '.svw-ghg .ghg-stage{background:#faf8f5;border:1px solid #e8e2d9;border-radius:12px;overflow:hidden;margin:0 0 .5rem}',
     '.svw-ghg .ghg-stage svg{display:block;width:100%}',
     '.svw-ghg .ghg-ctl{display:grid;grid-template-columns:1fr;gap:.5rem}',
     '.svw-ghg.ghg-wide .ghg-ctl{grid-template-columns:minmax(150px,.8fr) 1.6fr;gap:.9rem;align-items:start}',
-    '.svw-ghg .ghg-lab{font-size:.72rem;font-weight:600;color:#5b564e;margin:0 0 .28rem;line-height:1.35}',
+    '.svw-ghg .ghg-lab{display:flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;color:#5b564e;margin:0 0 .26rem;line-height:1.35}',
+    '.svw-ghg .ghg-sub{padding-left:calc(17px + .4rem)}',
+    '.svw-ghg .ghg-step{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:6px;background:var(--ghg-soft);color:var(--ghg-accent);font-size:.66rem;font-weight:700;line-height:1}',
     '.svw-ghg .ghg-row{display:flex;flex-wrap:wrap;gap:.28rem}',
-    '.svw-ghg .ghg-row+.ghg-lab{margin-top:.45rem}',
+    '.svw-ghg .ghg-row+.ghg-lab{margin-top:.4rem}',
     '.svw-ghg button{font-family:inherit;cursor:pointer;color:#2d2a26}',
-    '.svw-ghg .ghg-opt{font-size:.78rem;font-weight:600;padding:.44rem .6rem;border-radius:9px;border:1px solid #ddd7cd;background:#faf8f5;line-height:1.15}',
+    '.svw-ghg .ghg-opt{font-size:.78rem;font-weight:600;padding:.42rem .6rem;border-radius:9px;border:1px solid #ddd7cd;background:#faf8f5;line-height:1.15}',
     '.svw-ghg .ghg-opt[aria-pressed="true"]{background:#2d2a26;border-color:#2d2a26;color:#fff}',
-    '.svw-ghg .ghg-chip{flex:1 1 0;min-width:32px;text-align:center;padding:.44rem .1rem;font-variant-numeric:tabular-nums}',
+    '.svw-ghg .ghg-chip{flex:1 1 0;min-width:32px;text-align:center;padding:.42rem .1rem;font-variant-numeric:tabular-nums}',
     '.svw-ghg .ghg-need{border-color:var(--ghg-accent);box-shadow:0 0 0 2px var(--ghg-soft)}',
-    '.svw-ghg .ghg-derived{font-size:.74rem;color:#8d8880;margin:.36rem 0 0;font-variant-numeric:tabular-nums}',
-    '.svw-ghg .ghg-foot{display:flex;align-items:center;gap:.6rem;margin:.65rem 0 0}',
+    '.svw-ghg .ghg-derived{font-size:.74rem;color:#8d8880;margin:.3rem 0 0;font-variant-numeric:tabular-nums}',
+    '.svw-ghg .ghg-foot{display:flex;align-items:center;gap:.5rem;margin:.55rem 0 0}',
     '.svw-ghg .ghg-go{font-size:.82rem;font-weight:600;padding:.5rem .95rem;border-radius:10px;border:1px solid #ddd7cd;background:#faf8f5}',
     '.svw-ghg .ghg-go.ghg-primary{background:#2d2a26;border-color:#2d2a26;color:#fff}',
     '.svw-ghg .ghg-streak{font-size:.74rem;color:#8d8880;font-variant-numeric:tabular-nums}',
     '.svw-ghg .ghg-streak.ghg-done{color:#4f7d63;font-weight:600}',
-    '.svw-ghg .ghg-cap{font-size:.84rem;line-height:1.5;margin:.5rem 0 0;min-height:4.6em;color:#2d2a26}',
+    '.svw-ghg .ghg-cap{font-size:.84rem;line-height:1.5;margin:.45rem 0 0;min-height:3.1em;color:#2d2a26}',
     '.svw-ghg .ghg-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}'
   ].join('\n');
 
@@ -79,6 +88,20 @@
     return arr;
   }
   function clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
+  /* a numbered chip carries the ORDER of the three control groups, so the
+     setting, the prediction and the commit do not read as equal siblings */
+  function stepChip(n) {
+    var s = el('span', 'ghg-step', String(n));
+    s.setAttribute('aria-hidden', 'true');
+    return s;
+  }
+  function labelWith(step, text, extra) {
+    var d = el('div', 'ghg-lab' + (extra ? ' ' + extra : ''));
+    if (step) d.appendChild(stepChip(step));
+    d.words = el('span', '', text);
+    d.appendChild(d.words);
+    return d;
+  }
 
   window.SVWidget = {
     meta: {
@@ -123,6 +146,15 @@
       root.appendChild(el('div', 'ghg-kick', 'Greenhouse effect'));
       root.appendChild(el('h3', 'ghg-ttl', 'Where does the infrared go?'));
 
+      /* task frame: the scenario, then the ask. Not a how-to. */
+      var frame = el('p', 'ghg-frame');
+      frame.appendChild(document.createTextNode('The warm ground gives out '));
+      frame.appendChild(el('b', '', '12 packets of infrared radiation'));
+      frame.appendChild(document.createTextNode(
+        ', heading up towards space. Predict how many escape, how many come back down, ' +
+        'and how many stay trapped — then run it.'));
+      root.appendChild(frame);
+
       var stageBox = el('div', 'ghg-stage');
       root.appendChild(stageBox);
 
@@ -130,15 +162,15 @@
       root.appendChild(ctl);
 
       var gSky = el('div', 'ghg-grp');
-      gSky.appendChild(el('div', 'ghg-lab', 'Greenhouse gas in the air'));
+      gSky.appendChild(labelWith(1, 'Greenhouse gas in the air'));
       var skyRow = el('div', 'ghg-row');
       gSky.appendChild(skyRow);
       ctl.appendChild(gSky);
 
       var gPred = el('div', 'ghg-grp');
-      var labDown = el('div', 'ghg-lab', 'How many of the 12 come back down to the surface?');
+      var labDown = labelWith(2, 'How many come back down?');
       var rowDown = el('div', 'ghg-row');
-      var labStuck = el('div', 'ghg-lab', 'How many stay stuck up in the atmosphere?');
+      var labStuck = labelWith(0, 'How many stay trapped in the air?', 'ghg-sub');
       var rowStuck = el('div', 'ghg-row');
       var derived = el('div', 'ghg-derived', '');
       gPred.appendChild(labDown); gPred.appendChild(rowDown);
@@ -150,6 +182,7 @@
       var goBtn = el('button', 'ghg-go', 'Run it');
       goBtn.type = 'button';
       var streakOut = el('span', 'ghg-streak', '');
+      foot.appendChild(stepChip(3));
       foot.appendChild(goBtn); foot.appendChild(streakOut);
       root.appendChild(foot);
 
@@ -198,12 +231,12 @@
         return btns;
       }
       var downBtns = chipRow(rowDown, 'down', 'back down to the surface');
-      var stuckBtns = chipRow(rowStuck, 'stuck', 'stuck in the atmosphere');
+      var stuckBtns = chipRow(rowStuck, 'stuck', 'trapped in the air');
 
       /* --- stage ---------------------------------------------------------- */
       var geo = null;
       var svgRoot = null;
-      var tGas = null;
+      var legend = null;
 
       function stageWidth() {
         var w = Math.round(stageBox.clientWidth || stageBox.getBoundingClientRect().width);
@@ -216,9 +249,9 @@
 
       function buildGeometry() {
         var W = stageWidth();
-        var H = isWide() ? 178 : 164;
+        var H = isWide() ? 164 : 144;
         var padX = 12;
-        var toaY = 34;
+        var toaY = 30;
         var groundTop = H - 22;
         var bandTop = toaY + 12;
         var bandBot = groundTop - 24;
@@ -311,12 +344,9 @@
         svgRoot.appendChild(svg('rect', { x: 0, y: geo.groundTop, width: W, height: H - geo.groundTop, fill: '#c9bfae' }));
         svgRoot.appendChild(svg('line', { x1: 0, y1: geo.groundTop, x2: W, y2: geo.groundTop, stroke: '#b0a693', 'stroke-width': 1 }));
 
-        var tSpace = svg('text', { x: 10, y: 20, fill: '#8d8880', 'font-size': '11', 'letter-spacing': '.08em', 'font-family': 'Inter,system-ui,sans-serif' });
+        var tSpace = svg('text', { x: 10, y: 19, fill: '#8d8880', 'font-size': '11', 'letter-spacing': '.08em', 'font-family': 'Inter,system-ui,sans-serif' });
         tSpace.textContent = 'SPACE';
         svgRoot.appendChild(tSpace);
-        tGas = svg('text', { x: W - 10, y: 20, fill: '#8d8880', 'font-size': '11', 'text-anchor': 'end', 'font-family': 'Inter,system-ui,sans-serif' });
-        tGas.textContent = 'gases: CO₂ · CH₄ · H₂O';
-        svgRoot.appendChild(tGas);
         var tSurf = svg('text', { x: 10, y: H - 7, fill: '#584f42', 'font-size': '11', 'letter-spacing': '.08em', 'font-family': 'Inter,system-ui,sans-serif' });
         tSurf.textContent = 'SURFACE';
         svgRoot.appendChild(tSurf);
@@ -328,6 +358,31 @@
           gMol.appendChild(m.node);
         });
         svgRoot.appendChild(gMol);
+
+        /* legend: name both kinds of dot, so nothing in the picture is
+           decoration. Both are replaced by the tallies after a run. */
+        legend = svg('g', {});
+        function key(x, y, text, fill, anchor, haloFill) {
+          var t = svg('text', {
+            x: x, y: y, fill: fill, 'font-size': '11', 'text-anchor': anchor,
+            'font-family': 'Inter,system-ui,sans-serif',
+            stroke: haloFill, 'stroke-width': '3', 'paint-order': 'stroke',
+            'stroke-linejoin': 'round'
+          });
+          t.textContent = text;
+          legend.appendChild(t);
+          return t;
+        }
+        var kGas = key(W - 10, geo.toaY + 13, 'greenhouse gas molecules', '#6f685d', 'end', '#f2ede4');
+        var kPk = key(W - 10, H - 7, '12 infrared packets', '#584f42', 'end', '#c9bfae');
+        svgRoot.appendChild(legend);
+        [[kGas, '#b8afa1', geo.toaY + 9], [kPk, '#2d2a26', H - 11]].forEach(function (pair) {
+          var wid = 130;
+          try { wid = pair[0].getComputedTextLength() || wid; } catch (e) { /* estimate */ }
+          legend.insertBefore(svg('circle', {
+            cx: clamp(W - 14 - wid - 4, 8, W - 8), cy: pair[2], r: 3, fill: pair[1]
+          }), pair[0]);
+        });
 
         /* flight paths, hidden until the run */
         flights = [];
@@ -373,21 +428,22 @@
         if (!svgRoot || !svgRoot.tallyGroup) return;
         var g = svgRoot.tallyGroup;
         while (g.firstChild) g.removeChild(g.firstChild);
-        if (tGas) tGas.setAttribute('opacity', 0);
+        if (legend) legend.setAttribute('opacity', 0);
         var W = geo.W, H = geo.H;
-        function tag(x, y, text, fill, weight, anchor) {
+        function tag(x, y, text, fill, halo, weight, anchor) {
           var t = svg('text', {
             x: x, y: y, fill: fill, 'font-size': '11.5', 'text-anchor': anchor || 'end',
             'font-weight': weight || '600', 'font-family': 'Inter,system-ui,sans-serif',
-            stroke: '#faf8f5', 'stroke-width': '3.5', 'paint-order': 'stroke',
+            stroke: halo, 'stroke-width': '3.5', 'paint-order': 'stroke',
             'stroke-linejoin': 'round'
           });
           t.textContent = text;
           g.appendChild(t);
         }
-        tag(W - 10, 20, S.truth.space + ' out to space', '#5b564e');
-        tag(10, geo.toaY + 20, S.truth.stuck + ' stuck in the gas', '#8d8880', '500', 'start');
-        tag(W - 10, H - 7, S.truth.down + ' back to the surface', accent, '700');
+        /* each tally is haloed in the colour of the band it sits in */
+        tag(W - 10, 19, S.truth.space + ' escaped to space', '#5b564e', '#faf8f5');
+        tag(10, geo.toaY + 19, S.truth.stuck + ' trapped in the air', '#7a736a', '#f2ede4', '600', 'start');
+        tag(W - 10, H - 7, S.truth.down + ' back to the surface', accent, '#c9bfae', '700');
       }
 
       /* --- the round ------------------------------------------------------ */
@@ -428,6 +484,7 @@
 
         drawStage();
         paintSky();
+        paintAsk();
         paintChips();
         paintDerived();
         paintGo();
@@ -451,12 +508,18 @@
           b.classList.remove('ghg-need');
         });
       }
+      /* the round's one hidden fact — how many were absorbed — belongs where
+         the prediction is made, not in a line below the button */
+      function paintAsk() {
+        labDown.words.textContent = S.round.absorbed +
+          ' of the 12 are absorbed. How many come back down?';
+      }
       function paintDerived() {
         if (S.down == null || S.stuck == null) {
-          derived.textContent = 'The rest of the 12 go out to space.';
+          derived.textContent = 'The rest of the 12 escape to space.';
         } else {
-          derived.textContent = 'Your prediction sends ' + (PACKETS - S.down - S.stuck) +
-            ' of the 12 out to space.';
+          derived.textContent = 'Your prediction lets ' + (PACKETS - S.down - S.stuck) +
+            ' of the 12 escape to space.';
         }
       }
       function paintGo() {
@@ -485,10 +548,9 @@
       function setCaption(text) {
         if (text) { cap.textContent = text; sr.textContent = text; return; }
         var sky = SKIES[S.skyKey], A = S.round.absorbed;
-        cap.textContent = sky.note + ': ' + A + ' of the 12 packets meet a greenhouse gas ' +
-          'molecule on the way up, and ' + (PACKETS - A) + ' pass straight through. ' +
-          'What becomes of the ' + A + ' that are absorbed?';
-        sr.textContent = cap.textContent;
+        cap.textContent = 'The other ' + (PACKETS - A) + ' packets meet nothing on the way up: ' +
+          'they pass straight through and escape.';
+        sr.textContent = sky.note + '. ' + A + ' of the 12 packets are absorbed. ' + cap.textContent;
       }
 
       /* --- commit ---------------------------------------------------------- */
@@ -496,7 +558,7 @@
         if (S.phase === 'revealed') { newRound(); return; }
         if (S.down == null || S.stuck == null) {
           (S.down == null ? downBtns : stuckBtns).forEach(function (b) { b.classList.add('ghg-need'); });
-          setCaption('Choose a number in each row, then run it.');
+          setCaption('The prediction needs both numbers — how many come back down, and how many stay trapped.');
           return;
         }
         var A = S.round.absorbed, D = S.truth.down, up = A - D;
@@ -512,29 +574,26 @@
 
         var msg;
         if (S.correct && S.mastered && S.streak === TARGET_STREAK) {
-          msg = 'Three in a row — you have it. Greenhouse gases do not block infrared or hold on to it: ' +
-                'they absorb it and send it out again in a random direction, so about half comes back ' +
-                'down and the surface settles warmer.';
+          msg = 'Three in a row — you have it. Absorbed infrared is re-emitted at once in a random ' +
+                'direction, so about half returns and the surface settles warmer.';
         } else if (S.correct && S.skyKey === 'more') {
-          msg = 'Right — ' + D + ' back down, ' + up + ' onwards, none stuck. More greenhouse gas means more ' +
-                'absorb-and-re-emit events, so more returns to the surface, which settles warmer until what ' +
-                'escapes balances what the Sun sends in.';
+          msg = 'Right — ' + D + ' back down, ' + up + ' onwards, none trapped. More greenhouse gas means ' +
+                'more absorb-and-re-emit events, so more infrared returns to the ground.';
         } else if (S.correct) {
-          msg = 'Right — ' + D + ' back down, ' + up + ' onwards, none stuck. Absorb, then re-emit in a ' +
-                'random direction: about half of what a molecule takes in heads back towards the ground.';
+          msg = 'Right — ' + D + ' back down, ' + up + ' onwards, none trapped. A molecule cannot aim its ' +
+                're-emission, so roughly half of what it absorbs heads back down.';
         } else if (S.stuck > 0) {
-          msg = 'Nothing stays stuck. A molecule that absorbs infrared re-emits it within a fraction of a ' +
-                'second — it cannot hold the energy as a blanket holds warm air. Of the ' + A +
-                ' absorbed, ' + D + ' came back down.';
+          msg = 'Nothing stays trapped. A molecule re-emits absorbed infrared in a fraction of a second — ' +
+                'it cannot hold it like a blanket. ' + D + ' of the ' + A + ' came back down.';
         } else if (S.down === 0) {
-          msg = 'You had it all escaping. A molecule cannot aim its re-emission, so it does not send ' +
-                'everything upwards: ' + D + ' of the ' + A + ' absorbed came back down to the surface.';
+          msg = 'You had it all escaping. A molecule cannot aim its re-emission, so ' + D + ' of the ' + A +
+                ' absorbed came back down to the surface.';
         } else if (S.down === A) {
-          msg = 'That is the mirror picture — everything absorbed sent straight back. Re-emission goes off ' +
-                'in a random direction, so only about half returns: ' + D + ' down, ' + up + ' onwards.';
+          msg = 'That is the mirror picture — all of it sent straight back. Re-emission is random, so only ' +
+                'about half returns: ' + D + ' down, ' + up + ' onwards.';
         } else {
-          msg = 'Re-emission is random, so about half of the absorbed infrared heads back down: ' + D +
-                ' of the ' + A + ', not ' + S.down + '. The other ' + up + ' carry on out. None stays stuck.';
+          msg = 'Re-emission is random, so about half of the absorbed infrared comes back down: ' + D +
+                ' of the ' + A + ', not ' + S.down + '. None stays trapped.';
         }
 
         paintGo();

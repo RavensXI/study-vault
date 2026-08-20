@@ -16,59 +16,61 @@
   var ITEMS = [
     {
       id: 'normal',
-      text: 'A normal impulse travels down the first neurone and reaches the gap.',
+      frame: { stem: 'An impulse reaches this synapse and ', fault: 'everything is working normally', tail: '.' },
       stop: 5, art: {},
       why: 'Electrical, chemical, then electrical again. The impulse stops at the membrane; a chemical crosses; binding starts a brand-new impulse.'
     },
     {
       id: 'empty',
-      text: 'The vesicles at the end of the first neurone are empty — no neurotransmitter is stored.',
+      frame: { stem: 'An impulse reaches this synapse, but ', fault: 'the vesicles in the first neurone are empty', tail: '.' },
       stop: 1, art: { vesicles: 'empty' },
       why: 'With no chemical to release, nothing crosses. An impulse cannot jump the gap by itself — only neurotransmitter closes it.'
     },
     {
       id: 'backwards',
-      text: 'An impulse travels the wrong way and arrives at the gap from the receptor side.',
+      frame: { stem: 'An impulse reaches this synapse ', fault: 'from the receptor side, travelling the wrong way', tail: '.' },
       stop: 1, art: { dir: -1 },
-      why: 'Traffic is one-way: vesicles sit only in the first neurone and receptors only on the other membrane, so nothing can be released from this side.'
+      why: 'Traffic is one-way: vesicles sit only in the first neurone, receptors only on the other side, so nothing can be released here.'
     },
     {
       id: 'blocker',
-      text: 'A drug has settled into the receptor molecules, so the neurotransmitter cannot fit them.',
+      frame: { stem: 'An impulse reaches this synapse, but ', fault: 'a drug has settled into the receptor molecules', tail: '.' },
       stop: 3, art: { receptors: 'plug' },
-      why: 'Still released, and it still diffuses across — diffusion needs no receptors. But crossing is not the signal: no new impulse until it binds.'
+      why: 'Still released, and it still crosses — diffusion needs no receptors. But crossing is not the signal: no new impulse until it binds.'
     },
     {
       id: 'shape',
-      text: 'The receptor molecules on the next neurone are the wrong shape for this neurotransmitter.',
+      frame: { stem: 'An impulse reaches this synapse, but ', fault: 'the receptor molecules are the wrong shape', tail: '.' },
       stop: 3, art: { receptors: 'wrong' },
       why: 'Receptors are shape-specific. The molecules reach the membrane but cannot fit it, so the message dies in the gap it has just crossed.'
     },
     {
       id: 'enzyme',
-      text: 'An enzyme in the gap breaks the neurotransmitter down as soon as it is released.',
+      frame: { stem: 'An impulse reaches this synapse, but ', fault: 'an enzyme in the gap destroys the neurotransmitter', tail: '.' },
       stop: 2, art: { gap: 'enzyme' },
-      why: 'Released, then destroyed before it could cross. Nothing reaches the receptors. Breaking it down is also how a synapse switches itself off.'
+      why: 'Released, then destroyed before it could cross — nothing reaches the receptors. That is also how a synapse switches itself off.'
     },
     {
       id: 'wider',
-      text: 'This gap is wider than normal. Everything else about the synapse works.',
+      frame: { stem: 'An impulse reaches this synapse. ', fault: 'The gap is wider than normal', tail: ', but everything else works.' },
       stop: 5, art: { gap: 'wide' },
-      why: 'Diffusion still carries the molecules across, only more slowly. Delayed, not stopped — and that delay at every synapse is why signals are not instant.'
+      why: 'Diffusion still carries them across, only more slowly. Delayed, not stopped — that delay at every synapse is why signals are not instant.'
     },
     {
       id: 'burst',
-      text: 'A burst of impulses arrives and many vesicles empty into the gap at once.',
+      frame: { stem: '', fault: 'A burst of impulses reaches this synapse and many vesicles empty at once', tail: '.' },
       stop: 5, art: { vesicles: 'many' },
       why: 'More neurotransmitter fills more receptors, so the threshold is passed easily. Extra chemical makes firing more certain, not bigger.'
     },
     {
       id: 'few',
-      text: 'Very little neurotransmitter is released, so only a few receptors are filled.',
+      frame: { stem: 'An impulse reaches this synapse, but ', fault: 'very little neurotransmitter is released', tail: '.' },
       stop: 4, art: { vesicles: 'few' },
       why: 'Binding happened, but not enough of it. A new impulse starts only when enough receptors are filled to reach the threshold.'
     }
   ];
+
+  var ASK = ' Decide how far it gets: tap the last step that still happens, then Check.';
 
   var INK = '#2d2a26', MUTED = '#8d8880', HAIR = '#e8e2d9', PAPER = '#faf8f5', DONE = '#4f7d63';
 
@@ -82,10 +84,11 @@
     '.svw-syn .ttl{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:1.22rem;line-height:1.2;margin-top:.12rem}',
     '.svw-syn .mid{display:grid;gap:.55rem}',
     '.svw-syn.is-wide .mid{grid-template-columns:1.02fr .98fr;gap:.9rem;align-items:start}',
-    '.svw-syn .stage{background:' + PAPER + ';border:1px solid ' + HAIR + ';border-radius:12px;padding:.45rem .55rem .5rem}',
-    '.svw-syn .dia{display:block;width:100%;max-width:360px;max-height:118px;height:auto;margin:0 auto}',
+    '.svw-syn .stage{background:' + PAPER + ';border:1px solid ' + HAIR + ';border-radius:12px;padding:.4rem .5rem}',
+    '.svw-syn .dia{display:block;width:100%;max-width:360px;max-height:104px;height:auto;margin:0 auto}',
     '.svw-syn.is-wide .dia{max-width:100%;max-height:180px}',
-    '.svw-syn .scen{font-size:.82rem;line-height:1.45;color:#4a453e;margin-top:.35rem;min-height:2.6em}',
+    '.svw-syn .task{font-size:.84rem;line-height:1.45;color:#4a453e;margin-top:.3rem}',
+    '.svw-syn .task b{font-weight:700;color:' + INK + '}',
     '.svw-syn .rows{display:grid;gap:.25rem}',
     '.svw-syn .row{display:flex;align-items:center;gap:.5rem;width:100%;text-align:left;',
     'background:' + PAPER + ';border:1px solid #ddd7cd;border-radius:10px;padding:.32rem .5rem;',
@@ -186,9 +189,10 @@
       wrap.className = 'svw-syn';
       wrap.style.setProperty('--a', accent);
       wrap.innerHTML =
-        '<div><p class="kick">Synapse</p><h3 class="ttl">How far does the signal get?</h3></div>' +
+        '<div><p class="kick">Synapse</p><h3 class="ttl">How far does the signal get?</h3>' +
+          '<p class="task"></p></div>' +
         '<div class="mid">' +
-          '<div class="stage">' + SVG + '<p class="scen"></p></div>' +
+          '<div class="stage">' + SVG + '</div>' +
           '<div class="ctl"><div class="rows"></div>' +
             '<div class="act"><p class="run"></p><button type="button" class="go">Check</button></div>' +
           '</div>' +
@@ -199,7 +203,7 @@
       var q = function (s) { return wrap.querySelector(s); };
       var qa = function (s) { return Array.prototype.slice.call(wrap.querySelectorAll(s)); };
 
-      var scenEl = q('.scen'), capEl = q('.cap'), runEl = q('.run'),
+      var taskEl = q('.task'), capEl = q('.cap'), runEl = q('.run'),
           goEl = q('.go'), srEl = q('.sr'), rowsEl = q('.rows');
       var postG = q('.g-post'), imp = q('.imp'), imp2 = q('.imp2'),
           pline = q('.pline'), pflag = q('.pflag'), pnum = q('.pflag text'),
@@ -229,7 +233,7 @@
       });
 
       /* ---------- state ---------- */
-      var st = { picked: 0, checked: false, correct: false, streak: 0, mastered: false, attempted: 0, first: true };
+      var st = { picked: 0, checked: false, correct: false, streak: 0, mastered: false, attempted: 0 };
       var item = null, queue = [], raf = 0, guard = 0, molCount = 3;
       var POCKET_Y = [42, 57, 72];
 
@@ -379,7 +383,7 @@
         item = it;
         st.picked = 0; st.checked = false; st.correct = false;
         applyArt(it);
-        scenEl.textContent = it.text;
+        taskEl.innerHTML = it.frame.stem + '<b>' + it.frame.fault + '</b>' + it.frame.tail + ASK;
         rowEls.forEach(function (b) {
           b.disabled = false;
           b.setAttribute('aria-pressed', 'false');
@@ -393,9 +397,8 @@
         tflag.setAttribute('opacity', 0); tline.setAttribute('opacity', 0);
         imp.setAttribute('opacity', 0); imp2.setAttribute('opacity', 0);
         mols.forEach(function (m) { m.setAttribute('opacity', 0); });
-        capEl.innerHTML = st.first
-          ? 'Tap the last step that still happens, then press <b>Check</b>.'
-          : (st.mastered ? 'Another one — same chain, a different fault.' : 'A new synapse. Where does this one stop?');
+        capEl.textContent = '';
+        srEl.textContent = taskEl.textContent;
         publish();
       }
 
@@ -412,7 +415,6 @@
       function check() {
         st.checked = true;
         st.attempted++;
-        st.first = false;
         st.correct = st.picked === item.stop;
         if (st.correct) { st.streak++; if (st.streak >= 3) st.mastered = true; }
         else { st.streak = 0; }
@@ -436,11 +438,11 @@
           verdict = '<b>Not quite</b> — step ' + (st.picked + 1) + ' (' + lower(STEPS[st.picked].label) + ') still happens here.';
         }
 
-        var extra = '';
-        if (st.mastered && st.streak === 3) {
-          extra = ' <b>Three in a row — you have it:</b> no electricity crosses the gap; a chemical does, and binding starts the new impulse.';
-        }
-        capEl.innerHTML = verdict + ' ' + item.why + extra;
+        /* On the mastery round the conclusion replaces the per-item note:
+           they have just proved the mechanism three times over. */
+        capEl.innerHTML = (st.mastered && st.streak === 3)
+          ? verdict + ' <b>Three in a row — you have it:</b> nothing electrical crosses the gap. A chemical does, and only binding to receptors starts the new impulse.'
+          : verdict + ' ' + item.why;
         srEl.textContent = capEl.textContent;
 
         runEl.textContent = (st.mastered || st.streak === 0) ? ''

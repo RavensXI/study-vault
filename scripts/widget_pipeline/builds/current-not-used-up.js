@@ -68,7 +68,12 @@
   }
 
   function amps(ma) { return (ma / 1000).toFixed(2) + ' A'; }
-  function volts(v) { return (Math.round(v * 10) / 10).toFixed(1) + ' V'; }
+  /* a teacher writes 6 V and 4.5 V, not 6.0 V - keep the decimal only
+     where the value actually has one */
+  function volts(v) {
+    var x = Math.round(v * 10) / 10;
+    return (x === Math.round(x) ? String(Math.round(x)) : x.toFixed(1)) + ' V';
+  }
 
   function shuffled(n) {
     var a = [], i, j, t;
@@ -99,11 +104,20 @@
     'text-transform:uppercase;color:var(--cnu-accent);margin:0 0 .16rem}',
     '.svw-cnu .cnu-title{font-family:"Source Serif 4",Georgia,serif;font-weight:600;',
     'font-size:1.22rem;line-height:1.2;margin:0}',
+    /* the task frame: scenario + ask, in the header, above the stage */
+    '.svw-cnu .cnu-frame{font-size:.84rem;line-height:1.45;color:#5b564e;margin:.3rem 0 0}',
+    '.svw-cnu .cnu-frame b{font-weight:600;color:#2d2a26}',
+    '.svw-cnu .cnu-steprow{display:flex;align-items:center;gap:.5rem}',
+    '.svw-cnu .cnu-num{flex:0 0 auto;width:20px;height:20px;border-radius:50%;',
+    'display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;',
+    'font-weight:700;border:1px solid #ddd7cd;background:#fff;color:#8d8880}',
+    '.svw-cnu .cnu-num.is-now{background:#2d2a26;border-color:#2d2a26;color:#fff}',
+    '.svw-cnu .cnu-num.is-done{background:#4f7d63;border-color:#4f7d63;color:#fff}',
     '.svw-cnu .cnu-stage{background:#faf8f5;border:1px solid #efe9e0;border-radius:12px;',
     'padding:.45rem .4rem;margin:.65rem 0 .6rem}',
     '.svw-cnu .cnu-svg{display:block;width:100%;max-width:440px;height:auto;margin:0 auto;',
     'aspect-ratio:' + VB_W + '/' + VB_H + '}',
-    '.svw-cnu .cnu-bank{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center}',
+    '.svw-cnu .cnu-bank{display:flex;flex-wrap:wrap;gap:.4rem;flex:1 1 auto}',
     '.svw-cnu .cnu-chip{font-family:inherit;font-size:.82rem;font-weight:600;line-height:1;',
     'font-variant-numeric:tabular-nums;padding:.52rem .68rem;border:1px solid #ddd7cd;',
     'background:#faf8f5;color:#2d2a26;border-radius:10px;cursor:pointer}',
@@ -116,7 +130,7 @@
     '.svw-cnu .cnu-go:disabled{background:#faf8f5;color:#a49e94;border-color:#ddd7cd;cursor:default}',
     '.svw-cnu .cnu-streak{font-size:.76rem;color:#8d8880;font-variant-numeric:tabular-nums}',
     '.svw-cnu .cnu-cap{font-size:.86rem;line-height:1.5;color:#3a352e;margin:.55rem 0 0;',
-    'min-height:3.5rem}',
+    'min-height:2.4rem}',
     '.svw-cnu .cnu-cap b{font-weight:600}',
     '.svw-cnu .cnu-cap b.ok{color:#4f7d63}',
     '.svw-cnu .cnu-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;',
@@ -231,16 +245,21 @@
         '<style>' + CSS + '</style>' +
         '<div class="cnu-kick">Series circuits</div>' +
         '<h3 class="cnu-title">Where does the current go?</h3>' +
+        '<p class="cnu-frame" data-k="frame"></p>' +
         '<div class="cnu-stage">' + svgMarkup() + '</div>' +
         '<div class="cnu-controls">' +
-          '<div class="cnu-bank" role="group" aria-label="Ammeter readings to place">' +
-            '<button type="button" class="cnu-chip"></button>' +
-            '<button type="button" class="cnu-chip"></button>' +
-            '<button type="button" class="cnu-chip"></button>' +
-            '<button type="button" class="cnu-chip"></button>' +
-            '<button type="button" class="cnu-chip"></button>' +
+          '<div class="cnu-steprow">' +
+            '<span class="cnu-num" data-k="n1" aria-hidden="true">1</span>' +
+            '<div class="cnu-bank" role="group" aria-label="Step 1: readings to place">' +
+              '<button type="button" class="cnu-chip"></button>' +
+              '<button type="button" class="cnu-chip"></button>' +
+              '<button type="button" class="cnu-chip"></button>' +
+              '<button type="button" class="cnu-chip"></button>' +
+              '<button type="button" class="cnu-chip"></button>' +
+            '</div>' +
           '</div>' +
           '<div class="cnu-act">' +
+            '<span class="cnu-num" data-k="n2" aria-hidden="true">2</span>' +
             '<button type="button" class="cnu-go">Check the readings</button>' +
             '<span class="cnu-streak"></span>' +
           '</div>' +
@@ -336,6 +355,18 @@
           var on = !revealed && active !== null && picks[active] === R.bank[c];
           chips[c].setAttribute('aria-pressed', on ? 'true' : 'false');
         }
+        setSteps();
+      }
+
+      /* The two control groups are numbered, and the number shows where the
+         student is: step 1 is live until every dial is set, then it goes
+         green and step 2 lights up with the button it belongs to. */
+      function setSteps() {
+        var done = filled();
+        el.n1.classList.toggle('is-now', !revealed && !done);
+        el.n1.classList.toggle('is-done', done);
+        el.n2.classList.toggle('is-now', !revealed && done);
+        el.n2.classList.toggle('is-done', revealed);
       }
 
       function setStreakLine() {
@@ -345,6 +376,23 @@
         else if (streak === 2) t = '2 in a row — 1 more to go.';
         else if (attempted > 0) t = 'Back to zero — 3 in a row finishes.';
         streakEl.textContent = t;
+      }
+
+      /* The task frame: the situation, then the ask - the way a question
+         paper states it. It never says what the readings will do. */
+      function pairPhrase() {
+        if (R.c1.name.indexOf('Lamp') === 0 && R.c2.name.indexOf('Lamp') === 0) return 'two lamps';
+        return 'a ' + R.c1.name.toLowerCase() + ' and a ' + R.c2.name.toLowerCase();
+      }
+      function taskFrame() {
+        var scene = 'A ' + volts(R.cell) + ' cell, ' + pairPhrase() + ', one loop. ';
+        if (R.given === null) {
+          return scene + 'No ammeter is reading yet. Predict the readings at A1, A2 and A3.';
+        }
+        var others = [];
+        for (var m = 0; m < 3; m++) if (m !== R.given) others.push('A' + (m + 1));
+        return scene + 'Ammeter A' + (R.given + 1) + ' reads <b>' + amps(I) +
+               '</b>. Predict the readings at ' + others[0] + ' and ' + others[1] + '.';
       }
 
       function note() {
@@ -437,11 +485,13 @@
         go.textContent = 'Check the readings';
         go.disabled = !filled();
         stopFlow();
+        el.frame.innerHTML = taskFrame();
         drawMeters();
         setStreakLine();
-        say(R.given === null
-          ? 'Nothing is reading yet. What current does this cell drive, and at which meters?'
-          : 'One meter is already reading. Do the other two show the same, more, or less?');
+        /* the caption is feedback only: before a commit there is nothing
+           honest to put in it that is not the ask or the answer */
+        cap.textContent = '';
+        live.textContent = el.frame.textContent;
         publish();
       }
 

@@ -148,14 +148,36 @@ given. `match-the-minister` draws eight dashed boxes reading the literal words
 anything. Reveal a slot when it is filled, or lay the answers into the tile
 they came from.
 
-**Title only in the header.** No instruction paragraph. See rule 2.
+**Header carries the title AND the task frame.** See rule 2 for what a task
+frame is and what it is not.
 
 ---
 
-## 2. The opening state must teach itself
+## 2. State the task, then let the controls teach themselves
 
-**If you need a sentence of instructions, the design has already failed.** The
-opening state must show the student what to do without them reading anything.
+**Open with a task frame: the scenario and the command, in exam register,
+one or two sentences, at the top under the title.** Tom's field test of
+stage 1 (20 Aug) found every widget guilty of the same thing: the opening
+screen assumed the student already knew the premise. The greenhouse widget's
+first question was "How many of the 12 come back down?" - twelve WHAT? The
+scenario (the warm ground sends 12 packets of infrared up towards space)
+existed only in a caption BELOW the commit button. An exam question never
+does this: it states the situation before it asks anything. So must a widget.
+
+A task frame is the situation plus the ask - "A heater delivers 50 J to
+this ice every second. Predict what the thermometer does over the next two
+minutes, and where the energy goes." It is NOT a how-to paragraph: "click a
+button to choose, then press Check" is still banned, because -
+
+**- the controls themselves must still teach themselves.** After the task
+frame, the opening state must show the student what to DO without any UI
+instructions.
+
+**Sequence the control groups.** When there is more than one group of
+controls (a setting, a prediction, a commit), the eye must be told the
+order - numbered step chips, or progressive disclosure (the next group
+wakes when the previous is set). Three equal-weight groups side by side
+read as a control panel, not a task.
 
 Before you write the markup, answer this: *what is the single most likely first
 action of a bored 15-year-old?* Make that action work.
@@ -399,8 +421,10 @@ Answer all of these. Any "no" means edit before you output.
 6. Designed at 360px first, and measured height ≤ 560px at 900px wide and
    ≤ 640px at 360px wide, with no internal scrollbar?
 7. Four zones or fewer, one stage, no placeholder boxes for unearned answers?
-8. Would a student know what to do with the instructions deleted? (Now delete
-   them.)
+8. Does the widget open with a task frame — scenario + ask, exam register,
+   1-2 sentences? And with every OTHER piece of text deleted, would a
+   student still know what to do? (Delete any text that only survives the
+   test by explaining the UI.)
 9. Does the most likely first click do something useful rather than scold?
 10. Do the title and framing avoid giving away any answer?
 11. Is every discrete choice a button whose label carries its trade-off, and every
