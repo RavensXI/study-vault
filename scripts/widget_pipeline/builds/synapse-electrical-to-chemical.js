@@ -4,11 +4,11 @@
   'use strict';
 
   var STEPS = [
-    { n: 1, label: 'Impulse arrives at the gap',     form: 'electrical' },
-    { n: 2, label: 'Neurotransmitter released',      form: 'chemical'   },
-    { n: 3, label: 'Diffuses across the gap',        form: 'chemical'   },
-    { n: 4, label: 'Binds to receptor molecules',    form: 'chemical'   },
-    { n: 5, label: 'A new impulse starts',           form: 'electrical' }
+    { n: 1, label: 'Impulse arrives at the gap',  form: 'electrical', claim: 'the impulse still reaches the gap' },
+    { n: 2, label: 'Neurotransmitter released',   form: 'chemical',   claim: 'neurotransmitter is still released' },
+    { n: 3, label: 'Diffuses across the gap',     form: 'chemical',   claim: 'it still crosses the gap' },
+    { n: 4, label: 'Binds to receptor molecules', form: 'chemical',   claim: 'it still binds to the receptors' },
+    { n: 5, label: 'A new impulse starts',        form: 'electrical', claim: 'a new impulse still starts' }
   ];
 
   /* stop = the last step in the chain that still happens.
@@ -18,7 +18,7 @@
       id: 'normal',
       frame: { stem: 'An impulse reaches this synapse and ', fault: 'everything is working normally', tail: '.' },
       stop: 5, art: {},
-      why: 'Electrical, chemical, then electrical again. The impulse stops at the membrane; a chemical crosses; binding starts a brand-new impulse.'
+      why: 'Electrical, chemical, electrical. The impulse stops at the membrane; a chemical crosses; binding starts a new one.'
     },
     {
       id: 'empty',
@@ -36,13 +36,13 @@
       id: 'blocker',
       frame: { stem: 'An impulse reaches this synapse, but ', fault: 'a drug has settled into the receptor molecules', tail: '.' },
       stop: 3, art: { receptors: 'plug' },
-      why: 'Still released, and it still crosses — diffusion needs no receptors. But crossing is not the signal: no new impulse until it binds.'
+      why: 'Diffusion needs no receptors, so it still crosses. But crossing is not the signal: no new impulse until it binds.'
     },
     {
       id: 'shape',
       frame: { stem: 'An impulse reaches this synapse, but ', fault: 'the receptor molecules are the wrong shape', tail: '.' },
       stop: 3, art: { receptors: 'wrong' },
-      why: 'Receptors are shape-specific. The molecules reach the membrane but cannot fit it, so the message dies in the gap it has just crossed.'
+      why: 'Receptors are shape-specific. The molecules cross the gap but cannot fit, so the message dies at the membrane.'
     },
     {
       id: 'enzyme',
@@ -54,13 +54,13 @@
       id: 'wider',
       frame: { stem: 'An impulse reaches this synapse. ', fault: 'The gap is wider than normal', tail: ', but everything else works.' },
       stop: 5, art: { gap: 'wide' },
-      why: 'Diffusion still carries them across, only more slowly. Delayed, not stopped — that delay at every synapse is why signals are not instant.'
+      why: 'Diffusion still carries them across, only more slowly. Delayed, not stopped — that delay is why nerve signals are not instant.'
     },
     {
       id: 'burst',
       frame: { stem: '', fault: 'A burst of impulses reaches this synapse and many vesicles empty at once', tail: '.' },
       stop: 5, art: { vesicles: 'many' },
-      why: 'More neurotransmitter fills more receptors, so the threshold is passed easily. Extra chemical makes firing more certain, not bigger.'
+      why: 'More neurotransmitter fills more receptors, so the threshold is passed easily. Extra chemical makes firing more certain.'
     },
     {
       id: 'few',
@@ -77,7 +77,7 @@
   var CSS = [
     '.svw-syn{--a:#a6603c;box-sizing:border-box;background:#fff;border:1px solid #e8e3db;border-radius:16px;',
     'padding:1rem 1rem 1.05rem;color:' + INK + ';font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;',
-    'display:grid;gap:.5rem;line-height:1.4}',
+    'display:grid;gap:.45rem;line-height:1.4}',
     '.svw-syn *,.svw-syn *::before,.svw-syn *::after{box-sizing:border-box}',
     '.svw-syn p,.svw-syn h3{margin:0}',
     '.svw-syn .kick{font-size:.66rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--a)}',
@@ -85,7 +85,7 @@
     '.svw-syn .mid{display:grid;gap:.55rem}',
     '.svw-syn.is-wide .mid{grid-template-columns:1.02fr .98fr;gap:.9rem;align-items:start}',
     '.svw-syn .stage{background:' + PAPER + ';border:1px solid ' + HAIR + ';border-radius:12px;padding:.4rem .5rem}',
-    '.svw-syn .dia{display:block;width:100%;max-width:360px;max-height:104px;height:auto;margin:0 auto}',
+    '.svw-syn .dia{display:block;width:100%;max-width:360px;max-height:96px;height:auto;margin:0 auto}',
     '.svw-syn.is-wide .dia{max-width:100%;max-height:180px}',
     '.svw-syn .task{font-size:.84rem;line-height:1.45;color:#4a453e;margin-top:.3rem}',
     '.svw-syn .task b{font-weight:700;color:' + INK + '}',
@@ -427,15 +427,17 @@
           if (i + 1 === st.picked) b.setAttribute('data-picked', 'yes');
         });
 
-        var verdict;
+        var verdict, pk = STEPS[st.picked - 1], an = STEPS[item.stop - 1];
         if (st.correct) {
           verdict = item.stop === 5
-            ? '<b>Right</b> — it goes the whole way and a new impulse starts.'
-            : '<b>Right</b> — it gets to step ' + item.stop + ' and no further.';
+            ? '<b>Right</b> — you said it goes the whole way, and it does: a new impulse starts.'
+            : '<b>Right</b> — you said it stops at step ' + item.stop + ', ' + lower(an.label) + '. It does.';
         } else if (st.picked > item.stop) {
-          verdict = '<b>Not quite</b> — step ' + (item.stop + 1) + ' (' + lower(STEPS[item.stop].label) + ') does not happen here.';
+          verdict = '<b>Not quite</b> — you said ' + pk.claim + '. It stops before that, at step '
+                  + item.stop + ': ' + lower(an.label) + '.';
         } else {
-          verdict = '<b>Not quite</b> — step ' + (st.picked + 1) + ' (' + lower(STEPS[st.picked].label) + ') still happens here.';
+          verdict = '<b>Not quite</b> — you said it stops at step ' + st.picked + ', ' + lower(pk.label)
+                  + '. It goes further — ' + an.claim + '.';
         }
 
         /* On the mastery round the conclusion replaces the per-item note:

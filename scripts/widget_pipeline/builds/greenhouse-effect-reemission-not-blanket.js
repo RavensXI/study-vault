@@ -10,6 +10,10 @@
    commit do not read as equal siblings; and every dot in the picture is
    named by a legend, so nothing on the stage is decoration.
 
+   The chips run 0..A, so "all of them stay trapped" is always expressible.
+   The down count is marked within one packet of half — the copy says "about
+   half", so the marking must too — while trapped = 0 is marked exactly.
+
    The "trapped" row is the blanket picture written as a number. It comes out
    zero every single time, because a molecule that absorbs infrared re-emits
    it within a fraction of a second, in a direction it cannot choose. Half of
@@ -23,14 +27,15 @@
   var SVGNS = 'http://www.w3.org/2000/svg';
   var PACKETS = 12;
   var TARGET_STREAK = 3;
-  var MAX_CHIP = 6;
+  var MAX_CHIP = 8;    /* the largest absorbed count: 9 chips fit one row */
+  var SLACK = 1;       /* the split is random, so accept within one packet */
   var DUR = 1300;      /* ms per packet flight */
   var STAGGER = 45;
 
   var SKIES = {
-    less:  { key: 'less',  label: 'Less CO₂',  molecules: 9,  absorbed: [2, 4],  note: 'Less carbon dioxide' },
-    today: { key: 'today', label: 'Today’s air', molecules: 20, absorbed: [6, 8],  note: 'Today’s air' },
-    more:  { key: 'more',  label: 'More CO₂',  molecules: 36, absorbed: [10],    note: 'More carbon dioxide and methane' }
+    less:  { key: 'less',  label: 'Less CO₂',  molecules: 9,  absorbed: 4, note: 'Less carbon dioxide' },
+    today: { key: 'today', label: 'Today’s air', molecules: 20, absorbed: 6, note: 'Today’s air' },
+    more:  { key: 'more',  label: 'More CO₂',  molecules: 36, absorbed: 8, note: 'More carbon dioxide' }
   };
 
   var CSS = [
@@ -50,9 +55,9 @@
     '.svw-ghg .ghg-row{display:flex;flex-wrap:wrap;gap:.28rem}',
     '.svw-ghg .ghg-row+.ghg-lab{margin-top:.4rem}',
     '.svw-ghg button{font-family:inherit;cursor:pointer;color:#2d2a26}',
-    '.svw-ghg .ghg-opt{font-size:.78rem;font-weight:600;padding:.42rem .6rem;border-radius:9px;border:1px solid #ddd7cd;background:#faf8f5;line-height:1.15}',
+    '.svw-ghg .ghg-opt{font-size:.78rem;font-weight:600;padding:.4rem .6rem;border-radius:9px;border:1px solid #ddd7cd;background:#faf8f5;line-height:1.15}',
     '.svw-ghg .ghg-opt[aria-pressed="true"]{background:#2d2a26;border-color:#2d2a26;color:#fff}',
-    '.svw-ghg .ghg-chip{flex:1 1 0;min-width:32px;text-align:center;padding:.42rem .1rem;font-variant-numeric:tabular-nums}',
+    '.svw-ghg .ghg-chip{flex:1 1 0;min-width:28px;text-align:center;padding:.4rem .1rem;font-variant-numeric:tabular-nums}',
     '.svw-ghg .ghg-need{border-color:var(--ghg-accent);box-shadow:0 0 0 2px var(--ghg-soft)}',
     '.svw-ghg .ghg-derived{font-size:.74rem;color:#8d8880;margin:.3rem 0 0;font-variant-numeric:tabular-nums}',
     '.svw-ghg .ghg-foot{display:flex;align-items:center;gap:.5rem;margin:.55rem 0 0}',
@@ -60,7 +65,7 @@
     '.svw-ghg .ghg-go.ghg-primary{background:#2d2a26;border-color:#2d2a26;color:#fff}',
     '.svw-ghg .ghg-streak{font-size:.74rem;color:#8d8880;font-variant-numeric:tabular-nums}',
     '.svw-ghg .ghg-streak.ghg-done{color:#4f7d63;font-weight:600}',
-    '.svw-ghg .ghg-cap{font-size:.84rem;line-height:1.5;margin:.45rem 0 0;min-height:3.1em;color:#2d2a26}',
+    '.svw-ghg .ghg-cap{font-size:.84rem;line-height:1.45;margin:.45rem 0 0;min-height:3em;color:#2d2a26}',
     '.svw-ghg .ghg-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}'
   ].join('\n');
 
@@ -249,7 +254,7 @@
 
       function buildGeometry() {
         var W = stageWidth();
-        var H = isWide() ? 164 : 144;
+        var H = isWide() ? 164 : 136;
         var padX = 12;
         var toaY = 30;
         var groundTop = H - 22;
@@ -452,7 +457,9 @@
         S.roundId++;
         var sky = SKIES[S.skyKey];
         var r = rng(Math.floor(Math.random() * 1e9));
-        var absorbed = sky.absorbed[Math.floor(r() * sky.absorbed.length)];
+        var absorbed = sky.absorbed;
+        S.down = null;
+        S.stuck = null;
 
         var idx = [];
         for (var i = 0; i < PACKETS; i++) idx.push(i);
@@ -485,6 +492,7 @@
         drawStage();
         paintSky();
         paintAsk();
+        paintRange();
         paintChips();
         paintDerived();
         paintGo();
@@ -511,15 +519,24 @@
       /* the round's one hidden fact — how many were absorbed — belongs where
          the prediction is made, not in a line below the button */
       function paintAsk() {
-        labDown.words.textContent = S.round.absorbed +
-          ' of the 12 are absorbed. How many come back down?';
+        var A = S.round.absorbed;
+        labDown.words.textContent = A + ' of the 12 are absorbed. How many come back down?';
+        labStuck.words.textContent = 'How many of the ' + A + ' stay trapped in the air?';
+      }
+      /* chips run 0..A, so "all of them come back down" and "all of them stay
+         trapped" — the two pictures this widget exists to test — can both be
+         committed, in every sky */
+      function paintRange() {
+        var A = S.round.absorbed;
+        downBtns.forEach(function (b, v) { b.style.display = v <= A ? '' : 'none'; });
+        stuckBtns.forEach(function (b, v) { b.style.display = v <= A ? '' : 'none'; });
       }
       function paintDerived() {
         if (S.down == null || S.stuck == null) {
-          derived.textContent = 'The rest of the 12 escape to space.';
+          derived.textContent = 'The rest of the 12 go out to space.';
         } else {
-          derived.textContent = 'Your prediction lets ' + (PACKETS - S.down - S.stuck) +
-            ' of the 12 escape to space.';
+          derived.textContent = 'Your prediction: ' + S.down + ' down, ' + S.stuck + ' trapped, ' +
+            (PACKETS - S.down - S.stuck) + ' out to space.';
         }
       }
       function paintGo() {
@@ -548,8 +565,8 @@
       function setCaption(text) {
         if (text) { cap.textContent = text; sr.textContent = text; return; }
         var sky = SKIES[S.skyKey], A = S.round.absorbed;
-        cap.textContent = 'The other ' + (PACKETS - A) + ' packets meet nothing on the way up: ' +
-          'they pass straight through and escape.';
+        cap.textContent = sky.molecules + ' greenhouse gas molecules in the air; the other ' +
+          (PACKETS - A) + ' packets meet none of them.';
         sr.textContent = sky.note + '. ' + A + ' of the 12 packets are absorbed. ' + cap.textContent;
       }
 
@@ -561,9 +578,12 @@
           setCaption('The prediction needs both numbers — how many come back down, and how many stay trapped.');
           return;
         }
-        var A = S.round.absorbed, D = S.truth.down, up = A - D;
+        var A = S.round.absorbed, D = S.truth.down, out = PACKETS - D;
         S.attempted++;
-        S.correct = (S.down === D && S.stuck === 0);
+        /* the blanket claim is marked exactly — that is the idea under test.
+           The split is random in reality, so the down count is accepted within
+           one packet of the model's half, which is what the copy promises. */
+        S.correct = (Math.abs(S.down - D) <= SLACK) && S.stuck === 0;
         if (S.correct) {
           S.streak++;
           if (S.streak >= TARGET_STREAK) S.mastered = true;
@@ -572,28 +592,34 @@
         }
         S.phase = 'revealed';
 
-        var msg;
-        if (S.correct && S.mastered && S.streak === TARGET_STREAK) {
-          msg = 'Three in a row — you have it. Absorbed infrared is re-emitted at once in a random ' +
-                'direction, so about half returns and the surface settles warmer.';
-        } else if (S.correct && S.skyKey === 'more') {
-          msg = 'Right — ' + D + ' back down, ' + up + ' onwards, none trapped. More greenhouse gas means ' +
-                'more absorb-and-re-emit events, so more infrared returns to the ground.';
-        } else if (S.correct) {
-          msg = 'Right — ' + D + ' back down, ' + up + ' onwards, none trapped. A molecule cannot aim its ' +
-                're-emission, so roughly half of what it absorbs heads back down.';
-        } else if (S.stuck > 0) {
-          msg = 'Nothing stays trapped. A molecule re-emits absorbed infrared in a fraction of a second — ' +
-                'it cannot hold it like a blanket. ' + D + ' of the ' + A + ' came back down.';
+        /* one ledger, the same one the picture tallies: every packet ends up
+           back down, trapped, or out to space */
+        var itWas = D + ' down, 0 trapped, ' + out + ' out to space.';
+        var why;
+        if (S.stuck > 0) {
+          why = 'A molecule re-emits what it absorbs within a fraction of a second — nothing can stay trapped.';
         } else if (S.down === 0) {
-          msg = 'You had it all escaping. A molecule cannot aim its re-emission, so ' + D + ' of the ' + A +
-                ' absorbed came back down to the surface.';
+          why = 'A molecule cannot aim its re-emission, so it does not send everything upwards.';
         } else if (S.down === A) {
-          msg = 'That is the mirror picture — all of it sent straight back. Re-emission is random, so only ' +
-                'about half returns: ' + D + ' down, ' + up + ' onwards.';
+          why = 'Re-emission is random, not a mirror: only about half of it comes back down.';
+        } else if (!S.correct) {
+          why = 'Re-emission is random, so about half of what a molecule absorbs comes back down.';
+        } else if (S.skyKey === 'more') {
+          why = 'More greenhouse gas, more absorb-and-re-emit events, so more infrared returns to the ground.';
         } else {
-          msg = 'Re-emission is random, so about half of the absorbed infrared comes back down: ' + D +
-                ' of the ' + A + ', not ' + S.down + '. None stays trapped.';
+          why = 'A molecule cannot aim its re-emission, so about half of what it absorbs heads back down.';
+        }
+
+        var msg;
+        if (!S.correct) {
+          msg = 'Not quite. You said ' + S.down + ' down, ' + S.stuck + ' trapped. It was ' +
+                itWas + ' ' + why;
+        } else if (S.mastered && S.streak === TARGET_STREAK) {
+          msg = 'Right — ' + itWas + ' Three in a row: you have it. ' + why;
+        } else if (S.down !== D) {
+          msg = 'Right — you said ' + S.down + ' down; it was ' + itWas + ' ' + why;
+        } else {
+          msg = 'Right — ' + itWas + ' ' + why;
         }
 
         paintGo();

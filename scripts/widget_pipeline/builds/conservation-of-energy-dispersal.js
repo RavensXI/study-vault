@@ -17,10 +17,10 @@
         { label: 'Thermal store of the water — by heating', fixed: 1700, kind: 'useful' },
         { label: 'Thermal store of the kettle body and stand', kind: 'waste' },
         { label: 'Thermal store of the kitchen air and steam', kind: 'waste' },
-        { label: 'Destroyed — these joules stop existing', kind: 'trap',
-          msg: 'Nothing was destroyed. Those {n} J are in the thermal store of the kettle body, the steam and the kitchen air — you can feel them.' }
+        { label: 'Destroyed — these joules stop existing', kind: 'trap', short: 'Destroyed',
+          msg: 'Nothing is destroyed: those joules are in the thermal store of the kettle body, the steam and the kitchen air — you can feel them.' }
       ],
-      win: 'Balanced: {input} J in, {input} J still here. {useful} J sits in the water’s thermal store — {eff}% efficient. Heating spread the other {waste} J through the body, the steam and the air: dispersed, not destroyed.'
+      win: 'balanced: {input} J in, {input} J still here. {useful} J sits in the water’s thermal store — {eff}% efficient. Heating spread the other {waste} J through the body, the steam and the air: dispersed, not destroyed.'
     },
     {
       id: 'hoist',
@@ -33,10 +33,10 @@
         { label: 'Gravitational potential store of the crate', fixed: 4000, kind: 'useful' },
         { label: 'Thermal store of the motor and gears', kind: 'waste' },
         { label: 'Thermal store of the air around the hoist', kind: 'waste' },
-        { label: 'Used up — spent doing the lifting', kind: 'trap',
-          msg: 'Energy is never used up. Lifting is a transfer, not a cost: those {n} J are heating the motor, the gears and the air.' }
+        { label: 'Used up — spent doing the lifting', kind: 'trap', short: 'Used up',
+          msg: 'Energy is never used up. Lifting is a transfer, not a cost: those joules are heating the motor, the gears and the air.' }
       ],
-      win: 'Balanced: {input} J in, {input} J still here. Mechanical working put {useful} J into the crate’s gravitational potential store — {eff}% efficient. Friction heated the other {waste} J into the surroundings.'
+      win: 'balanced: {input} J in, {input} J still here. Mechanical working put {useful} J into the crate’s gravitational potential store — {eff}% efficient. Friction heated the other {waste} J into the surroundings.'
     },
     {
       id: 'rabbit',
@@ -49,10 +49,10 @@
         { label: 'Chemical store of the rabbit’s new tissue', fixed: 800, kind: 'useful' },
         { label: 'Chemical store of the droppings and urine', fixed: 3200, kind: 'waste' },
         { label: 'Thermal store of the surroundings', kind: 'waste' },
-        { label: 'Destroyed — used up staying alive', kind: 'trap',
-          msg: 'Nothing is used up. Those {n} J left the rabbit by heating: respiration and hopping warmed the air, the burrow and the ground.' }
+        { label: 'Destroyed — used up staying alive', kind: 'trap', short: 'Destroyed',
+          msg: 'Nothing is used up staying alive: respiration and hopping moved those joules into the air, the burrow and the ground by heating.' }
       ],
-      win: 'Balanced: {input} J eaten, {input} J still here. Just {useful} J becomes new tissue — about {eff}% passed on. Respiration and hopping heated {r2} J into the surroundings; {r1} J stays in the droppings.'
+      win: 'balanced: {input} J eaten, {input} J still here. Just {useful} J becomes new tissue — about {eff}% passed on. Respiration and hopping heated {r2} J into the surroundings; {r1} J stays in the droppings.'
     },
     {
       id: 'lamp',
@@ -64,12 +64,12 @@
       rows: [
         { label: 'Thermal store of the filament, glass and air', fixed: 950, kind: 'waste' },
         { label: 'Radiated as light — the walls absorb it', kind: 'useful' },
-        { label: 'Destroyed — these joules stop existing', kind: 'trap',
-          msg: 'Nothing is destroyed. Those {n} J heated the filament, the glass and the air around the lamp, and they are still there.' },
-        { label: 'Used up — spent making the bulb glow', kind: 'trap',
-          msg: 'Glowing is a transfer, not a cost. Those {n} J left the lamp by radiation or by heating, and both routes end in the room.' }
+        { label: 'Destroyed — these joules stop existing', kind: 'trap', short: 'Destroyed',
+          msg: 'Nothing is destroyed: those joules heated the filament, the glass and the air around the lamp.' },
+        { label: 'Used up — spent making the bulb glow', kind: 'trap', short: 'Used up',
+          msg: 'Glowing is a transfer, not a cost: those joules left by radiation or by heating, and both routes end in the room.' }
       ],
-      win: 'Balanced: {input} J in, {input} J still here. Only {useful} J is radiated as light — {eff}% efficient. The walls absorb that light too, so all {input} J ends in the room’s thermal store.'
+      win: 'balanced: {input} J in, {input} J still here. Only {useful} J is radiated as light — {eff}% efficient. The walls absorb that light too, so all {input} J ends in the room’s thermal store.'
     },
     {
       id: 'brakes',
@@ -81,12 +81,12 @@
       rows: [
         { label: 'Thermal store of the brake blocks and rims', fixed: 900, kind: 'waste' },
         { label: 'Thermal store of the air and surroundings', kind: 'waste' },
-        { label: 'Kinetic store of the bike — some is kept', kind: 'trap',
-          msg: 'The bike has stopped, so v = 0 and its kinetic store is empty. Those {n} J are in the blocks, the rims and the air.' },
-        { label: 'Destroyed — stopping wipes it out', kind: 'trap',
-          msg: 'Stopping destroys nothing. Those {n} J are in the thermal store of the blocks, the rims and the air — hot enough to burn a finger.' }
+        { label: 'Kinetic store of the bike — some is kept', kind: 'trap', short: 'Kinetic store of the bike',
+          msg: 'The bike has stopped, so v = 0 and that store is empty: those joules are in the blocks, the rims and the air.' },
+        { label: 'Destroyed — stopping wipes it out', kind: 'trap', short: 'Destroyed',
+          msg: 'Stopping destroys nothing: those joules are in the thermal store of the blocks, the rims and the air — hot enough to burn a finger.' }
       ],
-      win: 'Balanced: {input} J of kinetic store, {input} J still here. Braking dissipates on purpose: friction heated all {waste} J into the blocks, the rims and the air — none of it gone.'
+      win: 'balanced: {input} J of kinetic store, {input} J still here. Braking dissipates on purpose: friction heated all {waste} J into the blocks, the rims and the air — none of it gone.'
     }
   ];
 
@@ -126,6 +126,8 @@
     '.svw-coe button.coe-go{background:#2d2a26;color:#fff;border:1px solid #2d2a26;border-radius:10px;padding:.5rem 1.05rem;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}',
     '.svw-coe button.coe-go:hover{background:#413c36}',
     '.svw-coe .coe-streak{font-size:.78rem;color:#4f7d63;font-weight:600;flex:1 1 11rem;min-width:0;margin:0}',
+    '.svw-coe .coe-verdict{font-weight:600;color:#2d2a26}',
+    '.svw-coe .coe-verdict.is-right{color:#4f7d63}',
     '.svw-coe .coe-cap{font-size:.84rem;line-height:1.5;color:#5b564e;margin:.5rem 0 0;min-height:2.8em}',
     '.svw-coe .coe-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}',
     '.svw-coe.is-narrow .coe-row{display:block;padding:.25rem 0 .3rem}',
@@ -211,6 +213,17 @@
       var round = null, vals = [], phase = 'placing', blown = false;
       var rowEls = [], tail = null;
 
+      /* every committed message carries its verdict first: no branch can
+         report the mechanism without first answering "was I right?" */
+      function setCap(verdict, text) {
+        cap.textContent = '';
+        if (verdict) {
+          cap.appendChild(el('b', 'coe-verdict' + (verdict === 'Right' ? ' is-right' : ''),
+            verdict + ' — '));
+        }
+        cap.appendChild(document.createTextNode(text));
+      }
+
       function setFrame(text) {
         frame.textContent = '';
         text.split('|').forEach(function (part, i) {
@@ -294,7 +307,7 @@
         tail = el('div', 'coe-tail');
         bar.appendChild(tail);
 
-        cap.textContent = round.evidence;
+        setCap(null, round.evidence);
         go.textContent = 'Check';
         render();
       }
@@ -334,17 +347,18 @@
             streak++;
             if (streak >= 3) mastered = true;
           }
-          cap.textContent = fill(round.win, map);
+          setCap('Right', fill(round.win, map));
           go.textContent = mastered ? 'Another anyway' : 'Next device';
         } else {
           blown = true;
           streak = 0;
           if (bad !== -1) {
-            cap.textContent = fill(round.rows[bad].msg, map);
+            setCap('Not quite', fill('you put {n} J in “' + round.rows[bad].short +
+              '”. ' + round.rows[bad].msg, map));
           } else if (placed < round.input) {
-            cap.textContent = fill('Only {placed} J of the {input} J is accounted for. The missing {diff} J cannot leak out of the universe — every joule ends up in some store.', map);
+            setCap('Not quite', fill('you placed {placed} J of the {input} J that went in. The missing {diff} J cannot leak out of the universe: every joule ends up in some store.', map));
           } else {
-            cap.textContent = fill('You have placed {placed} J, but only {input} J went in. Energy cannot be created either — the books have to balance exactly.', map);
+            setCap('Not quite', fill('you placed {placed} J, but only {input} J went in. Energy cannot be created either: the books have to balance exactly.', map));
           }
         }
         render();

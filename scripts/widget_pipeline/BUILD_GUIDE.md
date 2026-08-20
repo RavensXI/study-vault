@@ -275,6 +275,23 @@ costs nothing is worse: it turns into guess-until-green.
 
 ## 6. Feedback teaches; it does not score
 
+**But the first words still answer "was I right?"** Tom's field test (20
+Aug): he committed a wrong answer to the greenhouse widget and got a
+correct paragraph about re-emission - and could not tell whether he had
+been right or wrong. Teaching-not-scoring is about what follows the
+verdict, not a licence to omit it. Every feedback message opens with an
+explicit marker - "Right -" or "Not quite -" - and every wrong branch
+echoes the student's own committed answer before the mechanism: "Not
+quite - you said 3 came back down and 3 stayed trapped. What happened: 4
+came back down, none stayed trapped." A student who cannot find their own
+answer in the feedback cannot connect the teaching to their mistake.
+
+**The misconception answer must be expressible.** If the wrong picture the
+widget exists to falsify cannot even be committed - the greenhouse chip
+rows stopped at 6 while 8 packets were absorbed, so "all 8 stay trapped"
+was un-enterable - the widget tests nothing. Scale answer ranges to the
+round's data, and check the misconception answer fits at every round.
+
 The caption is the teaching. It is always present, updates on every change, and
 has a `min-height` so nothing jumps.
 

@@ -409,13 +409,27 @@
                '. Energy is shared out along the loop; charge is not.';
       }
 
+      /* The student's own committed answer, named meter by meter, so they
+         can find themselves in the feedback. The meter that was handed to
+         them is left out - it was never their answer. */
+      function echoAnswer() {
+        if (shape(picks) === 'flat') return 'all three at ' + amps(picks[0]);
+        var parts = [], m;
+        for (m = 0; m < 3; m++) {
+          if (m === R.given) continue;
+          parts.push('A' + (m + 1) + ' at ' + amps(picks[m]));
+        }
+        if (parts.length === 1) return parts[0];
+        return parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1];
+      }
+
+      /* Every branch opens with a verdict marker - "Right -" or
+         "Not quite -" - before any teaching. */
       function feedback() {
-        var s = shape(picks), same = amps(I);
-        var theirs = amps(picks[0]) + ', ' + amps(picks[1]) + ', ' + amps(picks[2]);
-        var sum = R.c1.r + R.c2.r;
+        var s = shape(picks), same = amps(I), sum = R.c1.r + R.c2.r;
         if (wasRight) {
           if (mastered) {
-            return '<b class="ok">Three in a row — you have it.</b> ' + same +
+            return '<b class="ok">Right — three in a row.</b> ' + same +
                    ' at every meter. In series the current is the same at every point: charge ' +
                    'travels a loop and none of it is used up. What gets shared out is the ' +
                    'potential difference — the bigger resistance takes the bigger share.';
@@ -425,31 +439,32 @@
                  'back in. ' + note();
         }
         if (s === 'falling') {
-          return '<b>Not quite.</b> You had the readings falling round the loop: ' + theirs +
-                 '. Charge cannot leak out of the wire or pile up inside a component, so every ' +
-                 'meter reads <b>' + same + '</b>. A component takes energy from the charge, ' +
-                 'not the charge itself.';
+          return '<b>Not quite —</b> you had ' + echoAnswer() + ', falling round the loop. All ' +
+                 'three read <b>' + same + '</b>. Charge cannot leak out of the wire or pile up ' +
+                 'inside a component: a component takes energy from the charge, not the charge ' +
+                 'itself.';
         }
         if (s === 'rising') {
-          return '<b>Not quite.</b> You had the current growing round the loop: ' + theirs +
-                 '. The cell does not make new charge — it pushes the charge already in the ' +
-                 'wires. Every meter reads <b>' + same + '</b>.';
+          return '<b>Not quite —</b> you had ' + echoAnswer() + ', growing round the loop. All ' +
+                 'three read <b>' + same + '</b>. The cell does not make new charge — it pushes ' +
+                 'the charge already in the wires.';
         }
         if (s === 'mixed') {
-          return '<b>Not quite.</b> Your readings disagree: ' + theirs + '. There is no junction ' +
-                 'in this circuit where charge could leave or gather, so all three meters must ' +
-                 'read the same: <b>' + same + '</b>.';
+          return '<b>Not quite —</b> you had ' + echoAnswer() + '. All three read <b>' + same +
+                 '</b>. There is no junction in this circuit where charge could leave or gather, ' +
+                 'so every meter must show the same.';
         }
         /* flat, but the wrong value */
         var only = null;
         if (picks[0] === Math.round(R.cell * 1000 / R.c1.r)) only = R.c1;
         else if (picks[0] === Math.round(R.cell * 1000 / R.c2.r)) only = R.c2;
-        var lead = '<b>Close.</b> The same reading everywhere is right' +
-                   (only ? ' — but you used only the ' + only.r + ' ' + OHM + ' ' +
-                    only.name.toLowerCase() + '. ' : ' — but not that value. ');
-        return lead + 'In series the resistances add: ' + R.c1.r + ' ' + OHM + ' + ' + R.c2.r +
-               ' ' + OHM + ' = ' + sum + ' ' + OHM + ', so I = V ÷ R = ' + volts(R.cell) + ' ÷ ' +
-               sum + ' ' + OHM + ' = <b>' + same + '</b> at all three meters.';
+        return '<b>Not quite —</b> you had ' + echoAnswer() + '. The same reading everywhere is ' +
+               'right, but the value is <b>' + same + '</b>' +
+               (only ? ': you used only the ' + only.r + ' ' + OHM + ' ' +
+                only.name.toLowerCase() + '. ' : '. ') +
+               'In series the resistances add: ' + R.c1.r + ' ' + OHM + ' + ' + R.c2.r + ' ' +
+               OHM + ' = ' + sum + ' ' + OHM + ', so I = V ÷ R = ' + volts(R.cell) + ' ÷ ' +
+               sum + ' ' + OHM + ' = ' + same + '.';
       }
 
       function say(html) {

@@ -56,3 +56,11 @@ Then take ONE screenshot each at 420px and 900px and look at them:
 (The harness writes its mount page to a temp dir; simplest is a tiny
 test.html of your own that loads the widget file and mounts at one width.)
 Fix what looks wrong, re-run the harness, stop.
+
+## Scripting your own test driver
+
+SVG elements have no `.click()` method — a driver calling it fails
+silently and the test passes vacuously. Use
+`el.dispatchEvent(new MouseEvent('click', {bubbles: true}))` for any
+scripted interaction with SVG controls. (Real pointer and keyboard
+events are unaffected.)

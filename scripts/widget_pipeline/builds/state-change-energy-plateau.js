@@ -65,57 +65,70 @@
   function degC(n) { return (n < 0 ? '−' + Math.abs(n) : String(n)) + ' °C'; }
 
   /* ------------------------------------------------------------ feedback */
+  /* Every message opens with an explicit marker, and every wrong branch
+     echoes BOTH parts of what the student actually committed. */
+  function echoPick(pt, pe, heat) {
+    var t = pt === 'rise' ? 'it rises' : pt === 'flat' ? 'it stays flat' : 'it falls';
+    var e = pe === 'none'
+      ? (heat ? 'the heater had stopped' : 'the cooling had stopped')
+      : (heat ? 'energy to the ' : 'energy from the ') + (pe === 'kin' ? 'kinetic' : 'potential') + ' store';
+    return 'Not quite — you said ' + t + ', ' + e + '.';
+  }
+
   function feedback(r, pt, pe) {
     var tr = truthOf(r), J = fmt(r.pow * SECS), heat = r.dir === 'heat';
+
     if (pt === tr.t && pe === tr.e) {
       if (tr.t === 'flat') {
         return { ok: true,
-          v: heat ? 'Flat — and ' + J + ' J still went in.'
-                  : 'Flat — and ' + J + ' J still came out.',
+          v: heat ? 'Right — flat, and ' + J + ' J still went in.'
+                  : 'Right — flat, and ' + J + ' J still came out.',
           b: r.changing === 'boil'
-              ? 'It went to the potential store, pulling the molecules apart — they are not broken up themselves. Average kinetic energy is unchanged.'
+              ? 'It goes to the potential store, pulling the molecules apart — they are not broken up themselves.'
               : r.changing === 'condense'
-              ? 'It came from the potential store as the molecules pulled together — they were never broken up. Average kinetic energy is unchanged.'
+              ? 'It comes from the potential store as the molecules pull together — they were never broken up.'
               : heat
-              ? 'It went to the potential store, pulling particles apart against the forces holding them. Average kinetic energy is unchanged: latent heat.'
-              : 'It came from the potential store as particles pulled together and the forces re-formed. Average kinetic energy is unchanged: latent heat.' };
+              ? 'It goes to the potential store, pulling particles apart. Average kinetic energy is unchanged: latent heat.'
+              : 'It comes from the potential store as particles pull together and the forces re-form: latent heat.' };
       }
       if (tr.t === 'rise') {
-        return { ok: true, v: 'Rising — nothing is changing state.',
-          b: 'So all of the energy goes to the kinetic store. The particles speed up, and that is what the thermometer reads.' };
+        return { ok: true, v: 'Right — it rises, no state change.',
+          b: 'All of the energy goes to the kinetic store. The particles speed up, and that is what the thermometer reads.' };
       }
-      return { ok: true, v: 'Falling — nothing is changing state.',
-        b: 'So the energy leaving comes out of the kinetic store. The particles slow down, and the thermometer follows.' };
+      return { ok: true, v: 'Right — it falls, no state change.',
+        b: 'The energy leaving comes out of the kinetic store. The particles slow down, and the thermometer follows.' };
     }
 
+    var v = echoPick(pt, pe, heat);
+
     if (pe === 'none') {
-      return { ok: false,
-        v: heat ? 'The heater has not stopped.' : 'It has not stopped losing energy.',
-        b: heat
-            ? 'The energy is not lost: ' + J + ' J still arrived, and it is now held in the pulled-apart arrangement of the particles.'
-            : 'About ' + J + ' J still left, and it came out of the store held in the arrangement of the particles as they pulled together.' };
+      return { ok: false, v: v,
+        b: tr.e === 'pot'
+            ? (heat ? 'The heater is still delivering ' + J + ' J. It is held in the pulled-apart arrangement of the particles.'
+                    : 'It is still losing energy — that comes out of the arrangement of the particles as they pull together.')
+            : (heat ? 'The heater is still delivering ' + J + ' J, and every joule of it is speeding the particles up.'
+                    : 'It is still losing energy, and that energy is coming out of the motion of the particles.') };
     }
 
     if (pt !== tr.t) {
       if (tr.t === 'flat') {
-        return { ok: false, v: 'Not quite — the line stays flat.',
-          b: (heat ? J + ' J still arrived. ' : 'About ' + J + ' J still left. ') +
-             'While two states sit together at ' + degC(r.now) + ', every joule goes to the forces between particles, not to speed.' };
+        return { ok: false, v: v,
+          b: 'The line stays flat — every joule goes to the forces between particles, not to particle speed.' };
       }
       if (tr.t === 'rise') {
-        return { ok: false, v: 'Not quite — the line rises.',
-          b: 'Nothing is changing state, so there are no forces to overcome. All of the energy goes to the kinetic store and particles speed up.' };
+        return { ok: false, v: v,
+          b: 'The line rises — nothing is changing state, so all of the energy goes to the kinetic store.' };
       }
-      return { ok: false, v: 'Not quite — the line falls.',
-        b: 'Nothing is changing state, so the energy leaving comes straight out of the kinetic store. The particles slow down.' };
+      return { ok: false, v: v,
+        b: 'The line falls — nothing is changing state, so the energy leaving comes out of the kinetic store.' };
     }
 
     if (tr.e === 'pot') {
-      return { ok: false, v: 'The flat line was right.',
-        b: 'If the energy were changing how fast the particles move, the thermometer would move too. A flat line means the potential store.' };
+      return { ok: false, v: v,
+        b: 'The line was right. A flat line means the potential store — if particles changed speed the thermometer would move.' };
     }
-    return { ok: false, v: 'The direction was right.',
-      b: 'Nothing is changing state, so no forces are being overcome and none are re-forming. Every joule goes to the kinetic store.' };
+    return { ok: false, v: v,
+      b: 'The line was right. Nothing is changing state, so no forces are overcome or re-formed — every joule goes to the kinetic store.' };
   }
 
   /* --------------------------------------------------------- particle art */
@@ -674,8 +687,8 @@
         q2.classList.remove('hide');
 
         if (fb.ok && streak === 3) {
-          setCap('Three in a row — you have it.',
-            ' During a change of state the energy still flows — into the potential store, not the kinetic one. The temperature holds flat: latent heat.', true);
+          setCap('Right — three in a row. You have it.',
+            ' The energy still flows during a change of state — into the potential store, not the kinetic one — so the temperature holds flat. That is latent heat.', true);
         } else {
           setCap(fb.v, ' ' + fb.b, fb.ok);
         }
