@@ -38,11 +38,41 @@
       line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
       after: "Input Control Devices: Switches"
     },
+    "geography-aqa/paper-1/14": {
+      file: "longshore-drift-zigzag",
+      label: "Predict the pebble's path",
+      line: "Choose how one pebble moves over eight waves, then watch the swash and backwash play it out.",
+      after: "Deposition"
+    },
     "geography-aqa/paper-1/8": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Effects on People and the Environment"
+    },
+    "geography-edexcel-a/paper-1-physical-environment/2": {
+      file: "longshore-drift-zigzag",
+      label: "Predict the pebble's path",
+      line: "Choose how one pebble moves over eight waves, then watch the swash and backwash play it out.",
+      after: "Erosional Landforms: Headlands, Bays, Cliffs & Stacks"
+    },
+    "geography-edexcel-b/uk-geographical-issues/2": {
+      file: "longshore-drift-zigzag",
+      label: "Predict the pebble's path",
+      line: "Choose how one pebble moves over eight waves, then watch the swash and backwash play it out.",
+      after: "Transport and Deposition"
+    },
+    "geography-eduqas/landscapes-physical-processes/3": {
+      file: "longshore-drift-zigzag",
+      label: "Predict the pebble's path",
+      line: "Choose how one pebble moves over eight waves, then watch the swash and backwash play it out.",
+      after: "Beaches, Spits and Bars"
+    },
+    "geography-ocr/living-in-the-uk-today/3": {
+      file: "longshore-drift-zigzag",
+      label: "Predict the pebble's path",
+      line: "Choose how one pebble moves over eight waves, then watch the swash and backwash play it out.",
+      after: "UK Case Study: The Holderness Coast"
     },
     "geology-eduqas/geological-time-and-life/3": {
       file: "half-life-exponential-decay",
@@ -116,11 +146,23 @@
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "Reflex Actions"
     },
+    "science-aqa/biology-paper-2/3": {
+      file: "menstrual-cycle-hormone-feedback",
+      label: "Walk the hormone cycle",
+      line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
+      after: "Contraception"
+    },
     "science-aqa/chemistry-paper-1/8": {
       file: "ion-migration-electrolysis",
       label: "Predict where the ions go",
       line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
       after: "Electrolysis of Molten Compounds"
+    },
+    "science-aqa/chemistry-paper-2/2": {
+      file: "equilibrium-not-static",
+      label: "Predict the next ten seconds",
+      line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
+      after: "Dynamic Equilibrium"
     },
     "science-aqa/chemistry-paper-2/5": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -187,11 +229,29 @@
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "The Reflex Arc"
     },
+    "science-edexcel/biology-paper-2/3": {
+      file: "menstrual-cycle-hormone-feedback",
+      label: "Walk the hormone cycle",
+      line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
+      after: "Contraception"
+    },
+    "science-edexcel/biology-paper-2/5": {
+      file: "natural-selection-not-directed",
+      label: "Predict what the population does",
+      line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
+      after: "Evolution — Change Over Time"
+    },
     "science-edexcel/chemistry-paper-1/8": {
       file: "ion-migration-electrolysis",
       label: "Predict where the ions go",
       line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
       after: "Electrolysis of Specific Substances"
+    },
+    "science-edexcel/chemistry-paper-2/2": {
+      file: "equilibrium-not-static",
+      label: "Predict the next ten seconds",
+      line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
+      after: "The Haber Process"
     },
     "science-edexcel/chemistry-paper-2/7": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -228,6 +288,18 @@
       label: "Find where the signal stops",
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "The Endocrine System"
+    },
+    "science-ocr-b/biology-paper-2/7": {
+      file: "menstrual-cycle-hormone-feedback",
+      label: "Walk the hormone cycle",
+      line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
+      after: "When Organs and Control Systems Fail"
+    },
+    "science-ocr-b/biology-paper-2/8": {
+      file: "natural-selection-not-directed",
+      label: "Predict what the population does",
+      line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
+      after: "Classification and Phylogenetic Trees"
     },
     "science-ocr-b/chemistry-paper-1/3": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -295,11 +367,23 @@
       line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
       after: "Biotic and Abiotic Factors"
     },
+    "science-ocr/biology-paper-2/4": {
+      file: "natural-selection-not-directed",
+      label: "Predict what the population does",
+      line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
+      after: "Selective Breeding"
+    },
     "science-ocr/chemistry-paper-2/1": {
       file: "reactivity-series-electron-transfer",
       label: "Predict the displacement",
       line: "Decide whether one metal will displace another from its solution, and which metal ends up as the ions.",
       after: "Extracting Metals"
+    },
+    "science-ocr/chemistry-paper-2/5": {
+      file: "equilibrium-not-static",
+      label: "Predict the next ten seconds",
+      line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
+      after: "Le Chatelier’s Principle (Higher)"
     },
     "science-ocr/chemistry-paper-2/7": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -319,11 +403,29 @@
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
       after: "Resistance and Ohm’s Law"
     },
+    "science-ocr/physics-paper-2/1": {
+      file: "em-spectrum-continuous",
+      label: "Slide across the spectrum",
+      line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
+      after: "Reflection, Refraction and Diffraction"
+    },
+    "science-ocr/physics-paper-2/2": {
+      file: "em-spectrum-continuous",
+      label: "Slide across the spectrum",
+      line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
+      after: "Absorption, Transmission and Reflection"
+    },
     "separate-sciences-edexcel/biology-paper-1/4": {
       file: "synapse-electrical-to-chemical",
       label: "Find where the signal stops",
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "The Eye (Triple Only)"
+    },
+    "separate-sciences-edexcel/biology-paper-1/6": {
+      file: "natural-selection-not-directed",
+      label: "Predict what the population does",
+      line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
+      after: "Evidence for Evolution"
     },
     "separate-sciences-edexcel/chemistry-paper-1/6": {
       file: "reactivity-series-electron-transfer",
@@ -367,6 +469,12 @@
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "Reflex Actions"
     },
+    "separate-sciences-ocr-b/biology-life-on-earth-ecosystems/4": {
+      file: "natural-selection-not-directed",
+      label: "Predict what the population does",
+      line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
+      after: "Evidence for Evolution"
+    },
     "separate-sciences-ocr-b/chemistry-earth-air-water/3": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
@@ -409,6 +517,12 @@
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "The Brain"
     },
+    "separate-sciences-ocr/biology-paper-1/8": {
+      file: "menstrual-cycle-hormone-feedback",
+      label: "Walk the hormone cycle",
+      line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
+      after: "Plant Hormones"
+    },
     "separate-sciences-ocr/chemistry-paper-1/1": {
       file: "state-change-energy-plateau",
       label: "Predict the next two minutes",
@@ -420,6 +534,12 @@
       label: "Predict where the ions go",
       line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
       after: "Electrolysis of Aqueous Solutions"
+    },
+    "separate-sciences-ocr/chemistry-paper-2/5": {
+      file: "equilibrium-not-static",
+      label: "Predict the next ten seconds",
+      line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
+      after: "Le Chatelier’s Principle (Higher Tier)"
     },
     "separate-sciences-ocr/chemistry-paper-2/8": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -445,11 +565,29 @@
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
       after: "AC and DC"
     },
+    "separate-sciences-ocr/physics-paper-2/1": {
+      file: "em-spectrum-continuous",
+      label: "Slide across the spectrum",
+      line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
+      after: "Reflection, Refraction and Diffraction"
+    },
+    "separate-sciences-ocr/physics-paper-2/2": {
+      file: "em-spectrum-continuous",
+      label: "Slide across the spectrum",
+      line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
+      after: "The Electromagnetic Spectrum"
+    },
     "separate-sciences-ocr/physics-paper-2/4": {
       file: "half-life-exponential-decay",
       label: "Predict what is left",
       line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
       after: "Contamination and Irradiation"
+    },
+    "separate-sciences/biology-paper-2/3": {
+      file: "menstrual-cycle-hormone-feedback",
+      label: "Walk the hormone cycle",
+      line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
+      after: "Contraception"
     },
     "separate-sciences/chemistry-paper-1/6": {
       file: "reactivity-series-electron-transfer",
@@ -462,6 +600,12 @@
       label: "Predict where the ions go",
       line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
       after: "Electrolysis of Molten Compounds"
+    },
+    "separate-sciences/chemistry-paper-2/2": {
+      file: "equilibrium-not-static",
+      label: "Predict the next ten seconds",
+      line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
+      after: "Dynamic Equilibrium"
     },
     "separate-sciences/chemistry-paper-2/5": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -504,6 +648,12 @@
       label: "Predict what is left",
       line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
       after: "Uses and Hazards of Radiation"
+    },
+    "separate-sciences/physics-paper-2/7": {
+      file: "em-spectrum-continuous",
+      label: "Slide across the spectrum",
+      line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
+      after: "Uses and Dangers"
     }
   };
 

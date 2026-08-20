@@ -85,7 +85,7 @@ for cid in CLUSTERS:
     ok = sum(1 for r in rows if r.get("after"))
     print("%s: %d/%d placed" % (cid, ok, len(rows)), flush=True)
 
-OUT = "_placements_stage1.json" if not sys.argv[1:] else "_placements_stage2.json"
+OUT = "_placements_stage1.json" if not sys.argv[1:] else "_placements_custom.json"
 io.open(OUT, "w", encoding="utf-8").write(
     json.dumps(out, indent=1, ensure_ascii=False))
 print("wrote " + OUT)
