@@ -44,6 +44,12 @@
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
       after: "Ohm's Law: V = I × R"
     },
+    "classical-civilisation-ocr/greek-warfare-and-the-persian-wars/5": {
+      file: "trireme-coordinated-maneuvering",
+      label: "Give the order at Salamis",
+      line: "Read the water ahead — the gap, the flank, the sea room — and decide where a trireme's ram can actually strike.",
+      after: "The Battle and Artemisia"
+    },
     "computer-science-aqa/algorithms/3": {
       file: "binary-search-requires-sorted-data",
       label: "Trace the binary search",
@@ -116,6 +122,12 @@
       line: "See an ADC measure a sound wave at fixed instants, then work out how much of the wave survives — and how big the file becomes.",
       after: "Quality versus File Size"
     },
+    "drama-aqa/the-great-wave/5": {
+      file: "cross-cutting-structural-device",
+      label: "Cut between the two scenes",
+      line: "Two scenes, one cut — predict what an audience experiences when a director intercuts them instead of playing one and then the other.",
+      after: "The Wave as Structural Metaphor"
+    },
     "economics-aqa/how-prices-are-determined/1": {
       file: "demand-curve-movement-vs-shift",
       label: "Predict movement or shift",
@@ -139,6 +151,12 @@
       label: "Predict the secondary side",
       line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
       after: "Input Control Devices: Switches"
+    },
+    "film-studies-eduqas/film-form-and-language/5": {
+      file: "plot-vs-story",
+      label: "Work out the cut",
+      line: "Three short stories, each re-arranged into a film — decide what the audience meets first, which events never reach the screen, and what that order creates.",
+      after: "Three-Act Structure"
     },
     "geography-aqa/paper-1/14": {
       file: "longshore-drift-zigzag",
@@ -241,6 +259,12 @@
       label: "Predict the election results",
       line: "Five real results between 1928 and 1933 — commit to a prediction, then see what the votes actually did.",
       after: "The Appeal of Hitler and the Nazi Party"
+    },
+    "music-aqa/aos1-western-classical/2": {
+      file: "sonata-form-key-relationships",
+      label: "Follow the key journey",
+      line: "Predict where the second subject goes in the exposition — and which key it comes back in.",
+      after: "Sonata form"
     },
     "physical-education-aqa/human-body-and-movement/4": {
       file: "heart-simultaneous-double-circulation",
@@ -1320,6 +1344,18 @@
       label: "Slide across the spectrum",
       line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
       after: "Uses and Dangers"
+    },
+    "sociology-aqa/crime-deviance/3": {
+      file: "labelling-theory-identity",
+      label: "Predict what the label does",
+      line: "Two people, one act, one label — find out whether the label changes anything.",
+      after: "Primary and Secondary Deviance"
+    },
+    "sociology-aqa/education/5": {
+      file: "labelling-theory-identity",
+      label: "Predict what the label does",
+      line: "Two people, one act, one label — find out whether the label changes anything.",
+      after: "Labelling Theory and the Self-Fulfilling Prophecy"
     }
   };
 
