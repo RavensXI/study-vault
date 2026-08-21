@@ -26,6 +26,78 @@
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
       after: "Ohm's Law: V = I × R"
     },
+    "computer-science-aqa/algorithms/3": {
+      file: "binary-search-requires-sorted-data",
+      label: "Trace the binary search",
+      line: "Predict what the search checks, and whether it finds the target at all — on lists that are not always sorted.",
+      after: "Choosing the Right Algorithm"
+    },
+    "computer-science-aqa/computer-systems/2": {
+      file: "fetch-decode-simultaneous",
+      label: "Predict what each stage changes",
+      line: "Given a CPU part-way through a short program, predict what one named register holds once fetch, decode or execute has finished.",
+      after: "CPU Performance Factors"
+    },
+    "computer-science-aqa/data-representation/3": {
+      file: "sampling-repeated-measurement",
+      label: "Predict what gets stored",
+      line: "See an ADC measure a sound wave at fixed instants, then work out how much of the wave survives — and how big the file becomes.",
+      after: "Quality Versus File Size"
+    },
+    "computer-science-edexcel/computational-thinking/4": {
+      file: "binary-search-requires-sorted-data",
+      label: "Trace the binary search",
+      line: "Predict what the search checks, and whether it finds the target at all — on lists that are not always sorted.",
+      after: "Choosing the Right Algorithm"
+    },
+    "computer-science-edexcel/data/3": {
+      file: "sampling-repeated-measurement",
+      label: "Predict what gets stored",
+      line: "See an ADC measure a sound wave at fixed instants, then work out how much of the wave survives — and how big the file becomes.",
+      after: "Limitations of Binary Representation"
+    },
+    "computer-science-eduqas/algorithms-programming-software/3": {
+      file: "binary-search-requires-sorted-data",
+      label: "Trace the binary search",
+      line: "Predict what the search checks, and whether it finds the target at all — on lists that are not always sorted.",
+      after: "Comparing Linear and Binary Search"
+    },
+    "computer-science-eduqas/data-representation-storage/5": {
+      file: "sampling-repeated-measurement",
+      label: "Predict what gets stored",
+      line: "See an ADC measure a sound wave at fixed instants, then work out how much of the wave survives — and how big the file becomes.",
+      after: "Bit Depth (Sample Resolution)"
+    },
+    "computer-science-eduqas/hardware-and-systems/1": {
+      file: "fetch-decode-simultaneous",
+      label: "Predict what each stage changes",
+      line: "Given a CPU part-way through a short program, predict what one named register holds once fetch, decode or execute has finished.",
+      after: "Cache Memory"
+    },
+    "computer-science-eduqas/hardware-and-systems/2": {
+      file: "fetch-decode-simultaneous",
+      label: "Predict what each stage changes",
+      line: "Given a CPU part-way through a short program, predict what one named register holds once fetch, decode or execute has finished.",
+      after: "CPU Performance Factor 3 — Cache Size"
+    },
+    "computer-science/computational-thinking/3": {
+      file: "binary-search-requires-sorted-data",
+      label: "Trace the binary search",
+      line: "Predict what the search checks, and whether it finds the target at all — on lists that are not always sorted.",
+      after: "Comparing the two searches"
+    },
+    "computer-science/computer-systems/1": {
+      file: "fetch-decode-simultaneous",
+      label: "Predict what each stage changes",
+      line: "Given a CPU part-way through a short program, predict what one named register holds once fetch, decode or execute has finished.",
+      after: "The fetch-execute cycle"
+    },
+    "computer-science/computer-systems/7": {
+      file: "sampling-repeated-measurement",
+      label: "Predict what gets stored",
+      line: "See an ADC measure a sound wave at fixed instants, then work out how much of the wave survives — and how big the file becomes.",
+      after: "Quality versus File Size"
+    },
     "electronics-eduqas/discovering-electronics/2": {
       file: "current-not-used-up",
       label: "Predict all three ammeters",
@@ -379,6 +451,12 @@
       line: "Split an animal's food intake between new biomass, respiration, egestion and excretion, and find out which loss is really the big one.",
       after: "Predator–Prey Cycles and Population Change"
     },
+    "science-ocr-b/biology-paper-2/2": {
+      file: "organelle-3d-spatial-architecture",
+      label: "See where organelles actually sit",
+      line: "Predict where a specialised cell concentrates an organelle, then watch the textbook diagram redraw itself as the crowded thing it really is.",
+      after: "Prokaryotic Cell Structure"
+    },
     "science-ocr-b/biology-paper-2/4": {
       file: "sa-v-ratio-real-limit",
       label: "Test which block copes",
@@ -390,6 +468,12 @@
       label: "Find where the signal stops",
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "The Endocrine System"
+    },
+    "science-ocr-b/biology-paper-2/6": {
+      file: "negative-feedback-continuous-cycle",
+      label: "Predict what happens next",
+      line: "Join a control system mid-story and predict which response is acting, what the level does, and what happens once it crosses the set point.",
+      after: "Controlling Blood Glucose"
     },
     "science-ocr-b/biology-paper-2/7": {
       file: "menstrual-cycle-hormone-feedback",
@@ -463,6 +547,12 @@
       line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
       after: "Changes of State and Specific Latent Heat"
     },
+    "science-ocr/biology-paper-1/1": {
+      file: "organelle-3d-spatial-architecture",
+      label: "See where organelles actually sit",
+      line: "Predict where a specialised cell concentrates an organelle, then watch the textbook diagram redraw itself as the crowded thing it really is.",
+      after: "Microscopy"
+    },
     "science-ocr/biology-paper-1/4": {
       file: "photosynthesis-limiting-factor-plateau",
       label: "Lift the plateau",
@@ -480,6 +570,12 @@
       label: "Find where the signal stops",
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "Synapses"
+    },
+    "science-ocr/biology-paper-1/8": {
+      file: "negative-feedback-continuous-cycle",
+      label: "Predict what happens next",
+      line: "Join a control system mid-story and predict which response is acting, what the level does, and what happens once it crosses the set point.",
+      after: "Blood Glucose Control"
     },
     "science-ocr/biology-paper-2/1": {
       file: "conservation-of-energy-dispersal",
@@ -541,6 +637,12 @@
       line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
       after: "Absorption, Transmission and Reflection"
     },
+    "separate-sciences-edexcel/biology-paper-1/1": {
+      file: "organelle-3d-spatial-architecture",
+      label: "See where organelles actually sit",
+      line: "Predict where a specialised cell concentrates an organelle, then watch the textbook diagram redraw itself as the crowded thing it really is.",
+      after: "Animal and Plant Cell Organelles"
+    },
     "separate-sciences-edexcel/biology-paper-1/4": {
       file: "synapse-electrical-to-chemical",
       label: "Find where the signal stops",
@@ -558,6 +660,12 @@
       label: "Predict what the population does",
       line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
       after: "Evidence for Evolution"
+    },
+    "separate-sciences-edexcel/biology-paper-2/4": {
+      file: "negative-feedback-continuous-cycle",
+      label: "Predict what happens next",
+      line: "Join a control system mid-story and predict which response is acting, what the level does, and what happens once it crosses the set point.",
+      after: "The Menstrual Cycle"
     },
     "separate-sciences-edexcel/biology-paper-2/7": {
       file: "sa-v-ratio-real-limit",
@@ -703,6 +811,12 @@
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Climate Models and the Role of Evidence"
     },
+    "separate-sciences-ocr/biology-paper-1/1": {
+      file: "organelle-3d-spatial-architecture",
+      label: "See where organelles actually sit",
+      line: "Predict where a specialised cell concentrates an organelle, then watch the textbook diagram redraw itself as the crowded thing it really is.",
+      after: "Microscopy — Seeing Cells"
+    },
     "separate-sciences-ocr/biology-paper-1/4": {
       file: "photosynthesis-limiting-factor-plateau",
       label: "Lift the plateau",
@@ -726,6 +840,12 @@
       label: "Walk the hormone cycle",
       line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
       after: "Plant Hormones"
+    },
+    "separate-sciences-ocr/biology-paper-2/1": {
+      file: "negative-feedback-continuous-cycle",
+      label: "Predict what happens next",
+      line: "Join a control system mid-story and predict which response is acting, what the level does, and what happens once it crosses the set point.",
+      after: "Blood Glucose Control"
     },
     "separate-sciences-ocr/biology-paper-2/3": {
       file: "biomass-transfer-respiration",
@@ -1002,7 +1122,10 @@
   }
 
   function placeStrip(cfg) {
-    var heads = document.querySelectorAll('#lesson-content h2, .lesson-content h2, article h2');
+    /* some lessons structure with h3s and have no h2s at all */
+    var heads = document.querySelectorAll(
+      '#lesson-content h2, .lesson-content h2, article h2, ' +
+      '#lesson-content h3, .lesson-content h3, article h3');
     var target = null;
     for (var i = 0; i < heads.length; i++) {
       if (heads[i].textContent.trim().indexOf(cfg.after) === 0) { target = heads[i]; break; }
