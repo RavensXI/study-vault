@@ -20,6 +20,24 @@
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Radio Telescopes"
     },
+    "astronomy-edexcel/telescopic-astronomy/14": {
+      file: "redshift-stretching-mechanism",
+      label: "Predict the spectral shift",
+      line: "Give a galaxy's speed and direction, then say where its hydrogen lines land in the light that reaches Earth.",
+      after: "The Redshift Formula"
+    },
+    "business-aqa/finance/2": {
+      file: "profit-vs-cash-not-interchangeable",
+      label: "Predict profit, then cash",
+      line: "One month of a small business — work out what it earned, and what is actually in the bank.",
+      after: "Reading a Cash-Flow Forecast"
+    },
+    "business-edexcel/investigating-small-business/8": {
+      file: "profit-vs-cash-not-interchangeable",
+      label: "Predict profit, then cash",
+      line: "One month of a small business — work out what it earned, and what is actually in the bank.",
+      after: "Reading a Cash-Flow Forecast"
+    },
     "cambridge-nationals-engineering-programmable-systems/principles-of-electronic-and-programmable-systems/2": {
       file: "current-not-used-up",
       label: "Predict all three ammeters",
@@ -97,6 +115,18 @@
       label: "Predict what gets stored",
       line: "See an ADC measure a sound wave at fixed instants, then work out how much of the wave survives — and how big the file becomes.",
       after: "Quality versus File Size"
+    },
+    "economics-aqa/how-prices-are-determined/1": {
+      file: "demand-curve-movement-vs-shift",
+      label: "Predict movement or shift",
+      line: "One chocolate bar, one demand curve — decide whether each event slides the point along the curve or moves the whole curve.",
+      after: "Shifts in the Demand Curve"
+    },
+    "economics-aqa/how-prices-are-determined/3": {
+      file: "demand-curve-movement-vs-shift",
+      label: "Predict movement or shift",
+      line: "One chocolate bar, one demand curve — decide whether each event slides the point along the curve or moves the whole curve.",
+      after: "The Price Mechanism: Three Functions"
     },
     "electronics-eduqas/discovering-electronics/2": {
       file: "current-not-used-up",
@@ -176,11 +206,41 @@
       line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
       after: "What Radiometric Dating Actually Dates"
     },
+    "geology-eduqas/hazards-resources-and-investigative-geology/5": {
+      file: "porosity-vs-permeability",
+      label: "Test a rock with water",
+      line: "Read the grains, predict the porosity and the permeability, then watch whether the water soaks in and stops or streams straight through.",
+      after: "Domestic Waste and Landfill Sites"
+    },
+    "geology-eduqas/rocks-and-minerals/5": {
+      file: "porosity-vs-permeability",
+      label: "Test a rock with water",
+      line: "Read the grains, predict the porosity and the permeability, then watch whether the water soaks in and stops or streams straight through.",
+      after: "Sorting: Reading Energy Consistency"
+    },
     "history-aqa/elizabethan-england/13": {
       file: "armada-chain-of-consequence",
       label: "Put the disaster in order",
       line: "Five links, shuffled. Commit to the chain, then see what forced what.",
       after: "The Long Way Home"
+    },
+    "history-aqa/germany-democracy-dictatorship/7": {
+      file: "nazi-rise-contingent-not-inevitable",
+      label: "Predict the election results",
+      line: "Five real results between 1928 and 1933 — commit to a prediction, then see what the votes actually did.",
+      after: "Bruning and the Politics of Austerity"
+    },
+    "history-aqa/germany-democracy-dictatorship/8": {
+      file: "nazi-rise-contingent-not-inevitable",
+      label: "Predict the election results",
+      line: "Five real results between 1928 and 1933 — commit to a prediction, then see what the votes actually did.",
+      after: "The Appointment, 30 January 1933"
+    },
+    "history-edexcel/weimar-nazi-germany/6": {
+      file: "nazi-rise-contingent-not-inevitable",
+      label: "Predict the election results",
+      line: "Five real results between 1928 and 1933 — commit to a prediction, then see what the votes actually did.",
+      after: "The Appeal of Hitler and the Nazi Party"
     },
     "physical-education-aqa/human-body-and-movement/4": {
       file: "heart-simultaneous-double-circulation",
@@ -1140,6 +1200,12 @@
       label: "Predict what is left",
       line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
       after: "Contamination and Irradiation"
+    },
+    "separate-sciences-ocr/physics-paper-2/9": {
+      file: "redshift-stretching-mechanism",
+      label: "Predict the spectral shift",
+      line: "Give a galaxy's speed and direction, then say where its hydrogen lines land in the light that reaches Earth.",
+      after: "Red-Shift and the Expanding Universe"
     },
     "separate-sciences/biology-paper-1/4": {
       file: "heart-simultaneous-double-circulation",
