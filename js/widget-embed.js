@@ -505,12 +505,6 @@
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
       after: "Resistance and Ohm’s Law"
     },
-    "science-ocr/physics-paper-2/1": {
-      file: "em-spectrum-continuous",
-      label: "Slide across the spectrum",
-      line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
-      after: "Reflection, Refraction and Diffraction"
-    },
     "science-ocr/physics-paper-2/2": {
       file: "em-spectrum-continuous",
       label: "Slide across the spectrum",
@@ -708,12 +702,6 @@
       label: "Predict all three ammeters",
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
       after: "AC and DC"
-    },
-    "separate-sciences-ocr/physics-paper-2/1": {
-      file: "em-spectrum-continuous",
-      label: "Slide across the spectrum",
-      line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
-      after: "Reflection, Refraction and Diffraction"
     },
     "separate-sciences-ocr/physics-paper-2/2": {
       file: "em-spectrum-continuous",
