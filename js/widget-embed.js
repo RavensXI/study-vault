@@ -158,6 +158,18 @@
       line: "Five links, shuffled. Commit to the chain, then see what forced what.",
       after: "The Long Way Home"
     },
+    "physical-education-aqa/human-body-and-movement/4": {
+      file: "heart-simultaneous-double-circulation",
+      label: "Track one blood cell",
+      line: "See both sides of the heart squeeze on the same beat, and find out why blood passes through it twice on every lap of the body.",
+      after: "The Cardiac Cycle: How the Heart Beats"
+    },
+    "physical-education-ocr/physical-factors-affecting-performance/6": {
+      file: "heart-simultaneous-double-circulation",
+      label: "Track one blood cell",
+      line: "See both sides of the heart squeeze on the same beat, and find out why blood passes through it twice on every lap of the body.",
+      after: "The Heart: Structure and Function"
+    },
     "psychology-aqa/brain-neuropsychology/2": {
       file: "synapse-electrical-to-chemical",
       label: "Find where the signal stops",
@@ -242,6 +254,12 @@
       line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
       after: "Unitarians and Rejection of the Trinity"
     },
+    "science-aqa/biology-paper-1/4": {
+      file: "heart-simultaneous-double-circulation",
+      label: "Track one blood cell",
+      line: "See both sides of the heart squeeze on the same beat, and find out why blood passes through it twice on every lap of the body.",
+      after: "Blood Vessels"
+    },
     "science-aqa/biology-paper-1/8": {
       file: "photosynthesis-limiting-factor-plateau",
       label: "Lift the plateau",
@@ -265,6 +283,12 @@
       label: "Walk the hormone cycle",
       line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
       after: "Contraception"
+    },
+    "science-aqa/chemistry-paper-1/10": {
+      file: "nanoparticle-surface-area-threshold",
+      label: "Cut the cube smaller",
+      line: "Predict what happens to the total surface area as a block is cut into ever-smaller cubes, and why the same substance behaves differently at 10 nm.",
+      after: "Uses of Nanoparticles"
     },
     "science-aqa/chemistry-paper-1/8": {
       file: "ion-migration-electrolysis",
@@ -343,11 +367,29 @@
       line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
       after: "Uses and Hazards of Radiation"
     },
+    "science-aqa/physics-paper-1/9": {
+      file: "field-lines-as-maps-not-paths",
+      label: "Read the field map",
+      line: "Predict which way a charge is pushed at a point between the lines, and where the field is strongest.",
+      after: "Uses and Dangers of Static Electricity"
+    },
+    "science-aqa/physics-paper-2/1": {
+      file: "resultant-force-vector-subtraction",
+      label: "Find the resultant force",
+      line: "Predict what two opposing forces add up to — and what it does to the object's motion.",
+      after: "Resultant Forces"
+    },
     "science-aqa/physics-paper-2/12": {
       file: "transformer-voltage-current-tradeoff",
       label: "Predict the secondary side",
       line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
       after: "The National Grid"
+    },
+    "science-aqa/physics-paper-2/4": {
+      file: "newtons-third-law-different-objects",
+      label: "Name the partner force",
+      line: "Given one force in a scenario, work out its third law partner: what type it is, which object it acts on, and which way it points.",
+      after: "Terminal Velocity"
     },
     "science-edexcel/biology-paper-2/1": {
       file: "synapse-electrical-to-chemical",
@@ -433,11 +475,23 @@
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
       after: "Parallel Circuits"
     },
+    "science-edexcel/physics-paper-1/6": {
+      file: "field-lines-as-maps-not-paths",
+      label: "Read the field map",
+      line: "Predict which way a charge is pushed at a point between the lines, and where the field is strongest.",
+      after: "Ions and Electron Transfer"
+    },
     "science-edexcel/physics-paper-1/8": {
       file: "state-change-energy-plateau",
       label: "Predict the next two minutes",
       line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
       after: "Specific Heat Capacity"
+    },
+    "science-edexcel/physics-paper-2/1": {
+      file: "newtons-third-law-different-objects",
+      label: "Name the partner force",
+      line: "Given one force in a scenario, work out its third law partner: what type it is, which object it acts on, and which way it points.",
+      after: "Circular Motion"
     },
     "science-ocr-b/biology-paper-1/7": {
       file: "photosynthesis-limiting-factor-plateau",
@@ -510,6 +564,12 @@
       label: "Predict where the ions go",
       line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
       after: "Extracting Aluminium by Electrolysis"
+    },
+    "science-ocr-b/chemistry-paper-2/7": {
+      file: "nanoparticle-surface-area-threshold",
+      label: "Cut the cube smaller",
+      line: "Predict what happens to the total surface area as a block is cut into ever-smaller cubes, and why the same substance behaves differently at 10 nm.",
+      after: "Properties That Change at the Nanoscale"
     },
     "science-ocr-b/physics-paper-1/2": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -721,6 +781,18 @@
       line: "Predict the repeat unit, then watch the C=C open and its electrons become the links along the chain.",
       after: "Condensation Polymerisation"
     },
+    "separate-sciences-edexcel/chemistry-paper-2/7": {
+      file: "nanoparticle-surface-area-threshold",
+      label: "Cut the cube smaller",
+      line: "Predict what happens to the total surface area as a block is cut into ever-smaller cubes, and why the same substance behaves differently at 10 nm.",
+      after: "Applications of Nanoparticles"
+    },
+    "separate-sciences-edexcel/physics-paper-1/2": {
+      file: "resultant-force-vector-subtraction",
+      label: "Find the resultant force",
+      line: "Predict what two opposing forces add up to — and what it does to the object's motion.",
+      after: "Newton’s Second Law and F = ma"
+    },
     "separate-sciences-edexcel/physics-paper-1/7": {
       file: "half-life-exponential-decay",
       label: "Predict what is left",
@@ -787,11 +859,29 @@
       line: "Predict the height where a hydrocarbon condenses, from its boiling point and the column temperatures.",
       after: "Alkanes"
     },
+    "separate-sciences-ocr-b/chemistry-materials-reactions/5": {
+      file: "nanoparticle-surface-area-threshold",
+      label: "Cut the cube smaller",
+      line: "Predict what happens to the total surface area as a block is cut into ever-smaller cubes, and why the same substance behaves differently at 10 nm.",
+      after: "Properties and Uses of Nanoparticles"
+    },
+    "separate-sciences-ocr-b/physics-energy-electricity/2": {
+      file: "field-lines-as-maps-not-paths",
+      label: "Read the field map",
+      line: "Predict which way a charge is pushed at a point between the lines, and where the field is strongest.",
+      after: "Uses and Hazards of Static Electricity"
+    },
     "separate-sciences-ocr-b/physics-energy-electricity/3": {
       file: "current-not-used-up",
       label: "Predict all three ammeters",
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
       after: "I-V Graphs and Non-Ohmic Components"
+    },
+    "separate-sciences-ocr-b/physics-forces-motion-radioactivity/1": {
+      file: "newtons-third-law-different-objects",
+      label: "Name the partner force",
+      line: "Given one force in a scenario, work out its third law partner: what type it is, which object it acts on, and which way it points.",
+      after: "Weight and the Gravitational Field"
     },
     "separate-sciences-ocr-b/physics-forces-motion-radioactivity/4": {
       file: "half-life-exponential-decay",
@@ -907,6 +997,12 @@
       line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
       after: "Specific Heat Capacity"
     },
+    "separate-sciences-ocr/physics-paper-1/4": {
+      file: "resultant-force-vector-subtraction",
+      label: "Find the resultant force",
+      line: "Predict what two opposing forces add up to — and what it does to the object's motion.",
+      after: "Weight, Mass and Gravitational Field Strength"
+    },
     "separate-sciences-ocr/physics-paper-1/6": {
       file: "current-not-used-up",
       label: "Predict all three ammeters",
@@ -930,6 +1026,12 @@
       label: "Predict what is left",
       line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
       after: "Contamination and Irradiation"
+    },
+    "separate-sciences/biology-paper-1/4": {
+      file: "heart-simultaneous-double-circulation",
+      label: "Track one blood cell",
+      line: "See both sides of the heart squeeze on the same beat, and find out why blood passes through it twice on every lap of the body.",
+      after: "Blood Vessels"
     },
     "separate-sciences/biology-paper-2/3": {
       file: "menstrual-cycle-hormone-feedback",
@@ -1014,6 +1116,18 @@
       label: "Predict what is left",
       line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
       after: "Uses and Hazards of Radiation"
+    },
+    "separate-sciences/physics-paper-2/1": {
+      file: "resultant-force-vector-subtraction",
+      label: "Find the resultant force",
+      line: "Predict what two opposing forces add up to — and what it does to the object's motion.",
+      after: "Resultant Forces"
+    },
+    "separate-sciences/physics-paper-2/4": {
+      file: "newtons-third-law-different-objects",
+      label: "Name the partner force",
+      line: "Given one force in a scenario, work out its third law partner: what type it is, which object it acts on, and which way it points.",
+      after: "Terminal Velocity"
     },
     "separate-sciences/physics-paper-2/7": {
       file: "em-spectrum-continuous",
