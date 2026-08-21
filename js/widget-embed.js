@@ -212,12 +212,6 @@
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "The Greenhouse Effect"
     },
-    "science-aqa/chemistry-paper-2/8": {
-      file: "polymer-double-bond-electron-rearrangement",
-      label: "Open the double bond",
-      line: "Predict the repeat unit, then watch the C=C open and its electrons become the links along the chain.",
-      after: "Alcohols"
-    },
     "science-aqa/chemistry-paper-2/9": {
       file: "polymer-double-bond-electron-rearrangement",
       label: "Open the double bond",
@@ -312,12 +306,6 @@
       label: "Predict the next ten seconds",
       line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
       after: "The Haber Process"
-    },
-    "science-edexcel/chemistry-paper-2/4": {
-      file: "polymer-double-bond-electron-rearrangement",
-      label: "Open the double bond",
-      line: "Predict the repeat unit, then watch the C=C open and its electrons become the links along the chain.",
-      after: "Cracking"
     },
     "science-edexcel/chemistry-paper-2/5": {
       file: "polymer-double-bond-electron-rearrangement",
