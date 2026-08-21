@@ -200,6 +200,12 @@
       line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
       after: "Electrolysis of Molten Compounds"
     },
+    "science-aqa/chemistry-paper-1/9": {
+      file: "bond-energy-not-sequential",
+      label: "Balance the bond energies",
+      line: "Work out which way the energy goes at each side, then let the two totals decide whether the reaction is exothermic or endothermic.",
+      after: "Practical Applications"
+    },
     "science-aqa/chemistry-paper-2/2": {
       file: "equilibrium-not-static",
       label: "Predict the next ten seconds",
@@ -283,6 +289,12 @@
       line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
       after: "Contraception"
     },
+    "science-edexcel/biology-paper-2/4": {
+      file: "punnett-square-meaning",
+      label: "Test the 3:1 ratio",
+      line: "Fill in the missing cell, give the chance, then see what four real offspring actually do.",
+      after: "Monohybrid Inheritance"
+    },
     "science-edexcel/biology-paper-2/5": {
       file: "natural-selection-not-directed",
       label: "Predict what the population does",
@@ -301,11 +313,23 @@
       line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
       after: "Electrolysis of Specific Substances"
     },
+    "science-edexcel/chemistry-paper-2/1": {
+      file: "collision-theory-energy-distribution",
+      label: "Predict the effect on collisions",
+      line: "Warm it, dilute it or add a catalyst, then predict both the number of collisions and the share of them with enough energy to react.",
+      after: "Catalysts"
+    },
     "science-edexcel/chemistry-paper-2/2": {
       file: "equilibrium-not-static",
       label: "Predict the next ten seconds",
       line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
       after: "The Haber Process"
+    },
+    "science-edexcel/chemistry-paper-2/3": {
+      file: "fractional-distillation-boiling-point",
+      label: "Send it up the column",
+      line: "Predict the height where a hydrocarbon condenses, from its boiling point and the column temperatures.",
+      after: "How Fractions Differ"
     },
     "science-edexcel/chemistry-paper-2/5": {
       file: "polymer-double-bond-electron-rearrangement",
@@ -354,6 +378,12 @@
       label: "Account for every kilojoule",
       line: "Split an animal's food intake between new biomass, respiration, egestion and excretion, and find out which loss is really the big one.",
       after: "Predator–Prey Cycles and Population Change"
+    },
+    "science-ocr-b/biology-paper-2/4": {
+      file: "sa-v-ratio-real-limit",
+      label: "Test which block copes",
+      line: "Two blocks of living tissue side by side — commit to which can supply every cell through its own surface, then watch the surface and volume counted.",
+      after: "Moving Substances Across Cell Membranes"
     },
     "science-ocr-b/biology-paper-2/5": {
       file: "synapse-electrical-to-chemical",
@@ -439,6 +469,12 @@
       line: "The graph has levelled off — work out which single change raises the rate, and which does nothing at all.",
       after: "Factors Affecting the Rate of Photosynthesis"
     },
+    "science-ocr/biology-paper-1/5": {
+      file: "sa-v-ratio-real-limit",
+      label: "Test which block copes",
+      line: "Two blocks of living tissue side by side — commit to which can supply every cell through its own surface, then watch the surface and volume counted.",
+      after: "The Challenges of Size"
+    },
     "science-ocr/biology-paper-1/6": {
       file: "synapse-electrical-to-chemical",
       label: "Find where the signal stops",
@@ -462,6 +498,12 @@
       label: "Fire the alpha beam",
       line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
       after: "Electronic Configuration"
+    },
+    "science-ocr/chemistry-paper-1/7": {
+      file: "bond-energy-not-sequential",
+      label: "Balance the bond energies",
+      line: "Work out which way the energy goes at each side, then let the two totals decide whether the reaction is exothermic or endothermic.",
+      after: "Bond Energy Calculations (Higher)"
     },
     "science-ocr/chemistry-paper-2/1": {
       file: "reactivity-series-electron-transfer",
@@ -505,11 +547,23 @@
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "The Eye (Triple Only)"
     },
+    "separate-sciences-edexcel/biology-paper-1/5": {
+      file: "punnett-square-meaning",
+      label: "Test the 3:1 ratio",
+      line: "Fill in the missing cell, give the chance, then see what four real offspring actually do.",
+      after: "Codominance and ABO Blood Groups (Triple Only)"
+    },
     "separate-sciences-edexcel/biology-paper-1/6": {
       file: "natural-selection-not-directed",
       label: "Predict what the population does",
       line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
       after: "Evidence for Evolution"
+    },
+    "separate-sciences-edexcel/biology-paper-2/7": {
+      file: "sa-v-ratio-real-limit",
+      label: "Test which block copes",
+      line: "Two blocks of living tissue side by side — commit to which can supply every cell through its own surface, then watch the surface and volume counted.",
+      after: "Alveoli and Gas Exchange"
     },
     "separate-sciences-edexcel/biology-paper-2/8": {
       file: "biomass-transfer-respiration",
@@ -534,6 +588,18 @@
       label: "Predict where the ions go",
       line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
       after: "Electrolysis of Molten Ionic Compounds"
+    },
+    "separate-sciences-edexcel/chemistry-paper-2/1": {
+      file: "collision-theory-energy-distribution",
+      label: "Predict the effect on collisions",
+      line: "Warm it, dilute it or add a catalyst, then predict both the number of collisions and the share of them with enough energy to react.",
+      after: "Core Practical — Measuring Rates of Reaction"
+    },
+    "separate-sciences-edexcel/chemistry-paper-2/3": {
+      file: "fractional-distillation-boiling-point",
+      label: "Send it up the column",
+      line: "Predict the height where a hydrocarbon condenses, from its boiling point and the column temperatures.",
+      after: "Alkanes"
     },
     "separate-sciences-edexcel/chemistry-paper-2/5": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -583,6 +649,18 @@
       line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
       after: "Evidence for Evolution"
     },
+    "separate-sciences-ocr-b/biology-you-and-your-genes/2": {
+      file: "punnett-square-meaning",
+      label: "Test the 3:1 ratio",
+      line: "Fill in the missing cell, give the chance, then see what four real offspring actually do.",
+      after: "Sex Determination"
+    },
+    "separate-sciences-ocr-b/chemistry-analysis-useful-products/3": {
+      file: "collision-theory-energy-distribution",
+      label: "Predict the effect on collisions",
+      line: "Warm it, dilute it or add a catalyst, then predict both the number of collisions and the share of them with enough energy to react.",
+      after: "Yield and Atom Economy"
+    },
     "separate-sciences-ocr-b/chemistry-earth-air-water/3": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
@@ -594,6 +672,12 @@
       label: "Predict the displacement",
       line: "Decide whether one metal will displace another from its solution, and which metal ends up as the ions.",
       after: "Extracting Metals from Their Ores"
+    },
+    "separate-sciences-ocr-b/chemistry-materials-reactions/3": {
+      file: "fractional-distillation-boiling-point",
+      label: "Send it up the column",
+      line: "Predict the height where a hydrocarbon condenses, from its boiling point and the column temperatures.",
+      after: "Alkanes"
     },
     "separate-sciences-ocr-b/physics-energy-electricity/3": {
       file: "current-not-used-up",
@@ -625,6 +709,12 @@
       line: "The graph has levelled off — work out which single change raises the rate, and which does nothing at all.",
       after: "Limiting Factors"
     },
+    "separate-sciences-ocr/biology-paper-1/5": {
+      file: "sa-v-ratio-real-limit",
+      label: "Test which block copes",
+      line: "Two blocks of living tissue side by side — commit to which can supply every cell through its own surface, then watch the surface and volume counted.",
+      after: "Specialised Exchange Surfaces"
+    },
     "separate-sciences-ocr/biology-paper-1/7": {
       file: "synapse-electrical-to-chemical",
       label: "Find where the signal stops",
@@ -655,17 +745,35 @@
       line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
       after: "Electronic Configuration"
     },
+    "separate-sciences-ocr/chemistry-paper-1/8": {
+      file: "bond-energy-not-sequential",
+      label: "Balance the bond energies",
+      line: "Work out which way the energy goes at each side, then let the two totals decide whether the reaction is exothermic or endothermic.",
+      after: "Bond Energy Calculations (Higher Tier)"
+    },
     "separate-sciences-ocr/chemistry-paper-2/2": {
       file: "ion-migration-electrolysis",
       label: "Predict where the ions go",
       line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
       after: "Electrolysis of Aqueous Solutions"
     },
+    "separate-sciences-ocr/chemistry-paper-2/4": {
+      file: "collision-theory-energy-distribution",
+      label: "Predict the effect on collisions",
+      line: "Warm it, dilute it or add a catalyst, then predict both the number of collisions and the share of them with enough energy to react.",
+      after: "Catalysts"
+    },
     "separate-sciences-ocr/chemistry-paper-2/5": {
       file: "equilibrium-not-static",
       label: "Predict the next ten seconds",
       line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
       after: "Le Chatelier’s Principle (Higher Tier)"
+    },
+    "separate-sciences-ocr/chemistry-paper-2/7": {
+      file: "fractional-distillation-boiling-point",
+      label: "Send it up the column",
+      line: "Predict the height where a hydrocarbon condenses, from its boiling point and the column temperatures.",
+      after: "Alkanes"
     },
     "separate-sciences-ocr/chemistry-paper-2/8": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -709,6 +817,12 @@
       line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
       after: "Contraception"
     },
+    "separate-sciences/biology-paper-2/5": {
+      file: "punnett-square-meaning",
+      label: "Test the 3:1 ratio",
+      line: "Fill in the missing cell, give the chance, then see what four real offspring actually do.",
+      after: "Sex Determination"
+    },
     "separate-sciences/chemistry-paper-1/1": {
       file: "atom-mostly-empty-space",
       label: "Fire the alpha beam",
@@ -726,6 +840,12 @@
       label: "Predict where the ions go",
       line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
       after: "Electrolysis of Molten Compounds"
+    },
+    "separate-sciences/chemistry-paper-1/9": {
+      file: "bond-energy-not-sequential",
+      label: "Balance the bond energies",
+      line: "Work out which way the energy goes at each side, then let the two totals decide whether the reaction is exothermic or endothermic.",
+      after: "Practical Applications"
     },
     "separate-sciences/chemistry-paper-2/2": {
       file: "equilibrium-not-static",
