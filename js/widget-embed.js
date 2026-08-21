@@ -98,6 +98,18 @@
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "Neurotransmitters and Behaviour"
     },
+    "religious-studies-aqa/buddhism-beliefs/1": {
+      file: "dependent-origination-web-not-chain",
+      label: "Remove one condition",
+      line: "See what ceases when a single condition is taken out of the web, and what carries on regardless.",
+      after: "Dukkha — Unsatisfactoriness and Suffering"
+    },
+    "religious-studies-aqa/buddhism-beliefs/2": {
+      file: "dependent-origination-web-not-chain",
+      label: "Remove one condition",
+      line: "See what ceases when a single condition is taken out of the web, and what carries on regardless.",
+      after: "The Five Aggregates in Everyday Life"
+    },
     "religious-studies-aqa/catholic-christianity-beliefs/1": {
       file: "trinity-three-persons",
       label: "Sort the Trinity claims",
@@ -115,6 +127,12 @@
       label: "Sort the Trinity claims",
       line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
       after: "Creation and Genesis"
+    },
+    "religious-studies-edexcel/paper-2-buddhism/3": {
+      file: "dependent-origination-web-not-chain",
+      label: "Remove one condition",
+      line: "See what ceases when a single condition is taken out of the web, and what carries on regardless.",
+      after: "Arahant and Bodhisattva Ideals"
     },
     "religious-studies-edexcel/paper-2-catholic-christianity/1": {
       file: "trinity-three-persons",
@@ -134,17 +152,41 @@
       line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
       after: "Why the Trinity Matters in Practice"
     },
+    "religious-studies-ocr/buddhism-beliefs-and-teachings/1": {
+      file: "dependent-origination-web-not-chain",
+      label: "Remove one condition",
+      line: "See what ceases when a single condition is taken out of the web, and what carries on regardless.",
+      after: "The Three Marks of Existence"
+    },
+    "religious-studies-ocr/buddhism-beliefs-and-teachings/4": {
+      file: "dependent-origination-web-not-chain",
+      label: "Remove one condition",
+      line: "See what ceases when a single condition is taken out of the web, and what carries on regardless.",
+      after: "Arahant and Bodhisattva"
+    },
     "religious-studies-ocr/christianity-beliefs-and-teachings/1": {
       file: "trinity-three-persons",
       label: "Sort the Trinity claims",
       line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
       after: "Unitarians and Rejection of the Trinity"
     },
+    "science-aqa/biology-paper-1/8": {
+      file: "photosynthesis-limiting-factor-plateau",
+      label: "Lift the plateau",
+      line: "The graph has levelled off — work out which single change raises the rate, and which does nothing at all.",
+      after: "Aerobic Respiration"
+    },
     "science-aqa/biology-paper-2/1": {
       file: "synapse-electrical-to-chemical",
       label: "Find where the signal stops",
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "Reflex Actions"
+    },
+    "science-aqa/biology-paper-2/12": {
+      file: "biomass-transfer-respiration",
+      label: "Account for every kilojoule",
+      line: "Split an animal's food intake between new biomass, respiration, egestion and excretion, and find out which loss is really the big one.",
+      after: "Implications for Food Production"
     },
     "science-aqa/biology-paper-2/3": {
       file: "menstrual-cycle-hormone-feedback",
@@ -169,6 +211,18 @@
       label: "Follow the infrared out",
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "The Greenhouse Effect"
+    },
+    "science-aqa/chemistry-paper-2/8": {
+      file: "polymer-double-bond-electron-rearrangement",
+      label: "Open the double bond",
+      line: "Predict the repeat unit, then watch the C=C open and its electrons become the links along the chain.",
+      after: "Alcohols"
+    },
+    "science-aqa/chemistry-paper-2/9": {
+      file: "polymer-double-bond-electron-rearrangement",
+      label: "Open the double bond",
+      line: "Predict the repeat unit, then watch the C=C open and its electrons become the links along the chain.",
+      after: "Condensation Polymers"
     },
     "science-aqa/physics-paper-1/1": {
       file: "conservation-of-energy-dispersal",
@@ -241,6 +295,12 @@
       line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
       after: "Evolution — Change Over Time"
     },
+    "science-edexcel/biology-paper-2/8": {
+      file: "biomass-transfer-respiration",
+      label: "Account for every kilojoule",
+      line: "Split an animal's food intake between new biomass, respiration, egestion and excretion, and find out which loss is really the big one.",
+      after: "Material Cycles — Why Recycling Matters"
+    },
     "science-edexcel/chemistry-paper-1/8": {
       file: "ion-migration-electrolysis",
       label: "Predict where the ions go",
@@ -252,6 +312,18 @@
       label: "Predict the next ten seconds",
       line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
       after: "The Haber Process"
+    },
+    "science-edexcel/chemistry-paper-2/4": {
+      file: "polymer-double-bond-electron-rearrangement",
+      label: "Open the double bond",
+      line: "Predict the repeat unit, then watch the C=C open and its electrons become the links along the chain.",
+      after: "Cracking"
+    },
+    "science-edexcel/chemistry-paper-2/5": {
+      file: "polymer-double-bond-electron-rearrangement",
+      label: "Open the double bond",
+      line: "Predict the repeat unit, then watch the C=C open and its electrons become the links along the chain.",
+      after: "Alkenes — The Monomers for Addition Polymers"
     },
     "science-edexcel/chemistry-paper-2/7": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -283,6 +355,18 @@
       line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
       after: "Specific Heat Capacity"
     },
+    "science-ocr-b/biology-paper-1/7": {
+      file: "photosynthesis-limiting-factor-plateau",
+      label: "Lift the plateau",
+      line: "The graph has levelled off — work out which single change raises the rate, and which does nothing at all.",
+      after: "Resources That Producers Need: Minerals and Water"
+    },
+    "science-ocr-b/biology-paper-1/8": {
+      file: "biomass-transfer-respiration",
+      label: "Account for every kilojoule",
+      line: "Split an animal's food intake between new biomass, respiration, egestion and excretion, and find out which loss is really the big one.",
+      after: "Predator–Prey Cycles and Population Change"
+    },
     "science-ocr-b/biology-paper-2/5": {
       file: "synapse-electrical-to-chemical",
       label: "Find where the signal stops",
@@ -306,6 +390,12 @@
       label: "Follow the infrared out",
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Key Greenhouse Gases and Their Sources"
+    },
+    "science-ocr-b/chemistry-paper-1/5": {
+      file: "atom-mostly-empty-space",
+      label: "Fire the alpha beam",
+      line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
+      after: "Models as Tools: Strengths and Limitations"
     },
     "science-ocr-b/chemistry-paper-2/2": {
       file: "reactivity-series-electron-transfer",
@@ -355,6 +445,12 @@
       line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
       after: "Changes of State and Specific Latent Heat"
     },
+    "science-ocr/biology-paper-1/4": {
+      file: "photosynthesis-limiting-factor-plateau",
+      label: "Lift the plateau",
+      line: "The graph has levelled off — work out which single change raises the rate, and which does nothing at all.",
+      after: "Factors Affecting the Rate of Photosynthesis"
+    },
     "science-ocr/biology-paper-1/6": {
       file: "synapse-electrical-to-chemical",
       label: "Find where the signal stops",
@@ -372,6 +468,12 @@
       label: "Predict what the population does",
       line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
       after: "Selective Breeding"
+    },
+    "science-ocr/chemistry-paper-1/2": {
+      file: "atom-mostly-empty-space",
+      label: "Fire the alpha beam",
+      line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
+      after: "Electronic Configuration"
     },
     "science-ocr/chemistry-paper-2/1": {
       file: "reactivity-series-electron-transfer",
@@ -427,6 +529,18 @@
       line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
       after: "Evidence for Evolution"
     },
+    "separate-sciences-edexcel/biology-paper-2/8": {
+      file: "biomass-transfer-respiration",
+      label: "Account for every kilojoule",
+      line: "Split an animal's food intake between new biomass, respiration, egestion and excretion, and find out which loss is really the big one.",
+      after: "Biodiversity and Food Security"
+    },
+    "separate-sciences-edexcel/chemistry-paper-1/1": {
+      file: "atom-mostly-empty-space",
+      label: "Fire the alpha beam",
+      line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
+      after: "The Development of the Atomic Model"
+    },
     "separate-sciences-edexcel/chemistry-paper-1/6": {
       file: "reactivity-series-electron-transfer",
       label: "Predict the displacement",
@@ -444,6 +558,12 @@
       label: "Follow the infrared out",
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Human Impact and Climate Change"
+    },
+    "separate-sciences-edexcel/chemistry-paper-2/6": {
+      file: "polymer-double-bond-electron-rearrangement",
+      label: "Open the double bond",
+      line: "Predict the repeat unit, then watch the C=C open and its electrons become the links along the chain.",
+      after: "Condensation Polymerisation"
     },
     "separate-sciences-edexcel/physics-paper-1/7": {
       file: "half-life-exponential-decay",
@@ -468,6 +588,12 @@
       label: "Find where the signal stops",
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "Reflex Actions"
+    },
+    "separate-sciences-ocr-b/biology-life-on-earth-ecosystems/1": {
+      file: "photosynthesis-limiting-factor-plateau",
+      label: "Lift the plateau",
+      line: "The graph has levelled off — work out which single change raises the rate, and which does nothing at all.",
+      after: "Transpiration and Water Loss"
     },
     "separate-sciences-ocr-b/biology-life-on-earth-ecosystems/4": {
       file: "natural-selection-not-directed",
@@ -511,6 +637,12 @@
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
       after: "Climate Models and the Role of Evidence"
     },
+    "separate-sciences-ocr/biology-paper-1/4": {
+      file: "photosynthesis-limiting-factor-plateau",
+      label: "Lift the plateau",
+      line: "The graph has levelled off — work out which single change raises the rate, and which does nothing at all.",
+      after: "Limiting Factors"
+    },
     "separate-sciences-ocr/biology-paper-1/7": {
       file: "synapse-electrical-to-chemical",
       label: "Find where the signal stops",
@@ -523,11 +655,23 @@
       line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
       after: "Plant Hormones"
     },
+    "separate-sciences-ocr/biology-paper-2/3": {
+      file: "biomass-transfer-respiration",
+      label: "Account for every kilojoule",
+      line: "Split an animal's food intake between new biomass, respiration, egestion and excretion, and find out which loss is really the big one.",
+      after: "Adaptations and Biodiversity"
+    },
     "separate-sciences-ocr/chemistry-paper-1/1": {
       file: "state-change-energy-plateau",
       label: "Predict the next two minutes",
       line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
       after: "Heating and Cooling Curves"
+    },
+    "separate-sciences-ocr/chemistry-paper-1/2": {
+      file: "atom-mostly-empty-space",
+      label: "Fire the alpha beam",
+      line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
+      after: "Electronic Configuration"
     },
     "separate-sciences-ocr/chemistry-paper-2/2": {
       file: "ion-migration-electrolysis",
@@ -588,6 +732,12 @@
       label: "Walk the hormone cycle",
       line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
       after: "Contraception"
+    },
+    "separate-sciences/chemistry-paper-1/1": {
+      file: "atom-mostly-empty-space",
+      label: "Fire the alpha beam",
+      line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
+      after: "How the Atomic Model Developed"
     },
     "separate-sciences/chemistry-paper-1/6": {
       file: "reactivity-series-electron-transfer",
