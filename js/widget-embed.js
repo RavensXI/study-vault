@@ -116,6 +116,12 @@
       line: "Choose how one pebble moves over eight waves, then watch the swash and backwash play it out.",
       after: "Deposition"
     },
+    "geography-aqa/paper-1/16": {
+      file: "holderness-hard-defences",
+      label: "Test a coastal defence",
+      line: "Predict what a proposed scheme does to a stretch further along the coast, then watch the sediment budget settle it.",
+      after: "Conflicts on the Coast"
+    },
     "geography-aqa/paper-1/8": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
@@ -128,17 +134,35 @@
       line: "Choose how one pebble moves over eight waves, then watch the swash and backwash play it out.",
       after: "Erosional Landforms: Headlands, Bays, Cliffs & Stacks"
     },
+    "geography-edexcel-a/paper-1-physical-environment/3": {
+      file: "holderness-hard-defences",
+      label: "Test a coastal defence",
+      line: "Predict what a proposed scheme does to a stretch further along the coast, then watch the sediment budget settle it.",
+      after: "Soft Engineering: Working With the Sea"
+    },
     "geography-edexcel-b/uk-geographical-issues/2": {
       file: "longshore-drift-zigzag",
       label: "Predict the pebble's path",
       line: "Choose how one pebble moves over eight waves, then watch the swash and backwash play it out.",
       after: "Transport and Deposition"
     },
+    "geography-edexcel-b/uk-geographical-issues/3": {
+      file: "holderness-hard-defences",
+      label: "Test a coastal defence",
+      line: "Predict what a proposed scheme does to a stretch further along the coast, then watch the sediment budget settle it.",
+      after: "Sustainable Approaches: Doing Nothing and Strategic Realignment"
+    },
     "geography-eduqas/landscapes-physical-processes/3": {
       file: "longshore-drift-zigzag",
       label: "Predict the pebble's path",
       line: "Choose how one pebble moves over eight waves, then watch the swash and backwash play it out.",
       after: "Beaches, Spits and Bars"
+    },
+    "geography-eduqas/landscapes-physical-processes/4": {
+      file: "holderness-hard-defences",
+      label: "Test a coastal defence",
+      line: "Predict what a proposed scheme does to a stretch further along the coast, then watch the sediment budget settle it.",
+      after: "Rivers Feel Human Pressure Too"
     },
     "geography-ocr/living-in-the-uk-today/3": {
       file: "longshore-drift-zigzag",
@@ -176,11 +200,35 @@
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "Neurotransmitters and Behaviour"
     },
+    "psychology-aqa/development/2": {
+      file: "piaget-qualitative-stages",
+      label: "Predict the child's answer",
+      line: "A classic Piagetian task and a named stage — predict how that child answers, then hear them say it.",
+      after: "Evaluating Piaget’s Theory"
+    },
+    "psychology-aqa/development/3": {
+      file: "piaget-qualitative-stages",
+      label: "Predict the child's answer",
+      line: "A classic Piagetian task and a named stage — predict how that child answers, then hear them say it.",
+      after: "Implications for Education"
+    },
     "psychology-edexcel/brain-neuropsychology/3": {
       file: "synapse-electrical-to-chemical",
       label: "Find where the signal stops",
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "Neurotransmitters and Behaviour"
+    },
+    "psychology-edexcel/development/2": {
+      file: "piaget-qualitative-stages",
+      label: "Predict the child's answer",
+      line: "A classic Piagetian task and a named stage — predict how that child answers, then hear them say it.",
+      after: "Piaget and Inhelder’s Three Mountains Task (1956)"
+    },
+    "psychology-ocr/development/2": {
+      file: "piaget-qualitative-stages",
+      label: "Predict the child's answer",
+      line: "A classic Piagetian task and a named stage — predict how that child answers, then hear them say it.",
+      after: "The Core Study: Piaget (1952) and the Conservation of Number"
     },
     "religious-studies-aqa/buddhism-beliefs/1": {
       file: "dependent-origination-web-not-chain",
@@ -284,11 +332,23 @@
       line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
       after: "Contraception"
     },
+    "science-aqa/biology-paper-2/5": {
+      file: "heterozygous-carrier-no-symptoms",
+      label: "Predict health from genotype",
+      line: "One working allele is enough — see why a carrier has no symptoms at all, yet can still pass the faulty allele on.",
+      after: "Punnett Squares and Genetic Diagrams"
+    },
     "science-aqa/chemistry-paper-1/10": {
       file: "nanoparticle-surface-area-threshold",
       label: "Cut the cube smaller",
       line: "Predict what happens to the total surface area as a block is cut into ever-smaller cubes, and why the same substance behaves differently at 10 nm.",
       after: "Uses of Nanoparticles"
+    },
+    "science-aqa/chemistry-paper-1/2": {
+      file: "periodic-table-group-reactivity-trends",
+      label: "Predict the reactivity trend",
+      line: "Two elements and one prediction — work out why reactivity climbs down Group 1 but falls down Group 7.",
+      after: "Group 7 — Halogens"
     },
     "science-aqa/chemistry-paper-1/8": {
       file: "ion-migration-electrolysis",
@@ -391,6 +451,12 @@
       line: "Given one force in a scenario, work out its third law partner: what type it is, which object it acts on, and which way it points.",
       after: "Terminal Velocity"
     },
+    "science-edexcel/biology-paper-1/5": {
+      file: "heterozygous-carrier-no-symptoms",
+      label: "Predict health from genotype",
+      line: "One working allele is enough — see why a carrier has no symptoms at all, yet can still pass the faulty allele on.",
+      after: "Monohybrid Crosses and Punnett Squares"
+    },
     "science-edexcel/biology-paper-2/1": {
       file: "synapse-electrical-to-chemical",
       label: "Find where the signal stops",
@@ -492,6 +558,12 @@
       label: "Name the partner force",
       line: "Given one force in a scenario, work out its third law partner: what type it is, which object it acts on, and which way it points.",
       after: "Circular Motion"
+    },
+    "science-ocr-b/biology-paper-1/5": {
+      file: "antibodies-dont-kill",
+      label: "Predict what happens next",
+      line: "Commit a prediction for each scene — bound antibodies, an antigen that does not fit, an antibiotic against a virus — then see what really happens.",
+      after: "How Vaccination Works"
     },
     "science-ocr-b/biology-paper-1/7": {
       file: "photosynthesis-limiting-factor-plateau",
@@ -643,11 +715,23 @@
       line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
       after: "Biotic and Abiotic Factors"
     },
+    "science-ocr/biology-paper-2/3": {
+      file: "heterozygous-carrier-no-symptoms",
+      label: "Predict health from genotype",
+      line: "One working allele is enough — see why a carrier has no symptoms at all, yet can still pass the faulty allele on.",
+      after: "Alleles and Inheritance"
+    },
     "science-ocr/biology-paper-2/4": {
       file: "natural-selection-not-directed",
       label: "Predict what the population does",
       line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
       after: "Selective Breeding"
+    },
+    "science-ocr/biology-paper-2/7": {
+      file: "antibodies-dont-kill",
+      label: "Predict what happens next",
+      line: "Commit a prediction for each scene — bound antibodies, an antigen that does not fit, an antibiotic against a virus — then see what really happens.",
+      after: "The Body’s Defence Systems"
     },
     "science-ocr/chemistry-paper-1/2": {
       file: "atom-mostly-empty-space",
@@ -721,6 +805,12 @@
       line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
       after: "Evidence for Evolution"
     },
+    "separate-sciences-edexcel/biology-paper-1/7": {
+      file: "antibodies-dont-kill",
+      label: "Predict what happens next",
+      line: "Commit a prediction for each scene — bound antibodies, an antigen that does not fit, an antibiotic against a virus — then see what really happens.",
+      after: "Vaccination and Herd Immunity"
+    },
     "separate-sciences-edexcel/biology-paper-2/4": {
       file: "negative-feedback-continuous-cycle",
       label: "Predict what happens next",
@@ -744,6 +834,12 @@
       label: "Fire the alpha beam",
       line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
       after: "The Development of the Atomic Model"
+    },
+    "separate-sciences-edexcel/chemistry-paper-1/2": {
+      file: "periodic-table-group-reactivity-trends",
+      label: "Predict the reactivity trend",
+      line: "Two elements and one prediction — work out why reactivity climbs down Group 1 but falls down Group 7.",
+      after: "Group 7 — The Halogens"
     },
     "separate-sciences-edexcel/chemistry-paper-1/6": {
       file: "reactivity-series-electron-transfer",
@@ -840,6 +936,12 @@
       label: "Predict the effect on collisions",
       line: "Warm it, dilute it or add a catalyst, then predict both the number of collisions and the share of them with enough energy to react.",
       after: "Yield and Atom Economy"
+    },
+    "separate-sciences-ocr-b/chemistry-atoms-patterns-bonding/2": {
+      file: "periodic-table-group-reactivity-trends",
+      label: "Predict the reactivity trend",
+      line: "Two elements and one prediction — work out why reactivity climbs down Group 1 but falls down Group 7.",
+      after: "Group 7 — The Halogens"
     },
     "separate-sciences-ocr-b/chemistry-earth-air-water/3": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -942,6 +1044,18 @@
       label: "Account for every kilojoule",
       line: "Split an animal's food intake between new biomass, respiration, egestion and excretion, and find out which loss is really the big one.",
       after: "Adaptations and Biodiversity"
+    },
+    "separate-sciences-ocr/biology-paper-2/5": {
+      file: "heterozygous-carrier-no-symptoms",
+      label: "Predict health from genotype",
+      line: "One working allele is enough — see why a carrier has no symptoms at all, yet can still pass the faulty allele on.",
+      after: "Inherited Disorders"
+    },
+    "separate-sciences-ocr/biology-paper-2/9": {
+      file: "antibodies-dont-kill",
+      label: "Predict what happens next",
+      line: "Commit a prediction for each scene — bound antibodies, an antigen that does not fit, an antibiotic against a virus — then see what really happens.",
+      after: "Vaccination and Antibiotics"
     },
     "separate-sciences-ocr/chemistry-paper-1/1": {
       file: "state-change-energy-plateau",
@@ -1050,6 +1164,12 @@
       label: "Fire the alpha beam",
       line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
       after: "How the Atomic Model Developed"
+    },
+    "separate-sciences/chemistry-paper-1/2": {
+      file: "periodic-table-group-reactivity-trends",
+      label: "Predict the reactivity trend",
+      line: "Two elements and one prediction — work out why reactivity climbs down Group 1 but falls down Group 7.",
+      after: "Group 7 — Halogens"
     },
     "separate-sciences/chemistry-paper-1/6": {
       file: "reactivity-series-electron-transfer",
