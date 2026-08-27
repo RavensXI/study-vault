@@ -32,17 +32,47 @@
       line: "One month of a small business — work out what it earned, and what is actually in the bank.",
       after: "Reading a Cash-Flow Forecast"
     },
+    "business-edexcel/building-a-business/7": {
+      file: "marketing-mix-interdependent",
+      label: "Test the mix",
+      line: "Change one P in a small business and predict which of the other three cannot stay as it was.",
+      after: "The Integrated Marketing Mix and Competitive Advantage"
+    },
+    "business-edexcel/investigating-small-business/7": {
+      file: "break-even-line-crossing",
+      label: "Find where the lines cross",
+      line: "Predict a small firm's break-even quantity, the profit or loss at a given output, and which way the crossing slides when a cost or the price changes.",
+      after: "Using Break-Even in Decision Making"
+    },
     "business-edexcel/investigating-small-business/8": {
       file: "profit-vs-cash-not-interchangeable",
       label: "Predict profit, then cash",
       line: "One month of a small business — work out what it earned, and what is actually in the bank.",
       after: "Reading a Cash-Flow Forecast"
     },
+    "cambridge-nationals-creative-imedia/creative-imedia-in-the-media-industry/2": {
+      file: "post-production-parallel-workflow",
+      label: "Schedule the post team",
+      line: "Predict which specialists can work while the edit is still open, and what a re-cut after picture lock does to the delivery date.",
+      after: "Pre-Production, Production and Post-Production"
+    },
     "cambridge-nationals-engineering-programmable-systems/principles-of-electronic-and-programmable-systems/2": {
       file: "current-not-used-up",
       label: "Predict all three ammeters",
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
       after: "Ohm's Law: V = I × R"
+    },
+    "cambridge-nationals-enterprise-and-marketing/enterprise-and-marketing-concepts/6": {
+      file: "break-even-line-crossing",
+      label: "Find where the lines cross",
+      line: "Predict a small firm's break-even quantity, the profit or loss at a given output, and which way the crossing slides when a cost or the price changes.",
+      after: "Using Break-Even to Support Decisions"
+    },
+    "cambridge-nationals-enterprise-and-marketing/enterprise-and-marketing-concepts/7": {
+      file: "marketing-mix-interdependent",
+      label: "Test the mix",
+      line: "Change one P in a small business and predict which of the other three cannot stay as it was.",
+      after: "How the Four Ps Create a Brand Image"
     },
     "citizenship-aqa/politics-participation-active-citizenship/8": {
       file: "devolution-vs-independence",
@@ -307,6 +337,24 @@
       label: "Predict the election results",
       line: "Five real results between 1928 and 1933 — commit to a prediction, then see what the votes actually did.",
       after: "The Appeal of Hitler and the Nazi Party"
+    },
+    "l12-construction-built-environment/construction-technology-and-sustainability/1": {
+      file: "structural-systems-differ-in-load-bearing",
+      label: "Trace the load path",
+      line: "Work out which parts of a building actually carry its weight — and which walls could come out.",
+      after: "Superstructure: Frame, Upper Floors and Roof Supports"
+    },
+    "l12-construction-built-environment/construction-technology-and-sustainability/3": {
+      file: "structural-systems-differ-in-load-bearing",
+      label: "Trace the load path",
+      line: "Work out which parts of a building actually carry its weight — and which walls could come out.",
+      after: "Heritage and Traditional Building Methods"
+    },
+    "l12-construction-built-environment/the-construction-sector/3": {
+      file: "reinforced-concrete-embedding",
+      label: "Place the steel bars",
+      line: "Predict which face a loaded beam stretches, and find out where the rebar has to sit.",
+      after: "Stage 3 — Construction"
     },
     "media-studies-aqa/media-industries/1": {
       file: "vertical-vs-horizontal-integration",
