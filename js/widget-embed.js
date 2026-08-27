@@ -44,6 +44,12 @@
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
       after: "Ohm's Law: V = I × R"
     },
+    "citizenship-aqa/politics-participation-active-citizenship/8": {
+      file: "devolution-vs-independence",
+      label: "Work out who decides",
+      line: "Predict whether a decision belongs to the Scottish Parliament, the Senedd, the Northern Ireland Assembly or Westminster — and see why the three lists are not the same.",
+      after: "Reserved and Devolved Powers"
+    },
     "classical-civilisation-ocr/greek-warfare-and-the-persian-wars/5": {
       file: "trireme-coordinated-maneuvering",
       label: "Give the order at Salamis",
@@ -152,11 +158,29 @@
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
       after: "Test Equipment"
     },
+    "electronics-eduqas/discovering-electronics/5": {
+      file: "voltage-divider-output-direction-depends-on-position",
+      label: "Predict which way V_out moves",
+      line: "Same LDR, opposite behaviour — whether the output rises or falls in the light depends on which side of the tap the sensor sits.",
+      after: "Other Sensing Types"
+    },
+    "electronics-eduqas/discovering-electronics/6": {
+      file: "transistor-current-amplification",
+      label: "Predict the collector current",
+      line: "A small base current controls a much larger one — but the big current comes from the supply, and below 0.7 V nothing flows at all.",
+      after: "The n-Channel Enhancement-Mode MOSFET"
+    },
     "engineering-aqa/engineering-systems/4": {
       file: "transformer-voltage-current-tradeoff",
       label: "Predict the secondary side",
       line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
       after: "Input Control Devices: Switches"
+    },
+    "engineering-aqa/engineering-systems/6": {
+      file: "transistor-current-amplification",
+      label: "Predict the collector current",
+      line: "A small base current controls a much larger one — but the big current comes from the supply, and below 0.7 V nothing flows at all.",
+      after: "Industrial Application: Pick-and-Place Machines"
     },
     "english-literature-aqa/macbeth/7": {
       file: "witches-prophecies-ambiguous-loopholes",
@@ -254,6 +278,12 @@
       line: "Read the grains, predict the porosity and the permeability, then watch whether the water soaks in and stops or streams straight through.",
       after: "Sorting: Reading Energy Consistency"
     },
+    "health-social-care-ocr/principles-of-care/8": {
+      file: "active-listening-behaviours",
+      label: "Name the listening behaviour",
+      line: "Read a short care-setting exchange and name which of the six active-listening behaviours the worker is using — or which one is missing.",
+      after: "Active Listening Skills"
+    },
     "history-aqa/elizabethan-england/13": {
       file: "armada-chain-of-consequence",
       label: "Put the disaster in order",
@@ -289,6 +319,12 @@
       label: "Follow the key journey",
       line: "Predict where the second subject goes in the exposition — and which key it comes back in.",
       after: "Sonata form"
+    },
+    "music-technology/sound-creation/2": {
+      file: "adsr-simultaneous-shaping",
+      label: "Match sound to envelope",
+      line: "Attack, decay and release are times; sustain is the level a note holds while the key is down.",
+      after: "Method 4: Digital Sample Manipulation"
     },
     "physical-education-aqa/human-body-and-movement/4": {
       file: "heart-simultaneous-double-circulation",
