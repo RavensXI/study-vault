@@ -90,13 +90,13 @@
     '.svw-rs *{box-sizing:border-box;}',
     '.svw-rs .rs-kick{font-size:.66rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;margin:0 0 .15rem;}',
     '.svw-rs .rs-ttl{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:1.2rem;line-height:1.2;margin:0 0 .28rem;}',
-    '.svw-rs .rs-frame{font-size:.86rem;line-height:1.42;margin:0 0 .5rem;color:#4a453e;}',
+    '.svw-rs .rs-frame{font-size:.86rem;line-height:1.4;margin:0 0 .45rem;color:#4a453e;}',
     '.svw-rs .rs-stage{background:#faf8f5;border:1px solid #efe9e0;border-radius:12px;padding:.35rem .3rem;margin:0 0 .45rem;}',
     '.svw-rs .rs-svg{display:block;width:100%;height:auto;max-width:470px;margin:0 auto;}',
     '.svw-rs .rs-opts{display:grid;gap:.3rem;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));margin:0 0 .45rem;}',
     '.svw-rs .rs-opt{display:flex;align-items:baseline;justify-content:space-between;gap:.45rem;width:100%;text-align:left;',
     'font-family:inherit;font-size:.8rem;font-weight:600;line-height:1.25;color:#2d2a26;background:#faf8f5;',
-    'border:1px solid #ddd7cd;border-radius:10px;padding:.35rem .6rem;cursor:pointer;font-variant-numeric:tabular-nums;}',
+    'border:1px solid #ddd7cd;border-radius:10px;padding:.3rem .6rem;cursor:pointer;font-variant-numeric:tabular-nums;}',
     '.svw-rs .rs-opt:hover:not(:disabled){border-color:#c3bbac;}',
     '.svw-rs .rs-opt[aria-pressed="true"]{background:#2d2a26;border-color:#2d2a26;color:#fff;}',
     '.svw-rs .rs-opt:disabled{cursor:default;opacity:.45;}',
@@ -110,7 +110,7 @@
     '.svw-rs .rs-go{font-family:inherit;font-size:.82rem;font-weight:600;color:#fff;background:#2d2a26;border:1px solid #2d2a26;',
     'border-radius:10px;padding:.45rem .95rem;cursor:pointer;white-space:nowrap;}',
     '.svw-rs .rs-go:disabled{opacity:.4;cursor:default;}',
-    '.svw-rs .rs-cap{font-size:.84rem;line-height:1.45;margin:0;min-height:5.4em;color:#3c3831;}',
+    '.svw-rs .rs-cap{font-size:.84rem;line-height:1.45;margin:0;min-height:4.8em;color:#3c3831;}',
     '.svw-rs .rs-cap b{font-weight:700;}',
     '.svw-rs .rs-cap b.ok{color:#4f7d63;}',
     '.svw-rs .rs-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;',
@@ -150,7 +150,7 @@
       /* ---------- stage ---------- */
       var stage = h('div', 'rs-stage');
       var s = svg('svg', {
-        'class': 'rs-svg', viewBox: '0 0 300 96',
+        'class': 'rs-svg', viewBox: '0 0 300 90',
         preserveAspectRatio: 'xMidYMid meet', role: 'img'
       });
       var sTitle = svg('title', {}); sTitle.textContent = 'Spectra';
@@ -203,7 +203,7 @@
           });
           g.appendChild(r); lines.push(r);
           var t = svg('text', {
-            x: xOf(nm).toFixed(2), y: 40, 'font-size': 11, 'text-anchor': 'middle',
+            x: xOf(nm).toFixed(2), y: 39, 'font-size': 11, 'text-anchor': 'middle',
             fill: '#5b564e', 'font-family': 'Inter, system-ui, sans-serif'
           });
           t.textContent = nm;
@@ -213,7 +213,7 @@
         return { g: g, lab: lab, lines: lines, nums: nums, ghosts: ghosts, links: links };
       }
 
-      var strip = [makeStrip('Laboratory hydrogen'), makeStrip('Galaxy A'), makeStrip('Light reaching Earth')];
+      var strip = [makeStrip('Measured in the lab'), makeStrip('Arriving from galaxy A'), makeStrip('Arriving from the galaxy')];
       stage.appendChild(s);
       root.appendChild(stage);
 
@@ -298,15 +298,15 @@
         if (kind === 'shift') {
           strip[0].g.setAttribute('transform', 'translate(0,0)');
           strip[1].g.style.display = 'none';
-          strip[2].g.setAttribute('transform', 'translate(0,50)');
-          strip[2].lab.textContent = 'Light reaching Earth';
+          strip[2].g.setAttribute('transform', 'translate(0,47)');
+          strip[2].lab.textContent = 'Arriving from the galaxy';
         } else {
           strip[0].g.setAttribute('transform', 'translate(0,0)');
           strip[1].g.style.display = '';
           strip[1].g.setAttribute('transform', 'translate(0,30)');
           strip[2].g.setAttribute('transform', 'translate(0,60)');
-          strip[1].lab.textContent = 'Galaxy A';
-          strip[2].lab.textContent = 'Galaxy B';
+          strip[1].lab.textContent = 'Arriving from galaxy A';
+          strip[2].lab.textContent = 'Arriving from galaxy B';
         }
         strip[2].g.style.display = '';
       }
@@ -342,14 +342,14 @@
           setLines(strip[2], 0, false);
           strip[2].g.style.opacity = '.5';
           frame.textContent = frameShift(r);
-          label(0, 'Red end, small shift → ' + obsNm(HEAD, r.small) + ' nm');
-          label(1, 'Red end, big shift → ' + obsNm(HEAD, r.big) + ' nm');
-          label(2, 'Blue end → ' + obsNm(HEAD, -r.blue) + ' nm');
-          label(3, 'No shift — stays ' + HEAD + ' nm');
-          label(4, 'The galaxy itself looks red');
+          label(0, 'Small move towards red — ' + obsNm(HEAD, r.small) + ' nm');
+          label(1, 'Big move towards red — ' + obsNm(HEAD, r.big) + ' nm');
+          label(2, 'Move towards blue — ' + obsNm(HEAD, -r.blue) + ' nm');
+          label(3, 'No move — lines stay at ' + HEAD + ' nm');
+          label(4, 'The galaxy itself turns red');
           label(5, 'The light arrives more slowly');
-          cap.innerHTML = 'Hydrogen in that galaxy absorbs the same three wavelengths as hydrogen ' +
-            'in a laboratory: 434 nm, 486 nm and ' + HEAD + ' nm. Light travels at 300,000 km/s.';
+          cap.innerHTML = 'The lab lines sit at 434 nm, 486 nm and ' + HEAD +
+            ' nm. Light travels at 300,000 km/s.';
         } else {
           strip[0].nums.forEach(function (t) { t.style.display = 'none'; });
           strip[1].g.style.opacity = '1';
@@ -360,11 +360,12 @@
           strip[2].nums.forEach(function (t) { t.style.display = 'none'; });
           strip[1].lab.textContent = 'Galaxy A';
           strip[2].lab.textContent = 'Galaxy B';
-          frame.textContent = 'Two galaxies show the same hydrogen lines. Which one is farther away?';
+          frame.textContent = 'Hydrogen leaves the same dark lines wherever it is, so each galaxy’s ' +
+            'light can be compared with the lab. Which of these two galaxies is farther away?';
           label(0, 'Galaxy A is farther');
           label(1, 'Galaxy B is farther');
           label(2, 'Both are the same distance');
-          label(3, 'You cannot tell from redshift');
+          label(3, 'You cannot tell from the shift');
           btn[4].style.display = 'none';
           btn[5].style.display = 'none';
           cap.innerHTML = 'Both galaxies contain hydrogen, so the light left each of them with its ' +
@@ -375,16 +376,19 @@
         publish();
       }
 
+      var PREMISE = 'Hydrogen leaves the same dark lines wherever it is, so a shift against the ' +
+        'lab reveals how a galaxy moves. ';
+
       function frameShift(r) {
         if (r.truth === 'none') {
-          return 'A galaxy neither approaches nor recedes. Where do its hydrogen lines land?';
+          return PREMISE + 'This one neither approaches nor recedes — where do its lines land?';
         }
         if (r.truth === 'blue') {
-          return 'A galaxy approaches us at ' + group(speedKms(r.pm)) +
-            ' km/s. Where do its hydrogen lines land?';
+          return PREMISE + 'This one approaches us at ' + group(speedKms(r.pm)) +
+            ' km/s — where do its lines land?';
         }
-        return 'A galaxy recedes from us ' + (r.truth === 'redbig' ? 'fast' : 'slowly') + ', at ' +
-          group(speedKms(r.pm)) + ' km/s. Where do its hydrogen lines land?';
+        return PREMISE + 'This one recedes ' + (r.truth === 'redbig' ? 'fast' : 'slowly') + ', at ' +
+          group(speedKms(r.pm)) + ' km/s — where do its lines land?';
       }
 
       function pick(k) {
@@ -438,10 +442,10 @@
             });
           }
         } else {
-          strip[1].lab.textContent = 'Galaxy A · ' + obsNm(HEAD, r.a) + ' nm' +
-            (r.ans === 'A' ? ' (farther)' : (r.ans === 'same' ? ' (same shift)' : ''));
-          strip[2].lab.textContent = 'Galaxy B · ' + obsNm(HEAD, r.b) + ' nm' +
-            (r.ans === 'B' ? ' (farther)' : (r.ans === 'same' ? ' (same shift)' : ''));
+          strip[1].lab.textContent = 'Galaxy A arrives at ' + obsNm(HEAD, r.a) + ' nm' +
+            (r.ans === 'A' ? ' (the farther one)' : (r.ans === 'same' ? ' (same shift)' : ''));
+          strip[2].lab.textContent = 'Galaxy B arrives at ' + obsNm(HEAD, r.b) + ' nm' +
+            (r.ans === 'B' ? ' (the farther one)' : (r.ans === 'same' ? ' (same shift)' : ''));
         }
 
         var msg = justMastered ? masteryText(r) : (r.kind === 'shift' ? shiftText(r, ok) : distText(r, ok));
@@ -488,7 +492,7 @@
               : 'The wavelength changed, not the speed: ' + HEAD + ' nm left, ' + o + ' nm arrived.'));
         }
         if (c === 'looksred') {
-          return no('you said the galaxy itself looks red. Nothing is dyed red. ' + (r.pm > 0
+          return no('you said the galaxy itself turns red. Nothing is dyed red. ' + (r.pm > 0
             ? 'The dark lines slide towards the red end — ' + HEAD + ' nm arriving as ' + o +
               ' nm. The pattern moves, the colour of the galaxy does not.'
             : (r.pm < 0
@@ -536,7 +540,7 @@
             ' has the bigger redshift, so Galaxy ' + big + ' is farther.');
         }
         if (c === 'none') {
-          return no('you said redshift cannot tell you. For distant galaxies it can: a bigger redshift ' +
+          return no('you said you cannot tell from the shift. For distant galaxies it can: a bigger redshift ' +
             'means faster recession, and faster recession means greater distance. ' + (far === 'same'
               ? 'Here both shift by ' + fa + ', so both are the same distance.'
               : 'Here Galaxy ' + big + ' shifts more, so Galaxy ' + big + ' is farther.'));

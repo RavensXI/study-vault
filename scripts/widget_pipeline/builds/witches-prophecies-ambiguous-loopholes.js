@@ -82,7 +82,7 @@
       sa: 'The words guarantee',
       ta: 'Banquo fathers kings and wears no crown.',
       sb: 'Macbeth hears',
-      tb: 'A barren sceptre — so the line can be cut.'
+      tb: 'My crown dies with me — so the line can be cut.'
     },
     {
       id: 'born',
@@ -163,12 +163,12 @@
       shape: 'image',
       correct: 1,
       fbs: [
-        'you said both warn. The words are pure comfort — laugh at the power of man. The warning is in the image alone: a child slick with blood is Macduff’s birth, the very thing that lets him through.',
+        'you said both warn. The words are pure comfort: human power is nothing to fear. The warning is in the image alone — a child covered in blood is Macduff’s birth, the very thing that lets him through.',
         'you said the words reassure while the image warns. He is shown his killer as a newborn, bloody from the cutting that puts him outside “of woman born”, and he takes only the comfort.',
         'you said both reassure — Macbeth’s reading exactly. The words do. A child covered in blood does not: it shows the delivery the words quietly exclude. He hears only the promise.'
       ],
       sa: 'The words',
-      ta: 'Fear no man; laugh at human power.',
+      ta: 'Human power cannot harm him.',
       sb: 'The image',
       tb: 'A newborn bloody from being cut free — Macduff.'
     },
@@ -208,7 +208,7 @@
         {
           t: 'It shows the witches steering every move he makes.',
           ok: false,
-          fb: 'you said the witches steer him. They urge an attitude and answer what he asks; they name no victim and set no date. The prophecies open a door — Macbeth walks through it and bars it behind him.'
+          fb: 'you said the witches steer him. They urge an attitude and answer what he asks; they name no victim and set no date. Every target after that is his own choice.'
         }
       ],
       sa: 'The words say',
@@ -225,12 +225,12 @@
         {
           t: 'Every word came true; only his reading of them was false.',
           ok: true,
-          fb: 'you said every word came true and only the reading failed. The wood came, carried; the man came, cut not born. “Palter” means to quibble — keep the promise to the ear, break it to the hope.'
+          fb: 'you said every word came true; only the reading failed. The wood came, carried; the man came, cut not born. Macbeth’s verdict: they “keep the word of promise to our ear, and break it to our hope”.'
         },
         {
           t: 'The witches lied about Birnam Wood — no trees ever moved.',
           ok: false,
-          fb: 'you said the wood prophecy was a lie. It was kept: Malcolm’s soldiers cut boughs and carried them, and a messenger reports the wood beginning to move. “Remove” never promised roots and walking.'
+          fb: 'you said the wood prophecy was a lie. It was kept: Malcolm’s soldiers cut boughs and carried them, and a messenger reports that “the wood began to move”. “Remove” never promised roots and walking.'
         },
         {
           t: 'The witches lied about his death — a man did kill him.',
@@ -239,7 +239,7 @@
         }
       ],
       sa: 'What was said',
-      ta: 'Every prophecy held, to the letter.',
+      ta: 'Every word held — “palter” means to quibble, not to lie.',
       sb: 'What Macbeth heard',
       tb: 'Guarantees — so he calls it a lie.'
     }

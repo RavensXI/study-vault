@@ -288,6 +288,18 @@ costs nothing is worse: it turns into guess-until-green.
 
 ## 6. Feedback teaches; it does not score
 
+**Never borrow a text's own words without marking them as quotation.**
+Tom's field review (27 Aug): the witches widget wove Macbeth's line
+"keep the word of promise to our ear, and break it to our hope" into its
+own prose, unquoted - and Tom read it as overly flowery AI
+editorialising. He was right in effect: a reader cannot tell borrowed
+brilliance from generated purple. If the set text's words appear, put
+them in quotation marks with a beat of attribution and keep each
+quotation under 15 words; otherwise write plain English. The same field
+review produced the plain-language rule: feedback must parse FIRST TIME
+for a 15-year-old who got the answer wrong - poetic compression ("the
+wish is heard with the letter") fails that test even when it is precise.
+
 **But the first words still answer "was I right?"** Tom's field test (20
 Aug): he committed a wrong answer to the greenhouse widget and got a
 correct paragraph about re-emission - and could not tell whether he had

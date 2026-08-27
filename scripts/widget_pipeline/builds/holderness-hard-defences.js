@@ -158,16 +158,16 @@
       'padding:.55rem .7rem .45rem;}',
       '.svw-hd-strip{display:grid;grid-template-columns:15px minmax(0,1fr) 97px;',
       'column-gap:.5rem;row-gap:.3rem;align-items:center;}',
-      '.svw-hd-rail{grid-column:1;grid-row:1 / span 6;display:flex;flex-direction:column;',
+      '.svw-hd-rail{grid-column:1;grid-row:2 / span 6;display:flex;flex-direction:column;',
       'align-items:center;justify-content:space-between;height:100%;',
       'font-size:.66rem;color:#8d8880;letter-spacing:.04em;}',
       '.svw-hd-railline{flex:1;width:0;border-left:1px dashed #cfc7ba;margin:2px 0;}',
       '.svw-hd-arrow{width:0;height:0;border-left:3.5px solid transparent;',
       'border-right:3.5px solid transparent;border-top:5px solid #b7ae9f;margin-bottom:2px;}',
-      '.svw-hd-track{grid-column:2;position:relative;height:14px;background:#e4eaec;',
+      '.svw-hd-key{grid-column:2;display:flex;justify-content:space-between;align-items:end;','font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;','color:#8d8880;line-height:1;}','.svw-hd-keyland{grid-column:3;font-size:.66rem;font-weight:700;letter-spacing:.09em;','text-transform:uppercase;color:#8d8880;line-height:1;}','.svw-hd-track{grid-column:2;position:relative;height:14px;background:#d8e3e9;',
       'border-right:2px solid #2d2a26;border-radius:3px 0 0 3px;}',
       '.svw-hd-track--ask{outline:1.5px solid ', accent, ';outline-offset:1.5px;}',
-      '.svw-hd-beach{position:absolute;right:0;top:0;bottom:0;background:#e6d6b2;',
+      '.svw-hd-beach{position:absolute;right:0;top:0;bottom:0;background:#e0cb9b;',
       'border-radius:2px 0 0 2px;transition:width .55s cubic-bezier(.16,1,.3,1);}',
       '.svw-hd--still .svw-hd-beach{transition:none;}',
       '.svw-hd-def{position:absolute;right:0;top:-2px;bottom:-2px;}',
@@ -240,6 +240,11 @@
     rail.appendChild(el('span', 'svw-hd-arrow'));
     rail.appendChild(el('span', null, 'S'));
     strip.appendChild(rail);
+    var key = el('div', 'svw-hd-key');
+    key.appendChild(el('span', null, 'Sea'));
+    key.appendChild(el('span', null, 'Beach'));
+    strip.appendChild(key);
+    strip.appendChild(el('div', 'svw-hd-keyland', 'Cliff · land'));
 
     var tracks = [], beaches = [], marks = [], names = [];
     PLACES.forEach(function (name, i) {
