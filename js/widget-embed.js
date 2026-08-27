@@ -122,6 +122,12 @@
       line: "See an ADC measure a sound wave at fixed instants, then work out how much of the wave survives — and how big the file becomes.",
       after: "Quality versus File Size"
     },
+    "design-technology-eduqas/electronic-mechanical-systems/3": {
+      file: "motion-types-distinction",
+      label: "Name the motion type",
+      line: "Watch a real machine part move, commit to rotary, linear, reciprocating or oscillating, then see the path it traced.",
+      after: "Levers"
+    },
     "drama-aqa/the-great-wave/5": {
       file: "cross-cutting-structural-device",
       label: "Cut between the two scenes",
@@ -152,11 +158,23 @@
       line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
       after: "Input Control Devices: Switches"
     },
+    "english-literature-aqa/macbeth/7": {
+      file: "witches-prophecies-ambiguous-loopholes",
+      label: "Test the witches' wording",
+      line: "Commit to what one prophecy actually guarantees, then see the loophole Macbeth never hears.",
+      after: "False Confidence and the Turn to Tyranny"
+    },
     "film-studies-eduqas/film-form-and-language/5": {
       file: "plot-vs-story",
       label: "Work out the cut",
       line: "Three short stories, each re-arranged into a film — decide what the audience meets first, which events never reach the screen, and what that order creates.",
       after: "Three-Act Structure"
+    },
+    "food-preparation-and-nutrition-aqa/food-science/2": {
+      file: "gelatinisation-vs-dextrinisation",
+      label: "Predict the starch reaction",
+      line: "Read the conditions in a kitchen scenario, commit to gelatinisation, dextrinisation, both or neither, then watch the granules show what really happened.",
+      after: "Functional Properties of Carbohydrates"
     },
     "geography-aqa/paper-1/14": {
       file: "longshore-drift-zigzag",
@@ -259,6 +277,12 @@
       label: "Predict the election results",
       line: "Five real results between 1928 and 1933 — commit to a prediction, then see what the votes actually did.",
       after: "The Appeal of Hitler and the Nazi Party"
+    },
+    "media-studies-aqa/media-industries/1": {
+      file: "vertical-vs-horizontal-integration",
+      label: "Judge Kestrel's next takeover",
+      line: "A media conglomerate proposes a run of acquisitions — decide which are vertical, which are horizontal, and what power each one buys.",
+      after: "Diversification and Synergy"
     },
     "music-aqa/aos1-western-classical/2": {
       file: "sonata-form-key-relationships",
@@ -1356,6 +1380,12 @@
       label: "Predict what the label does",
       line: "Two people, one act, one label — find out whether the label changes anything.",
       after: "Labelling Theory and the Self-Fulfilling Prophecy"
+    },
+    "statistics-aqa/interpreting-results-sec/3": {
+      file: "time-series-trend-vs-noise",
+      label: "Separate the trend from noise",
+      line: "A quarterly series is trend, season and noise stacked on top of each other — commit to where it is really heading before the graph gives it away.",
+      after: "Seasonal and Cyclic Trends"
     }
   };
 
