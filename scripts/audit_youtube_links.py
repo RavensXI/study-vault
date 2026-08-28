@@ -13,6 +13,12 @@ Each id is checked once via oEmbed — which proves the video EXISTS and is
 EMBEDDABLE, and returns its real title + channel. Where we stored a label
 (related-media titles, embed captions), the real title is compared by word
 overlap: zero shared meaningful words = flagged as possibly the wrong video.
+Where a label credits a channel ("Channel — Title") the prefix is compared with
+oEmbed's author_name, which catches an on-topic video by the wrong channel.
+Ids in DENY (build-time placeholders) are always reported dead.
+
+Mismatch pairs a human has already cleared live in scripts/_yt_audit_accepted.json
+and are not flagged again; dead-link checking ignores that file.
 
 Output: scripts/_yt_audit_report.md (+ .json). Exit 1 if any DEAD links.
 Intended cadence: weekly scheduled + on demand; scripts/tests/live/ has a
@@ -20,6 +26,7 @@ sampling wrapper for suite runs.
 
 Usage: python scripts/audit_youtube_links.py [--limit N]
 """
+import difflib
 import io
 import json
 import os
@@ -42,10 +49,60 @@ BARE = re.compile(r"^[\w-]{11}$")
 STOP = set("the a an of and in on for with to from by at is are music gcse "
            "lesson official video full hd".split())
 
+# Placeholder ids the generic build left behind. They are dead-level whatever
+# the title overlap says: the video is alive, so oEmbed can never catch one, and
+# one of them hid for days behind a label that shared the word "you".
+DENY = {"dQw4w9WgXcQ": "known placeholder (Rick Astley) — never a real reference"}
+
+# (id, stored label) pairs already checked by hand: a curator's label can read
+# nothing like the real title while still pointing at the right video.
+ACCEPTED = set()
+try:
+    for a in json.load(io.open(os.path.join(HERE, "_yt_audit_accepted.json"),
+                               encoding="utf-8"))["accepted"]:
+        ACCEPTED.add((a["id"], a["stored"]))
+except Exception:
+    pass
+
 
 def words(s):
     return set(w for w in re.findall(r"[a-z0-9']+", (s or "").lower())
                if len(w) > 2 and w not in STOP)
+
+
+CHANNEL_SPLIT = re.compile(r"^(.{2,40}?)\s+[—–-]\s+")
+
+
+def norm(s):
+    return re.sub(r"[^a-z0-9]+", "", (s or "").lower())
+
+
+def wrong_credit(label, title, channel):
+    """Stored labels usually read "Channel — Title". Title word overlap never
+    notices an on-topic video that is somebody else's, so compare the credited
+    channel with oEmbed's author_name too. Only a clear disagreement counts:
+    case and punctuation are ignored, a part name matches the whole
+    ("Kurzgesagt" vs "Kurzgesagt – In a Nutshell"), a channel credited anywhere
+    else in the label is fine, and a prefix that reads as a topic (it turns up
+    in the real title) is not a credit at all."""
+    m = CHANNEL_SPLIT.match(label or "")
+    if not m or not channel or not title:
+        return None
+    claimed = m.group(1).strip()
+    a, b, lab = norm(claimed), norm(channel), norm(label)
+    if not a or len(claimed.split()) > 4:
+        return None
+    if a in b or b in a or a in norm(title) or (words(claimed) & words(title)):
+        return None
+    first = re.split(r"[^A-Za-z0-9]+", channel)[0]
+    if b in lab or (len(first) > 3 and norm(first) in lab):
+        return None
+    ct, at = set(claimed.lower().split()), set(channel.lower().split())
+    if ct <= at or at <= ct:
+        return None
+    if difflib.SequenceMatcher(None, a, b).ratio() >= 0.6:  # "Mr Cloake"/"MrClokeHistory"
+        return None
+    return claimed
 
 
 def oembed(vid):
@@ -119,7 +176,7 @@ def main():
 
     dead, mismatched, ok = [], [], 0
     for i, vid in enumerate(ids):
-        r = oembed(vid)
+        r = {"ok": False, "err": DENY[vid]} if vid in DENY else oembed(vid)
         info = by_id[vid]
         if not r["ok"]:
             dead.append((vid, info, r["err"]))
@@ -127,7 +184,15 @@ def main():
         else:
             ok += 1
             for label in info["labels"]:
-                if words(label) and not (words(label) & words(r["title"] + " " + r["channel"])):
+                if (vid, label) in ACCEPTED:
+                    continue
+                claimed = wrong_credit(label, r["title"], r["channel"])
+                if claimed:
+                    mismatched.append((vid, label, "%s [%s]" % (r["title"], r["channel"]),
+                                       info["where"][0]))
+                    print("WRONG CREDIT %s stored %r but plays %r by %r  %s"
+                          % (vid, label[:40], r["title"][:40], r["channel"], info["where"][0]))
+                elif words(label) and not (words(label) & words(r["title"] + " " + r["channel"])):
                     mismatched.append((vid, label, r["title"], info["where"][0]))
                     print("MISMATCH? %s stored %r but plays %r  %s"
                           % (vid, label[:40], r["title"][:40], info["where"][0]))
