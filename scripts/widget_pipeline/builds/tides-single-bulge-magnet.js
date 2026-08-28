@@ -14,7 +14,7 @@
 
   var META = {
     id: 'tides-single-bulge-magnet',
-    title: 'High water at Whitby',
+    title: 'High tide at Whitby',
     teaches: 'Tidal force is the difference in the Moon’s pull across Earth: the near side is pulled hardest, the centre less, the far side least. Water stands high at both ends, so a coast meets a high tide about every 12 hours 25 minutes.'
   };
 
@@ -43,6 +43,16 @@
     ['12', 'About 12½ hours'],
     ['25', 'About 25 hours']
   ];
+  /* The pull arrows are a GIVEN, on stage from the opening state: the student
+     predicts the water from a shown mechanism instead of recalling it. One
+     signed perpendicular offset per Moon slot keeps the three words clear of
+     the coast markers, the Moon and the key at every deal. */
+  var PULL_WORD = ['hardest', 'less', 'least'];
+  var PULL_OFF = { 0: -11, 1: -11, 3: 11, 4: 11, 5: -16.5, 7: 16.5 };
+  var GIVEN = 'The arrows are the Moon’s pull: hardest on the near side, less at the centre, ' +
+    'least on the far side. A coast comes back round to the Moon every 24 hours 50 minutes.';
+  var MECH = 'The far side is pulled least, so it gets left behind. That leaves the water ' +
+    'high at both ends of the Moon’s line.';
   var TIME_SAID = { '6': 'about 6 hours', '12': 'about 12½ hours', '25': 'about 25 hours' };
   var NUMWORD = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
   var REL_SAID = [
@@ -95,7 +105,10 @@
         '.svw-tide .t-stage{background:#faf8f5;border:1px solid #efe9e0;border-radius:12px;padding:.3rem}',
         '.svw-tide .t-ring{position:relative;width:100%;max-width:244px;margin:0 auto}',
         '.svw-tide .t-base{display:block;width:100%;height:auto}',
-        '.svw-tide .t-over{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}',
+        '.svw-tide .t-over,.svw-tide .t-top{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}',
+        /* the coast buttons sit at z-index 1, so the pull arrows pass UNDER
+           them while Whitby and the sweep dot ride above and stay findable */
+        '.svw-tide .t-top{z-index:2}',
         '.svw-tide .t-mk{position:absolute;width:' + MK + 'px;height:' + MK + 'px;transform:translate(-50%,-50%);border:0;background:none;padding:0;margin:0;cursor:pointer;z-index:1;display:flex;align-items:center;justify-content:center}',
         '.svw-tide .t-mk i{display:block;width:16px;height:16px;border-radius:50%;border:1.5px solid #8f8778;background:rgba(255,255,255,.62)}',
         '.svw-tide .t-mk[aria-pressed="true"] i{border-width:2.5px;border-color:' + INK + ';background:rgba(45,42,38,.28)}',
@@ -136,10 +149,10 @@
       wrap.appendChild(h);
 
       var frame = mk('p', 't-frame');
-      frame.textContent = 'Whitby is a coastal town on the Earth below, which turns anticlockwise. A coast comes back round to the Moon every 24 hours 50 minutes.';
+      frame.textContent = 'The Moon pulls on the Earth’s water. Where does that water stand high, and how long does Whitby wait for its next high tide?';
       wrap.appendChild(frame);
 
-      wrap.appendChild(label('1', 'Mark every coast point where the sea stands highest right now.'));
+      wrap.appendChild(label('1', 'Predict where the sea stands highest — mark every coast point.'));
 
       var stage = mk('div', 't-stage');
       var ring = mk('div', 't-ring');
@@ -147,7 +160,7 @@
       wrap.appendChild(stage);
 
       var g2 = mk('div', 't-grp');
-      g2.appendChild(label('2', 'How long until Whitby’s next high water?'));
+      g2.appendChild(label('2', 'How long until Whitby’s next high tide?'));
       var opts2 = mk('div', 't-opts');
       var timeBtns = TIME_OPTS.map(function (o) {
         var b = mk('button', 't-opt');
@@ -182,16 +195,15 @@
 
       base.appendChild(svgel('circle', { cx: CX, cy: CY, r: ER, fill: '#d5cdbd', stroke: '#a49b8a', 'stroke-width': 1 }));
 
-      /* which way Earth turns: the student needs it to time the next high water */
+      /* which way Earth turns: the student needs it to time the next high tide */
       base.appendChild(svgel('path', {
         d: arcPath(CX, CY, 25, 188, 292), fill: 'none', stroke: '#8f8778',
         'stroke-width': 1.7, 'stroke-linecap': 'round'
       }));
       base.appendChild(svgel('path', { d: tangentHead(CX, CY, 25, 292), fill: '#8f8778' }));
 
-      /* Earth–Moon line and the Moon */
-      var emLine = svgel('line', { stroke: '#bdb4a4', 'stroke-width': 1, 'stroke-dasharray': '3 4' });
-      base.appendChild(emLine);
+      /* the Moon. The three pull arrows draw the Earth–Moon line, so there is
+         no separate dashed line to double it. */
       var moonG = svgel('g', {});
       moonG.appendChild(svgel('circle', { r: MOON_R, fill: '#cfc8bc', stroke: '#a49d93', 'stroke-width': 1 }));
       moonG.appendChild(svgel('circle', { cx: -2.6, cy: -2.4, r: 2.4, fill: '#b6ada0' }));
@@ -221,27 +233,37 @@
         markers.push(b);
       }
 
-      /* overlay, above the markers: Whitby, the pull arrows, the sweep, the readout */
+      /* two overlays. The arrows go UNDER the coast buttons so a marked point
+         is never cut by a shaft; Whitby, the sweep and the readout go OVER
+         them so the town the timing question asks about is always findable. */
       var over = svgel('svg', { viewBox: '0 0 ' + VW + ' ' + VH, 'aria-hidden': 'true' });
       over.setAttribute('class', 't-over');
       ring.appendChild(over);
+      var topLayer = svgel('svg', { viewBox: '0 0 ' + VW + ' ' + VH, 'aria-hidden': 'true' });
+      topLayer.setAttribute('class', 't-top');
+      ring.appendChild(topLayer);
 
       var arrows = [];
       for (var a = 0; a < 3; a++) {
-        var g = svgel('g', { opacity: '0' });
+        var g = svgel('g', {});
         var halo = svgel('line', { stroke: '#faf8f5', 'stroke-width': 4.4, 'stroke-linecap': 'round' });
         var shaft = svgel('line', { stroke: INK, 'stroke-width': 2, 'stroke-linecap': 'round' });
         var headP = svgel('path', { fill: INK, stroke: '#faf8f5', 'stroke-width': .7 });
-        g.appendChild(halo); g.appendChild(shaft); g.appendChild(headP);
+        var lab = svgtext(0, 0, PULL_WORD[a], 'middle', 9, '#5b564e');
+        lab.setAttribute('font-weight', '600');
+        lab.setAttribute('stroke', '#faf8f5');
+        lab.setAttribute('stroke-width', '2.4');
+        lab.setAttribute('paint-order', 'stroke');
+        g.appendChild(halo); g.appendChild(shaft); g.appendChild(headP); g.appendChild(lab);
         over.appendChild(g);
-        arrows.push({ g: g, halo: halo, shaft: shaft, head: headP });
+        arrows.push({ g: g, halo: halo, shaft: shaft, head: headP, lab: lab });
       }
       var townDot = svgel('circle', { r: 4.2, fill: INK, stroke: '#faf8f5', 'stroke-width': 1 });
-      over.appendChild(townDot);
+      topLayer.appendChild(townDot);
       var sweepDot = svgel('circle', { r: 4.6, fill: accent, stroke: '#faf8f5', 'stroke-width': 1.3, opacity: '0' });
-      over.appendChild(sweepDot);
+      topLayer.appendChild(sweepDot);
       var readout = svgtext(VW - 8, 167.5, '', 'end', 9.5, '#5b564e');
-      over.appendChild(readout);
+      topLayer.appendChild(readout);
 
       /* ---------- state ---------- */
       var round = { moon: 0, off: 0 };
@@ -292,15 +314,18 @@
         var me = markEcho(chosen, hs);
         var msg;
         if (streak === 3) {
-          msg = 'Three in a row — you have it. The Moon’s pull is strongest on the near side, weaker at Earth’s centre, weakest on the far side. Water heaps up at both ends, so a coast meets a high tide about every 12 hours 25 minutes.';
+          msg = 'Three in a row — you have it. The near side is pulled hardest and the far side least, ' +
+            'so the water heaps up at both ends. A coast meets a high tide about every 12 hours 25 minutes.';
         } else if (right) {
-          msg = 'Right — ' + me + ', and ' + ansSaid + '. The Moon pulls the near side hardest and the far side least, so the far side is left behind. The sea stands high at both ends.';
+          msg = 'Right — ' + me + ', and ' + ansSaid + '. ' + MECH;
         } else if (okTime) {
-          msg = 'Not quite — the timing you had right, but ' + me + '. The sea stands high at both ends of the Moon’s line. The far side is pulled least of all, so it lags behind, and that lagging water is the second bulge.';
+          msg = 'Not quite — the timing was right, but ' + me + '. ' + MECH;
         } else if (okMark) {
-          msg = 'Not quite — the two high-water places you had right, but you said ' + TIME_SAID[pickTime] + '. Whitby meets a bulge every 12 hours 25 minutes, so its next high water is ' + ansSaid + '.';
+          msg = 'Not quite — you found both high-tide places, but you said ' + TIME_SAID[pickTime] +
+            '. Whitby passes a high about every 12 hours 25 minutes, so its next one is ' + ansSaid + '.';
         } else {
-          msg = 'Not quite — ' + me + ', and you said ' + TIME_SAID[pickTime] + '. Water stands high at both ends of the Moon’s line, so Whitby’s next high water is ' + ansSaid + '. The far side is pulled least, so it lags behind — that is the second bulge.';
+          msg = 'Not quite — ' + me + ', and you said ' + TIME_SAID[pickTime] + '. ' + MECH +
+            ' Whitby’s next high tide is ' + ansSaid + '.';
         }
         say(msg);
         paint();
@@ -313,15 +338,15 @@
         var n = chosen.length;
         if (n === 1) {
           var rel = ((chosen[0] - round.moon) % 8 + 8) % 8;
-          if (rel === 0) { return 'you marked one place, the side facing the Moon'; }
-          if (rel === 4) { return 'you marked one place, the far side from the Moon'; }
-          return 'you marked one place, off the Moon’s line';
+          if (rel === 0) { return 'you marked the near side only'; }
+          if (rel === 4) { return 'you marked the far side only'; }
+          return 'you marked one point, off the line';
         }
         if (n === 2 && chosen.indexOf(hs[0]) >= 0 && chosen.indexOf(hs[1]) >= 0) {
-          return 'you marked both ends of the Moon’s line';
+          return 'you marked both ends of the line';
         }
-        if (n === 2) { return 'you marked the wrong two places'; }
-        return 'you marked ' + NUMWORD[Math.min(n, 8)] + ' places';
+        if (n === 2) { return 'you marked two wrong points'; }
+        return 'you marked ' + NUMWORD[Math.min(n, 8)] + ' points';
       }
 
       /* ---------- rounds ---------- */
@@ -357,9 +382,6 @@
         var ux = Math.cos(rad(md)), uy = -Math.sin(rad(md));
         var mx = CX + MOON_ORBIT * ux, my = CY + MOON_ORBIT * uy;
         moonG.setAttribute('transform', 'translate(' + r2(mx) + ' ' + r2(my) + ')');
-        emLine.setAttribute('x1', CX); emLine.setAttribute('y1', CY);
-        emLine.setAttribute('x2', r2(mx)); emLine.setAttribute('y2', r2(my));
-        emLine.setAttribute('opacity', '1');
 
         keyG.setAttribute('transform', round.moon === 5 ? 'translate(0 -139)' : 'translate(0 0)');
 
@@ -371,7 +393,7 @@
         sea.setAttribute('ry', SEA_FLAT);
         sea.setAttribute('transform', 'rotate(' + (-md) + ' ' + CX + ' ' + CY + ')');
 
-        arrows.forEach(function (ar) { ar.g.setAttribute('opacity', '0'); });
+        showArrows();
         sweepDot.setAttribute('opacity', '0');
         readout.textContent = '';
 
@@ -384,10 +406,11 @@
         });
 
         base.setAttribute('aria-label', 'A view down onto Earth from above the North Pole. Earth turns anticlockwise, ' +
-          'the Moon lies out to one side, and eight coast points are marked round the shore. Whitby is the solid dot.');
+          'the Moon lies out to one side, and eight coast points are marked round the shore. Whitby is the solid dot. ' +
+          'Three arrows on the Earth–Moon line show the Moon’s pull: hardest on the near side, less at the centre, least on the far side.');
       }
 
-      function setArrow(ar, a0, a1, ux, uy) {
+      function setArrow(ar, a0, a1, ux, uy, off) {
         var x0 = CX + a0 * ux, y0 = CY + a0 * uy;
         var x1 = CX + a1 * ux, y1 = CY + a1 * uy;
         var hx = x1 - 5 * ux, hy = y1 - 5 * uy;
@@ -399,7 +422,9 @@
         ar.head.setAttribute('d', 'M' + r2(x1) + ' ' + r2(y1) +
           'L' + r2(hx + 3.2 * nx) + ' ' + r2(hy + 3.2 * ny) +
           'L' + r2(hx - 3.2 * nx) + ' ' + r2(hy - 3.2 * ny) + 'Z');
-        ar.g.setAttribute('opacity', '1');
+        var mid = (a0 + a1) / 2;
+        ar.lab.setAttribute('x', r2(CX + mid * ux + off * nx));
+        ar.lab.setAttribute('y', r2(CY + mid * uy + off * ny));
       }
 
       function setSweep(absDeg, rx, ry) {
@@ -416,27 +441,29 @@
         return { rx: rx, ry: ry };
       }
 
-      /* the three-arrow picture: hardest at the near side, least at the far side */
+      /* the three-arrow picture: hardest at the near side, least at the far
+         side. Drawn from the opening state, so the marking question is a
+         prediction from a shown mechanism, not a memory test. */
       function showArrows() {
         var md = round.moon * 45;
         var ux = Math.cos(rad(md)), uy = -Math.sin(rad(md));
-        setArrow(arrows[0], ER, ER + 27, ux, uy);
-        setArrow(arrows[1], 0, 19, ux, uy);
-        setArrow(arrows[2], -ER, -ER + 11, ux, uy);
-        emLine.setAttribute('opacity', '0');
+        var off = PULL_OFF[round.moon] || -11;
+        setArrow(arrows[0], ER, ER + 27, ux, uy, off);
+        setArrow(arrows[1], 0, 19, ux, uy, off);
+        setArrow(arrows[2], -ER, -ER + 11, ux, uy, off);
       }
 
-      /* The reveal is a demonstration, not a question. The sea pulls into two
-         bulges, the pull arrows appear, then Whitby is carried once round so
-         both of its high waters are seen happening. */
+      /* The reveal is a demonstration, not a question. The even sea pulls out
+         into two bulges under the arrows the student has been reading all
+         along, then Whitby is carried once round so both of its high tides
+         are seen happening. */
       function reveal() {
         var td = ((round.moon + round.off) % 8) * 45;
         if (calm) {
           var d0 = paintSea(1);
-          showArrows();
           sweepDot.setAttribute('opacity', '1');
           setSweep(td, d0.rx, d0.ry);
-          readout.textContent = '12½ h between high waters';
+          readout.textContent = '12½ h between high tides';
           return;
         }
         var t0 = 0;
@@ -449,14 +476,13 @@
           var mp = Math.min(1, t / 620);
           var e = mp < .5 ? 2 * mp * mp : 1 - Math.pow(-2 * mp + 2, 2) / 2;
           var d = paintSea(e);
-          if (t > 260) { showArrows(); readout.textContent = 'pull: hardest · less · least'; }
           var sp = Math.max(0, Math.min(1, (t - 900) / 3000));
           var ang = td + 360 * sp;
           setSweep(ang, d.rx, d.ry);
           if (t > 900) {
             var relPos = ((ang - round.moon * 45) % 360 + 360) % 360;
-            var word = (relPos < 24 || relPos > 336 || Math.abs(relPos - 180) < 24) ? 'high water'
-              : (Math.abs(relPos - 90) < 24 || Math.abs(relPos - 270) < 24) ? 'low water' : 'in between';
+            var word = (relPos < 24 || relPos > 336 || Math.abs(relPos - 180) < 24) ? 'high tide'
+              : (Math.abs(relPos - 90) < 24 || Math.abs(relPos - 270) < 24) ? 'low tide' : 'in between';
             readout.textContent = '+' + (LUNAR_DAY * sp).toFixed(1) + ' h · ' + word;
           }
           if (t < 3960) { raf = requestAnimationFrame(step); }
@@ -464,7 +490,7 @@
             raf = 0;
             var d1 = paintSea(1);
             setSweep(td, d1.rx, d1.ry);
-            readout.textContent = '12½ h between high waters';
+            readout.textContent = '12½ h between high tides';
           }
         });
       }
@@ -499,10 +525,9 @@
         if (phase === 'answer') {
           go.textContent = 'Check';
           go.disabled = !(chosen.length && pickTime);
-          var line = 'The near side of Earth is about 13 000 km closer to the Moon than the far side.';
-          if (chosen.length) { line += ' Marked: ' + NUMWORD[Math.min(chosen.length, 8)] + '.'; }
-          if (pickTime) { line += ' Chosen: ' + TIME_SAID[pickTime] + '.'; }
-          say(line);
+          /* the model facts stay put while the student reasons from them; the
+             pressed markers and the filled time button carry the live values */
+          say(GIVEN);
         } else {
           go.textContent = mastered ? 'Another anyway' : 'Next';
           go.disabled = false;
@@ -512,7 +537,9 @@
             : streak + ' in a row — ' + (3 - streak) + ' more';
       }
 
-      function say(msg) { cap.textContent = msg; sr.textContent = msg; }
+      /* the live region only speaks when the words actually change, so
+         marking a coast point does not re-read the standing model facts */
+      function say(msg) { cap.textContent = msg; if (sr.textContent !== msg) { sr.textContent = msg; } }
 
       function publish() {
         var hours = hoursToNextHigh(round.off);

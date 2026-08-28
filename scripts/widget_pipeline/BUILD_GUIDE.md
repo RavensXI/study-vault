@@ -357,6 +357,47 @@ invariant for free.
 
 ---
 
+## 6b. The plain-language test has no exemptions (28 Aug review)
+
+Tom's depth-band review failed FOUR widgets on language alone, all of
+them violating the existing rule in new ways. The failures, verbatim:
+"Priya wants the money her town counts as success" (a noun phrase
+doing a theory's work); "the rules give the post the right" (three
+abstract nouns chained); "the notes are the music, colour is a wrapper"
+and "plaintive" (metaphor and literary vocabulary standing in for an
+explanation); "After an act of cold grey, the look has to make one
+source of warmth mean loss" (poetic compression). The rule, sharpened:
+
+- A metaphor may DECORATE an explanation that already exists in plain
+  words; it may never BE the explanation.
+- Vocabulary budget: the lesson's own taught terms, plus everyday
+  words. If the word is yours and a 15-year-old might not know it,
+  replace it.
+- Read every student-facing string once, aloud, cold. If any sentence
+  needs a second pass, rewrite it. Option labels and their echoes count.
+
+## 6c. Predictions need a shown basis; options need a reasoning path
+
+Two more depth-band findings, one principle: the student must be able
+to REASON to the answer from what the stage shows.
+
+- Draw the model's GIVEN facts before commit; hide only the consequence.
+  The tides widget asked "mark where the sea stands highest" over a
+  featureless circle - nothing to reason from, so the ask read as recall.
+  (The subduction widget got this right: the 100 km melting-depth line
+  is visible from the start; where the volcanoes rise is the hidden
+  consequence.)
+- Answer options must be distinguishable by one clean mental step from
+  stated facts, never by fine visual estimation. Tom, verbatim: "How
+  can students eyeball the angle? 100/120 km difference?" If a correct
+  method could land within the gap between two options, the options are
+  too close or the method is not really available on the stage.
+- When a widget asks TWO questions, the two control groups must read as
+  separate numbered steps (accent-numbered chips, ideally progressive
+  disclosure) AND each group must visibly point at the part of the
+  stage it asks about - a face tag, a highlighted region, a per-case
+  step label.
+
 ## 7. Never promise what the interaction cannot deliver
 
 **Compute the reachable range before you write a word of prose.** Every claim in

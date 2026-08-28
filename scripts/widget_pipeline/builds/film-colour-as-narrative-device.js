@@ -32,57 +32,57 @@
       name: 'Cold neon',
       c: { bg: '#06121a', back: '#0e2b39', key: '#3fd0cf', glow: '#17798a',
            fig: '#04090d', floor: '#08202b', rim: '#5fdcd6' },
-      signal: 'Light that belongs to the city outside — public, electric, nobody’s to switch off.',
-      echo: 'light nobody in the room controls'
+      signal: 'The light comes from the city outside. Nobody in the room owns it or can turn it off.',
+      echo: 'light nobody in the room can turn off'
     },
     tungsten: {
       name: 'Warm tungsten',
       c: { bg: '#1a1208', back: '#3d2c15', key: '#f4b75e', glow: '#a5722c',
            fig: '#120c05', floor: '#241809', rim: '#f9d08f' },
-      signal: 'Somewhere lived in and looked after — occupied, settled, on your side.',
-      echo: 'somewhere lived in'
+      signal: 'Somebody lives here and looks after the place. It is on your side.',
+      echo: 'somewhere somebody lives'
     },
     daylight: {
       name: 'Flat daylight',
       c: { bg: '#c9ccce', back: '#e3e6e7', key: '#ffffff', glow: '#dcdfe1',
            fig: '#787d81', floor: '#b3b7ba', rim: '#a4a9ad' },
-      signal: 'Ordinary conditions with nothing withheld — every face and every corner shown.',
-      echo: 'nothing withheld'
+      signal: 'This is an ordinary place on an ordinary day, and you are shown every face and every corner.',
+      echo: 'an ordinary place with nothing hidden'
     },
     gold: {
       name: 'Lantern gold',
       c: { bg: '#170d04', back: '#4d2e0c', key: '#f7c455', glow: '#bd7d1f',
            fig: '#0f0803', floor: '#2c1906', rim: '#ffdd85' },
-      signal: 'Money’s own light — theatrical, expensive, lit so that it is looked at.',
-      echo: 'money’s own light'
+      signal: 'This is what money looks like. The room is expensive, and it is lit to be shown off.',
+      echo: 'what money looks like'
     },
     bluegrey: {
       name: 'Cold blue-grey',
       c: { bg: '#161b21', back: '#2c353e', key: '#8296a6', glow: '#47555f',
            fig: '#0d1115', floor: '#1d242b', rim: '#9fb3c2' },
-      signal: 'Institutions and procedure — offices, corridors, being kept at arm’s length.',
-      echo: 'institutions and procedure'
+      signal: 'This is an official place, full of offices and corridors, where you are kept at arm’s length.',
+      echo: 'an official place'
     },
     slate: {
       name: 'Slate grey',
       c: { bg: '#343940', back: '#565059', key: '#8f9299', glow: '#666066',
            fig: '#20242a', floor: '#43484e', rim: '#a0a4aa' },
-      signal: 'Bare, exposed country with nothing to hide behind and nothing to call on.',
-      echo: 'bare, exposed country'
+      signal: 'This is bare, open country, with nothing to hide behind and nobody to call for help.',
+      echo: 'bare, open country'
     },
     highkey: {
       name: 'High-key white',
       c: { bg: '#e7e9eb', back: '#f5f6f7', key: '#ffffff', glow: '#edeff1',
            fig: '#969b9f', floor: '#dadce0', rim: '#bcc0c3' },
-      signal: 'A clean, well-resourced operation with nothing going wrong in it.',
-      echo: 'nothing going wrong'
+      signal: 'Everything here is clean, well funded and working properly.',
+      echo: 'everything working properly'
     },
     fire: {
       name: 'Fire orange',
       c: { bg: '#07050a', back: '#1e0e06', key: '#ff7d21', glow: '#ad3f07',
            fig: '#050305', floor: '#160b05', rim: '#ffa14e' },
-      signal: 'One violent source of warmth in the dark — heat that is also destruction.',
-      echo: 'warmth that destroys'
+      signal: 'One fierce warm light in the dark, and the thing giving that warmth is destroying something.',
+      echo: 'warmth from something being destroyed'
     }
   };
 
@@ -94,184 +94,184 @@
     {
       id: 'shanghai',
       where: 'Shanghai · an empty glass tower, night',
-      need: 'Bond follows a killer into an unlit tower and they fight without a word. The sequence has ' +
-            'to hold both men as shapes, so we watch the fight and not the faces.',
+      need: 'Bond follows a killer into a dark, empty tower, and they fight without saying a word. ' +
+            'The shot has to keep both men as black outlines, so we watch the fight and not their faces.',
       key: { cx: 76, cy: 30, r: 25 }, band: { x: 22, w: 106 }, two: true,
       ok: 'neon',
-      teach: 'The room lights are out and one screen outside does all the work, so the audience gets ' +
-             'outlines instead of faces. That is the sequence saying Bond is fighting in a city that is ' +
-             'not his, in light he cannot switch off.',
+      teach: 'The room lights are off. All the light comes from one huge advertising screen on the ' +
+             'building outside, so we see outlines instead of faces. The light belongs to the city, ' +
+             'not to Bond.',
       gs: [
         { p: 'neon',
           dud: { t: 'That the city is exciting and modern, so the fight looks stylish.',
-                 e: 'it just looks stylish',
-                 why: 'Style is the by-product. The blue is doing a job: it comes from outside, it belongs to the city, and it lets you see two bodies and not one face.' },
+                 e: 'just a stylish look',
+                 why: 'The style is a side effect, not the reason. The blue does a job: it comes from outside, it belongs to the city, and it lets you see two bodies but no faces.' },
           mis: { t: 'Nothing in particular — the advert outside was blue, so the shots came out blue.',
                  e: 'nothing in particular',
-                 why: 'The screen outside is something the film built. Making it the only light in the room is the choice; blue is what that choice looks like.' } },
+                 why: 'The screen outside is something the film put there. Making it the only light in the room is the choice, and blue is what that choice looks like.' } },
         { p: 'tungsten',
-          fail: 'Warm tungsten would give the tower an owner. This sequence needs a room on nobody’s side, so that Bond has nothing to lean on.',
-          dud: { t: 'That violence is coming, because warm colours read as heat and blood.',
-                 e: 'warm means violence',
-                 why: 'Warmth reads as shelter far more often than danger — think how a lit window looks from a cold street. Nothing here is meant to shelter anybody.' },
-          mis: { t: 'Nothing in particular — an office at night looks however its own lights happen to look.',
+          fail: 'Warm light would make the tower feel like somebody’s place. This scene needs a room that is on nobody’s side, so Bond has nothing to fall back on.',
+          dud: { t: 'That violence is coming, because warm colours make you think of heat and blood.',
+                 e: 'a sign that violence is coming',
+                 why: 'Warm light usually means shelter, not danger. Think how a lit window looks when you are out in the cold. Nothing in this tower is meant to shelter anybody.' },
+          mis: { t: 'Nothing in particular — an office at night just looks however its own lights make it look.',
                  e: 'nothing in particular',
-                 why: 'The office was built and lit for the camera. Somebody switched the room lights off so that one screen outside supplied everything.' } },
+                 why: 'The office was built and lit for the camera. Somebody decided to switch the room lights off and let one screen outside do all the lighting.' } },
         { p: 'daylight',
-          fail: 'Flat daylight shows you everything. This fight works because you are shown almost nothing — two outlines against a screen.',
+          fail: 'Flat daylight shows you everything. This fight works because you are shown almost nothing: two black outlines against a bright screen.',
           dud: { t: 'That the audience is meant to feel safe, because bright light means nothing bad can happen.',
-                 e: 'bright means safe',
-                 why: 'Even light does not promise safety, it promises clarity. Here clarity is the enemy: it would hand you both faces and empty the fight out.' },
+                 e: 'a sign the audience should feel safe',
+                 why: 'Even light does not make a scene safe. It only makes it clear. Seeing clearly is the problem here: you would get both faces, and the fight would lose what makes it work.' },
           mis: { t: 'Nothing in particular — this is simply what a camera records in a normal room.',
                  e: 'nothing in particular',
-                 why: 'A camera records what it is given. Flat, even light takes as much rigging as any other look — it is a choice, not a default.' } }
+                 why: 'A camera records whatever it is given. Flat, even light has to be set up just like any other look, so it is a choice too.' } }
       ]
     },
 
     {
       id: 'macau',
       where: 'Macau · the floating casino, night',
-      need: 'Bond arrives at a floating casino where money settles everything and none of his authority ' +
-            'reaches. The look has to say so before anyone explains where he is.',
+      need: 'Bond walks into a floating casino. Money decides everything here, and none of his usual ' +
+            'authority counts. The shot has to show that before anyone explains where he is.',
       key: { cx: 166, cy: 26, r: 20 }, band: null, two: false,
       ok: 'gold',
-      teach: 'Gold does the exposition. Before anybody explains where Bond is, the light has said it: ' +
-             'a room built to be looked at, running on money, holding nothing he can appeal to.',
+      teach: 'The gold explains the room before anybody speaks. It tells us this place was built to be ' +
+             'looked at, that it runs on money, and that there is nothing here Bond can appeal to.',
       gs: [
         { p: 'gold',
           dud: { t: 'That the room is friendly, because gold is warm and warm means welcoming.',
-                 e: 'gold means friendly',
-                 why: 'Gold here is display, not welcome. The room is warm the way a shop window is warm — lit so that you want what is inside it — and Bond is shown a price.' },
+                 e: 'a sign the room is friendly',
+                 why: 'The gold here is for showing off, not for welcoming you. The room is warm the way a shop window is warm: lit so that you want what is inside.' },
           mis: { t: 'Nothing in particular — the casino was full of gold lanterns, so the shots came out gold.',
                  e: 'nothing in particular',
-                 why: 'Somebody chose to fill it with gold lanterns and the grade pushes them further. What a room holds is settled before the camera arrives.' } },
+                 why: 'Somebody chose to fill the room with gold lanterns, and the colour work pushes that gold further. What a room contains is decided long before the camera arrives.' } },
         { p: 'bluegrey',
-          fail: 'Cold blue-grey is this film’s institutional look. Give it to the casino and the room picks up rules and authority, when neither reaches this far.',
+          fail: 'Cold blue-grey is the colour this film gives to offices. In the casino it would make the room look like somewhere with rules, and this is a place with none.',
           dud: { t: 'That danger is close, because cold colours are how films signal a threat.',
-                 e: 'cold means danger',
-                 why: 'Not reliably. This film gives the same blue-grey to MI6 once it is working underground, where it means diminished, not dangerous. A colour means what it is set against.' },
+                 e: 'a sign that danger is close',
+                 why: 'Not always. This film uses the same blue-grey for MI6 down in the tunnels, and there it means beaten down, not dangerous. What a colour means depends on what it is put next to.' },
           mis: { t: 'Nothing in particular — it would just be a cooler-looking version of the same room.',
                  e: 'nothing in particular',
-                 why: 'A cooler room is a different room. Take the gold out and the casino stops being money’s territory, and the audience stops being shown a price.' } },
+                 why: 'A cooler room is a different room. Take the gold away and the casino stops looking like money’s own ground.' } },
         { p: 'neon',
-          fail: 'Neon belongs to the street — public, electric, free to anyone walking past. This room has to feel private, sealed and paid for.',
+          fail: 'Neon is street light: public, electric and free to anyone walking past. This room has to feel private, closed off and paid for.',
           dud: { t: 'That the casino is glamorous, because neon is the colour of nightlife.',
-                 e: 'neon means glamour',
-                 why: 'Neon is public glamour, the outside of a city, free to look at. The casino’s gold is private and paid for, and that difference is the whole room.' },
+                 e: 'a sign the casino is glamorous',
+                 why: 'Neon is public glamour, out in the street, free for anyone to look at. The casino’s gold is private and paid for, and that difference is what the room is about.' },
           mis: { t: 'Nothing in particular — Macau is a neon city, so a neon look would just be accurate.',
                  e: 'nothing in particular',
-                 why: 'Accuracy is not the question a grade answers. Plenty of true-to-life looks would be wrong here, and being wrong is what counts.' } }
+                 why: 'Being true to life is not what colour is for. A neon casino would match the streets outside and still tell us the wrong thing about the room.' } }
       ]
     },
 
     {
       id: 'tunnel',
       where: 'London · MI6 working from a tunnel',
-      need: 'MI6 has been bombed out of its building and now runs the service from an old tunnel. ' +
-            'The look has to show an institution cut down to bare walls.',
+      need: 'MI6 has been bombed out of its building. It now runs the whole service from an old tunnel. ' +
+            'The shot has to show an organisation cut down to bare brick walls.',
       key: { cx: 118, cy: 16, r: 23 }, band: null, two: true,
       ok: 'bluegrey',
-      teach: 'The grade carries the plot. MI6 has lost its building, its list of agents and its ' +
-             'reputation, and you are told all three by walls you can barely see and light nobody ' +
+      teach: 'The colour tells you the plot. MI6 has lost its building, its list of agents and its ' +
+             'reputation, and you learn all three from walls you can barely see and light nobody ' +
              'would choose to work in.',
       gs: [
         { p: 'bluegrey',
           dud: { t: 'That MI6 is more secretive now, because dim light hides what people are doing.',
-                 e: 'dim means secretive',
-                 why: 'Secrecy here is carried by how much of a face you are allowed to see, not by cold walls. The tunnels hide nothing; they show a service that has lost its building.' },
+                 e: 'a sign MI6 is being secretive',
+                 why: 'Secrets in this film are kept by how much of a face you are allowed to see, not by how cold the walls are. The tunnels are not hiding anything.' },
           mis: { t: 'Nothing in particular — a tunnel is cold and grey whether anybody plans it or not.',
                  e: 'nothing in particular',
-                 why: 'A tunnel can be lit any way a crew chooses. A few warm lamps would make the same brick read as a shelter, not a comedown.' } },
+                 why: 'A tunnel can be lit any way the crew chooses. A few warm lamps would make the same brick look like a safe shelter instead of a step down in the world.' } },
         { p: 'gold',
-          fail: 'Warm gold shelters people. Bring it down here and going underground reads as a homecoming, when it has to feel like a service driven into a hole.',
+          fail: 'Warm gold makes a place feel safe. Use it here and moving underground would look like coming home, when it has to feel like a service driven into a hole.',
           dud: { t: 'That the service is old and traditional, because gold looks historic.',
-                 e: 'gold means historic',
-                 why: 'Gold reads as money before it reads as age. It would make the tunnels look like a club with a budget, when the story is that the budget and the building have gone.' },
+                 e: 'a sign the service is old and traditional',
+                 why: 'Gold makes us think of money before it makes us think of age. It would make the tunnels look like a private club with plenty of funding, when the funding and the building have both gone.' },
           mis: { t: 'Nothing in particular — the tunnels are old, so warm old lighting would just suit them.',
                  e: 'nothing in particular',
-                 why: 'Suiting the location is not the job. The tunnels could be lit warm or cold, and which one you pick decides what the audience concludes.' } },
+                 why: 'Matching the location is not the job. The tunnels could be lit warm or cold, and whichever you pick is what the audience will believe about MI6.' } },
         { p: 'highkey',
-          fail: 'High-key white says the machine is working. This whole sequence is about a service that has stopped working, so even light would argue against the story.',
-          dud: { t: 'That the scene is tense, because bright white light feels clinical and cold.',
-                 e: 'white means clinical tension',
-                 why: 'Clinical light suits a laboratory or an interrogation, where everything is visible and under control. This scene is about losing control.' },
+          fail: 'Bright white light says everything is running properly. This scene is about a service that has stopped, so that light would contradict the story.',
+          dud: { t: 'That the scene is tense, because hard white light feels cold and clinical.',
+                 e: 'a sign the scene is tense',
+                 why: 'Hard white light suits a laboratory or a police interview, where everything is visible and under control. This scene is about losing control.' },
           mis: { t: 'Nothing in particular — you have to light a dark tunnel somehow so people can see.',
                  e: 'nothing in particular',
-                 why: 'A dark tunnel has to be lit somehow, and how much you light it is the decision. The film gives just enough to follow the scene, so the walls stay half-lost.' } }
+                 why: 'A dark tunnel has to be lit somehow, and how much light you give it is the decision. This film gives just enough to follow the scene.' } }
       ]
     },
 
     {
       id: 'moor',
       where: 'Scotland · the road to Skyfall Lodge',
-      need: 'Bond drives M north to the house he grew up in, with no back-up and nothing but an old car. ' +
-            'The look has to strip the film back to two people in open country.',
+      need: 'Bond drives M north to the house he grew up in. They have no back-up and nothing but an old ' +
+            'car. The shot has to strip the film back to two people in open country.',
       key: { cx: 120, cy: 18, r: 44 }, band: null, two: true,
       ok: 'slate',
-      teach: 'The grade takes the franchise apart. The cities, the technology and the service are gone, ' +
-             'the palette drops to wet slate and dead heather, and what is left is two people and no ' +
-             'help coming.',
+      teach: 'The colour takes the Bond film apart. The cities, the gadgets and the service have all ' +
+             'gone. The colours drop to wet slate and dead heather, and all that is left is two people ' +
+             'with no help coming.',
       gs: [
         { p: 'slate',
           dud: { t: 'That the scene is sad, because grey is a sad colour.',
-                 e: 'grey means sad',
-                 why: 'Grey here is not mood music, it is a statement of resources. The gadgets, the cities and the service have gone, and what is left is a house and two people.' },
+                 e: 'a sign the scene is sad',
+                 why: 'The grey is not there to make you feel sad. It shows what Bond has left: the gadgets, the cities and the service have all gone, and what remains is a cold house and two people.' },
           mis: { t: 'Nothing in particular — Scotland in bad weather is grey, so the shots came out grey.',
                  e: 'nothing in particular',
-                 why: 'Plenty of films have made the same moor look golden. A crew picks its weather and its grade, and this one refuses every warm option.' } },
+                 why: 'Plenty of films have made the same Scottish moor look golden. A crew chooses which weather to wait for and which colours to push, and this one turns down every warm option.' } },
         { p: 'tungsten',
-          fail: 'Warm tungsten promises a homecoming. Bond is going back to a house with nothing left in it, so warmth would tell the audience the wrong thing.',
+          fail: 'Warm light would promise a happy homecoming. Bond is going back to an empty house, so warmth would tell us the wrong thing about what is waiting.',
           dud: { t: 'That the family who own the house are kind, so we are ready to like them.',
-                 e: 'warm means a kind family',
-                 why: 'There is no family left to like. Warm light would promise a welcome the house cannot give, and the story needs Bond arriving somewhere emptied out.' },
+                 e: 'a sign the family are kind',
+                 why: 'There is no family left in the house. Warm light would promise a welcome that nobody is there to give, and the story needs Bond arriving somewhere emptied out.' },
           mis: { t: 'Nothing in particular — sunlight over a moor is warm, so a warm look is just realistic.',
                  e: 'nothing in particular',
-                 why: 'Realism is not what a grade is for. This film keeps every warm option off the moor until the moment the house burns.' } },
+                 why: 'Being realistic is not what colour is for. This film keeps every warm colour off the moor until the moment the house catches fire.' } },
         { p: 'highkey',
-          fail: 'High-key white makes the country look manageable. This sequence needs the opposite: two people with no cover, in weather that does not care.',
+          fail: 'Bright white light would make the country look easy to handle. This scene needs the opposite: two people with nowhere to hide, in weather that does not care.',
           dud: { t: 'That the moor is beautiful, so the audience gets a break before the fight.',
-                 e: 'a beautiful break',
-                 why: 'It is beautiful either way. Bright even light would make the landscape hospitable, and the point of this country is that it will not help him.' },
+                 e: 'a beautiful break before the fight',
+                 why: 'It is beautiful either way. Bright, even light would make the moor look welcoming, and the whole point of this landscape is that it will not help him.' },
           mis: { t: 'Nothing in particular — you light a landscape so the audience can see it, and that is all.',
                  e: 'nothing in particular',
-                 why: 'How much light, and how cold, are both decisions. The same moor can be made to look like a day out or a place you survive.' } }
+                 why: 'How much light you use, and how cold it is, are both decisions. The same moor can be made to look like a nice day out or a place you have to survive.' } }
       ]
     },
 
     {
       id: 'burning',
       where: 'Skyfall Lodge · the house burns',
-      need: 'The house Bond grew up in burns while the fight goes on in front of it. After an act of ' +
-            'cold grey, the look has to make one source of warmth mean loss.',
+      need: 'The house Bond grew up in burns while the fight goes on in front of it. The whole ending ' +
+            'has been cold and grey. Now one warm thing, the fire, has to feel like a loss.',
       key: { cx: 88, cy: 46, r: 32 }, band: null, two: true,
       ok: 'fire',
-      teach: 'Read it as a change, not a look. A film that has spent its length on neon, institutional ' +
-             'blue and wet slate makes one orange source mean something: the only warmth left is the ' +
-             'fire taking Bond’s past.',
+      teach: 'What matters is the change. The film has spent hours on cold neon, office blue and wet ' +
+             'slate. So when one orange light finally arrives, the only warm thing left is the fire ' +
+             'burning Bond’s childhood home.',
       gs: [
         { p: 'fire',
           dud: { t: 'That the sequence is exciting, because fire and explosions look spectacular.',
-                 e: 'fire just looks spectacular',
-                 why: 'It is spectacular, and that is the surface. The grade gives the film its only warm light at the moment warmth is a house burning down — comfort and ruin in one colour.' },
+                 e: 'just a spectacular fire',
+                 why: 'It is spectacular, but that is only the surface. This is the one warm light in the whole ending, and the thing giving that warmth is Bond’s home burning down.' },
           mis: { t: 'Nothing in particular — a burning house is orange, so the shots came out orange.',
                  e: 'nothing in particular',
-                 why: 'The fire is orange; giving it the whole frame and keeping everything else black is the decision, held back for a whole act.' } },
+                 why: 'The fire really is orange. The decision is to let it fill the whole frame and keep everything else black, after holding warm colour back for the entire ending.' } },
         { p: 'bluegrey',
-          fail: 'Cold blue-grey is this film’s office look. Nothing about this night is institutional, and it would flatten the one break in the film’s colour.',
+          fail: 'Cold blue-grey is what this film uses for offices. Nothing about this night is office business, and it would wipe out the one moment the colour finally changes.',
           dud: { t: 'That the night is cold, which is honest for a Scottish moor in winter.',
-                 e: 'it would just be cold and honest',
-                 why: 'Honesty about the weather is not what the shot is for. The film has already spent the whole act on cold; the fire is where it stops, and that break is the meaning.' },
+                 e: 'just a cold, realistic night',
+                 why: 'Being honest about the weather is not what the shot is for. The ending has already been cold all the way through. The fire is where that stops, and the change is the point.' },
           mis: { t: 'Nothing in particular — night scenes are blue, and this is a night scene.',
                  e: 'nothing in particular',
-                 why: 'Night is only blue because films agreed to make it so. Here the film breaks its own rule, and an audience feels the change.' } },
+                 why: 'Night looks blue in films because films decided long ago to make it blue. Here the film breaks its own habit.' } },
         { p: 'highkey',
-          fail: 'High-key white lights it from nowhere. The fire has to be the only source, so the thing destroying the house is also the only thing letting you see.',
+          fail: 'Bright white light would come from nowhere. The fire has to be the only light, so the thing destroying the house is also the only thing letting us see.',
           dud: { t: 'That the danger is clear, because you can see everything that is happening.',
-                 e: 'you would see everything',
-                 why: 'You would, and that is the problem. The fire shows you fragments — a shape, a face, then dark again — and even light would hand the whole fight over at once.' },
+                 e: 'a way of showing everything',
+                 why: 'You would, and that is the problem. The fire shows you the fight in pieces: a shape, a face, then darkness again. Flat light would show you all of it at once.' },
           mis: { t: 'Nothing in particular — you have to light a night scene somehow.',
                  e: 'nothing in particular',
-                 why: 'A night scene has to be lit somehow, and there were plenty of ways to do it. Somebody picked one, and picking one is what a grade is.' } }
+                 why: 'A night scene has to be lit somehow, and there were many ways to do it. Somebody chose this one, and that choice is the grade.' } }
       ]
     }
   ];
@@ -367,7 +367,7 @@
       '<div class="f-stage">' +
         '<p class="f-where" id="fwhere"></p>' +
         '<div id="fshot"></div>' +
-        '<p class="f-note">Schematic frame — the shapes stand for figure, light and ground.</p>' +
+        '<p class="f-note">A diagram, not a still: the shapes stand for a person, a light and the ground.</p>' +
         '<p class="f-map" id="fmap"><span class="f-mname" id="fmname"></span><span id="fmsig"></span></p>' +
       '</div>' +
       '<div class="f-ask" id="fask">' +
@@ -401,7 +401,7 @@
     /* ---- the frame, built once and repainted ---------------------------- */
     var svg = sv('svg', {
       'class': 'f-shot', viewBox: '0 0 239 100',
-      role: 'img', 'aria-label': 'Schematic frame: two figures, a light source and a ground plane'
+      role: 'img', 'aria-label': 'Diagram of a shot: two figures, a light source and the ground'
     });
     var pBg    = sv('rect', { x: 0, y: 0, width: 239, height: 100 });
     var pBack  = sv('rect', { x: 0, y: 0, width: 239, height: 70 });
@@ -605,11 +605,11 @@
       } else if (gradeOk) {
         body = read.why + ' ' + pal.name + ' is telling the audience: ' + lower(pal.signal);
       } else if (readOk) {
-        body = 'You read that grade correctly, and that is exactly why it cannot serve this scene. ' + g.fail;
+        body = 'You read that colour correctly, and that is exactly why it does not work for this scene. ' + g.fail;
       } else if (read.kind === 'mis') {
         body = read.why + ' ' + g.fail;
       } else {
-        body = g.fail + ' And ' + pal.name.toLowerCase() + ' does not say that; it says ' + lower(pal.signal);
+        body = g.fail + ' And ' + pal.name.toLowerCase() + ' does not say that. What it does say is: ' + lower(pal.signal);
       }
 
       elFlag.textContent = right ? 'Right' : 'Not quite';
@@ -617,7 +617,7 @@
       elSay.textContent = '— you graded it ' + pal.name.toLowerCase() + ' and read it as ' +
         read.e + '. ' + body +
         (right && state.streak === 3
-          ? ' You have it: a grade argues what a scene means; it does not record how a place looked.'
+          ? ' You have it: colour is an argument about what a scene means, not a record of how the place looked.'
           : '');
 
       /* The round ends in the grade the film uses, so the palette and its
@@ -680,9 +680,9 @@
     meta: {
       id: 'film-colour-as-narrative-device',
       title: 'Grade the shot',
-      teaches: 'A colour grade is a narrative choice, not a record of how a location happened to look: ' +
-               'each palette makes a claim about where the audience is and what it should feel, so the ' +
-               'same shapes mean different things under different grades.'
+      teaches: 'The colour of a shot is a storytelling choice, not a record of how the place happened to ' +
+               'look. Each palette makes a claim about where we are and what we should feel, so the ' +
+               'same shapes mean different things under different colours.'
     },
     mount: mount
   };

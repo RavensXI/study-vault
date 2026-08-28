@@ -50,7 +50,14 @@
 
   /* ---------------------------------------------------------------- rounds */
 
+  /* Round 1 is fixed and teaches dip itself before dip is ever used: the bed
+     slopes down one way while the valley floor slopes the other, so a student
+     has to read the bed line rather than the ground. */
+  var PRIMER = { dir: 'dip', att: 'up', D: 0.055, u: 150 };
+
   var DECK = [
+    { dir: 'dip', att: 'down', D: 0.135, u: 150 },
+    { dir: 'dip', att: 'horizontal', D: 0, u: 150 },
     { dir: 'predict', att: 'horizontal', D: 0, u: 120 },
     { dir: 'predict', att: 'down', D: 0.075, u: 200 },
     { dir: 'predict', att: 'up', D: 0.075, u: 150 },
@@ -66,14 +73,20 @@
     { dir: 'read', att: 'vertical', D: 0, u: 190 }
   ];
 
+  function dipKey(att) {
+    return att === 'horizontal' ? 'level' : att === 'vertical' ? 'vertical' : att;
+  }
+
+  function makeRound(r) {
+    var t = traceOf(r.att, r.D);
+    return {
+      dir: r.dir, att: r.att, D: r.D, uStar: r.u, trace: t,
+      answer: r.dir === 'predict' ? t.v : r.dir === 'dip' ? dipKey(r.att) : r.att
+    };
+  }
+
   function buildDeck() {
-    var d = DECK.map(function (r) {
-      var t = traceOf(r.att, r.D);
-      return {
-        dir: r.dir, att: r.att, D: r.D, uStar: r.u, trace: t,
-        answer: r.dir === 'predict' ? t.v : r.att
-      };
-    });
+    var d = DECK.map(makeRound);
     for (var i = d.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1)), t = d[i];
       d[i] = d[j]; d[j] = t;
@@ -200,10 +213,28 @@
   var PRED_ORDER = ['upstream', 'downstream', 'none'];
 
   var ATT_LABEL = {
-    horizontal: 'Horizontal — follows a contour',
-    down: 'Dips downstream (to the right)',
-    up: 'Dips upstream (to the left)',
+    horizontal: 'Horizontal — level, follows a contour',
+    down: 'Dips downstream — down to the right',
+    up: 'Dips upstream — down to the left',
     vertical: 'Vertical — crosses in a straight line'
+  };
+
+  var DIP_LABEL = {
+    down: 'Down to the right (downstream)',
+    up: 'Down to the left (upstream)',
+    level: 'Level — it does not slope'
+  };
+  var DIP_ECHO = {
+    down: 'it slopes down to the right',
+    up: 'it slopes down to the left',
+    level: 'it is level'
+  };
+  var DIP_ORDER = ['down', 'up', 'level'];
+
+  /* the words that sit on the bed in the section, in every round */
+  var SLOPE_PHRASE = {
+    down: 'slopes down', up: 'slopes down',
+    level: 'stays level', vertical: 'straight down'
   };
   var ATT_ECHO = {
     horizontal: 'it is horizontal',
@@ -214,10 +245,10 @@
   var ATT_ORDER = ['horizontal', 'down', 'up', 'vertical'];
 
   var FRAME = {
-    horizontal: 'A boundary crosses this valley. The bed is horizontal.',
-    down: 'A boundary crosses this valley. The bed dips downstream.',
-    up: 'A boundary crosses this valley. The bed dips upstream.',
-    vertical: 'A boundary crosses this valley. The bed is vertical.'
+    horizontal: 'A bed crosses this valley. It is horizontal — all at one height.',
+    down: 'A bed crosses this valley. It dips downstream — sloping down to the right.',
+    up: 'A bed crosses this valley. It dips upstream — sloping down to the left.',
+    vertical: 'A bed crosses this valley. It is vertical — it goes straight down.'
   };
 
   /* --------------------------------------------------------------- mount */
@@ -328,6 +359,11 @@
       var traceG = el('g', { 'clip-path': 'url(#' + uid + '-m)' });
       svg.appendChild(ghostG); svg.appendChild(traceG);
       var labG = el('g', { 'clip-path': 'url(#' + uid + '-m)' });
+      var viewLbl = txt(MAP_L + 4, MAP_T + 9, 'from above', 8.5, '#7a736a', 'start');
+      viewLbl.setAttribute('stroke', '#e9e2d6');
+      viewLbl.setAttribute('stroke-width', '2.6');
+      viewLbl.setAttribute('paint-order', 'stroke');
+      labG.appendChild(viewLbl);
       labels.forEach(function (n) { labG.appendChild(n); });
       svg.appendChild(labG);
 
@@ -358,8 +394,9 @@
       var sghostS = el('g', { 'clip-path': 'url(#' + uid + '-g)' });
       var sbedG = el('g', { 'clip-path': 'url(#' + uid + '-s)' });
       var sbedS = el('g', { 'clip-path': 'url(#' + uid + '-g)' });
+      var sannG = el('g', { 'clip-path': 'url(#' + uid + '-s)' });
       svg.appendChild(sghostG); svg.appendChild(sghostS);
-      svg.appendChild(sbedG); svg.appendChild(sbedS);
+      svg.appendChild(sbedG); svg.appendChild(sbedS); svg.appendChild(sannG);
 
       var linkG = el('g', {});
       svg.appendChild(linkG);
@@ -390,7 +427,7 @@
       root.appendChild(wrap);
 
       /* ------------------------------------------------------------ state */
-      var deck = buildDeck(), deckAt = 0;
+      var deck = [makeRound(PRIMER)].concat(buildDeck()), deckAt = 0;
       var round = null, picked = null, locked = false;
       var streak = 0, attempted = 0, mastered = false;
 
@@ -466,6 +503,76 @@
         solid.appendChild(seg(1));
       }
 
+      /* where the bed line is actually inside the section panel */
+      function bedRange(att, D) {
+        if (att === 'vertical') return null;
+        var P = bedP(att, D);
+        var Zb0 = groundZ(round.uStar) - P * round.uStar;
+        if (P === 0) {
+          var y = sy(Zb0);
+          return (y > SEC_T + 4 && y < SEC_B - 4) ? [12, ULEN - 12] : null;
+        }
+        var uA = ((CY0 - SEC_T) / VE - Zb0) / P;
+        var uB = ((CY0 - SEC_B) / VE - Zb0) / P;
+        var lo = Math.max(6, Math.min(uA, uB));
+        var hi = Math.min(ULEN - 6, Math.max(uA, uB));
+        return hi - lo > 26 ? [lo, hi] : null;
+      }
+
+      function arrowTo(g, x1, y1, x2, y2, colour, dashed, w) {
+        var a = { x1: x1, y1: y1, x2: x2, y2: y2, stroke: colour,
+          'stroke-width': w, 'stroke-linecap': 'round' };
+        if (dashed) a['stroke-dasharray'] = '4 3';
+        g.appendChild(el('line', a));
+        var dx = x2 - x1, dy = y2 - y1, L = Math.sqrt(dx * dx + dy * dy) || 1;
+        var ux = dx / L, uy = dy / L, h = 5;
+        g.appendChild(el('path', {
+          d: 'M ' + (x2 - ux * h - uy * h * 0.6) + ' ' + (y2 - uy * h + ux * h * 0.6) +
+            ' L ' + x2 + ' ' + y2 +
+            ' L ' + (x2 - ux * h + uy * h * 0.6) + ' ' + (y2 - uy * h - ux * h * 0.6),
+          fill: 'none', stroke: colour, 'stroke-width': w,
+          'stroke-linecap': 'round', 'stroke-linejoin': 'round'
+        }));
+      }
+
+      /* An arrow ON the bed pointing the way it slopes down, with the words
+         next to it. This is what makes "dip" mean something before a student
+         is asked to use it. `which` is the direction being claimed, so a
+         wrong guess draws its own arrow. */
+      function drawBedArrow(att, D, which, colour, dashed) {
+        clear(sannG);
+        var lx, ly, w = dashed ? 1.6 : 1.9;
+        if (att === 'vertical') {
+          var xv = gx(round.uStar);
+          arrowTo(sannG, xv, SEC_T + 10, xv, SEC_T + 26, colour, dashed, w);
+          lx = xv; ly = SEC_T + 34;
+        } else {
+          var P = bedP(att, D);
+          var Zb0 = groundZ(round.uStar) - P * round.uStar;
+          var r = bedRange(att, D);
+          if (!r) return;
+          if (which === 'level') {
+            lx = gx((r[0] + r[1]) / 2); ly = sy(Zb0 + P * (r[0] + r[1]) / 2) - 6;
+          } else {
+            var fwd = which === 'down' ? 1 : -1;
+            var from = fwd > 0 ? r[0] : r[1];
+            var span = fwd > 0 ? r[1] - r[0] : r[0] - r[1];
+            var u1 = from + 0.38 * span, u2 = from + 0.76 * span;
+            arrowTo(sannG, gx(u1), sy(Zb0 + P * u1), gx(u2), sy(Zb0 + P * u2), colour, dashed, w);
+            var midY = sy(Zb0 + P * (u1 + u2) / 2);
+            lx = gx((u1 + u2) / 2);
+            ly = midY - 6.5 < SEC_T + 21 ? midY + 11 : midY - 6.5;
+          }
+        }
+        lx = Math.max(MAP_L + 32, Math.min(MAP_R - 32, lx));
+        ly = Math.max(SEC_T + 21, Math.min(SEC_B - 4, ly));
+        var t = txt(lx, ly, SLOPE_PHRASE[which], 8.5, colour);
+        t.setAttribute('stroke', '#e6ddce');
+        t.setAttribute('stroke-width', '2.6');
+        t.setAttribute('paint-order', 'stroke');
+        sannG.appendChild(t);
+      }
+
       function ghostDip(choice) {
         if (choice === 'horizontal' || choice === 'vertical') return 0;
         return round.att === 'down' || round.att === 'up' ? round.D : 0.1;
@@ -486,50 +593,71 @@
 
       function contourM() { return Math.round(groundZ(round.uStar) * MPU); }
 
-      function predictRight() {
-        if (round.att === 'horizontal') {
-          return 'the V points upstream. A bed at one height follows a contour, and every contour bends upstream where it crosses a valley.';
-        }
-        if (round.att === 'vertical') {
-          return 'there is no V. A vertical bed sits at every height at once, so the valley cannot bend it. The boundary crosses in a straight line.';
+      function dipRight() {
+        if (round.att === 'up') {
+          return 'it slopes down to the left, upstream. That is what dip means — the way a bed tilts down into the ground. The valley floor slopes the other way.';
         }
         if (round.att === 'down') {
-          return 'the V points downstream. Go upstream and this bed climbs faster than the valley floor, so it crops out high on the sides. The point is left downstream.';
+          return 'it slopes down to the right, downstream. That is what dip means — the way a bed tilts down into the ground. It drops faster than the valley floor.';
         }
-        return 'the V points upstream. Go downstream and this bed climbs while the valley floor falls, so it crops out on higher ground there. The point is left upstream.';
+        return 'it is level. The bed line is flat, so the bed stays at one height all the way. A level bed has no dip direction at all.';
+      }
+
+      function dipWrong(pick) {
+        var said = 'you said ' + DIP_ECHO[pick] + '. ';
+        if (round.att === 'up') {
+          return said + 'Follow the bed itself, not the ground. The bed is higher on the right and lower on the left, so it slopes down to the left.';
+        }
+        if (round.att === 'down') {
+          return said + 'Follow the bed itself. It starts high on the left and drops as it goes right, so it slopes down to the right.';
+        }
+        return said + 'The bed line is flat all the way across, so the bed stays at one height. It does not slope either way.';
+      }
+
+      function predictRight() {
+        if (round.att === 'horizontal') {
+          return 'the V points upstream. A bed that stays at one height follows a contour line, and contour lines bend upstream in a valley.';
+        }
+        if (round.att === 'vertical') {
+          return 'there is no V. A vertical bed goes straight down, so it is at every height at once and the valley cannot bend it.';
+        }
+        if (round.att === 'down') {
+          return 'the V points downstream. Going upstream, this bed rises faster than the valley floor, so you meet it high up the sides. The point of the V is left downstream.';
+        }
+        return 'the V points upstream. Going downstream, this bed rises while the valley floor drops, so you meet it up on the higher ground. The point of the V is left upstream.';
       }
 
       function predictWrong(pick) {
         var said = 'you said ' + PRED_ECHO[pick] + '. ';
         if (round.att === 'vertical') {
-          return said + 'A vertical bed cuts every height at once, so the valley cannot bend it. Its boundary runs straight across the contours.';
+          return said + 'A vertical bed goes straight down, so it is at every height at once. The valley cannot bend it, and the boundary runs dead straight.';
         }
         if (pick === 'none') {
-          return said + 'Only a vertical bed crosses in a straight line. This one is ' +
-            (round.att === 'horizontal' ? 'horizontal' : 'tilted') +
-            ', so where it meets the ground shifts along the valley — it Vs ' + round.trace.v + '.';
+          return said + 'Only a vertical bed runs dead straight. This bed is ' +
+            (round.att === 'horizontal' ? 'level' : 'tilted') +
+            ', so the place where it meets the surface moves along the valley — the V points ' + round.trace.v + '.';
         }
         if (round.att === 'down') {
-          return said + 'This bed falls faster than the stream does, so upstream it crops out high on the valley sides. The point of the V is left downstream.';
+          return said + 'Going upstream, this bed rises faster than the valley floor, so you meet it high up the valley sides. That leaves the point of the V downstream.';
         }
         if (round.att === 'up') {
-          return said + 'This bed climbs downstream while the valley floor falls, so it crops out on higher ground there. The point of the V is left upstream.';
+          return said + 'Going downstream, this bed rises while the valley floor drops, so you meet it up on the higher ground. That leaves the point of the V upstream.';
         }
-        return said + 'A bed at one height follows a contour, and every contour bends upstream in a valley. So this boundary Vs upstream too.';
+        return said + 'A bed at one height follows a contour line, and contour lines bend upstream in a valley. So this boundary points upstream too.';
       }
 
       function readRight() {
         if (round.att === 'horizontal') {
-          return 'horizontal. The boundary sits on the ' + contourM() +
-            ' m contour the whole way, so the bed is at one height. It Vs upstream because contours do.';
+          return 'horizontal. The boundary stays on the ' + contourM() +
+            ' m contour the whole way, so the bed is all at one height. It points upstream because contour lines do.';
         }
         if (round.att === 'vertical') {
-          return 'vertical. The boundary cuts straight across the contours, so the valley makes no difference. Only a bed standing on end does that.';
+          return 'vertical. The boundary runs dead straight across the contours, so the valley makes no difference to it. Only a bed on end does that.';
         }
         if (round.att === 'down') {
-          return 'it dips downstream. The V points downstream, and its arms run upstream onto higher ground — so the bed climbs upstream and falls downstream.';
+          return 'it dips downstream. The V points downstream and its arms run back upstream, up the valley sides — so the bed rises upstream and slopes down to the right.';
         }
-        return 'it dips upstream. The V points upstream, and its arms run downstream onto higher ground — so the bed climbs downstream and falls upstream.';
+        return 'it dips upstream. The V points upstream and its arms run downstream, up the valley sides — so the bed rises downstream and slopes down to the left.';
       }
 
       function readWrong(pick) {
@@ -537,22 +665,22 @@
         var v = round.trace.v;
         if (round.att === 'horizontal') {
           return said + 'Follow the boundary: it stays on the ' + contourM() +
-            ' m contour all the way, so the bed is at one height — horizontal.';
+            ' m contour the whole way, so the bed is all at one height — horizontal.';
         }
         if (round.att === 'vertical') {
-          return said + 'A tilted or horizontal bed bends with the valley. This boundary runs dead straight across the contours, so the bed is vertical.';
+          return said + 'A tilted or level bed follows the shape of the valley. This boundary runs dead straight across the contours, so the bed is vertical.';
         }
         if (pick === 'up') {
-          return said + 'A bed dipping upstream climbs downstream, so the V would point upstream. This V points downstream.';
+          return said + 'A bed dipping upstream rises downstream, so its V would point upstream. This V points downstream.';
         }
         if (pick === 'down') {
-          return said + 'A bed dipping downstream climbs upstream, so the V would point downstream. This V points upstream.';
+          return said + 'A bed dipping downstream rises upstream, so its V would point downstream. This V points upstream.';
         }
         if (pick === 'horizontal') {
-          return said + 'A horizontal boundary stays on one contour. This one cuts across them, and its V points ' +
+          return said + 'A level bed stays on one contour. This boundary crosses the contours, and its V points ' +
             v + ' — so the bed dips ' + v + '.';
         }
-        return said + 'A vertical bed would cross in a straight line. This boundary bends into a V pointing ' +
+        return said + 'A vertical bed runs dead straight. This boundary bends into a V pointing ' +
           v + ', so the bed dips ' + v + '.';
       }
 
@@ -575,14 +703,20 @@
         picked = null; locked = false;
 
         clear(traceG); clear(ghostG); clear(sbedG); clear(sbedS);
-        clear(sghostG); clear(sghostS); clear(linkG);
+        clear(sghostG); clear(sghostS); clear(linkG); clear(sannG);
         drawDipSymbol();
 
         var ids;
-        if (round.dir === 'predict') {
+        if (round.dir === 'dip') {
+          frame.textContent = 'Dip is the way a bed slopes down into the ground. The section shows one bed.';
+          ask.textContent = 'Which way does this bed slope down?';
+          drawBed(sbedG, sbedS, round.att, round.D, '#3a352e', '', 2.4);
+          ids = DIP_ORDER;
+        } else if (round.dir === 'predict') {
           frame.textContent = FRAME[round.att];
           ask.textContent = 'Which way does the boundary V across the valley?';
-          drawBed(sbedG, sbedS, round.att, round.D, '#5f5a51', '', 1.7);
+          drawBed(sbedG, sbedS, round.att, round.D, '#3a352e', '', 2.2);
+          drawBedArrow(round.att, round.D, dipKey(round.att), '#3a352e', false);
           ids = PRED_ORDER;
         } else {
           frame.textContent = 'A boundary crosses this valley. Contours are in metres.';
@@ -595,7 +729,8 @@
           if (n >= ids.length) { b.style.display = 'none'; return; }
           b.style.display = '';
           b.value = ids[n];
-          b.textContent = round.dir === 'predict' ? PRED_LABEL[ids[n]] : ATT_LABEL[ids[n]];
+          b.textContent = round.dir === 'predict' ? PRED_LABEL[ids[n]]
+            : round.dir === 'dip' ? DIP_LABEL[ids[n]] : ATT_LABEL[ids[n]];
           b.setAttribute('aria-label', b.textContent);
           b.disabled = false;
           b.setAttribute('aria-pressed', 'false');
@@ -605,9 +740,11 @@
         go.textContent = 'Check';
         go.disabled = true;
         cap.className = 'cap rest';
-        cap.textContent = round.dir === 'predict'
-          ? 'The section shows this bed against the falling valley floor.'
-          : 'The boundary is drawn on the map; the contours give the heights.';
+        cap.textContent = round.dir === 'dip'
+          ? 'The dark line is the bed. The blue-grey line is the valley floor.'
+          : round.dir === 'predict'
+            ? 'The section shows this bed under the valley floor.'
+            : 'The boundary is drawn on the map; the contours give the heights.';
         pushState();
       }
 
@@ -620,18 +757,23 @@
         var justMastered = ok && streak >= 3 && !mastered;
         if (streak >= 3) mastered = true;
 
-        if (round.dir === 'predict') {
+        if (round.dir === 'dip') {
+          drawBedArrow(round.att, round.D, round.answer, accent, false);
+        } else if (round.dir === 'predict') {
           drawTrace();
           if (ok) clear(ghostG);
         } else {
-          drawBed(sbedG, sbedS, round.att, round.D, accent, '', 2);
+          drawBed(sbedG, sbedS, round.att, round.D, accent, '', 2.2);
+          drawBedArrow(round.att, round.D, dipKey(round.att), accent, false);
           if (ok) { clear(sghostG); clear(sghostS); }
         }
-        drawLink();
+        if (round.dir !== 'dip') drawLink();
 
-        var body = round.dir === 'predict'
-          ? (ok ? predictRight() : predictWrong(picked))
-          : (ok ? readRight() : readWrong(picked));
+        var body = round.dir === 'dip'
+          ? (ok ? dipRight() : dipWrong(picked))
+          : round.dir === 'predict'
+            ? (ok ? predictRight() : predictWrong(picked))
+            : (ok ? readRight() : readWrong(picked));
         if (justMastered) {
           body = 'that is three in a row, and you have it. A boundary follows the line where bed and ground are at the same height, so its V points the way the bed dips.';
         }
@@ -658,11 +800,15 @@
           if (locked) return;
           picked = b.value;
           btns.forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
-          if (round.dir === 'predict') {
+          if (round.dir === 'dip') {
+            drawBedArrow(round.att, round.D, picked, '#2d2a26', true);
+            cap.textContent = 'Marked on the bed: ' + DIP_ECHO[picked] + '.';
+          } else if (round.dir === 'predict') {
             drawGhostTrace(picked);
             cap.textContent = 'Drawn on the map: ' + PRED_ECHO[picked] + '.';
           } else {
-            drawBed(sghostG, sghostS, picked, ghostDip(picked), '#2d2a26', '4 3', 1.5);
+            drawBed(sghostG, sghostS, picked, ghostDip(picked), '#2d2a26', '4 3', 1.8);
+            drawBedArrow(picked, ghostDip(picked), dipKey(picked), '#2d2a26', true);
             cap.textContent = 'Drawn in the section: ' + ATT_ECHO[picked] + '.';
           }
           cap.className = 'cap rest';

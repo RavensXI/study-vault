@@ -160,12 +160,14 @@
     },
     "history-aqa/conflict-tension-first-world-war/13": {
       file: "tactical-vs-strategic-victory",
+      variant: "ww1",
       label: "Two scoreboards",
       line: "Battles won, war lost — judge where a day’s fighting really leaves a side, and what decides it.",
       after: "The Hundred Days"
     },
     "history-edexcel/usa-conflict-home-abroad/12": {
       file: "tactical-vs-strategic-victory",
+      variant: "vietnam",
       label: "Two scoreboards",
       line: "Battles won, war lost — judge where a day’s fighting really leaves a side, and what decides it.",
       after: "Chemical Weapons: Agent Orange and Napalm"
@@ -1786,7 +1788,8 @@
         window.SVWidget = null;
         mount.textContent = '';
         var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-        W.mount(mount, { accent: accentOf(strip), reducedMotion: !!reduced });
+        W.mount(mount, { accent: accentOf(strip), reducedMotion: !!reduced,
+                         variant: cfg.variant || null });
       })
       .catch(function (e) {
         mount.textContent = 'This interactive could not load (' + e.message + ').';

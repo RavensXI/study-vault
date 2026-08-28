@@ -9,7 +9,13 @@
    geometry moves the answer: a shelf held at both ends stretches
    underneath, a bracket held at one end stretches on TOP. Two axial
    rounds (a prop pushed end to end, a tie pulled end to end) are the
-   contrast: those really are a single force. */
+   contrast: those really are a single force.
+
+   The two marks are sequenced, not offered as a panel. Step 2 sleeps
+   until step 1 is set, and the face being asked about is named on the
+   drawing itself — a numbered chip on a leader line, plus its edge lit
+   in the accent — so "which face is this question about" is answered by
+   the stage, not by the label alone. */
 (function () {
   'use strict';
 
@@ -172,6 +178,11 @@
     { key: 'none', word: 'No change' }
   ];
 
+  var FACES = [
+    { slot: 'top', num: '1', label: 'The top face', tag: 'top face' },
+    { slot: 'bot', num: '2', label: 'The underside', tag: 'underside' }
+  ];
+
   var WORD = { stretch: 'stretched', squash: 'squashed', none: 'unchanged' };
   var MARK = { stretch: 'stretched', squash: 'squashed', none: 'no change' };
   var BIG = { stretch: 'TENSION', squash: 'COMPRESSION' };
@@ -215,6 +226,7 @@
 
   var VB_W = 320, VB_H = 106;
   var MID_Y = 62, DEPTH = 42, EXAG = 10;
+  var CHIP_X = 256, CHIP_R = 7;        /* the face chips live in a right-hand gutter */
   var BASE = '#eee9df', SQUASH = '#dbd8d2', LINE = '#b7ae9e', FURN = '#6f6a62';
   var INK_C = '#5b564e';    /* compression: neutral, on the grey band */
   var NS = 'http://www.w3.org/2000/svg';
@@ -241,10 +253,11 @@
     return e;
   }
 
+  /* the member stops short of the gutter so the face chips have room */
   function span(sc) {
-    if (sc.geom === 'cant') { return [30, 292]; }
-    if (sc.geom === 'axial') { return [20, 300]; }
-    return [26, 294];
+    if (sc.geom === 'cant') { return [20, 234]; }
+    if (sc.geom === 'axial') { return [14, 218]; }
+    return [16, 232];
   }
 
   function vArrow(x, y1, y2) {
@@ -273,8 +286,12 @@
     '.svw-btc .btc-stage{background:#faf8f5;border:1px solid #efe9e0;border-radius:12px;padding:.45rem;margin:0 0 .55rem}',
     '.svw-btc .btc-stage svg{display:block;width:100%;max-width:360px;height:auto;margin:0 auto}',
     '.svw-btc .btc-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:.5rem;margin:0 0 .5rem}',
-    '.svw-btc .btc-lab{display:flex;align-items:center;gap:.35rem;font-size:.73rem;font-weight:600;color:#5b564e;margin:0 0 .28rem}',
-    '.svw-btc .btc-num{display:inline-flex;align-items:center;justify-content:center;width:1.12rem;height:1.12rem;border-radius:50%;background:var(--btc-t);color:var(--btc-a);font-size:.66rem;font-weight:700;flex:0 0 auto}',
+    '.svw-btc .btc-grp[data-state="dormant"]{opacity:.38}',
+    '.svw-btc .btc-lab{display:flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:600;color:#8d8880;margin:0 0 .3rem}',
+    '.svw-btc .btc-grp[data-state="live"] .btc-lab,.svw-btc .btc-grp[data-state="done"] .btc-lab{color:#2d2a26}',
+    '.svw-btc .btc-num{display:inline-flex;align-items:center;justify-content:center;width:1.24rem;height:1.24rem;border-radius:50%;border:1.5px solid #c9c2b6;background:#fff;color:#8d8880;font-size:.72rem;font-weight:700;line-height:1;flex:0 0 auto}',
+    '.svw-btc .btc-grp[data-state="live"] .btc-num{background:var(--btc-a);border-color:var(--btc-a);color:#fff}',
+    '.svw-btc .btc-grp[data-state="done"] .btc-num{background:var(--btc-t);border-color:var(--btc-a);color:var(--btc-a)}',
     '.svw-btc .btc-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem}',
     '.svw-btc .btc-opt{appearance:none;font-family:inherit;font-size:.78rem;font-weight:600;line-height:1.2;text-align:center;background:#faf8f5;border:1px solid #ddd7cd;border-radius:9px;padding:.42rem .2rem;cursor:pointer;color:#2d2a26}',
     '.svw-btc .btc-opt[aria-pressed="true"]{background:#2d2a26;border-color:#2d2a26;color:#fff}',
@@ -321,7 +338,7 @@
       order = order.concat(tail);
 
       var pos = 0, sc = ROUNDS[order[0]], model = analyse(sc);
-      var pickTop = null, pickBot = null;
+      var pick2 = { top: null, bot: null };
       var revealed = false, streak = 0, attempted = 0, mastered = false;
       var bend = 0, raf = 0;
 
@@ -344,28 +361,57 @@
       var pTopBand = svgEl('path', { fill: BASE, stroke: 'none', opacity: '0' });
       var pBotBand = svgEl('path', { fill: BASE, stroke: 'none', opacity: '0' });
       var pEdge = svgEl('path', { fill: 'none', stroke: LINE, 'stroke-width': '1.2', 'stroke-linejoin': 'round' });
+      var pLive = svgEl('path', { fill: 'none', stroke: accent, 'stroke-width': '2.6', 'stroke-linecap': 'round', opacity: '0' });
       var pTopArr = svgEl('path', { fill: 'none', stroke: FURN, 'stroke-width': '1.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: '0' });
       var pBotArr = svgEl('path', { fill: 'none', stroke: FURN, 'stroke-width': '1.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: '0' });
       var tTop = svgEl('text', { 'text-anchor': 'middle', 'paint-order': 'stroke', 'stroke-width': '4', 'stroke-linejoin': 'round', opacity: '0' });
       var tBot = svgEl('text', { 'text-anchor': 'middle', 'paint-order': 'stroke', 'stroke-width': '4', 'stroke-linejoin': 'round', opacity: '0' });
+
+      /* the gutter chips: the same numeral as the control group, sitting
+         at the height of the face that group is asking about */
+      var gChips = svgEl('g', {});
+      var pLead = svgEl('path', { fill: 'none', stroke: '#c4bcac', 'stroke-width': '1', 'stroke-dasharray': '3 2.6' });
+      gChips.appendChild(pLead);
+      var chips = FACES.map(function (fc, k) {
+        var cy = MID_Y + (k === 0 ? -DEPTH / 2 : DEPTH / 2);
+        var g = svgEl('g', {});
+        var circ = svgEl('circle', { cx: CHIP_X, cy: cy, r: CHIP_R, fill: '#fff', stroke: '#c9c2b6', 'stroke-width': '1.5' });
+        var num = svgEl('text', {
+          x: CHIP_X, y: cy + 3.2, 'text-anchor': 'middle', 'font-size': '9.2',
+          'font-weight': '700', fill: '#8d8880'
+        });
+        num.textContent = fc.num;
+        var word = svgEl('text', {
+          x: CHIP_X + CHIP_R + 4, y: cy + 3.1, 'font-size': '9.4', 'font-weight': '600', fill: '#8d8880'
+        });
+        word.textContent = fc.tag;
+        g.appendChild(circ); g.appendChild(num); g.appendChild(word);
+        gChips.appendChild(g);
+        return { circ: circ, num: num, word: word, cy: cy };
+      });
+
       svg.appendChild(gFurn); svg.appendChild(pLoad);
       svg.appendChild(pFill); svg.appendChild(pTopBand); svg.appendChild(pBotBand);
-      svg.appendChild(pEdge); svg.appendChild(pTopArr); svg.appendChild(pBotArr);
+      svg.appendChild(pEdge); svg.appendChild(pLive);
+      svg.appendChild(pTopArr); svg.appendChild(pBotArr);
       svg.appendChild(tTop); svg.appendChild(tBot);
+      svg.appendChild(gChips);
       stage.appendChild(svg);
 
       var groups = document.createElement('div');
       groups.className = 'btc-groups';
       root.appendChild(groups);
 
-      function buildGroup(num, label, onPick) {
+      function buildGroup(fc) {
         var wrap = document.createElement('div');
+        wrap.className = 'btc-grp';
+        wrap.setAttribute('data-state', 'dormant');
         var lab = document.createElement('p');
         lab.className = 'btc-lab';
         var chip = document.createElement('span');
-        chip.className = 'btc-num'; chip.textContent = String(num); chip.setAttribute('aria-hidden', 'true');
+        chip.className = 'btc-num'; chip.textContent = fc.num; chip.setAttribute('aria-hidden', 'true');
         lab.appendChild(chip);
-        lab.appendChild(document.createTextNode(label));
+        lab.appendChild(document.createTextNode(fc.label));
         wrap.appendChild(lab);
         var row = document.createElement('div');
         row.className = 'btc-row';
@@ -373,19 +419,18 @@
           var b = document.createElement('button');
           b.type = 'button'; b.className = 'btc-opt';
           b.setAttribute('aria-pressed', 'false');
-          b.setAttribute('aria-label', label + ': ' + o.word);
+          b.setAttribute('aria-label', fc.label + ': ' + o.word);
           b.textContent = o.word;
-          b.addEventListener('click', function () { onPick(o.key); });
+          b.addEventListener('click', function () { pick(fc.slot, o.key); });
           row.appendChild(b);
           return b;
         });
         wrap.appendChild(row);
         groups.appendChild(wrap);
-        return made;
+        return { wrap: wrap, btns: made };
       }
 
-      var topBtns = buildGroup(1, 'The top face', function (k) { pick('top', k); });
-      var botBtns = buildGroup(2, 'The underside', function (k) { pick('bot', k); });
+      var grp = { top: buildGroup(FACES[0]), bot: buildGroup(FACES[1]) };
 
       var go = document.createElement('button');
       go.type = 'button'; go.className = 'btc-go'; go.textContent = 'Check it'; go.disabled = true;
@@ -400,8 +445,8 @@
 
       go.addEventListener('click', function () { if (revealed) { next(); } else { commit(); } });
       root.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && !revealed && (pickTop || pickBot)) {
-          pick('top', null); pick('bot', null);
+        if (e.key === 'Escape' && !revealed && (pick2.top || pick2.bot)) {
+          pick2.bot = null; pick('top', null);
         }
       });
 
@@ -427,7 +472,7 @@
       /* a short arrow lying along the face, pointing out (stretched) or
          in (squashed), rotated with the local slope of the curve */
       function faceArrows(pts, off, out) {
-        var d = '', spots = [[11, -1], [29, 1]], q;
+        var d = '', spots = [[7, -1], [33, 1]], q;
         for (q = 0; q < spots.length; q++) {
           var idx = spots[q][0], s = spots[q][1] * (out ? 1 : -1);
           var a = pts[Math.max(0, idx - 2)], b2 = pts[Math.min(pts.length - 1, idx + 2)];
@@ -453,13 +498,13 @@
         }
       }
 
-      /* walls, supports and load arrows change only when the round does */
+      /* walls and supports change only when the round does */
       function drawFurniture() {
         gFurn.textContent = '';
         var s = span(sc), x0 = s[0], x1 = s[1], k;
 
         if (sc.geom === 'axial') {
-          [[2, 20], [300, 318]].forEach(function (w) {
+          [[2, 14], [218, 230]].forEach(function (w) {
             gFurn.appendChild(svgEl('rect', {
               x: w[0], y: 22, width: w[1] - w[0], height: 78,
               fill: '#ede7dd', stroke: '#c4bcac', 'stroke-width': '1'
@@ -467,20 +512,20 @@
           });
           var out = sc.axial === 'stretch';
           gFurn.appendChild(svgEl('path', {
-            d: hArrow(out ? 96 : 48, out ? 48 : 96, 34), fill: 'none', stroke: FURN,
+            d: hArrow(out ? 88 : 42, out ? 42 : 88, 34), fill: 'none', stroke: FURN,
             'stroke-width': '1.8', 'stroke-linecap': 'round'
           }));
           gFurn.appendChild(svgEl('path', {
-            d: hArrow(out ? 224 : 272, out ? 272 : 224, 34), fill: 'none', stroke: FURN,
+            d: hArrow(out ? 146 : 192, out ? 192 : 146, 34), fill: 'none', stroke: FURN,
             'stroke-width': '1.8', 'stroke-linecap': 'round'
           }));
           return;
         }
 
         if (sc.geom === 'cant') {
-          gFurn.appendChild(svgEl('rect', { x: 4, y: 18, width: 26, height: 84, fill: '#ede7dd', stroke: '#c4bcac', 'stroke-width': '1' }));
+          gFurn.appendChild(svgEl('rect', { x: 2, y: 18, width: 20, height: 84, fill: '#ede7dd', stroke: '#c4bcac', 'stroke-width': '1' }));
           for (k = 0; k < 6; k++) {
-            gFurn.appendChild(svgEl('line', { x1: 4, y1: 26 + k * 13, x2: 30, y2: 18 + k * 13, stroke: '#cfc7b8', 'stroke-width': '1' }));
+            gFurn.appendChild(svgEl('line', { x1: 2, y1: 26 + k * 13, x2: 22, y2: 18 + k * 13, stroke: '#cfc7b8', 'stroke-width': '1' }));
           }
         } else {
           sc.sup.forEach(function (f) {
@@ -492,7 +537,6 @@
             hatch(gFurn, sx - 11, sy + 13, sx + 11, sy + 19, 4);
           });
         }
-
       }
 
       /* the load arrows land on the surface they are pressing on, so they
@@ -532,19 +576,64 @@
         tBot.setAttribute('y', (mid.y + 15).toFixed(1));
 
         /* the arrows sit on the same line as their own face word */
-        pTopArr.setAttribute('d', faceArrows(pts, -(h - 9.5), revealed ? model.top === 'stretch' : pickTop === 'stretch'));
-        pBotArr.setAttribute('d', faceArrows(pts, (h - 9.5), revealed ? model.bottom === 'stretch' : pickBot === 'stretch'));
+        pTopArr.setAttribute('d', faceArrows(pts, -(h - 9.5), revealed ? model.top === 'stretch' : pick2.top === 'stretch'));
+        pBotArr.setAttribute('d', faceArrows(pts, (h - 9.5), revealed ? model.bottom === 'stretch' : pick2.bot === 'stretch'));
+
+        /* the face the live control group is asking about, lit along its
+           own edge so the question has a place on the drawing */
+        var live = liveSlot();
+        pLive.setAttribute('d', live ? edge(pts, live === 'top' ? -h : h) : '');
+        pLive.setAttribute('opacity', live ? '1' : '0');
+
+        /* leaders from each face's end across to its numbered chip */
+        var endX = sc.geom === 'axial' ? 233 : pts[40].x + 3;
+        var endTop = sc.geom === 'axial' ? MID_Y - h : pts[40].y - h;
+        var endBot = sc.geom === 'axial' ? MID_Y + h : pts[40].y + h;
+        pLead.setAttribute('d',
+          'M' + endX.toFixed(1) + ' ' + endTop.toFixed(1) + 'L' + (CHIP_X - CHIP_R - 2) + ' ' + chips[0].cy +
+          'M' + endX.toFixed(1) + ' ' + endBot.toFixed(1) + 'L' + (CHIP_X - CHIP_R - 2) + ' ' + chips[1].cy);
+
         drawLoads(pts);
       }
 
       function tintFor(k) { return k === 'stretch' ? STRETCH : k === 'squash' ? SQUASH : BASE; }
 
+      /* which group is being asked for right now: step 2 sleeps until
+         step 1 is set, and neither is live once both are marked */
+      function liveSlot() {
+        if (revealed) { return null; }
+        if (!pick2.top) { return 'top'; }
+        if (!pick2.bot) { return 'bot'; }
+        return null;
+      }
+
+      function groupStates() {
+        var live = liveSlot();
+        ['top', 'bot'].forEach(function (slot, k) {
+          var st = revealed ? 'done'
+            : slot === live ? 'live'
+              : pick2[slot] ? 'done'
+                : slot === 'bot' && !pick2.top ? 'dormant' : 'done';
+          grp[slot].wrap.setAttribute('data-state', st);
+          grp[slot].btns.forEach(function (b) {
+            b.disabled = revealed || (slot === 'bot' && !pick2.top);
+          });
+          /* the chip on the drawing mirrors the chip on the control group */
+          var on = st === 'live', marked = !!pick2[slot];
+          chips[k].circ.setAttribute('fill', on ? accent : marked ? accent + '22' : '#fff');
+          chips[k].circ.setAttribute('stroke', on || marked ? accent : '#c9c2b6');
+          chips[k].num.setAttribute('fill', on ? '#fff' : marked ? accent : '#8d8880');
+          chips[k].word.setAttribute('fill', on || marked ? INK_C : '#8d8880');
+          chips[k].word.setAttribute('font-weight', on ? '700' : '600');
+        });
+      }
+
       /* the student's own marking, shown lightly and without a verdict */
       function showMarks() {
-        [[pTopBand, tTop, pTopArr, pickTop], [pBotBand, tBot, pBotArr, pickBot]].forEach(function (r) {
+        [[pTopBand, tTop, pTopArr, pick2.top], [pBotBand, tBot, pBotArr, pick2.bot]].forEach(function (r) {
           var k = r[3];
           r[0].setAttribute('fill', tintFor(k));
-          r[0].setAttribute('opacity', k && k !== 'none' ? '0.55' : '0');
+          r[0].setAttribute('opacity', k && k !== 'none' ? '0.6' : '0');
           r[1].setAttribute('opacity', k ? '1' : '0');
           r[1].setAttribute('font-size', '8.5');
           r[1].setAttribute('font-weight', '400');
@@ -555,6 +644,7 @@
           r[2].setAttribute('stroke', FURN);
           r[2].setAttribute('opacity', k === 'stretch' || k === 'squash' ? '0.5' : '0');
         });
+        groupStates();
         drawMember(bend);
       }
 
@@ -577,6 +667,7 @@
         /* no curve, so both faces do the same thing: say it once, across
            the whole section, rather than printing the word twice */
         if (!model.bending) { tBot.setAttribute('opacity', '0'); }
+        groupStates();
         drawMember(bend);
       }
 
@@ -599,11 +690,12 @@
       function state() {
         root.dataset.svState = JSON.stringify({
           round: sc.id,
-          top: pickTop,
-          bottom: pickBot,
+          step: revealed ? 'checked' : liveSlot() === 'top' ? 1 : liveSlot() === 'bot' ? 2 : 'ready',
+          top: pick2.top,
+          bottom: pick2.bot,
           answerTop: revealed ? model.top : null,
           answerBottom: revealed ? model.bottom : null,
-          correct: revealed ? (pickTop === model.top && pickBot === model.bottom) : null,
+          correct: revealed ? (pick2.top === model.top && pick2.bot === model.bottom) : null,
           streak: streak,
           mastered: mastered,
           attempted: attempted
@@ -612,12 +704,14 @@
 
       function pick(which, key) {
         if (revealed) { return; }
-        var btns = which === 'top' ? topBtns : botBtns;
-        if (which === 'top') { pickTop = key; } else { pickBot = key; }
-        OPTS.forEach(function (o, k) {
-          btns[k].setAttribute('aria-pressed', o.key === key ? 'true' : 'false');
+        pick2[which] = key;
+        if (which === 'top' && !key) { pick2.bot = null; }
+        ['top', 'bot'].forEach(function (slot) {
+          grp[slot].btns.forEach(function (b, k) {
+            b.setAttribute('aria-pressed', OPTS[k].key === pick2[slot] ? 'true' : 'false');
+          });
         });
-        go.disabled = !(pickTop && pickBot);
+        go.disabled = !(pick2.top && pick2.bot);
         showMarks();
         state();
       }
@@ -633,28 +727,22 @@
       }
 
       function commit() {
-        if (!pickTop || !pickBot || revealed) { return; }
+        if (!pick2.top || !pick2.bot || revealed) { return; }
         revealed = true; attempted++;
-        var right = pickTop === model.top && pickBot === model.bottom;
+        var right = pick2.top === model.top && pick2.bot === model.bottom;
         streak = right ? streak + 1 : 0;
         var justMastered = false;
         if (right && streak >= 3 && !mastered) { mastered = true; justMastered = true; }
 
-        topBtns.forEach(function (b, k) {
-          b.disabled = true;
-          if (OPTS[k].key === model.top) { b.setAttribute('data-ans', '1'); }
-        });
-        botBtns.forEach(function (b, k) {
-          b.disabled = true;
-          if (OPTS[k].key === model.bottom) { b.setAttribute('data-ans', '1'); }
-        });
+        grp.top.btns.forEach(function (b, k) { if (OPTS[k].key === model.top) { b.setAttribute('data-ans', '1'); } });
+        grp.bot.btns.forEach(function (b, k) { if (OPTS[k].key === model.bottom) { b.setAttribute('data-ans', '1'); } });
 
         showTruth();
         bendTo(model.bending ? 1 : 0);
 
-        var body = echoOf(pickTop, pickBot) + ' ' +
+        var body = echoOf(pick2.top, pick2.bot) + ' ' +
           (right ? sc.win + (justMastered ? ' ' + MASTER : '')
-            : sc.mech + ' ' + diagnose(pickTop, pickBot, sc));
+            : sc.mech + ' ' + diagnose(pick2.top, pick2.bot, sc));
         setCap(right ? 'Right —' : 'Not quite —', body, right);
         runLine();
         go.textContent = mastered ? 'Another anyway' : 'Next one';
@@ -673,9 +761,9 @@
         pos = (pos + 1) % order.length;
         sc = ROUNDS[order[pos]];
         model = analyse(sc);
-        pickTop = null; pickBot = null; revealed = false; bend = 0;
-        topBtns.concat(botBtns).forEach(function (b) {
-          b.disabled = false; b.removeAttribute('data-ans'); b.setAttribute('aria-pressed', 'false');
+        pick2.top = null; pick2.bot = null; revealed = false; bend = 0;
+        grp.top.btns.concat(grp.bot.btns).forEach(function (b) {
+          b.removeAttribute('data-ans'); b.setAttribute('aria-pressed', 'false');
         });
         go.textContent = 'Check it'; go.disabled = true;
         render();

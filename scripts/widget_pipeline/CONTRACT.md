@@ -42,3 +42,12 @@ from looking at real rendered output.
    no lyrics.
 8. **It must be possible to get it wrong.** An interaction with no wrong answer,
    or a control that doesn't change what the student sees, is a failure.
+
+## Mount option: variant (added 28 Aug)
+
+`mount(root, opts)` may receive `opts.variant` (string or null),
+set per lesson by the `variant` field on a MAP entry in
+js/widget-embed.js. A widget that serves lessons with different
+content (e.g. the same mechanism in two historical settings)
+filters its round deck by variant, and must treat null as the
+full deck (the review artifacts mount with no variant).

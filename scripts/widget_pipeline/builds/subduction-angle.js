@@ -1,8 +1,10 @@
 /* subduction-angle — StudyVault lesson widget
-   Predict where a destructive margin's features sit from the angle of the
-   descending slab. Every position is computed from the geometry
-   (dip + a melting depth of about 100 km), so the reveal cannot contradict
-   the marking. */
+   Predict where a destructive margin's features sit from the path of the
+   descending slab. The slab is given as a countable rate — "it drops 50 km
+   for every 100 km it travels inland" — drawn on a square 100 km grid, so
+   the student reasons in whole steps and never estimates an angle. Every
+   position is computed from that rate and a melting depth of 100 km, so the
+   reveal cannot contradict the marking. */
 (function () {
   'use strict';
 
@@ -11,68 +13,52 @@
 
   /* ------------------------------------------------------------------ model */
 
-  var MELT = 100;                    /* km — depth at which melting starts */
-  var DIPS = [20, 25, 30, 40, 45, 60];
+  var MELT = 100;                 /* km — depth at which melting starts */
+  var RATES = [50, 100, 200];     /* km of descent per 100 km travelled inland */
+  var DIST_LADDER = [50, 100, 200, 400];
+  var DEPTH_LADDER = [25, 50, 100];
 
-  function rad(d) { return d * Math.PI / 180; }
-  function snap5(v) { return Math.round(v / 5) * 5; }
-  /* horizontal distance from the trench at which the slab is MELT km down */
-  function arcDist(dip) { return snap5(MELT / Math.tan(rad(dip))); }
+  /* distance from the trench at which the slab is MELT km down */
+  function arcDist(rate) { return MELT * 100 / rate; }
   /* depth of the slab a given distance inland */
-  function slabDepth(dip, km) { return snap5(km * Math.tan(rad(dip))); }
+  function slabDepth(rate, km) { return km * rate / 100; }
 
   function asc(a, b) { return a - b; }
 
-  /* pick one value below the target and one above it, else fill from nearest */
-  function bracket(pool, target, blocked, want) {
-    var out = [], used = blocked.slice(), i;
-    var below = pool.filter(function (v) { return v < target && used.indexOf(v) < 0; }).sort(function (a, b) { return b - a; });
-    var above = pool.filter(function (v) { return v > target && used.indexOf(v) < 0; }).sort(asc);
-    if (below.length) { out.push(below[0]); used.push(below[0]); }
-    if (above.length && out.length < want) { out.push(above[0]); used.push(above[0]); }
-    var rest = pool.slice().sort(function (a, b) { return Math.abs(a - target) - Math.abs(b - target); });
-    for (i = 0; i < rest.length && out.length < want; i++) {
-      if (used.indexOf(rest[i]) < 0) { used.push(rest[i]); out.push(rest[i]); }
-    }
-    return out;
+  /* the n ladder values closest to the answer, answer included */
+  function ladder(pool, answer, keep, n) {
+    var out = keep.slice();
+    pool.slice().sort(function (a, b) { return Math.abs(a - answer) - Math.abs(b - answer); })
+      .forEach(function (v) {
+        if (out.length < n && out.indexOf(v) < 0) out.push(v);
+      });
+    return out.sort(asc);
   }
 
-  function arcRound(dip) {
-    var ans = arcDist(dip);
-    var pool = DIPS.map(arcDist);
-    var opts = [0, ans].concat(bracket(pool, ans, [0, ans], 2)).sort(asc);
-    return { type: 'arc', dip: dip, answer: ans, options: opts };
+  function arcRound(rate) {
+    var ans = arcDist(rate);
+    return { type: 'arc', rate: rate, answer: ans, options: ladder(DIST_LADDER, ans, [0, ans], 4) };
   }
 
-  function depthRound(dip, site) {
-    var ans = slabDepth(dip, site);
-    var pool = [];
-    DIPS.forEach(function (d) {
-      if (d === dip) return;
-      var v = slabDepth(d, site);
-      if (v >= 20 && v <= 165) pool.push(v);
-    });
-    var opts = [10, ans].concat(bracket(pool, ans, [10, ans], 2)).sort(asc);
-    return { type: 'depth', dip: dip, site: site, answer: ans, options: opts };
+  function depthRound(rate, site) {
+    var ans = slabDepth(rate, site);
+    return { type: 'depth', rate: rate, site: site, answer: ans, options: ladder(DEPTH_LADDER, ans, [10, ans], 4) };
   }
 
-  function changeRound(d1, d2) {
-    var ans = arcDist(d2), old = arcDist(d1);
-    var pool = DIPS.map(arcDist);
-    var opts = [ans, old].concat(bracket(pool, ans, [ans, old], 2)).sort(asc);
-    return { type: 'change', dip: d2, oldDip: d1, oldArc: old, answer: ans, options: opts };
+  function changeRound(r1, r2) {
+    var ans = arcDist(r2), old = arcDist(r1);
+    return { type: 'change', rate: r2, oldRate: r1, oldArc: old, answer: ans, options: DIST_LADDER.slice() };
   }
 
   function buildDeck() {
     var deck = [];
-    DIPS.forEach(function (d) { deck.push(arcRound(d)); });
-    [[20, 200], [25, 180], [30, 150], [40, 120], [45, 100]].forEach(function (p) {
+    RATES.forEach(function (r) { deck.push(arcRound(r)); });
+    [[50, 50], [50, 100], [50, 200], [100, 50], [100, 100], [200, 50]].forEach(function (p) {
       deck.push(depthRound(p[0], p[1]));
     });
-    [[30, 45], [45, 25], [20, 40], [40, 20], [25, 60], [60, 30]].forEach(function (p) {
-      deck.push(changeRound(p[0], p[1]));
+    RATES.forEach(function (a) {
+      RATES.forEach(function (b) { if (a !== b) deck.push(changeRound(a, b)); });
     });
-    /* shuffle */
     for (var i = deck.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1)), t = deck[i];
       deck[i] = deck[j]; deck[j] = t;
@@ -83,21 +69,21 @@
   /* ------------------------------------------------------------- geometry */
 
   var VBW = 300, VBH = 128;
-  var K = 0.5;            /* px per km — equal on both axes, so drawn dip is true dip */
-  var XT = 79;            /* x of the trench (0 km) */
-  var SURF = 44;          /* y of the ground / sea floor */
-  var PLOT_L = 24, PLOT_R = 299, PLOT_B = 124;
-  var MAXD = (PLOT_B - SURF) / K;   /* 170 km of depth on the section */
-  var MAXKM = (PLOT_R - XT) / K;    /* 440 km inland */
+  var K = 0.55;           /* px per km — equal on both axes, so a 100 km grid is square */
+  var XT = 68;            /* x of the trench (0 km); 80 km of ocean to its left */
+  var SURF = 38;          /* y of the ground / sea floor */
+  var PLOT_L = 24, PLOT_R = 299, PLOT_B = 122;
+  var MAXD = Math.round((PLOT_B - SURF) / K);   /* 152 km of depth on the section */
+  var MAXKM = Math.round((PLOT_R - XT) / K);    /* 420 km inland */
 
   function X(km) { return XT + km * K; }
   function Y(d) { return SURF + d * K; }
 
-  function slabPath(dip) {
-    var t = Math.tan(rad(dip));
-    var endKm = Math.min(MAXKM, (MAXD - 2) / t);
+  function slabPath(rate) {
+    var g = rate / 100;
+    var endKm = Math.min(MAXKM, MAXD / g);
     return 'M ' + PLOT_L + ' ' + (SURF + 2.2) + ' L ' + XT + ' ' + (SURF + 2.2) +
-      ' L ' + X(endKm).toFixed(1) + ' ' + Y(endKm * t).toFixed(1);
+      ' L ' + X(endKm).toFixed(1) + ' ' + Y(endKm * g).toFixed(1);
   }
 
   /* ------------------------------------------------------------------ view */
@@ -153,7 +139,7 @@
     meta: {
       id: 'subduction-angle',
       title: 'Follow the slab down',
-      teaches: 'A subducting plate descends at a shallow angle and stays in contact, so the trench, the deepening earthquake foci and the volcanic arc all sit where the slab’s geometry puts them.'
+      teaches: 'A subducting plate descends at a shallow angle and stays in contact, so the trench, the deepening earthquake foci and the volcanic arc all sit where the slab’s path puts them.'
     },
 
     mount: function (root, ctx) {
@@ -177,35 +163,37 @@
       var stage = document.createElement('div'); stage.className = 'stage';
       var svg = el('svg', {
         viewBox: '0 0 ' + VBW + ' ' + VBH, role: 'img',
-        'aria-label': 'Cross-section through a destructive plate margin'
+        'aria-label': 'Cross-section through a destructive plate margin, on a 100 km grid'
       });
       stage.appendChild(svg); wrap.appendChild(stage);
 
-      /* static furniture */
       svg.appendChild(el('rect', { x: PLOT_L, y: SURF, width: PLOT_R - PLOT_L, height: PLOT_B - SURF, fill: '#f1ebe1' }));
 
-      [50, 100, 150].forEach(function (d) {
-        svg.appendChild(el('line', {
-          x1: PLOT_L, y1: Y(d), x2: PLOT_R, y2: Y(d),
-          stroke: d === MELT ? '#cfc4b2' : '#e0d9cd', 'stroke-width': .7,
-          'stroke-dasharray': d === MELT ? '4 3' : '2 4'
-        }));
-        svg.appendChild(txt(PLOT_L - 3, Y(d) + 3.4, String(d), 9.5, '#8d8880', 'end'));
-      });
+      /* the square 100 km grid — countable, so nobody has to judge an angle */
       [100, 200, 300, 400].forEach(function (km) {
         svg.appendChild(el('line', {
-          x1: X(km), y1: SURF, x2: X(km), y2: PLOT_B,
-          stroke: '#e0d9cd', 'stroke-width': .7, 'stroke-dasharray': '2 4'
+          x1: X(km), y1: SURF, x2: X(km), y2: PLOT_B, stroke: '#cbbfa8', 'stroke-width': 1
         }));
+        svg.appendChild(txt(X(km), SURF - 26, String(km), 9.5, '#8d8880'));
       });
-      svg.appendChild(txt(PLOT_R, Y(MELT) - 3.5, 'melting depth', 9, '#9a938a', 'end'));
+      [50, 100, 150].forEach(function (d) {
+        if (d > MAXD) return;
+        var bold = d === MELT;
+        svg.appendChild(el('line', {
+          x1: PLOT_L, y1: Y(d), x2: PLOT_R, y2: Y(d),
+          stroke: bold ? '#9e9179' : '#cbbfa8', 'stroke-width': bold ? 1.4 : 1,
+          'stroke-dasharray': bold ? '5 3' : ''
+        }));
+        svg.appendChild(txt(PLOT_L - 3, Y(d) + 3.4, String(d), 9.5, bold ? '#5b564e' : '#8d8880', 'end'));
+      });
+      svg.appendChild(txt(PLOT_R - 2, Y(MELT) - 4, 'melting depth', 9, '#9a938a', 'end'));
 
       /* sea */
       svg.appendChild(el('rect', { x: PLOT_L, y: SURF - 10, width: XT - PLOT_L, height: 10, fill: '#dce6ea' }));
       svg.appendChild(el('path', {
-        d: 'M ' + (PLOT_L + 10) + ' ' + (SURF - 4.5) + ' L ' + (PLOT_L + 30) + ' ' + (SURF - 4.5) +
-          ' M ' + (PLOT_L + 26) + ' ' + (SURF - 7) + ' L ' + (PLOT_L + 31) + ' ' + (SURF - 4.5) +
-          ' L ' + (PLOT_L + 26) + ' ' + (SURF - 2),
+        d: 'M ' + (PLOT_L + 8) + ' ' + (SURF - 4.5) + ' L ' + (PLOT_L + 28) + ' ' + (SURF - 4.5) +
+          ' M ' + (PLOT_L + 24) + ' ' + (SURF - 7) + ' L ' + (PLOT_L + 29) + ' ' + (SURF - 4.5) +
+          ' L ' + (PLOT_L + 24) + ' ' + (SURF - 2),
         stroke: '#7d8f97', 'stroke-width': 1.1, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'
       }));
 
@@ -214,7 +202,6 @@
       var slab = el('path', { d: '', stroke: '#5f5a51', 'stroke-width': 4.4, fill: 'none', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
       svg.appendChild(oldSlab); svg.appendChild(slab);
 
-      /* continental plate over the top of the slab */
       svg.appendChild(el('path', {
         d: 'M ' + XT + ' ' + SURF + ' L ' + X(60) + ' ' + Y(15) + ' L ' + X(200) + ' ' + Y(32) +
           ' L ' + PLOT_R + ' ' + Y(35) + ' L ' + PLOT_R + ' ' + SURF + ' Z',
@@ -225,24 +212,21 @@
         d: 'M ' + X(-24) + ' ' + SURF + ' L ' + XT + ' ' + (SURF + 6) + ' L ' + X(10) + ' ' + SURF,
         fill: '#dce6ea', stroke: '#6e6960', 'stroke-width': .9, 'stroke-linejoin': 'round'
       }));
-      svg.appendChild(txt(XT, SURF - 30, 'Trench', 10.5, '#2d2a26'));
-      var contLbl = txt(X(250), Y(20), 'continental plate', 9.5, '#6b6459');
+      svg.appendChild(txt(XT, SURF - 26, 'Trench', 10.5, '#2d2a26'));
+      var contLbl = txt(X(250), Y(22), 'continental plate', 9.5, '#6b6459');
       svg.appendChild(contLbl);
-      var oceanLbl = txt(PLOT_L, SURF - 14, 'oceanic plate (denser)', 9.5, '#6b6459', 'start');
+      var oceanLbl = txt(PLOT_L, SURF - 14, 'oceanic plate', 9.5, '#6b6459', 'start');
       svg.appendChild(oceanLbl);
 
-      /* candidate ticks */
       var ticks = el('g', {});
       svg.appendChild(ticks);
 
-      /* the student's mark */
       var markG = el('g', { style: 'display:none' });
       var markLine = el('line', { stroke: '#2d2a26', 'stroke-width': 1, 'stroke-dasharray': '3 2' });
       var markShape = el('path', { d: '', fill: '#fff', stroke: '#2d2a26', 'stroke-width': 1.6, 'stroke-linejoin': 'round' });
       markG.appendChild(markLine); markG.appendChild(markShape);
       svg.appendChild(markG);
 
-      /* the revealed truth */
       var revG = el('g', { style: 'display:none' });
       var revRise = el('line', { stroke: accent, 'stroke-width': 1.1, 'stroke-dasharray': '3 2' });
       var revDot = el('circle', { r: 2.6, fill: accent });
@@ -285,7 +269,7 @@
 
       function pushState(extra) {
         var s = { streak: streak, mastered: mastered, attempted: attempted };
-        if (round) { s.dip = round.dip; s.ask = round.type; s.answer = round.answer; }
+        if (round) { s.rate = round.rate; s.ask = round.type; s.answer = round.answer; }
         if (extra) for (var k in extra) if (extra.hasOwnProperty(k)) s[k] = extra[k];
         root.dataset.svState = JSON.stringify(s);
       }
@@ -301,15 +285,14 @@
         while (ticks.firstChild) ticks.removeChild(ticks.firstChild);
         if (round.type === 'depth') {
           ticks.appendChild(el('line', {
-            x1: X(round.site), y1: SURF - 5, x2: X(round.site), y2: Y(slabDepth(round.dip, round.site)),
-            stroke: '#a49b8c', 'stroke-width': .9, 'stroke-dasharray': '3 3'
+            x1: X(round.site), y1: SURF - 5, x2: X(round.site), y2: Y(slabDepth(round.rate, round.site)),
+            stroke: '#8d8880', 'stroke-width': 1, 'stroke-dasharray': '3 3'
           }));
-          ticks.appendChild(el('circle', { cx: X(round.site), cy: SURF, r: 2.2, fill: '#2d2a26' }));
-          ticks.appendChild(txt(Math.min(X(round.site), PLOT_R - 26), SURF - 14, round.site + ' km', 9.5, '#6b6459'));
+          ticks.appendChild(el('circle', { cx: X(round.site), cy: SURF, r: 2.4, fill: '#2d2a26' }));
         } else {
           round.options.forEach(function (km) {
             ticks.appendChild(el('line', {
-              x1: X(km), y1: SURF - 4.5, x2: X(km), y2: SURF, stroke: '#a49b8c', 'stroke-width': 1.1
+              x1: X(km), y1: SURF - 4.5, x2: X(km), y2: SURF, stroke: '#8d8880', 'stroke-width': 1.2
             }));
           });
           if (round.type === 'change') {
@@ -336,7 +319,6 @@
       }
 
       function drawReveal() {
-        var i;
         while (revQuakes.firstChild) revQuakes.removeChild(revQuakes.firstChild);
         oceanLbl.style.display = 'none';
         if (round.type === 'depth') {
@@ -345,25 +327,22 @@
           revRise.setAttribute('x2', xs); revRise.setAttribute('y2', ys);
           revDot.setAttribute('cx', xs); revDot.setAttribute('cy', ys);
           revShape.setAttribute('d', '');
-          [0.3, 0.6, 1.35].forEach(function (f) {
-            var km = round.site * f;
-            var d = km * Math.tan(rad(round.dip));
+          [0.3, 0.6, 1.3].forEach(function (f) {
+            var km = round.site * f, d = slabDepth(round.rate, km);
             if (km > MAXKM || d > MAXD - 3) return;
-            revQuakes.appendChild(el('circle', { cx: X(km), cy: Y(d), r: 1.7, fill: accent, opacity: .55 }));
+            revQuakes.appendChild(el('circle', { cx: X(km), cy: Y(d), r: 1.8, fill: accent, opacity: .55 }));
           });
-          revLbl.setAttribute('x', Math.min(Math.max(xs, PLOT_L + 26), PLOT_R - 4));
+          revLbl.setAttribute('x', Math.min(Math.max(xs, PLOT_L + 30), PLOT_R - 34));
           revLbl.setAttribute('y', Math.min(ys + 12, PLOT_B - 3));
-          revLbl.setAttribute('text-anchor', 'middle');
           revLbl.textContent = round.answer + ' km deep';
         } else {
-          var xa = X(round.answer), ya = Y(slabDepth(round.dip, round.answer));
+          var xa = X(round.answer), ya = Y(slabDepth(round.rate, round.answer));
           revRise.setAttribute('x1', xa); revRise.setAttribute('y1', ya);
           revRise.setAttribute('x2', xa); revRise.setAttribute('y2', SURF);
           revDot.setAttribute('cx', xa); revDot.setAttribute('cy', ya);
           revShape.setAttribute('d', volcano(xa, SURF));
           revLbl.setAttribute('x', Math.min(Math.max(xa, PLOT_L + 22), PLOT_R - 22));
           revLbl.setAttribute('y', SURF - 14);
-          revLbl.setAttribute('text-anchor', 'middle');
           revLbl.textContent = 'volcanoes';
         }
         revG.style.display = '';
@@ -383,50 +362,48 @@
       }
 
       function message(ok, pick) {
-        var r = round, d;
+        var r = round, per = r.rate + ' km per 100 km';
         if (r.type === 'arc') {
           if (ok) {
-            return r.answer + ' km from the trench. A ' + r.dip + '° slab only reaches 100 km down — where melting ' +
-              'starts — that far inland, so the volcanic arc sits back from the trench, not on it.';
+            return r.answer + ' km from the trench. At ' + per + ', the slab needs ' + r.answer +
+              ' km inland to reach the 100 km melting depth — so the volcanic arc sits back from the trench, not on it.';
           }
           if (pick === 0) {
-            return 'you put the volcanoes at the trench itself. There the slab has barely started down, ' +
-              'far too shallow to melt anything. It gets to 100 km deep ' + r.answer + ' km inland, and that is where the volcanoes rise.';
+            return 'you put the volcanoes at the trench, where the slab has only just started down. At ' + per +
+              ' it is 100 km deep after ' + r.answer + ' km inland, and that is where they rise.';
           }
-          d = slabDepth(r.dip, pick);
           if (pick < r.answer) {
-            return 'you said ' + pick + ' km. Under there the ' + r.dip + '° slab is only ' + d +
-              ' km down, short of the 100 km melting depth. It gets that deep ' + r.answer + ' km inland, so the volcanoes sit further back.';
+            return 'you said ' + pick + ' km. That far inland the slab is only ' + slabDepth(r.rate, pick) +
+              ' km down, short of the 100 km melting depth. It gets there after ' + r.answer + ' km, so the volcanoes sit further back.';
           }
-          return 'you said ' + pick + ' km. By there the slab is already ' + d +
-            ' km down — it passed the 100 km melting depth back at ' + r.answer + ' km, so that is where the volcanoes are.';
+          return 'you said ' + pick + ' km. At ' + per + ' the slab passes 100 km — the melting depth — after only ' +
+            r.answer + ' km, so the volcanoes rise there, not ' + pick + ' km inland.';
         }
         if (r.type === 'depth') {
           if (ok) {
-            return 'about ' + r.answer + ' km. ' + r.site + ' km inland the ' + r.dip + '° slab has already dived ' +
-              r.answer + ' km, and the quakes happen along the slab. Go further inland and the foci get deeper still.';
+            return r.answer + ' km. At ' + per + ', the slab is ' + r.answer + ' km down under a town ' + r.site +
+              ' km inland, and the foci sit on the slab. Go further inland and they deepen — that is the Benioff zone.';
           }
           if (pick === 10) {
-            return 'you said about 10 km, which keeps every focus shallow. The foci follow the slab down: ' +
-              r.site + ' km inland it is already ' + r.answer + ' km deep, so the quakes there are ' + r.answer + ' km deep too.';
+            return 'you said 10 km, which keeps every focus shallow. The foci follow the slab down: at ' + per +
+              ' it is already ' + r.answer + ' km deep under a town ' + r.site + ' km inland.';
           }
-          return 'you said ' + pick + ' km. A ' + r.dip + '° slab drops about ' + snap5(100 * Math.tan(rad(r.dip))) +
-            ' km for every 100 km inland, so at ' + r.site + ' km it is ' + r.answer + ' km down — and the foci sit on the slab.';
+          return 'you said ' + pick + ' km. The slab drops ' + per + ' inland, so ' + r.site + ' km inland it is ' +
+            r.answer + ' km down — and the foci sit on the slab itself.';
         }
-        /* change */
         var closer = r.answer < r.oldArc;
         var delta = Math.abs(r.answer - r.oldArc);
         var dir = closer ? 'closer to the trench' : 'further inland';
         var than = (closer ? 'nearer the trench than' : 'further inland than') + ' the old ' + r.oldArc + ' km';
         if (ok) {
-          return r.answer + ' km. The ' + (closer ? 'steeper' : 'shallower') + ' ' + r.dip + '° slab reaches 100 km depth ' +
+          return r.answer + ' km. At ' + per + ' instead of ' + r.oldRate + ' km, the slab reaches 100 km depth ' +
             (closer ? 'sooner' : 'later') + ', so the volcanic arc moves ' + delta + ' km ' + dir + '.';
         }
         if (pick === r.oldArc) {
-          return 'you left the volcanoes at ' + r.oldArc + ' km. The melting depth has not moved, but the route to it has: ' +
-            'a ' + r.dip + '° slab is 100 km down after ' + r.answer + ' km, so they shift ' + delta + ' km ' + dir + '.';
+          return 'you left the volcanoes at ' + r.oldArc + ' km. Melting still starts at 100 km, but the route there ' +
+            'has changed: at ' + per + ' the slab is 100 km down after ' + r.answer + ' km, so they shift ' + delta + ' km ' + dir + '.';
         }
-        return 'you said ' + pick + ' km. A ' + r.dip + '° slab is 100 km down after ' + r.answer +
+        return 'you said ' + pick + ' km. At ' + per + ' the slab is 100 km down after ' + r.answer +
           ' km, so that is where the volcanoes rise — ' + delta + ' km ' + than + '.';
       }
 
@@ -438,28 +415,27 @@
         picked = null; locked = false;
 
         if (round.type === 'arc') {
-          frame.textContent = 'An oceanic plate is denser, so it dives under the continent — here at ' + round.dip +
-            '°. Melting begins about 100 km down.';
-          ask.textContent = 'How far from the trench do the volcanoes rise?';
+          frame.textContent = 'The denser oceanic plate dives under the continent. For every 100 km inland, it drops ' +
+            round.rate + ' km deeper.';
+          ask.textContent = 'Melting starts 100 km down. How far from the trench do the volcanoes rise?';
         } else if (round.type === 'depth') {
-          frame.textContent = 'An oceanic plate dives under the continent at ' + round.dip +
-            '°. Earthquakes happen all along the top of the slab.';
-          ask.textContent = 'How deep are the foci beneath a town ' + round.site + ' km inland from the trench?';
+          frame.textContent = 'The denser oceanic plate dives under the continent. For every 100 km inland, it drops ' +
+            round.rate + ' km deeper.';
+          ask.textContent = 'Quakes happen all along the slab. How deep are the foci under a town ' + round.site + ' km inland?';
         } else {
-          frame.textContent = 'The same margin, but the slab now dips at ' + round.dip + '° instead of ' +
-            round.oldDip + '° (dashed). Melting still begins about 100 km down.';
+          frame.textContent = 'The slab used to drop ' + round.oldRate + ' km for every 100 km inland; now it drops ' +
+            round.rate + ' km. Melting still starts 100 km down.';
           ask.textContent = 'The volcanoes used to rise ' + round.oldArc + ' km from the trench. Where do they rise now?';
         }
 
-        slab.setAttribute('d', slabPath(round.dip));
+        slab.setAttribute('d', slabPath(round.rate));
         if (round.type === 'change') {
-          oldSlab.setAttribute('d', slabPath(round.oldDip));
+          oldSlab.setAttribute('d', slabPath(round.oldRate));
           oldSlab.style.display = '';
         } else {
           oldSlab.style.display = 'none';
         }
         oceanLbl.style.display = '';
-        contLbl.style.display = '';
         revG.style.display = 'none';
         markG.style.display = 'none';
         drawTicks();

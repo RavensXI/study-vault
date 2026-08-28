@@ -27,21 +27,21 @@
   var REASONS = [
     { key: 'trad',  label: 'It has always been done this way.',
       echo: 'it has always been done this way' },
-    { key: 'char',  label: 'This person is extraordinary.',
-      echo: 'this person is extraordinary' },
-    { key: 'legal', label: 'The rules give the post the right.',
-      echo: 'the rules give the post the right' },
+    { key: 'char',  label: 'This person is out of the ordinary.',
+      echo: 'this person is out of the ordinary' },
+    { key: 'legal', label: 'The rules of the job put them in charge.',
+      echo: 'the rules of the job put them in charge' },
     { key: 'force', label: 'They have no choice — they are forced.',
       echo: 'they are forced' }
   ];
 
   var SUCCS = [
-    { key: 'custom', label: '…passes to the next in line, by custom.',
-      echo: 'it passes to the next in line by custom' },
-    { key: 'person', label: '…goes with them. Nothing to hand on.',
+    { key: 'custom', label: '…passes to the next in line, as always.',
+      echo: 'it passes to the next in line, as always' },
+    { key: 'person', label: '…goes with them. There is nothing to hand on.',
       echo: 'it goes with them' },
-    { key: 'post',   label: '…passes to whoever holds the post next.',
-      echo: 'it passes to whoever holds the post next' }
+    { key: 'post',   label: '…passes to the next person to do the job.',
+      echo: 'it passes to the next person to do the job' }
   ];
 
   var R = {}, S = {};
@@ -49,98 +49,98 @@
   SUCCS.forEach(function (o) { S[o.key] = o; });
 
   var SUCCWHY = {
-    legal: 'The office outlives whoever fills it, which is what makes this kind of authority stable.',
-    trad:  'The grounds are handed down with the position, so custom carries it across.',
-    char:  'Weber called the struggle to keep it going after the founder routinisation — with no post to hand on, the next person must win it from scratch.'
+    legal: 'The job goes on after the person leaves, and that is what makes this kind of authority steady.',
+    trad:  'The position is handed down, and the reason for obeying is handed down with it.',
+    char:  'Weber called this problem routinisation: there is no job to hand over, so the next person has to start from nothing.'
   };
 
   /* Original cases. In every one the person has nothing to force with. */
   var CASES = [
     { id: 'supply', type: 'legal',
-      text: 'A supply teacher nobody has met takes the register in a hall of Year 11. She knows not one name and has no sanction here. Every student answers.',
+      text: 'A supply teacher nobody has met takes the register in a hall of Year 11. She does not know a single name and can punish nobody. Every student answers.',
       subj: 'The supply teacher',
-      noforce: 'she knows nobody and has no sanction to use',
-      why: 'Weber argued the hall is answering the post, not the woman.',
-      gone: 'the next teacher handed that register is answered the same way',
-      no: { trad: 'nobody in that hall has seen her before, so no custom points at her',
+      noforce: 'she is a stranger there and can punish nobody',
+      why: 'Weber argued the hall is answering the job, not the woman.',
+      gone: 'the next teacher to take that register is answered in the same way',
+      no: { trad: 'nobody in that hall has seen her before, so there is no custom about her',
             char: 'they know nothing about her at all — she could be anyone' } },
 
     { id: 'show', type: 'trad',
-      text: 'One family has judged the village show vegetables for a hundred years. This year it is the grandson, who grows nothing. Growers take his verdict.',
+      text: 'One family has judged the vegetables at the village show for a hundred years. This year it is the grandson, who grows nothing. The growers accept what he decides.',
       subj: 'The grandson',
-      noforce: 'there is no prize money and nothing lost by walking away',
-      why: 'Weber argued the grounds are the custom itself: it has been this family, so it stays this family.',
-      gone: 'his own son will judge on exactly the same grounds',
-      no: { char: 'the grandson has grown nothing and nobody calls him remarkable',
-            legal: 'there is no committee and no post he was appointed to' } },
+      noforce: 'there is no prize money, and nobody loses anything by walking away',
+      why: 'Weber argued the reason is the custom itself: it has been this family, so it stays this family.',
+      gone: 'his own son will judge next, for exactly the same reason',
+      no: { char: 'the grandson grows nothing, and nobody says he is anything special',
+            legal: 'there is no committee, and no job he was appointed to' } },
 
     { id: 'climate', type: 'char',
-      text: 'A Year 12 student set up the lunchtime climate group. She holds no post, gives no orders and can make nobody come. Thirty turn up for her each week.',
+      text: 'A Year 12 student set up the lunchtime climate group. She holds no job, gives no orders and can make nobody come. Thirty turn up for her each week.',
       subj: 'The Year 12 student',
       noforce: 'she gives no orders and can make nobody come',
-      why: 'Weber argued the claim rests on the person: they follow her because they find her out of the ordinary.',
-      gone: 'the next student who stands up has to win the room from nothing',
+      why: 'Weber argued the pull here is the person herself: they follow her, not a job and not a custom.',
+      gone: 'the next student who stands up has to win the room over from nothing',
       no: { trad: 'the group started this term, so there is no custom to lean on',
-            legal: 'she holds no post, so no rule can be handing her the right' } },
+            legal: 'she holds no job, so there is no rule putting her in charge' } },
 
     { id: 'ref', type: 'legal',
-      text: 'A referee takes a park league match. No crowd, no camera, nobody to report a player to, and the men are twice her size. She sends one off; he walks.',
+      text: 'A referee takes a park league match. No crowd, no camera, nobody to report a player to, and the men are twice her size. She sends one off and he goes.',
       subj: 'The referee',
-      noforce: 'she is outsized, unwatched and has nobody to report him to',
-      why: 'Weber argued the laws of the game give whoever holds the whistle the right to decide.',
-      gone: 'next week’s referee sends players off with the same right',
-      no: { trad: 'she is new to the league and no custom points at her',
-            char: 'nothing here is personal to her — she is unknown and outsized' } },
+      noforce: 'she is smaller than them, and has nobody to report him to',
+      why: 'Weber argued the rules of the game put whoever has the whistle in charge.',
+      gone: 'next week’s referee sends players off in exactly the same way',
+      no: { trad: 'she is new to the league, so no custom is at work here',
+            char: 'nothing here is about her personally — she is a stranger, and smaller than them' } },
 
     { id: 'firm', type: 'trad',
-      text: 'The founder’s granddaughter runs the family firm. The job was never advertised and a manager sets the pay. Staff say she is no sharper, but do as she asks.',
+      text: 'The founder’s granddaughter runs the family firm. The job was never advertised and a manager sets the pay. Staff say she is no cleverer than them, but do as she asks.',
       subj: 'The granddaughter',
-      noforce: 'a manager sets the pay, so she holds nothing over them',
-      why: 'Weber argued she is obeyed as the founder’s line, not as the best candidate.',
-      gone: 'her own daughter will be asked next, on the same grounds',
-      no: { char: 'the staff say plainly that she is no sharper than they are',
-            legal: 'no rule hands her the say and the job was never advertised' } },
+      noforce: 'a manager sets the pay, so she has nothing to hold over them',
+      why: 'Weber argued she is obeyed because of the family she comes from, not because she is the best person for it.',
+      gone: 'her own daughter will be asked next, for the same reason',
+      no: { char: 'the staff say plainly that she is no cleverer than they are',
+            legal: 'no rule put her there, and the job was never advertised' } },
 
     { id: 'coach', type: 'char',
       text: 'A volunteer took over the Sunday football sessions; six players became sixty in a year. He holds no badge and no contract. The players come for him.',
       subj: 'The volunteer',
-      noforce: 'he holds no contract and nothing at all over anybody',
-      why: 'Weber argued the grounds are the man himself, and nothing else.',
-      gone: 'a replacement inherits the pitch and the kit, but not the sixty players',
+      noforce: 'he has no contract and nothing at all to hold over anybody',
+      why: 'Weber argued the reason is the man himself, and nothing else.',
+      gone: 'whoever takes over gets the pitch and the kit, but not the sixty players',
       no: { trad: 'the sessions are one year old, so no custom has formed',
-            legal: 'he holds no badge, no contract and no post' } },
+            legal: 'he has no badge, no contract and no job' } },
 
     { id: 'clerk', type: 'legal',
       text: 'A polling clerk hands out ballot papers and sends each voter to a booth. She is unpaid, there for one day, and can stop nobody. Everyone does as she says.',
       subj: 'The polling clerk',
       noforce: 'she is paid nothing and can stop nobody',
-      why: 'Weber argued they obey the role the rules set out, not the volunteer filling it.',
-      gone: 'the clerk on duty at the next election directs the queue the same way',
-      no: { trad: 'she is a volunteer for one day, so no custom attaches to her',
-            char: 'nothing about her personally is in play — she is unpaid and unknown' } },
+      why: 'Weber argued they obey the job the rules set out, not the volunteer doing it.',
+      gone: 'whoever is on duty at the next election directs the queue in the same way',
+      no: { trad: 'she is there for one day, so no custom has built up around her',
+            char: 'nothing about her personally comes into it — she is unpaid and unknown' } },
 
     { id: 'crown', type: 'trad',
-      text: 'A monarch opens parliament. She commands no army and can pass no law; the crown came to her from her father. The chamber follows her lead through it.',
+      text: 'A monarch opens parliament. She commands no army and can pass no law; the crown came to her from her father. The chamber follows her lead.',
       subj: 'The monarch',
       noforce: 'she commands no army and can pass no law',
-      why: 'Weber argued the grounds are inheritance and long custom, not office and not personal gift.',
-      gone: 'the crown moves to her heir and the ceremony carries on unchanged',
-      no: { char: 'the ceremony would run the same way for whoever inherited',
-            legal: 'nobody appointed her and no rule book put her there' } },
+      why: 'Weber argued the reason is inheritance and long custom: not a job she was given, and not anything special about her.',
+      gone: 'the crown passes to her heir and the ceremony carries on unchanged',
+      no: { char: 'the ceremony would run the same way for whoever inherited the crown',
+            legal: 'nobody appointed her, and no rule book put her there' } },
 
     { id: 'band', type: 'char',
-      text: 'The singer in a new band sets the set list and rehearsal times. She owns none of the gear and pays nobody. The others follow her for what she does on stage.',
+      text: 'The singer in a new band picks the set list and the rehearsal times. She owns none of the gear and pays nobody. The others follow her for what she does on stage.',
       subj: 'The singer',
       noforce: 'she owns none of the gear and pays nobody',
-      why: 'Weber argued this rests on a personal gift the other three believe in.',
-      gone: 'if she walks, the other three are back to arguing it out from scratch',
-      no: { trad: 'the band is new, so there is no custom in it',
-            legal: 'there is no post and no rule — she was never appointed anything' } }
+      why: 'Weber argued this rests on something the other three see in her, and nothing else.',
+      gone: 'if she leaves, the other three are back to arguing it out from scratch',
+      no: { trad: 'the band is new, so no custom has had time to form',
+            legal: 'there is no job and no rule — nobody appointed her anything' } }
   ];
 
   var OPEN_CAP = 'Look at what each person does not have, as much as what they do.';
 
-  var MASTERY = 'Weber’s question is never how hard the order is pushed but why it is accepted: long custom, an extraordinary person, or rules that give the post its right. Only the personal one cannot be handed on.';
+  var MASTERY = 'Weber’s question is never how strong the order is. It is why people accept it: long custom, a person they find exceptional, or the rules of a job. Only the one built on the person cannot be passed on.';
 
   /* ---------- styles (every selector under .svw-wba) ----------------- */
 
@@ -207,7 +207,7 @@
       root.appendChild(el('p', 'wba-kick', 'Power and authority'));
       root.appendChild(el('h3', 'wba-title', 'Obeyed — but on what grounds?'));
       root.appendChild(el('p', 'wba-frame',
-        'Each of these people is obeyed. Decide what the obedience rests on, and whether it would survive them.'));
+        'Each of these people is obeyed. Decide why the obedience holds, and what happens when they go.'));
 
       var stage = el('div', 'wba-stage');
       var caseP = el('p', 'wba-case');
@@ -337,7 +337,7 @@
         });
         g2.hidden = false;
         armGo();
-        sr.textContent = R[key].label + ' chosen. Now settle what happens when ' +
+        sr.textContent = R[key].label + ' chosen. Now decide what happens when ' +
                          cur.subj.toLowerCase() + ' is gone.';
         sync({ reason: key, succession: succ });
       }
@@ -404,9 +404,9 @@
                  ', and that ' + S[succ].echo + '. ' + cur.why + ' So ' + cur.gone + '.';
         } else if (reason === 'force') {
           body = '<b>Not quite — you said they are forced.</b> Nothing here can force them: ' +
-                 cur.noforce + '. Weber kept <b>power</b> for making people comply, and <b>authority</b> ' +
-                 'for obedience people accept as right. Here ' + R[cur.type].echo + ' — that is <b>' +
-                 t.name + '</b> authority.';
+                 cur.noforce + '. Weber used the word <b>power</b> for making people do things, and <b>authority</b> ' +
+                 'for when people obey because they think it is right. Here ' + R[cur.type].echo +
+                 ' — that is <b>' + t.name + '</b> authority.';
         } else if (!okReason) {
           body = '<b>Not quite — you said ' + R[reason].echo + '.</b> But ' + cur.no[reason] + '. ' +
                  cur.why + ' That is <b>' + t.name + '</b> authority, and ' + cur.gone + '.';

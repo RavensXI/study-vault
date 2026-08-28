@@ -7,12 +7,14 @@
    Model: sizeMm(days) = 10^((log10 days - 4.2) / 3)
      3 days      (thin lava flow)      -> 0.057 mm   fine
      70 days     (thick lava flow)     -> 0.16 mm    fine
-     3 years     (dyke 10 m wide)      -> 0.41 mm    fine
+     2,000 y     (6 km, phenocrysts)   -> 3.6 mm     coarse (then quenched)
      10,000 y    (chamber 8 km down)   -> 6.1 mm     coarse
      100,000 y   (pluton 15 km down)   -> 13 mm      coarse
      30 seconds  (chilled in seawater) -> 0.0028 mm  glassy (no crystals)
-   Every value sits clear of the 1 mm coarse/fine boundary by 2.4x or more,
-   and the verdict itself compares ids, never floats. */
+   Every value sits clear of the 1 mm coarse/fine boundary by 6x or more, and
+   the verdict itself compares ids, never floats. Every setting is also
+   unambiguously at the surface or unambiguously deep, so one application of
+   "slow cooling grows large crystals" settles every round. */
 (function () {
   'use strict';
 
@@ -51,47 +53,47 @@
     return o;
   }
 
+  /* The dyke setting (1 km down, fine-grained) was removed after a field
+     test: it is underground, so the lesson's own rule — "coarse means slow
+     cooling deep underground" — gives the WRONG answer unless you already
+     know that 1 km is not deep and three years is not slow. Every setting
+     here is now unambiguous on the one dimension being tested: clearly at
+     the surface, or clearly deep. */
   var S = {
     flow: setting({
       id: 'flow', depthKm: 0, days: 3 * DAY, rock: 'basalt',
-      opt: 'Thin lava flow at the surface — 3 days',
-      frame: 'Basaltic magma erupts as a thin lava flow. It is solid three days later.',
+      opt: 'At the surface — 3 days',
+      frame: 'At the surface, basaltic magma spreads as a thin lava flow and is solid in three days.',
       when: 'three days at the surface'
     }),
     thick: setting({
       id: 'thick', depthKm: 0, days: 70 * DAY, rock: 'rhyolite',
-      opt: 'Thick lava flow at the surface — 10 weeks',
-      frame: 'A thick rhyolitic lava flow spreads at the surface. It stays hot for about ten weeks.',
+      opt: 'At the surface — 10 weeks',
+      frame: 'At the surface, a thick rhyolitic lava flow stays hot for about ten weeks.',
       when: 'ten weeks at the surface'
     }),
     quench: setting({
       id: 'quench', depthKm: 0, sea: true, days: 30 / 86400, rock: 'obsidian',
-      opt: 'Lava chilled in seawater — under a minute',
-      frame: 'Rhyolitic lava erupts into the sea and chills solid in under a minute.',
+      opt: 'At the surface — under a minute',
+      frame: 'At the surface, rhyolitic lava pours into the sea and chills solid in under a minute.',
       when: 'seconds in seawater'
-    }),
-    dyke: setting({
-      id: 'dyke', depthKm: 1, days: 3 * YEAR, rock: null,
-      opt: 'Dyke 10 m wide, 1 km down — 3 years',
-      frame: 'Basaltic magma fills a dyke 10 m wide, 1 km down. It sets after about three years.',
-      when: 'three years 1 km down'
     }),
     pluton8: setting({
       id: 'pluton8', depthKm: 8, days: 10000 * YEAR, rock: 'granite',
-      opt: 'Magma chamber 8 km down — 10,000 years',
-      frame: 'Granitic magma sits in a chamber 8 km down. It takes about 10,000 years to solidify.',
+      opt: '8 km down — 10,000 years',
+      frame: 'Eight kilometres down, granitic magma sits in a chamber for about 10,000 years.',
       when: '10,000 years 8 km down'
     }),
     pluton15: setting({
       id: 'pluton15', depthKm: 15, days: 100000 * YEAR, rock: 'gabbro',
-      opt: 'Deep pluton 15 km down — 100,000 years',
-      frame: 'Basaltic magma pools 15 km down and cools there for about 100,000 years.',
+      opt: '15 km down — 100,000 years',
+      frame: 'Fifteen kilometres down, basaltic magma cools for about 100,000 years.',
       when: '100,000 years 15 km down'
     }),
     two: setting({
       id: 'two', depthKm: 6, days: 2000 * YEAR, thenDays: 3 * DAY, rock: 'porphyritic andesite',
-      opt: 'Chamber 6 km down 2,000 years, then erupted',
-      frame: 'Andesitic magma grows crystals for 2,000 years 6 km down, then erupts and sets in three days.',
+      opt: '6 km down 2,000 years, then erupted',
+      frame: 'Six kilometres down, andesitic magma grows crystals for 2,000 years — then it erupts and sets in three days.',
       when: '2,000 years at 6 km, then erupted'
     })
   };
@@ -113,32 +115,40 @@
      stage for a two-size rock. */
   function byDays(a, b) { return S[a].days - S[b].days; }
 
+  /* The rule rides on every ask, so a student who half-remembers the lesson
+     still has the one thing they need in front of them. */
+  var RULE = 'Slow cooling grows large crystals. ';
+
   function readRound(ansId, optIds, frame) {
     return {
       dir: 'read', answer: ansId, spec: S[ansId],
       options: optIds.slice().sort(byDays),
-      frame: frame, ask: 'Where and how fast did this magma cool?'
+      frame: frame, ask: RULE + 'Where did this rock cool?'
     };
   }
 
   function buildDeck() {
     var deck = [];
-    ['flow', 'thick', 'quench', 'dyke', 'pluton8', 'pluton15', 'two'].forEach(function (id) {
+    ['flow', 'thick', 'quench', 'pluton8', 'pluton15', 'two'].forEach(function (id) {
       deck.push({
         dir: 'predict', answer: S[id].texture, spec: S[id], options: TEX_ORDER.slice(),
-        frame: S[id].frame, ask: 'What texture does the rock have?'
+        frame: S[id].frame, ask: RULE + 'What texture forms?'
       });
     });
-    deck.push(readRound('pluton8', ['flow', 'thick', 'dyke', 'pluton8'],
-      'A hand specimen. The interlocking crystals measure about ' + fmtMm(S.pluton8.mm) + ' mm across.'));
-    deck.push(readRound('quench', ['quench', 'flow', 'dyke', 'pluton8'],
+    /* Read rounds describe the specimen in the lesson's own words - seen by
+       eye, needs a lens, no crystals - never in millimetres the lesson never
+       taught. Every distractor is wrong on PLACE or on the number of cooling
+       stages, so one clean application of the rule settles it. */
+    deck.push(readRound('pluton8', ['flow', 'thick', 'quench', 'pluton8'],
+      'A hand specimen. Interlocking crystals, all much the same size, easily seen by eye.'));
+    deck.push(readRound('pluton15', ['thick', 'quench', 'two', 'pluton15'],
+      'A hand specimen. Crystals all much the same size, some as wide as a fingernail.'));
+    deck.push(readRound('quench', ['quench', 'flow', 'pluton8', 'two'],
       'A hand specimen. It is smooth and glassy, with no crystals at all.'));
+    deck.push(readRound('flow', ['flow', 'two', 'pluton8', 'pluton15'],
+      'A hand specimen. All the crystals are far too small to see without a lens.'));
     deck.push(readRound('two', ['flow', 'thick', 'two', 'pluton8'],
-      'A hand specimen. Crystals about ' + fmtMm(S.two.mm) + ' mm sit in a groundmass too fine to see.'));
-    deck.push(readRound('flow', ['quench', 'flow', 'pluton8', 'two'],
-      'A hand specimen. Every crystal is under a tenth of a millimetre.'));
-    deck.push(readRound('pluton15', ['quench', 'thick', 'dyke', 'pluton15'],
-      'A hand specimen. Interlocking crystals measure about ' + fmtMm(S.pluton15.mm) + ' mm across.'));
+      'A hand specimen. Large crystals sit in a groundmass too fine to see.'));
     for (var i = deck.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1)), t = deck[i];
       deck[i] = deck[j]; deck[j] = t;
@@ -151,7 +161,10 @@
   var VBW = 300, VBH = 104;
   var SX = 18, SW = 98;              /* crust section panel */
   var AIR = 8, SURF = 20, HB = 96;   /* sky top, ground level, section base */
-  var KM = (HB - SURF) / 15;         /* px per km, 0-15 km */
+  /* The section runs to 18 km although the deepest body sits at 15, so a
+     15 km pluton is drawn at its true depth and still clears the axis
+     caption underneath. Ticks are labelled to 15 only. */
+  var KM = (HB - SURF) / 18;         /* px per km */
   var CX = 236, CY = 48, R = 40;     /* specimen circle */
   var AX1 = 126, AX2 = 186, AY = 48; /* arrow between the two panels */
 
@@ -209,9 +222,9 @@
       p + '.stage{background:#faf8f5;border:1px solid #efe9e0;border-radius:12px;' +
       'max-width:366px;margin:0 auto .45rem;overflow:hidden;}' +
       p + '.stage svg{display:block;width:100%;height:auto;}' +
-      p + '.opts{display:grid;grid-template-columns:1fr;gap:.32rem;margin:0 0 .45rem;}' +
+      p + '.opts{display:grid;grid-template-columns:1fr;gap:.3rem;margin:0 0 .42rem;}' +
       p + '.o{font:600 .82rem/1.3 Inter,system-ui,sans-serif;color:#2d2a26;background:#faf8f5;' +
-      'border:1px solid #ddd7cd;border-radius:10px;padding:.38rem .6rem;min-height:32px;' +
+      'border:1px solid #ddd7cd;border-radius:10px;padding:.34rem .6rem;min-height:30px;' +
       'cursor:pointer;text-align:left;' +
       (reduced ? '' : 'transition:background .12s,border-color .12s;') + '}' +
       p + '.o[aria-pressed="true"]{background:#2d2a26;border-color:#2d2a26;color:#fff;}' +
@@ -222,7 +235,7 @@
       'border:1px solid #2d2a26;border-radius:10px;padding:.44rem .95rem;cursor:pointer;}' +
       p + '.go[disabled]{background:#faf8f5;color:#a8a29a;border-color:#e0d9cd;cursor:default;}' +
       p + '.run{font-size:.78rem;color:#8d8880;font-variant-numeric:tabular-nums;}' +
-      p + '.cap{margin:0;font-size:.84rem;line-height:1.45;color:#2d2a26;min-height:50px;}' +
+      p + '.cap{margin:0;font-size:.84rem;line-height:1.45;color:#2d2a26;min-height:44px;}' +
       p + '.cap .v{font-weight:700;}' +
       p + '.cap .rt{color:#4f7d63;}' +
       p + '.cap.rest{color:#8d8880;}' +
@@ -305,6 +318,21 @@
         stroke: '#ddd5c7', 'stroke-width': 0.8
       }));
       svg.appendChild(txt(SX + SW / 2, 103, 'depth (km)', 9, '#8d8880'));
+
+      /* rate axis: deeper is slower. Sits clear of the magma bodies, which
+         never reach past x = 92. */
+      var RAX = SX + SW - 17;
+      svg.appendChild(el('path', {
+        d: 'M ' + RAX + ' ' + (SURF + 7) + ' L ' + RAX + ' ' + (HB - 9) +
+          ' M ' + (RAX - 2.8) + ' ' + (HB - 14) + ' L ' + RAX + ' ' + (HB - 9) + ' L ' + (RAX + 2.8) + ' ' + (HB - 14),
+        fill: 'none', stroke: '#c4b9a6', 'stroke-width': 1,
+        'stroke-linecap': 'round', 'stroke-linejoin': 'round'
+      }));
+      [[SURF + 21, 'fast'], [HB - 24, 'slow']].forEach(function (q) {
+        var lx = SX + SW - 8, t = txt(lx, q[0], q[1], 8.5, '#9a938a');
+        t.setAttribute('transform', 'rotate(-90 ' + lx + ' ' + q[0] + ')');
+        svg.appendChild(t);
+      });
 
       var bodies = el('g', {});
       svg.appendChild(bodies);
@@ -510,35 +538,40 @@
 
       var WHERE = {
         flow: 'at the surface', thick: 'at the surface', quench: 'at the surface',
-        dyke: '1 km down', pluton8: '8 km down', pluton15: '15 km down', two: '6 km down'
+        pluton8: '8 km down', pluton15: '15 km down', two: '6 km down'
       };
       var DUR = {
         flow: 'three days', thick: 'ten weeks', quench: 'under a minute',
-        dyke: 'three years', pluton8: '10,000 years', pluton15: '100,000 years', two: '2,000 years'
+        pluton8: '10,000 years', pluton15: '100,000 years', two: '2,000 years'
+      };
+      /* a faithful echo of what the button said, in prose */
+      var ECHO = {
+        flow: 'the surface, three days', thick: 'the surface, ten weeks',
+        quench: 'the surface, under a minute', pluton8: '8 km down, 10,000 years',
+        pluton15: '15 km down, 100,000 years', two: '6 km down for 2,000 years, then erupted'
       };
       var WHY = {
-        flow: 'At the surface the heat pours away into the air, so it sets in three days and atoms freeze where they stand.',
-        thick: 'Ten weeks sounds long, but surface heat escapes fast — nowhere near long enough to grow anything over 1 mm.',
-        quench: 'Chilled in seawater in under a minute, the atoms had no time to line up into any crystal.',
-        dyke: 'Only 1 km down, a 10 m dyke gives its heat to cold country rock in three years — still too fast for large crystals.',
-        pluton8: '8 km down the rock around it holds the heat in, so the melt takes 10,000 years to set. Atoms have time to travel to a growing crystal.',
-        pluton15: '15 km down the melt cools for 100,000 years — the slowest setting here, and the biggest crystals.',
+        flow: 'At the surface the heat pours straight into the air, so it sets in three days and atoms freeze where they stand.',
+        thick: 'Ten weeks sounds long, but surface heat escapes fast — nowhere near slow enough to grow anything over 1 mm.',
+        quench: 'Chilled in seawater in under a minute, the atoms had no time at all to line up into a crystal.',
+        pluton8: 'Wrapped in hot rock 8 km down, the melt takes 10,000 years to set — time for atoms to travel to a growing crystal.',
+        pluton15: '15 km down the melt cools for 100,000 years, the slowest setting here, so the crystals grow the biggest.',
         two: 'The 2,000 years at 6 km grew the big crystals; the eruption then froze the rest in three days.'
       };
       function cap1(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
-      function optPhrase(id) {
-        var t = S[id].opt;
-        return 'the ' + t.charAt(0).toLowerCase() + t.slice(1);
-      }
       function sizePhrase(s) {
-        if (s.groundMm) return 'crystals about ' + fmtMm(s.mm) + ' mm in a groundmass of about ' + fmtMm(s.groundMm) + ' mm';
         if (s.texture === 'glassy') return 'no crystals at all';
-        return 'crystals about ' + fmtMm(s.mm) + ' mm across';
+        return 'crystals about ' + fmtMm(s.mm) + ' mm';
       }
 
       function predictMsg(ok, pick) {
         var s = round.spec, ans = round.answer, mm = fmtMm(s.mm);
         if (ok) {
+          if (ans === 'porph') {
+            return 'porphyritic: two sizes at once. The 2,000 years at 6 km grew crystals about ' +
+              fmtMm(s.mm) + ' mm; the eruption then froze the rest at ' + fmtMm(s.groundMm) +
+              ' mm. That is ' + s.rock + '.';
+          }
           return TEXTURES[ans].short + ', ' + sizePhrase(s) + '. ' + WHY[s.id] +
             (s.rock ? ' That is ' + s.rock + '.' : '');
         }
@@ -546,14 +579,14 @@
         if (pick === 'coarse') {
           if (ans === 'fine') {
             return said + cap1(DUR[s.id]) + ' sounds long, but ' + WHERE[s.id] +
-              ' the heat escapes quickly, so crystals stop at about ' + mm +
-              ' mm. Over 1 mm needs thousands of years, and only depth is that slow.';
+              ' the heat escapes almost at once, so crystals stop at about ' + mm +
+              ' mm. Large crystals need depth.';
           }
           if (ans === 'glassy') {
             return said + 'This lava was solid in under a minute. Atoms need time to travel to a growing crystal; here they had none, so it froze as glass.';
           }
-          return said + 'One size cannot record two stages. The 2,000 years at 6 km grew crystals about ' +
-            fmtMm(s.mm) + ' mm, then the eruption froze the rest at about ' + fmtMm(s.groundMm) + ' mm.';
+          return said + 'One size cannot record two stages: 2,000 years at 6 km grew crystals about ' +
+            fmtMm(s.mm) + ' mm, then the eruption froze the rest at ' + fmtMm(s.groundMm) + ' mm.';
         }
         if (pick === 'fine') {
           if (ans === 'coarse') {
@@ -581,37 +614,37 @@
       }
 
       var READ_OK = {
-        pluton8: 'crystals about ' + fmtMm(S.pluton8.mm) + ' mm say slow. Only depth cools that slowly: 8 km down, wrapped in hot rock, the melt took 10,000 years to set. That is granite.',
-        pluton15: 'crystals about ' + fmtMm(S.pluton15.mm) + ' mm say very slow. 15 km down the melt cooled for 100,000 years, so the grains grew to the size of a fingernail. That is gabbro.',
-        quench: 'no crystals at all says instant. Lava dropped into seawater loses its heat in seconds, and atoms freeze before any crystal can start. That is obsidian.',
-        flow: 'crystals under 0.1 mm say fast. A thin flow gives its heat to the air and is solid in three days, so nothing grows. That is basalt.',
-        two: 'two crystal sizes say two stages. The ' + fmtMm(S.two.mm) + ' mm crystals grew slowly 6 km down; the groundmass froze in days after the eruption. That is porphyritic andesite.'
+        pluton8: 'crystals you can see by eye mean slow. Only depth is that slow: 8 km down, wrapped in hot rock, the melt took 10,000 years. That is granite.',
+        pluton15: 'crystals that big mean very slow indeed. 15 km down the melt cooled for 100,000 years, so the grains grew to about ' + fmtMm(S.pluton15.mm) + ' mm. That is gabbro.',
+        quench: 'no crystals at all means instant. Lava dropped into seawater loses its heat in seconds, and atoms freeze before a crystal can start. That is obsidian.',
+        flow: 'crystals too small to see mean fast. A thin flow gives its heat to the air and is solid in three days, so nothing grows big. That is basalt.',
+        two: 'two crystal sizes mean two stages. The big crystals grew slowly 6 km down; the groundmass froze in days after the eruption. That is porphyritic andesite.'
       };
 
       function readMsg(ok, pick) {
         var s = round.spec, p = S[pick];
         if (ok) return READ_OK[s.id];
-        var said = 'you chose ' + optPhrase(pick) + '. ';
+        var said = 'you chose ' + ECHO[pick] + '. ';
         if (s.groundMm) {
-          return said + 'One rate gives one crystal size. These have two: 2,000 years at 6 km grew the ' +
-            fmtMm(s.mm) + ' mm crystals, then eruption froze the rest in days.';
+          return said + 'One place at one rate gives one crystal size. This rock has two, so it cooled in two stages: slowly at 6 km, then fast after erupting.';
         }
         if (p.groundMm) {
-          return said + 'Two stages give two sizes. Every crystal here is about ' +
-            fmtMm(s.mm) + ' mm, so this melt cooled in one place at one rate — ' + s.when + '.';
+          return said + 'That gives two crystal sizes. These are all one size, so one place and one rate — ' + s.when + '.';
         }
         if (p.texture === 'glassy') {
-          return said + 'A freeze that fast leaves glass, not crystals. These are about ' +
-            fmtMm(s.mm) + ' mm, so this melt cooled far more slowly — ' + s.when + '.';
+          return said + 'A freeze that fast leaves glass, not crystals. These reached ' + fmtMm(s.mm) +
+            ' mm, so this melt cooled much more slowly — ' + s.when + '.';
         }
         if (p.depthKm === 0 && s.depthKm > 0) {
-          return said + 'Surface heat escapes into the air, so even ' + DUR[p.id] + ' only reaches about ' +
-            fmtMm(p.mm) + ' mm. ' + fmtMm(s.mm) + ' mm needs ' + DUR[s.id] + ', and only depth is that slow.';
+          return said + 'Surface heat escapes into the air, so even ' + DUR[p.id] + ' only reaches ' +
+            fmtMm(p.mm) + ' mm. Crystals this big need ' + DUR[s.id] + ' deep down.';
         }
         if (p.mm > s.mm) {
-          return said + 'That grows crystals about ' + fmtMm(p.mm) + ' mm. These are far smaller, so the melt lost its heat much faster — ' + s.when + '.';
+          return said + 'That grows crystals about ' + fmtMm(p.mm) +
+            ' mm. These are far smaller, so this melt lost its heat much faster — ' + s.when + '.';
         }
-        return said + 'That only reaches about ' + fmtMm(p.mm) + ' mm. These crystals are far bigger, so the melt cooled much more slowly — ' + s.when + '.';
+        return said + 'That only reaches about ' + fmtMm(p.mm) +
+          ' mm. These crystals are far bigger, so the melt cooled much more slowly — ' + s.when + '.';
       }
 
       function verdict(ok, body) {
@@ -668,8 +701,8 @@
         go.disabled = true;
         cap.className = 'cap rest';
         cap.textContent = round.dir === 'predict'
-          ? 'The section shows where this melt cooled and how long it took.'
-          : 'The scale bar under the specimen gives the size of the crystals.';
+          ? 'The section shows where this melt sat, and how fast it lost its heat there.'
+          : 'Work back from the crystals: how fast did this melt have to lose its heat?';
         pushState();
       }
 

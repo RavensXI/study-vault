@@ -63,13 +63,13 @@
       frame: 'A closing phrase must sound strained and pleading. Choose the scoring.',
       options: [
         { name: 'bassoon', inst: 'bassoon', text: 'One bassoon, exposed, no doubling', right: true,
-          fb: 'These notes sit high in the bassoon’s range, so the reed is under pressure and the line sounds pinched.' },
+          fb: 'These notes sit high in the bassoon’s range, so the player must push, and the line sounds tight and strained.' },
         { name: 'flute', inst: 'flute', text: 'One flute, over held strings',
-          fb: 'C4–A4 is the bottom of the flute: breathy and weak, not strained. Strain comes from a player near the top.' },
+          fb: 'These notes are at the bottom of the flute’s range, where it sounds breathy and weak. Strain comes from playing near the top.' },
         { name: 'viola section', inst: 'viola', text: 'Viola section, all together',
-          fb: 'Mid-range violas blend and console, and a section hides one player’s effort. The bassoon strains; the violas do not.' },
+          fb: 'Mid-range violas blend into one warm sound, and a section hides one player’s effort. The bassoon strains; violas do not.' },
         { mis: true, name: 'any of them would do', text: 'Any of them — the notes plead anyway',
-          fb: 'The pitches are identical, yet the three do not sound alike: the bassoon strains, the flute weakens, the violas soothe.' }
+          fb: 'The pitches are the same, but the three do not sound alike: the bassoon strains, the flute weakens, the violas sound calm.' }
       ]
     },
     {
@@ -80,28 +80,28 @@
         { prefix: 'Now: ', name: 'Solo cor anglais', inst: 'corAnglais', on: true }
       ],
       options: [
-        { name: 'thinner and more plaintive', text: 'Thinner and more plaintive — one reed where a section had been', right: true,
-          fb: 'A reed’s narrow, nasal colour replaces a dozen bowed strings, so the line stops sounding communal.' },
+        { name: 'thinner and sadder', text: 'Thinner and sadder — one reed where a section had been', right: true,
+          fb: 'One reed has a narrow, nasal tone where a dozen bowed strings were, so the line stops sounding like a group.' },
         { name: 'grander and more triumphant', text: 'Grander and more triumphant than before',
-          fb: 'One reed subtracts weight rather than adding it: the same notes now sound smaller and more private.' },
+          fb: 'One reed takes weight away instead of adding it. The same notes now sound smaller and more alone.' },
         { name: 'quieter but otherwise the same', text: 'Quieter, but otherwise the same music',
-          fb: 'Loudness is only part of it. The reedy colour changes what the phrase seems to be about, not just how loud it is.' },
-        { mis: true, name: 'colour is only a wrapper', text: 'No real change — the notes are the music, colour is a wrapper',
-          fb: 'The pitches are unchanged, so every difference you would hear is timbre: violas sound communal, one reed sounds alone.' }
+          fb: 'Loudness is only part of it. The reedy tone changes the mood of the phrase, not just how loud it is.' },
+        { mis: true, name: 'the same notes mean the same music', text: 'No real change — the pitches are the same, so the music is the same',
+          fb: 'The pitches have not changed, so every difference you hear is timbre: violas sound like a group, one reed sounds alone.' }
       ]
     },
     {
       id: 'distance', kind: 'score', phrase: { lo: 53, hi: 60 },
       frame: 'The melody must sound distant, as if from another room. Choose the scoring.',
       options: [
-        { name: 'muted horn', inst: 'horn', text: 'Muted horn, under hushed tremolo strings', right: true,
-          fb: 'The mute veils the tone and the tremolo blurs the edges, so the same notes arrive softened, as if through a wall.' },
+        { name: 'muted horn', inst: 'horn', text: 'Muted horn, under quiet tremolo strings', right: true,
+          fb: 'The mute makes the tone softer and duller, and the tremolo blurs it, so the same notes seem to come through a wall.' },
         { name: 'trombone section', inst: 'trombone', text: 'Trombone section, unison, loud and open',
-          fb: 'That is a hard, near, ceremonial sound. Distance is made by veiling the tone, not by choosing low notes.' },
+          fb: 'That is a hard, close, brassy sound. Distance comes from softening the tone, not from choosing low notes.' },
         { name: 'cello section', inst: 'cello', text: 'Cello section, warm, doubled by violas',
-          fb: 'Warm massed strings sound close and present. The muted horn under tremolo is the one that sounds far off.' },
-        { mis: true, name: 'any of them, quietly', text: 'Any of them, marked pianissimo — the dynamic makes the distance',
-          fb: 'A quiet trombone section is still hard and near. The distance comes from the mute and the blurred tremolo.' }
+          fb: 'A warm block of strings sounds close and solid. The muted horn under tremolo is the one that sounds far away.' },
+        { mis: true, name: 'quiet playing sounds far away', text: 'Any of them, marked pianissimo — quiet playing sounds far away',
+          fb: 'A quiet trombone section still sounds hard and close. Distance comes from the mute and the blurred tremolo.' }
       ]
     },
     {
@@ -115,25 +115,25 @@
         { name: 'tighter and more exposed', text: 'Tighter, more strained, more exposed', right: true,
           fb: 'The pitches have not moved, but they sit at the very top of the bassoon’s range, and one reed replaces a section.' },
         { name: 'lower and heavier', text: 'Lower and heavier — the bassoon is a bass instrument',
-          fb: 'The pitches are unchanged. On the bassoon they sit at the very top of its range, so the effect is tight, not heavy.' },
+          fb: 'The pitches have not changed. On the bassoon they sit at the very top of its range, so the sound is tight, not heavy.' },
         { name: 'warmer and rounder', text: 'Warmer and rounder than the violas were',
-          fb: 'Violas in a section are the warm option. One bassoon at the top of its range is thinner and audibly effortful.' },
-        { mis: true, name: 'nothing that matters', text: 'Nothing that matters — the pitches are identical',
-          fb: 'Identical pitches are the point: with the notes fixed, every change — strain, exposure, colour — is the scoring.' }
+          fb: 'A section of violas is the warm option. One bassoon at the top of its range sounds thinner, and you hear the effort.' },
+        { mis: true, name: 'nothing important changes', text: 'Nothing important changes — the pitches are the same',
+          fb: 'That is the point: the pitches are fixed, so the strain, the thinness and the colour all come from the scoring.' }
       ]
     },
     {
       id: 'brilliance', kind: 'score', phrase: { lo: 72, hi: 79 },
-      frame: 'The last phrase must cut through, hard and brilliant. Choose the scoring.',
+      frame: 'The last phrase must cut through, hard and bright. Choose the scoring.',
       options: [
         { name: 'trumpets', inst: 'trumpet', text: 'Two trumpets, unmuted, no doubling', right: true,
-          fb: 'High in its range the trumpet is hard and brilliant, and brass carries where mid-range woodwind is absorbed.' },
+          fb: 'High in its range the trumpet is hard and bright. Brass cuts through a loud orchestra; mid-range woodwind is covered.' },
         { name: 'flutes', inst: 'flute', text: 'Flutes, doubled by clarinets',
-          fb: 'Mid-range woodwind blends in and is swallowed by a loud orchestra. Brilliance needs an edge; the trumpets have it.' },
+          fb: 'Mid-range woodwind blends in and gets buried under a loud orchestra. A cutting sound needs an edge; trumpets have it.' },
         { name: 'celesta', inst: 'celesta', text: 'Celesta alone',
-          fb: 'It glitters, but the sound is small and dies at once, so a full orchestra buries it. Trumpets ring out.' },
+          fb: 'It sparkles, but the sound is small and dies at once, so a full orchestra covers it. Trumpets ring out.' },
         { mis: true, name: 'any of them would do', text: 'Any of them — it is the top line, so it will cut through',
-          fb: 'Being the top line does not make it audible: flutes vanish under a tutti while trumpets on the same notes ring out.' }
+          fb: 'Being the top line does not make it heard. Flutes vanish under a loud orchestra; the same notes on trumpets ring out.' }
       ]
     },
     {
@@ -144,18 +144,18 @@
         { prefix: 'Now: ', name: 'Violin section', inst: 'violin', on: true }
       ],
       options: [
-        { name: 'massed and insistent', text: 'Massed and insistent — not one voice', right: true,
-          fb: 'The pitches are unchanged, but many players in unison give the line weight. It stops sounding like one person.' },
+        { name: 'a whole section, not one voice', text: 'A whole section now, not one voice', right: true,
+          fb: 'The pitches have not changed, but many players in unison give the line weight. It stops sounding like one person.' },
         { name: 'higher and brighter', text: 'Higher and brighter than the flute',
-          fb: 'Nothing has been transposed: A4 to F5 either way, mid-range for violins. Weight and colour change, not pitch.' },
-        { name: 'louder but still solitary', text: 'Louder, but the line keeps its solitary character',
-          fb: 'Sixteen players in unison do not sound like one loud flute: the line becomes massed and public, not private.' },
-        { mis: true, name: 'scoring is only the wrapping', text: 'No change worth naming — scoring is only the wrapping',
-          fb: 'With the notes fixed, the scoring carries every difference: a solo flute sounds fragile, a section insistent.' }
+          fb: 'Nothing has been transposed: still A4 to F5, mid-range for violins. The weight and the colour change, not the pitch.' },
+        { name: 'louder but still one player', text: 'Louder, but the line still sounds like one player',
+          fb: 'Sixteen players in unison do not sound like one loud flute. The line sounds like a crowd, not one person.' },
+        { mis: true, name: 'it is still the same tune', text: 'Not much — it is still the same tune',
+          fb: 'The notes are fixed, so the scoring makes every difference: a solo flute sounds fragile, a section sounds strong.' }
       ]
     }
   ];
-  var MASTERY = 'Three in a row — you have it. Where the notes sit in an instrument’s range, and how many play them, decide what the music means.';
+  var MASTERY = 'Three in a row — you have it. Change the instrument, the part of its range, or the number of players, and the same notes mean something new.';
 
   function rowsFor(r) {
     if (r.rows) { return r.rows; }
@@ -350,7 +350,7 @@
         run.textContent = 'Mastered — carry on';
       } else if (streak === 0) {
         run.className = 'run';
-        run.textContent = attempted ? 'Run reset — 3 in a row' : '';
+        run.textContent = attempted ? 'Back to zero — 3 in a row to go' : '';
       } else {
         run.className = 'run';
         run.textContent = streak + ' in a row — ' + (3 - streak) + ' to go';
@@ -384,8 +384,8 @@
       go.textContent = 'Check';
       go.disabled = true;
       cap.textContent = round.kind === 'score'
-        ? 'Each row shows one instrument’s range, with the dark block where these notes fall.'
-        : 'Both rows carry the same notes. Only the instrument, and how many play, have changed.';
+        ? 'Each row shows one instrument’s range. The dark block is where these notes fall.'
+        : 'Both rows show the same notes. What has changed is the instrument, and how many play it.';
       paintRun();
       pushState({ chosen: null, correct: null, misconception: null });
       n++;
