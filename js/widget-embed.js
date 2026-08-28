@@ -14,6 +14,36 @@
   'use strict';
 
   var MAP = {
+    "drama-aqa/theatre-roles-stagecraft/3": {
+      file: "theatre-configuration-impact",
+      label: "Place the audience",
+      line: "Six production briefs, one plan. Choose the configuration each one demands, then see the sightlines it creates.",
+      after: "$end"
+    },
+    "sociology-aqa/social-stratification/5": {
+      file: "weber-authority-source-of-legitimacy",
+      label: "Obeyed — on what grounds?",
+      line: "Nine people are obeyed with nothing to force anyone. Work out why the obedience holds — and whether it survives them.",
+      after: "Formal and Informal Sources of Power"
+    },
+    "geology-eduqas/hazards-resources-and-investigative-geology/7": {
+      file: "v-shape-rule-geology",
+      label: "Where the boundary Vs",
+      line: "Work out which way a bed dips from the V its boundary makes where it crosses a valley.",
+      after: "Constructing a Cross-Section"
+    },
+    "music-aqa/aos4-since-1910/1": {
+      file: "timbre-integral-to-composition",
+      label: "Same notes, different music",
+      line: "One phrase, three scorings — see where the identical notes fall inside each instrument’s range, and commit to which one the composer wants.",
+      after: "Open Space versus Dense Texture"
+    },
+    "film-studies-eduqas/global-and-uk-film/18": {
+      file: "film-colour-as-narrative-device",
+      label: "Grade the shot",
+      line: "Same shapes, three different grades — pick the one the scene needs, then say what it tells an audience.",
+      after: "Typicality: Blockbuster Aesthetic as Analytical Question"
+    },
     "economics-aqa/how-prices-are-determined/2": {
       file: "curve-movement-vs-shift",
       label: "Movement or shift?",
