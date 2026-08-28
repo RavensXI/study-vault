@@ -14,6 +14,66 @@
   'use strict';
 
   var MAP = {
+    "design-technology/specialist-technical/2": {
+      file: "bending-tension-compression",
+      label: "Mark the two faces",
+      line: "One load, two opposite stresses. Mark which face is stretched and which is squashed — then watch it bend.",
+      after: "Forces Across Material Categories"
+    },
+    "design-technology-eduqas/electronic-mechanical-systems/5": {
+      file: "bending-tension-compression",
+      label: "Mark the two faces",
+      line: "One load, two opposite stresses. Mark which face is stretched and which is squashed — then watch it bend.",
+      after: "$end"
+    },
+    "design-technology-edexcel/specialist-material-principles/4": {
+      file: "bending-tension-compression",
+      label: "Mark the two faces",
+      line: "One load, two opposite stresses. Mark which face is stretched and which is squashed — then watch it bend.",
+      after: "Forces Across Material Categories"
+    },
+    "food-preparation-and-nutrition-aqa/food-safety/1": {
+      file: "spoilage-factors-interact",
+      label: "Try the storage test",
+      line: "Five conditions microorganisms need. Predict what a fridge, a jam jar or a vacuum pack really takes away — and whether it is enough.",
+      after: "High-Risk Foods"
+    },
+    "food-preparation-and-nutrition-eduqas/food-safety-provenance-and-choice/1": {
+      file: "spoilage-factors-interact",
+      label: "Try the storage test",
+      line: "Five conditions microorganisms need. Predict what a fridge, a jam jar or a vacuum pack really takes away — and whether it is enough.",
+      after: "Mould and Yeast"
+    },
+    "electronics-eduqas/discovering-electronics/8": {
+      file: "zener-regulator-active-clamping",
+      label: "Move the supply",
+      line: "The input voltage climbs. Predict what happens to the output and to the current through the zener.",
+      after: "$end"
+    },
+    "design-technology-eduqas/materials-and-properties/4": {
+      file: "thermoforming-vs-thermosetting-polymers",
+      label: "Slide or hold?",
+      line: "Two polymers meet the same heat. Predict which one re-shapes and which one only chars — and say why.",
+      after: "$end"
+    },
+    "engineering-eduqas/engineering-materials-and-properties/2": {
+      file: "thermoforming-vs-thermosetting-polymers",
+      label: "Slide or hold?",
+      line: "Two polymers meet the same heat. Predict which one re-shapes and which one only chars — and say why.",
+      after: "Smart Materials"
+    },
+    "business-ocr/business-activity-marketing-people/3": {
+      file: "limited-liability-protects-personal-assets-only",
+      label: "Where the loss stops",
+      line: "A failing business, two columns of assets, one line between them — mark what creditors can reach, then say what the owner loses.",
+      after: "Suitability in Different Business Contexts"
+    },
+    "business-edexcel/investigating-small-business/10": {
+      file: "limited-liability-protects-personal-assets-only",
+      label: "Where the loss stops",
+      line: "A failing business, two columns of assets, one line between them — mark what creditors can reach, then say what the owner loses.",
+      after: "Franchises"
+    },
     "drama-aqa/theatre-roles-stagecraft/3": {
       file: "theatre-configuration-impact",
       label: "Place the audience",
