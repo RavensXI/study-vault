@@ -85,15 +85,15 @@
   }
 
   var CSS = [
-    '.svw-rs{background:#fff;border:1px solid #e8e3db;border-radius:16px;padding:1rem 1.1rem 1.05rem;',
+    '.svw-rs{background:#fff;border:1px solid #e8e3db;border-radius:16px;padding:.8rem 1rem .85rem;',
     'font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#2d2a26;line-height:1.4;}',
     '.svw-rs *{box-sizing:border-box;}',
     '.svw-rs .rs-kick{font-size:.66rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;margin:0 0 .15rem;}',
     '.svw-rs .rs-ttl{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:1.2rem;line-height:1.2;margin:0 0 .28rem;}',
-    '.svw-rs .rs-frame{font-size:.86rem;line-height:1.4;margin:0 0 .45rem;color:#4a453e;}',
-    '.svw-rs .rs-stage{background:#faf8f5;border:1px solid #efe9e0;border-radius:12px;padding:.35rem .3rem;margin:0 0 .45rem;}',
+    '.svw-rs .rs-frame{font-size:.84rem;line-height:1.36;margin:0 0 .4rem;color:#4a453e;}',
+    '.svw-rs .rs-stage{background:#faf8f5;border:1px solid #efe9e0;border-radius:12px;padding:.3rem .3rem;margin:0 0 .4rem;}',
     '.svw-rs .rs-svg{display:block;width:100%;height:auto;max-width:470px;margin:0 auto;}',
-    '.svw-rs .rs-opts{display:grid;gap:.3rem;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));margin:0 0 .45rem;}',
+    '.svw-rs .rs-opts{display:grid;gap:.25rem;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));margin:0 0 .45rem;}',
     '.svw-rs .rs-opt{display:flex;align-items:baseline;justify-content:space-between;gap:.45rem;width:100%;text-align:left;',
     'font-family:inherit;font-size:.8rem;font-weight:600;line-height:1.25;color:#2d2a26;background:#faf8f5;',
     'border:1px solid #ddd7cd;border-radius:10px;padding:.3rem .6rem;cursor:pointer;font-variant-numeric:tabular-nums;}',
@@ -105,12 +105,12 @@
     '.svw-rs .rs-tag{font-size:.68rem;font-weight:600;letter-spacing:.04em;white-space:nowrap;color:#8d8880;}',
     '.svw-rs .rs-opt.is-key .rs-tag{color:#4f7d63;}',
     '.svw-rs .rs-opt[aria-pressed="true"] .rs-tag{color:#e8e3db;}',
-    '.svw-rs .rs-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin:0 0 .45rem;}',
+    '.svw-rs .rs-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin:0 0 .4rem;}',
     '.svw-rs .rs-run{font-size:.76rem;color:#8d8880;min-height:1rem;}',
     '.svw-rs .rs-go{font-family:inherit;font-size:.82rem;font-weight:600;color:#fff;background:#2d2a26;border:1px solid #2d2a26;',
     'border-radius:10px;padding:.45rem .95rem;cursor:pointer;white-space:nowrap;}',
     '.svw-rs .rs-go:disabled{opacity:.4;cursor:default;}',
-    '.svw-rs .rs-cap{font-size:.84rem;line-height:1.45;margin:0;min-height:4.8em;color:#3c3831;}',
+    '.svw-rs .rs-cap{font-size:.84rem;line-height:1.4;margin:0;min-height:4em;color:#3c3831;}',
     '.svw-rs .rs-cap b{font-weight:700;}',
     '.svw-rs .rs-cap b.ok{color:#4f7d63;}',
     '.svw-rs .rs-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;',
@@ -150,7 +150,7 @@
       /* ---------- stage ---------- */
       var stage = h('div', 'rs-stage');
       var s = svg('svg', {
-        'class': 'rs-svg', viewBox: '0 0 300 90',
+        'class': 'rs-svg', viewBox: '0 0 300 82',
         preserveAspectRatio: 'xMidYMid meet', role: 'img'
       });
       var sTitle = svg('title', {}); sTitle.textContent = 'Spectra';
@@ -178,18 +178,18 @@
         lab.textContent = label;
         g.appendChild(lab);
         g.appendChild(svg('rect', {
-          x: X0, y: 12, width: X1 - X0, height: 18, rx: 2,
+          x: X0, y: 12, width: X1 - X0, height: 15, rx: 2,
           fill: 'url(#' + uid + '-g)', stroke: '#cfc6b7', 'stroke-width': .8
         }));
         var ghosts = [], links = [];
         REST.forEach(function (nm) {
           var lk = svg('line', {
-            x1: xOf(nm).toFixed(2), y1: 21, x2: xOf(nm).toFixed(2), y2: 21,
+            x1: xOf(nm).toFixed(2), y1: 19.5, x2: xOf(nm).toFixed(2), y2: 19.5,
             stroke: '#fff', 'stroke-width': 1.3, 'stroke-linecap': 'round', 'stroke-opacity': .92
           });
           lk.style.display = 'none'; g.appendChild(lk); links.push(lk);
           var gh = svg('line', {
-            x1: xOf(nm).toFixed(2), y1: 12, x2: xOf(nm).toFixed(2), y2: 30,
+            x1: xOf(nm).toFixed(2), y1: 12, x2: xOf(nm).toFixed(2), y2: 27,
             stroke: '#fff', 'stroke-width': 1.3, 'stroke-dasharray': '2.4 2.4', 'stroke-opacity': .85
           });
           gh.style.display = 'none'; g.appendChild(gh); ghosts.push(gh);
@@ -198,12 +198,12 @@
         REST.forEach(function (nm) {
           var r = svg('rect', {
             'class': 'rs-line', x: (xOf(nm) - 1.6).toFixed(2), y: 12,
-            width: 3.2, height: 18, fill: '#17161a',
+            width: 3.2, height: 15, fill: '#17161a',
             stroke: '#f7f3ec', 'stroke-width': .7, 'stroke-opacity': .75
           });
           g.appendChild(r); lines.push(r);
           var t = svg('text', {
-            x: xOf(nm).toFixed(2), y: 39, 'font-size': 11, 'text-anchor': 'middle',
+            x: xOf(nm).toFixed(2), y: 36, 'font-size': 11, 'text-anchor': 'middle',
             fill: '#5b564e', 'font-family': 'Inter, system-ui, sans-serif'
           });
           t.textContent = nm;
@@ -298,13 +298,13 @@
         if (kind === 'shift') {
           strip[0].g.setAttribute('transform', 'translate(0,0)');
           strip[1].g.style.display = 'none';
-          strip[2].g.setAttribute('transform', 'translate(0,47)');
+          strip[2].g.setAttribute('transform', 'translate(0,43)');
           strip[2].lab.textContent = 'Arriving from the galaxy';
         } else {
           strip[0].g.setAttribute('transform', 'translate(0,0)');
           strip[1].g.style.display = '';
-          strip[1].g.setAttribute('transform', 'translate(0,30)');
-          strip[2].g.setAttribute('transform', 'translate(0,60)');
+          strip[1].g.setAttribute('transform', 'translate(0,27)');
+          strip[2].g.setAttribute('transform', 'translate(0,54)');
           strip[1].lab.textContent = 'Arriving from galaxy A';
           strip[2].lab.textContent = 'Arriving from galaxy B';
         }
@@ -360,8 +360,7 @@
           strip[2].nums.forEach(function (t) { t.style.display = 'none'; });
           strip[1].lab.textContent = 'Galaxy A';
           strip[2].lab.textContent = 'Galaxy B';
-          frame.textContent = 'Hydrogen leaves the same dark lines wherever it is, so each galaxy’s ' +
-            'light can be compared with the lab. Which of these two galaxies is farther away?';
+          frame.textContent = PREMISE + 'Which of these two galaxies is farther away?';
           label(0, 'Galaxy A is farther');
           label(1, 'Galaxy B is farther');
           label(2, 'Both are the same distance');
@@ -376,12 +375,12 @@
         publish();
       }
 
-      var PREMISE = 'Hydrogen leaves the same dark lines wherever it is, so a shift against the ' +
-        'lab reveals how a galaxy moves. ';
+      var PREMISE = 'Hydrogen always leaves the same dark lines; a shift against the lab ' +
+        'reveals motion. ';
 
       function frameShift(r) {
         if (r.truth === 'none') {
-          return PREMISE + 'This one neither approaches nor recedes — where do its lines land?';
+          return PREMISE + 'Rarely, a galaxy neither approaches nor recedes — where do its lines land?';
         }
         if (r.truth === 'blue') {
           return PREMISE + 'This one approaches us at ' + group(speedKms(r.pm)) +
@@ -482,12 +481,13 @@
             return ok('a shift towards the blue end. Approaching at ' + v + ' km/s squeezes each ' +
               'wavelength by ' + f + ', so ' + HEAD + ' nm arrives as ' + o + ' nm — shorter wavelength, higher frequency.');
           }
-          return ok('the lines stay put. With no motion towards or away, each crest sets off from ' +
-            'the same distance, so ' + HEAD + ' nm arrives as ' + HEAD + ' nm. No stretch, no squeeze.');
+          return ok('the lines stay put: ' + HEAD + ' nm arrives as ' + HEAD + ' nm. Almost every ' +
+            'galaxy recedes as the universe expands; only neighbours like Andromeda approach, ' +
+            'so no shift is rare.');
         }
         if (c === 'slower') {
-          return no('you said the light arrives more slowly. It does not — light from every galaxy ' +
-            'arrives at 3.0 × 10⁸ m/s. ' + (r.pm === 0
+          return no('you said the light arrives more slowly. It does not: all light arrives at ' +
+            '3.0 × 10⁸ m/s. ' + (r.pm === 0
               ? 'Here nothing changed at all: ' + HEAD + ' nm left and ' + HEAD + ' nm arrived.'
               : 'The wavelength changed, not the speed: ' + HEAD + ' nm left, ' + o + ' nm arrived.'));
         }
@@ -505,8 +505,8 @@
             ' nm arrives as ' + o + ' nm. Faster recession, bigger stretch.');
         }
         if (c === 'redsmall' || c === 'redbig') {
-          return no('you said the lines shift towards red. Red means a longer wavelength, which ' +
-            'happens when the source recedes. ' + (r.pm === 0
+          return no('you said the lines shift towards red. Red is a longer wavelength, seen when ' +
+            'a source recedes. ' + (r.pm === 0
               ? 'This galaxy does neither, so ' + HEAD + ' nm arrives as ' + HEAD + ' nm.'
               : 'This one approaches at ' + v + ' km/s, so ' + HEAD + ' nm arrives as ' + o + ' nm.'));
         }
