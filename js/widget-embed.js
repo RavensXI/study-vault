@@ -14,6 +14,36 @@
   'use strict';
 
   var MAP = {
+    "statistics-aqa/planning-designing-enquiry/4": {
+      file: "stratification-not-a-sampling-method",
+      label: "Plan a stratified sample",
+      line: "Split a school into year groups, set each group’s share of the sample — then decide how the individuals are actually chosen.",
+      after: "Quota Sampling (Higher)"
+    },
+    "english-literature-eduqas/othello/3": {
+      file: "iago-exploits-perception-gap",
+      label: "Iago’s move",
+      line: "The audience sees the whole scene; Othello sees a part. Work out what Iago actually does in nine moments.",
+      after: "The Handkerchief (Act 3, Scene 4)"
+    },
+    "media-studies-aqa/media-language/2": {
+      file: "media-construction-of-reality",
+      label: "Two bulletins, one afternoon",
+      line: "Two accurate news bulletins cover the same protest. Work out what makes their versions differ — and why neither simply shows what happened.",
+      after: "$end"
+    },
+    "music-eduqas/aos2-music-for-ensemble/3": {
+      file: "small-ensemble-full-sound",
+      label: "Fill the texture",
+      line: "Five players sound thin and top-heavy. Choose the one change that fills the texture — and find out whether more players would help.",
+      after: "Comparing Ensembles: Theatre vs Chamber"
+    },
+    "classical-civilisation-ocr/the-mycenaean-world/5": {
+      file: "tholos-engineered-structure",
+      label: "How the tholos stands up",
+      line: "Predict what holds a corbelled dome together — each ring oversailing the last, the lintel’s triangle, the mound’s weight — before the section shows you.",
+      after: "$end"
+    },
     "design-technology/specialist-technical/2": {
       file: "bending-tension-compression",
       label: "Mark the two faces",
