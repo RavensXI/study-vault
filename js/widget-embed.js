@@ -14,6 +14,72 @@
   'use strict';
 
   var MAP = {
+    "economics-aqa/national-economy-and-government-objectives/1": {
+      file: "interest-rate-differential-effects",
+      label: "Predict who feels it",
+      line: "One base rate move, six households and firms — work out which way each one moves, and how long the change takes to reach them.",
+      after: "How Interest Rates Affect Producers"
+    },
+    "economics-aqa/government-policy-and-the-global-economy/2": {
+      file: "interest-rate-differential-effects",
+      label: "Predict who feels it",
+      line: "One base rate move, six households and firms — work out which way each one moves, and how long the change takes to reach them.",
+      after: "Quantitative Easing"
+    },
+    "sociology-aqa/crime-deviance/2": {
+      file: "merton-structural-strain",
+      label: "Place the person on the grid",
+      line: "Sort each case by what the person does with society’s goal and the approved route — not by their character.",
+      after: "Subcultural Theories: Albert Cohen"
+    },
+    "sociology-eduqas/crime-deviance/4": {
+      file: "merton-structural-strain",
+      label: "Place the person on the grid",
+      line: "Sort each case by what the person does with society’s goal and the approved route — not by their character.",
+      after: "Subcultural Theories: Albert Cohen"
+    },
+    "geology-eduqas/structures-and-earth-dynamics/6": {
+      file: "subduction-angle",
+      label: "Follow the slab down",
+      line: "Work out where the trench, the deepest earthquakes and the volcanoes end up when the plate dives at an angle.",
+      after: "Continental Collision Zones"
+    },
+    "geography-aqa/paper-1/2": {
+      file: "subduction-angle",
+      label: "Follow the slab down",
+      line: "Work out where the trench, the deepest earthquakes and the volcanoes end up when the plate dives at an angle.",
+      after: "Conservative Margins"
+    },
+    "astronomy-edexcel/telescopic-astronomy/1": {
+      file: "moon-synchronous-rotation",
+      label: "Predict the Moon’s face",
+      line: "Predict which face Earth sees, and how much of it is sunlit, when the Moon travels round with no spin, one spin per orbit, or two.",
+      after: "Inside the Moon"
+    },
+    "astronomy-edexcel/naked-eye-astronomy/2": {
+      file: "moon-synchronous-rotation",
+      label: "Predict the Moon’s face",
+      line: "Predict which face Earth sees, and how much of it is sunlit, when the Moon travels round with no spin, one spin per orbit, or two.",
+      after: "Libration: Peeking Around the Edge"
+    },
+    "history-ocr/english-reformation-1520-1550/8": {
+      file: "kenilworth-spatial-system",
+      label: "Read the castle plan",
+      line: "Work out why the keep, the mere, the dam and Leicester’s new building each stand where they do.",
+      after: "The Slighting of 1649–1650"
+    },
+    "history-aqa/elizabethan-england/14": {
+      file: "kenilworth-spatial-system",
+      label: "Read the castle plan",
+      line: "Work out why the keep, the mere, the dam and Leicester’s new building each stand where they do.",
+      after: "The Nineteen Days of 1575"
+    },
+    "history-ocr/english-reformation-1520-1550/9": {
+      file: "kenilworth-spatial-system",
+      label: "Read the castle plan",
+      line: "Work out why the keep, the mere, the dam and Leicester’s new building each stand where they do.",
+      after: "Robert Dudley and the 1575 Royal Visit"
+    },
     "astronomy-edexcel/telescopic-astronomy/11": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
