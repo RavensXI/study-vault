@@ -14,6 +14,42 @@
   'use strict';
 
   var MAP = {
+    "economics-aqa/how-prices-are-determined/2": {
+      file: "curve-movement-vs-shift",
+      label: "Movement or shift?",
+      line: "A price change slides the point along the curve; only a non-price factor moves the whole curve. Commit a prediction, then watch it.",
+      after: "Factors That Shift the Supply Curve"
+    },
+    "geology-eduqas/rocks-and-minerals/2": {
+      file: "igneous-texture-cooling-rate",
+      label: "Read the rock backwards",
+      line: "Predict a texture from where the magma cooled, then work backwards from crystals to a cooling history.",
+      after: "Metamorphic Recrystallisation"
+    },
+    "geology-eduqas/rocks-and-minerals/3": {
+      file: "igneous-texture-cooling-rate",
+      label: "Read the rock backwards",
+      line: "Predict a texture from where the magma cooled, then work backwards from crystals to a cooling history.",
+      after: "Colour and Mineralogy"
+    },
+    "astronomy-edexcel/naked-eye-astronomy/3": {
+      file: "tides-single-bulge-magnet",
+      label: "Two bulges, not one",
+      line: "Mark where the sea stands highest, then time Whitby’s next high water — and watch the far side bulge too.",
+      after: "$end"
+    },
+    "history-aqa/conflict-tension-first-world-war/13": {
+      file: "tactical-vs-strategic-victory",
+      label: "Two scoreboards",
+      line: "Battles won, war lost — judge where a day’s fighting really leaves a side, and what decides it.",
+      after: "The Hundred Days"
+    },
+    "history-edexcel/usa-conflict-home-abroad/12": {
+      file: "tactical-vs-strategic-victory",
+      label: "Two scoreboards",
+      line: "Battles won, war lost — judge where a day’s fighting really leaves a side, and what decides it.",
+      after: "Chemical Weapons: Agent Orange and Napalm"
+    },
     "economics-aqa/national-economy-and-government-objectives/1": {
       file: "interest-rate-differential-effects",
       label: "Predict who feels it",
@@ -60,13 +96,13 @@
       file: "moon-synchronous-rotation",
       label: "Predict the Moon’s face",
       line: "Predict which face Earth sees, and how much of it is sunlit, when the Moon travels round with no spin, one spin per orbit, or two.",
-      after: "Libration: Peeking Around the Edge"
+      after: "$end"
     },
     "history-ocr/english-reformation-1520-1550/8": {
       file: "kenilworth-spatial-system",
       label: "Read the castle plan",
       line: "Work out why the keep, the mere, the dam and Leicester’s new building each stand where they do.",
-      after: "The Slighting of 1649–1650"
+      after: "$end"
     },
     "history-aqa/elizabethan-england/14": {
       file: "kenilworth-spatial-system",
@@ -120,7 +156,7 @@
       file: "post-production-parallel-workflow",
       label: "Schedule the post team",
       line: "Predict which specialists can work while the edit is still open, and what a re-cut after picture lock does to the delivery date.",
-      after: "Pre-Production, Production and Post-Production"
+      after: "$end"
     },
     "cambridge-nationals-engineering-programmable-systems/principles-of-electronic-and-programmable-systems/2": {
       file: "current-not-used-up",
@@ -138,7 +174,7 @@
       file: "marketing-mix-interdependent",
       label: "Test the mix",
       line: "Change one P in a small business and predict which of the other three cannot stay as it was.",
-      after: "How the Four Ps Create a Brand Image"
+      after: "$end"
     },
     "citizenship-aqa/politics-participation-active-citizenship/8": {
       file: "devolution-vs-independence",
@@ -174,7 +210,7 @@
       file: "binary-search-requires-sorted-data",
       label: "Trace the binary search",
       line: "Predict what the search checks, and whether it finds the target at all — on lists that are not always sorted.",
-      after: "Choosing the Right Algorithm"
+      after: "$end"
     },
     "computer-science-edexcel/data/3": {
       file: "sampling-repeated-measurement",
@@ -204,7 +240,7 @@
       file: "fetch-decode-simultaneous",
       label: "Predict what each stage changes",
       line: "Given a CPU part-way through a short program, predict what one named register holds once fetch, decode or execute has finished.",
-      after: "CPU Performance Factor 3 — Cache Size"
+      after: "$end"
     },
     "computer-science/computational-thinking/3": {
       file: "binary-search-requires-sorted-data",
@@ -216,7 +252,7 @@
       file: "fetch-decode-simultaneous",
       label: "Predict what each stage changes",
       line: "Given a CPU part-way through a short program, predict what one named register holds once fetch, decode or execute has finished.",
-      after: "The fetch-execute cycle"
+      after: "$end"
     },
     "computer-science/computer-systems/7": {
       file: "sampling-repeated-measurement",
@@ -234,7 +270,7 @@
       file: "cross-cutting-structural-device",
       label: "Cut between the two scenes",
       line: "Two scenes, one cut — predict what an audience experiences when a director intercuts them instead of playing one and then the other.",
-      after: "The Wave as Structural Metaphor"
+      after: "$end"
     },
     "economics-aqa/how-prices-are-determined/1": {
       file: "demand-curve-movement-vs-shift",
@@ -294,7 +330,7 @@
       file: "gelatinisation-vs-dextrinisation",
       label: "Predict the starch reaction",
       line: "Read the conditions in a kitchen scenario, commit to gelatinisation, dextrinisation, both or neither, then watch the granules show what really happened.",
-      after: "Functional Properties of Carbohydrates"
+      after: "$end"
     },
     "geography-aqa/paper-1/14": {
       file: "longshore-drift-zigzag",
@@ -306,7 +342,7 @@
       file: "holderness-hard-defences",
       label: "Test a coastal defence",
       line: "Predict what a proposed scheme does to a stretch further along the coast, then watch the sediment budget settle it.",
-      after: "Conflicts on the Coast"
+      after: "$end"
     },
     "geography-aqa/paper-1/8": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -330,13 +366,13 @@
       file: "longshore-drift-zigzag",
       label: "Predict the pebble's path",
       line: "Choose how one pebble moves over eight waves, then watch the swash and backwash play it out.",
-      after: "Transport and Deposition"
+      after: "$end"
     },
     "geography-edexcel-b/uk-geographical-issues/3": {
       file: "holderness-hard-defences",
       label: "Test a coastal defence",
       line: "Predict what a proposed scheme does to a stretch further along the coast, then watch the sediment budget settle it.",
-      after: "Sustainable Approaches: Doing Nothing and Strategic Realignment"
+      after: "$end"
     },
     "geography-eduqas/landscapes-physical-processes/3": {
       file: "longshore-drift-zigzag",
@@ -372,13 +408,13 @@
       file: "porosity-vs-permeability",
       label: "Test a rock with water",
       line: "Read the grains, predict the porosity and the permeability, then watch whether the water soaks in and stops or streams straight through.",
-      after: "Sorting: Reading Energy Consistency"
+      after: "$end"
     },
     "health-social-care-ocr/principles-of-care/8": {
       file: "active-listening-behaviours",
       label: "Name the listening behaviour",
       line: "Read a short care-setting exchange and name which of the six active-listening behaviours the worker is using — or which one is missing.",
-      after: "Active Listening Skills"
+      after: "$end"
     },
     "history-aqa/elizabethan-england/13": {
       file: "armada-chain-of-consequence",
@@ -396,7 +432,7 @@
       file: "nazi-rise-contingent-not-inevitable",
       label: "Predict the election results",
       line: "Five real results between 1928 and 1933 — commit to a prediction, then see what the votes actually did.",
-      after: "The Appointment, 30 January 1933"
+      after: "$end"
     },
     "history-edexcel/weimar-nazi-germany/6": {
       file: "nazi-rise-contingent-not-inevitable",
@@ -432,7 +468,7 @@
       file: "sonata-form-key-relationships",
       label: "Follow the key journey",
       line: "Predict where the second subject goes in the exposition — and which key it comes back in.",
-      after: "Sonata form"
+      after: "$end"
     },
     "music-technology/sound-creation/2": {
       file: "adsr-simultaneous-shaping",
@@ -492,7 +528,7 @@
       file: "dependent-origination-web-not-chain",
       label: "Remove one condition",
       line: "See what ceases when a single condition is taken out of the web, and what carries on regardless.",
-      after: "Dukkha — Unsatisfactoriness and Suffering"
+      after: "$end"
     },
     "religious-studies-aqa/buddhism-beliefs/2": {
       file: "dependent-origination-web-not-chain",
@@ -510,7 +546,7 @@
       file: "trinity-three-persons",
       label: "Sort the Trinity claims",
       line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
-      after: "The Oneness of God and the Trinity"
+      after: "$end"
     },
     "religious-studies-edexcel/paper-1-catholic-christianity/1": {
       file: "trinity-three-persons",
@@ -606,7 +642,7 @@
       file: "periodic-table-group-reactivity-trends",
       label: "Predict the reactivity trend",
       line: "Two elements and one prediction — work out why reactivity climbs down Group 1 but falls down Group 7.",
-      after: "Group 7 — Halogens"
+      after: "$end"
     },
     "science-aqa/chemistry-paper-1/8": {
       file: "ion-migration-electrolysis",
@@ -624,13 +660,13 @@
       file: "equilibrium-not-static",
       label: "Predict the next ten seconds",
       line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
-      after: "Dynamic Equilibrium"
+      after: "$end"
     },
     "science-aqa/chemistry-paper-2/5": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
-      after: "The Greenhouse Effect"
+      after: "$end"
     },
     "science-aqa/chemistry-paper-2/9": {
       file: "polymer-double-bond-electron-rearrangement",
@@ -695,7 +731,7 @@
       file: "resultant-force-vector-subtraction",
       label: "Find the resultant force",
       line: "Predict what two opposing forces add up to — and what it does to the object's motion.",
-      after: "Resultant Forces"
+      after: "$end"
     },
     "science-aqa/physics-paper-2/12": {
       file: "transformer-voltage-current-tradeoff",
@@ -731,7 +767,7 @@
       file: "punnett-square-meaning",
       label: "Test the 3:1 ratio",
       line: "Fill in the missing cell, give the chance, then see what four real offspring actually do.",
-      after: "Monohybrid Inheritance"
+      after: "$end"
     },
     "science-edexcel/biology-paper-2/5": {
       file: "natural-selection-not-directed",
@@ -785,7 +821,7 @@
       file: "conservation-of-energy-dispersal",
       label: "Account for every joule",
       line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
-      after: "Drawing Energy Transfer Diagrams"
+      after: "$end"
     },
     "science-edexcel/physics-paper-1/2": {
       file: "conservation-of-energy-dispersal",
@@ -917,7 +953,7 @@
       file: "current-not-used-up",
       label: "Predict all three ammeters",
       line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
-      after: "Series and Parallel Circuits"
+      after: "$end"
     },
     "science-ocr-b/physics-paper-2/4": {
       file: "conservation-of-energy-dispersal",
@@ -929,7 +965,7 @@
       file: "half-life-exponential-decay",
       label: "Predict what is left",
       line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
-      after: "Half-Life"
+      after: "$end"
     },
     "science-ocr-b/physics-paper-2/7": {
       file: "state-change-energy-plateau",
@@ -941,25 +977,25 @@
       file: "organelle-3d-spatial-architecture",
       label: "See where organelles actually sit",
       line: "Predict where a specialised cell concentrates an organelle, then watch the textbook diagram redraw itself as the crowded thing it really is.",
-      after: "Microscopy"
+      after: "$end"
     },
     "science-ocr/biology-paper-1/4": {
       file: "photosynthesis-limiting-factor-plateau",
       label: "Lift the plateau",
       line: "The graph has levelled off — work out which single change raises the rate, and which does nothing at all.",
-      after: "Factors Affecting the Rate of Photosynthesis"
+      after: "$end"
     },
     "science-ocr/biology-paper-1/5": {
       file: "sa-v-ratio-real-limit",
       label: "Test which block copes",
       line: "Two blocks of living tissue side by side — commit to which can supply every cell through its own surface, then watch the surface and volume counted.",
-      after: "The Challenges of Size"
+      after: "$end"
     },
     "science-ocr/biology-paper-1/6": {
       file: "synapse-electrical-to-chemical",
       label: "Find where the signal stops",
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
-      after: "Synapses"
+      after: "$end"
     },
     "science-ocr/biology-paper-1/8": {
       file: "negative-feedback-continuous-cycle",
@@ -971,13 +1007,13 @@
       file: "conservation-of-energy-dispersal",
       label: "Account for every joule",
       line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
-      after: "Biotic and Abiotic Factors"
+      after: "$end"
     },
     "science-ocr/biology-paper-2/3": {
       file: "heterozygous-carrier-no-symptoms",
       label: "Predict health from genotype",
       line: "One working allele is enough — see why a carrier has no symptoms at all, yet can still pass the faulty allele on.",
-      after: "Alleles and Inheritance"
+      after: "$end"
     },
     "science-ocr/biology-paper-2/4": {
       file: "natural-selection-not-directed",
@@ -989,7 +1025,7 @@
       file: "antibodies-dont-kill",
       label: "Predict what happens next",
       line: "Commit a prediction for each scene — bound antibodies, an antigen that does not fit, an antibiotic against a virus — then see what really happens.",
-      after: "The Body’s Defence Systems"
+      after: "$end"
     },
     "science-ocr/chemistry-paper-1/2": {
       file: "atom-mostly-empty-space",
@@ -1001,7 +1037,7 @@
       file: "bond-energy-not-sequential",
       label: "Balance the bond energies",
       line: "Work out which way the energy goes at each side, then let the two totals decide whether the reaction is exothermic or endothermic.",
-      after: "Bond Energy Calculations (Higher)"
+      after: "$end"
     },
     "science-ocr/chemistry-paper-2/1": {
       file: "reactivity-series-electron-transfer",
@@ -1037,7 +1073,7 @@
       file: "em-spectrum-continuous",
       label: "Slide across the spectrum",
       line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
-      after: "Absorption, Transmission and Reflection"
+      after: "$end"
     },
     "separate-sciences-edexcel/biology-paper-1/1": {
       file: "organelle-3d-spatial-architecture",
@@ -1091,13 +1127,13 @@
       file: "atom-mostly-empty-space",
       label: "Fire the alpha beam",
       line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
-      after: "The Development of the Atomic Model"
+      after: "$end"
     },
     "separate-sciences-edexcel/chemistry-paper-1/2": {
       file: "periodic-table-group-reactivity-trends",
       label: "Predict the reactivity trend",
       line: "Two elements and one prediction — work out why reactivity climbs down Group 1 but falls down Group 7.",
-      after: "Group 7 — The Halogens"
+      after: "$end"
     },
     "separate-sciences-edexcel/chemistry-paper-1/6": {
       file: "reactivity-series-electron-transfer",
@@ -1157,7 +1193,7 @@
       file: "transformer-voltage-current-tradeoff",
       label: "Predict the secondary side",
       line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
-      after: "The National Grid and Transformers"
+      after: "$end"
     },
     "separate-sciences-edexcel/physics-paper-2/7": {
       file: "transformer-voltage-current-tradeoff",
@@ -1175,7 +1211,7 @@
       file: "photosynthesis-limiting-factor-plateau",
       label: "Lift the plateau",
       line: "The graph has levelled off — work out which single change raises the rate, and which does nothing at all.",
-      after: "Transpiration and Water Loss"
+      after: "$end"
     },
     "separate-sciences-ocr-b/biology-life-on-earth-ecosystems/4": {
       file: "natural-selection-not-directed",
@@ -1199,7 +1235,7 @@
       file: "periodic-table-group-reactivity-trends",
       label: "Predict the reactivity trend",
       line: "Two elements and one prediction — work out why reactivity climbs down Group 1 but falls down Group 7.",
-      after: "Group 7 — The Halogens"
+      after: "$end"
     },
     "separate-sciences-ocr-b/chemistry-earth-air-water/3": {
       file: "greenhouse-effect-reemission-not-blanket",
@@ -1265,13 +1301,13 @@
       file: "organelle-3d-spatial-architecture",
       label: "See where organelles actually sit",
       line: "Predict where a specialised cell concentrates an organelle, then watch the textbook diagram redraw itself as the crowded thing it really is.",
-      after: "Microscopy — Seeing Cells"
+      after: "$end"
     },
     "separate-sciences-ocr/biology-paper-1/4": {
       file: "photosynthesis-limiting-factor-plateau",
       label: "Lift the plateau",
       line: "The graph has levelled off — work out which single change raises the rate, and which does nothing at all.",
-      after: "Limiting Factors"
+      after: "$end"
     },
     "separate-sciences-ocr/biology-paper-1/5": {
       file: "sa-v-ratio-real-limit",
@@ -1307,7 +1343,7 @@
       file: "heterozygous-carrier-no-symptoms",
       label: "Predict health from genotype",
       line: "One working allele is enough — see why a carrier has no symptoms at all, yet can still pass the faulty allele on.",
-      after: "Inherited Disorders"
+      after: "$end"
     },
     "separate-sciences-ocr/biology-paper-2/9": {
       file: "antibodies-dont-kill",
@@ -1331,7 +1367,7 @@
       file: "bond-energy-not-sequential",
       label: "Balance the bond energies",
       line: "Work out which way the energy goes at each side, then let the two totals decide whether the reaction is exothermic or endothermic.",
-      after: "Bond Energy Calculations (Higher Tier)"
+      after: "$end"
     },
     "separate-sciences-ocr/chemistry-paper-2/2": {
       file: "ion-migration-electrolysis",
@@ -1403,7 +1439,7 @@
       file: "redshift-stretching-mechanism",
       label: "Predict the spectral shift",
       line: "Give a galaxy's speed and direction, then say where its hydrogen lines land in the light that reaches Earth.",
-      after: "Red-Shift and the Expanding Universe"
+      after: "$end"
     },
     "separate-sciences/biology-paper-1/4": {
       file: "heart-simultaneous-double-circulation",
@@ -1433,13 +1469,13 @@
       file: "periodic-table-group-reactivity-trends",
       label: "Predict the reactivity trend",
       line: "Two elements and one prediction — work out why reactivity climbs down Group 1 but falls down Group 7.",
-      after: "Group 7 — Halogens"
+      after: "$end"
     },
     "separate-sciences/chemistry-paper-1/6": {
       file: "reactivity-series-electron-transfer",
       label: "Predict the displacement",
       line: "Decide whether one metal will displace another from its solution, and which metal ends up as the ions.",
-      after: "Extraction of Metals"
+      after: "$end"
     },
     "separate-sciences/chemistry-paper-1/8": {
       file: "ion-migration-electrolysis",
@@ -1457,13 +1493,13 @@
       file: "equilibrium-not-static",
       label: "Predict the next ten seconds",
       line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
-      after: "Dynamic Equilibrium"
+      after: "$end"
     },
     "separate-sciences/chemistry-paper-2/5": {
       file: "greenhouse-effect-reemission-not-blanket",
       label: "Follow the infrared out",
       line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
-      after: "The Greenhouse Effect"
+      after: "$end"
     },
     "separate-sciences/physics-paper-1/1": {
       file: "conservation-of-energy-dispersal",
@@ -1505,7 +1541,7 @@
       file: "resultant-force-vector-subtraction",
       label: "Find the resultant force",
       line: "Predict what two opposing forces add up to — and what it does to the object's motion.",
-      after: "Resultant Forces"
+      after: "$end"
     },
     "separate-sciences/physics-paper-2/4": {
       file: "newtons-third-law-different-objects",
@@ -1529,14 +1565,14 @@
       file: "labelling-theory-identity",
       label: "Predict what the label does",
       line: "Two people, one act, one label — find out whether the label changes anything.",
-      after: "Labelling Theory and the Self-Fulfilling Prophecy"
+      after: "$end"
     },
     "statistics-aqa/interpreting-results-sec/3": {
       file: "time-series-trend-vs-noise",
       label: "Separate the trend from noise",
       line: "A quarterly series is trend, season and noise stacked on top of each other — commit to where it is really heading before the graph gives it away.",
       after: "Seasonal and Cyclic Trends"
-    }
+    },
   };
 
   var BASE = '/scripts/widget_pipeline/builds/';
@@ -1638,15 +1674,19 @@
   }
 
   function placeStrip(cfg) {
-    /* some lessons structure with h3s and have no h2s at all */
-    var heads = document.querySelectorAll(
-      '#lesson-content h2, .lesson-content h2, article h2, ' +
-      '#lesson-content h3, .lesson-content h3, article h3');
+    /* "$end" appends after the lesson's final section - for widgets whose
+       teaching section is the last one, so the strip never precedes it */
     var target = null;
-    for (var i = 0; i < heads.length; i++) {
-      if (heads[i].textContent.trim().indexOf(cfg.after) === 0) { target = heads[i]; break; }
+    if (cfg.after !== '$end') {
+      /* some lessons structure with h3s and have no h2s at all */
+      var heads = document.querySelectorAll(
+        '#lesson-content h2, .lesson-content h2, article h2, ' +
+        '#lesson-content h3, .lesson-content h3, article h3');
+      for (var i = 0; i < heads.length; i++) {
+        if (heads[i].textContent.trim().indexOf(cfg.after) === 0) { target = heads[i]; break; }
+      }
+      if (!target) return;
     }
-    if (!target) return;
     css();
     var strip = document.createElement('div');
     strip.className = 'sv-embed-strip';
@@ -1661,6 +1701,14 @@
     go.textContent = 'Try it';
     go.addEventListener('click', function () { openModal(cfg, strip); });
     strip.appendChild(go);
+    if (!target) {
+      /* the loader injects content_html into #study-notes; the bare
+         .lesson-content match would hit the skeleton placeholder */
+      var cont = document.getElementById('study-notes') ||
+                 document.querySelector('#lesson-content, .lesson-content, article');
+      if (cont) cont.appendChild(strip);
+      return;
+    }
     /* never trap the strip inside a tier-gated block - a widget for a
        core idea must be visible to Foundation students too */
     var gate = target.closest && target.closest('.higher-only, .foundation-only');

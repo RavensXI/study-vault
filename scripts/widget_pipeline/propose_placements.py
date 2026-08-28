@@ -74,10 +74,11 @@ for cid in CLUSTERS:
             if sc > bscore:
                 best, bscore = idx, sc
         # anchor on the heading AFTER the best section, so the strip lands
-        # at the end of the passage it illuminates; last section -> anchor
-        # on its own heading (strip sits at the section start instead)
+        # at the end of the passage it illuminates; last section -> "$end"
+        # (placeStrip appends after the final section - never before the
+        # teaching passage, which loses the lesson context)
         anchor = heads[best + 1][0] if best is not None and best + 1 < len(heads) \
-                 else (heads[best][0] if best is not None else None)
+                 else ("$end" if best is not None else None)
         rows.append({"key": "%s/%s/%s" % (l["subject"], l["unit"], l["n"]),
                      "after": anchor, "score": round(bscore, 2),
                      "title": recs[0]["title"], "n_heads": len(heads)})
