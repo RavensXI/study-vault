@@ -141,7 +141,10 @@ R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), video on R2
 - **Admin pages:** `/admin/pipeline`, `/admin/review`, `/admin/images`,
   `/admin/editor`, `/admin/editor-guide` (Tom-only, never redesigned — leave).
 - **Teacher pages:** `/teacher/login`, `/teacher/signup`, `/teacher/classes`
-  (customer-facing; redesign before Sept).
+  (customer-facing; redesign before Sept). `/teacher/dashboard` is a rewrite
+  onto `/teacher/classes` — the demo prototype it used to serve was deleted
+  29 Aug. Every figure on the class screen comes from
+  `/api/teacher/class-progress`; nothing on it is seeded or illustrative.
 - **Supabase tables:** schools, profiles, subjects, units, lessons,
   guide_pages, school_subscriptions, user_selected_subjects, lesson_visits,
   knowledge_check_scores, user_state, content_pipeline_logs, upload_jobs,
@@ -193,8 +196,7 @@ void that day — treat 2–3 Sep as a re-calibration day from the batch logs.
   saved in memory; read real throughput from batch logs, re-size caps).
 - **English Literature debt**: audit + worklist for AQA regex-generated
   flashcards and placeholder `content_html`; then fixes on approval.
-- **Parents' evening print view**; **dashboard progress widgets** (replace
-  demo data with real Supabase queries).
+- **Parents' evening print view**.
 - **Exam dates 2027 edition** of `data/exam-dates-2026.json` once boards
   publish timetables.
 - **Mobile app (Capacitor)** — execution ready when Tom green-lights.

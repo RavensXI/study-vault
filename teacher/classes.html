@@ -107,8 +107,26 @@
           padding:5px 13px;color:var(--sec)}
     .pill b{color:var(--ink);font-weight:700}
 
+    /* ---- the attainment strip ----
+       Three figures a teacher can read from the doorway. Deliberately not four:
+       the fourth slot on the old prototype was "total study hours", which is the
+       kind of number that gets a school a complaint rather than a lesson plan. */
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
+    .stats div{background:var(--card);border:1px solid var(--line);border-radius:16px;
+               padding:14px 16px;box-shadow:0 1px 2px rgba(38,35,30,.04)}
+    .stats b{display:block;font-family:var(--read);font-size:1.75rem;font-weight:700;line-height:1.15}
+    .stats small{display:block;font-size:.78rem;color:var(--sec);margin-top:2px}
+    .stats i{font-style:normal;color:var(--mut)}
+
     .sheet{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;
            box-shadow:0 1px 2px rgba(38,35,30,.04)}
+    /* a coverage bar inside a table cell — same component the pack uses */
+    .cov{position:relative;display:block;height:9px;width:120px;background:#ece5d7;border-radius:5px}
+    .cov i{display:block;height:100%;background:#5b8f6d;border-radius:5px}
+    .cov.low i{background:#b8624e}
+    .cov.mid i{background:#c09442}
+    .tag{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:.8rem;color:var(--anchor)}
+    .hint{font-size:.82rem;color:var(--mut);margin-top:8px}
     .scroller{overflow-x:auto}
     table{width:100%;border-collapse:collapse;font-size:.89rem}
     th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);
@@ -192,6 +210,7 @@
 
     @media (max-width:660px){
       .fields{grid-template-columns:1fr}
+      .stats{grid-template-columns:1fr}
       .kv{grid-template-columns:repeat(2,1fr)}
       .two{grid-template-columns:1fr}
       .codewrap{margin-left:0;width:100%}
@@ -348,6 +367,31 @@
      Everything here comes from /api/teacher/class-progress, which enforces the
      data boundary server-side: attainment through, last-active bucketed, study
      habits never sent. Nothing below tries to be cleverer than that. */
+  /* A course made only of practice units carries no knowledge check at all, so a
+     blank attainment panel there is the format working, not the data missing.
+     Saying which it is costs one line and saves a support email. */
+  function allPractice(d) {
+    var u = (d.coverage && d.coverage.units) || [];
+    return u.length > 0 && u.every(function (x) { return x.practice; });
+  }
+
+  function statsHtml(d) {
+    var a = d.attainment;
+    if (!a) return '';
+    var acc = a.accuracy == null ? '&mdash;' : a.accuracy + '%';
+    var evidence = a.accuracy == null
+      ? (a.answered ? 'only ' + a.answered + ' answers so far' : 'no quiz answers yet')
+      : 'over ' + a.answered + ' answers';
+    var cov = d.coverage;
+    return '<div class="stats">' +
+      '<div><b>' + acc + '</b><small>recall accuracy &middot; <i>' + evidence + '</i></small></div>' +
+      '<div><b>' + a.studentsWithEvidence + ' <i>of ' + a.size + '</i></b>' +
+        '<small>have been quizzed in this subject</small></div>' +
+      '<div><b>' + (cov ? cov.lessonsTouched : 0) +
+        (cov && cov.lessonsInStartedUnits ? ' <i>of ' + cov.lessonsInStartedUnits + '</i>' : '') + '</b>' +
+        '<small>lessons reached in the units they have started</small></div></div>';
+  }
+
   function viewHtml(d) {
     var act = d.activity || {};
     var order = ['this week','last week','this month','over a month','never'];
@@ -355,8 +399,45 @@
       return '<span class="pill"><b>' + act[k] + '</b> ' + esc(k) + '</span>';
     }).join('');
 
-    var h = '<div class="section"><h3>Last worked on ' + esc(d.class.subject || 'this subject') + '</h3>' +
+    var h = statsHtml(d);
+
+    h += '<div class="section"><h3>Last worked on ' + esc(d.class.subject || 'this subject') + '</h3>' +
             '<div class="bars">' + (pills || '<span class="thin">No activity recorded yet.</span>') + '</div></div>';
+
+    /* Curriculum coverage: which lessons have been REACHED, in which units.
+       A completion count and an opened-but-unfinished count, both aggregated
+       over the class. No day, no duration, no per-child grid — this answers
+       "what have they got to", not "when were they at their desk". */
+    h += '<div class="section"><h3>Where the class has got to</h3>';
+    var cov = d.coverage;
+    if (!cov || !cov.units.length) {
+      h += '<div class="empty">Nobody has opened a lesson in this subject yet. ' +
+           'Once they do, this shows which units they have reached and how far into ' +
+           'each one they are.</div>';
+    } else {
+      h += '<div class="sheet"><div class="scroller"><table><thead><tr>' +
+           '<th>Unit</th><th class="num">Lessons reached</th><th class="num">Started it</th>' +
+           '<th class="num">Typical lessons done</th></tr></thead><tbody>';
+      cov.units.forEach(function (u) {
+        var pct = u.percent == null ? 0 : u.percent;
+        var cls = pct < 40 ? 'low' : (pct < 80 ? 'mid' : '');
+        h += '<tr><td>' + esc(u.unit) +
+             (u.practice ? ' <span class="where">practice</span>' : '') + '</td>' +
+             '<td class="num"><span class="cov ' + cls + '" style="display:inline-block;vertical-align:middle;' +
+             'margin-right:8px"><i style="width:' + pct + '%"></i></span>' +
+             u.touched + (u.lessons ? ' of ' + u.lessons : '') + '</td>' +
+             '<td class="num">' + u.studentsStarted + ' of ' + d.size + '</td>' +
+             '<td class="num">' + u.avgDone + '</td></tr>';
+      });
+      h += '</tbody></table></div></div>';
+      if (cov.unitsUntouched) {
+        h += '<p class="hint">' + cov.unitsUntouched + ' other unit' +
+             (cov.unitsUntouched === 1 ? '' : 's') + ' on this course ' +
+             (cov.unitsUntouched === 1 ? 'has' : 'have') + ' nothing recorded. On a course ' +
+             'that offers more options than any one class takes, that is expected.</p>';
+      }
+    }
+    h += '</div>';
 
     h += '<div class="section"><h3>Questions the class gets wrong</h3>';
     if (!(d.missedItems || []).length) {
@@ -374,6 +455,63 @@
              '<td class="num">' + q.students + '</td></tr>';
       });
       h += '</tbody></table></div></div>';
+    }
+    h += '</div>';
+
+    /* Named error patterns. These are only written when a wrong answer MATCHED a
+       known misconception, never on a guess — which is why the empty state has
+       to say "none matched" rather than "no data". The tally has been coming
+       back from the API since August and was simply never drawn. */
+    h += '<div class="section"><h3>Misconceptions the class shares</h3>';
+    if (!(d.misconceptions || []).length) {
+      h += '<div class="empty">No named misconception has been matched in this class yet. ' +
+           'These are only recorded when a wrong answer matches a known error pattern, ' +
+           'so an empty table means nothing has been diagnosed &mdash; not that nobody has ' +
+           'made a mistake. The table above shows every wrong answer.</div>';
+    } else {
+      h += '<div class="sheet"><div class="scroller"><table><thead><tr>' +
+           '<th>Error pattern</th><th>Where</th><th class="num">Students</th>' +
+           '<th class="num">Times</th></tr></thead><tbody>';
+      d.misconceptions.forEach(function (m) {
+        h += '<tr><td class="tag">' + esc(String(m.tag).replace(/-/g, ' ')) + '</td>' +
+             '<td class="where">' + esc(m.unitName || m.unit || '—') +
+             (m.lesson ? ' &middot; L' + esc(m.lesson) : '') + '</td>' +
+             '<td class="num">' + m.students + '</td>' +
+             '<td class="num">' + m.count + '</td></tr>';
+      });
+      h += '</tbody></table></div></div>';
+    }
+    h += '</div>';
+
+    /* Attainment lesson by lesson: the same knowledge-check rows as the pupil
+       column, tallied down the class instead of across one child. */
+    h += '<div class="section"><h3>Weakest lessons</h3>';
+    if (!(d.lessonAttainment || []).length) {
+      h += '<div class="empty">' + (allPractice(d)
+        ? 'This course is practice-first, so it carries no knowledge-check quiz. ' +
+          'There is no recall accuracy to report for it, and that is the format ' +
+          'working rather than anything missing.'
+        : 'No lesson yet has quiz answers from two or more of them. One pupil’s ' +
+          'score is not a class picture, so nothing is averaged here until a second ' +
+          'has been quizzed on the same lesson.') + '</div>';
+    } else {
+      h += '<div class="sheet"><div class="scroller"><table><thead><tr>' +
+           '<th>Lesson</th><th class="num">Accuracy</th><th class="num">Students</th>' +
+           '<th class="num">Answers</th></tr></thead><tbody>';
+      d.lessonAttainment.forEach(function (l) {
+        var cls = l.accuracy < 55 ? 'low' : (l.accuracy < 72 ? 'mid' : '');
+        h += '<tr><td>' + esc(l.title || ('Lesson ' + l.lesson)) +
+             '<br><span class="where">' + esc(l.unit) + ' &middot; L' + l.lesson + '</span></td>' +
+             '<td class="num"><span class="cov ' + cls + '" style="display:inline-block;vertical-align:middle;' +
+             'margin-right:8px"><i style="width:' + l.accuracy + '%"></i></span>' + l.accuracy + '%</td>' +
+             '<td class="num">' + l.students + '</td>' +
+             '<td class="num">' + l.answered + '</td></tr>';
+      });
+      h += '</tbody></table></div></div>';
+      if (d.attainment && d.attainment.lessonsWithEvidence > d.attainment.lessonsShown) {
+        h += '<p class="hint">' + (d.attainment.lessonsWithEvidence - d.attainment.lessonsShown) +
+             ' more lessons have some quiz evidence, but too little to average yet.</p>';
+      }
     }
     h += '</div>';
 

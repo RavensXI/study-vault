@@ -38,11 +38,28 @@ with sync_playwright() as pw:
     codes = pg.locator(".code").all_inner_texts()
     t("selected class shows its join code", any("QENSA9" in c for c in codes), codes)
 
-    # the progress table for the selected class (fixture: 25 real students)
-    rows = pg.locator("tbody tr").count()
-    t("progress table renders the class", rows >= 25, "%d rows" % rows)
+    # the progress table for the selected class (fixture: 25 real students).
+    # .last, not "every tbody" — the screen now carries several tables and a
+    # bare row count passed while the student table was empty.
+    rows = pg.locator("tbody").last.locator("tr").count()
+    t("progress table renders the class", rows == 25, "%d rows" % rows)
     names = pg.locator("tbody").last.inner_text()[:2000]
     t("a student name renders", "Albie" in names)
+
+    # the class-level blocks, all from the same real capture
+    body = pg.locator("main").inner_text()
+    low = body.lower()
+    t("attainment strip renders a real accuracy",
+      "recall accuracy" in low and "75%" in body and "over 284 answers" in body)
+    t("coverage renders against the started units",
+      "where the class has got to" in low and "21 of 28" in body and "Romeo and Juliet" in body)
+    t("untouched units are counted, not listed", "26 other units" in body)
+    t("weakest lessons render with real titles",
+      "weakest lessons" in low and "Act 1: The Feud and the Party" in body)
+    t("misconceptions have an honest empty state",
+      "No named misconception has been matched" in body)
+    t("no study-habit figure reaches the screen",
+      not any(w in low for w in ("study hours", "streak", "minutes", "logged in", "homework")))
 
     # the closed class carries the shut badge once selected
     pg.select_option("#classSelect", index=2)
