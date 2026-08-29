@@ -179,6 +179,9 @@ void that day — treat 2–3 Sep as a re-calibration day from the batch logs.
   Sept) — pick the direction; Claude builds it.
 - **Microsoft SSO**: chase Entra admin consent — the blocker for all
   per-pupil data.
+- **Vercel env check**: confirm `ALLOW_US_FALLBACK` is NOT set (the AI
+  routes fail closed as of 4307ac6d, deployed 29 Aug — that env var is the
+  only override).
 - **Per-school term dates** for planner holiday awareness (needs school
   calendars only Tom can obtain).
 - **GPT-image-2 diagrams**: budget call (~£0.12/image, ~£400–700 full
@@ -188,7 +191,6 @@ void that day — treat 2–3 Sep as a re-calibration day from the batch logs.
 ### Claude's tasks (delegable — runnable any time)
 - **NLM re-calibration** on 2–3 Sep after the compute-limit change (plan
   saved in memory; read real throughput from batch logs, re-size caps).
-- **AI fallback fail-closed** (US region) — required before any DPA claim.
 - **English Literature debt**: audit + worklist for AQA regex-generated
   flashcards and placeholder `content_html`; then fixes on approval.
 - **Parents' evening print view**; **dashboard progress widgets** (replace
