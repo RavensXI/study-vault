@@ -4,7 +4,7 @@ Multi-subject GCSE revision site. Repo: https://github.com/RavensXI/study-vault
 
 ### Deployments
 - **GitHub Pages** (`main`): https://ravensxi.github.io/study-vault/ — History only, no login
-- **Vercel** (`platform`): https://www.studyvault.co.uk/ (custom domain, also accessible at study-vault-alpha.vercel.app) — full platform, public content, admin/teacher login
+- **Vercel** (`platform`): https://www.studyvault.co.uk/ (custom domain, also study-vault-alpha.vercel.app) — full platform, public content, admin/teacher login
 
 ### Owner
 Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
@@ -13,169 +13,196 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 
 ## Branches
 - **`main`** — History at root level. Single-subject, no login.
-- **`platform`** (current) — multi-subject. History under `history/`. Public content, school login for students, password-gated admin/teacher areas.
+- **`platform`** (current) — multi-subject. History under `history/`. Public content, school login, password-gated admin/teacher areas.
+- **`lesson-widgets`** — the interactive widget fleet (see below). Local only, merge-ready (clean test-merge vs platform, QA evidence 29 Aug), awaiting Tom's merge decision.
+- **`sandbox` / `landing-wizard`** — summer redesign work. Never merge to platform/main until launch.
 
-## Subjects — Unity College (school_id set, all on Vercel)
+## Counts snapshot — 29 Aug 2026
 
-| Subject | Exam Board | Lessons | Units | Podcasts |
-|---------|-----------|---------|-------|----------|
-| History | AQA | 60 | 4 (Conflict, Health, Elizabethan, America) | 60/60 |
-| Business Studies | Edexcel 1BS0 | 30 | 2 themes | 30/30 |
-| Geography | AQA 8035 | 54 | 3 (Paper 1, Paper 2, Geographical Skills) | 40/40 |
-| Sport Science | OCR R180 | 10 | 1 (R180) | 10/10 |
-| Drama | OCR J316 | 12 | 2 (Blood Brothers, Rise Up) | 12/12 |
-| Food Technology | AQA 8585 | 10 | 1 (Nutrition & Health) | 10/10 |
-| Religious Education | AQA 8062 | 40 | 8 | 40/40 |
-| Music | Eduqas C660U | 26 | 6 | 26/26 |
-| English Literature | AQA 8702 | 42 | 5 | 42/42 |
-| English Language | AQA 8700 | 30 (practice-first) | 4 | No narration — practice format |
-| Science | AQA 8464 | 48 + 15 practice | 6 + 3 practice (Physics Calc, Chem Calc, Bio Data) | 48/48 |
-| Separate Sciences | AQA 8461/8462/8463 | 22 + 6 practice | 3 + 1 practice (Higher Calculations) | 22/22 |
-| Spanish | AQA 8692 | 26 | 3 | 26/26 |
-| German | AQA 8662 | 26 | 3 | 26/26 |
-| French | AQA 8652 | 26 | 3 | 26/26 |
-| Creative iMedia | OCR J834 | 23 | 4 | 23/23 |
-| Mathematics | Edexcel 1MA1 | 48 (practice-first) | 6 | No narration — practice format |
-| Computer Science | OCR J277 | 23 | 2 (Computer Systems, Computational Thinking) | 23/23 |
-| Design & Technology | AQA 8552 | 20 | 3 (Core Technical, Specialist Technical, Designing & Making) | 20/20 |
-| Music Technology | NCFE 603/7008/7 | 15 | 5 (subscribed from generic, last year — remove Sept 2026) | 15/15 |
-| **Subtotal** | | **598 + 21 practice** | | **584/584** |
+> **Rule: every count in this file carries a date.** Counts go stale the day
+> after they are written. Regenerate with `python scripts/audit_subject_status.py`
+> (add `--subjects` for per-subject live lesson counts) and re-stamp this
+> section rather than trusting or hand-editing the numbers.
 
-## Subjects — Severn Vale School (school_id set)
+| | Subjects | Lessons (live) | Lessons (all) |
+|---|---|---|---|
+| Free tier (school_id NULL) | 93 live | 4,318 | 4,412 |
+| Unity College | 18 | 554 | 554 |
+| Severn Vale School | 1 (`science-severnvale`) | 32 | 48 |
+| **Total** | | **4,904** | **5,014** |
 
-| Subject | Exam Board | Lessons | Units | Podcasts |
-|---------|-----------|---------|-------|----------|
-| Combined Science (Biology) | AQA 8464 | 16 | 2 (Bio P1, Bio P2) — bespoke from teacher PPTs | 1/16 |
-| + Chemistry & Physics | AQA 8464 | 32 | 4 (copied from generic) | 0/32 |
+Also in the census (29 Aug): 92 lessons `pending_review` — mostly the three
+new Music boards (Eduqas / OCR / Edexcel) awaiting Tom's review flips; 16
+`ready_for_teacher`; 693 units.
 
-Teacher account: Alex Cameron (acameron@severnvaleschool.com), school code `vale2026`.
+**Unity's 18 subjects** (bespoke, school code `unitypassionrespect`):
+business, computer-science, creative-imedia, design-technology, drama,
+english-language, english-literature, food-preparation-and-nutrition, french,
+gcse-music, geography, german, history, religious-studies, science,
+separate-sciences, spanish, sport-science. (Maths and Music Technology no
+longer appear as live Unity subject rows — Music Tech was last taught
+2025-26.)
 
-## Subjects — Free Tier (school_id NULL, generic content)
+**Free tier** covers every major GCSE subject across AQA / Edexcel / OCR /
+Eduqas where the spec allows (100%-coursework specs excluded), plus niche
+single-board subjects (Astronomy, Geology, Electronics, Film Studies,
+Psychology ×3 boards, Economics, Sociology, Statistics, Classical
+Civilisation, L1/2 vocational ports, and more). Per-board lesson counts:
+run the census with `--subjects` — do not maintain a table here.
 
-**72 live free-tier subjects, ~3,823 lessons.** Run `python scripts/_audit_subject_status.py` or query Supabase for the live count.
+**Architecture:** `school_id = NULL` rows are generic/public content for free
+users. `school_id` set = school-specific bespoke content. Both tiers share
+the same templates and loaders. **Never mix generic and school content; Unity
+content never ports to free tier (same spec = fresh build).**
 
-### Core subjects across all exam boards
+## What every subject has
 
-| Subject | AQA | Edexcel | OCR | Eduqas | Total |
-|---------|-----|---------|-----|--------|-------|
-| English Language | 30 | 50 | 50 | 50 | 180 |
-| English Literature | 214 | 215 | 156 | 190 | 775 |
-| Mathematics | 48 | 48 | 48 | 48 | 192 |
-| Combined Science | 85 | 63 | 63 (J250) + 63 (J260 OCR-B) | — | 274 |
-| Separate Sciences | 69 | 71 | 72 (J260) + 74 (J260 OCR-B) | — | 286 |
-| History | 210 | 202 | 117 | 167 | 696 |
-| Geography | 52 | 40 (A) + 40 (B) | 32 | 44 | 208 |
-| Religious Studies | 74 | 71 | — | 53 | 198 |
-| Business | 30 | 30 | 30 | — | 90 |
-| Computer Science | 26 | 26 | 23 | 29 | 104 |
-| Physical Education | 33 | 30 | 27 | — | 90 |
-| Health & Social Care | — | 12 | 13 | 13 | 38 |
-| Sociology | 33 | — | — | 33 | 66 |
+Content, practice questions (6/lesson), knowledge checks (5/lesson),
+flashcards (5/lesson), TTS narration (Azure, MP3s on R2), hero images
+(photographs — vision-gated pipeline), exam/revision technique guides,
+curated related media (URL-audited — see YouTube audit below).
 
-### Single-board subjects
+**Format exceptions — practice-first** (`practice.html` + `practice-loader.js`,
+no narration/podcasts/flashcards/KCs): Maths ×4 boards, English Language ×4,
+Spanish/French/German (AQA + Edexcel), Science/Separate-Science calculation
+units, Geography Skills. Mixed-format subjects list practice units in
+`subjects.settings.practice_units`.
 
-| Subject | Board | Lessons |
-|---------|-------|---------|
-| Astronomy | Edexcel | 26 |
-| Cambridge Nationals — Enterprise & Marketing | OCR | 12 |
-| Cambridge Nationals — Sport Studies | OCR | 10 |
-| Citizenship | AQA | 29 |
-| Design & Technology | AQA | 20; Eduqas | 22 |
-| Drama | AQA | 85 |
-| Electronics | Eduqas | 20 |
-| Engineering | AQA 22; Eduqas 14 | |
-| Film Studies | Eduqas | 44 |
-| Food Preparation & Nutrition | Eduqas | 16 |
-| French / German / Spanish (practice) | AQA + Edexcel | 26/27 each board |
-| Geology | Eduqas | 30 |
-| Hospitality & Catering | Eduqas | 10 |
-| IT | OCR (J836) | 12 |
-| Media Studies | AQA | 20 |
-| Music Technology | NCFE | 15 |
-| **Psychology** | AQA | 32 *(2026-05-28)* |
-| Statistics | AQA | 28 |
+**Tier gaps (accurate 29 Aug 2026):**
+- **Diagrams**: Unity-only (Gemini diagrams stripped from free tier Apr 2026;
+  GPT-image-2 replacement parked).
+- **Cinematic explainer videos**: Unity complete (552). Free tier now has
+  SOME videos — Google Drive video cards exist on e.g. economics-aqa,
+  geology-eduqas and science-aqa lessons — but no systematic free-tier video
+  coverage. (Do not claim "free tier has no videos"; it is no longer true.)
+- **Podcasts**: Unity complete; free-tier backlog cleared Aug 2026; new units
+  generate automatically the morning after their last lesson flips live.
 
-**Practice-format subjects** (no narration/podcasts/flashcards/KCs): Maths × 4 boards, English Language × 4 boards, Spanish/French/German (AQA + Edexcel), Science calculation units, Geography Skills.
+## Interactive widgets (branch `lesson-widgets`, unmerged)
 
-**Grand total: ~4,400 lessons** across 72 free-tier subjects + 19 Unity bespoke + 3 Severn Vale.
+91 bespoke misconception-driven interactives wired into 279 lessons
+(280 strips; one lesson carries two), built Aug 2026, all field-reviewed by
+Tom. Commit-before-feedback, phone-first, mastery exit (3-in-a-row), embed
+strip → modal. Verified 29 Aug: clean test-merge vs platform, 91/91 harness
+passes, 279/279 lessons render.
 
-**Architecture:** `school_id = NULL` rows are generic/public content visible to free users. `school_id` set = school-specific bespoke content. Both tiers share the same templates and loaders.
-
-Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), flashcard questions (5/lesson), TTS narration (Azure Speech, MP3s on R2), hero images, exam technique guides, revision technique guides, related media (curated YouTube, study tools, documentaries, podcasts). **Diagrams are Unity-only** — Gemini diagrams were stripped from all free tier lessons on 22 Apr 2026 due to quality concerns; GPT-image-2 being evaluated as replacement (see Active TODO). **Cinematic videos are Unity-only** — free tier has none because NotebookLM's 20/day generation limit doesn't scale. **Exceptions using practice-first format** (`practice.html` + `practice-loader.js`): Maths (misconception detection, 5 maths input types), English Language (10 English input types including AI marking), Languages — Spanish/French/German (7 language input types including AI translation marking), and Science/Separate Sciences calculation units (equation recall drilling with hint toggle). No article narration/podcasts/flashcards/KCs for practice-first subjects. Science calculation units sit alongside article units (mixed format via `practice_units` in subject settings).
+- Wiring: `js/widget-embed.js` (MAP of lesson-key → widget file, anchor,
+  optional per-lesson `variant`). Builds in `scripts/widget_pipeline/builds/`.
+- Pipeline + design rules: `scripts/widget_pipeline/BUILD_GUIDE.md` (the
+  design authority), `CONTRACT.md`, `STYLE_DIGEST.md`, harness at
+  `scripts/widget_pipeline/harness/check.mjs`.
+- Completion credit: widget mastery earns a 10-weight "interactive" activity
+  (commit 23635106; in-denominator vs bonus-credit decision open with Tom).
+- Remaining queues: 3-lesson band (48 clusters), merge decision.
 
 ## Specification Database
 
-193 GCSE specifications from all 4 exam boards, converted to markdown with YAML frontmatter. Used by the content generation pipeline as the authoritative source for each subject.
+193 GCSE specs from all 4 boards as markdown + YAML frontmatter, the
+authoritative source for content generation.
 
 - **Location:** `specs/{board}/{slug}-{code}.md` — indexed by `specs/index.json`
-- **Boards:** AQA (48), Edexcel (37), OCR (42), WJEC (32), Eduqas (34)
-- **Script:** `python scripts/download_specs.py` — downloads PDFs from exam board websites, converts via `markitdown`, adds frontmatter
-- **Usage:** Pipeline matches teacher's exam board + subject to the right spec file. Content agents receive the spec markdown as context.
-- **Frontmatter:** `board`, `subject`, `spec_code`, `slug`
-- **Two build modes:** Bespoke (teacher uploads resources + spec) or Generic (spec-only, no teacher input). Generic mode enables building every GCSE subject at scale. See `docs/PIPELINE.md` for the rebuilt master playbook and `docs/PLANNING_PROMPT.md` for lesson planning rules (exam weight scaling, unit structure, lesson count ranges, article-vs-practice mode decision).
+- **Script:** `python scripts/download_specs.py`
+- **Two build modes:** Bespoke (teacher uploads) or Generic (spec-only).
+  See `docs/PIPELINE.md` (master playbook) and `docs/PLANNING_PROMPT.md`.
+- Annual spec-currency audit before each new cohort (skill:
+  `spec-currency-audit-2027`).
 
 ## Dynamic Architecture (LIVE on Vercel)
 
-All content served from Supabase. Static HTML files remain as backup.
+All content served from Supabase. Static HTML remains as backup. Images on
+R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), video on R2
+(`studyvault-video`).
 
-- **~4,400 lessons** (~535 Unity incl 21 practice + 48 Severn Vale + 3,823 generic free-tier across 72 subjects) plus hundreds of guide pages in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
-- **Templates:** `lesson.html`, `browse.html`, `guide.html`, `practice.html` with JS loaders
-- **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/practice/{subject}/{unit}/{number}` (maths, geography skills, english-language, spanish, french, german, science calculations), `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`, `/exams` (personal exam timetable + revision planner)
-- **Mixed-format subjects:** `subjects.settings.practice_units` array lists which units use `/practice/` URLs. `browse-loader.js` checks this per unit. Example: Geography has article units (Paper 1, Paper 2) + practice unit (Geographical Skills). English Language has all 4 units as practice-first.
+- **Templates:** `lesson.html`, `browse.html`, `guide.html`, `practice.html` + JS loaders
+- **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/practice/...`,
+  `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`, `/exams`
 - **Auth (4 tiers):**
-  - **Free users:** No login. Generic content (school_id NULL). NO ADS — decided against ads on the free tier. Prefs stored in localStorage via `js/free-user.js`.
-  - **School students:** ⚠ **SCHOOL CODES ARE RETIRED — do not describe them as the model.** School sign-in is **SSO (Microsoft / Google)**, with school email as the fallback. The code path (`schools.settings.student_code`, `api/auth/login.js`) still exists in the repo and still functions, but it is legacy: it is not what a school will use and it is not what to build against. Individual student identity arrives with SSO — until then there is none, which is why teacher-facing per-pupil data cannot be built yet.
-  - **Teachers:** Individual Supabase Auth accounts (email + password). Invited by admin, sign up at `/teacher/signup?token=...`. Login at `/teacher/login`. Scoped to their school + assigned subjects via `teacher_subjects` table. Session stored in both sessionStorage and localStorage (cross-tab). Auth-gate supports `data-auth="teacher"` mode.
-  - **Admin:** `ADMIN_PASSWORD` via `js/auth-gate.js`. Sees all schools/subjects. Shared password still works alongside Supabase Auth.
-  - **Microsoft SSO:** The school model. Still pending Entra admin consent — that consent is the blocker for student identity, and therefore for everything teacher-facing.
-- **Admin pages:** `/admin/pipeline` (upload/generate), `/admin/review` (QC), `/admin/images` (image QA with school filter), `/admin/editor` (lesson editor), `/admin/editor-guide` (guide editor)
-- **Teacher pages:** `/teacher/login`, `/teacher/signup`, `/teacher/dashboard` (demo data), `/teacher/review` → review.html, `/teacher/editor` → editor.html, `/teacher/upload` → pipeline.html
-- **Supabase tables:** schools, profiles, subjects, units, lessons, guide_pages, school_subscriptions, user_selected_subjects, lesson_visits, knowledge_check_scores, content_pipeline_logs, upload_jobs, pipeline_steps, classes, class_members, teacher_invitations, teacher_subjects, notifications
-- **R2 buckets:** `studyvault-audio` (`pub-f7b76d81365b4b2f954567763694a24e.r2.dev`), `studyvault-images` (`pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev`), `studyvault-video` (`pub-157a3979382e4f98b51f7f868078e5a3.r2.dev`)
-- **Cookie consent:** Banner on all pages via `js/cookie-consent.js`. Privacy policy at `/privacy.html`.
+  - **Free users:** no login required; email+password accounts exist for sync
+    (`user_state` table, merge-on-sign-in — js/account-sync.js). **NO ADS on
+    the free tier** — settled decision. ⚠ STANDING RULE: no student state may
+    be device-only; every new localStorage key joins the account-sync
+    whitelist.
+  - **School students:** ⚠ **SCHOOL CODES ARE RETIRED — not the model.**
+    School sign-in is **SSO (Microsoft / Google)**, school email fallback.
+    The code path (`schools.settings.student_code`, `api/auth/login.js`)
+    still functions but is legacy — do not build against it. Microsoft SSO
+    awaits Entra admin consent; that consent gates student identity and
+    therefore everything teacher-facing per-pupil.
+  - **Teachers:** individual Supabase Auth accounts, invited by admin,
+    scoped via `teacher_subjects`. One consolidated screen at
+    `/teacher/classes`. Boundary rules: teachers SEE attainment +
+    misconceptions; behaviour aggregate-only; never study habits; NO
+    work-setting/assignments/due dates (vision boundary).
+  - **Admin:** `ADMIN_PASSWORD` via `js/auth-gate.js`.
+- **AI routes:** all 5 run on Bedrock **eu-west-2 (London)** — verify with
+  `servedBy` on `/api/ai-mark`. Marking is marks-routed (Haiku ≤8, Sonnet >8;
+  essays 2000 tokens). ⚠ open: US fallback must fail closed before any DPA
+  claim.
+- **Admin pages:** `/admin/pipeline`, `/admin/review`, `/admin/images`,
+  `/admin/editor`, `/admin/editor-guide` (Tom-only, never redesigned — leave).
+- **Teacher pages:** `/teacher/login`, `/teacher/signup`, `/teacher/classes`
+  (customer-facing; redesign before Sept).
+- **Supabase tables:** schools, profiles, subjects, units, lessons,
+  guide_pages, school_subscriptions, user_selected_subjects, lesson_visits,
+  knowledge_check_scores, user_state, content_pipeline_logs, upload_jobs,
+  pipeline_steps, classes, class_members, teacher_invitations,
+  teacher_subjects, notifications
+- **R2 buckets:** `studyvault-audio` (pub-f7b76d81365b4b2f954567763694a24e.r2.dev),
+  `studyvault-images` (pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev),
+  `studyvault-video` (pub-157a3979382e4f98b51f7f868078e5a3.r2.dev)
+- **Cookie consent:** `js/cookie-consent.js`; privacy at `/privacy.html`.
 - **Business email:** studyvault.info@gmail.com
 
-## Active TODO
+## Automation (scheduled tasks, all hourly-heartbeat wrappers with cooldowns)
 
-### Open work (still pending)
-- **GPT-image-2 diagram evaluation** (parked) — quality much better than Gemini, ~£0.12/image, ~£400-700 full build-out cost. Two-step pipeline (Claude prompt → gpt-image-2). See `memory/gpt_image_2_evaluation.md`.
-- **Revision planner: school holiday awareness** — needs per-school term dates before Sep 2026 cohort. Open design question on intensity (more / less / hybrid). See `memory/project_holiday_awareness.md`.
-- **Revision planner: update exam dates annually** — `data/exam-dates-2026.json` needs new version each year from board timetables.
-- **Practice question format review (English Literature)** — currently 30+4-mark full essays. Consider varied mix vs exam authenticity. Needs legal advice on copyright risk. See `GCSE Platform Copyright Risk Analysis.txt`.
-- **Geography Skills L13 (Contours) and L14 (Map Interpretation) QA pass** — L11/L12 done with Tom; L13/L14 still need review.
-- **Parents' evening print view** — dashboard section with quick-print per class.
-- **Mobile app (Capacitor)** — wrap PWA for App Store + Google Play.
-- **Dashboard progress widgets** — currently hardcoded demo data; need real Supabase queries.
-- **Music Technology** — remove Unity subscription Sept 2026 (last year taught).
+| Task | Wrapper | What it does |
+|---|---|---|
+| StudyVault - Daily Podcast Build | `scripts/daily_podcast_build.ps1` | NLM podcasts for units whose last lesson flipped live; unit-complete gated; logs `scripts/_podcast_daily_logs/` |
+| StudyVault - Daily Explainer Build | `scripts/daily_explainer_build.ps1` | NLM explainer videos; logs `scripts/_explainer_daily_logs/` |
+| StudyVaultShorts | sandbox worktree `scripts/daily_shorts_build.ps1` | shorts feed, cap 100/day; yields ≤35 video slots to explainer demand |
+| StudyVault - Weekly YouTube Audit | `scripts/weekly_yt_audit.ps1` (Sun 04:00) | full link audit; Resend email on dead links; accepted-list + placeholder denylist + wrong-channel check (`scripts/_yt_audit_accepted.json`) |
+| StudyVaultBackup | (Sun 03:00) | OneDrive backup; R2→B2 mirror (30-day lock) |
 
-### Recent (last 4 weeks)
-- **Psychology AQA LIVE** (28 May) — 32 lessons / 8 units, AQA 8182, free-tier. Full assets (heroes, narration 792 + 321 re-narrate clips, related media URL-audited, 7 revision guides). Mandatory fact-check applied: 14/14 findings fixed surgically (3 HIGH — Müller-Lyer fin/corner inversion, Milgram procedure missing, Peterson & Peterson missing; 6 MEDIUM — Beck triad, Gilchrist & Nesberg framing, Piliavin alcohol-smell, Whorf/Malotki, Von Frisch distance threshold; 5 LOW). 13 affected lessons re-narrated post-fix.
-- **History Eduqas C100QS LIVE** (24 May) — 167 lessons / 16 units. Sub-agents worked once off the 1M-context credits gate. Full assets; podcasts pending (Tom does NLM).
-- **Build status reliability fix** (28 May) — `admin/build-status.html` first-load was over-fetching 78MB on cold cache; now ~500KB. Also fixed podcasts-coverage query (supabase-js .contains serialisation bug).
-- **Severn Vale science re-slug** (27 May) — `science` → `science-severnvale` to clear cross-school slug collision with Unity. R2 narration paths now namespaced; see [[architecture_multi_school_slug_model]].
-- **history-aqa entity corruption fixed** (27 May) — Unity history-aqa had broken `&reacute;` + raw entities; fixed across 86 lessons in Supabase. Open: re-narrate britain-health-people L4; sweep other Unity bespoke for the same garbling.
-- **Business Edexcel free-tier LIVE** (3 May) — 30 lessons / 2 themes. All 3 boards now have Business on free tier (AQA 30 + Edexcel 30 + OCR 30 = 90).
-- **History Edexcel 1HI0 free-tier LIVE** (1-2 May) — 13 new units, 166 lessons. Joined the 4 existing units for a 17-option picker. Middle East unit got a documented editorial pass (`scripts/_content_history-edexcel/_middle_east_audit_log.md`).
-- **Email alerts on bug reports + subject requests LIVE** (1 May) — `/api/bug-report` and `/api/subject-request` send Resend email after DB insert. Env vars: `RESEND_API_KEY`, `NOTIFY_TO`, `NOTIFY_FROM`. Awaiting `studyvault.co.uk` domain verification before switching to branded sender.
-- **Auto-sync unit.image_url from L1 hero LIVE** (2 May) — Postgres trigger `sync_unit_image_from_lesson_1_trg`. Edit any L1 hero, parent unit's `image_url` auto-updates. Schema: `scripts/_create_unit_image_sync_trigger.sql`.
-- **Validator catches HTML entities in plain-text fields** (2 May) — `scripts/_validate_content_json.py` rejects `&rsquo;`, `&amp;`, etc. in `description` / `practice_questions` / `knowledge_checks` / `flashcard_questions` / `glossary_terms`. Rule: `*_html` fields use entities; plain-text fields use unicode.
-- **Fact-check before narration** — pipeline-rule update: run `_fact_check_subject.py` BEFORE Azure narration so any content corrections don't waste a $4 narration pass. See `memory/feedback_factcheck_before_narration.md`.
+⚠ **2 Sep 2026: Gemini Notebook (ex-NotebookLM) switches to compute-based
+limits, 5-hour refresh, deferred generations.** Every calibrated quota
+(60/day podcasts, ~200/day audio, 20/day video pool, shorts contention) is
+void that day — treat 2–3 Sep as a re-calibration day from the batch logs.
 
-### Major builds completed
-- **Core 4-board coverage**: English Lang (180), English Lit (775), Maths (192 practice), Combined Science (3 boards × 144), Separate Sciences (3 boards × 286), History (4 boards × 696), Geography (4 boards / 5 papers × 208), RS (3 boards × 198), Business (3 boards × 90), Computer Science (4 boards × 104), PE (3 boards × 90).
-- **Niche / single-board generic builds**: Astronomy, Citizenship, Drama AQA (85), Engineering, Electronics, Film Studies, Food Prep & Nutrition, Geology, Health & Social Care (3 boards), IT OCR, Media Studies AQA, Music Tech, **Psychology AQA**, **Sociology** (AQA + Eduqas), Statistics AQA, Hospitality & Catering. **Coursework-only specs** (Art, Photography, Dance, L1/2 Performing Arts) excluded — see [[feedback_coursework_only_specs_excluded]].
-- **Practice-first builds**: Maths (4 boards × 48), English Language (30 / 600 problems / 151 passages each board), Languages (Spanish/French/German × 26 / 1,560 problems / 234 dictation clips), Geography Skills (14 / 280 problems), Science Practice (21 / 420 problems).
-- **Foundation/Higher tiering** (3 Apr) — 562 lessons across Maths, Sciences, Languages.
-- **Exam Countdown LIVE** (`js/exam-countdown.js`) + **Exam Timetable & Revision Planner LIVE** at `/exams` (no AI, deterministic scheduling).
-- **AI Marking API LIVE** at `/api/ai-mark` — Haiku ≤8 marks, Sonnet >8 marks, formative.
-- **Cinematic videos COMPLETE** for Unity (552/552). Free-tier no videos (NotebookLM 20/day doesn't scale).
-- **Podcasts**: AUTOMATED (17 Aug) — `daily_podcast_build.ps1` (scheduled task "StudyVault - Daily Podcast Build", ~06:00) runs `batch_podcasts.py --live-only --unit-complete --all-subjects`: a unit's podcasts generate the morning after its LAST lesson flips live, newest subjects first, cap 60/day (audio quota ~200/day, separate from the video pool). Verified by backlog recount (`_podcast_sweep.py`); health probe `--stream podcast`. Unity 526/526 done; free-tier backlog cleared by the old nightly dispatcher (formerly inside the sandbox shorts wrapper, removed 17 Aug).
-- **Diagrams**: Unity-only — CS (19), D&T (14), 7 data-viz Chart.js, 57 Geography chart problems. Free-tier diagrams stripped 22 Apr; GPT-image-2 replacement under evaluation (parked).
-- **OS Map Skills** (4 Apr) — 28 OS OpenData maps + contour overlays at R2 `geography/os-maps/`.
+## Active TODO (pruned 29 Aug 2026)
 
-### Schools
-- **Severn Vale** — code `vale2026`. Bespoke Biology (16 from teacher PPTs), generic Chem/Physics (re-slugged to `science-severnvale` 27 May). Teacher: Alex Cameron (individual Supabase Auth).
-- **Unity College** — code `unitypassionrespect`. 17 bespoke subjects (16 + Maths copied from generic).
+- **Review flips**: 92 `pending_review` lessons — the three Music boards
+  (Eduqas 32 / OCR 37 / Edexcel 31, built 16 Aug) + music listening feature.
+- **Widget fleet**: merge decision for `lesson-widgets`; completion-credit
+  denominator decision; 3-lesson band (48 clusters) if wanted.
+- **NLM re-calibration** after 2 Sep limit change (see Automation).
+- **Teacher pages redesign** (3 customer-facing pages) before Sept.
+- **Microsoft SSO**: Entra admin consent — the blocker for per-pupil data.
+- **AI fallback fail-closed** (US region) before any DPA claim.
+- **Revision planner**: per-school term dates (holiday awareness) before the
+  Sep 2026 cohort; `data/exam-dates-2026.json` needs a 2027 edition each year.
+- **English Literature debt**: AQA regex-generated flashcards; placeholder
+  `content_html` lessons; practice-format/copyright review.
+- **Geography Skills L13/L14** QA pass (L11/12 done).
+- **Parents' evening print view**; **mobile app (Capacitor)**; **dashboard
+  progress widgets** (still demo data); **GPT-image-2 diagrams** (parked,
+  ~£0.12/image).
+- **Prescribed-works register holes**: Music AQA + Media AQA (2027 CSP list).
+
+### Recently shipped (Aug 2026)
+- Widget fleet built + field-reviewed (equity band: every qualifying subject
+  family; depth band stages 14–18); fleet-wide strip-anchor fix ($end mode).
+- Account sync (19 Aug): all student state account-linked; `user_state`.
+- Podcasts/explainers/shorts fully automated with health probes.
+- Misconception tagging live: 2,384 AI-marking prompts + per-distractor MC
+  enrichment feed the teacher misconception table.
+- YouTube link hygiene (28–29 Aug): 38 wrong videos + 64 wrong credits fixed
+  (218 items; the generic pipeline had invented ids — incl. a 22× rickroll
+  placeholder); audit hardened (accepted-list, denylist, channel check).
+- Fact-check content fixes on live rows (e.g. geology rule-of-Vs inversion,
+  28 Aug — re-narrated).
+- Parents' evening packs, teacher area consolidation, AI marking in London,
+  essay-tier routing fix, cohort gate, D&T Edexcel, EngLit Eduqas anthology
+  (all earlier Aug — details in memory).
 
 ## API Keys
 
@@ -183,73 +210,104 @@ All in environment variables — never commit.
 
 | Service | Env Var | Notes |
 |---------|---------|-------|
-| Gemini | `GEMINI_API_KEY` | Diagram generation |
-| Supabase | `SUPABASE_URL` | Hardcoded in `index.html` (public) |
-| Supabase | `SUPABASE_ANON_KEY` | Hardcoded in `index.html` (public) |
-| Supabase | `SUPABASE_SERVICE_KEY` | Server-side only, never commit |
-| Azure Speech | `AZURE_SPEECH_KEY` | Region: `uksouth`. Pay-as-you-go (upgraded from free tier 27 Mar 2026). |
-| R2 | `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ACCOUNT_ID` | Cloudflare R2 |
-| Unsplash | `UNSPLASH_ACCESS_KEY` | Hero image search |
-| ElevenLabs | `ELEVENLABS_API_KEY` | TTS fallback (unused) |
-| Admin auth | `ADMIN_PASSWORD` | Gates `/admin/pipeline`, `/admin/review`, `/admin/images` |
-| Teacher auth | `TEACHER_PASSWORD` | Shared password fallback (Unity-scoped). Individual teacher accounts preferred. |
-| Resend | `RESEND_API_KEY` | Bug-report + subject-request email alerts. `NOTIFY_TO`, `NOTIFY_FROM` also required. |
+| Gemini | `GEMINI_API_KEY` | image generation (`gemini-3.1-flash-image-preview`) |
+| Supabase | `SUPABASE_URL`, `SUPABASE_ANON_KEY` | public, hardcoded in `index.html` |
+| Supabase | `SUPABASE_SERVICE_KEY` | server-side only |
+| Supabase (DDL) | `SUPABASE_DB_URL` | psycopg2 → aws-1-eu-west-2 pooler |
+| Azure Speech | `AZURE_SPEECH_KEY` | region `uksouth`, pay-as-you-go |
+| R2 | `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ACCOUNT_ID` | Cloudflare |
+| Unsplash | `UNSPLASH_ACCESS_KEY` | hero search |
+| ElevenLabs | `ELEVENLABS_API_KEY` | unused fallback |
+| Admin auth | `ADMIN_PASSWORD` | gates /admin/* |
+| Teacher auth | `TEACHER_PASSWORD` | legacy shared fallback |
+| Resend | `RESEND_API_KEY` + `NOTIFY_TO`, `NOTIFY_FROM` | bug reports, subject requests, audit alerts |
+| AWS | (Vercel env) | Bedrock eu-west-2 for AI routes |
 
 ## Key Conventions
 
-- **Design:** Background `#faf8f5`, text `#2d2a26`, Inter + Source Serif 4, `border-radius: 16px`, soft shadows
-- **Images:** Heroes max 1200px, diagrams max 1000px, JPEG quality 82
-- **Content:** 6 practice questions + 5 knowledge checks per lesson. Readability for GCSE age 15-16.
-- **Narration:** Azure Speech, Ollie (odd lessons) / Ada (even — replaced Bella 21 Mar 2026), MP3 96kbps 24kHz mono. Language subjects (French/German/Spanish) use multilingual voices (`OllieMultilingualNeural` + `AdaMultilingualNeural`) with SSML `<lang>` tags for foreign phrases. Foreign text must be in `<em>` or `<strong>` tags for auto-detection. See `docs/NARRATION_PIPELINE.md`.
-- **PPTs:** Read with `python -m markitdown "filepath"` (.pptx only)
-- **Equations (KaTeX):** Maths/science equations use KaTeX auto-render. Inline: `\(...\)`, display: `$$...$$`. CDN loaded on `lesson.html` and `guide.html`. `docs/CONTENT_PROMPT.md` instructs future content to output LaTeX (not HTML entities). Conversion script: `scripts/convert_equations_to_katex.py`.
-- **Animations:** Soft-close damping `cubic-bezier(0.16, 1, 0.3, 1)` on all entrance animations. `.sv-reveal` / `.sv-stagger` CSS classes + IntersectionObserver. Split timing: fast opacity (~0.5s), slow transform glide (~1-1.3s). `prefers-reduced-motion` respected. Browse page unit cards have no scroll reveal (all visible immediately so students don't miss units below the fold).
+- **Design:** background `#faf8f5`, text `#2d2a26`, Inter + Source Serif 4,
+  `border-radius: 16px`, soft shadows. No coloured left-border stripes.
+- **Images:** heroes max 1200px (photographs, vision-gated), diagrams max
+  1000px, JPEG q82.
+- **Content:** 6 practice + 5 KCs + 5 flashcards per lesson; GCSE age 15–16
+  readability. `*_html` fields use entities; plain-text fields use unicode
+  (validator enforces). Fact-check BEFORE narration.
+- **Narration:** Azure, Ollie (odd) / Ada (even lessons), MP3 96kbps 24kHz
+  mono; languages use multilingual voices + SSML `<lang>` (foreign text in
+  `<em>`/`<strong>`). See `docs/NARRATION_PIPELINE.md`.
+- **PPTs:** `python -m markitdown "file.pptx"`.
+- **Equations:** KaTeX auto-render — inline `\(...\)`, display `$$...$$`.
+- **Animations:** soft-close damping `cubic-bezier(0.16, 1, 0.3, 1)`,
+  `.sv-reveal`/`.sv-stagger`, `prefers-reduced-motion` respected; browse unit
+  cards never scroll-revealed.
+- **Lesson completion:** WEIGHTED model — spec at
+  `design-lab/LESSON_COMPLETION_SPEC.md`, implemented in `js/main.js`
+  `weighted()`. Never invent an ad-hoc completion rule.
 
 ## Reference Docs (read on demand)
 
-**Start here for any new subject build:** `docs/PIPELINE.md` — master playbook covering both free-tier and Unity modes, both article and practice formats.
+**Start here for any new subject build:** `docs/PIPELINE.md`.
 
-| Doc | When to read |
-|-----|-------------|
-| `docs/PIPELINE.md` | **Entry point** — building a new subject. Replaces old `SUBJECT_PLAYBOOK.md` |
-| `docs/PLANNING_PROMPT.md` | Phase 1 — planning agent prompt (research + mode decision + plan JSON) |
-| `docs/CONTENT_PROMPT.md` | Phase 3 article — content agent system prompt + output schema |
-| `docs/PRACTICE_PIPELINE.md` | Phase 3 practice — factory stages for practice-format lessons |
-| `docs/REFERENCE_LESSONS.md` | Pinned Supabase IDs of structural example lessons |
-| `docs/REVISION_TECHNIQUES/` | 7 canonical technique templates (fill in subject examples only) |
-| `docs/LESSON_TEMPLATE.md` | HTML components reference for article lessons |
-| `docs/QUESTIONS_PIPELINE.md` | Practice question formats, mark allocations, `getGuideUrl()` mappings |
-| `docs/DIAGRAM_PIPELINE.md` | Unity-only: Gemini diagrams. GPT-image-2 replacement under evaluation |
-| `docs/NARRATION_PIPELINE.md` | TTS narration (Ollie/Ada, multilingual SSML) |
-| `docs/VIDEO_PIPELINE.md` | Unity-only: cinematic videos. Both tiers: podcasts (NotebookLM) |
-| `docs/RELATED_MEDIA_PIPELINE.md` | Related media agent prompt. Podcast-into-related-media contract |
-| `docs/UNIT_THEMES.md` | Unit body classes and accent colours |
-| `docs/FUTURE_FEATURES.md` | Planned features and wishlist |
-| `docs/SUBJECT_ROADMAP.md` | Subjects built and still to build |
-| `docs/FILE_STRUCTURE.md` | Repo file/folder layout |
-| `docs/archive/` | Superseded docs (pre-rebuild). Do not generate from these |
-| `scripts/science-practice/SCIENCE_PRACTICE_SCHEMA.md` | Science practice data format, equation reference |
-| `scripts/language-practice/PRACTICE_DATA_SCHEMA.md` | Language practice data format, 12 input types |
-| `scripts/factory/FACTORY_RULES.md` | English Language factory stage rules |
-| `data/exam-dates-2026.json` | All GCSE exam dates by board, plus Unity board mapping |
-| `{subject}/BUILD_PLAN.md` | Subject-specific lesson breakdown |
-| `tts-research-log.md` | TTS/voice cloning developments |
-| `tech-research-log.md` | EdTech/platform developments |
+| Doc | When |
+|-----|------|
+| `docs/PIPELINE.md` | entry point for builds |
+| `docs/PLANNING_PROMPT.md` | phase 1 planning agent |
+| `docs/CONTENT_PROMPT.md` | article content agent |
+| `docs/PRACTICE_PIPELINE.md` | practice-format factory |
+| `docs/REFERENCE_LESSONS.md` | pinned structural examples |
+| `docs/REVISION_TECHNIQUES/` | 7 canonical templates |
+| `docs/LESSON_TEMPLATE.md` | article HTML components |
+| `docs/QUESTIONS_PIPELINE.md` | question formats, marks |
+| `docs/DIAGRAM_PIPELINE.md` | Unity-only diagrams |
+| `docs/NARRATION_PIPELINE.md` | TTS |
+| `docs/VIDEO_PIPELINE.md` | videos + podcasts |
+| `docs/RELATED_MEDIA_PIPELINE.md` | media curation (URLs MUST be audited) |
+| `docs/UNIT_THEMES.md` | unit accents |
+| `docs/PRACTICE_BUILD_MASTER_PLAN.md` | practice corpus plan + QA gates |
+| `docs/TIER_DIFFERENTIATION_PLAN.md` | Foundation/Higher runbook |
+| `docs/FUTURE_FEATURES.md`, `docs/SUBJECT_ROADMAP.md`, `docs/FILE_STRUCTURE.md` | planning |
+| `docs/archive/` | superseded — never generate from these |
+| `scripts/widget_pipeline/BUILD_GUIDE.md` | widget design authority |
+| `scripts/science-practice/SCIENCE_PRACTICE_SCHEMA.md` | science practice data |
+| `scripts/language-practice/PRACTICE_DATA_SCHEMA.md` | language practice data |
+| `scripts/factory/FACTORY_RULES.md` | EngLang factory |
+| `data/exam-dates-2026.json` | exam dates (needs annual refresh) |
+| `{subject}/BUILD_PLAN.md` | per-subject breakdown |
+
+Commercial/privacy docs live OUTSIDE this repo in
+`Documents\StudyVault Business\` (`docs/` deploys verbatim to Vercel).
 
 ## JS Architecture (main.js)
 
-**Phase 1** (DOMContentLoaded): scroll progress, mobile nav, accessibility toolbar, page transitions, `initRevealAnimations()` (scroll-triggered entrance animations)
-**Phase 2** (`window.initLessonFeatures()`, called after content injection): collapsibles, visited tracking, practice questions, narration, glossary tooltips, knowledge check, lightbox, revision tips, nav icons, lesson pill
+**Phase 1** (DOMContentLoaded): scroll progress, mobile nav, a11y toolbar,
+page transitions, `initRevealAnimations()`.
+**Phase 2** (`window.initLessonFeatures()`, after content injection):
+collapsibles, visited tracking, practice questions, narration, glossary,
+knowledge check, lightbox, revision tips, nav icons, lesson pill, weighted
+completion.
 
-**Dynamic loaders:** `lesson-loader.js`, `browse-loader.js`, `guide-loader.js` — auth check → Supabase fetch → populate template → init features. `guide-loader.js` has school_id scoping (fetches school-specific guides when logged in as school student).
+**Dynamic loaders:** `lesson-loader.js`, `browse-loader.js`,
+`guide-loader.js` — auth check → Supabase fetch → populate → init.
+Lesson content injects into `#study-notes`. `js/widget-embed.js` places
+widget strips post-render (on `lesson-widgets` branch).
 
 ## Sidebar Structure
 
-Three sections: **Knowledge Check** (button → modal), **Related Media** (collapsible categories), **Video** (YouTube embed or Google Drive modal). Do NOT add a "Key Facts" section. See `docs/RELATED_MEDIA_PIPELINE.md` for media curation.
+Three sections: **Knowledge Check** (button → modal), **Related Media**
+(collapsible categories), **Video**. Do NOT add a "Key Facts" section.
 
 ## Video Embeds
 
-- **YouTube:** Store YouTube video ID in `lessons.youtube_video_id`. Renders inline iframe in sidebar.
-- **Google Drive:** Store full Google Drive `/preview` URL in `lessons.youtube_video_id` (e.g. `https://drive.google.com/file/d/{FILE_ID}/preview`). `lesson-loader.js` detects `drive.google.com`, shows thumbnail + play button in sidebar, opens video in a large modal overlay on click. CSS class `sidebar-video--gdrive`.
-- **R2 Video:** Store R2 URL (containing `r2.dev/` or ending `.mp4`) in `lessons.youtube_video_id`. Renders dark thumbnail card with play button in sidebar, opens native `<video>` element in modal overlay (`preload="metadata"`, no autoplay). Bucket: `studyvault-video` (`pub-157a3979382e4f98b51f7f868078e5a3.r2.dev`).
-- **Sharing:** Google Drive files must be set to "Anyone with the link can view" for embed to work.
+- **YouTube:** video ID in `lessons.youtube_video_id` → inline iframe.
+- **Google Drive:** full `/preview` URL in the same field → thumbnail +
+  modal (`sidebar-video--gdrive`). Files must be "Anyone with the link".
+- **R2:** URL containing `r2.dev/` or ending `.mp4` → native `<video>` modal.
+- Related-media YouTube links render as `<a target="_blank">` (not iframes),
+  so embed-disabled (403) videos still work there.
+
+## Schools
+
+- **Unity College** — code `unitypassionrespect` (legacy), 18 bespoke
+  subjects (snapshot above).
+- **Severn Vale School** — code `vale2026` (legacy), `science-severnvale`.
+  Teacher: Alex Cameron (individual Supabase Auth).
