@@ -1735,6 +1735,76 @@
     return v || '#8a6a4f';
   }
 
+  /* ---------- completion credit ----------
+     A widget is a weighted lesson activity ("interactive", worth 10 —
+     design-lab/LESSON_COMPLETION_SPEC.md). It earns that credit on
+     MASTERY, not on opening: the widgets exit at three correct in a row
+     and publish it as {mastered:true} on the mount root's data-sv-state.
+     Two older builds carry the same idea under their own name
+     (armada-chain-of-consequence: every link right; greenhouse-effect:
+     every step walked), so we accept those rather than leave an
+     unearnable tick sitting on their 13 lessons.
+
+     Stored in sv-widget-done, a dict keyed by the same subject/unit/number
+     path the MAP uses — dict-shaped so js/account-sync.js deep-merges it
+     across a student's devices. A lesson can carry two interactives;
+     mastering EITHER earns the lesson's credit once. */
+  var DONE_KEY = 'sv-widget-done';
+
+  function lessonPath() {
+    var m = location.pathname.match(/\/lesson\/([^/]+)\/([^/]+)\/(\d+)/);
+    return m ? m[1] + '/' + m[2] + '/' + m[3] : null;
+  }
+  function doneMap() {
+    try { return JSON.parse(localStorage.getItem(DONE_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function isMastery(raw) {
+    var s;
+    try { s = JSON.parse(raw); } catch (e) { return false; }
+    if (!s || typeof s !== 'object') return false;
+    if (s.mastered === true) return true;
+    if ('mastered' in s) return false;          // the widget owns the word
+    return s.completed === true || s.correct === true;
+  }
+  function markMastered(file) {
+    var path = lessonPath();
+    if (!path) return;
+    var map = doneMap();
+    if (map[path]) return;                      // already credited
+    map[path] = true;
+    try { localStorage.setItem(DONE_KEY, JSON.stringify(map)); } catch (e) {}
+    /* js/main.js listens and ticks the checklist — same shape as the
+       flashcards-completed / kc-completed handshakes */
+    try {
+      document.dispatchEvent(new CustomEvent('sv-widget-mastered',
+        { detail: { lesson: path, file: file || null } }));
+    } catch (e) {}
+  }
+  function watchMastery(mount, file) {
+    if (!window.MutationObserver) return null;
+    var obs = new MutationObserver(function () {
+      if (!isMastery(mount.dataset.svState)) return;
+      obs.disconnect();
+      markMastered(file);
+    });
+    obs.observe(mount, { attributes: true, attributeFilter: ['data-sv-state'] });
+    return obs;
+  }
+
+  /* Asked by js/main.js when it builds the lesson checklist: does this
+     lesson carry an interactive at all? A MAP lookup only — no widget
+     file is fetched, so a lesson nobody opens still pays nothing. */
+  window.SVWidgetMap = MAP;
+  window.svLessonHasWidget = function () {
+    var p = lessonPath();
+    return !!(p && MAP[p]);
+  };
+  window.svLessonWidgetMastered = function () {
+    var p = lessonPath();
+    return !!(p && doneMap()[p]);
+  };
+
   function openModal(cfg, strip) {
     var overlay = document.createElement('div');
     overlay.className = 'sv-modal';
@@ -1754,9 +1824,11 @@
     document.body.appendChild(overlay);
 
     var lastFocus = document.activeElement;
+    var watcher = null;
     document.body.style.overflow = 'hidden';
 
     function shut() {
+      if (watcher) { watcher.disconnect(); watcher = null; }
       overlay.remove();
       document.body.style.overflow = '';
       document.removeEventListener('keydown', onKey);
@@ -1788,8 +1860,15 @@
         window.SVWidget = null;
         mount.textContent = '';
         var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+        /* watch before mounting: a widget that published its state during
+           mount would otherwise slip past the observer */
+        watcher = watchMastery(mount, cfg.file);
         W.mount(mount, { accent: accentOf(strip), reducedMotion: !!reduced,
                          variant: cfg.variant || null });
+        if (isMastery(mount.dataset.svState)) {
+          if (watcher) { watcher.disconnect(); watcher = null; }
+          markMastered(cfg.file);
+        }
       })
       .catch(function (e) {
         mount.textContent = 'This interactive could not load (' + e.message + ').';

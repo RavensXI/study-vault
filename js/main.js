@@ -2555,8 +2555,21 @@ function initLessonProgress() {
   // on this lesson — exam+any-one-thing is the shortest path to done; doing
   // everything except the exam scrapes 60. Rollup the dashboard reads:
   // sv-lessons-done = { "subject/unit": [lessonNumbers] }.
+  //
+  // 'interactive' (10) joins the table only where a lesson carries a widget
+  // (js/widget-embed.js knows which). Widget lessons measure at 110 available
+  // (podcast + video + quiz + flashcards + exam + revision + interactive), so
+  // the done line moves from 50 to 55. The spec's first and third requirements
+  // hold with more room (exam alone 40 < 55; everything-but-exam 70 >= 55), but
+  // its second ("exam + ANY one other passes") no longer holds for the three
+  // 10-weight partners: 40+10 = 50 < 55. The two-activity shortest path
+  // survives via flashcards or the revision task (40+15 = 55). This cannot be
+  // tuned away — the six agreed weights sit on that boundary with zero slack
+  // (40+10 = exactly half of 100), so ANY positive seventh weight breaks it,
+  // and raising the exam weight to compensate would let the exam alone finish
+  // the 4,100 lessons that have no widget. Flagged for Tom, not fixed here.
   var TASK_WEIGHTS = { 'practice-question': 40, 'flashcards': 15, 'revision-task': 15,
-    'knowledge-check': 10, 'video': 10, 'podcast': 10 };
+    'knowledge-check': 10, 'video': 10, 'podcast': 10, 'interactive': 10 };
   // exported so the sidebar weight tags (reader-skin.js) can never drift
   // from the completion maths
   window.svTaskWeights = TASK_WEIGHTS;
@@ -2657,6 +2670,7 @@ function initLessonProgress() {
     video: '<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><polygon points="5,3 19,12 5,21"/></svg>',
     kc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
     revision: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>',
+    interactive: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="m9 9 5 12 1.8-5.2L21 14z"/><path d="M7.2 2.2 8 5.1"/><path d="m5.1 8-2.9-.8"/><path d="M14 4.1 12 6"/><path d="m6 12-1.9 2"/></svg>',
   };
 
   // Check for podcast — either in the tabbed player or in sidebar media
@@ -2675,6 +2689,13 @@ function initLessonProgress() {
 
   // Flashcards
   tasks.push({ id: 'flashcards', label: 'Revise with flashcards', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><rect x="2" y="4" width="16" height="14" rx="2"/><rect x="6" y="6" width="16" height="14" rx="2"/></svg>', iconClass: 'lesson-progress-icon--flashcards', auto: true });
+
+  // Interactive — only on the lessons that carry one. js/widget-embed.js
+  // answers from its own map, so this costs a lookup and fetches nothing.
+  // Auto-ticks on mastery (three correct in a row), not on opening it.
+  if (typeof window.svLessonHasWidget === 'function' && window.svLessonHasWidget()) {
+    tasks.push({ id: 'interactive', label: 'Master the interactive', icon: icons.interactive, iconClass: 'lesson-progress-icon--interactive', auto: true });
+  }
 
   // Exam practice question — only if the lesson has practice questions.
   // Auto-ticks when the student clicks the AI mark button (asks for feedback).
@@ -2706,6 +2727,15 @@ function initLessonProgress() {
   if (tasks.length === 0) return;
 
   var state = getState();
+  // Widget mastery is recorded by js/widget-embed.js in its own key, so a
+  // student returning to the lesson finds the tick already in place.
+  if (!state['interactive'] &&
+      tasks.some(function (t) { return t.id === 'interactive'; }) &&
+      typeof window.svLessonWidgetMastered === 'function' &&
+      window.svLessonWidgetMastered()) {
+    state['interactive'] = true;
+    saveState(state);        // writes once, on the first load after mastery
+  }
   updateRollup(state);   // retro-register lessons finished before rollup existed
   var checkSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
@@ -2934,6 +2964,16 @@ function initLessonProgress() {
   // Auto-tick flashcards on completion
   document.addEventListener('flashcards-completed', function () {
     state['flashcards'] = true;
+    saveState(state);
+    syncAll();
+  });
+
+  // Auto-tick the interactive on mastery — js/widget-embed.js fires this
+  // when the widget reports three correct in a row, and has already
+  // recorded it in sv-widget-done.
+  document.addEventListener('sv-widget-mastered', function () {
+    if (state['interactive']) return;
+    state['interactive'] = true;
     saveState(state);
     syncAll();
   });
