@@ -168,25 +168,36 @@ limits, 5-hour refresh, deferred generations.** Every calibrated quota
 (60/day podcasts, ~200/day audio, 20/day video pool, shorts contention) is
 void that day — treat 2–3 Sep as a re-calibration day from the batch logs.
 
-## Active TODO (pruned 29 Aug 2026)
+## Active TODO (pruned 29 Aug 2026 — split by who can move it)
 
+### Tom's tasks (decisions, reviews, external actions)
 - **Review flips**: 92 `pending_review` lessons — the three Music boards
   (Eduqas 32 / OCR 37 / Edexcel 31, built 16 Aug) + music listening feature.
-- **Widget fleet**: merge decision for `lesson-widgets`; completion-credit
-  denominator decision; 3-lesson band (48 clusters) if wanted.
-- **NLM re-calibration** after 2 Sep limit change (see Automation).
-- **Teacher pages redesign** (3 customer-facing pages) before Sept.
-- **Microsoft SSO**: Entra admin consent — the blocker for per-pupil data.
-- **AI fallback fail-closed** (US region) before any DPA claim.
-- **Revision planner**: per-school term dates (holiday awareness) before the
-  Sep 2026 cohort; `data/exam-dates-2026.json` needs a 2027 edition each year.
-- **English Literature debt**: AQA regex-generated flashcards; placeholder
-  `content_html` lessons; practice-format/copyright review.
-- **Geography Skills L13/L14** QA pass (L11/12 done).
-- **Parents' evening print view**; **mobile app (Capacitor)**; **dashboard
-  progress widgets** (still demo data); **GPT-image-2 diagrams** (parked,
-  ~£0.12/image).
-- **Prescribed-works register holes**: Music AQA + Media AQA (2027 CSP list).
+- **Widget fleet decisions**: merge `lesson-widgets`? completion-credit
+  in-denominator vs bonus? go/no-go on the 3-lesson band (48 clusters)?
+- **Teacher pages redesign direction** (3 customer-facing pages, before
+  Sept) — pick the direction; Claude builds it.
+- **Microsoft SSO**: chase Entra admin consent — the blocker for all
+  per-pupil data.
+- **Per-school term dates** for planner holiday awareness (needs school
+  calendars only Tom can obtain).
+- **GPT-image-2 diagrams**: budget call (~£0.12/image, ~£400–700 full
+  build-out) — parked until decided.
+- **Geography Skills L13/L14**: review pass with Claude (L11/12 done).
+
+### Claude's tasks (delegable — runnable any time)
+- **NLM re-calibration** on 2–3 Sep after the compute-limit change (plan
+  saved in memory; read real throughput from batch logs, re-size caps).
+- **AI fallback fail-closed** (US region) — required before any DPA claim.
+- **English Literature debt**: audit + worklist for AQA regex-generated
+  flashcards and placeholder `content_html`; then fixes on approval.
+- **Parents' evening print view**; **dashboard progress widgets** (replace
+  demo data with real Supabase queries).
+- **Exam dates 2027 edition** of `data/exam-dates-2026.json` once boards
+  publish timetables.
+- **Mobile app (Capacitor)** — execution ready when Tom green-lights.
+- **Prescribed-works register**: fill Music AQA + Media AQA once the 2027
+  CSP list is published (blocked on external publication, then Claude's).
 
 ### Recently shipped (Aug 2026)
 - Widget fleet built + field-reviewed (equity band: every qualifying subject
