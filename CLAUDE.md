@@ -72,9 +72,9 @@ units, Geography Skills. Mixed-format subjects list practice units in
 - **Diagrams**: Unity-only (Gemini diagrams stripped from free tier Apr 2026;
   GPT-image-2 replacement parked).
 - **Cinematic explainer videos**: Unity complete (552). Free tier now has
-  SOME videos — Google Drive video cards exist on e.g. economics-aqa,
-  geology-eduqas and science-aqa lessons — but no systematic free-tier video
-  coverage. (Do not claim "free tier has no videos"; it is no longer true.)
+  substantial video coverage too — census 29 Aug: 3,999 lessons carry an R2
+  video, 357 a YouTube embed, 0 Google Drive. (Do not claim "free tier has
+  no videos"; it is no longer true. All self-hosted video is R2.)
 - **Podcasts**: Unity complete; free-tier backlog cleared Aug 2026; new units
   generate automatically the morning after their last lesson flips live.
 
