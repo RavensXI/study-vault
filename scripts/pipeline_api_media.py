@@ -33,7 +33,7 @@ sys.path.insert(0, SCRIPT_DIR)
 import anthropic
 from lib.supabase_client import get_client
 
-MODEL = "claude-sonnet-4-20250514"
+MODEL = "claude-sonnet-5"
 INPUT_PRICE = 3.0
 OUTPUT_PRICE = 15.0
 

@@ -33,7 +33,7 @@ sys.path.insert(0, SCRIPT_DIR)
 import anthropic
 from lib.supabase_client import get_client
 
-MODEL = "claude-sonnet-4-20250514"
+MODEL = "claude-sonnet-5"
 SPECS_DIR = os.path.join(os.path.dirname(SCRIPT_DIR), "specs")
 
 # State file to track progress

@@ -9,7 +9,7 @@ import os
 
 import anthropic
 
-MODEL = "claude-sonnet-4-20250514"
+MODEL = "claude-sonnet-5"
 
 QA_PROMPT = """You are a QA agent reviewing a Gemini-generated diagram for a GCSE revision website (students aged 15-16). Review this image against the checklist below.
 
