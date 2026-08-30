@@ -395,15 +395,15 @@
       after: "$end"
     },
     "economics-aqa/how-prices-are-determined/1": {
-      file: "demand-curve-movement-vs-shift",
-      label: "Predict movement or shift",
-      line: "One chocolate bar, one demand curve — decide whether each event slides the point along the curve or moves the whole curve.",
+      file: "curve-movement-vs-shift",
+      label: "Movement or shift?",
+      line: "A price change slides the point along the curve; only a non-price factor moves the whole curve. Commit a prediction, then watch it.",
       after: "Shifts in the Demand Curve"
     },
     "economics-aqa/how-prices-are-determined/3": {
-      file: "demand-curve-movement-vs-shift",
-      label: "Predict movement or shift",
-      line: "One chocolate bar, one demand curve — decide whether each event slides the point along the curve or moves the whole curve.",
+      file: "curve-movement-vs-shift",
+      label: "Movement or shift?",
+      line: "A price change slides the point along the curve; only a non-price factor moves the whole curve. Commit a prediction, then watch it.",
       after: "The Price Mechanism: Three Functions"
     },
     "electronics-eduqas/discovering-electronics/2": {
