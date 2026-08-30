@@ -1,0 +1,82 @@
+Full re-narration: english-literature-ocr / unseen-poetry (L1-L6)
+Date: 2026-08-30
+Script: scripts/_narrate_englit-ocr_unseen-poetry.py
+
+Reason: unit was rebuilt, style-swept and fact-checked. Old narration_manifest
+per lesson covered only a subset of the current data-narration-id set (e.g.
+17/30 ids on L1) and the surviving MP3s narrated deleted text. This was a
+from-scratch regeneration of every chunk, not a patch.
+
+Pre-flight check (old manifest vs new content ids, per lesson):
+  L1: content=30 (n1-n30)  old manifest=17 (n1-n12, n15-n19)
+  L2: content=26 (n1-n26)  old manifest=15
+  L3: content=27 (n1-n27)  old manifest=14
+  L4: content=25 (n1-n25)  old manifest=14
+  L5: content=28 (n1-n28)  old manifest=14
+  L6: content=29 (n1-n29)  old manifest=19
+  All old manifest ids were a strict subset of the new content id range for
+  every lesson -> 0 stale R2 keys to delete (verified against the live R2
+  listing before the run: 101 pre-existing objects all matched their
+  lessons' old manifests exactly, no orphans).
+
+Generation run (Azure Speech, uksouth, en-GB neural, 96kbps/24kHz/mono MP3,
+no multilingual SSML - English content only):
+
+  Lesson  Voice   Clips  Overwritten  New  Audio duration  Wall time
+  L1      Ollie   30     17           13   240.6s          79.6s
+  L2      Ada     26     15           11   274.6s          71.5s
+  L3      Ollie   27     14           13   338.2s          70.3s
+  L4      Ada     25     14           11   276.6s          65.8s
+  L5      Ollie   28     14           14   422.9s          71.5s
+  L6      Ada     29     19           10   270.1s          74.5s
+  ------------------------------------------------------------
+  TOTAL           165    93           72   1823.0s audio   433.2s wall
+  Chars: 30,247   Estimated Azure cost: $0.48
+  Stale R2 keys deleted: 0 (none existed - see pre-flight check above)
+
+R2 uploads: all 165 clips uploaded to
+  english-literature-ocr/unseen-poetry/narration_lesson-{NN}_{nid}.mp3
+  (bucket studyvault-audio, overwrite-on-coincide). Podcast files
+  (podcast_l01.mp3 .. podcast_l06.mp3) in the same prefix were untouched.
+
+Post-run verification:
+  1. R2 listing recount: 165 narration_lesson-* objects (30/26/27/25/28/29
+     per lesson, exact match), 6 podcast files untouched, 171 total.
+  2. Manifest id set == content data-narration-id set for all 6 lessons
+     (re-extracted from live content_html/exam_tip_html/conclusion_html
+     with lib.narration.extract_narration_chunks and diffed against the
+     live narration_manifest column). All 6: MATCH=True.
+  3. Spot-check HTTP 200 + plausible size on public host
+     (pub-f7b76d81365b4b2f954567763694a24e.r2.dev):
+       narration_lesson-01_n30.mp3  200  64,224 bytes
+       narration_lesson-04_n1.mp3   200  34,848 bytes
+       narration_lesson-06_n29.mp3  200  77,184 bytes
+       narration_lesson-03_n13.mp3  200  260,640 bytes
+  4. Headless player check: served lesson/english-literature-ocr/
+     unseen-poetry/1 via a local static rewrite server (127.0.0.1:8922,
+     scripts/_dev_rewrite_server.py - ported into this branch from the
+     lesson-widgets worktree, where it already existed, since it wasn't
+     present here yet). Page loaded correctly (title "Lesson 1: What is
+     Unseen Poetry? - StudyVault"). window.narrationManifest had 30
+     entries, first/last ids n1/n30, correct R2 src URLs, and the player
+     computed a total runtime of 4:00 (240s), matching the 240.6s summed
+     duration from the generation run above. No console errors on load
+     other than a pre-existing, site-wide, benign "Multiple GoTrueClient
+     instances" Supabase warning unrelated to narration.
+     A synthetic .click() on the play button threw the browser's standard
+     NotAllowedError ("play() failed because the user didn't interact
+     with the document") - expected under CDP automation without a real
+     user gesture, not a defect. A direct <audio>.load() also hit a
+     transient 503 from the R2 edge and, on retry, a timeout with no
+     tracked network request - both inconsistent with three back-to-back
+     curl GETs against the identical URL, which returned 200 every time,
+     and with a page-context no-cors fetch to the same URL resolving
+     successfully (opaque response, the expected shape for a successful
+     cross-origin no-cors load, not a failure). Read as a CDP/headless
+     media-Range-request artifact (the project already has a documented
+     "screenshots/media freeze under CDP" caveat for this kind of check),
+     not a narration/upload defect. Server killed after the check;
+     confirmed unreachable post-kill.
+
+Result: 165/165 clips generated, uploaded and verified. Manifest is a
+complete, contiguous n1..nX list per lesson with no gaps and no stale ids.
