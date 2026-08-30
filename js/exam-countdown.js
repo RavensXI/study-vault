@@ -113,18 +113,18 @@
     var s = document.createElement('style');
     s.id = 'exam-cd-css';
     s.textContent =
-      /* Base pill */
+      /* Base pill — inherits the unit accent (falls back to neutral warm grey) */
       '.exam-cd{display:inline-flex;align-items:center;gap:0.35rem;font-family:Inter,system-ui,sans-serif;' +
-        'font-size:0.75rem;background:#f0f7ff;border:1px solid #c7deff;border-radius:999px;' +
-        'padding:0.25rem 0.6rem 0.25rem 0.45rem;color:#1e3a5f;white-space:nowrap;' +
+        'font-size:0.75rem;background:var(--accent-light,#f0ece7);border:1px solid var(--accent-badge,#e8e4df);border-radius:999px;' +
+        'padding:0.25rem 0.6rem 0.25rem 0.45rem;color:var(--text-primary,#2d2a26);white-space:nowrap;' +
         'transition:opacity 0.25s,transform 0.25s;animation:examCdIn 0.35s cubic-bezier(0.16,1,0.3,1)}' +
-      '.exam-cd-clock{width:13px;height:13px;color:#2563eb;flex-shrink:0}' +
-      '.exam-cd-days{font-weight:700;color:#1d4ed8;font-size:0.78rem}' +
-      '.exam-cd-label{color:#475569;font-weight:500}' +
-      '.exam-cd-date{color:#94a3b8;font-size:0.7rem}' +
-      '.exam-cd-x{background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1rem;' +
+      '.exam-cd-clock{width:13px;height:13px;color:var(--accent,#2d2a26);flex-shrink:0}' +
+      '.exam-cd-days{font-weight:700;color:var(--accent,#2d2a26);font-size:0.78rem}' +
+      '.exam-cd-label{color:var(--text-secondary,#6b6560);font-weight:500}' +
+      '.exam-cd-date{color:var(--text-muted,#9b9590);font-size:0.7rem}' +
+      '.exam-cd-x{background:none;border:none;color:var(--text-muted,#9b9590);cursor:pointer;font-size:1rem;' +
         'line-height:1;padding:0 0 0 0.15rem;transition:color 0.15s}' +
-      '.exam-cd-x:hover{color:#475569}' +
+      '.exam-cd-x:hover{color:var(--text-secondary,#6b6560)}' +
       /* Soon (<30 days) */
       '.exam-cd-soon{background:#fefce8;border-color:#fde68a}' +
       '.exam-cd-soon .exam-cd-clock{color:#d97706}' +
@@ -140,9 +140,9 @@
       /* Hero placement (browse pages) */
       '.exam-cd-hero{margin-top:0.75rem}' +
       /* Dark mode */
-      '.dark-mode .exam-cd{background:#1e293b;border-color:#334155;color:#cbd5e1}' +
-      '.dark-mode .exam-cd-days{color:#60a5fa}' +
-      '.dark-mode .exam-cd-clock{color:#60a5fa}' +
+      '.dark-mode .exam-cd{background:var(--accent-light,#1e293b);border-color:var(--accent-badge,#334155);color:#cbd5e1}' +
+      '.dark-mode .exam-cd-days{color:var(--accent,#60a5fa)}' +
+      '.dark-mode .exam-cd-clock{color:var(--accent,#60a5fa)}' +
       '.dark-mode .exam-cd-label{color:#94a3b8}' +
       '.dark-mode .exam-cd-date{color:#64748b}' +
       '.dark-mode .exam-cd-x{color:#64748b}' +
