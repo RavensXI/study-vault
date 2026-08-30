@@ -1,0 +1,240 @@
+/**
+ * Build _plan.json for the Love & Relationships retro fact-check.
+ * Every `find` string is asserted against the live-fetched _raw.json before the
+ * plan is written, so a typo in a curly quote fails here rather than mid-PATCH.
+ */
+const fs = require('fs');
+const path = require('path');
+const HERE = __dirname;
+const rows = JSON.parse(fs.readFileSync(path.join(HERE, '_raw.json'), 'utf8'));
+const byNum = n => rows.find(r => r.lesson_number === n);
+
+const JSON_FIELDS = new Set(['practice_questions', 'knowledge_checks', 'flashcard_questions', 'glossary_terms']);
+
+const plan = [];
+function lesson(n, findings, edits) {
+  const r = byNum(n);
+  plan.push({ lesson_number: n, id: r.id, title: r.title, findings, edits });
+}
+
+/* ─────────────────────────── L1 Romantic Love ─────────────────────────── */
+lesson(1, [
+  { id: 'L1-1', severity: 'MEDIUM', action: 'fixed', field: 'content_html + flashcard_questions',
+    issue: "Love's Philosophy dated 1820. First published by Leigh Hunt in The Indicator, 22 December 1819.",
+    fix: '1820 -> 1819 in the section heading and in the matching flashcard answer.' },
+  { id: 'L1-2', severity: 'HIGH', action: 'fixed', field: 'content_html',
+    issue: 'Sonnet 29 misquoted: "burst, shatter, everywhere!". AQA anthology text reads "burst, shattered, everywhere!".',
+    fix: 'shatter -> shattered inside the quotation.' },
+  { id: 'L1-3', severity: 'MEDIUM', action: 'flagged', field: 'content_html (n10) + content_html (n11) + L8 content_html (n5) & flashcards',
+    issue: 'Sonnet 29 is described as a move "from despair to joy", and the final line "I do not think of thee - I am too near thee" is labelled the volta. Verified against the AQA anthology text: the volta is early, at line 5 ("Yet, O my palm-tree, be it understood"); the final line is the resolution, not the turn. The poem also does not begin in despair - it begins in longing/absence.',
+    locations: 'L1 content_html blocks n10 and n11; L8 content_html block n5 ("Barrett Browning (Sonnet 29): ... volta rejecting fantasy for reality"); L8 flashcard "Give a short Barrett Browning quotation marking her Sonnet 29 volta."',
+    analysis: 'Two linked analytical errors, spanning two lessons and four assets. Correcting them needs one consistent editorial decision (does the unit teach the line-5 volta, and how is the closing line then described?), so it is left for adjudication rather than patched piecemeal.' },
+  { id: 'L1-4', severity: 'LOW', action: 'flagged', field: 'knowledge_checks[2]',
+    issue: 'KC forces "metaphor" for the vine/tree comparison, but the anthology line introduces it with "as" ("as wild vines, about a tree"), which is technically a simile.',
+    analysis: 'Both framings are defensible and AQA-facing resources overwhelmingly teach "extended metaphor". A pedantic student answering "simile" is not wrong about the grammar. No change made; the orchestrator may prefer to reword the stem to "extended _____ (vine/tree)".' }
+], [
+  { field: 'content_html', find: 'Percy Bysshe Shelley (1820)', replace: 'Percy Bysshe Shelley (1819)' },
+  { field: 'flashcard_questions', find: '"a":"1820.","q":"In which year was \'Love\'s Philosophy\' published?"', replace: '"a":"1819.","q":"In which year was \'Love\'s Philosophy\' published?"' },
+  { field: 'content_html', find: '“burst, shatter, everywhere!”', replace: '“burst, shattered, everywhere!”' }
+]);
+
+/* ─────────────────────────── L2 Family Love ───────────────────────────── */
+lesson(2, [
+  { id: 'L2-1', severity: 'HIGH', action: 'fixed', field: 'content_html (n8)',
+    issue: '"Walking Away": the quoted phrase "has not worn away" is a fabrication - it appears nowhere in the poem.',
+    fix: 'Replaced with the poem\'s actual wording about the memory persisting: "Gnaws at my mind still".' },
+  { id: 'L2-2', severity: 'MEDIUM', action: 'fixed', field: 'content_html (n8)',
+    issue: '"Day Lewis watches his son walk away to school for the first time" - the poem is explicit that this is the son\'s first game of football; he then walks away towards the school. "First day at school" is a well-known misreading.',
+    fix: 'Reworded to name the first game of football.' },
+  { id: 'L2-3', severity: 'MEDIUM', action: 'fixed', field: 'content_html (n2)',
+    issue: '"Before You Were Mine" composite quotation "in your polka-dot dress ... on the corner" is not verbatim: the poem has "the corner you laugh on" and, separately, a line beginning "Your polka-dot dress".',
+    fix: 'Replaced with the verbatim opening fragment.' },
+  { id: 'L2-4', severity: 'LOW', action: 'flagged', field: 'content_html + flashcards (also L6, L7)',
+    issue: 'The poet is styled "Cecil Day Lewis" (19 occurrences across the unit). The AQA anthology contents list and poem header print the hyphenated "Cecil Day-Lewis"; its acknowledgements page prints the unhyphenated form.',
+    analysis: 'The anthology itself is inconsistent, so this is a house-style call, not an error. A rename would touch 19 strings in four lessons and re-narrate several clips for no mark-affecting gain. Left for adjudication.' },
+  { id: 'L2-5', severity: 'NONE', action: 'verified', field: 'content_html + flashcard_questions',
+    issue: 'Known past error class: the Armitage quotation truncated mid-hyphen ("the last one-hundredth of an inch").',
+    result: 'PASS - both the lesson prose (n7) and the flashcard now carry the full correct phrase. No residual "-Loss" splice in this lesson.' }
+], [
+  { field: 'content_html', find: 'Day Lewis watches his son walk away to school for the first time. The memory is eighteen years old but “has not worn away” — the pain of separation is permanent.',
+    replace: 'Day Lewis remembers watching his son walk away after his first game of football. The memory is eighteen years old but still “Gnaws at my mind” — the pain of separation is permanent.' },
+  { field: 'content_html', find: 'The speaker pictures her mother “in your polka-dot dress … on the corner” laughing with friends.',
+    replace: 'The speaker pictures her mother on “the corner you laugh on / with your pals”, ten years before her own birth.' }
+]);
+
+/* ─────────────────────────── L3 Loss & Distance ───────────────────────── */
+lesson(3, [
+  { id: 'L3-1', severity: 'HIGH', action: 'fixed', field: 'description, content_html, conclusion_html, exam_tip_html, practice_questions, knowledge_checks, flashcard_questions',
+    issue: '"Letters from Yorkshire" is attributed throughout to "Maura Doshi". The poet is MAURA DOOLEY. "Maura Doshi" returns zero results in any edition, catalogue or listing. 17 occurrences across this lesson plus L6 and L7.',
+    fix: 'Doshi -> Dooley everywhere; the flashcard answer "Maura Dooley (often listed as Maura Doshi in some editions)" - itself a fabricated editorial note - reduced to "Maura Dooley."' },
+  { id: 'L3-2', severity: 'HIGH', action: 'fixed', field: 'content_html (n12)',
+    issue: '"Eden Rock": the father\'s suit quoted as "the same suit / Of Survey tweed". The AQA anthology text reads "Of Genuine Irish Tweed". "Survey tweed" is a fabrication.',
+    fix: 'Survey tweed -> Genuine Irish Tweed (also fixed in L5, which repeats it).' },
+  { id: 'L3-3', severity: 'HIGH', action: 'fixed', field: 'content_html (n12, n14) + flashcard_questions',
+    issue: '"Eden Rock": a "tin of pears" is listed among the poem\'s mundane details. No tin of pears appears in the poem. The actual items are a Thermos, an H.P. Sauce bottle, three plates and "the tin cups painted blue".',
+    fix: 'tin of pears -> tin cups painted blue (3 occurrences).' },
+  { id: 'L3-4', severity: 'MEDIUM', action: 'fixed', field: 'content_html (n13)',
+    issue: '"Eden Rock" final line quoted as "I had not thought it would be like this" - the word "that" is dropped. The anthology text is "I had not thought that it would be like this." L5 already quotes it correctly, so the unit contradicted itself.',
+    fix: 'Restored "that".' },
+  { id: 'L3-5', severity: 'MEDIUM', action: 'flagged', field: 'content_html (n11) + practice_questions[5]',
+    issue: 'The image of souls tapping out messages is labelled "synaesthesia-like". Synaesthesia is the crossing of one sense into another; this image crosses the physical and the spiritual, which is not synaesthesia. The glossary entry supplied for the term is itself correct, which makes the mislabel more misleading, and the term is repeated in a practice-question mark scheme.',
+    analysis: 'Removing the term needs a replacement analytical label (metaphor? transferred agency?), which is an editorial choice. Not patched.' },
+  { id: 'L3-6', severity: 'NONE', action: 'verified', field: 'content_html',
+    issue: 'Hardy "Neutral Tones" closing line spelled "greyish leaves".',
+    result: 'PASS - the AQA anthology prints "greyish" (UK spelling). Scholarly editions print Hardy\'s "grayish", but for an AQA-facing resource "greyish" is correct. No change.' }
+], [
+  { field: 'description', find: 'Doshi', replace: 'Dooley' },
+  { field: 'content_html', find: 'Doshi', replace: 'Dooley', count: 7 },
+  { field: 'conclusion_html', find: 'Doshi', replace: 'Dooley' },
+  { field: 'exam_tip_html', find: 'Doshi', replace: 'Dooley' },
+  { field: 'practice_questions', find: 'Doshi', replace: 'Dooley', count: 3 },
+  { field: 'knowledge_checks', find: 'Doshi', replace: 'Dooley' },
+  { field: 'flashcard_questions', find: 'Maura Dooley (often listed as Maura Doshi in some editions).', replace: 'Maura Dooley.' },
+  { field: 'content_html', find: 'Of Survey tweed.', replace: 'Of Genuine Irish Tweed.' },
+  { field: 'content_html', find: 'the “tin of pears”', replace: 'the “tin cups painted blue”' },
+  { field: 'content_html', find: 'tweed suit, tin of pears', replace: 'tweed suit, tin cups painted blue' },
+  { field: 'flashcard_questions', find: 'H.P. sauce bottle, tin of pears, Causley\'s father\'s tweed suit.', replace: 'H.P. Sauce bottle, tin cups painted blue, and the father\'s Genuine Irish Tweed suit.' },
+  { field: 'content_html', find: '“I had not thought it would be like this”', replace: '“I had not thought that it would be like this”' }
+]);
+
+/* ────────────────────── L4 Desire & Relationships ─────────────────────── */
+lesson(4, [
+  { id: 'L4-1', severity: 'HIGH', action: 'fixed', field: 'flashcard_questions',
+    issue: 'A flashcard answers "Which image for the wife\'s hair does Nagra use?" with "\'Her hair is Toronto plane-Loss\' (sic, a reference to its length/darkness)." This phrase appears nowhere in "Singh Song!" or in any Nagra poem. It is the same extractor splice bug that produced "the last one-Loss of your tape" in L2 - a truncation at a hyphen with the next section heading ("Loss & Distance") spliced on. The "(sic)" note dressed the corruption up as authentic.',
+    fix: 'Replaced with the poem\'s actual description of the bride.' },
+  { id: 'L4-2', severity: 'MEDIUM', action: 'fixed', field: 'content_html (n7)',
+    issue: '"The Farmer\'s Bride" quoted as "like a leveret". The poem reads "Shy as a leveret". ("like a mouse" in the same list is verbatim and correct.)',
+    fix: 'Corrected the quotation.' },
+  { id: 'L4-3', severity: 'MEDIUM', action: 'flagged', field: 'content_html (n9)',
+    issue: 'The lesson says the chapatti detail is presented "with the same delight as the moonlit description of her face", then quotes the bride\'s red crew cut and Tartan sari. There is no moonlit description of the bride\'s face in "Singh Song!"; the moon appears when the couple look out at the beaches of the UK, not on her face. The quotation offered does not support the claim it is attached to.',
+    analysis: 'The sentence needs rewriting rather than a word swap, and the replacement image is an editorial choice. Not patched.' }
+], [
+  { field: 'content_html', find: '“like a leveret,”', replace: '“Shy as a leveret,”' },
+  { field: 'flashcard_questions', find: '"a":"\'Her hair is Toronto plane-Loss\' (sic, a reference to its length/darkness).","q":"Which image for the wife\'s hair does Nagra use?"',
+    replace: '"a":"\'She hav a red crew cut\' — paired with \'a Tartan sari\'.","q":"Which image for the wife\'s hair does Nagra use?"' }
+]);
+
+/* ─────────────────────────── L5 Memory & Time ─────────────────────────── */
+lesson(5, [
+  { id: 'L5-1', severity: 'HIGH', action: 'fixed', field: 'content_html, practice_questions, knowledge_checks, flashcard_questions',
+    issue: 'The adjective "accurate" is taught across four assets as the key word for the grandfather\'s heartbeat in "Climbing My Grandfather". It does not appear in the poem. It is a survivor of a fabricated line ("the distant, accurate, rocking of his heart") that an earlier audit already stripped from the prose - the derived key fact, knowledge check, flashcard and mark scheme were left behind. The lesson prose itself (n7) correctly analyses "good" and "slow", so the lesson contradicted its own analysis.',
+    fix: 'The "accurate" heartbeat -> the "good" heart, consistently across the key fact, the KC stem, the flashcard and the practice-question mark scheme.' },
+  { id: 'L5-2', severity: 'HIGH', action: 'fixed', field: 'content_html (n7) + flashcard_questions',
+    issue: '"still-beating heart" is presented as a quotation from "Climbing My Grandfather". The phrase is not in the poem.',
+    fix: 'Quotation marks removed / replaced with the poem\'s "good heart".' },
+  { id: 'L5-3', severity: 'HIGH', action: 'fixed', field: 'practice_questions, flashcard_questions, knowledge_checks (also L6, L7, L8)',
+    issue: '"Winter Swans" is repeatedly quoted as "our hands, like swans, / settled after flight". The anthology text is "and folded, one over the other, / like a pair of wings settling after flight" - the simile is to a pair of WINGS, not to swans, and the participle is "settling". The correct version already sits in the L5, L3 and L8 prose, so the unit contradicted itself. The same fabricated quotation was used in the L6 exam tip as the model of good AO2 practice.',
+    fix: 'Corrected in all five places across L5, L6, L7 and L8, including the KC blank (option "settled" -> "settling") and its stem.' },
+  { id: 'L5-4', severity: 'MEDIUM', action: 'fixed', field: 'content_html (n2)',
+    issue: 'The lesson states the swans “porcelain” their necks towards each other. The poem uses "porcelain" of the swans gliding away over the water, not of their necks, and there is no necks-towards-each-other action.',
+    fix: 'Replaced with the poem\'s actual use of the word.' },
+  { id: 'L5-5', severity: 'HIGH', action: 'fixed', field: 'content_html (n8)',
+    issue: 'Repeats the "Survey tweed" fabrication from L3 (see L3-2).',
+    fix: 'Survey tweed -> Genuine Irish Tweed.' },
+  { id: 'L5-6', severity: 'NONE', action: 'verified', field: 'content_html (n2, n7) + flashcard_questions',
+    issue: 'Other "Climbing My Grandfather" and "Winter Swans" claims: “earth-stained hand”; the free-verse, no-stanza-break form; the tercets-to-final-couplet structure; “they mate for life”; “I decide to do it free, without a rope or net”.',
+    result: 'PASS - all confirmed against the AQA anthology text. The anthology does hyphenate "earth-stained hand", so the lesson is right. The lesson claims tercets throughout plus a closing couplet without asserting a stanza count, which matches the poem (six tercets + a couplet).' }
+], [
+  { field: 'content_html', find: 'The swans “porcelain” their necks towards each other, and the couple begins to reconnect.',
+    replace: 'As the swans leave, they are “porcelain over the stilling water” — a fragile, ornamental calm — and the couple begins to reconnect.' },
+  { field: 'content_html', find: 'his “still-beating heart” is discovered at the summit', replace: 'his still-beating heart is discovered at the summit' },
+  { field: 'content_html', find: 'The “accurate” heartbeat suggests reliability and trust.', replace: 'Calling the heart “good” suggests reliability and trust.' },
+  { field: 'content_html', find: '“Survey tweed”', replace: '“Genuine Irish Tweed”' },
+  { field: 'practice_questions', find: "Physical mapping, 'accurate' heartbeat, 'free without rope.'", replace: "Physical mapping, the 'good heart' at the summit, 'free without rope.'" },
+  { field: 'practice_questions', find: "simile ('like swans')", replace: "simile ('like a pair of wings settling after flight')" },
+  { field: 'knowledge_checks', find: "What does the 'accurate' heartbeat represent in 'Climbing My Grandfather'?", replace: "What does calling the grandfather's heart 'good' represent in 'Climbing My Grandfather'?" },
+  { field: 'knowledge_checks', find: '"In \'Winter Swans,\' the couple\'s hands are compared to swans that have \'_____ after flight\' — suggesting the turbulence of their conflict is over.","type":"fill","correct":1,"options":["landed","settled","rested","returned"]',
+    replace: '"In \'Winter Swans,\' the couple\'s folded hands are compared to \'a pair of wings _____ after flight\' — suggesting the turbulence of their conflict is over.","type":"fill","correct":1,"options":["landing","settling","resting","returning"]' },
+  { field: 'flashcard_questions', find: '"a":"\'Our hands, like swans, / settled after flight.\'","q":"Which final \'Winter Swans\' simile resolves the couple\'s discord?"',
+    replace: '"a":"\'...folded, one over the other, / like a pair of wings settling after flight.\'","q":"Which final \'Winter Swans\' simile resolves the couple\'s discord?"' },
+  { field: 'flashcard_questions', find: '"a":"The grandfather\'s \'still-beating heart\' — the emotional core.","q":"What does reaching the \'summit\' represent in the poem?"',
+    replace: '"a":"The \'slow pulse of his good heart\' — the emotional core.","q":"What does reaching the \'summit\' represent in the poem?"' },
+  { field: 'flashcard_questions', find: '"a":"\'Accurate\' — suggesting reliability, precision, trust.","q":"Which adjective describes the grandfather\'s heartbeat unusually?"',
+    replace: '"a":"\'Good\' — in \'the slow pulse of his good heart\', suggesting reliability and moral worth.","q":"Which adjective does Waterhouse use for the grandfather\'s heart?"' }
+]);
+
+/* ────────────────── L6 Form, Structure & Language ─────────────────────── */
+lesson(6, [
+  { id: 'L6-1', severity: 'HIGH', action: 'fixed', field: 'content_html (n11)',
+    issue: 'Repeats the "Doshi" misattribution for "Letters from Yorkshire" (see L3-1).', fix: 'Doshi -> Dooley.' },
+  { id: 'L6-2', severity: 'HIGH', action: 'fixed', field: 'exam_tip_html (n19)',
+    issue: 'The exam tip holds up the fabricated "Winter Swans" quotation ("like swans, / settled after flight") as the MODEL of good AO2 writing - the worst possible place for a misquotation, since students are told to copy it.',
+    fix: 'Corrected to the anthology wording.' },
+  { id: 'L6-3', severity: 'MEDIUM', action: 'flagged', field: 'content_html (n13) + flashcard_questions',
+    issue: 'Caesura is illustrated with Hardy\'s "We stood by a pond that winter day," - a line with no mid-line pause at all; its only punctuation is the comma at the line end. The flashcard repeats the same false example. A student taught this will mislabel caesura in the exam.',
+    analysis: 'The fix needs a genuine caesura example chosen from the cluster, which is an editorial decision. Not patched.' },
+  { id: 'L6-4', severity: 'MEDIUM', action: 'flagged', field: 'flashcard_questions',
+    issue: 'Flashcard: "Which poem uses a cyclical structure to show entrapment?" is answered "Mew\'s \'The Farmer\'s Bride\' (circular return to the husband\'s obsession)." "The Farmer\'s Bride" does not return to its opening; it ends in an outburst. L1 and L3 both teach cyclical structure as Byron\'s "When We Two Parted" (and L3 also assigns it to Hardy\'s "Neutral Tones"), so the unit contradicts itself three ways.',
+    analysis: 'The answer is wrong, but there are two candidate replacements already taught in the unit (Byron and Hardy), so choosing one is an editorial call. Not patched.' }
+], [
+  { field: 'content_html', find: 'Letters from Yorkshire (Doshi)', replace: 'Letters from Yorkshire (Dooley)' },
+  { field: 'exam_tip_html', find: '‘like swans, / settled after flight’', replace: '‘like a pair of wings settling after flight’' }
+]);
+
+/* ─────────────────────────── L7 Comparison Skills ─────────────────────── */
+lesson(7, [
+  { id: 'L7-1', severity: 'HIGH', action: 'fixed', field: 'content_html (n8)',
+    issue: 'Repeats the "Doshi" misattribution (see L3-1).', fix: 'Doshi -> Dooley.' },
+  { id: 'L7-2', severity: 'HIGH', action: 'fixed', field: 'content_html (n18)',
+    issue: 'The PECLC model paragraph - the exemplar students are told to imitate - uses the fabricated "Winter Swans" quotation.',
+    fix: 'Corrected to the anthology wording.' },
+  { id: 'L7-3', severity: 'MEDIUM', action: 'fixed', field: 'flashcard_questions',
+    issue: 'Flashcard describes the 45-minute allocation as being for "the longer of the two Paper 2 Section B questions". The spec is explicit that Section B is a SINGLE comparative question; it is Section C (unseen poetry) that carries two questions.',
+    fix: 'Replaced with a spec-true statement (one third of the 2 hour 15 minute paper).' },
+  { id: 'L7-4', severity: 'MEDIUM', action: 'flagged', field: 'content_html (n2) + knowledge_checks[2]',
+    issue: 'The lesson calls the printed named poem "open book" and the comparison poem "closed book". AQA GCSE English Literature is a CLOSED BOOK examination throughout - no text may be taken in. The named poem is simply reproduced on the question paper. The KC then drills the same misuse as its answer ("The named poem is printed (open book)").',
+    analysis: 'The substance the lesson conveys is right (one poem printed, one from memory) and is exactly what the spec says; only the terminology is wrong, and it is wrong in a way a teacher would flinch at. Correcting it means rewording both the prose block and the KC stem plus its option set, so it is left for adjudication.' },
+  { id: 'L7-5', severity: 'NONE', action: 'verified', field: 'content_html (n2), key fact, KCs, all 48 practice questions',
+    issue: 'Exam claims for the anthology comparison: Paper 2 Section B, 30 marks, AO1 12 / AO2 12 / AO3 6, one named poem printed plus one from memory, ~45 minutes.',
+    result: 'PASS - all confirmed. The spec states Section B is "one comparative question on one named poem printed on the paper and one other poem from their chosen anthology cluster". The 12/12/6 split reconciles exactly with the spec\'s Paper 2 AO weightings (AO1 36, AO2 44, AO3 12, AO4 4 of 96 marks). 45 minutes is one third of the 2h15 paper. No AO4/SPaG is claimed on this question, correctly - AO4 sits on Section A only.' }
+], [
+  { field: 'content_html', find: 'Doshi + Causley', replace: 'Dooley + Causley' },
+  { field: 'content_html', find: '‘like swans, settled after flight.’', replace: '‘folded, one over the other, / like a pair of wings settling after flight.’' },
+  { field: 'flashcard_questions', find: 'Approximately 45 minutes — the longer of the two Paper 2 Section B questions.', replace: 'Approximately 45 minutes — one third of the 2 hour 15 minute Paper 2.' }
+]);
+
+/* ────────────────── L8 Exam Technique & Key Quotations ────────────────── */
+lesson(8, [
+  { id: 'L8-1', severity: 'HIGH', action: 'fixed', field: 'flashcard_questions',
+    issue: 'The quotation bank - the asset students memorise from - repeats the fabricated "Winter Swans" simile.',
+    fix: 'Corrected to the anthology wording. (The L8 prose at n12 already had it right.)' },
+  { id: 'L8-2', severity: 'MEDIUM', action: 'flagged', field: 'content_html (n2)',
+    issue: 'The lesson hedges the exam format: "Some papers print one of the poems in the question booklet while your comparison poem is from memory - others may print neither... Check your exam board\'s specimen paper for the exact format." This is an AQA-specific subject. The AQA spec is unambiguous that one named poem IS printed, and L7 states this correctly, so L8 undercuts it.',
+    analysis: 'This reads like cross-board boilerplate that leaked into a board-specific lesson (the same hedging recurs at n17 and in the Week 4 revision plan). It is not false in general, but it is vague where the spec is definite. Rewriting it is an editorial call; not patched.' },
+  { id: 'L8-3', severity: 'NONE', action: 'verified', field: 'content_html (n20)',
+    issue: 'Revision plan tells students to re-read "all 15 poems".',
+    result: 'PASS - the spec states each cluster contains 15 poems and that students should study all 15. The unit names exactly the 15 Love and Relationships poems and no others; no membership errors found.' }
+], [
+  { field: 'flashcard_questions', find: '"a":"\'Our hands, like swans, / settled after flight.\'","q":"Give a short Sheers simile from \'Winter Swans\'."',
+    replace: '"a":"\'...folded, one over the other, / like a pair of wings settling after flight.\'","q":"Give a short Sheers simile from \'Winter Swans\'."' }
+]);
+
+/* ───────────────────────────── verify + write ─────────────────────────── */
+let bad = 0;
+for (const p of plan) {
+  const r = byNum(p.lesson_number);
+  const acc = {};
+  for (const e of (p.edits || [])) {
+    const isJson = JSON_FIELDS.has(e.field);
+    if (!(e.field in acc)) acc[e.field] = isJson ? JSON.stringify(r[e.field]) : (r[e.field] || '');
+    // JSON-field finds are written as the SERIALISED form already, so they must
+    // NOT be re-escaped here - doing so would turn " into \" and never match.
+    const find = e.find;
+    const repl = e.replace;
+    const want = e.count === undefined ? 1 : e.count;
+    const n = acc[e.field].split(find).length - 1;
+    if (n !== want) { console.error(`ASSERT FAIL L${p.lesson_number} ${e.field}: want ${want}, found ${n} :: ${e.find.slice(0, 80)}`); bad++; }
+    acc[e.field] = acc[e.field].split(find).join(repl);
+  }
+  for (const [f, v] of Object.entries(acc)) {
+    if (JSON_FIELDS.has(f)) { try { JSON.parse(v); } catch (err) { console.error(`ASSERT FAIL L${p.lesson_number} ${f}: result is not valid JSON - ${err.message}`); bad++; } }
+  }
+}
+if (bad) { console.error(`\n${bad} assertion failure(s) - plan NOT written`); process.exit(1); }
+
+fs.writeFileSync(path.join(HERE, '_plan.json'), JSON.stringify(plan, null, 1));
+const nEdit = plan.reduce((s, p) => s + p.edits.length, 0);
+const nFix = plan.reduce((s, p) => s + p.findings.filter(f => f.action === 'fixed').length, 0);
+const nFlag = plan.reduce((s, p) => s + p.findings.filter(f => f.action === 'flagged').length, 0);
+const nVer = plan.reduce((s, p) => s + p.findings.filter(f => f.action === 'verified').length, 0);
+console.log(`plan OK: ${plan.length} lessons, ${nEdit} string edits, ${nFix} fixed findings, ${nFlag} flagged, ${nVer} verified-clean`);
