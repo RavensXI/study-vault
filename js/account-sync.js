@@ -37,7 +37,7 @@
     'studyvault-visited', 'sv-lessons-done', 'sv-lessons-when',
     'sv-kc-log', 'sv-practice-log', 'sv-flash-log', 'sv-flash-day',
     'sv-warmup-log', 'sv-misconception-log', 'sv-flashcard-progress',
-    'sv-ko-data', 'sv-widget-done',
+    'sv-ko-data', 'sv-widget-done', 'sv-exit-log',
     // shorts
     'sv_shorts_watched', 'sv_shorts_saved', 'sv_shorts_day',
     'sv_shorts_streak', 'sv-shorts-checks',

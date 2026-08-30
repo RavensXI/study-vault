@@ -1120,22 +1120,55 @@
     host.parentNode.insertBefore(fig, host.nextSibling);   // right after the paragraph
   }
 
-  // EXIT TICKET (Tom, 11 Jun) — ONE synthesis question per lesson, fired on
-  // Next-lesson click. QUESTION TEMPLATE (Tom): open with "In Lesson N, you
-  // learned that ..." — restate the prior knowledge explicitly, THEN ask the
-  // question that synthesises it with THIS lesson. `from` names the source
-  // lesson in the modal header. Hand-written for two specimen lessons; the
-  // real version is a pipeline job (generated with prior-lesson context).
+  // EXIT TICKET (Tom, 11 Jun; register + voice redesign 31 Aug) — ONE
+  // synthesis question per lesson, fired on Next-lesson click.
+  // QUESTION REGISTER (Tom, 31 Aug): teacher-voice — one question, simply
+  // put, like a question asked aloud at the end of a lesson. No stacked
+  // asks, no exam-stem formality. The restatement hands over the minimum
+  // prior idea in plain words; dates and precision live in the MODEL
+  // ANSWER. Anchor = best prior lesson, not necessarily N-1. Lesson 1 of
+  // a unit gets a forward-frame question, never fake synthesis.
+  // Prototype batch: 8 Unity History specimens (artifact 254d8c7d).
   var EXIT_TICKETS = {
-    '/lesson/business-aqa/marketing/2': {
-      from: 'Draws on Lesson 1',
-      q: 'In Lesson 1, you learned that a market map can reveal a gap in the market — a space where customer demand isn’t being served by any rival. This lesson showed how market research measures demand. Suppose research finds strong demand among 16–25s, but your market map shows that space is crowded with competitors. Using both lessons, what decision should the business take, and why?',
-      a: 'Use the two together: rather than fight head-on, reposition toward a gap — an underserved segment where demand exists but competition is thin. Market research proves the demand is real; the market map shows where the space is empty.'
+    '/lesson/history/health-people/1': {
+      from: 'Setting up the unit',
+      q: 'Galen’s anatomy was full of mistakes — he’d only ever dissected animals, not people. So why did nobody put him right for over a thousand years?',
+      a: 'The Church held the wrong ideas in place. It taught that Galen’s “perfectly designed” body fitted God’s creation, controlled the universities and the books, and banned human dissection — so nobody could check his claims. After Rome fell, the surviving ancient texts were treated with such respect that questioning them felt impossible. Before anyone could prove Galen wrong, something had to change: permission to dissect real human bodies, or the technology to see what was really there.'
     },
-    '/lesson/history-aqa/britain-health-people/7': {
-      from: 'Draws on Lesson 6',
-      q: 'In Lesson 6, you learned that Jenner proved vaccination worked — a country doctor acting on chance observation of milkmaids, with no idea WHY it worked. In this lesson, Pasteur — a chemist paid by brewers — finally supplied the explanation. Use both men to argue that “science and technology” alone does not explain medical progress.',
-      a: 'Each breakthrough needed other factors too: Jenner — chance observation plus government compulsion (the 1853 Vaccination Act); Pasteur — industrial funding, the microscope, and rivalry with Koch. Progress comes from factors combining — the core argument the 16-marker rewards.'
+    '/lesson/history/health-people/9': {
+      from: 'Draws on Lesson 8',
+      q: 'Last lesson you learned about Pasteur’s Germ Theory — that microbes in the air are what can make us sick. So why did death rates actually go up after the invention of anaesthetics?',
+      a: 'Anaesthetics meant patients were unconscious, so surgeons attempted longer and deeper operations — but nobody yet knew germs existed, so every extra minute let infection in. That is why deaths rose during the “Black Period”. Lister’s breakthrough only became possible once Pasteur had shown there was something to kill: he read Germ Theory and reasoned that carbolic acid could destroy germs before they infected the wound.'
+    },
+    '/lesson/history/health-people/13': {
+      from: 'Draws on Lesson 10',
+      q: 'Back in Lesson 10 you saw governments refusing for decades to spend a penny on public health — remember laissez-faire? Yet in 1948 the same country gave everyone free healthcare. What changed?',
+      a: 'War changed everything. The Emergency Medical Service proved the state could run hospitals; evacuation showed the country how poor city children’s health really was; and the shared sacrifice of the war made people demand a fairer Britain — captured by the Beveridge Report and delivered by Labour’s landslide in 1945. But notice the continuity: just like 1875, change came when undeniable evidence met political pressure the government could no longer ignore.'
+    },
+    '/lesson/history/conflict-tension/9': {
+      from: 'Draws on Lesson 8',
+      q: 'Over Manchuria the League did nothing and Japan got away with it. Over Abyssinia the League actually imposed sanctions — and Mussolini still won. So is the lesson that sanctions just don’t work, or did something else fail both times?',
+      a: 'Sanctions were never really tried. The Abyssinian sanctions left out oil, coal and steel — the things Italy actually needed — the Suez Canal stayed open, and the USA kept trading. What truly failed both times was the will of Britain and France: over Manchuria they moved slowly and risked nothing; over Abyssinia they protected their own trade and courted Mussolini as an ally against Hitler — even secretly offering him most of the country. The tool didn’t fail; the members refused to use it properly.'
+    },
+    '/lesson/history/conflict-tension/12': {
+      from: 'Draws on Lesson 3',
+      q: 'Remember how many British people had come to feel Versailles was too harsh on Germany — even Lloyd George predicted another war within 25 years. How does that help explain why Chamberlain got a hero’s welcome for handing Hitler the Sudetenland?',
+      a: 'By 1938 many British people had spent twenty years believing Versailles had been unjust — Keynes’s bestselling attack on the treaty and Lloyd George’s own doubts had seen to that. So when Hitler demanded the Sudetenland, where three million Germans lived, it looked like the correction of an old wrong rather than aggression. Chamberlain seemed to have righted an injustice AND prevented a war — that is why the crowds cheered. The logic only collapsed in March 1939, when Hitler took the rest of Czechoslovakia: no Germans to “reunite”, no wrong to right.'
+    },
+    '/lesson/history/elizabethan/6': {
+      from: 'Draws on Lesson 5',
+      q: 'For 19 years Elizabeth refused to execute Mary — no proof, royal blood, the risk of war. Then the Babington Plot changed everything. So was Mary’s execution her own doing, or Walsingham’s trap?',
+      a: 'A strong answer can argue either way. Mary’s own doing: she chose to reply to Babington and approved the assassination in writing. Walsingham’s trap: he built the entire channel — his double agent Gifford carried the letters in beer barrels, his codebreaker Phelippes read every word — and he let the plot run until Mary wrote the one thing Elizabeth had lacked for 19 years: proof. Once that letter existed, Parliament’s pressure overrode every other objection.'
+    },
+    '/lesson/history/elizabethan/15': {
+      from: 'Draws on Lesson 10',
+      q: 'A few lessons ago we saw prices rising four times faster than wages, harvests failing, and beggars being whipped and branded. Knowing all that — can we honestly call Elizabeth’s reign a Golden Age?',
+      a: 'A balanced answer uses the poverty evidence to challenge the label — golden for the gentry building great houses, not for the families whose wages collapsed in real terms or the vagabonds who were whipped and branded — and then concedes what the label gets right: Shakespeare’s theatre, the Armada victory and relative religious peace were real achievements. The Golden Age describes the experience of a brilliant minority, polished by Elizabeth’s own propaganda.'
+    },
+    '/lesson/history/america/5': {
+      from: 'Draws on Lesson 1',
+      q: 'Think back to what powered the boom — buying everything on credit, playing the stock market with borrowed money. Can you spot the Crash already hiding inside the boom? Where?',
+      a: 'The boom and the crash are one story. Buying on credit felt like wealth but was really debt waiting to be called in. Margin speculation — $8.5 billion of borrowed money, more than all the cash in circulation — inflated a bubble that had to burst. And because 42% of Americans were too poor to buy the goods pouring off the production lines, overproduction was built in from the start. Every engine of the boom doubled as a cause of the crash.'
     }
   };
 
@@ -1162,6 +1195,12 @@
     }, true);
   }
 
+  // The answer flow (31 Aug): type OR dictate (browser-side speech
+  // recognition, transcript editable, student prompted to check it before
+  // sending). Send locks the answer; the model answer only reveals AFTER
+  // send — skippers never see it. Response saved to sv-exit-log (account-
+  // sync whitelisted). Continue is always one click; answering is invited,
+  // never extorted.
   function openExitModal(t, nextHref) {
     var wrap = document.createElement('div');
     wrap.className = 'sv-exit-modal';
@@ -1171,9 +1210,21 @@
         '<button type="button" class="sv-exit-close" aria-label="Stay on this lesson">&times;</button>' +
         '<div class="sv-exit-kicker"><span>Before you go</span><span class="sv-exit-from"></span></div>' +
         '<p class="sv-exit-q"></p>' +
+        '<div class="sv-exit-answer">' +
+          '<textarea class="sv-exit-input" rows="4" placeholder="Type your answer here — or press the mic and just say it."></textarea>' +
+          '<p class="sv-exit-checknote" hidden>Have a read through what the mic heard — it often mishears names and dates. Fix anything, then send.</p>' +
+          '<div class="sv-exit-answer-row">' +
+            '<button type="button" class="sv-exit-mic" hidden aria-label="Dictate your answer">' +
+              '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v4"/></svg>' +
+              '<span>Speak your answer</span>' +
+            '</button>' +
+            '<button type="button" class="sv-exit-send">Send my answer</button>' +
+          '</div>' +
+        '</div>' +
+        '<p class="sv-exit-saved" hidden>Saved. When exit tickets go live, your teacher will see this.</p>' +
         '<p class="sv-exit-a" hidden></p>' +
         '<div class="sv-exit-actions">' +
-          '<button type="button" class="sv-exit-btn" data-act="reveal">Reveal a model answer</button>' +
+          '<button type="button" class="sv-exit-btn" data-act="reveal" hidden>Reveal a model answer</button>' +
           '<a class="sv-exit-continue" href="">Continue to next lesson &rarr;</a>' +
         '</div>' +
       '</div>';
@@ -1181,18 +1232,99 @@
     wrap.querySelector('.sv-exit-a').textContent = t.a;
     wrap.querySelector('.sv-exit-from').textContent = t.from || '';
     wrap.querySelector('.sv-exit-continue').href = nextHref;
+
+    var input = wrap.querySelector('.sv-exit-input');
+    var mic = wrap.querySelector('.sv-exit-mic');
+    var micLabel = mic.querySelector('span');
+    var send = wrap.querySelector('.sv-exit-send');
+    var checknote = wrap.querySelector('.sv-exit-checknote');
+    var saved = wrap.querySelector('.sv-exit-saved');
     var a = wrap.querySelector('.sv-exit-a'), rv = wrap.querySelector('[data-act="reveal"]');
+
+    // --- dictation: browser-side, transcript lands in the editable box.
+    // Nothing is recorded or uploaded — the browser's own recogniser
+    // returns text only.
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var rec = null, listening = false, usedVoice = false, baseText = '';
+    if (SR) {
+      mic.hidden = false;
+      rec = new SR();
+      rec.lang = 'en-GB';
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.onresult = function (e) {
+        var finals = '', interim = '';
+        for (var i = 0; i < e.results.length; i++) {
+          if (e.results[i].isFinal) finals += e.results[i][0].transcript;
+          else interim += e.results[i][0].transcript;
+        }
+        usedVoice = true;
+        input.value = (baseText + finals + interim).replace(/^\s+/, '');
+      };
+      rec.onerror = function (e) {
+        stopListening();
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+          micLabel.textContent = 'Mic blocked — check permissions';
+        }
+      };
+      rec.onend = function () { if (listening) stopListening(); };
+    }
+    function startListening() {
+      baseText = input.value ? input.value.replace(/\s+$/, '') + ' ' : '';
+      listening = true; usedVoice = false;
+      mic.classList.add('sv-exit-mic--live');
+      micLabel.textContent = 'Listening… tap to stop';
+      checknote.hidden = true;
+      try { rec.start(); } catch (err) {}
+    }
+    function stopListening() {
+      listening = false;
+      mic.classList.remove('sv-exit-mic--live');
+      micLabel.textContent = 'Speak your answer';
+      try { rec.stop(); } catch (err) {}
+      if (usedVoice && input.value.trim()) { checknote.hidden = false; input.focus(); }
+    }
+    mic.addEventListener('click', function () {
+      if (listening) stopListening(); else startListening();
+    });
+
+    // --- send: locks the answer, saves it, and only THEN offers the model
+    var submitted = false;
+    send.addEventListener('click', function () {
+      var text = input.value.trim();
+      if (!text) { input.focus(); return; }
+      if (listening) stopListening();
+      submitted = true;
+      input.readOnly = true;
+      input.classList.add('sv-exit-input--locked');
+      mic.hidden = true; send.hidden = true; checknote.hidden = true;
+      saved.hidden = false; rv.hidden = false;
+      try {
+        var log = JSON.parse(localStorage.getItem('sv-exit-log')) || {};
+        log[location.pathname] = {
+          q: t.q, answer: text,
+          method: usedVoice ? 'voice' : 'typed',
+          ts: Date.now()
+        };
+        localStorage.setItem('sv-exit-log', JSON.stringify(log));
+      } catch (err) {}
+      rv.focus();
+    });
+
     rv.addEventListener('click', function () {
       a.hidden = !a.hidden;
       rv.textContent = a.hidden ? 'Reveal a model answer' : 'Hide the model answer';
     });
-    function close() { wrap.remove(); document.removeEventListener('keydown', onKey); }
+    function close() {
+      if (listening) stopListening();
+      wrap.remove(); document.removeEventListener('keydown', onKey);
+    }
     function onKey(e) { if (e.key === 'Escape') close(); }
     wrap.querySelector('.sv-exit-close').addEventListener('click', close);
     wrap.querySelector('.sv-exit-backdrop').addEventListener('click', close);
     document.addEventListener('keydown', onKey);
     document.body.appendChild(wrap);
-    wrap.querySelector('.sv-exit-continue').focus();
+    input.focus();
   }
 
   // Duotone icon set (soft filled shape + bold glyph) — replaces the generic
