@@ -256,6 +256,13 @@ def validate_file(path):
     narration_ids = re.findall(r'data-narration-id="n(\d+)"', content)
     narration_ids += re.findall(r'data-narration-id="n(\d+)"', data.get('exam_tip_html', '') + ' ' + data.get('conclusion_html', ''))
     if narration_ids:
+        # Duplicates across content/exam_tip/conclusion map two blocks to ONE
+        # R2 key, so the later clip overwrites the earlier and a block plays
+        # the wrong audio. Found live in 75 lessons (30 Aug 2026 sweep).
+        from collections import Counter as _Counter
+        dupes = sorted(n for n, c in _Counter(narration_ids).items() if c > 1)
+        if dupes:
+            violations.append(f"duplicate narration IDs (blocks would share one audio file): n{', n'.join(dupes[:8])}")
         nums = sorted(set(int(n) for n in narration_ids))
         expected = list(range(1, max(nums) + 1))
         missing = [n for n in expected if n not in nums]
