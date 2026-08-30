@@ -314,8 +314,6 @@
       body: 'Hand-picked media to go deeper, and a tutor on hand to explain anything a different way.' },
     { sel: '#sidebar-video-section .sidebar-video', pad: 8, title: 'Watch the overview',
       body: 'A short video explainer for the lesson. Tap it to play full-size.' },
-    { sel: '.lesson-nav-link--next', pad: 8, title: 'Before you go',
-      body: 'When you move to the next lesson, we’ll ask one question that links it back to something you already learned — that’s what makes it stick.' },
     { sel: '.sv-tour-replay', pad: 10, title: 'Replay any time',
       body: 'New to all this? Tap here whenever you like to run through the tour again.' }
   ];
