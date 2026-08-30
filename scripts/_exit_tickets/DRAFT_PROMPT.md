@@ -58,6 +58,16 @@ not the exam paper.
    compare-two-cases. A question with a genuinely arguable answer beats a fact-check.
 10. **Parallel-structure units** (case studies, set works, poems): synthesis ACROSS parallel
     items is gold — that is exactly the comparison skill the exams reward.
+11. **False-paradox check.** "Yet" and "but" must join facts that genuinely pull against each
+    other. If the expected relationship already explains the contrast, there is no paradox —
+    "Haiti's earthquake was bigger, YET its death toll was higher" implies smaller quakes
+    should kill more, which teaches the wrong intuition. The real anomaly is usually the
+    DISPROPORTION, not the direction: the quakes were close in size, the death tolls a
+    thousand times apart. Frame the question around the genuine surprise.
+12. **No overlapping answers on consecutive lessons.** Before drafting each ticket, re-read
+    the one you just wrote. If the two model answers would substantially overlap, the later
+    ticket must find a different angle — a judgement, an application, a strain-test of the
+    framework — not a repeat of yesterday's answer wearing a new question.
 
 ## Model answers
 
