@@ -1220,6 +1220,7 @@
             '</button>' +
             '<button type="button" class="sv-exit-send">Send my answer</button>' +
           '</div>' +
+          '<p class="sv-exit-privacy" hidden>Your voice is never recorded or saved &mdash; your words become text as you speak, and your teacher only ever sees the text you send.</p>' +
         '</div>' +
         '<p class="sv-exit-saved" hidden>Saved. When exit tickets go live, your teacher will see this.</p>' +
         '<p class="sv-exit-a" hidden></p>' +
@@ -1248,6 +1249,7 @@
     var rec = null, listening = false, usedVoice = false, baseText = '';
     if (SR) {
       mic.hidden = false;
+      wrap.querySelector('.sv-exit-privacy').hidden = false;
       rec = new SR();
       rec.lang = 'en-GB';
       rec.continuous = true;
@@ -1295,7 +1297,21 @@
     // student edits before it returns, the result is discarded.
     var editedSince = false;
     input.addEventListener('input', function () { editedSince = true; });
+    // Abuse guard: at most 30 cleanup calls per device per day. Dictation
+    // still works past the cap - the raw transcript just isn't tidied.
+    function underCleanupCap() {
+      try {
+        var k = 'sv-exit-cleanups', today = new Date().toISOString().slice(0, 10);
+        var d = JSON.parse(localStorage.getItem(k)) || {};
+        if (d.day !== today) d = { day: today, n: 0 };
+        if (d.n >= 30) return false;
+        d.n++;
+        localStorage.setItem(k, JSON.stringify(d));
+        return true;
+      } catch (e) { return true; }
+    }
     function tidyTranscript() {
+      if (!underCleanupCap()) return;
       var snapshot = input.value;
       editedSince = false;
       checknote.textContent = 'Tidying up what the mic heard…';
