@@ -366,6 +366,8 @@ function initPracticeQuestions() {
       ['20 marks \u2014 Whole Text Essay', 'whole-text-essay.html'],
       ['40 marks \u2014 Shakespeare Essay', 'shakespeare-essay.html'],
       ['40 marks \u2014 Poetry Comparison', 'poetry-across-time.html'],
+      ['20 marks \u2014 Linked Poetry Comparison', 'poetry-across-time.html'],
+      ['20 marks \u2014 Single Poem Response', 'poetry-across-time.html'],
       // Eduqas English Lit (C720U)
       ['20 marks \u2014 Wider Text Response', 'post-1914-two-part.html'],
       ['40 marks \u2014 19th Century Essay', 'nineteenth-century-essay.html'],
