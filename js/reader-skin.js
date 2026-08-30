@@ -1137,8 +1137,8 @@
     },
     '/lesson/history/health-people/9': {
       from: 'Draws on Lesson 8',
-      q: 'Last lesson you learned about Pasteur’s Germ Theory — that microbes in the air are what can make us sick. So why did death rates actually go up after the invention of anaesthetics?',
-      a: 'Anaesthetics meant patients were unconscious, so surgeons attempted longer and deeper operations — but nobody yet knew germs existed, so every extra minute let infection in. That is why deaths rose during the “Black Period”. Lister’s breakthrough only became possible once Pasteur had shown there was something to kill: he read Germ Theory and reasoned that carbolic acid could destroy germs before they infected the wound.'
+      q: 'Here’s a strange one: anaesthetics were meant to make surgery safer, yet for twenty years death rates went up — and the surgeons had no idea why, because Germ Theory hadn’t been discovered yet. But you met Pasteur’s germs last lesson, so you know something they didn’t. What was really going wrong on the operating table?',
+      a: 'With patients unconscious, surgeons attempted longer and deeper operations — but they still believed in miasma and operated in dirty coats with unwashed hands, so every extra minute let germs into the wound. The surgeons couldn’t see the real killer; you can. That is why deaths rose during the “Black Period”, and why it only ended after Pasteur (1861) gave Lister something to kill — carbolic acid destroying the germs before they infected the wound.'
     },
     '/lesson/history/health-people/13': {
       from: 'Draws on Lesson 10',
