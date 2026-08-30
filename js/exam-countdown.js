@@ -115,7 +115,7 @@
     s.textContent =
       /* Base pill — inherits the unit accent (falls back to neutral warm grey) */
       '.exam-cd{display:inline-flex;align-items:center;gap:0.35rem;font-family:Inter,system-ui,sans-serif;' +
-        'font-size:0.75rem;background:var(--accent-light,#f0ece7);border:1px solid var(--accent-badge,#e8e4df);border-radius:999px;' +
+        'font-size:0.75rem;background:var(--accent-light,#f0ece7);border:1px solid var(--accent-badge,#e8e4df);border-radius:var(--radius-sm,10px);' +
         'padding:0.25rem 0.6rem 0.25rem 0.45rem;color:var(--text-primary,#2d2a26);white-space:nowrap;' +
         'transition:opacity 0.25s,transform 0.25s;animation:examCdIn 0.35s cubic-bezier(0.16,1,0.3,1)}' +
       '.exam-cd-clock{width:13px;height:13px;color:var(--accent,#2d2a26);flex-shrink:0}' +
