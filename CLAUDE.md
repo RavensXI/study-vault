@@ -176,8 +176,8 @@ void that day — treat 2–3 Sep as a re-calibration day from the batch logs.
 ### Tom's tasks (decisions, reviews, external actions)
 - **Review flips**: 92 `pending_review` lessons — the three Music boards
   (Eduqas 32 / OCR 37 / Edexcel 31, built 16 Aug) + music listening feature.
-- **Widget fleet decisions**: merge `lesson-widgets`? completion-credit
-  in-denominator vs bonus? go/no-go on the 3-lesson band (48 clusters)?
+- **Completion-credit denominator**: in-denominator (current) vs bonus —
+  explained to Tom 30 Aug, awaiting his call (see js/main.js weighted()).
 - **Teacher pages redesign direction** (3 customer-facing pages, before
   Sept) — pick the direction; Claude builds it.
 - **Microsoft SSO**: chase Entra admin consent — the blocker for all
@@ -187,11 +187,20 @@ void that day — treat 2–3 Sep as a re-calibration day from the batch logs.
   only override).
 - **Per-school term dates** for planner holiday awareness (needs school
   calendars only Tom can obtain).
-- **GPT-image-2 diagrams**: budget call (~£0.12/image, ~£400–700 full
-  build-out) — parked until decided.
+- *(long-term)* **GPT-image-2 diagrams** (~£400–700) — revisit when school
+  revenue lands (Tom, 30 Aug). **Mobile app (Capacitor)** — after launch
+  settles (Tom, 30 Aug).
 - **Geography Skills L13/L14**: review pass with Claude (L11/12 done).
 
 ### Claude's tasks (delegable — runnable any time)
+- **Retro fact-check programme** (task #78, tracker artifact 10dfeef7) —
+  queue in scripts/_retrofc/_queue.json; Thursday opener: 190 question-type
+  relabels + 178 band ladders + PD extract authoring + science takeaway
+  de-dup + Eduqas self-naming sweep + platform duration re-measure.
+- **3-lesson widget band** (48 clusters) — APPROVED, gated on the retro
+  fact-check programme completing first (Tom's ruling 30 Aug).
+- **Teacher login/signup redesign** in the /teacher/classes house style —
+  approved 30 Aug, build without further taste questions.
 - **NLM re-calibration** on 2–3 Sep after the compute-limit change (plan
   saved in memory; read real throughput from batch logs, re-size caps).
 - **English Literature debt**: audit + worklist for AQA regex-generated
@@ -199,7 +208,6 @@ void that day — treat 2–3 Sep as a re-calibration day from the batch logs.
 - **Parents' evening print view**.
 - **Exam dates 2027 edition** of `data/exam-dates-2026.json` once boards
   publish timetables.
-- **Mobile app (Capacitor)** — execution ready when Tom green-lights.
 - **Prescribed-works register**: fill Music AQA + Media AQA once the 2027
   CSP list is published (blocked on external publication, then Claude's).
 
