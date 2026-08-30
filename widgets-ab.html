@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opus vs Sonnet — same spec, same freedom</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --accent:#8a6a4f; }
+  body{background:#faf8f5;color:#2d2a26;font-family:Inter,system-ui,sans-serif;
+    margin:0;padding:1.2rem 1.4rem;max-width:1500px}
+  h1{font-family:'Source Serif 4',serif;font-size:1.35rem;margin:0 0 .3rem}
+  p.note{color:#8d8880;font-size:.85rem;margin:0 0 1.6rem;line-height:1.5;max-width:70ch}
+  .lesson{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;
+    color:#8d8880;font-weight:700;margin:2.2rem 0 .6rem}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;align-items:start}
+  @media (max-width:1000px){ .pair{grid-template-columns:1fr} }
+  .col > h2{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+    margin:0 0 .5rem;color:#2d2a26}
+  .col > h2 span{font-weight:500;color:#8d8880;text-transform:none;letter-spacing:0}
+  .holder{background:#fff;border:1px solid #e8e3db;border-radius:16px;padding:1rem;
+    box-shadow:0 1px 2px rgba(45,42,38,.04)}
+  .fail{background:#fbeee9;border:1px solid #e3c4b8;border-radius:12px;
+    padding:.8rem 1rem;color:#9a3a25;font-size:.86rem}
+</style>
+</head>
+<body>
+<h1>Opus vs Sonnet — same spec, same freedom</h1>
+<p class="note">Identical design specs, identical unconstrained contract; the only variable is
+which model wrote the code. The point of the comparison is whether the step change came from
+removing my constraints or from paying 5&times; more per widget.</p>
+<div id="mount"></div>
+<script>
+(async function () {
+  const LESSONS = [
+    ['match-the-minister', 'History AQA · Elizabethan England L2 · Key ministers', '#b45309'],
+    ['insulate-to-target', 'Combined Science AQA · Physics P1 L2 · Efficiency', '#ea580c']
+  ];
+  const VARIANTS = [
+    ['Opus 5',   '~$0.30 each', id => '/scripts/widget_pipeline/builds/_opus-' + id + '.txt'],
+    ['Sonnet 5', '~$0.06 each', id => '/scripts/widget_pipeline/builds/' + id + '.js']
+  ];
+  const mount = document.getElementById('mount');
+  for (const [id, ref, accent] of LESSONS) {
+    const h = document.createElement('div');
+    h.className = 'lesson'; h.textContent = ref; mount.appendChild(h);
+    const pair = document.createElement('div'); pair.className = 'pair';
+    mount.appendChild(pair);
+    for (const [label, price, url] of VARIANTS) {
+      const col = document.createElement('div'); col.className = 'col';
+      col.innerHTML = '<h2>' + label + ' <span>' + price + '</span></h2>';
+      const holder = document.createElement('div');
+      holder.className = 'holder';
+      holder.style.setProperty('--accent', accent);
+      col.appendChild(holder); pair.appendChild(col);
+      try {
+        const src = await fetch(url(id) + '?t=' + Date.now())
+          .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); });
+        const tag = document.createElement('script');
+        tag.textContent = src;
+        document.head.appendChild(tag);
+        if (!window.SVWidget || !window.SVWidget.mount) throw new Error('no SVWidget.mount');
+        const root = document.createElement('div');
+        holder.appendChild(root);
+        window.SVWidget.mount(root, { accent: accent, reducedMotion: false });
+        window.SVWidget = null;
+      } catch (e) {
+        holder.innerHTML = '<div class="fail">' + label + ' — ' + e.message + '</div>';
+      }
+    }
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Local review server.
+"""Local review server for the lesson-widgets branch.
 
 Mimics the Vercel rewrites the loaders depend on: /lesson/... serves
 lesson.html, /practice/... practice.html, /browse/... browse.html,

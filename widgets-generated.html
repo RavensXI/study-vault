@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generated interactives — review</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/lesson-widgets.css">
+<style>
+  body{background:#faf8f5;color:#2d2a26;font-family:Inter,system-ui,sans-serif;
+    max-width:760px;margin:0;padding:1.2rem}
+  h1{font-family:'Source Serif 4',serif;font-size:1.35rem;margin:0 0 .2rem}
+  p.note{color:#8d8880;font-size:.85rem;margin:.2rem 0 1.4rem;line-height:1.5}
+  .lessonref{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;
+    color:#8d8880;font-weight:700;margin:1.8rem 0 .3rem}
+  .fail{background:#fbeee9;border:1px solid #e3c4b8;border-radius:12px;
+    padding:.8rem 1rem;color:#9a3a25;font-size:.88rem}
+</style>
+</head>
+<body>
+<h1>Generated interactives</h1>
+<p class="note">Built by the four-tier pipeline from the lessons themselves — each one a
+different <em>thing to do</em>, not a different set of numbers in the same slider.
+Click the pictures; they are driven by the widgets' own hit regions. Each card takes
+the accent colour of whatever lesson it sits in (here they inherit the page default).</p>
+<div id="mount"></div>
+
+<script src="/js/widget-host.js"></script>
+<script>
+(async function () {
+  const FILES = [
+    ['match-the-minister',     'History AQA · Elizabethan England L2 · Key ministers'],
+    ['elizabeths-crossroads',  'History AQA · Elizabethan England L3 · A female ruler'],
+    ['ohms-law-circuit-lab',   'Combined Science AQA · Physics P1 L3 · Circuits'],
+    ['energy-store-scaler',    'Combined Science AQA · Physics P1 L1 · Energy stores'],
+    ['insulate-to-target',     'Combined Science AQA · Physics P1 L2 · Efficiency']
+  ];
+  const mount = document.getElementById('mount');
+  for (const [id, ref] of FILES) {
+    const h = document.createElement('div');
+    h.className = 'lessonref';
+    h.textContent = ref;
+    mount.appendChild(h);
+    try {
+      const src = await fetch('/scripts/widget_pipeline/builds/' + id + '.js?t=' + Date.now())
+                        .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); });
+      // the modules declare `var W = {...}`; evaluate in a private scope
+      const W = new Function(src + '\n;return typeof W !== "undefined" ? W : null;')();
+      if (!W) throw new Error('module did not expose W');
+      mount.appendChild(window.SVWidgetHost(W, { height: 330 }).el);
+    } catch (e) {
+      const f = document.createElement('div');
+      f.className = 'fail';
+      f.textContent = id + ' — could not load: ' + e.message;
+      mount.appendChild(f);
+    }
+  }
+})();
+</script>
+</body>
+</html>
