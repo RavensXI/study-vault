@@ -1282,7 +1282,37 @@
       mic.classList.remove('sv-exit-mic--live');
       micLabel.textContent = 'Speak your answer';
       try { rec.stop(); } catch (err) {}
-      if (usedVoice && input.value.trim()) { checknote.hidden = false; input.focus(); }
+      if (usedVoice && input.value.trim()) {
+        checknote.hidden = false; input.focus();
+        tidyTranscript();
+      }
+    }
+
+    // Post-dictation repair (the Wispr Flow trick): a tiny Haiku call fixes
+    // punctuation, false starts and misheard vocab, anchored on the question
+    // text. Repair only - the prompt forbids improving the answer. Never
+    // blocks (failure keeps the raw transcript) and never clobbers: if the
+    // student edits before it returns, the result is discarded.
+    var editedSince = false;
+    input.addEventListener('input', function () { editedSince = true; });
+    function tidyTranscript() {
+      var snapshot = input.value;
+      editedSince = false;
+      checknote.textContent = 'Tidying up what the mic heard…';
+      fetch('/api/exit-cleanup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: t.q, transcript: snapshot })
+      }).then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function (d) {
+          if (!d.text || submitted || listening) return;
+          if (editedSince || input.value !== snapshot) return;   // their edits win
+          input.value = d.text;
+          checknote.textContent = 'Tidied up. Have a quick read through - then send.';
+        })
+        .catch(function () {
+          checknote.textContent = 'Have a read through what the mic heard - it often mishears names and dates. Fix anything, then send.';
+        });
     }
     mic.addEventListener('click', function () {
       if (listening) stopListening(); else startListening();
