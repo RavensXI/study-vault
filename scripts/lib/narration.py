@@ -424,11 +424,19 @@ def generate_audio_rest(text, voice_name, lang_code=None):
 # ── MP3 Duration ────────────────────────────────────────────────────────
 
 def get_mp3_duration(mp3_bytes):
-    """Return duration of MP3 in seconds by reading MPEG frame headers."""
+    """Return duration of MP3 in seconds by reading MPEG frame headers.
+
+    Handles MPEG-1 AND MPEG-2/2.5 Layer III. Azure's house format
+    (96kbps 24kHz mono) is MPEG-2, which the old version of this
+    function rejected - it then byte-scanned to a false-positive header
+    and produced durations up to 3.4x off (the "manifest durations
+    unreliable" bug, root-caused 30 Aug 2026).
+    """
     SAMPLE_RATES = {0: [11025, 12000, 8000], 1: [0, 0, 0],
                     2: [22050, 24000, 16000], 3: [44100, 48000, 32000]}
+    # Layer III bitrate tables (kbps): MPEG-1 vs MPEG-2/2.5
     BITRATES_V1 = [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0]
-    SAMPLES_PER_FRAME = 1152  # MPEG1 Layer III
+    BITRATES_V2 = [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0]
 
     file_size = len(mp3_bytes)
     data = mp3_bytes[:16384]
@@ -444,17 +452,23 @@ def get_mp3_duration(mp3_bytes):
     while offset < len(data) - 4:
         if data[offset] == 0xFF and (data[offset + 1] & 0xE0) == 0xE0:
             header = struct.unpack(">I", data[offset:offset + 4])[0]
-            version = (header >> 19) & 3
+            version = (header >> 19) & 3     # 0=MPEG2.5, 2=MPEG2, 3=MPEG1
+            layer = (header >> 17) & 3       # 1 = Layer III
             bitrate_idx = (header >> 12) & 0xF
             sr_idx = (header >> 10) & 3
 
-            if version == 3 and bitrate_idx not in (0, 15) and sr_idx != 3:
-                bitrate = BITRATES_V1[bitrate_idx] * 1000
+            if (version in (0, 2, 3) and layer == 1
+                    and bitrate_idx not in (0, 15) and sr_idx != 3):
+                table = BITRATES_V1 if version == 3 else BITRATES_V2
+                samples_per_frame = 1152 if version == 3 else 576
+                bitrate = table[bitrate_idx] * 1000
                 sample_rate = SAMPLE_RATES[version][sr_idx]
+                if version == 0:
+                    sample_rate //= 2  # MPEG2.5 halves the MPEG2 rates
                 if bitrate > 0 and sample_rate > 0:
                     audio_bytes = file_size - offset
-                    total_frames = audio_bytes * sample_rate / (SAMPLES_PER_FRAME * (bitrate / 8))
-                    return round(total_frames * SAMPLES_PER_FRAME / sample_rate, 2)
+                    total_frames = audio_bytes * sample_rate / (samples_per_frame * (bitrate / 8))
+                    return round(total_frames * samples_per_frame / sample_rate, 2)
         offset += 1
 
     # Fallback: estimate from file size and known bitrate (96kbps)
