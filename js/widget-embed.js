@@ -1697,7 +1697,10 @@
     },
   };
 
-  var BASE = '/scripts/widget_pipeline/builds/';
+  // Deployed copies live in /widgets/ - scripts/ is .vercelignore'd.
+  // Canonical sources stay in scripts/widget_pipeline/builds/; copy on
+  // change (the build step is: cp scripts/widget_pipeline/builds/*.js widgets/).
+  var BASE = '/widgets/';
 
   var CSS = [
     '.sv-embed-strip{display:flex;align-items:center;gap:1rem;margin:2rem 0;padding:.95rem 1.1rem;',
