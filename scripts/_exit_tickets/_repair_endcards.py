@@ -132,7 +132,7 @@ def main():
             fail += 1
             continue
         print(f'{idx:4d} OK    {label}: {rep["orig_dur"]}s -> {rep["new_dur"]}s '
-              f'(card {rep["endcard"]}s, {rep["method"]}, tail std {rep.get("tail_std")})')
+              f'(card {rep["endcard"]}s, {rep["method"]}, vs card {rep.get("vs_card")})')
         ok += 1
         if a.apply:
             key = key_of(c['url'])

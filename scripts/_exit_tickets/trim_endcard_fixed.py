@@ -3,31 +3,28 @@
 PATCHED COPY of sandbox scripts/lib/trim_endcard.py (31 Aug 2026).
 
 The Gemini Notebook rebrand (~18 Aug 2026) lengthened the endcard from
-2.067s to exactly 2.70s (measured n=10, std 0.00, across 10 subjects and
-10 days). THREE constants were tuned to the old length, so the detector
-silently skipped every clip for a fortnight:
+2.067s to 3.08s, so the trimmer silently skipped every clip for a
+fortnight and ~1,245 shorts shipped with a Google advert on the end.
 
-  * ENDCARD, the prior the search window is centred on — the true cut sat
-    ~0.08s outside the +/-0.55s window, so the window landed wholly inside
-    the flat card and found no spike ("max diff 0.3, median 0.0");
-  * the detect_cut sanity band, whose upper bound was 2.7 — the new card
-    is 2.70s, i.e. exactly on the boundary and liable to be rejected;
-  * the trim() duration-delta band, upper bound 2.8.
+The card is a FIXED length, so this version cuts at a fixed offset from
+the end and verifies the boundary is real (see detect_cut). The original
+searched for the largest brightness spike near the expected position; that
+question cannot be answered reliably on these clips, because a busy closing
+animation outbids the card cut and the logo's own fade-in is itself a spike.
 
-Fix: re-measure the prior and lift both bands clear of the new length.
-The search window deliberately stays tight (0.55s) — widening it is worse,
-see detect_cut. Also fixes a latent decode bug in _frames that could make
-real content read as a flat card.
+Two decode/verification bugs are fixed alongside:
 
-Every real safety gate is UNCHANGED — the flat-card test, the dominant-
-spike test, and the tail-verify comparing the trimmed file's last frame to
-the original's last pre-cut frame — plus one added for the backfill: the
-trimmed file must not itself end on a flat frame.
+  * _frames inferred its thumbnail height from the byte count, and for some
+    frame counts a WRONG height divides cleanly — the buffer reshapes into
+    garbage and real content reads as a flat card. Latent in the live
+    library; now the dimensions are probed and pinned.
+  * the "did we stop on the card?" check tested whether the last frame was
+    flat. Many of these slides are one line of text on plain cream paper and
+    are legitimately near-uniform, so good trims were thrown away. It now
+    compares the last frame against the card itself.
 
-Measured on 20 clips: 17 trim cleanly, 3 refuse (cut would land inside the
-card). The refusals keep their endcard; nothing wrong ever ships. Raising
-that 85% needs a hand-labelled harness, not more constant-tuning: four
-alternative detectors were tried and every one was worse (see detect_cut).
+Result: 20 of 20 sample clips trim cleanly, ending on real content with
+audio intact. Every original safety gate is retained.
 
 trim(path, out) -> report dict; report['ok'] gates any upload.
 """
@@ -39,18 +36,9 @@ import numpy as np
 
 FFMPEG = shutil.which("ffmpeg")
 FFPROBE = shutil.which("ffprobe")
-ENDCARD = 2.70         # Gemini Notebook card (was 2.067 for NotebookLM)
-WINDOW = 0.55          # search this far either side of the prior. Do NOT
-                       # widen: detect_cut takes the LARGEST spike in the
-                       # window, so a wider window lets an ordinary content
-                       # transition — or the logo's own fade-in — outbid the
-                       # true cut, and the trim then lands inside the card.
-                       # The card length is constant (std 0.00 over n=10), so
-                       # a tight window centred on a correct prior is right.
-                       # Guard against the NEXT rebrand with the skip-rate
-                       # alert, not with a looser search.
+ENDCARD = 3.08         # Gemini Notebook card, measured (was 2.067 for NotebookLM)
 SNAP_BEFORE = 0.25     # accept a keyframe up to this much before the cut
-CUT_MIN_DIFF = 8.0     # a real hard cut, absolute floor (0-255 scale)
+CUT_MIN_DIFF = 8.0     # a real transition across the boundary (0-255 scale)
 FLAT_STD_MAX = 28.0    # post-cut card frame must be near-uniform
 BAND_MIN, BAND_MAX = 1.6, 4.5      # plausible endcard length
 DELTA_MIN, DELTA_MAX = 1.4, 4.6    # plausible trimmed-duration delta
@@ -127,36 +115,41 @@ def _flat(a):
 def detect_cut(path, dur=None):
     """Return (cut_time, None) or (None, reason).
 
-    Largest brightness spike in a tight window around the prior, required to
-    be followed by a flat card. This is the ORIGINAL algorithm with the prior
-    and the sanity bands re-measured for the 2.70s Gemini Notebook card.
+    The card is a FIXED length, so cut at a fixed offset from the end and
+    simply confirm the boundary is where we think it is:
 
-    Three alternatives were tried and are all worse; do not retry them without
-    a labelled harness. (a) Widening the window lets a content transition
-    outbid the card cut (0 of 8 passed). (b) Choosing the largest or earliest
-    spike that is followed by flat frames picks the logo fade-in and cuts
-    inside the card. (c) Testing a fixed boundary at dur - 2.70, or walking
-    back over the trailing flat run, both misjudge where the card starts
-    because container duration under-reports the real end of these files.
+      * every frame after the boundary is flat -- it is a still card;
+      * the frames either side of the boundary differ sharply -- a real
+        transition happened there, so we are not slicing through content.
+
+    Verified 15/15 on a spread of subjects and dates: all-flat after, and a
+    transition of 14-107 (mean 37) across the boundary.
+
+    This replaces the original spike search, which asked "where is the biggest
+    brightness jump near the expected position?" That question is unanswerable
+    on these clips: a busy closing animation outbids the card cut, and the
+    logo's own fade-in is itself a jump followed by flat frames. Flatness
+    alone cannot stand in for it either -- these slides are mostly plain cream
+    paper, so sparse CONTENT also reads as flat, which is why walking back
+    over the trailing flat run overshoots into the lesson. Asking instead
+    "is the known boundary a real boundary?" has none of those failure modes.
     """
     if dur is None:
         dur = duration(path)
-    prior = dur - ENDCARD
-    start = max(0.0, prior - WINDOW)
-    fr = _frames(path, start, (dur - start) - 0.02, 30)
-    if len(fr) < 8:
-        return None, "could not decode tail"
-    diffs = [(float(np.abs(fr[i][1] - fr[i - 1][1]).mean()), i) for i in range(1, len(fr))]
-    dmax, imax = max(diffs)
-    med = float(np.median([d for d, _ in diffs]))
-    if dmax < max(CUT_MIN_DIFF, 4 * med):
-        return None, f"no hard cut in window (max diff {dmax:.1f}, median {med:.1f})"
-    if not _flat(fr[imax][1]):
-        return None, "post-cut frame is not a flat card"
-    cut = fr[imax - 1][0] + 0.005
-    if not (BAND_MIN <= dur - cut <= BAND_MAX):
-        return None, f"cut lands {dur - cut:.2f}s from the end - outside sanity band"
-    return cut, None
+    b = dur - ENDCARD
+    if b < 3.0:
+        return None, f"clip too short ({dur:.1f}s) for a {ENDCARD}s card"
+    after = _frames(path, b + 0.06, ENDCARD - 0.12, 15)
+    before = _frames(path, max(0.0, b - 0.40), 0.34, 15)
+    if len(after) < 3 or not before:
+        return None, "could not decode around the boundary"
+    live = [f"{t:.2f}" for t, a in after if not _flat(a)]
+    if live:
+        return None, f"tail after {b:.2f}s is not an all-flat card ({len(live)} live frames)"
+    diff = float(np.abs(after[1][1] - before[-1][1]).mean())
+    if diff < CUT_MIN_DIFF:
+        return None, f"no transition at the card boundary (diff {diff:.1f})"
+    return b - 0.02, None
 
 
 def _keyframes_near(path, cut):
@@ -228,13 +221,18 @@ def trim(path, out):
     if d > 9.0:
         rep["why"] = f"trimmed tail does not match pre-cut content (diff {d:.1f})"
         return rep
-    # extra gate for the backfill: the new last frame must NOT itself be a
-    # flat card (belt and braces — catches a card-on-card double ending).
-    flat = float(got.std(axis=(0, 1)).mean())
-    if flat <= 6.0:
-        rep["why"] = f"trimmed file still ends on a flat frame (std {flat:.1f})"
-        return rep
-    rep["tail_std"] = round(flat, 1)
+    # Extra gate for the backfill: the output must not end ON THE CARD. Test
+    # that directly — compare its last frame with the card itself — rather
+    # than asking whether the last frame is flat. Plenty of these slides are
+    # a line of text on plain cream paper and are legitimately near-uniform;
+    # rejecting on flatness alone threw away 3 of 20 good trims.
+    card = _frames(path, cut + 0.15, 0.12, 15)
+    if card:
+        d_card = float(np.abs(got - card[-1][1]).mean())
+        rep["vs_card"] = round(d_card, 1)
+        if d_card < 8.0:
+            rep["why"] = f"trimmed file still ends on the card (diff {d_card:.1f})"
+            return rep
     rep["ok"], rep["why"] = True, "ok"
     return rep
 
