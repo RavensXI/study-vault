@@ -60,11 +60,47 @@ class H(http.server.SimpleHTTPRequestHandler):
         super().__init__(*a, directory=ROOT, **kw)
 
     def do_GET(self):
+        # /r2/<full-r2-url> — same-origin proxy for R2 media. The public R2
+        # host rejects requests with no User-Agent, and cross-origin media
+        # loads are blocked in some browser profiles; proxying sidesteps both
+        # so local QA pages can play production video.
+        if self.path.startswith("/r2/"):
+            return self._proxy_r2(self.path[4:])
         for prefix, page in REWRITES:
             if self.path.startswith(prefix):
                 self.path = "/" + page
                 break
         return super().do_GET()
+
+    def _proxy_r2(self, target):
+        import urllib.parse
+        target = urllib.parse.unquote(target)
+        if not target.startswith("https://pub-"):
+            self.send_error(400, "only R2 public hosts")
+            return
+        headers = {"User-Agent": "Mozilla/5.0 (StudyVault local QA)"}
+        rng = self.headers.get("Range")
+        if rng:
+            headers["Range"] = rng
+        try:
+            up = urllib.request.urlopen(
+                urllib.request.Request(target, headers=headers), timeout=60)
+        except Exception as e:
+            self.send_error(502, str(e)[:120])
+            return
+        self.send_response(up.status)
+        for h in ("Content-Type", "Content-Length", "Content-Range", "Accept-Ranges"):
+            if up.headers.get(h):
+                self.send_header(h, up.headers[h])
+        self.end_headers()
+        try:
+            while True:
+                chunk = up.read(65536)
+                if not chunk:
+                    break
+                self.wfile.write(chunk)
+        except (BrokenPipeError, ConnectionAbortedError):
+            pass
 
     def do_POST(self):
         if self.path != "/api/exit-cleanup":
