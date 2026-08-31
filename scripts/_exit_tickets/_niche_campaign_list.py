@@ -112,6 +112,12 @@ for back in range(0, 7):
         text = data.decode('cp1252', errors='replace')
         rdr = csv.DictReader(io.StringIO(text))
         for g in rdr:
+            pupils = g.get('NumberOfPupils', '')
+            try:
+                n = int(pupils)
+                band = 'Under 600' if n < 600 else ('600-1,200' if n <= 1200 else 'Over 1,200')
+            except (TypeError, ValueError):
+                band = ''
             gias_rows[g.get('URN', '')] = {
                 'street': g.get('Street', ''), 'locality': g.get('Locality', ''),
                 'town': g.get('Town', ''), 'postcode': g.get('Postcode', ''),
@@ -119,6 +125,7 @@ for back in range(0, 7):
                 'head': ' '.join(x for x in [g.get('HeadTitle (name)', '') or g.get('HeadTitle', ''),
                                              g.get('HeadFirstName', ''), g.get('HeadLastName', '')] if x).strip(),
                 'status': g.get('EstablishmentStatus (name)', ''),
+                'pupils_on_roll': pupils, 'pricing_band': band,
             }
         break
     except Exception as e:
@@ -128,8 +135,8 @@ if not gias_rows:
 
 print('4) writing output...')
 os.makedirs(OUT_DIR, exist_ok=True)
-cols = ['subject', 'entries', 'school', 'urn', 'la', 'street', 'locality',
-        'town', 'postcode', 'head', 'phone', 'website', 'status']
+cols = ['subject', 'entries', 'school', 'urn', 'la', 'pupils_on_roll', 'pricing_band',
+        'street', 'locality', 'town', 'postcode', 'head', 'phone', 'website', 'status']
 for row in rows:
     row.update(gias_rows.get(str(row['urn']), {}))
 rows.sort(key=lambda r: (r['subject'], -(r['entries'] if isinstance(r['entries'], int) else -1)))
