@@ -225,7 +225,12 @@ def cmd_finish(subject, unit, narrate=True):
         applied = load(os.path.join(d, "_apply_result.json"), applied)
         # Validator AFTER: refuse NEW violations by restoring from backup
         post = {r["lesson_number"]: validator_violations(r) for r in fetch_rows(raw["unit"]["id"])}
-        new_viol = {n: [v for v in post.get(n, []) if v not in pre.get(n, [])] for n in post}
+        # Compare violation KINDS, not messages: the validator embeds counts
+        # ("word count 546"), so a pre-existing violation whose number moved
+        # by a few words must not read as new.
+        kind = lambda v: re.sub(r"\d+", "#", v.split(":")[0])  # noqa: E731
+        pre_kinds = {n: {kind(v) for v in vs} for n, vs in pre.items()}
+        new_viol = {n: [v for v in post.get(n, []) if kind(v) not in pre_kinds.get(n, set())] for n in post}
         new_viol = {n: v for n, v in new_viol.items() if v}
         if new_viol:
             print("NEW VALIDATOR VIOLATIONS after edits:", json.dumps(new_viol, indent=1)[:2000])
@@ -293,7 +298,8 @@ def restore_from_backup(d):
                                      headers={"apikey": K, "Authorization": "Bearer " + K, "Content-Type": "application/json"})
         urllib.request.urlopen(req, timeout=60).read()
         print("restored L", e["lesson_number"], list(e["before"]))
-    os.rename(os.path.join(d, "_backup.json"), os.path.join(d, "_backup.rolledback.json"))
+    stamp = datetime.datetime.now().strftime("%H%M%S")
+    os.rename(os.path.join(d, "_backup.json"), os.path.join(d, f"_backup.rolledback-{stamp}.json"))
 
 
 if __name__ == "__main__":
