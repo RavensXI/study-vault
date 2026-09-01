@@ -259,6 +259,10 @@ def cmd_finish(subject, unit, narrate=True):
         row["checked_on"] = today
         left = [x for x in q["items"] if x["subject"] == subject and x.get("status") == "queued"]
         row["status"] = "done" if not left else "partial"
+        mine = [x for x in q["items"] if x["subject"] == subject]
+        done_n = sum(1 for x in mine if x.get("status") == "done")
+        row["note"] = (f"{done_n} of {len(mine)} queued units checked by the overnight loop (latest: {unit}); "
+                       f"mechanical relabel + band-ladder passes still pending as separate workstreams")
     st["batches"].append({"date": today, "what": f"{subject}/{unit} ({len(raw['lessons'])}L) - autonomous loop",
                           "findings": len(findings), "fixed": applied["applied"]})
     st["updated"] = today
