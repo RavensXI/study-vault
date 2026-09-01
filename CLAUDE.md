@@ -124,8 +124,9 @@ R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), video on R2
     whitelist.
   - **School students:** ⚠ **SCHOOL CODES ARE RETIRED — not the model.**
     School sign-in is **SSO (Microsoft / Google)**, school email fallback.
-    The code path (`schools.settings.student_code`, `api/auth/login.js`)
-    still functions but is legacy — do not build against it. Microsoft SSO
+    The code path is CLOSED (1 Sep 2026): `api/auth/login.js` answers 410
+    to any code and the three "Enter school code" buttons on `index.html`
+    are hidden. `schools.settings.student_code` is dead data. Microsoft SSO
     awaits Entra admin consent; that consent gates student identity and
     therefore everything teacher-facing per-pupil.
   - **Teachers:** individual Supabase Auth accounts, invited by admin,

@@ -7,33 +7,16 @@ module.exports = async (req, res) => {
 
   const { password, code } = req.body || {};
 
-  // --- Student school code login ---
+  // --- Student school codes: RETIRED (1 Sep 2026) ---
+  // School sign-in is SSO (Microsoft / Google) with a school-email fallback.
+  // The old landing page at /index.html still carried the code form, so a
+  // student with last year's code could open a school session and reach
+  // bespoke content outside the identity model. Refuse every code here so no
+  // client, old or new, can mint a student session from a shared secret.
   if (code) {
-    const { data: schools } = await supabase
-      .from('schools')
-      .select('id, name, slug, settings');
-
-    const match = (schools || []).find(s =>
-      s.settings && s.settings.student_code === code.toLowerCase().trim()
-    );
-
-    if (match) {
-      // Check if school has bespoke subjects (school_id set on subjects table)
-      const { data: bespokeSubjects } = await supabase
-        .from('subjects')
-        .select('slug')
-        .eq('school_id', match.id);
-
-      return res.json({
-        role: 'student',
-        school_id: match.id,
-        school_name: match.name,
-        school_slug: match.slug,
-        subscribed_subjects: (match.settings && match.settings.subscribed_subjects) || [],
-        bespoke_subjects: (bespokeSubjects || []).map(s => s.slug),
-      });
-    }
-    return res.status(401).json({ error: 'Invalid school code' });
+    return res.status(410).json({
+      error: 'School codes have been retired. Sign in with your school account instead.',
+    });
   }
 
   // --- Admin / teacher password login ---

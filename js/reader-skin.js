@@ -1177,6 +1177,12 @@
   // and asks the synthesis question. Continue is always one click — answering
   // is invited, never extorted. Second click passes straight through.
   function setupExitIntercept() {
+    // Feature flag: exit tickets are a post-launch, school-tier feature and
+    // ship when Tom says so, not when this file happens to deploy. Off unless
+    // the device carries the dev flag (set it in DevTools:
+    // localStorage.setItem('sv-exit-tickets-on', '1')). Not student state, so
+    // it is deliberately NOT in the account-sync whitelist.
+    try { if (localStorage.getItem('sv-exit-tickets-on') !== '1') return; } catch (e) { return; }
     if (document.body.dataset.exitIntercept) return;
     var t = EXIT_TICKETS[location.pathname.replace(/\/$/, '')];
     if (!t) return;
