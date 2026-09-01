@@ -11,6 +11,7 @@ import html
 import os
 import re
 import sys
+import time
 import urllib.parse
 import urllib.request
 
@@ -24,6 +25,7 @@ keywords = [k.strip().lower() for k in sys.argv[2].split(',')]
 
 
 def fetch(url):
+    time.sleep(0.5)   # politeness: up to 6 pages per school, thousands of schools on shared hosts
     try:
         req = urllib.request.Request(url, headers=UA)
         with urllib.request.urlopen(req, timeout=15) as r:
@@ -73,7 +75,7 @@ for row in rows:
 
 out = csv_name.replace('.csv', '_checked.csv')
 with open(os.path.join(BUSINESS, out), 'w', newline='', encoding='utf-8-sig') as f:
-    w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+    w = csv.DictWriter(f, fieldnames=list(rows[0].keys()) if rows else ['course_check'])
     w.writeheader()
     w.writerows(rows)
 c = sum(1 for r in rows if r['course_check'] == 'confirmed')
