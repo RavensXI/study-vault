@@ -16,8 +16,11 @@ ISO time or null, `in_progress` {subject, unit, stage} or null, `ticks`,
 2. If `resume_after` is in the future: do nothing, ScheduleWakeup for
    min(3600, seconds until resume_after + 120) with `noop: true`.
 3. If `in_progress.stage == "checking"` and the unit dir has `_report.json`:
-   go to step 6 (finish). If it has no report and no checker is running
-   (no pending task notification), relaunch the checker (step 5).
+   go to step 6 (finish). If it has no report: a checker is probably still
+   running - only relaunch it (step 5) when `checker_launched_at` is more
+   than 45 minutes old. A second wake source (an hourly cron heartbeat)
+   exists purely so a dead wakeup chain recovers; this guard is what stops
+   it double-running a unit.
 4. Otherwise take the next queued unit: `python scripts/_retrofc/_unit.py
    prep <subject> <unit>`; set `in_progress = {subject, unit, stage:
    "checking"}` in `_loop.json`.
