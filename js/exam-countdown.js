@@ -1,7 +1,7 @@
 /**
  * Exam Countdown — compact pill showing days until next exam.
- * Practice/lesson: sits in the header bar's left dead space.
- * Browse: sits inside the hero section under the title.
+ * Practice: sits in the score bar beside the bug / tour / dark-mode buttons.
+ * Lesson: above the lesson title. Browse: inside the hero under the title.
  * Dismissible via localStorage.
  */
 (function () {
@@ -133,7 +133,9 @@
       '.exam-cd-urgent{background:#fef2f2;border-color:#fca5a5}' +
       '.exam-cd-urgent .exam-cd-clock{color:#dc2626}' +
       '.exam-cd-urgent .exam-cd-days{color:#b91c1c}' +
-      /* Header placement (practice pages — left panel dead space) */
+      /* Score-bar placement (practice pages — beside bug / tour / dark mode) */
+      '.exam-cd-scorebar{animation:none}' +   /* the bar's own gap spaces it */
+      /* Header placement (legacy fallback when the score bar is absent) */
       '.exam-cd-header{position:absolute;left:1rem;top:50%;transform:translateY(-50%)}' +
       /* Lesson page — above the title */
       '.exam-cd-lesson{margin-bottom:0.5rem}' +
@@ -153,7 +155,9 @@
       '.dark-mode .exam-cd-urgent .exam-cd-clock,.dark-mode .exam-cd-urgent .exam-cd-days{color:#f87171}' +
       '@keyframes examCdIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}' +
       /* Mobile: hide date to save space, keep days + paper */
-      '@media(max-width:600px){.exam-cd-date{display:none}.exam-cd-header{left:0.5rem;font-size:0.7rem}}' +
+      '@media(max-width:600px){.exam-cd-date{display:none}.exam-cd-header{left:0.5rem;font-size:0.7rem}' +
+        /* the score bar's utility cluster hides at this width; the pill goes with it */
+        '.exam-cd-scorebar{display:none}}' +
       /* Very small: hide label too, just show days */
       '@media(max-width:400px){.exam-cd-label{display:none}}';
     document.head.appendChild(s);
@@ -203,12 +207,21 @@
       var pill = renderPill(next);
 
       if (pageType === 'practice') {
-        // Practice page — header's left panel dead space
-        pill.classList.add('exam-cd-header');
-        var header = document.querySelector('.page-header');
-        if (header) {
-          header.style.position = 'relative';
-          header.appendChild(pill);
+        // Practice page — the score bar's utility cluster (bug, tour, dark
+        // mode). The header's left gutter, where this used to sit, now
+        // carries the wordmark on desktop (practice masthead, Aug 2026), so
+        // the two collided. Fall back to the header only if the bar is gone.
+        var utils = document.getElementById('score-bar-utils');
+        if (utils && utils.parentNode) {
+          pill.classList.add('exam-cd-scorebar');
+          utils.parentNode.insertBefore(pill, utils);
+        } else {
+          pill.classList.add('exam-cd-header');
+          var header = document.querySelector('.page-header');
+          if (header) {
+            header.style.position = 'relative';
+            header.appendChild(pill);
+          }
         }
       } else if (pageType === 'lesson') {
         // Article lesson — above the lesson title
