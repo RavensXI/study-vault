@@ -57,7 +57,7 @@ Read {rel}/raw/L01.txt ... one at a time. Check every quotation (wording, speake
     log = open(os.path.join(unit_dir, "_codex_run.log"), "w", encoding="utf-8")
     started = datetime.datetime.now()
     cmd = [CODEX, "exec", "-m", model, "-c", f'model_reasoning_effort="{effort}"', "-c", 'shell_environment_policy.inherit="core"',
-           "-C", ROOT, "-s", "workspace-write", "--ephemeral", "--color", "never",
+           "-C", ROOT, "-s", "workspace-write", "--add-dir", unit_dir, "--color", "never",
            "-o", os.path.join(unit_dir, "_codex_last_message.md"), prompt]
     log.write(f"# {started.isoformat(timespec='seconds')} model={model} effort={effort}\n# {' '.join(cmd[:-1])} <prompt>\n\n")
     log.flush()
