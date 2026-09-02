@@ -281,6 +281,9 @@ def cmd_finish(subject, unit, narrate=True):
         done_n = sum(1 for x in mine if x.get("status") == "done")
         row["note"] = (f"{done_n} of {len(mine)} queued units checked by the overnight loop (latest: {unit}); "
                        f"mechanical relabel + band-ladder passes still pending as separate workstreams")
+        rb = [x["unit"] for x in mine if x.get("status") == "needs-rebuild"]
+        if rb:
+            row["note"] += " | ⚠ NEEDS REBUILD (wrong texts/cluster, not fixable by edits): " + ", ".join(rb)
     st["batches"].append({"date": today, "what": f"{subject}/{unit} ({len(raw['lessons'])}L) - autonomous loop",
                           "findings": len(findings), "fixed": applied["applied"]})
     st["updated"] = today
