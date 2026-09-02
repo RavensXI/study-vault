@@ -1,0 +1,133 @@
+{
+ "unit": "english-literature-edexcel/poetry-conflict",
+ "checked_at": "2026-09-02T00:00:00Z",
+ "primary_text_used": true,
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html / description / knowledge_checks / flashcard_questions",
+   "severity": "HIGH",
+   "claim": "The banned component-code pattern \"Component 2\" (matching the house validator's `Component \\d` drift check, which rejects the whole unit on publish) appears six times: L1 content_html n19 \"(Component 2, Section B Part 1)\"; L6 content_html n20 \"(Component 2, Section B Part 1)\"; L7 description \"Edexcel Component 2 Section B Part 1\" (also makes the description 103 characters, over the 100-char validator limit); L7 content_html n2 \"(Component 2, Section B Part 1)\"; L7 knowledge_checks[0].q \"Edexcel Component 2 Section B Part 1 comparison question\"; L7 flashcard_questions[0].q \"Edexcel Component 2 Section B Part 1 comparison worth\".",
+   "truth": "The house style bans board component/paper codes; say \"the Edexcel poetry comparison\" / \"this section\" instead. All facts in these sentences (20 marks, AO2 15 + AO3 5, named poem printed) are correct per the spec — only the banned code wording needs to change.",
+   "evidence": "scripts/api_build/driver.py DRIFT_PATTERNS: `(r\"Component \\d\", \"component code\")`; CHECK_PROMPT.md banned-strings list (\"Component 1\" example, same category).",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 8,
+   "field": "knowledge_checks / flashcard_questions",
+   "severity": "HIGH",
+   "claim": "The banned pattern \"AO code immediately followed by a full stop\" appears three times in L8: knowledge_checks[2].q ends \"...15 for AO2 and 5 for AO3.\"; flashcard_questions[2].a is literally \"AO2.\"; flashcard_questions[3].a is literally \"AO3.\".",
+   "truth": "Per CHECK_PROMPT.md this exact pattern is rejected by the validator. Reworded to keep the AO code away from a trailing full stop, e.g. \"...5 for AO3 (context).\" and \"AO2, covering language, form and structure.\"",
+   "evidence": "CHECK_PROMPT.md: 'never write an AO code immediately followed by a full stop'.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 2,
+   "field": "content_html / practice_questions / flashcard_questions",
+   "severity": "HIGH",
+   "claim": "The same short quotation from Carole Satyamurti's \"War Photographer\" is given two different exact wordings in this unit: L2 content_html n11 — “The reassurance of the frame”; L8 content_html (quotation bank) — “The reassurance of the viewfinder.”",
+   "truth": "Cannot confirm which (if either) is verbatim — web search was unavailable this session (budget exhausted) and WebFetch could not reach any source that prints Satyamurti's \"War Photographer\" (Poetry Archive lists her other poems but not this one; poemanalysis.com, Genius, BBC and all search engines were blocked or 403). Two defensible options: (a) the poem really does use \"frame\" and L8 is wrong, (b) it uses \"viewfinder\" and L2 is wrong, or (c) both words appear in different lines and each lesson is a legitimate partial quote — in which case they should still be reconciled so no line is presented as more definitive than the other.",
+   "evidence": "L2 raw n11; L8 raw n17 (quotation bank entry for War Photographer). Recommend Tom check the printed Edexcel anthology / a library copy of Satyamurti's collected poems and align both lessons to the confirmed wording.",
+   "verdict": "FIX",
+   "ruling": "orchestrator ruling 2 Sep"
+  },
+  {
+   "id": "F4",
+   "lesson": 1,
+   "field": "content_html / glossary_terms / flashcard_questions (also recurs in L6)",
+   "severity": "MEDIUM",
+   "claim": "Owen's \"Exposure\" is quoted throughout as \"merciless iced east winds that knive us\" (L1 content n5, flashcard; L1 knowledge_checks fill-blank; L6 content n13/n17), used as the anthology's flagship half-rhyme example.",
+   "truth": "Two independent full-text sources fetched this session (Wikisource 'Exposure', and Project Gutenberg ebook 1034, Owen's 1920 'Poems') both give \"knife us\", not \"knive us\", character for character. I could not corroborate \"knive\" from any source despite repeated attempts (BBC, Poetry Foundation and search engines were all blocked). I have some prior recollection of \"knive\" being the commonly cited GCSE spelling (possibly a later scholarly-edition variant, e.g. Stallworthy's Complete Poems), so this is genuinely unresolved rather than a confident fix.",
+   "evidence": "https://en.wikisource.org/wiki/Exposure and https://www.gutenberg.org/files/1034/1034-h/1034-h.htm both render the line with \"knife us\". Recommend checking the actual printed Edexcel anthology text, since that is the version students are marked against.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F5",
+   "lesson": 2,
+   "field": "content_html / flashcard_questions (also recurs in L8)",
+   "severity": "MEDIUM",
+   "claim": "Jane Weir's \"Poppies\" is described as \"commissioned by the Poetry Archive in 2009\" (L2 key-fact and flashcard; L8 flashcard \"commissioned for Remembrance Day\").",
+   "truth": "Could not confirm this attribution. The Poetry Archive's own page for Jane Weir makes no claim to having commissioned \"Poppies\" (it only notes the poem is GCSE-studied). My working knowledge suggests the more commonly cited origin is Carol Ann Duffy's 2009 Guardian-commissioned \"Exit Wounds\" sequence of conflict poems, not the Poetry Archive, but theguardian.com was blocked to WebFetch this session so I could not confirm that alternative either.",
+   "evidence": "https://www.poetryarchive.org/poet/jane-weir/ (no commissioning claim). Recommend a quick check of a reliable Weir biography or the anthology teacher notes before editing.",
+   "verdict": "FIX",
+   "ruling": "orchestrator ruling 2 Sep"
+  },
+  {
+   "id": "F6",
+   "lesson": 1,
+   "field": "practice_questions",
+   "severity": "HIGH",
+   "claim": "Across all 8 lessons, 24 of 31 practice questions are labelled \"type\": \"20 marks — Poetry Comparison\" but their own mark scheme only awards up to 7-8 or 10-12 (not 20), and the question itself analyses ONE poem, not a comparison (e.g. L1 'How does Tennyson use repetition and rhythm in The Charge of the Light Brigade...' is labelled 20 marks/Poetry Comparison but its band ladder tops out at 7-8 and never mentions a second poem). Only the questions with a genuine two-poem prompt carry a matching Top band (16-20) ladder.",
+   "truth": "The real Edexcel Section B Part 1 question is always a 20-mark, two-poem comparison (AO2 15 + AO3 5, no AO1) — there is no such thing as a stand-alone single-poem question on this paper. Labelling single-poem analysis practice as \"20 marks — Poetry Comparison\" misrepresents the exam's actual format and could mislead a student's revision (writing to 7-8 marks' worth of content when the real question needs a sustained two-poem 20-mark response). Two defensible fixes: (a) relabel these as e.g. \"8 marks — Poetry Analysis\" / \"12 marks — Poetry Analysis\" to match their own band ladder, or (b) rewrite the question stems to add a second poem and expand the band ladder to 16-20. (a) is far less disruptive; not applied because it is 24 separate items and a judgement call, not a single surgical text fix.",
+   "evidence": "grep of \"Top band\" ranges against \"type\" labels across raw/L01.txt-L08.txt: every lesson has 2-3 mismatched instances (Top band max 7-8 or 10-12) alongside 1 correctly-banded (16-20) genuine comparison question. Spec: specs/edexcel/english-literature-1ET0.md — Component 2 Section B overview + AO weighting table (AO2 15 / AO3 5, comparison-only).",
+   "verdict": "ADJUDICATE"
+  }
+ ],
+ "lessons_clean": [],
+ "summary": "8 lessons checked against specs/edexcel/english-literature-1ET0.md and the confirmed 15-poem Conflict anthology list. Exam-structure claims (20 marks, AO2 15/AO3 5, no AO1, no SPaG, closed book, named poem printed) are correct throughout and the collection is never confused with AQA's Power and Conflict. All public-domain quotations checked against Wikisource/Gutenberg were verbatim-accurate except one contested word. The two release-blocking issues are banned validator strings (F1, F2, both FIX); the rest are quotation/attribution conflicts I could not resolve because web search and most reference sites were unavailable this session (F3-F5), plus one systemic practice-question mislabelling pattern spanning all 8 lessons (F6).",
+ "renarration": {
+  "run_at": "2026-09-02T12:38:02Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n19",
+    "key": "english-literature-edexcel/poetry-conflict/narration_lesson-01_n19.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature-edexcel/poetry-conflict/narration_lesson-01_n19.mp3",
+    "voice": "Ollie",
+    "duration": 27.91,
+    "bytes": 334944,
+    "verify_status": 206,
+    "last_modified": "Wed, 02 Sep 2026 12:37:42 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n3",
+    "key": "english-literature-edexcel/poetry-conflict/narration_lesson-02_n3.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature-edexcel/poetry-conflict/narration_lesson-02_n3.mp3",
+    "voice": "Ada",
+    "duration": 16.94,
+    "bytes": 203328,
+    "verify_status": 206,
+    "last_modified": "Wed, 02 Sep 2026 12:37:45 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n20",
+    "key": "english-literature-edexcel/poetry-conflict/narration_lesson-06_n20.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature-edexcel/poetry-conflict/narration_lesson-06_n20.mp3",
+    "voice": "Ada",
+    "duration": 35.95,
+    "bytes": 431424,
+    "verify_status": 206,
+    "last_modified": "Wed, 02 Sep 2026 12:37:51 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n2",
+    "key": "english-literature-edexcel/poetry-conflict/narration_lesson-07_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature-edexcel/poetry-conflict/narration_lesson-07_n2.mp3",
+    "voice": "Ollie",
+    "duration": 30.89,
+    "bytes": 370656,
+    "verify_status": 206,
+    "last_modified": "Wed, 02 Sep 2026 12:37:57 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n17",
+    "key": "english-literature-edexcel/poetry-conflict/narration_lesson-08_n17.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature-edexcel/poetry-conflict/narration_lesson-08_n17.mp3",
+    "voice": "Ada",
+    "duration": 16.58,
+    "bytes": 199008,
+    "verify_status": 206,
+    "last_modified": "Wed, 02 Sep 2026 12:38:01 GMT"
+   }
+  ],
+  "verified_ok": 5,
+  "total": 5
+ }
+}
