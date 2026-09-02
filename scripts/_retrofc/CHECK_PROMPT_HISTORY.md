@@ -99,6 +99,12 @@ exactly the shapes below.
   list; two flashcards in one lesson must not share the same answer text;
   lesson `description` under 100 characters; never write an AO code
   immediately followed by a full stop.
+- Copyright distancing (house rule): never paste a board's mark-scheme
+  descriptors, level wording, indicative content, past-paper questions or
+  specimen answers into any field. Correct FACTS (marks, timing, paper and
+  section, objectives, extract / closed-book rules) and describe formats in
+  the house vocabulary. The banned-string list below is the validator's
+  floor, not the whole rule.
 - Banned strings (the validator rejects the whole unit): "Level 1".."Level
   9" band names (use Top band / Upper-mid band / Mid band / Lower-mid band /
   Low band); "Paper 1 Section B"-style codes (say "Paper 1" or "this
