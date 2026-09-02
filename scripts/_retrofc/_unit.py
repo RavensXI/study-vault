@@ -275,7 +275,7 @@ def cmd_finish(subject, unit, narrate=True):
         row["findings"] = (row.get("findings") or 0) + len(findings)
         row["fixed"] = (row.get("fixed") or 0) + applied["applied"]
         row["checked_on"] = today
-        left = [x for x in q["items"] if x["subject"] == subject and x.get("status") == "queued"]
+        left = [x for x in q["items"] if x["subject"] == subject and x.get("status") != "done"]   # needs-rebuild / blocked keep the subject partial
         row["status"] = "checked" if not left else "partial"   # tracker vocabulary: checked | partial
         mine = [x for x in q["items"] if x["subject"] == subject]
         done_n = sum(1 for x in mine if x.get("status") == "done")
