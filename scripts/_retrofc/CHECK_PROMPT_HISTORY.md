@@ -31,9 +31,11 @@ History teacher: precision on dates, names, figures and causation matters.
    period study + wider world depth; Paper 2 thematic + British depth with
    historic environment), Edexcel 1HI0 (Paper 1 thematic + historic
    environment; Paper 2 period study + British depth; Paper 3 modern depth),
-   OCR J410 (SHP: Paper 1 British thematic + British depth; Paper 2 history
-   around us; Paper 3 world period + world depth). Read the spec's assessment
-   section before asserting any of it.
+   OCR J410 (Explaining the Modern World: period study International
+   Relations 1918-1975, "People and the State" non-British depth studies,
+   British thematic studies, British depth studies with a historic
+   environment site - the paper-to-unit mapping is in the spec, not here).
+   Read the spec's assessment section before asserting any of it.
 2. **Dates, names, figures.** Years and exact dates of events, regnal and
    ministerial dates, treaty terms, casualty and money figures, election
    results, population numbers, the names of acts, battles, places and
