@@ -263,7 +263,7 @@ def cmd_finish(subject, unit, narrate=True):
         row["fixed"] = (row.get("fixed") or 0) + applied["applied"]
         row["checked_on"] = today
         left = [x for x in q["items"] if x["subject"] == subject and x.get("status") == "queued"]
-        row["status"] = "done" if not left else "partial"
+        row["status"] = "checked" if not left else "partial"   # tracker vocabulary: checked | partial
         mine = [x for x in q["items"] if x["subject"] == subject]
         done_n = sum(1 for x in mine if x.get("status") == "done")
         row["note"] = (f"{done_n} of {len(mine)} queued units checked by the overnight loop (latest: {unit}); "
