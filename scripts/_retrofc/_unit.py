@@ -184,13 +184,19 @@ def cmd_prep(subject, unit):
     os.makedirs(d, exist_ok=True)
     r = run(["node", os.path.join(HERE, "_fetch_unit.js"), subject, unit])
     raw = load(os.path.join(d, "_raw.json"))
-    spec = SPECS[board_of(subject)]
-    text_path, text_note = fetch_gutenberg(unit, d)
+    item = next((i for i in load(QUEUE, {"items": []})["items"] if i["subject"] == subject and i["unit"] == unit), {})
+    family = item.get("family", "english-literature")
+    spec = item.get("spec") or SPECS.get(board_of(subject))
+    if family == "english-literature":
+        text_path, text_note = fetch_gutenberg(unit, d)
+    else:
+        text_path, text_note = None, "no primary text: the spec is the authority"
     brief = {
         "subject": subject, "unit": unit, "unit_name": raw["unit"]["name"], "dir": os.path.relpath(d, ROOT),
-        "spec": spec, "board": board_of(subject),
+        "spec": spec, "board": board_of(subject), "family": family, "qualification": item.get("qualification"),
+        "check_prompt": "scripts/_retrofc/CHECK_PROMPT_SCIENCE.md" if family == "science" else "scripts/_retrofc/CHECK_PROMPT.md",
         "primary_text": os.path.relpath(text_path, ROOT) if text_path else None, "primary_text_note": text_note,
-        "lessons": [{"n": l["lesson_number"], "title": l["title"], "chars": len(l.get("content_html") or "")} for l in raw["lessons"]],
+        "lessons": [{"n": l["lesson_number"], "title": l["title"], "tier": l.get("tier"), "chars": len(l.get("content_html") or "")} for l in raw["lessons"]],
         "fetched_at": datetime.datetime.now().isoformat(timespec="seconds"),
     }
     save(os.path.join(d, "_brief.json"), brief)

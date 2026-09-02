@@ -51,12 +51,52 @@ read the reset time from the message, write it to `_loop.json.resume_after`
 `noop: true`. Chained hourly wakeups until the reset are expected. If no
 reset time is given, use now + 5h05m.
 
+## When the EngLit queue empties: roll into the sciences (Tom, 2 Sep)
+
+Do NOT stop. Run `python scripts/_retrofc/_build_science_queue.py` once (it
+appends the 8 science subjects' article units with `family: "science"`,
+`spec`, `qualification`; practice units excluded; idempotent), publish the
+tracker, send a PushNotification with the EngLit totals, then go straight
+to step 4. Science items use `CHECK_PROMPT_SCIENCE.md` (the brief's
+`check_prompt` field says which) and the science prompt template below.
+After the sciences: history (tracker priority 3) - build its queue the same
+way when the time comes.
+
 ## Stop
 
-Queue empty (`next` returns done): build the tracker once more, publish
-it, send a PushNotification with the totals, ScheduleWakeup `stop: true`.
-Also stop, with a PushNotification saying why, if three consecutive units
-block.
+Queue empty after the sciences (`next` returns done) and no further family
+has been queued: build the tracker once more, publish it, send a
+PushNotification with the totals, ScheduleWakeup `stop: true`. Also stop,
+with a PushNotification saying why, if three consecutive units block.
+
+## Science checker prompt template
+
+```
+Repo root: C:\Users\tshau\Documents\Study Vault (run everything from there).
+First read scripts/_retrofc/CHECK_PROMPT_SCIENCE.md in full; it is your brief and its rules bind.
+Unit to check: <subject> / <unit> (<n> lessons; qualification: <combined|separate>; board <board>). Unit dir: <dir>.
+Brief: <dir>/_brief.json (each lesson's tier is listed). Spec: <spec> - grep it for
+scope, tier flags (HT only), required practicals, the equations list, and read its
+assessment section for paper structure before asserting any exam claim.
+Read raw/L01.txt ... one at a time. Check every value, unit, equation and worked
+example (recompute), every spec-scope and tier claim, every required practical,
+every answer key. Write <dir>/_report.json and <dir>/_edits.json exactly in the
+shapes CHECK_PROMPT_SCIENCE.md specifies; `find` strings copied exactly and unique
+in their field. Do NOT write to Supabase or run any script that writes. This
+session's WebSearch budget is exhausted; the spec is the authority, WebFetch
+(BBC Bitesize is blocked; use Wikipedia / physics.nist.gov) only for settled
+constants. Finish with a report under 250 words as the brief describes.
+```
+
+Science board anchors (verify in the spec before asserting):
+- AQA Trilogy 8464: 6 papers (Bio 1-2, Chem 1-2, Phys 1-2), 1h15 each, 70
+  marks, F/H tiers; separate 8461/8462/8463: 2 papers each, 1h45, 100 marks.
+- Edexcel 1SC0: 6 papers, 1h10, 60 marks; separate 1BI0/1CH0/1PH0: 2 papers
+  each, 1h45, 100 marks.
+- OCR Gateway A J250: 6 papers, 1h10, 60 marks; separate J247/J248/J249: 2
+  papers each, 1h45, 90 marks.
+- OCR 21st Century B J260 and J257/J258/J259: read the spec (different
+  structure - do not assert from memory).
 
 ## Checker prompt template
 
