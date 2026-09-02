@@ -59,13 +59,23 @@ appends the 8 science subjects' article units with `family: "science"`,
 tracker, send a PushNotification with the EngLit totals, then go straight
 to step 4. Science items use `CHECK_PROMPT_SCIENCE.md` (the brief's
 `check_prompt` field says which) and the science prompt template below.
-After the sciences: history (tracker priority 3) - build its queue the same
-way when the time comes.
+After the sciences, every later family is queued the same way, in tracker
+priority order, each time `next` returns done:
+`python scripts/_retrofc/_build_queue.py --priority N --confirm` for N = 3
+(history, brief CHECK_PROMPT_HISTORY.md), 4 (geography), 5 (RS / geology /
+astronomy), 6 (business / CS / PE / sociology / D&T), 7 (niche), 8, 9
+(music). Priorities 4-9 use CHECK_PROMPT_GENERIC.md (the brief's
+`check_prompt` field says which; the checker prompt template is the science
+one with the brief path swapped and the "board anchors" line replaced by
+"read the spec's assessment section before asserting any exam claim"). The
+builder prints its spec mapping; if it reports UNRESOLVED specs it refuses
+to save - fix the mapping by hand (`--subjects a,b --family X`) and rerun.
+Publish the tracker and send a PushNotification at each family boundary.
 
 ## Stop
 
-Queue empty after the sciences (`next` returns done) and no further family
-has been queued: build the tracker once more, publish it, send a
+Queue empty after priority 9 (`next` returns done and every family has
+been queued): build the tracker once more, publish it, send a
 PushNotification with the totals, ScheduleWakeup `stop: true`. Also stop,
 with a PushNotification saying why, if three consecutive units block.
 

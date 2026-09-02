@@ -194,7 +194,8 @@ def cmd_prep(subject, unit):
     brief = {
         "subject": subject, "unit": unit, "unit_name": raw["unit"]["name"], "dir": os.path.relpath(d, ROOT),
         "spec": spec, "board": board_of(subject), "family": family, "qualification": item.get("qualification"),
-        "check_prompt": "scripts/_retrofc/CHECK_PROMPT_SCIENCE.md" if family == "science" else "scripts/_retrofc/CHECK_PROMPT.md",
+        "check_prompt": {"english-literature": "scripts/_retrofc/CHECK_PROMPT.md", "science": "scripts/_retrofc/CHECK_PROMPT_SCIENCE.md",
+                         "history": "scripts/_retrofc/CHECK_PROMPT_HISTORY.md"}.get(family, "scripts/_retrofc/CHECK_PROMPT_GENERIC.md"),
         "primary_text": os.path.relpath(text_path, ROOT) if text_path else None, "primary_text_note": text_note,
         "lessons": [{"n": l["lesson_number"], "title": l["title"], "tier": l.get("tier"), "chars": len(l.get("content_html") or "")} for l in raw["lessons"]],
         "fetched_at": datetime.datetime.now().isoformat(timespec="seconds"),
