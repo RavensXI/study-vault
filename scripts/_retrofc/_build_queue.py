@@ -36,7 +36,8 @@ SKIP = {"science-aqa", "science-edexcel", "science-ocr", "science-ocr-b", "separ
 # Hand overrides where the index cannot tell: slug -> spec path relative to specs/ ("" = no spec in the repo: skip, log).
 OVERRIDES = {"history-ocr": "ocr/history-a-J410.md",            # units are the Explaining the Modern World options
              "it-ocr": "ocr/cambridge-nationals-it-J836.md",
-             "health-social-care-edexcel": ""}                   # BTEC Tech Award: no spec downloaded yet
+             "health-social-care-edexcel": "",                   # BTEC Tech Award: no spec downloaded yet
+             "music-technology": ""}                             # NCFE, last taught 2025-26: no spec in the repo
 BOARD_ALIASES = {"aqa": "AQA", "edexcel": "Edexcel", "pearson": "Edexcel", "ocr": "OCR", "eduqas": "Eduqas", "wjec": "Eduqas"}
 
 
