@@ -93,6 +93,10 @@ Two output files in `<unit-dir>`:
   value) so a stale edit cannot land on the wrong item.
 - Plain-language rule: any sentence you rewrite must read for a 15-year-old.
   Short sentences, no hedging, British spelling.
+- Validator limits that have bitten: flashcard answers 30 words or fewer;
+  lesson `description` under 100 characters; never write an AO code
+  immediately followed by a full stop ("...AO1 and AO3." is rejected as a
+  spec-code pattern; write "...AO1 and AO3 (context)." or reorder).
 
 ## How to report back
 
