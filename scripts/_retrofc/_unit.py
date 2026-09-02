@@ -135,6 +135,19 @@ def fetch_gutenberg(unit, d):
         if os.path.exists(out) and os.path.getsize(out) > 20000:
             return out, query
         notes = []
+        # 0) Curated ids first: Gutendex once returned a LibriVox catalogue whose
+        #    header mentioned the title (Silas Marner, #26269), so a title match
+        #    alone is not proof. Novels and plays are long; require real length.
+        for gid in GUTENBERG_IDS.get(key, []):
+            for url in (f"https://www.gutenberg.org/cache/epub/{gid}/pg{gid}.txt", f"https://www.gutenberg.org/files/{gid}/{gid}-0.txt"):
+                try:
+                    txt = _get(url).decode("utf-8", "replace")
+                except Exception:  # noqa: BLE001
+                    continue
+                if len(txt) > 60000 and _title_ok(txt, query):
+                    with open(out, "w", encoding="utf-8") as f:
+                        f.write(txt)
+                    return out, f"{query} (Gutenberg #{gid}, curated id)"
         # 1) Gutendex search
         try:
             data = json.loads(_get("https://gutendex.com/books?languages=en&search=" + urllib.parse.quote(query), 60))
