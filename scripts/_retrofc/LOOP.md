@@ -43,6 +43,19 @@ ISO time or null, `in_progress` {subject, unit, stage} or null, `ticks`,
 8. Go straight to step 4 for the next unit in the SAME turn if capacity
    allows; otherwise ScheduleWakeup 60s.
 
+## Second-reader audit (Tom, 2 Sep)
+
+Every tenth unit (`units_done % 10 == 0`), the orchestrator itself re-reads
+ONE lesson of the unit just finished, cold: export the live post-fix text
+(the `audit_*.md` export used on 2 Sep: description, content, conclusion,
+exam tip, questions, checks, flashcards, glossary, plus the checker's
+findings for that lesson), grep every quotation against the cached text or
+verify facts against the spec, and record the result in `_loop.json.audits`
+as `{unit, lesson, missed: [...], wrong_fixes: [...], verdict}`. A missed
+mark-affecting error or a wrong fix means: fix it directly (edit + finish
+path), and tighten CHECK_PROMPT*.md before the next launch. First two
+audits (OCR Macbeth L2, Edexcel Animal Farm L3, 2 Sep): clean.
+
 ## Rate limit
 
 If an Agent launch or any model call fails with a usage-limit message,
