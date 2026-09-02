@@ -1,0 +1,233 @@
+{
+ "unit": "english-literature-edexcel / romeo-and-juliet",
+ "checked_at": "2026-09-02",
+ "primary_text_used": true,
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 0,
+   "field": "practice_questions",
+   "severity": "HIGH",
+   "claim": "All 42 practice questions across lessons 1-7 are labelled “15 marks — Extract Response” (23 of them) or “25 marks — Essay Response” (19), and every mark scheme runs a band ladder scaled to 15 or 25 marks (“Top band (13–15)”, “Top band (21–25)”). Lesson 7 repeats the split in its conclusion: “Part (a) = AO2 only (language analysis, 15 marks, ~20 mins). Part (b) = AO1 + AO3 (theme essay with context, 25 marks, ~35 mins).”",
+   "truth": "Both parts of the Edexcel Shakespeare question are worth 20 marks: part (a) 20 (AO2 only, on a printed extract of about 30 lines), part (b) 20 (AO1 15 + AO3 5), 40 marks in total out of the paper's 80, closed book, 1 hour 45. Every label becomes “20 marks” and every ladder is rescaled to 17-20 / 13-16 / 9-12 / 5-8 / 1-4. The old ladders also used the label “Top band” twice (lesson 1 questions 1 and 2) and “Lower band”, which is not the house ladder. The timings become ~25 minutes each.",
+   "evidence": "specs/edexcel/english-literature-1ET0.md lines 1102-1113 (1h45, closed book, 80 marks, two-part question, part a close language analysis of a ~30-line extract, part b theme elsewhere in the play with AO1 and AO3) and the raw-mark table at lines 1312-1400 (totals 20 / 20 / 40 for the Shakespeare and post-1914 questions). Same error family as the sister Edexcel Twelfth Night and Much Ado units.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 1,
+   "field": "exam_tip_html",
+   "severity": "HIGH",
+   "claim": "“In the Edexcel 1ET0 exam, AO3 (context) is assessed in the part (b) question worth 25 marks.”",
+   "truth": "Part (b) is worth 20 marks (AO1 15 + AO3 5). The spec code “1ET0” is also a banned string in a lesson field, and “the Edexcel exam” carries the same meaning.",
+   "evidence": "specs/edexcel/english-literature-1ET0.md lines 1102-1113 and 1312-1400; scripts/_retrofc/CHECK_PROMPT.md banned-strings list.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 7,
+   "field": "knowledge_checks",
+   "severity": "HIGH",
+   "claim": "Knowledge check 1 asks how many marks part (a) is worth and keys the answer to “15 marks”; knowledge check 3 asks what part (b) is worth and keys the answer to “25”. Both papers' true answer, “20”, is present in the options and marked wrong.",
+   "truth": "Part (a) is 20 marks and part (b) is 20 marks, so the keys move to index 2 and index 1 respectively. Knowledge check 2 (“AO2 only” for part (a)) is already correct.",
+   "evidence": "specs/edexcel/english-literature-1ET0.md lines 1102-1113 and 1312-1400.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "“Top-level answers (Level 5) explore the tension between fate and choice…”",
+   "truth": "“Level 5” is a banned band name that makes the house validator reject the whole unit. The house ladder calls it the top band.",
+   "evidence": "scripts/_retrofc/CHECK_PROMPT.md banned-strings list.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "MED",
+   "claim": "“In the Edexcel 1ET0 exam, both the part (a) extract question and the part (b) essay question…”",
+   "truth": "A bare spec code in a lesson field is a banned string. “the Edexcel exam” carries the same meaning.",
+   "evidence": "scripts/_retrofc/CHECK_PROMPT.md banned-strings list.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MED",
+   "claim": "Romeo's first sight of Juliet is quoted as “It seems she hangs upon the cheek of night / Like a rich jewel in an Ethiope's ear.” Lesson 3 repeats “a rich jewel in an Ethiope's ear”, and the mark schemes of lesson 1 question 3 and lesson 6 question 2 both reward the “simile ‘like a rich jewel’”.",
+   "truth": "The line reads “As a rich jewel in an Ethiop's ear”. Two words are wrong in a quotation students memorise, and the mark schemes quote the wrong word back at them.",
+   "evidence": "Gutenberg #1513 lines 1222-1224 (inside 1.5 = lines 1142-1424): “O, she doth teach the torches to burn bright! / It seems she hangs upon the cheek of night / As a rich jewel in an Ethiop's ear;”",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "MED",
+   "claim": "Juliet “describes him as stars that would ‘make the face of heaven so fine / That all the world would be in love with night.’”",
+   "truth": "Juliet says “that all the world will be in love with night”. The conditional changes a memorised quotation.",
+   "evidence": "Gutenberg #1513 lines 2936-2937 (inside 3.2 = lines 2909-3112).",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 5,
+   "field": "exam_tip_html",
+   "severity": "MED",
+   "claim": "The tomb scene is “rich in AO2 material: dramatic irony…, oxymorons (‘happy dagger’, ‘true apothecary’)…”",
+   "truth": "“Happy dagger” is an oxymoron; “true apothecary” is not — the words do not contradict each other. It is verbal irony: Romeo praises the man who sold him poison as reliable. The article of the same lesson already calls it “bitterly ironic”, so the exam tip contradicts the lesson and would cost a student AO2 credit for misnaming the device.",
+   "evidence": "Gutenberg #1513 lines 4956-4957 (5.3); the lesson's own content_html, narration block n13.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 7,
+   "field": "knowledge_checks",
+   "severity": "MED",
+   "claim": "Knowledge check 3 reads “The part (b) question is worth _____ marks and tests AO1 + AO3.”",
+   "truth": "An AO code immediately before a full stop is rejected by the validator as a spec-code pattern. Naming the objectives in words avoids it.",
+   "evidence": "scripts/_retrofc/CHECK_PROMPT.md validator limits.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 0,
+   "field": "practice_questions",
+   "severity": "MED",
+   "claim": "The 23 part (a) practice extracts run from two lines (lesson 2 question 5: Juliet's “My only love sprung from my only hate!” couplet; lesson 5 question 3: Romeo's “O true apothecary” couplet) to about fourteen lines. None reaches the length of a real extract.",
+   "truth": "Edexcel prints an extract of approximately 30 lines for part (a). Students practising on two-line ‘extracts’ are not rehearsing the real task. Two options: (a) extend each stem to a ~30-line span, which means re-authoring 23 question stems and re-checking each mark scheme against the longer passage; or (b) leave the stems and accept them as focused drills on the key lines. Recommend (a), but it is a re-authoring job rather than a correction and it ripples into every mark scheme.",
+   "evidence": "specs/edexcel/english-literature-1ET0.md lines 1104-1106.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F11",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "The exam-technique section says “Many boards run this as a closed book exam — you must memorise quotations. Check your exam board's specimen paper for the exact format, mark allocations, and timings.”",
+   "truth": "Nothing there is false, but a board-specific unit should state the board's own format instead of sending the student away to look it up. Edexcel is closed book, 1 hour 45, and the Shakespeare question is 20 + 20. The lesson conclusion states these figures once F1 is applied, so the hedged paragraph is redundant rather than wrong. Left alone to avoid a re-narration for a style change.",
+   "evidence": "specs/edexcel/english-literature-1ET0.md lines 1096-1113.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F12",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "“Juliet's death is quick, physical, and decisive — she stabs herself without hesitation.”",
+   "truth": "Juliet first tries the poison: she kisses Romeo hoping “some poison yet doth hang on them”, finds his lips still warm, and only reaches for the dagger when she hears the watch coming. The passage omits the kiss rather than contradicting it, so no edit, but a student reading only this would miss the sequence.",
+   "evidence": "Gutenberg #1513 lines 5053-5070 (5.3): the kiss for poison, “Thy lips are warm!”, the watch approaching, then the dagger.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F13",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Rosaline is “a woman who barely appears on stage”.",
+   "truth": "Rosaline never appears at all. She is named on the Capulets' guest list and discussed by Romeo, Benvolio and Mercutio, but she has no entrance and no lines. “Barely” understates the point the lesson is making, so it is a weak sentence rather than a wrong one.",
+   "evidence": "Gutenberg #1513: Rosaline is named only at lines 719, 753, 1483, 1917-1968 and 2012, always by another character, and is never given an entrance or a line.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F14",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "“Romeo, I come! This do I drink to thee.” and “This is thy sheath; there rust, and let me die.”",
+   "truth": "Both are correct as printed in the modern editions GCSE students use. The Gutenberg text of the play carries the other attested readings (“Romeo, Romeo, Romeo, here's drink! I drink to thee” at 4.3 and “There rest, and let me die” at 5.3), so the primary text disagrees with the lessons here without either being wrong. Recorded so the next checker does not re-open it.",
+   "evidence": "Gutenberg #1513 lines 4250 and 5070.",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [],
+ "summary": "The unit is built on another board's question shape: all 42 practice questions, the lesson 1 exam tip, two lesson 7 knowledge-check answer keys and the lesson 7 conclusion put the Shakespeare question on a 15 + 25 split, where Edexcel is 20 + 20 (part a AO2 on a ~30-line extract, part b AO1 and AO3 on the theme elsewhere). Two banned strings would have failed the whole unit: “Level 5” in lesson 7 and the spec code in lessons 1 and 6. The play content is otherwise strong — every quotation in the lesson 7 memorisation bank is verbatim and correctly attributed, and none of the sister AQA unit's faults recur: the rose line reads “By any other name”, “I'll no longer be a Capulet” is absent, and Friar John's quarantine is described correctly. Lessons 2 and 4 carry no error of their own beyond the unit-wide question format.",
+ "renarration": {
+  "run_at": "2026-09-02T11:22:11Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n8",
+    "key": "english-literature-edexcel/romeo-and-juliet/narration_lesson-01_n8.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature-edexcel/romeo-and-juliet/narration_lesson-01_n8.mp3",
+    "voice": "Ollie",
+    "duration": 32.83,
+    "bytes": 393984,
+    "verify_status": 206,
+    "last_modified": "Wed, 02 Sep 2026 11:21:37 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n23",
+    "key": "english-literature-edexcel/romeo-and-juliet/narration_lesson-01_n23.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature-edexcel/romeo-and-juliet/narration_lesson-01_n23.mp3",
+    "voice": "Ollie",
+    "duration": 30.12,
+    "bytes": 361440,
+    "verify_status": 206,
+    "last_modified": "Wed, 02 Sep 2026 11:21:42 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n6",
+    "key": "english-literature-edexcel/romeo-and-juliet/narration_lesson-03_n6.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature-edexcel/romeo-and-juliet/narration_lesson-03_n6.mp3",
+    "voice": "Ollie",
+    "duration": 24.89,
+    "bytes": 298656,
+    "verify_status": 206,
+    "last_modified": "Wed, 02 Sep 2026 11:21:47 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n20",
+    "key": "english-literature-edexcel/romeo-and-juliet/narration_lesson-05_n20.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature-edexcel/romeo-and-juliet/narration_lesson-05_n20.mp3",
+    "voice": "Ollie",
+    "duration": 30.1,
+    "bytes": 361152,
+    "verify_status": 206,
+    "last_modified": "Wed, 02 Sep 2026 11:21:53 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n2",
+    "key": "english-literature-edexcel/romeo-and-juliet/narration_lesson-06_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature-edexcel/romeo-and-juliet/narration_lesson-06_n2.mp3",
+    "voice": "Ada",
+    "duration": 30.72,
+    "bytes": 368640,
+    "verify_status": 206,
+    "last_modified": "Wed, 02 Sep 2026 11:21:59 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n15",
+    "key": "english-literature-edexcel/romeo-and-juliet/narration_lesson-07_n15.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature-edexcel/romeo-and-juliet/narration_lesson-07_n15.mp3",
+    "voice": "Ollie",
+    "duration": 20.64,
+    "bytes": 247680,
+    "verify_status": 206,
+    "last_modified": "Wed, 02 Sep 2026 11:22:04 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n35",
+    "key": "english-literature-edexcel/romeo-and-juliet/narration_lesson-07_n35.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature-edexcel/romeo-and-juliet/narration_lesson-07_n35.mp3",
+    "voice": "Ollie",
+    "duration": 19.39,
+    "bytes": 232704,
+    "verify_status": 206,
+    "last_modified": "Wed, 02 Sep 2026 11:22:08 GMT"
+   }
+  ],
+  "verified_ok": 7,
+  "total": 7
+ }
+}
