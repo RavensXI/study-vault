@@ -97,6 +97,13 @@ Two output files in `<unit-dir>`:
   lesson `description` under 100 characters; never write an AO code
   immediately followed by a full stop ("...AO1 and AO3." is rejected as a
   spec-code pattern; write "...AO1 and AO3 (context)." or reorder).
+- Banned strings anywhere in lesson fields (the house validator rejects the
+  whole unit): "Level 1".."Level 9" band names (use the house ladder: Top
+  band / Upper-mid band / Mid band / Lower-mid band / Low band / Basic
+  band); "Paper 1 Section B"-style codes (say "the 19th-century novel
+  question" or "this section"); "Component 1"; spec codes like "AQA 8702"
+  or "OCR J352"; the rubric phrases "Nothing worthy of credit" and "Award N
+  marks for".
 
 ## How to report back
 
