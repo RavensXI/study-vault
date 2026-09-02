@@ -87,20 +87,20 @@ page = """<title>Retro Fact-Check Tracker</title>
   <div class="pill"><b>%(done)s</b><span>lessons checked or gate-built</span></div>
   <div class="pill"><b>%(part)s</b><span>lessons in partially-checked subjects</span></div>
   <div class="pill"><b style="color:#9a3a25">%(todo)s</b><span>lessons still to check</span></div>
-  <div class="pill"><b>%(findings)d / %(fixed)d</b><span>findings / fixed so far</span></div>
+  <div class="pill"><b>%(findings)d / %(fixed)d</b><span>findings / edits applied (one finding often needs many edits)</span></div>
 </div>
 <div class="bar"><i></i></div>
 <p class="barnote">%(pct)d%% of the corpus fully covered (practice-first subjects are separately machine-verified and excluded from the bar).</p>
 
 <h2>Subjects</h2>
 <div class="tablewrap"><table>
-<tr><th>Subject</th><th class="num">Live lessons</th><th>Status</th><th class="num">Findings</th><th class="num">Fixed</th></tr>
+<tr><th>Subject</th><th class="num">Live lessons</th><th>Status</th><th class="num">Findings</th><th class="num">Edits applied</th></tr>
 %(rows)s
 </table></div>
 
 <h2>Batch log</h2>
 <div class="tablewrap"><table>
-<tr><th>Date</th><th>Batch</th><th class="num">Findings</th><th class="num">Fixed</th></tr>
+<tr><th>Date</th><th>Batch</th><th class="num">Findings</th><th class="num">Edits applied</th></tr>
 %(log)s
 </table></div>
 
