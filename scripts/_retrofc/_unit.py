@@ -93,14 +93,18 @@ def board_of(subject):
 
 
 # ----------------------------------------------------------------------- next
-def cmd_next():
+def cmd_next(pool="claude"):
+    """Claude takes queued units from the FRONT of the queue, Codex from the BACK
+    (Tom, 3 Sep: the two pools start at opposite ends and meet in the middle).
+    A unit already stamped with a pool (by prep) is never handed out again."""
     q = load(QUEUE)
-    for it in q["items"]:
-        if it.get("status") == "queued":
-            print(json.dumps({"subject": it["subject"], "unit": it["unit"], "lessons": it.get("lessons"),
-                              "remaining": sum(1 for x in q["items"] if x.get("status") == "queued")}))
-            return
-    print(json.dumps({"done": True}))
+    free = [it for it in q["items"] if it.get("status") == "queued" and not it.get("pool")]
+    if not free:
+        print(json.dumps({"done": True, "pool": pool}))
+        return
+    it = free[-1] if pool == "codex" else free[0]
+    print(json.dumps({"subject": it["subject"], "unit": it["unit"], "lessons": it.get("lessons"), "family": it.get("family", "english-literature"),
+                      "spec": it.get("spec"), "pool": pool, "remaining": len(free)}))
 
 
 # ----------------------------------------------------------------------- prep
@@ -179,7 +183,7 @@ def fetch_gutenberg(unit, d):
     return None, "in copyright - verify quotations by web search"
 
 
-def cmd_prep(subject, unit):
+def cmd_prep(subject, unit, pool="claude"):
     d = unit_dir(subject, unit)
     os.makedirs(d, exist_ok=True)
     r = run(["node", os.path.join(HERE, "_fetch_unit.js"), subject, unit])
@@ -198,9 +202,15 @@ def cmd_prep(subject, unit):
                          "history": "scripts/_retrofc/CHECK_PROMPT_HISTORY.md"}.get(family, "scripts/_retrofc/CHECK_PROMPT_GENERIC.md"),
         "primary_text": os.path.relpath(text_path, ROOT) if text_path else None, "primary_text_note": text_note,
         "lessons": [{"n": l["lesson_number"], "title": l["title"], "tier": l.get("tier"), "chars": len(l.get("content_html") or "")} for l in raw["lessons"]],
+        "pool": pool,
         "fetched_at": datetime.datetime.now().isoformat(timespec="seconds"),
     }
     save(os.path.join(d, "_brief.json"), brief)
+    q = load(QUEUE, {"items": []})
+    for it in q["items"]:
+        if it["subject"] == subject and it["unit"] == unit:
+            it["pool"] = pool          # claimed: cmd_next never hands it to the other pool
+    save(QUEUE, q)
     print(json.dumps(brief, indent=1, ensure_ascii=False))
 
 
@@ -272,10 +282,13 @@ def cmd_finish(subject, unit, narrate=True):
     # Ledgers
     today = datetime.date.today().isoformat()
     q = load(QUEUE)
+    pool = "claude"
     for it in q["items"]:
         if it["subject"] == subject and it["unit"] == unit:
-            it.update({"status": "done", "findings": len(findings), "fixed": applied["applied"], "checked_on": today})
+            pool = it.get("pool") or "claude"
+            it.update({"status": "done", "findings": len(findings), "fixed": applied["applied"], "checked_on": today, "pool": pool})
     save(QUEUE, q)
+    summary["pool"] = pool
     st = load(STATE)
     row = next((s for s in st["subjects"] if (s.get("slug") or s.get("subject")) == subject), None)
     if row is not None:
@@ -291,7 +304,7 @@ def cmd_finish(subject, unit, narrate=True):
         rb = [x["unit"] for x in mine if x.get("status") == "needs-rebuild"]
         if rb:
             row["note"] += " | ⚠ NEEDS REBUILD (wrong texts/cluster, not fixable by edits): " + ", ".join(rb)
-    st["batches"].append({"date": today, "what": f"{subject}/{unit} ({len(raw['lessons'])}L) - autonomous loop",
+    st["batches"].append({"date": today, "what": f"{subject}/{unit} ({len(raw['lessons'])}L) - autonomous loop ({pool})",
                           "findings": len(findings), "fixed": applied["applied"]})
     st["updated"] = today
     save(STATE, st)
@@ -329,10 +342,11 @@ if __name__ == "__main__":
     a = sys.argv[1:]
     if not a:
         raise SystemExit(__doc__)
+    pool = a[a.index("--pool") + 1] if "--pool" in a else "claude"
     if a[0] == "next":
-        cmd_next()
+        cmd_next(pool)
     elif a[0] == "prep":
-        cmd_prep(a[1], a[2])
+        cmd_prep(a[1], a[2], pool)
     elif a[0] == "finish":
         cmd_finish(a[1], a[2], narrate="--no-narrate" not in a)
     elif a[0] == "restore":

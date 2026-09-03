@@ -37,6 +37,7 @@ SKIP = {"science-aqa", "science-edexcel", "science-ocr", "science-ocr-b", "separ
 OVERRIDES = {"history-ocr": "ocr/history-a-J410.md",            # units are the Explaining the Modern World options
              "it-ocr": "ocr/cambridge-nationals-it-J836.md",
              "health-social-care-edexcel": "",                   # BTEC Tech Award: no spec downloaded yet
+             "l12-retail-business": 'eduqas/l12-retail-business-5299QA.md',            # index resolver picked the GCSE Business spec for the L1/2 Retail award
              "music-technology": ""}                             # NCFE, last taught 2025-26: no spec in the repo
 BOARD_ALIASES = {"aqa": "AQA", "edexcel": "Edexcel", "pearson": "Edexcel", "ocr": "OCR", "eduqas": "Eduqas", "wjec": "Eduqas"}
 

@@ -170,7 +170,10 @@ R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), video on R2
 ⚠ **2 Sep 2026: Gemini Notebook (ex-NotebookLM) switches to compute-based
 limits, 5-hour refresh, deferred generations.** Every calibrated quota
 (60/day podcasts, ~200/day audio, 20/day video pool, shorts contention) is
-void that day — treat 2–3 Sep as a re-calibration day from the batch logs.
+void that day — but as of 3 Sep the change has NOT reached us (Google:
+~10% rollout; no usage bar in Tom's UI). Trigger for re-calibration = the
+usage bar appearing, or a mid-batch cap in the logs; then re-size from the
+batch logs.
 
 ## Active TODO (pruned 29 Aug 2026 — split by who can move it)
 

@@ -56,6 +56,57 @@ mark-affecting error or a wrong fix means: fix it directly (edit + finish
 path), and tighten CHECK_PROMPT*.md before the next launch. First two
 audits (OCR Macbeth L2, Edexcel Animal Farm L3, 2 Sep): clean.
 
+## Codex pool (Tom's ruling, 3 Sep 2026 evening)
+
+A second checker pool runs on Tom's ChatGPT Plus Codex CLI. It starts at the
+FAR END of the queue and the two pools meet in the middle: `_unit.py next`
+hands Claude the first free queued unit and `next --pool codex` the last;
+`prep --pool codex` stamps the queue item so neither pool can take the
+other's unit. The whole queue (priorities 1-9) is built up front for this
+reason (science via `_build_science_queue.py`, 3-9 via `_build_queue.py`);
+the family-boundary roll-over section below is therefore already done.
+Codex state lives in `_loop.json.codex`: `{in_progress: {subject, unit,
+model, effort, launched_at, attempts} | null, units_done, resume_after,
+audits}`.
+
+Every tick, AFTER the Claude steps and in the same turn:
+
+C1. If `codex.resume_after` is in the future: skip the Codex steps.
+C2. If `codex.in_progress` is set, read `<dir>/_codex_done.json`. If it is
+    missing, the run is still going (the wrapper kills at 40 min) - skip.
+    If present with `report_ok` true: read `<dir>/_codex_last_message.md`
+    (under 250 words), rule on ADJUDICATE items exactly as in step 6, run
+    `python scripts/_retrofc/_unit.py finish <subject> <unit>` (same
+    validator / rollback / re-narration / commit path; runs sequentially
+    with the Claude finish so git never sees two writers), publish the
+    tracker, `codex.units_done += 1`, `codex.in_progress = null`. If
+    `report_ok` is false or `exit_code` is not 0: tail `_codex_run.log`;
+    a usage-limit / rate-limit message -> set `codex.resume_after` from it
+    (or now + 5h05m) and leave `in_progress` for a relaunch; a network
+    error -> relaunch once (`attempts` 2); a second failure -> mark the
+    queue item `blocked` with a note and clear `in_progress`.
+C3. If nothing is in progress: `python scripts/_retrofc/_unit.py next
+    --pool codex`; if it returns a unit, `prep <subject> <unit> --pool codex`,
+    set `codex.in_progress`, and launch the wrapper DETACHED (PowerShell
+    `Start-Process -FilePath python -ArgumentList @(...) -WindowStyle Hidden
+    -PassThru -RedirectStandardOutput <dir>\_launcher_stdout.txt
+    -RedirectStandardError <dir>\_launcher_stderr.txt`) with
+    `scripts/_retrofc/_run_codex_checker.py <dir> --model gpt-5.6-terra
+    --effort xhigh --family <family> --facts "<facts>" --timeout-min 40`.
+    Default model Terra xhigh; Sol high is the alternate when Terra is
+    rate-limited. `--family` is the brief's family (`generic` for
+    priorities 4-9). `--facts`: the board-facts line from the lists below
+    for EngLit; the science anchors for science; otherwise "read the spec's
+    assessment section before asserting any exam claim". Delete a stale
+    `_codex_done.json` before launching.
+C4. Second-reader audit for Codex units: every FIFTH Codex unit for the
+    first twenty, then every tenth, same method as the Claude audit; record
+    in `codex.audits`. A missed mark-affecting error tightens the wrapper's
+    prompt in `_run_codex_checker.py` before the next launch.
+C5. Codex never receives service keys (`shell_environment_policy.inherit=
+    "core"`) and writes only inside its unit dir; the finish step is what
+    touches Supabase, R2 and git, and it runs with the orchestrator's env.
+
 ## Rate limit
 
 If an Agent launch or any model call fails with a usage-limit message,
