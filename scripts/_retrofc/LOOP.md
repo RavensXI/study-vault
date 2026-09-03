@@ -203,7 +203,13 @@ Board facts to paste (keep current with the spec files):
   essay 20) and 19th-century prose (extract 20 + essay 20 incl. SPaG); Component
   02 poetry across time (anthology comparison 20 + unseen 20) and Shakespeare
   (extract-based 20 + essay 20 incl. SPaG). Read the spec for AO weights.
-- Eduqas C720QS: Component 1 Shakespeare (extract 15 + essay 25 incl. SPaG 5)
-  and poetry anthology (15 + 25); Component 2 post-1914 prose/drama (extract
-  15 + essay 25... read the spec), 19th-century prose, unseen poetry (15 + 25).
-  Read the spec for exact marks before asserting any.
+- Eduqas C720QS: Component 1 (2h, 80 marks): Section A Shakespeare 40 = one
+  extract question + one whole-play essay, AO1/AO2/AO4 (SPaG credited, NO
+  AO3; per-question split not stated in the spec - keep numberless, NOTE);
+  Section B poetry anthology 40, AO1/AO2/AO3. Component 2 (2h30, 120 marks =
+  three 40-mark sections): Section A post-1914 prose/drama = ONE source-based
+  question 40, AO1/AO2/AO4 (NO AO3); Section B 19th-century prose = ONE
+  source-based question 40, AO1/AO2/AO3 (no SPaG); Section C unseen poetry
+  40 = first poem 15 + comparison 25 (the board's Section C guidance prints
+  the specimen as [15] and [25]; ~20 and ~40 minutes), AO1/AO2 only. Never
+  say "80 marks" for Component 2. Never name the board in Eduqas prose.
