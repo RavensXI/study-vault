@@ -224,7 +224,15 @@ def validator_violations(row):
     save(p, {k: row.get(k) for k in keep})
     r = run([sys.executable, os.path.join(ROOT, "scripts", "_validate_content_json.py"), p], check=False)
     os.remove(p)
-    return sorted(set(l.strip() for l in (r.stdout + r.stderr).splitlines() if l.strip() and not l.startswith(("[OK]", "Usage", "==")) and p not in l))
+    viol = set(l.strip() for l in (r.stdout + r.stderr).splitlines() if l.strip() and not l.startswith(("[OK]", "Usage", "==")) and p not in l)
+    # Structural guard: a wrapper edit whose closing-tag twin was skipped leaves <div> unbalanced
+    # (Edexcel physics-paper-1, 4 Sep 2026: three lessons). Counted as a violation KIND per field.
+    for f in ("content_html", "exam_tip_html", "conclusion_html"):
+        h = row.get(f) or ""
+        o, c = len(re.findall(r"<div", h)), h.count("</div>")
+        if o != c:
+            viol.add(f"div-imbalance {f}: {o} open vs {c} close")
+    return sorted(viol)
 
 
 def fetch_rows(unit_id):
