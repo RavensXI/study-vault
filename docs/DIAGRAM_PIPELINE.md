@@ -246,3 +246,68 @@ These are the most frequent problems found during QC — watch for them:
 | Packed figures | Isotype figures too close together to count | Specify spacing ("clear gap between each figure") |
 | Missing elements | Callouts or annotations dropped | List required annotations as a separate checklist in the prompt |
 | Data hallucination | Numbers changed from the original | Always cross-reference against matplotlib backup |
+
+## GPT-Image-2 house style (agreed with Tom, 4 Sep 2026)
+
+Bake-off of 4 Sep (GPT-Image-2 vs MAI-Image-2.6 vs 2.6-Flash on Foundry, ten
+GCSE diagram prompts): GPT-Image-2 at MEDIUM quality is the pick — nine of ten
+usable, 1,756 output tokens per 1024² image, billed £30 per million on Foundry
+(≈5.3p). LOW (196 tokens) got electron counts and a valve label wrong; HIGH is
+three times the price for no accuracy gain on diagrams. Endpoint:
+`POST {FOUNDRY_ENDPOINT}/openai/v1/images/generations`, header `api-key`,
+body `{prompt, model:"gpt-image-2", size, quality:"medium"}`. Page:
+https://claude.ai/code/artifact/96301c0a-13bd-4e33-8dc6-dae5da48706c
+
+### Prompt template
+
+Two parts. The **brief** is written per lesson by a Claude agent from the
+lesson content (pay for reasoning in Claude, not in the image model). The
+**style block** is fixed.
+
+```
+{diagram_form} of {subject}: {content sentence or two}.
+Label exactly these, spelled exactly like this, and nothing else: {label list}.
+The diagram must show: {2-3 facts the vision gate will check}.
+Do not include: a title, a caption, a key or legend, any other text.
+
+Style: a modern GCSE textbook illustration on a warm off-white paper background
+(#faf8f5), clean vector-like line work with soft flat colour fills and gentle
+shading for depth. Use the accent colour {accent} ONLY for label text, leader
+lines and arrows. Physical materials keep their natural colours (rock browns
+and greys, magma orange-red, water blue, vegetation green, oxygenated blood
+red, deoxygenated blood blue); abstract shapes with no natural colour (circuit
+symbols, wave curves, geometry) in neutral greys. Clear humanist sans-serif
+labels with thin leader lines, generous margins, no photographic realism, no
+clutter, no logos, no real people, no exam-board names.
+```
+
+- `{diagram_form}`: name it every time — flat cross-section, 3D block
+  cutaway, flat schematic, flowchart, dot-and-cross, labelled graph, timeline.
+  Left unnamed, the same prompt comes back in different forms across a unit.
+- `{accent}`: `units.accent` from Supabase.
+- A key is added ONLY when colour carries meaning (blood, states of matter,
+  plate types); otherwise the labels do the work and a key duplicates them.
+- Title and caption never go in the image. The lesson heading already exists
+  and the caption lives in the HTML `<figcaption>` (editable, narratable).
+- Size: landscape 3:2 (`1536x1024`) fits the 1000px article column better
+  than square. Read the token count on the first image — it differs from the
+  1,756 measured at 1024².
+- Foundation lessons: the label list excludes Higher-only terms; a Higher
+  diagram gets its own brief.
+
+### Vision gate (mandatory, same as heroes)
+
+A Claude vision pass receives the label list and the fact list and answers
+three questions: every label present and spelled correctly? no extra labels?
+each fact true in the picture? Any "no" rejects the image and the retry prompt
+carries the gate's note ("the aorta arrows pointed into the heart"). Even
+GPT-Image-2 medium drew a sector with its apex off-centre and MAI-2.6 reversed
+the aorta, so nothing ships ungated. Budget one retry in three.
+
+### Rollout rule
+
+Canary before fleet: one unit end to end (brief → image → gate → retry →
+figure inserted, with the real accepted-diagram cost read from the Foundry
+monitor) before any wider run. Estimate at 4 Sep prices: ≈£185 for one diagram
+per free-tier lesson at 1024², before retries and before the landscape
+re-measure.
