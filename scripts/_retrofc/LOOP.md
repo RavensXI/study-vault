@@ -183,8 +183,11 @@ Science board anchors (verify in the spec before asserting):
   each, 1h45, 100 marks.
 - OCR Gateway A J250: 6 papers, 1h10, 60 marks; separate J247/J248/J249: 2
   papers each, 1h45, 90 marks.
-  Bio P1 = B1-B3 (+CS7), Bio P2 = B4-B6; same pattern for chemistry (C1-C3 /
-  C4-C6) and physics (P1-P4 / P5-P8) - verify in the spec. Practicals are PAGs,
+  Bio P1 = B1-B3 (+CS7), Bio P2 = B4-B6; chemistry C1-C3 / C4-C6; PHYSICS HAS
+  SIX TOPICS: P1 Matter, P2 Forces, P3 Electricity and magnetism, P4 Waves and
+  radioactivity, P5 Energy, P6 Global challenges - Physics P1 = P1-P3, P2 =
+  P4-P6 (corrected 4 Sep after a checker caught the P1-P4 anchor). g = 10 N/kg
+  on OCR Gateway (P2.3h). Verify every anchor in the spec. Practicals are PAGs,
   never "required" or "core" practicals. Highest tariff 6 marks. OCR marks
   Higher-tier statements in BOLD like Edexcel: bold-preserved extractions exist
   for all 8 OCR specs as `specs/ocr/<name>-bold.md` (made 4 Sep with
