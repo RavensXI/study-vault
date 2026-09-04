@@ -1,0 +1,148 @@
+{
+ "unit": "chemistry-paper-2",
+ "checked_at": "2026-09-04T00:00:00Z",
+ "spec_used": "specs/edexcel/combined-science-1SC0.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 7,
+   "field": "knowledge_checks",
+   "severity": "HIGH",
+   "claim": "Match check [4] pairs three sources with right = [Carbon dioxide, Methane, Methane]; 'Methane' appears twice.",
+   "truth": "A match check is graded by index, so a student who pairs 'Livestock farming' with the second Methane is marked wrong even though the pairing is true. The third pair is changed to 'Evaporation from the oceans' -> 'Water vapour', which the spec names as a greenhouse gas alongside carbon dioxide and methane.",
+   "evidence": "spec 8.24: 'various gases in the atmosphere, including carbon dioxide, methane and water vapour, absorb heat radiated from the Earth'.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 0,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Fifteen plain-text flashcard fields across all eight lessons hold undelimited LaTeX: \\geq, \\rightleftharpoons, \\div, C_nH_{2n+2}, C_nH_{2n}, C_2H_4, NH_3, N_2 + 3H_2, R_f and CO_2.",
+   "truth": "Flashcard questions and answers are plain text, so the markup prints on the card exactly as written. Every one is rewritten with unicode subscripts and symbols, or with words.",
+   "evidence": "house rule: *_html fields use entities, plain-text fields use unicode.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 2,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "The article gates 'Changing the Position of Equilibrium' inside a higher-only block, but practice questions 5 and 6 and four flashcards test the same material with no tier flag.",
+   "truth": "Predicting how the position of a dynamic equilibrium responds to temperature, pressure and concentration is Higher tier only (spec point 4.17). A Foundation student meets it in the questions after the article has hidden the teaching. '(Higher tier)' is prefixed on the two questions and the four flashcards. The higher-only wrapper itself is correctly placed and holds no both-tier content, so it stays.",
+   "evidence": "spec 4.17. KNOWN GAP: this spec markdown has lost its bold, which is this board's only Higher-tier marker, so the tier ruling is from knowledge of the 1SC0 specification; the lesson's own higher-only wrapper agrees with that ruling.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "The lesson teaches addition polymerisation, drawing repeating units, deducing monomers, naming polymers, named polymer properties, the bromine water test and polymer disposal as examinable, and states 'This skill is commonly tested in the exam.'",
+   "truth": "Combined Science carries one polymer statement: 1.39, poly(ethene) as the example that simple polymers are large molecules containing chains of carbon atoms. 'monomer', 'addition polymerisation', 'biodegradable' and 'bromine' return no match anywhere in the spec; this material sits in topic 9, Separate chemistry 2, which the spec says is only found in the GCSE in Chemistry. The chemistry is sound, so the lesson is labelled 'Separate Chemistry only' at the head of the article and in the description rather than deleted, and the false exam claim is corrected.",
+   "evidence": "spec 1.39; spec note after topic 8: 'The following topic is only found in the GCSE in Chemistry: Topic 9 - Separate chemistry 2.'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "HIGH",
+   "claim": "The eight lessons are presented as the content of Chemistry Paper 2.",
+   "truth": "Chemistry Paper 2 (paper code 1SC0/2CF and 2CH) covers topic 1 Key concepts, topic 6 Groups in the periodic table, topic 7 Rates of reaction and energy changes, and topic 8 Fuels and Earth science. Four lessons map correctly: L1 (7.1-7.8), L3 (8.1-8.6, 8.15), L4 (8.7-8.17), L7 (8.18-8.26). Three sit on Chemistry Paper 1: L2 is topic 4.13-4.17 (reversible reactions, dynamic equilibrium, Haber), L6 is topic 2.6-2.12 plus 3.12 (purity, separation, chromatography, potable water, the hydrogen and carbon dioxide tests - only its chlorine test, 6.8, and its oxygen test, 8.23, belong to Paper 2), and L8 is topic 4.8-4.12 (biological extraction, recycling, life-cycle assessment). L5 is Chemistry-only, see F4. No lesson names a paper in its text, so nothing internal is factually wrong; the fault is the unit's title and grouping. Coverage is the larger problem: topic 6 is absent in full (alkali metals, halogens, noble gases, their trends and displacement reactions) and the energy half of topic 7 is absent in full (7.9-7.16: exothermic and endothermic changes, bond breaking and making, bond-energy calculations, activation energy diagrams and reaction profiles). That is roughly a third of the paper never taught. Option A: rename and regroup - move L2, L6 and L8 into the Chemistry Paper 1 unit, keep L5 as labelled background, and build two new lessons for topic 6 and topic 7 energy changes. Option B: leave the grouping and add the two missing lessons only. I recommend option A.",
+   "evidence": "spec 'Qualification at a glance', Paper 4: Chemistry 2 content overview; 'Topics for Paper 3' (topics 2, 3, 4) versus 'Topics for Paper 4' (topics 6, 7, 8); core practical 7.1 is the only core practical in topics 6-8 and L1 describes both of its methods correctly.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F6",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Phytoextraction and bioleaching are taught with no tier flag, and are also tested by practice question 4, knowledge check 4 and two flashcards.",
+   "truth": "Evaluating alternative biological methods of metal extraction, bacterial and phytoextraction, is Higher tier only (spec point 4.8). Option A: wrap the 'Alternative Methods of Metal Extraction' panel in a higher-only block and prefix '(Higher tier)' on the question, the check and the two flashcards, matching how lesson 2 handles 4.17. Option B: leave it untiered as enrichment, since it costs a Foundation student nothing to read. I recommend option A for consistency with lesson 2.",
+   "evidence": "spec 4.8. KNOWN GAP: the bold that marks Higher-tier-only statements is lost from this markdown, so the ruling is from knowledge of the 1SC0 specification, not from the file.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F7",
+   "lesson": 0,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "Five descriptions run past the 100-character validator limit: L1 111, L3 114, L4 112, L6 121, L8 101.",
+   "truth": "Each is shortened without losing a topic. Lesson 5's description was also over the limit at 109 and is rewritten under F4.",
+   "evidence": "house validator limit: description under 100 characters.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "The 'Cracking in Practice' panel and a flashcard teach the bromine water test for alkenes.",
+   "truth": "'bromine' returns no match in the Combined spec; the alkene reactions sit in the Chemistry-only topic 9. It is one correct sentence of background rather than a wrong statement, so it is left alone. If lesson 5 keeps its scope label, this line could carry the same label.",
+   "evidence": "spec grep: no match for 'bromine' in specs/edexcel/combined-science-1SC0.md.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F9",
+   "lesson": 0,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "Lessons 1-4 share one identical generic exam tip; lessons 5-8 have exam_tip_html set to null and carry their tip inside content_html as a div.exam-tip.",
+   "truth": "Neither is a factual error, but the exam tip slot renders empty on half the unit and the tips in lessons 1-4 say nothing specific to their content.",
+   "evidence": "raw fields.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F10",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "sea water can be made potable by distillation or reverse osmosis, but these are energy-intensive processes",
+   "truth": "The spec names distillation only for sea water. Reverse osmosis is correct chemistry and does no harm as extra, so no edit is made.",
+   "evidence": "spec 2.12b: 'sea water can be made potable by using distillation'.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F11",
+   "lesson": 0,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "Extended-response mark schemes use two different band ladders: 'Top band / Mid band / Lower band' in lessons 1-4 and 'Mastering / Secure / Developing' in lessons 5-8.",
+   "truth": "The house ladder is Top band / Upper-mid band / Mid band / Lower-mid band / Low band. Neither set is a banned string and neither misstates a mark total, so this is a consistency point rather than an error.",
+   "evidence": "house ladder in the checker brief.",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [],
+ "summary": "Eight lessons checked against the Combined Science 1SC0 spec. One hard error: a lesson 7 match check lists Methane twice on the right, so an index-graded pairing marks a correct answer wrong. The unit's real problem is scope and mapping - lessons 2, 6 and 8 are Chemistry Paper 1 topics (equilibrium and the Haber process, purity and chromatography and potable water, recycling and life-cycle assessment), lesson 5 is almost entirely Chemistry-only topic 9 and is now labelled rather than deleted, while topic 6 (groups 1, 7 and 0) and the energy half of topic 7 (exothermic and endothermic changes, bond energies, reaction profiles) are never taught at all. Lesson 2 gates equilibrium shifts as Higher tier in the article but not in its questions or flashcards; lesson 8 does not gate Higher-tier biological extraction anywhere. Fifteen plain-text flashcard fields print raw LaTeX. Every worked example, formula, balanced equation and answer key was recomputed and is correct, including the Rf calculation (4.2 / 6.0 = 0.7), the Haber conditions, the atmosphere percentages and all 40 knowledge checks.",
+ "renarration": {
+  "run_at": "2026-09-04T10:57:51Z",
+  "clips": [
+   {
+    "lesson": 5,
+    "id": "n2",
+    "key": "science-edexcel/chemistry-paper-2/narration_lesson-05_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/chemistry-paper-2/narration_lesson-05_n2.mp3",
+    "voice": "Ollie",
+    "duration": 40.08,
+    "bytes": 480960,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 10:57:48 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n16",
+    "key": "science-edexcel/chemistry-paper-2/narration_lesson-05_n16.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/chemistry-paper-2/narration_lesson-05_n16.mp3",
+    "voice": "Ollie",
+    "duration": 18.17,
+    "bytes": 218016,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 10:57:52 GMT"
+   }
+  ],
+  "verified_ok": 2,
+  "total": 2
+ }
+}
