@@ -1,0 +1,294 @@
+{
+ "unit": "separate-sciences-ocr / chemistry-paper-1",
+ "checked_at": "2026-09-04T18:51:04",
+ "spec_used": "specs/ocr/chemistry-a-gateway-J248.md + specs/ocr/chemistry-a-gateway-J248-bold.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "The whole Nanoparticles section (heading, two paragraphs and the risks collapsible, narration n14-n17) sits inside <div class=\"higher-only\">, which the page renders with a 'Higher Tier' badge.",
+   "truth": "C2.3g, C2.3h, C2.3i and C2.3j carry the separate-science dagger but are NOT bold, so they are assessed at both Foundation and Higher tier in J248. The wrapper was misused to mean 'separate-only'. Because body.tier-foundation .higher-only is display:none, a Foundation student saw no nanoparticle teaching at all, while the exam tip, takeaway 3, two practice questions and four flashcards still test it. Wrapper removed (opening and closing tag).",
+   "evidence": "bold file C2.3g-j are plain text with the dagger, not bold; spec key 'This symbol indicates content that is found only in the chemistry separate science qualification'; css/style.css:5062",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 8,
+   "field": "knowledge_checks",
+   "severity": "HIGH",
+   "claim": "Match check 'Match each reaction to its type:' has right = ['Exothermic','Endothermic','Exothermic'].",
+   "truth": "js/main.js renderMatch marks by option INDEX (parseInt(sel.value) === q.order[i]). With 'Exothermic' at index 0 and index 2, a student who picks the identical text from the wrong index is marked wrong. Rebuilt as three distinct term-to-meaning pairs: exothermic reaction, endothermic reaction, activation energy.",
+   "evidence": "js/main.js:2197-2209",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Flame Tests for Group 1 Metals (PAG C4)' and 'This is a practical activity group (PAG C4) context'.",
+   "truth": "PAG C4 is Distillation. Flame tests are PAG C5, Identification of species. The spec lists 'Flame tests. (PAG C5)' against C4.2c and names flame tests in the PAG 5 row.",
+   "evidence": "spec C7 PAG table (PAG 5 Identification of species); C4.2c and C4.2e practical suggestions",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Filtration and Crystallisation (PAG C2)' and 'This is a key technique in practical activity group PAG C2.'",
+   "truth": "PAG C2 is Electrolysis. PAG C3, Separation techniques, is the group that names evaporation, filtration, crystallisation, chromatography and distillation. The chromatography citation later in the same lesson (PAG C3) is right.",
+   "evidence": "spec C7 PAG table (PAG 2 Electrolysis; PAG 3 Separation techniques)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Practical Activity Group: Measuring Enthalpy Changes (PAG C1)' and 'In your practical work (PAG C1)'.",
+   "truth": "PAG C1 is Reactivity trend. The spec attaches 'Measuring the temperature change in reactions. (PAG C8)' to C3.2a. Corrected to PAG C8; 'Enthalpy' also replaced with 'Energy', which is the GCSE term.",
+   "evidence": "spec C3.2a practical suggestion; C7 PAG table (PAG 1 Reactivity trend, PAG 8 Measuring rates of reaction)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Dative covalent bonds are assessed at Higher Tier only.'",
+   "truth": "Dative (coordinate) bonding appears nowhere in J248, at either tier - a search for 'dative' and 'coordinate bond' in the spec returns nothing. The chemistry itself is right, so the paragraph stays as background, but the assessment claim is false and now says the topic is off-course. The higher-only wrapper is left in place so the material stays out of the Foundation view and reads as extension.",
+   "evidence": "specs/ocr/chemistry-a-gateway-J248.md - no occurrence of 'dative' or 'coordinate bond'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 4,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "'a sample of aspirin ... melts over the range 131-138 degrees C. The expected melting point of pure aspirin is 135 degrees C.'",
+   "truth": "An impurity lowers and broadens a melting point, so an impure sample melts BELOW the pure value. A range that straddles 135 contradicts the same lesson's own sentence, 'its measured melting point will be lower than the expected value'. Range changed to 128-133; answer B is unchanged.",
+   "evidence": "spec C2.1b 'use melting point data to distinguish pure from impure substances'; lesson 4 content_html paragraph n3",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 1,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "The 6-mark question 'Explain two limitations of the simple particle model...' carries no tier flag.",
+   "truth": "C1.1c is bold, so limitations of the particle model are Higher Tier only. The article already wraps this content correctly and the flashcards are tagged; the question was not. Prefixed '(Higher tier)'.",
+   "evidence": "bold file C1.1c is fully bold",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 7,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "The 6-mark FeCl2 reacting-mass question carries no tier flag.",
+   "truth": "C3.1h (mass to moles) and C3.1l (use a balanced equation to calculate masses) are both bold, so this is Higher Tier only. The article wraps the mole section correctly; the question did not. Prefixed '(Higher tier)'. Every number in the mark scheme recomputes: Mr FeCl2 = 127, 5.6/56 = 0.1 mol, 0.1 x 127 = 12.7 g, conservation check 12.9 - 0.2 = 12.7 g.",
+   "evidence": "bold file C3.1h, C3.1l",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 7,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard 'What is Avogadro's constant?' carries no tier flag.",
+   "truth": "C3.1g (recall and use the definitions of the Avogadro constant and of the mole) is bold, so Higher Tier only. Tag added at the end, as flashcards require. The neighbouring moles-from-mass card is already tagged.",
+   "evidence": "bold file C3.1g",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11",
+   "lesson": 8,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "The 4-mark H2 + F2 bond energy question carries no tier flag.",
+   "truth": "C3.2d (calculate energy changes by considering bond making and bond breaking energies) is bold, so Higher Tier only. Prefixed '(Higher tier)'. The arithmetic is right: 436 + 158 = 594, 2 x 568 = 1136, 594 - 1136 = -542 kJ, exothermic.",
+   "evidence": "bold file C3.2d",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 1,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "The 6-mark mark scheme ends '[Award up to 3 marks per limitation: 1 for naming it, 2 for explaining what it fails to account for, 3 for linking it to a property the model cannot explain]'.",
+   "truth": "'Award ... marks' is a banned rubric phrase under the house copyright-distancing rule. Replaced with a house-voice sentence that says the same thing.",
+   "evidence": "CHECK_PROMPT_SCIENCE.md banned-string list",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F13",
+   "lesson": 3,
+   "field": "flashcard_questions",
+   "severity": "LOW",
+   "claim": "Two flashcard stems read 'What is the answer to: Flame test colour for lithium?' and the same for potassium.",
+   "truth": "Builder residue. The sodium card in the same set reads simply 'Flame test colour for sodium?'. Both stems trimmed to match.",
+   "evidence": "lesson 3 flashcard_questions[4], [5], [6]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F14",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "MEDIUM",
+   "claim": "Lesson-to-paper mapping. The unit is titled Chemistry Paper 1, which assesses C1-C3 plus C7 (Foundation Paper 1, Higher Paper 3; each 90 marks, 1 hour 45 minutes, 50 per cent).",
+   "truth": "Lesson 3 'Periodic Table and Group Trends' is mostly Paper 2 content. The properties and trends of Groups 1, 7 and 0 and halogen displacement are C4.1a and C4.1b; flame tests are C4.2c and C4.2e. Topic C4 sits on Paper 2 and Paper 4. Only the Mendeleev-to-atomic-number material belongs to Paper 1 (C2.2i, C2.2c). COORDINATOR RULING: label it, do not move it. A scope note is inserted after the first heading saying these trends are C4.1 and are examined on Chemistry Paper 2. No narration id and no div change. The coverage gap in F15 stands separately.",
+   "evidence": "spec 2a assessment overview; bold file C4.1a, C4.1b, C4.2c, C4.2e under Topic C4",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F15",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "MEDIUM",
+   "claim": "Coverage of C1-C3 across the eight lessons.",
+   "truth": "Two whole Paper 1 sections are taught nowhere in the unit: C3.3 Types of chemical reactions (oxidation and reduction, acids forming hydrogen ions, neutralisation, salts, the pH scale, C3.3a-k) and C3.4 Electrolysis (C3.4a-e). Also absent: C2.1d empirical formulae, C3.1e balanced ionic equations, C3.1b half equations, and C3.1k stoichiometry from masses with limiting reactants - the last three bold, so Higher only. Separate-only content IS present where it matters (nanoparticles C2.3g-j, once F1 is applied). Recommendation: commission two new lessons, 'Acids, Bases and Redox' (C3.3) and 'Electrolysis' (C3.4), and add empirical formulae plus limiting reactants to lesson 7's Higher block.",
+   "evidence": "bold file C3.3a-k, C3.4a-e, C2.1d, C3.1b, C3.1e, C3.1k; no lesson in raw/L01-L08 covers them",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F16",
+   "lesson": 8,
+   "field": "content_html + conclusion_html + flashcard_questions",
+   "severity": "LOW",
+   "claim": "Takeaway 3 labels 'Breaking bonds is endothermic; making bonds is exothermic' as Higher Tier, but knowledge check 4 and practice question 4 test the same rule with no flag.",
+   "truth": "Only the CALCULATION (C3.2d) is bold; the qualitative rule is not a separate statement, and the C3.2 common-misconceptions note treats 'energy is released when bonds break' as an error for all learners. COORDINATOR RULING: the rule is both-tier, so untag it everywhere to match the knowledge check. Four tags removed: the takeaway now leads with the untagged rule and keeps 'Higher Tier:' on the calculation only; two flashcards lose their 'Higher:' prefix; the Key Fact revision tip loses its 'Higher:' prefix. The higher-only wrapper is also closed before that Key Fact, so the rule is now readable at Foundation tier - without that move a Foundation student would still be asked the rule in knowledge check 4 and practice question 4 with no teaching to read. The wrapper still covers the heading, the bond-energy paragraph and the worked example, which are C3.2d. Div counts stay equal.",
+   "evidence": "bold file C3.2a-d; C3.2 Common misconceptions paragraph",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17",
+   "lesson": 0,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "All eight lessons use the identical six-slot type template: 1 mark Multiple Choice, 1 mark State/Name, 2 marks Describe, 3 marks Explain, 4 marks Calculate, 6 marks Extended Response.",
+   "truth": "Slot 5 says 'Calculate' in every lesson, but four of the eight questions contain no calculation (L1 melting range, L3 halogen prediction, L5 dot-and-cross diagram, L6 surface area explanation); L7 slot 6 is the reverse, a pure calculation labelled Extended Response. Left for the programme-wide question-type relabel queue rather than edited here.",
+   "evidence": "practice_questions type field across L01-L08",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F18",
+   "lesson": 5,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "The 4-mark question treats aluminium chloride (AlCl3) as ionic, with Al3+ and Cl- in brackets.",
+   "truth": "AlCl3 is in fact substantially covalent - it sublimes at about 178 degrees C as Al2Cl6. GCSE textbooks routinely simplify it to ionic and OCR would accept the ionic treatment, so no edit; but a cleaner example (MgCl2 or Na2O) would avoid teaching 'metal plus non-metal is always ionic' as a rule. The question also asks the student to DRAW, which the typed practice box cannot take.",
+   "evidence": "settled chemistry",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F19",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'Most ionic compounds are soluble in water because water molecules can surround and separate the individual ions.'",
+   "truth": "Defensible for the common GCSE salts, but carbonates and hydroxides are mostly insoluble and the precipitation tests in C4.2b depend on that. 'Many' would be safer than 'Most'. Not edited.",
+   "evidence": "spec C4.2b precipitation tests",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F20",
+   "lesson": 0,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "Lessons 2-6 use four-step band ladders (Mastering, Secure, Developing, Emerging) as the mark scheme for 2-mark and 3-mark questions.",
+   "truth": "A band ladder is not a sensible mark scheme for a 2-mark describe; lessons 1, 7 and 8 use point-based schemes for the same slots. This belongs to the programme's band-ladder queue, not to this fact-check.",
+   "evidence": "practice_questions 3rd and 4th items in L02-L06",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F21",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "LOW",
+   "claim": "Verification sweep for the faults found in the other OCR science units.",
+   "truth": "Clean here. No spec statement codes are cited in any lesson, so there are no wrong codes to fix. No raw LaTeX in any plain-text field. No banned board strings, no 'required practical' or 'core practical', no wrong paper-structure claim, no duplicated options in the other seven match checks, no knowledge check with two correct options, no exam tip carrying truncated article text, no description over 100 characters, and div open and close counts are equal in every lesson before and after the edits. Every calculation recomputes: Mr 18, 100, 44, 132, 127 and 40; 31-15=16; phosphorus 2,8,5; Rf 4.8/8.0 and 5.4/9.0 both 0.60; 12 g Mg to 20 g MgO with 8 g of oxygen; 5.6 g Fe to 12.7 g FeCl2; both bond energy sums (-184 kJ and -542 kJ). Every chemical equation balances. Dalton, Thomson 1897, Rutherford 1909-11, Bohr 1913, Chadwick 1932 and Mendeleev 1869 with gallium and germanium are all right.",
+   "evidence": "recomputation and pattern sweeps over raw/L01-L08",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [
+  2
+ ],
+ "summary": "Eight lessons checked against OCR Gateway Chemistry A J248 (separate science), Paper 1 = topics C1-C3 plus C7. No calculation, equation, definition or historical attribution is wrong; every worked example and mark scheme recomputes. The damage is tiering, practical codes and one broken check. A higher-only wrapper hid the entire nanoparticles section from Foundation students even though C2.3g-j are separate-only rather than Higher-only. A match check offered 'Exothermic' twice and so marked a true answer wrong. Four of the six PAG citations named the wrong practical group. Four questions and one flashcard test bold statements with no tier tag. A paragraph claimed dative covalent bonding is Higher Tier content when it is not in J248 at all. Two unit-level calls are open: lesson 3 teaches Paper 2 material (Groups 1, 7 and 0 are C4.1), and two whole Paper 1 sections - C3.3 acids and redox and C3.4 electrolysis - are taught nowhere in the unit. Coordinator rulings applied: F14 is labelled rather than moved (a Paper 2 scope note added to lesson 3), and F16 is settled as both-tier (the bond-breaking rule untagged in the takeaway, two flashcards and the revision tip, and lifted out of the higher-only wrapper so Foundation students can read it). F15 stands with no edits.",
+ "renarration": {
+  "run_at": "2026-09-04T17:56:02Z",
+  "clips": [
+   {
+    "lesson": 3,
+    "id": "n10",
+    "key": "separate-sciences-ocr/chemistry-paper-1/narration_lesson-03_n10.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-1/narration_lesson-03_n10.mp3",
+    "voice": "Ollie",
+    "duration": 32.69,
+    "bytes": 392256,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:55:40 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n7",
+    "key": "separate-sciences-ocr/chemistry-paper-1/narration_lesson-04_n7.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-1/narration_lesson-04_n7.mp3",
+    "voice": "Ada",
+    "duration": 3.84,
+    "bytes": 46080,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:55:42 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n8",
+    "key": "separate-sciences-ocr/chemistry-paper-1/narration_lesson-04_n8.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-1/narration_lesson-04_n8.mp3",
+    "voice": "Ada",
+    "duration": 28.06,
+    "bytes": 336672,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:55:47 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n11",
+    "key": "separate-sciences-ocr/chemistry-paper-1/narration_lesson-05_n11.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-1/narration_lesson-05_n11.mp3",
+    "voice": "Ollie",
+    "duration": 36.84,
+    "bytes": 442080,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:55:53 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n8",
+    "key": "separate-sciences-ocr/chemistry-paper-1/narration_lesson-08_n8.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-1/narration_lesson-08_n8.mp3",
+    "voice": "Ada",
+    "duration": 29.83,
+    "bytes": 357984,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:55:59 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n23",
+    "key": "separate-sciences-ocr/chemistry-paper-1/narration_lesson-08_n23.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-1/narration_lesson-08_n23.mp3",
+    "voice": "Ada",
+    "duration": 13.68,
+    "bytes": 164160,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:56:02 GMT"
+   }
+  ],
+  "verified_ok": 6,
+  "total": 6
+ }
+}
