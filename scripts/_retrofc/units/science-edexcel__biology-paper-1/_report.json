@@ -1,0 +1,112 @@
+{
+ "unit": "science-edexcel/biology-paper-1",
+ "checked_at": "2026-09-04T08:55:24",
+ "spec_used": "specs/edexcel/combined-science-1SC0.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The percentile-charts paragraph (n12) is wrapped in <div class=\"higher-only\">, so Foundation students never see it.",
+   "truth": "Percentile charts are ordinary both-tier content in Edexcel Combined Science. Spec point 2.7 sits between the plainly both-tier points 2.6 and 2.8, and the topic 2 maths list carries \"Understand and use percentiles (1c)\" with no tier restriction. The lesson's own practice question 6 (the 40th percentile) tests the material with no Higher flag, so the wrapper contradicts the unit.",
+   "evidence": "spec lines 1163 (2.7 percentiles charts) and 1209 (topic 2 maths: understand and use percentiles); lesson 3 practice_questions[5] is untagged",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 3,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Mark scheme: \"Plants grow by cell elongation as well as cell division, whereas animals grow by cell division only\".",
+   "truth": "Animals grow by cell division AND differentiation. Only elongation is the plant-specific extra step. The mark scheme as written would mark a correct answer wrong, and it contradicts the lesson's own text, which says animals grow by mitosis then differentiation.",
+   "evidence": "spec 2.5 (spec lines 1147-1151): 'a cell division and differentiation in animals; b cell division, elongation and differentiation in plants'; lesson 3 content_html n11",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 4,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answer stored as \"Stimulus \\to receptor \\to sensory \\to relay \\to motor \\to effector \\to response.\"",
+   "truth": "Flashcards are plain-text fields with no KaTeX delimiters, so the LaTeX command \\to is not rendered. The student reads the literal characters instead of an arrow. Plain-text fields must use unicode.",
+   "evidence": "house convention: *_html fields use entities, plain-text fields use unicode; the flashcard field carries no \\( \\) delimiters",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 5,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Cloze flashcard question stored as \"Cloze: A Bb \\times Bb cross gives a dominant : recessive phenotype ratio of ____ : 1.\"",
+   "truth": "Same defect as F3: the student sees the literal LaTeX instead of a multiplication sign. The stored answer 3 is correct: Bb x Bb gives 1 BB : 2 Bb : 1 bb, a 3:1 phenotype ratio.",
+   "evidence": "recomputation of the Punnett square (BB, Bb, Bb, bb = 3 dominant : 1 recessive); plain-text field convention",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "\"Golden rice has been engineered to produce beta-carotene (vitamin A)\".",
+   "truth": "Beta-carotene is not vitamin A. It is a precursor that the body converts into vitamin A. The bracket states a false identity.",
+   "evidence": "settled fact: beta-carotene is a provitamin A carotenoid, cleaved to retinal in the intestinal mucosa",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The four main stages of genetic engineering (spec 4.11: restriction enzymes, ligase, sticky ends, vectors) sit inside <div class=\"higher-only\">, but practice questions 2, 3 and 4, knowledge checks 1-4 and five flashcards test exactly that material with no Higher-tier flag.",
+   "truth": "The unit is internally inconsistent and the spec file cannot settle it: the markdown conversion of specs/edexcel/combined-science-1SC0.md has stripped ALL bold, and bold is how the spec marks Higher-tier-only content. Two consistent options. (a) 4.11 is Higher-tier only: keep the wrapper and prefix \"(Higher tier)\" on practice_questions[1], [2], [3], knowledge_checks[0] to [3], and the five stage flashcards. (b) 4.11 is both-tier: delete the wrapper and leave the questions alone. RECOMMENDATION: option (a). The genetic-engineering stages are a standard Higher-tier-only point at Edexcel, and the wrapper looks deliberate, whereas the questions were generated without tier awareness.",
+   "evidence": "spec lines 1400-1410 (4.11 with sub-points a-d); spec line 899 'text in bold indicates content that is for higher tier only'; a grep for '**' in the spec markdown returns zero hits, so tier flags are unrecoverable from this file",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F7",
+   "lesson": 0,
+   "field": "conclusion_html",
+   "severity": "LOW",
+   "claim": "All 8 lessons close with the same boilerplate: each takeaway bullet is the section heading plus \"revise the key definitions, processes and equations from this section\".",
+   "truth": "The takeaways carry no content, and they promise equations in lessons that contain none (lessons 3, 4, 6 and 7). This is the science-takeaway de-dup item already on the programme worklist, not a fact error, so no edit here.",
+   "evidence": "conclusion_html in lessons 1-8",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F8",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "\"the impulse is processed by the spinal cord rather than the brain\", and the examples then given include the pupil reflex and blinking.",
+   "truth": "The pupil and blink reflexes are cranial reflexes routed through the brainstem, not the spinal cord. This is the standard GCSE simplification and mark schemes accept 'spinal cord', so it costs no marks; an edit would ripple through narration for no gain.",
+   "evidence": "settled fact: the pupillary light reflex arc runs via the optic nerve, the pretectal nucleus and the Edinger-Westphal nucleus in the midbrain",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [
+  1,
+  2,
+  6,
+  8
+ ],
+ "summary": "Eight lessons checked against Edexcel Combined Science 1SC0 topics 1 to 5. No HIGH findings: every number, magnification and osmosis calculation, Punnett ratio, definition, core practical, named pathogen and knowledge-check answer key is correct, and nothing that is separate-Biology only (brain, eye, protein synthesis, Mendel, monoclonal antibodies, aseptic technique) is taught as Combined. The real defects are two misplaced tier wrappers and two LaTeX commands left in plain-text flashcard fields. Blocker: the spec markdown has lost all bold, which is the spec's only marker for Higher-tier-only content, so F6 cannot be settled from the repo.",
+ "renarration": {
+  "run_at": "2026-09-04T07:56:28Z",
+  "clips": [
+   {
+    "lesson": 7,
+    "id": "n17",
+    "key": "science-edexcel/biology-paper-1/narration_lesson-07_n17.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/biology-paper-1/narration_lesson-07_n17.mp3",
+    "voice": "Ollie",
+    "duration": 18.02,
+    "bytes": 216288,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 07:56:28 GMT"
+   }
+  ],
+  "verified_ok": 1,
+  "total": 1
+ }
+}
