@@ -178,6 +178,13 @@ Science board anchors (verify in the spec before asserting):
   papers each, 1h45, 90 marks.
 - OCR 21st Century B J260 and J257/J258/J259: read the spec (different
   structure - do not assert from memory).
+- Edexcel 1SC0 / 1BI0 / 1CH0 / 1PH0: the markitdown specs lost their bold, and
+  bold is Edexcel's only Higher-tier marker. Bold-preserved extractions live
+  beside them as `specs/edexcel/<name>-bold.md` (made with
+  `scripts/_retrofc/_spec_bold_extract.py <pdf> <out>` from `specs/_pdfs/`);
+  point every Edexcel science checker at BOTH files and make the bold file the
+  authority for tier rulings. Also expect `higher-only` wrappers misused to
+  mean "separate-science only" in the Edexcel separate units.
 
 ## Checker prompt template
 
