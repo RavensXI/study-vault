@@ -1,0 +1,432 @@
+{
+ "unit": "discovering-electronics",
+ "checked_at": "2026-09-04T00:00:00+01:00",
+ "spec_used": "specs/eduqas/electronics-C490QS.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "Block diagram (left to right): [LDR sensor] → [AND gate] ← [PIR sensor] → [Transistor driver] → [Lamp]",
+   "truth": "Both sensors feed the AND gate. The AND gate then feeds the driver, which feeds the lamp.",
+   "evidence": "spec 2.1 Component 1, Topic 1(a): systems use sensing, processing and output sub-systems",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 1,
+   "field": "conclusion_html",
+   "severity": "MEDIUM",
+   "claim": "Input transducers include LDRs, thermistors, microphones, pressure sensors, moisture sensors and pulse generators. Each converts a physical quantity into an electrical signal.",
+   "truth": "A pulse generator provides a timing signal; it does not sense a physical quantity or act as an input transducer.",
+   "evidence": "spec 2.1 Component 1, Topic 1(a) lists sensing units; Topic 3(c) separately lists pulse generators for circuits",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 1,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "Two marks are typically awarded for correct stage identification and one for correct signal direction arrows.",
+   "truth": "The specification states the written assessment total and its question mix, but gives no fixed mark allocation for block-diagram questions.",
+   "evidence": "spec summary of assessment; 2.1 Component 1; 3.1 assessment objectives",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F4",
+   "lesson": 2,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "Oscilloscope reading questions are worth 3 marks",
+   "truth": "The specification gives no fixed mark allocation for an oscilloscope-reading question.",
+   "evidence": "spec 2.1 Component 1, Topic 2(c); summary of assessment",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F5",
+   "lesson": 3,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "Calculation questions award one mark for a correct method or equation and one mark for the correct answer with units.",
+   "truth": "The specification does not assign a fixed two-mark pattern to calculation questions.",
+   "evidence": "spec summary of assessment; 3.1 assessment objectives",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F6",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Resistors are manufactured only in a set of E24 preferred values.",
+   "truth": "E24 is the series required here, but E48, E96 and E192 are also standard preferred series.",
+   "evidence": "spec 2.1 Component 1, Topic 3(c); Vishay, E-Series Values (IEC 60063)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "680 Ω and 68 Ω in series give 748 Ω — closest achievable using two standard resistors.",
+   "truth": "510 Ω and 240 Ω are E24 values and sum to exactly 750 Ω.",
+   "evidence": "spec 2.1 Component 1, Topic 3(b)-(c); Vishay, E-Series Values (IEC 60063); recomputation",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 4,
+   "field": "conclusion_html",
+   "severity": "MEDIUM",
+   "claim": "E24 values are the only commercially available resistances.",
+   "truth": "E24 is not the only commercial resistor series; it is the series specified for this course.",
+   "evidence": "spec 2.1 Component 1, Topic 3(c); Vishay, E-Series Values (IEC 60063)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "A sensor on its own produces a change in resistance, not a change in voltage.",
+   "truth": "That is true only of resistive sensors. The specification also includes sound sensing, and a microphone produces a varying voltage.",
+   "evidence": "spec 2.1 Component 1, Topic 3(c); Topic 1(a) includes sound sensing",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 5,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "A comparator with its reference set at 4.5 V follows the divider. Determine the output state of the comparator in both conditions.",
+   "truth": "If the divider feeds the non-inverting input and the reference feeds the inverting input, dry gives HIGH and wet gives LOW. Swapping those inputs reverses both outputs. The question does not state the input connections; add them before treating either answer as definitive.",
+   "evidence": "spec 2.1 Component 1, Topic 4(d) requires comparator operation but specifies no sensor/reference input convention",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F11",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "Nearest E24 value below 2150 Ω is 2.2 kΩ",
+   "truth": "2.2 kΩ is above 2150 Ω. The E24 value below it is 2.0 kΩ, giving 2.15 mA from 4.3 V.",
+   "evidence": "spec 2.1 Component 1, Topic 3(c), Topic 4(c); Vishay, E-Series Values (IEC 60063); recomputation",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 6,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "Always show VBE = 0.7 V explicitly — omitting it costs a mark.",
+   "truth": "The specification sets the transistor rule but gives no fixed mark for explicitly writing this value.",
+   "evidence": "spec 2.1 Component 1, Topic 4(c); summary of assessment",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F13",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "A 0.7 V VBE is available from the comparator’s HIGH output",
+   "truth": "0.7 V is the approximate base-emitter voltage drop of an on npn transistor. A comparator HIGH output forward-biases that junction; it does not supply a fixed 0.7 V output.",
+   "evidence": "spec 2.1 Component 1, Topic 4(c)-(d)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F14",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The convention for this specification is: the inverting (−) input gets the reference voltage and the non-inverting (+) input gets the sensor signal.",
+   "truth": "The specification requires learners to describe and analyse comparators, but sets no fixed assignment of sensor and reference to the two inputs. Either assignment is valid and reverses the output. Recommend changing every ‘specification convention’ reference to a clearly named circuit configuration, including the linked checks, flashcards and practice answers.",
+   "evidence": "spec 2.1 Component 1, Topic 4(d)-(f)",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F15",
+   "lesson": 7,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "it costs two marks",
+   "truth": "The specification gives no fixed two-mark allocation for this comparator task.",
+   "evidence": "spec 2.1 Component 1, Topic 4(d); summary of assessment",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F16",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "the voltage across it stays close to 0.7 V regardless of how much current flows",
+   "truth": "0.7 V is a useful approximation. A silicon diode’s forward voltage varies with forward current and temperature.",
+   "evidence": "spec 2.1 Component 1, Topic 5(a); Nexperia 1N4148/1N4448 datasheet, forward-voltage values at stated currents",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "Supply (+) → Transistor collector → Relay coil → Supply (−). Flyback diode: cathode to collector end of relay coil, anode to the supply (−) end",
+   "truth": "For the low-side npn circuit used in this unit, the path is supply positive to coil to collector to emitter to supply negative. The flyback diode has its cathode at the coil’s positive-supply end and anode at its collector end.",
+   "evidence": "spec 2.1 Component 1, Topic 4(a), Topic 5(b); Omron relay safety precautions, diode method",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "never use the zener power rating to calculate current in a regulator question",
+   "truth": "When a zener power rating is supplied, maximum zener current can be calculated from P = VZ × IZ.",
+   "evidence": "spec Appendix A, power relationship; Diodes Incorporated AN45, zener dissipation calculation",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F19",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "A single diode converts AC to a pulsating DC by blocking the negative half-cycles and allowing only the positive half-cycles to pass.",
+   "truth": "The diode orientation determines which polarity passes. Either add a circuit diagram that fixes the positive-pulse orientation or use polarity-neutral wording throughout the content and checks.",
+   "evidence": "spec 2.1 Component 1, Topic 5(b) requires half-wave rectification but fixes no diode orientation",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F20",
+   "lesson": 9,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "You are not required to simplify Boolean expressions",
+   "truth": "Learners must use Boolean identities and simplify logic circuits using NAND gate redundancy.",
+   "evidence": "spec 2.1 Component 1, Topic 6(e), (g)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F21",
+   "lesson": 10,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "NAND of the complements equals the NOR",
+   "truth": "NAND of the complements is an OR: NOT(NOT A AND NOT B) = A OR B. NOR is NOT A AND NOT B.",
+   "evidence": "spec 2.1 Component 1, Topic 6(e); Boolean recomputation",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F22",
+   "lesson": 10,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Identifies the tied-input NAND on the AND output is back-to-back with the tied-input NAND on the C-input side of the OR equivalent.",
+   "truth": "The redundant pair is on the AND-output branch, not the C branch.",
+   "evidence": "spec 2.1 Component 1, Topic 6(g); Boolean evaluation of Q = AB + C",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F23",
+   "lesson": 10,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Alternatively accepts XOR gate with justification.",
+   "truth": "The listed logic gates for this component are NOT, AND, OR, NAND and NOR. The XOR function should be made from the listed gates rather than accepted as an additional gate type.",
+   "evidence": "spec 2.1 Component 1, Topic 6(b)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F24",
+   "lesson": 10,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "NAND-only conversion is worth 6 marks on the paper",
+   "truth": "The specification does not prescribe a fixed six-mark NAND-conversion question.",
+   "evidence": "spec 2.1 Component 1, Topic 6(g); summary of assessment",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [],
+ "summary": "Checked all ten lessons. Fifteen verified surgical fixes are supplied; three comparator or rectifier issues need a wider editorial decision, and six fixed-mark assertions are recorded as notes.",
+ "renarration": {
+  "run_at": "2026-09-04T18:16:37Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n35",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-01_n35.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-01_n35.mp3",
+    "voice": "Ollie",
+    "duration": 9.46,
+    "bytes": 113472,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:15:43 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n43",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-01_n43.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-01_n43.mp3",
+    "voice": "Ollie",
+    "duration": 11.98,
+    "bytes": 143712,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:15:46 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n28",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-04_n28.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-04_n28.mp3",
+    "voice": "Ada",
+    "duration": 13.01,
+    "bytes": 156096,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:15:49 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n33",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-04_n33.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-04_n33.mp3",
+    "voice": "Ada",
+    "duration": 9.7,
+    "bytes": 116352,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:15:51 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n34",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-04_n34.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-04_n34.mp3",
+    "voice": "Ada",
+    "duration": 13.01,
+    "bytes": 156096,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:15:53 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n35",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-04_n35.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-04_n35.mp3",
+    "voice": "Ada",
+    "duration": 8.71,
+    "bytes": 104544,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:15:55 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n40",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-04_n40.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-04_n40.mp3",
+    "voice": "Ada",
+    "duration": 10.63,
+    "bytes": 127584,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:15:57 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n2",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-05_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-05_n2.mp3",
+    "voice": "Ollie",
+    "duration": 18.58,
+    "bytes": 222912,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:16:01 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n14",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-06_n14.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-06_n14.mp3",
+    "voice": "Ada",
+    "duration": 25.13,
+    "bytes": 301536,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:16:06 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n11",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-07_n11.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-07_n11.mp3",
+    "voice": "Ollie",
+    "duration": 10.51,
+    "bytes": 126144,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:16:08 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n27",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-07_n27.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-07_n27.mp3",
+    "voice": "Ollie",
+    "duration": 14.59,
+    "bytes": 175104,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:16:11 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n4",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-08_n4.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-08_n4.mp3",
+    "voice": "Ada",
+    "duration": 34.01,
+    "bytes": 408096,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:16:17 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n11",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-08_n11.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-08_n11.mp3",
+    "voice": "Ada",
+    "duration": 18.62,
+    "bytes": 223488,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:16:21 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n24",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-08_n24.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-08_n24.mp3",
+    "voice": "Ada",
+    "duration": 17.78,
+    "bytes": 213408,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:16:25 GMT"
+   },
+   {
+    "lesson": 9,
+    "id": "n25",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-09_n25.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-09_n25.mp3",
+    "voice": "Ollie",
+    "duration": 18.19,
+    "bytes": 218304,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:16:29 GMT"
+   },
+   {
+    "lesson": 10,
+    "id": "n23",
+    "key": "electronics-eduqas/discovering-electronics/narration_lesson-10_n23.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/discovering-electronics/narration_lesson-10_n23.mp3",
+    "voice": "Ada",
+    "duration": 17.81,
+    "bytes": 213696,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:16:33 GMT"
+   }
+  ],
+  "verified_ok": 16,
+  "total": 16
+ }
+}

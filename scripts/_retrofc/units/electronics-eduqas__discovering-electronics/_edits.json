@@ -1,0 +1,141 @@
+[
+ {
+  "lesson": 1,
+  "field": "content_html",
+  "find": "Block diagram (left to right): [LDR sensor] &rarr; [AND gate] &larr; [PIR sensor] &rarr; [Transistor driver] &rarr; [Lamp]",
+  "replace": "Block diagram: The LDR sensor and PIR sensor both feed the AND gate. The AND gate feeds the transistor driver, which feeds the lamp.",
+  "severity": "HIGH",
+  "note": "F1: Corrects the signal path from both sensors through the processing and driver stages."
+ },
+ {
+  "lesson": 1,
+  "field": "conclusion_html",
+  "find": "Input transducers include LDRs, thermistors, microphones, pressure sensors, moisture sensors and pulse generators. Each converts a physical quantity into an electrical signal.",
+  "replace": "Input sensors include LDRs, thermistors, microphones, pressure sensors and moisture sensors. A pulse generator provides a timing signal; it is not a transducer.",
+  "severity": "MEDIUM",
+  "note": "F2: Separates the pulse generator from physical sensing transducers."
+ },
+ {
+  "lesson": 4,
+  "field": "content_html",
+  "find": "Resistors are manufactured only in a set of <dfn class=\"term\" data-def=\"The standard set of 24 resistor values per decade of resistance from which commercially available resistors are manufactured.\">E24 preferred values</dfn>. These are the 24 values per decade (multiplied by 1, 10, 100, 1k, 10k, etc.):",
+  "replace": "For this course, select from the <dfn class=\"term\" data-def=\"A standard set of 24 preferred resistor values per decade.\">E24 preferred values</dfn>. These are the 24 values per decade (multiplied by 1, 10, 100, 1k, 10k, etc.):",
+  "severity": "MEDIUM",
+  "note": "F6: Keeps the required E24 focus without excluding other standard series."
+ },
+ {
+  "lesson": 4,
+  "field": "content_html",
+  "find": "<p data-narration-id=\"n33\"><strong>Step 1:</strong> Look at the E24 table for values that might pair up. 680 &Omega; + 68 &Omega; = 748 &Omega; &mdash; very close. Alternatively 560 &Omega; + 180 &Omega; = 740 &Omega;.</p>\n    <p data-narration-id=\"n34\"><strong>Step 2:</strong> Check tolerance. With a &plusmn;5% tolerance, 748 &Omega; nominal could measure between 711 &Omega; and 786 &Omega; &mdash; acceptable for most sensor circuits.</p>\n    <p data-narration-id=\"n35\"><strong>Step 3:</strong> Confirm the answer: 680 &Omega; and 68 &Omega; in series give 748 &Omega; &mdash; closest achievable using two standard resistors.</p>",
+  "replace": "<p data-narration-id=\"n33\"><strong>Step 1:</strong> Look at the E24 table for values that might pair up. 510 &Omega; + 240 &Omega; = 750 &Omega; exactly.</p>\n    <p data-narration-id=\"n34\"><strong>Step 2:</strong> Check tolerance. With a &plusmn;5% tolerance, 750 &Omega; nominal could measure between 712.5 &Omega; and 787.5 &Omega;.</p>\n    <p data-narration-id=\"n35\"><strong>Step 3:</strong> Confirm the answer: 510 &Omega; and 240 &Omega; in series give 750 &Omega; exactly.</p>",
+  "severity": "MEDIUM",
+  "note": "F7: Replaces the false closest-pair claim with an exact E24 pair."
+ },
+ {
+  "lesson": 4,
+  "field": "conclusion_html",
+  "find": "E24 values are the only commercially available resistances. If a calculated value does not exist, choose the nearest E24 value or combine two E24 resistors. Always check power rating using \\(P = I^2R\\).",
+  "replace": "For E24 selection, use the nearest E24 value or combine E24 resistors. Always check power rating using \\(P = I^2R\\).",
+  "severity": "MEDIUM",
+  "note": "F8: Removes the false claim that E24 is the only commercial series."
+ },
+ {
+  "lesson": 5,
+  "field": "content_html",
+  "find": "A sensor on its own produces a change in resistance, not a change in voltage.",
+  "replace": "A resistive sensor on its own produces a change in resistance, not a change in voltage.",
+  "severity": "MEDIUM",
+  "note": "F9: Limits the statement to resistive sensors."
+ },
+ {
+  "lesson": 6,
+  "field": "content_html",
+  "find": "Nearest E24 value below 2150 &Omega; is 2.2 k&Omega; (rounding down keeps \\(I_B\\) at or above the minimum; 2.2 k&Omega; gives 4.3/2200 = 1.95 mA &mdash; just below; use 2 k&Omega; or accept 2.2 k&Omega; with a note that \\(I_B\\) is marginally insufficient; in practice, use \\(R_B\\) just below the calculated value). Check: is 1.95 mA sufficient? \\(h_{FE} \\times I_B = 100 \\times 0.00195 = 195 \\text{ mA}\\) &mdash; very close to 200 mA. For safety, choose a base resistor of 1.8 k&Omega; to give a comfortable margin.",
+  "replace": "Nearest E24 value below 2150 &Omega; is 2.0 k&Omega;. This gives \\(I_B = 4.3/2000 = 2.15 \\text{ mA}\\), which meets the minimum.",
+  "severity": "HIGH",
+  "note": "F11: Corrects the E24 choice and the resulting base-current check."
+ },
+ {
+  "lesson": 7,
+  "field": "content_html",
+  "find": "A 0.7 V \\(V_{BE}\\) is available from the comparator&rsquo;s HIGH output, which is typically close to the supply rail.",
+  "replace": "The comparator&rsquo;s HIGH output forward-biases the transistor&rsquo;s base-emitter junction.",
+  "severity": "MEDIUM",
+  "note": "F13: Identifies 0.7 V as the transistor junction drop rather than a comparator output."
+ },
+ {
+  "lesson": 8,
+  "field": "content_html",
+  "find": "Below 0.7&nbsp;V the diode behaves almost like an open circuit; above 0.7&nbsp;V it conducts freely and the voltage across it stays close to 0.7&nbsp;V regardless of how much current flows.",
+  "replace": "Below about 0.7&nbsp;V the diode conducts very little current; above this it conducts strongly. Its forward voltage varies with current and temperature.",
+  "severity": "MEDIUM",
+  "note": "F16: Retains the GCSE approximation without falsely making it current-independent."
+ },
+ {
+  "lesson": 8,
+  "field": "content_html",
+  "find": "Signal path for a relay circuit with flyback protection: Supply (+) &rarr; Transistor collector &rarr; Relay coil &rarr; Supply (&minus;). Flyback diode: cathode to collector end of relay coil, anode to the supply (&minus;) end &mdash; so it is reverse biased during normal operation.",
+  "replace": "Signal path for a relay circuit with flyback protection: Supply (+) &rarr; Relay coil &rarr; Transistor collector &rarr; Transistor emitter &rarr; Supply (&minus;). Flyback diode: cathode to the supply (+) end of the relay coil, anode to the collector end &mdash; so it is reverse biased during normal operation.",
+  "severity": "HIGH",
+  "note": "F17: Restores the low-side npn path and reverse-biased diode polarity."
+ },
+ {
+  "lesson": 8,
+  "field": "content_html",
+  "find": "Note: never use the zener power rating to calculate current in a regulator question &mdash; use \\(I = V/R\\) with the series resistor.",
+  "replace": "If the question gives a zener power rating instead of a maximum current, use \\(P = V_ZI_Z\\) to calculate the maximum zener current.",
+  "severity": "HIGH",
+  "note": "F18: Corrects the use of a zener power rating to determine current."
+ },
+ {
+  "lesson": 9,
+  "field": "content_html",
+  "find": "You are not required to simplify Boolean expressions &mdash; being able to write them from a truth table and from a circuit is the key skill.",
+  "replace": "You also need to use Boolean identities and NAND gate redundancy to simplify logic circuits.",
+  "severity": "MEDIUM",
+  "note": "F20: Restores the specified Boolean and NAND simplification requirement."
+ },
+ {
+  "lesson": 10,
+  "field": "content_html",
+  "find": "NAND of the complements equals the NOR",
+  "replace": "NAND of the complements equals the OR",
+  "severity": "HIGH",
+  "note": "F21: Corrects the De Morgan interpretation."
+ },
+ {
+  "lesson": 10,
+  "field": "practice_questions",
+  "path": "[3].marks",
+  "expect": "Step 1 — Replace AND(A,B) with NAND(A,B) followed by tied-input NAND; replace OR with NOT-NANDs on each input then a combining NAND. [2 marks for correct equivalents shown]\nStep 2 — Identifies the tied-input NAND on the AND output is back-to-back with the tied-input NAND on the C-input side of the OR equivalent. [1 mark]\nStep 3 — Cancels the back-to-back pair, resulting in three NAND gates: NAND(A,B), NAND(C,C), NAND of those two outputs. [2 marks for correct simplified circuit]\nBoolean verification or correct gate count stated. [1 mark]",
+  "value": "Step 1 — Replace AND(A,B) with NAND(A,B) followed by tied-input NAND; replace OR with NOT-NANDs on each input then a combining NAND. [2 marks for correct equivalents shown]\nStep 2 — Identifies the tied-input NAND on the AND output is back-to-back with the tied-input NAND on the AND-output side of the OR equivalent. [1 mark]\nStep 3 — Cancels the back-to-back pair, resulting in three NAND gates: NAND(A,B), NAND(C,C), NAND of those two outputs. [2 marks for correct simplified circuit]\nBoolean verification or correct gate count stated. [1 mark]",
+  "severity": "MEDIUM",
+  "note": "F22: Corrects the branch named in the practice answer."
+ },
+ {
+  "lesson": 10,
+  "field": "practice_questions",
+  "path": "[4].marks",
+  "expect": "Truth table (4 rows): TH=00 Q=0; TH=01 Q=1; TH=10 Q=1; TH=11 Q=0. [1 mark]\nBoolean expression: Q = T.NOT(H) + NOT(T).H (exclusive OR expression). [1 mark]\nGates required: two NOT gates (one on T, one on H), two AND gates for each product term, one OR gate combining them. [2 marks: 1 per correct gate type identified]\nAlternatively accepts XOR gate with justification. [1 mark]",
+  "value": "Truth table (4 rows): TH=00 Q=0; TH=01 Q=1; TH=10 Q=1; TH=11 Q=0. [1 mark]\nBoolean expression: Q = T.NOT(H) + NOT(T).H (exclusive OR expression). [1 mark]\nGates required: two NOT gates (one on T, one on H), two AND gates for each product term, one OR gate combining them. [2 marks: 1 per correct gate type identified]\nCorrect use of the specified NOT, AND and OR gates. [1 mark]",
+  "severity": "MEDIUM",
+  "note": "F23: Keeps the practice answer within the listed logic-gate scope."
+ },
+ {
+  "lesson": 7,
+  "field": "content_html",
+  "find": "The convention for this specification is:",
+  "replace": "The convention used in the circuits in this course is:",
+  "severity": "MEDIUM",
+  "note": "The spec sets no fixed sensor/reference assignment for comparator inputs (Codex ADJ ruled FIX)."
+ },
+ {
+  "lesson": 5,
+  "field": "practice_questions",
+  "path": "[5].text",
+  "expect": "A moisture sensor circuit uses a voltage divider: a fixed 47 kΩ resistor (R1, top) and moisture-sensing tracks (R2, bottom) connected to a 9 V supply. When the soil is dry, R2 = 200 kΩ. When wet, R2 = 5 kΩ. A comparator with its reference set at 4.5 V follows the divider. Determine the output state of the comparator in both conditions and evaluate whether this circuit design will correctly activate a watering pump when the soil is dry.",
+  "value": "A moisture sensor circuit uses a voltage divider: a fixed 47 kΩ resistor (R1, top) and moisture-sensing tracks (R2, bottom) connected to a 9 V supply. When the soil is dry, R2 = 200 kΩ. When wet, R2 = 5 kΩ. A comparator with its reference set at 4.5 V follows the divider. Determine the output state of the comparator in both conditions and evaluate whether this circuit design will correctly activate a watering pump when the soil is dry. The divider output is connected to the non-inverting (+) input and the 4.5 V reference to the inverting (−) input.",
+  "severity": "MEDIUM",
+  "note": "Input connections stated so the answer is determinate (Codex ADJ ruled FIX)."
+ }
+]
