@@ -298,15 +298,22 @@ clutter, no logos, no real people, no exam-board names.
 
 ### Vision gate (mandatory, same as heroes)
 
-A Claude vision pass receives the label list and the fact list and answers
-three questions: every label present and spelled correctly? every OTHER word in
-the picture legible, correctly spelled, right for the date and suitable for a
-GCSE audience (unverifiable text is flagged for Tom, not rejected)? each fact
-true in the picture? Period insignia are allowed where accurate (Tom, 4 Sep):
-the gate does not sanitise history. Any "no" rejects the image and the retry prompt
-carries the gate's note ("the aorta arrows pointed into the heart"). Even
-GPT-Image-2 medium drew a sector with its apex off-centre and MAI-2.6 reversed
-the aorta, so nothing ships ungated. Budget one retry in three.
+The gate is an AI reasoning over the image IN THE CONTEXT OF THE LESSON, not a
+checklist (Tom, 4 Sep 2026). It receives the lesson text, the brief and the
+image, and answers four questions in order:
+
+1. Does this picture make sense in the context of this lesson?
+2. Is it additive to the learning, i.e. would a student understand something
+   better with it than without it?
+3. If not, could one concrete correction make it so? Write that correction as
+   the retry note.
+4. If not, bin it and move on; the lesson is fine without a figure.
+
+Text, numbers, insignia, period detail and label spelling are judged inside
+question 1 (a wrong number or a garbled word stops it making sense), not as
+rules of their own. The label and fact lists in the brief are prompt aids for
+the image model and prompts for the gate's attention; they are not the verdict.
+Budget one retry in three; a second reject is a bin, not a third attempt.
 
 ### Rollout rule
 
