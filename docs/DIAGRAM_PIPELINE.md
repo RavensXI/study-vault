@@ -336,3 +336,24 @@ size. Worked example of `data-picture` (4 Sep, Weimar hyperinflation with the
 wheelbarrow, approved by Tom) is in the session scratchpad
 `foundry/gpt-image-2-scene__hist-hyperinflation.png`; the Versailles `scene`
 was rejected.
+
+### Lessons from the first canary (Germany 1919-1939, 4 Sep 2026)
+
+- **A data picture needs a real series.** With one figure from the lesson the
+  model built a fake axis (a coin, a wheelbarrow and a date laid out as if they
+  were points) and the gate passed it because every label was present. Tom
+  caught it on the live page. Rule: `data-picture` requires at least three
+  values in one unit from the lesson text; otherwise the brief agent picks
+  `scene` (one label at most) or `none`.
+- **The gate must judge the whole composition**, not tick labels: "would a
+  15-year-old understand this picture without the caption, and does every
+  drawn axis, arrow and number mean what it appears to mean?" A chart axis whose
+  labels are not a series is a reject.
+- **Dated timelines with a drawn month axis drift**: the model could not keep
+  five events on their months over four attempts. Prefer an undated sequence
+  (events in order, dates only in the labels) or `none`.
+- **Maps with arrows regress on retry** (a fixed arrow breaks another). Budget
+  one retry, then drop the figure rather than chase it.
+- **Insertion is idempotent** (skips a lesson that already has a
+  `figure.diagram`) and every touched row is backed up in
+  `_insert_backup.json`; removal is a restore from that file.
