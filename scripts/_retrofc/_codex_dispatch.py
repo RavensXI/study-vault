@@ -43,19 +43,29 @@ def main():
     model, effort = arg("--model", "gpt-5.6-terra"), arg("--effort", "xhigh")
     L = json.load(open(LOOP, encoding="utf-8"))
     cx = L.setdefault("codex", {"in_progress": None, "units_done": 0, "resume_after": None, "audits": []})
-    if cx.get("in_progress"):
-        print(json.dumps({"refused": "codex.in_progress is set", "in_progress": cx["in_progress"]}))
-        return
     ra = cx.get("resume_after")
     if ra and datetime.datetime.fromisoformat(ra) > datetime.datetime.now():
         print(json.dumps({"refused": "resume_after in the future", "resume_after": ra}))
         return
-    nxt = json.loads(subprocess.check_output([sys.executable, UNIT, "next", "--pool", "codex"], text=True, encoding="utf-8", cwd=ROOT))
-    if nxt.get("done"):
-        print(json.dumps({"done": True}))
+    relaunch = "--relaunch" in sys.argv
+    if cx.get("in_progress") and not relaunch:
+        print(json.dumps({"refused": "codex.in_progress is set (use --relaunch to retry it)", "in_progress": cx["in_progress"]}))
         return
-    subject, unit = nxt["subject"], nxt["unit"]
-    subprocess.check_call([sys.executable, UNIT, "prep", subject, unit, "--pool", "codex"], stdout=subprocess.DEVNULL, cwd=ROOT)
+    if relaunch:
+        if not cx.get("in_progress"):
+            print(json.dumps({"refused": "nothing to relaunch"}))
+            return
+        subject, unit = cx["in_progress"]["subject"], cx["in_progress"]["unit"]
+        attempts = int(cx["in_progress"].get("attempts", 1)) + 1
+        nxt = {"lessons": None, "remaining": None}
+    else:
+        nxt = json.loads(subprocess.check_output([sys.executable, UNIT, "next", "--pool", "codex"], text=True, encoding="utf-8", cwd=ROOT))
+        if nxt.get("done"):
+            print(json.dumps({"done": True}))
+            return
+        subject, unit = nxt["subject"], nxt["unit"]
+        attempts = 1
+        subprocess.check_call([sys.executable, UNIT, "prep", subject, unit, "--pool", "codex"], stdout=subprocess.DEVNULL, cwd=ROOT)
     d = os.path.join(HERE, "units", f"{subject}__{unit}")
     for stale in ("_codex_done.json", "_report.json", "_edits.json", "_codex_last_message.md"):
         p = os.path.join(d, stale)
@@ -70,8 +80,9 @@ def main():
     p = subprocess.Popen(cmd, cwd=ROOT, stdout=open(os.path.join(d, "_launcher_stdout.txt"), "w"),
                          stderr=open(os.path.join(d, "_launcher_stderr.txt"), "w"), stdin=subprocess.DEVNULL, creationflags=flags, close_fds=True)
     cx["in_progress"] = {"subject": subject, "unit": unit, "model": model, "effort": effort, "family": family,
-                         "launched_at": datetime.datetime.now().isoformat(timespec="seconds"), "attempts": 1, "pid": p.pid}
+                         "launched_at": datetime.datetime.now().isoformat(timespec="seconds"), "attempts": attempts, "pid": p.pid}
     L = json.load(open(LOOP, encoding="utf-8"))   # re-read: prep does not touch it, but stay safe
+    cx["resume_after"] = None
     L["codex"] = cx
     json.dump(L, open(LOOP, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     print(json.dumps({"launched": cx["in_progress"], "lessons": nxt.get("lessons"), "remaining_free": nxt.get("remaining")}))
