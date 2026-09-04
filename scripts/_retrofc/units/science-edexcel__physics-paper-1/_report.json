@@ -1,0 +1,295 @@
+{
+ "unit": "science-edexcel/physics-paper-1",
+ "checked_at": "2026-09-04",
+ "spec_used": "specs/edexcel/combined-science-1SC0.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The paragraph on lubrication and thermal insulation (n18) sits inside <div class=\"higher-only\">, so Foundation students never see it (body.tier-foundation .higher-only {display:none} in css/style.css).",
+   "truth": "Spec point 3.9 (reducing unwanted energy transfer through lubrication and thermal insulation) and 3.10 (wall thickness and thermal conductivity) are core Topic 3 content for both tiers. The same lesson then examines the hidden material at both tiers: practice question 2 asks for two ways to reduce unwanted energy transfers, and two flashcards ask about lubrication and insulation. Remove the wrapper.",
+   "evidence": "spec 3.9 and 3.10 (Topic 3 - Conservation of energy); NOTE the markdown has lost its bold, and bold is Edexcel's only marker for Higher-tier-only content, so the tier ruling comes from my knowledge of 1SC0 (Topic 3 carries no Higher-only statements) plus the lesson's own both-tier questions on the same material",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "g is taught as 9.8 N/kg ('On Earth, g = 9.8 N/kg'), and the GPE worked example, the glossary entry and practice question 3 all use 9.8 (29.4 J and 58.8 J).",
+   "truth": "Edexcel supplies g = 10 N/kg in its GCSE papers; 9.8 N/kg is the AQA value. Recomputed at 10 N/kg: 2 x 10 x 1.5 = 30 J and 3 x 10 x 2 = 60 J. A student who memorises 9.8 and uses it against a question that states 10 loses the accuracy mark.",
+   "evidence": "the spec markdown gives no numerical value for g anywhere (grep of specs/edexcel/ returns no '10 N/kg' or '9.8 N/kg'), so this ruling rests on Edexcel's published papers, which state gravitational field strength = 10 N/kg; recomputation of both worked answers",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 2,
+   "field": "knowledge_checks",
+   "severity": "HIGH",
+   "claim": "Match KC [4] has right options ['Renewable','Non-renewable','Renewable'] - 'Renewable' appears twice.",
+   "truth": "js/main.js renderMatch scores by option INDEX (parseInt(sel.value) === q.order[i]), and the two 'Renewable' entries are indexes 0 and 2. A student who pairs Wind with the identical-looking second 'Renewable' is marked wrong for a correct answer. Made the three options distinct: Wind - Renewable, Coal - Fossil fuel, Nuclear fuel - Non-renewable but not a fossil fuel.",
+   "evidence": "js/main.js renderMatch; spec 3.13 lists nuclear fuel alongside the fossil fuels and the renewables",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 2,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answers 'KE = \\frac{1}{2} m v^2.' and 'GPE = m \\times g \\times h.' contain raw LaTeX commands.",
+   "truth": "Flashcards are injected with innerHTML and KaTeX is never run on them, and there are no \\(...\\) delimiters, so students literally read 'KE = \\frac{1}{2} m v^2.'. Plain-text fields must use unicode.",
+   "evidence": "js/main.js flashcard render sets frontText.innerHTML / backText.innerHTML with no renderMathInElement call",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 3,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answers 'Q = I \\times t.', 'V = I \\times R.' and 'E = Q \\times V.' contain raw LaTeX commands.",
+   "truth": "Same defect as F4: no KaTeX on flashcards and no delimiters, so the backslash commands are shown to the student. Rewritten in unicode with the spec's word equations.",
+   "evidence": "js/main.js flashcard render; spec 10.9, 10.13, 10.6 word equations",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 4,
+   "field": "knowledge_checks",
+   "severity": "HIGH",
+   "claim": "Match KC [4] has right options ['Series','Parallel','Series'] - 'Series' appears twice.",
+   "truth": "Index-scored matching marks a correct pairing wrong when the student picks the identical duplicate tile. Turned the question round so each option is distinct: series circuit - current is the same in every component; parallel circuit - the potential difference is the same across each branch; junction - current in equals current out.",
+   "evidence": "js/main.js renderMatch; spec 10.3, 10.11, 10.14",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 4,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answers 'P = I \\times V.' and 'P = I^2 \\times R.' contain raw LaTeX commands.",
+   "truth": "Same defect as F4. Rewritten in unicode using the spec's word equations for 10.31.",
+   "evidence": "js/main.js flashcard render; spec 10.31",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "'a frequency of 50 Hz (meaning the current changes direction 50 times per second)'.",
+   "truth": "50 Hz means 50 complete cycles a second. Each cycle reverses the current twice, so the current changes direction 100 times a second. The lesson teaches the standard misconception as fact, and its own glossary defines frequency correctly as complete cycles per second.",
+   "evidence": "settled fact (one cycle = two reversals); spec 10.36 states 50 Hz without defining it as direction changes; the lesson's own dfn for frequency ('The number of complete cycles of alternating current per second')",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Key Fact n6: 'Energy transferred (J) = current (A) x potential difference (V) x time (s). You must be able to recall and rearrange this equation.'",
+   "truth": "Appendix 4 splits the equations into list a (recall and apply) and list b (select and apply, given on a formulae sheet at the end of the paper). Spec point 10.27, E = I x V x t, is in list b, so students are given it. Telling them it must be recalled is a wrong exam claim.",
+   "evidence": "spec Appendix 4, list b, entry 10.27 'energy transferred = current x potential difference x time'; list a holds 10.6, 10.9, 10.13, 10.29 and 10.31 but not 10.27",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Two <div class=\"higher-only\"> wrappers hide the equation P = I^2 x R (n14) and the explanation of why high-current devices need thicker cables (n15).",
+   "truth": "P = I^2 x R is spec 10.31 and sits in Appendix 4 list a, the recall list, for this qualification. The wrapper contradicts the lesson itself: the Key Fact immediately below (n16, ungated) says 'Three power equations to recall: P = E/t, P = I x V, and P = I^2 x R', lesson 4 teaches P = I^2 x R with no gate, and two flashcards in this lesson test it. Foundation students currently see the instruction to recall an equation the article hides from them.",
+   "evidence": "spec 10.31 and Appendix 4 list a; the markdown has lost its bold so the Higher-only marker cannot be read from the file - the tier ruling comes from my knowledge of 1SC0 (Topic 10 has no Higher-only equations) and from the lesson's own ungated Key Fact; css/style.css body.tier-foundation .higher-only {display:none !important}",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Calculate the normal operating current ... then choose the fuse with the next rating above this value. For a 700 W microwave: I = 700/230 = 3.0 A, so a 3 A fuse is suitable.'",
+   "truth": "700 / 230 = 3.04 A, which is above 3 A, so a 3 A fuse would blow in normal use and the example breaks the rule stated in the same sentence. Changed the appliance to 600 W: 600 / 230 = 2.6 A, so a 3 A fuse is right. The 2500 W case (10.9 A, 13 A fuse) is correct and untouched.",
+   "evidence": "recomputation: 700/230 = 3.043; 600/230 = 2.609; 2500/230 = 10.87",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'Its potential alternates between about +230 V and -230 V relative to the neutral wire' (also in the live-wire dfn).",
+   "truth": "230 V is the r.m.s. value; the peak of the UK mains waveform is about +325 V to -325 V. The sentence is the usual GCSE simplification and no Combined Science question asks for peak voltage, so it costs no marks, but the numbers are not the true swing. Not worth an edit.",
+   "evidence": "settled fact: peak = 230 x sqrt(2) = 325 V; spec 10.40 asks only for the potential differences between live, neutral and earth",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F13",
+   "lesson": 5,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answer 'E = I \\times V \\times t.' and two flashcard QUESTIONS ('P = I \\times ____.', 'P = ____^2 \\times R?') contain raw LaTeX commands.",
+   "truth": "Same defect as F4, and here it hits the question side too, so the student is asked to fill a blank in a string of backslash commands. Rewritten in unicode.",
+   "evidence": "js/main.js flashcard render",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F14",
+   "lesson": 6,
+   "field": "exam_tip_html",
+   "severity": "HIGH",
+   "claim": "The whole lesson (static electricity, charging by friction, electrostatic induction, electric fields, uniform fields) is presented to Combined Science students as examinable, with no scope label anywhere.",
+   "truth": "The spec states plainly: 'The following topic is only found in the GCSE in Physics: Topic 11 - Static electricity.' None of it is examined on Combined Science. The opening section on the structure of the atom IS in scope (spec 10.1, Topic 10). Brief says label rather than delete, so a scope label has been added to the exam tip; whether the lesson should stay in a Combined unit at all is part of F18.",
+   "evidence": "spec, end of Topic 10: 'The following topic is only found in the GCSE in Physics: Topic 11 - Static electricity.'; Paper 6 content overview lists topics 1, 8, 9, 10, 12, 13, 14, 15 and omits 11; spec 10.1 covers the atom",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F15",
+   "lesson": 6,
+   "field": "knowledge_checks",
+   "severity": "HIGH",
+   "claim": "Match KC [4] has right options ['Nucleus','Nucleus','Shells / orbits'] - 'Nucleus' appears twice.",
+   "truth": "Index-scored matching marks a correct pairing wrong when the student picks the identical duplicate tile. Made the options distinct by adding the relative charge, which is spec 10.1 content: proton - in the nucleus, relative charge +1; neutron - in the nucleus, relative charge 0; electron - in shells around the nucleus, relative charge -1.",
+   "evidence": "js/main.js renderMatch; spec 10.1 'the position, mass and charge of protons, neutrons and electrons'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F16",
+   "lesson": 7,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answer '\\rho = m / V (density = mass \\div volume).' contains raw LaTeX commands.",
+   "truth": "Same defect as F4: the student reads a literal backslash-rho and backslash-div. Rewritten in unicode.",
+   "evidence": "js/main.js flashcard render; spec 14.2",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17",
+   "lesson": 8,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answers '\\Delta Q = m \\times c \\times \\Delta \\theta.' and 'Q = m \\times L.' contain raw LaTeX commands.",
+   "truth": "Same defect as F4. Rewritten in unicode with the spec's word equations for 14.8 and 14.9.",
+   "evidence": "js/main.js flashcard render; spec 14.8 and 14.9",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "MEDIUM",
+   "claim": "The unit is called Physics Paper 1 and is built on the AQA paper split (energy, electricity, particle model). Every lesson is presented as first-paper content.",
+   "truth": "For Combined Science the physics papers are Paper 5: Physics 1 (topics 1-6: key concepts, motion and forces, conservation of energy, waves, light and the electromagnetic spectrum, radioactivity) and Paper 6: Physics 2 (topics 1, 8, 9, 10, 12, 13, 14, 15). Checked lesson by lesson: L1 and L2 are Topic 3 and do belong on the first physics paper; L3, L4 and L5 are Topic 10 and L7 and L8 are Topic 14, so all five sit on the SECOND physics paper; L6 is Topic 11, which is on neither Combined paper (see F14). The unit also omits topics 2, 4, 5 and 6 entirely, so it covers one topic out of the six on the paper it is named after. Options: (a) rename and re-slot - move L3-L5 and L7-L8 into the physics-paper-2 unit (still queued in the retro-fact-check queue), keep L1-L2 here and build the missing motion, waves, light and radioactivity lessons; (b) keep the grouping but rename both units so neither claims a paper number; (c) leave the split and add a scope line to each lesson. No lesson body states a paper number, a duration or a mark total, so no text needs correcting - the fault is the unit name and the lesson placement, and both need Tom's call.",
+   "evidence": "spec Paper 5 and Paper 6 content overviews; spec headings 'Topics for Paper 5' and 'Topics for Paper 6'; 'The following topic is only found in the GCSE in Physics: Topic 11'",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F19",
+   "lesson": 0,
+   "field": "conclusion_html",
+   "severity": "LOW",
+   "claim": "Every lesson's Key Takeaways list repeats one filler sentence per heading: '<section name> - revise the key definitions, processes and equations from this section.'",
+   "truth": "The takeaways teach nothing and are identical across all 8 lessons and all 39 bullets. They also mis-read the article structure: L7 lists 'Summary' as a section because the conclusion div contains an h2, and L8 stops at five bullets so gas pressure and absolute zero get no takeaway. Rewriting them is authoring, not fact-checking, and would re-narrate a block in every lesson, so it is flagged rather than edited.",
+   "evidence": "all 8 raw files, CONCLUSION_HTML sections",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F20",
+   "lesson": 0,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "All 8 lessons open the exam tip with 'In Edexcel Physics questions'.",
+   "truth": "This unit is Combined Science, not the separate GCSE Physics, and the phrase could push a student towards the wrong specification content. The advice itself is sound. Only lesson 6 is corrected here, because F14 rewrites that field anyway; changing the other seven would re-narrate a block each for a wording point.",
+   "evidence": "brief qualification: combined; spec title Pearson Edexcel GCSE (9-1) in Combined Science",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [
+  1
+ ],
+ "summary": "Two hard errors: 50 Hz taught as 50 direction changes a second (L5), and three match knowledge checks whose duplicated options make the index-based scorer mark a correct pairing wrong (L2, L4, L6). A systematic scope fault: L6 is Topic 11, static electricity, which the spec says is only in the separate GCSE Physics, and the unit as a whole follows the AQA paper split, so five of eight lessons are second-paper content sitting in a unit named Paper 1 while topics 2, 4, 5 and 6 are missing. Also g taught as 9.8 N/kg where Edexcel papers give 10, E = IVt claimed as a recall equation when Appendix 4 gives it on the formulae sheet, three higher-only wrappers hiding both-tier content, a fuse example that breaks its own rule, and 13 flashcard fields showing raw LaTeX commands to students.",
+ "renarration": {
+  "run_at": "2026-09-04T11:13:57Z",
+  "clips": [
+   {
+    "lesson": 2,
+    "id": "n7",
+    "key": "science-edexcel/physics-paper-1/narration_lesson-02_n7.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/physics-paper-1/narration_lesson-02_n7.mp3",
+    "voice": "Ada",
+    "duration": 20.83,
+    "bytes": 249984,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 11:13:31 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n8",
+    "key": "science-edexcel/physics-paper-1/narration_lesson-02_n8.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/physics-paper-1/narration_lesson-02_n8.mp3",
+    "voice": "Ada",
+    "duration": 10.78,
+    "bytes": 129312,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 11:13:34 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n9",
+    "key": "science-edexcel/physics-paper-1/narration_lesson-02_n9.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/physics-paper-1/narration_lesson-02_n9.mp3",
+    "voice": "Ada",
+    "duration": 7.58,
+    "bytes": 91008,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 11:13:36 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n6",
+    "key": "science-edexcel/physics-paper-1/narration_lesson-05_n6.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/physics-paper-1/narration_lesson-05_n6.mp3",
+    "voice": "Ollie",
+    "duration": 15.91,
+    "bytes": 190944,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 11:13:39 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n19",
+    "key": "science-edexcel/physics-paper-1/narration_lesson-05_n19.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/physics-paper-1/narration_lesson-05_n19.mp3",
+    "voice": "Ollie",
+    "duration": 21.36,
+    "bytes": 256320,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 11:13:43 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n36",
+    "key": "science-edexcel/physics-paper-1/narration_lesson-05_n36.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/physics-paper-1/narration_lesson-05_n36.mp3",
+    "voice": "Ollie",
+    "duration": 36.0,
+    "bytes": 432000,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 11:13:50 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "ne1",
+    "key": "science-edexcel/physics-paper-1/narration_lesson-06_ne1.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/physics-paper-1/narration_lesson-06_ne1.mp3",
+    "voice": "Ada",
+    "duration": 27.74,
+    "bytes": 332928,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 11:13:56 GMT"
+   }
+  ],
+  "verified_ok": 7,
+  "total": 7
+ }
+}
