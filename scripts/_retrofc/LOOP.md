@@ -194,8 +194,14 @@ Science board anchors (verify in the spec before asserting):
   `_spec_bold_extract.py`; specs/ is gitignored). Point every OCR checker at
   both files; only content STATEMENTS in bold are tier evidence (headings and
   table headers are bold too).
-- OCR 21st Century B J260 and J257/J258/J259: read the spec (different
-  structure - do not assert from memory).
+- OCR 21st Century B J260 (verified 4 Sep): Foundation Papers 1-4 = Biology
+  /01 (B1-B6 + BCP7/8), Chemistry /02, Physics /03, each 95 marks, 1h45,
+  26.4%; Paper 4 /04 = all content, 75 marks, 1h45, 20.8%; Higher mirrors as
+  Papers 5-8. Higher-only statements in BOLD (bold files exist). Chapters are
+  named (B1 You and your genes ...), outcomes coded B1.1 etc. Our units are
+  named biology-paper-1/2 Gateway-style although J260 has ONE biology paper -
+  label, do not rename. Separate J257/J258/J259: read the spec's assessment
+  section before asserting.
 - Edexcel 1SC0 / 1BI0 / 1CH0 / 1PH0: the markitdown specs lost their bold, and
   bold is Edexcel's only Higher-tier marker. Bold-preserved extractions live
   beside them as `specs/edexcel/<name>-bold.md` (made with
