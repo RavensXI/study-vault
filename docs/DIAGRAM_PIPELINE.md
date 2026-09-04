@@ -311,3 +311,23 @@ figure inserted, with the real accepted-diagram cost read from the Foundry
 monitor) before any wider run. Estimate at 4 Sep prices: ≈£185 for one diagram
 per free-tier lesson at 1024², before retries and before the landscape
 re-measure.
+
+### Visual forms (Tom, 4 Sep 2026): not every lesson wants a labelled diagram
+
+The brief agent chooses ONE `visual_form` per lesson, and `none` is a valid
+answer (a themed literary-analysis lesson or an ethics debate has nothing to
+draw; do not force one). Forms:
+
+| Form | Use when | Text allowed in the image | Gate checks |
+|---|---|---|---|
+| `labelled-diagram` | a structure or process with parts (sciences, physical geography, maths) | the closed label list only | labels present, spelled, none extra; facts true |
+| `data-picture` | one number series carries the point (hyperinflation, casualty figures, unemployment, trade) | axis titles + the supplied data points, verbatim | every number matches the lesson; axis scale honest (log labelled as log) |
+| `scene` | an abstract idea told through a constructed picture (Versailles as a dictated peace: three figures, one empty chair; Jekyll/Hyde split figure) | at most one short in-picture word the brief supplies | objects/dress period-correct; no identifiable real people (faceless or turned away); no invented text |
+| `timeline` / `sequence` | order carries the meaning | the supplied dates/step names | order and dates match the lesson |
+| `map` | place carries the meaning | the supplied place names | places positioned correctly; borders of the right year |
+
+Landscape `1536x1024` at medium returned 1,372 output tokens (≈4.1p), LESS
+than the 1,756 at 1024² — landscape is both the better fit and the cheaper
+size. Worked examples of `data-picture` and `scene` (4 Sep, Weimar
+hyperinflation with the wheelbarrow; Versailles table) are in the session
+scratchpad `foundry/gpt-image-2-scene__*.png`.
