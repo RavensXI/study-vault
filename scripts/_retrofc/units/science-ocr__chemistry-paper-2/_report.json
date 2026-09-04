@@ -1,0 +1,287 @@
+{
+ "unit": "science-ocr/chemistry-paper-2",
+ "checked_at": "2026-09-04T17:33:17",
+ "spec_used": "specs/ocr/combined-science-a-gateway-J250.md + specs/ocr/combined-science-a-gateway-J250-bold.md (tier authority); cross-checked against specs/ocr/chemistry-a-gateway-J248-bold.md for separate-science scope",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'The blue copper sulfate solution turns colourless (iron sulfate) and a brown coating of copper appears on the iron.'",
+   "truth": "Iron(II) sulfate solution is pale green, not colourless. The observation is that the blue fades to pale green while brown copper is deposited. (The lesson's own magnesium question is right, because magnesium sulfate solution is colourless.)",
+   "evidence": "settled fact: iron(II) sulfate in solution is pale green; C4.1e asks learners to deduce reactivity from experimental results, so the observation is the mark.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 1,
+   "field": "practice_questions + conclusion_html",
+   "severity": "MEDIUM",
+   "claim": "The phytoextraction practice question and the third Key Takeaway teach and test biological metal extraction with no tier flag, while the article paragraph sits inside a higher-only wrapper.",
+   "truth": "C4/C6 has only two bold statements in this qualification. C6.1c ('evaluate alternative biological methods of metal extraction', to include 'bacterial and phytoextraction') is one of them, so it is Higher only. The article wrapper is correct and must stay; the question and the takeaway need the tier tag to match.",
+   "evidence": "bold spec file: **C6.1c** ... **evaluate alternative biological methods of metal extraction** / **bacterial and phytoextraction**.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Revision tip: \"Use a mnemonic like 'Please Stop Letting Cows Moo At Cute Zebras In Hot Countries Since Goldfish Prefer Tanks'.\"",
+   "truth": "The series listed has 14 entries (K, Na, Li, Ca, Mg, Al, C, Zn, Fe, H, Cu, Ag, Au, Pt) but the mnemonic has 15 words, so the final word maps to nothing and implies a missing element. Ending '...Since Gold Persists' gives one word per entry.",
+   "evidence": "count: 14 entries against 15 words.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'The OCR Gateway specification requires you to know several key tests that can identify specific ions and gases.' and 'This is a key practical skill for the exam.' (of the sodium hydroxide precipitate tests).",
+   "truth": "Combined Science A requires only C3.1g, 'describe tests to identify selected gases', to include oxygen, hydrogen, carbon dioxide and chlorine, and that statement sits in topic C3 (Chemistry Paper 1 content, assumed knowledge here). Flame tests, hydroxide precipitates, halide, sulfate and carbonate tests and instrumental methods are not in this qualification at all.",
+   "evidence": "grep of both spec files for 'flame test', 'precipitat', 'silver nitrate', 'barium', 'instrumental', 'spectromet': zero hits outside the periodic table. Chemistry A (Gateway) C4.2b to C4.2g carry the separate-science marker; C4.2a is cross-referenced as 'Combined Science C3.1g'.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 3,
+   "field": "lesson",
+   "severity": "HIGH",
+   "claim": "The whole lesson 'Identifying Substances' teaches flame tests, sodium hydroxide cation precipitates, halide/sulfate/carbonate anion tests, systematic analysis and instrumental methods (gas chromatography, mass spectrometry, GC-MS) as examinable Combined Science content.",
+   "truth": "Only the gas-test paragraph is in scope, and it belongs to topic C3, not to C4-C6. Everything else is separate Chemistry (Chemistry A C4.2b-C4.2g, all separate-science only). The chemistry itself is accurate, and the cation set is a further sign of the wrong source: the lesson lists aluminium and magnesium (an AQA set) while the OCR list is calcium, copper, iron(II), iron(III) and zinc. COORDINATOR RULING: no deletion. A Scope note key-fact block is added as the first block of the article, before the first heading, telling the student that most of the lesson is separate-Chemistry content and that Combined Science needs only the four gas tests. The false spec claim and the 'key practical skill for the exam' line are corrected in place. Divs go 13/13 to 15/15 and no narration id is added or removed.",
+   "evidence": "Combined Science A topic C4 contains only C4.1 'Predicting chemical reactions' (summary of content, and the C4 section of both spec files). Chemistry A C4.2b-g carry the separate-science marker.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 5,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Two practice questions carry raw LaTeX: 'Describe what the symbol \\(\\rightleftharpoons\\) means' and 'the Haber process reaction: \\(N_2(g) + 3H_2(g) \\rightleftharpoons 2NH_3(g)\\)'.",
+   "truth": "Practice text renders as textContent, so the student read the backslash commands, not the symbols. Plain-text fields use unicode. This is the same fault found in Chemistry Paper 1.",
+   "evidence": "house rule: *_html fields use entities, plain-text fields use unicode.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 5,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answer 'N_2 + 3H_2 \\rightleftharpoons 2NH_3.'",
+   "truth": "Raw LaTeX in a plain-text flashcard answer. Should read N2 + 3H2 (reversible arrow) 2NH3 with unicode subscripts and the harpoon character.",
+   "evidence": "house rule: plain-text fields use unicode.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 5,
+   "field": "practice_questions + knowledge_checks + flashcard_questions + conclusion_html",
+   "severity": "MEDIUM",
+   "claim": "Four practice questions, three knowledge checks, seven flashcards and two Key Takeaways test the Le Chatelier and Haber material with no tier flag, while the article wraps all of it higher-only.",
+   "truth": "C5.2c ('predict the effect of changing reaction conditions on equilibrium position...', to include Le Chatelier's principle) is bold, so Higher only. The article wrapper is right. Everything that tests it, and everything that tests the Haber block a Foundation student cannot see, needs the tier tag.",
+   "evidence": "bold spec file: **C5.2c** **predict the effect of changing reaction conditions on equilibrium position** ... **Le Chatelier's principle concerning concentration, temperature and pressure**. C5.2a and C5.2b are not bold, so reversible reactions and dynamic equilibrium stay at both tiers, and the wrapper correctly starts after them.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 5,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "'Why are unreacted gases recycled in the Haber process?' answered 'To improve overall atom economy and reduce waste.'",
+   "truth": "Atom economy is fixed by the balanced equation, so recycling cannot change it. Recycling raises the overall yield (the conversion per pass is only about 15%). Atom economy is also not in this qualification.",
+   "evidence": "definition of atom economy; grep for 'atom economy' in both Combined Science A spec files returns zero hits.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 5,
+   "field": "content_html + exam_tip_html",
+   "severity": "MEDIUM",
+   "claim": "The Haber process section is taught as 'the most important industrial example' for this course, and the exam tip says the word 'compromise' is 'essential for full marks'.",
+   "truth": "The Haber process does not appear anywhere in Combined Science A. It is Chemistry A only: C6.1d (bold and separate-science) and C6.1g (separate-science). Le Chatelier's principle itself is in scope at Higher (C5.2c), so a worked context is legitimate, but no Combined paper can ask for Haber conditions, and the 'essential for full marks' claim is false. COORDINATOR RULING: keep the Haber process as the worked example for C5.2c. The exam tip now says the conditions are a compromise between yield and rate, with no claim about the examiner. Every pure-recall Haber item is reworded onto the equilibrium principle, with counts unchanged: practice question 5 now asks for the effect of a catalyst on rate and on equilibrium position; knowledge check 4 becomes the concentration rule (removing a product shifts the position towards the products) with its four options rewritten; flashcards 7-10 become the pressure, temperature, concentration and catalyst rules, and flashcard 12 asks why a reversible reaction cannot give 100% yield in one pass. 6 practice, 5 knowledge checks and 12 flashcards throughout.",
+   "evidence": "grep for 'Haber', 'ammonia', 'fertilis' across both Combined Science A spec files: zero hits. Chemistry A: **C6.1d** with the separate-science marker, 'the Haber process and Contact process'; C6.1g with the separate-science marker.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11",
+   "lesson": 6,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "Description: 'Metal extraction, life cycle assessments, crude oil fractions and cracking.'",
+   "truth": "The lesson teaches no metal extraction; that is lesson 1. It opens with atom economy and percentage yield.",
+   "evidence": "lesson 6 content_html headings: Atom Economy and Percentage Yield, Life Cycle Assessments, Recycling, Crude Oil and Hydrocarbons.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 6,
+   "field": "content_html + practice_questions + knowledge_checks + flashcard_questions + glossary_terms",
+   "severity": "MEDIUM",
+   "claim": "The opening section teaches atom economy, percentage yield and the limiting reactant as examinable, with a formula, a Key Fact, an exam tip, one practice calculation, two knowledge-check items, four flashcards and two glossary terms.",
+   "truth": "None of it is in Combined Science A. Chemistry A C5.1h (calculate percentage yield), C5.1i (define atom economy) and C5.1j (calculate atom economy) all carry the separate-science marker. The rest of lesson 6 (life-cycle assessment, recycling, fractional distillation, cracking) is squarely C6.1d to C6.1m and is fine. COORDINATOR RULING: no deletion. A one-sentence italic extension note is added immediately after the section heading, saying the calculations are not examined on Combined Science but the ideas explain why some processes are more sustainable. The description is also corrected, because it promised metal extraction that the lesson does not teach. No div and no narration id added.",
+   "evidence": "grep for 'atom economy' and 'percentage yield' in both Combined Science A spec files: zero hits. Chemistry A C5.1h, C5.1i, C5.1j carry the separate-science marker.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F13",
+   "lesson": 7,
+   "field": "knowledge_checks",
+   "severity": "MEDIUM",
+   "claim": "Match check 'Match each process to its effect on atmospheric CO2': the right-hand options are 'Decreases CO2', 'Increases CO2', 'Decreases CO2'.",
+   "truth": "Two options are the same text, so a student who pairs photosynthesis with the third option gives the same answer and is marked wrong. Each option must be unique to one row.",
+   "evidence": "options list, positions 0 and 2 identical.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F14",
+   "lesson": 7,
+   "field": "flashcard_questions",
+   "severity": "LOW",
+   "claim": "Four plain-text flashcard fields write 'CO_2' (two questions and two answers).",
+   "truth": "Raw underscore subscripts reach the student as literal text. The knowledge checks and practice questions in the same lesson already use the unicode subscript.",
+   "evidence": "house rule: plain-text fields use unicode.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F15",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Revision tip: \"'Sustainable development' is a key term in the spec. Learn the definition precisely ... Use this exact wording in exam answers.\"",
+   "truth": "'Sustainable development' is not a learning outcome in this qualification; the word only appears in topic introductions. The Brundtland definition given is correct, so only the spec claim is wrong.",
+   "evidence": "grep for 'sustainab' in the bold spec file: five hits, all in topic introduction prose, none a learning outcome.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F16",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'balancing environmental benefits against economic costs technological feasibility, and public willingness to change behaviour.'",
+   "truth": "A missing comma runs two list items together, and the sentence is narrated as written.",
+   "evidence": "reading.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "MEDIUM",
+   "claim": "Lesson-to-paper mapping and C4-C6 coverage for Chemistry Paper 2.",
+   "truth": "The mapping is right. Combined Science A has six papers, Foundation 1-6 and Higher 7-12, each 1 hour 10 minutes, 60 marks and 16.7% of the qualification; Chemistry Paper 2 is Foundation Paper 4 (J250/04) or Higher Paper 10 (J250/10), covering C4, C5, C6 and CS7 practical skills with C1-C3 as assumed knowledge, and it carries synoptic assessment. Statement coverage across the eight lessons is complete: C4.1a-e (lessons 1-2), C5.1a-i (lesson 4), C5.2a-c (lesson 5), C6.1a-c (lesson 1), C6.1d-m (lesson 6), C6.2a-e (lesson 7), C6.2f-g (lesson 8). Two soft gaps: C6.1f asks for a named process where a material is recycled for a DIFFERENT use, and lesson 6 only describes recycling in general; C6.2g names waste, ground and salt water, and lesson 8 covers surface and salt water but never ground water. Chemistry PAGs are C1 Electrolysis, C2 Distillation, C3 Separation techniques, C4 Production of salts and C5 Measuring rates of reaction; lesson 4 cites PAG C5 correctly and no lesson uses AQA or Edexcel practical vocabulary. The real coverage problem is the other way round: about one and a half lessons of separate-Chemistry content are taught as if examinable (F5, F10, F12).",
+   "evidence": "assessment overview and content overview of the Combined Science A spec; CS7 practical activity group table; summary of content listing C4.1, C5.1, C5.2, C6.1, C6.2 only.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F18",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "The chemistry of every test in lesson 3 was recomputed and checked: flame colours (Li crimson, Na yellow, K lilac, Ca orange-red, Cu green), the four gas tests, the hydroxide precipitate colours including the aluminium-versus-magnesium excess distinction, the two ionic equations, the halide colours and the sulfate and carbonate tests.",
+   "truth": "All correct. No edit needed on accuracy grounds; the only problem with lesson 3 is scope (F4, F5).",
+   "evidence": "recomputation and settled facts; both ionic equations balance.",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [
+  2,
+  4
+ ],
+ "summary": "Eight lessons checked against OCR Gateway Combined Science A, Chemistry Paper 2 (Foundation Paper 4 / Higher Paper 10, topics C4-C6 plus PAGs C1-C5). The chemistry is sound: every equation balances, the 74% yield, the 4x rate comparison and the Haber figures recompute, and every flame colour, precipitate colour, halide result and gas test is right. The damage is scope and tiering. Lesson 3 is almost entirely separate-Chemistry content (flame tests, hydroxide precipitates, anion tests, instrumental methods) taught as required, and it named OCR Gateway as requiring it; the Haber process in lesson 5 and the atom economy and percentage yield section in lesson 6 are separate-Chemistry too. On the coordinator's ruling none of that is deleted: lesson 3 gains a Scope note block, lesson 6 an extension note, and lesson 5 keeps Haber as the worked example for Le Chatelier with every pure-recall item reworded onto the equilibrium principle. C4-C6 has exactly two bold statements, C5.2c and C6.1c; both article wrappers are correctly placed, but sixteen questions, flashcards and takeaways that test them carried no tier tag. Beyond that: iron(II) sulfate solution was called colourless, a match check offered the same option twice, a flashcard claimed recycling improves atom economy, and seven plain-text fields carried raw LaTeX. 44 edits.",
+ "renarration": {
+  "run_at": "2026-09-04T16:34:32Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n11",
+    "key": "science-ocr/chemistry-paper-2/narration_lesson-01_n11.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/chemistry-paper-2/narration_lesson-01_n11.mp3",
+    "voice": "Ollie",
+    "duration": 27.41,
+    "bytes": 328896,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 16:34:01 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n22",
+    "key": "science-ocr/chemistry-paper-2/narration_lesson-01_n22.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/chemistry-paper-2/narration_lesson-01_n22.mp3",
+    "voice": "Ollie",
+    "duration": 13.58,
+    "bytes": 163008,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 16:34:04 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n2",
+    "key": "science-ocr/chemistry-paper-2/narration_lesson-03_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/chemistry-paper-2/narration_lesson-03_n2.mp3",
+    "voice": "Ollie",
+    "duration": 30.6,
+    "bytes": 367200,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 16:34:10 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n10",
+    "key": "science-ocr/chemistry-paper-2/narration_lesson-03_n10.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/chemistry-paper-2/narration_lesson-03_n10.mp3",
+    "voice": "Ollie",
+    "duration": 23.52,
+    "bytes": 282240,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 16:34:15 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n20",
+    "key": "science-ocr/chemistry-paper-2/narration_lesson-05_n20.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/chemistry-paper-2/narration_lesson-05_n20.mp3",
+    "voice": "Ollie",
+    "duration": 18.72,
+    "bytes": 224640,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 16:34:18 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n23",
+    "key": "science-ocr/chemistry-paper-2/narration_lesson-05_n23.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/chemistry-paper-2/narration_lesson-05_n23.mp3",
+    "voice": "Ollie",
+    "duration": 11.42,
+    "bytes": 137088,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 16:34:21 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n24",
+    "key": "science-ocr/chemistry-paper-2/narration_lesson-05_n24.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/chemistry-paper-2/narration_lesson-05_n24.mp3",
+    "voice": "Ollie",
+    "duration": 9.98,
+    "bytes": 119808,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 16:34:23 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n16",
+    "key": "science-ocr/chemistry-paper-2/narration_lesson-08_n16.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/chemistry-paper-2/narration_lesson-08_n16.mp3",
+    "voice": "Ada",
+    "duration": 39.98,
+    "bytes": 479808,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 16:34:31 GMT"
+   }
+  ],
+  "verified_ok": 8,
+  "total": 8
+ }
+}
