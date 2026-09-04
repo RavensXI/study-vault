@@ -1,0 +1,278 @@
+{
+ "unit": "science-edexcel/physics-paper-2",
+ "checked_at": "2026-09-04",
+ "spec_used": "specs/edexcel/combined-science-1SC0.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "g is taught as 9.8 N/kg: 'On Earth, \\(g \\approx 9.8\\) N/kg', the same figure in the gravitational field strength dfn, in the glossary entry and as the answer to a cloze flashcard.",
+   "truth": "Edexcel gives g = 10 N/kg on its GCSE papers. A student who memorises 9.8 and meets a question that states 10 loses the accuracy mark. Changed to 10 in all four places.",
+   "evidence": "spec 2.13: 'Recall that the acceleration, g, in free fall is 10 m/s2'; 9.8 N/kg is the AQA value",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 1,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answers 'F = m \\times a (resultant force equals mass times acceleration).' and 'W = m \\times g.' contain raw LaTeX.",
+   "truth": "Flashcards are injected as plain text and KaTeX is never run on them, and there are no \\(...\\) delimiters, so the student literally reads the backslash command. Rewritten in unicode.",
+   "evidence": "house rule: plain-text fields use unicode, *_html fields use entities",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Newton's third law (h2 n21, key fact n24, flashcard 8, match check right option 'Equal and opposite force pairs') is taught with no tier flag, while the same lesson wraps inertial mass and circular motion in a higher-only div.",
+   "truth": "Spec 2.23, which is where Newton's third law sits, belongs to the Higher-tier momentum block 2.23-2.26 in this specification, so the lesson gates 2.20-2.22 but leaves 2.23 open. The spec markdown in this repo has lost its bold, and bold is Edexcel's only marker for Higher-tier-only content, so the flag cannot be confirmed from the file; this ruling rests on my knowledge of the specification. Options: (a) check the printed spec, and if 2.23 is bold wrap the Newton's third law section in higher-only and prefix its flashcard and the match option; (b) leave it, on the view that third-law pairs are taught to every student anyway. Not edited, because a wrong wrapper hides correct content from Foundation students.",
+   "evidence": "spec 2.23 sits between 2.22 (inertial mass, already gated in the lesson) and 2.24 (momentum, gated); bold lost in the markdown",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F4",
+   "lesson": 2,
+   "field": "knowledge_checks",
+   "severity": "HIGH",
+   "claim": "Match check [4] has right options ['Thinking distance', 'Braking distance', 'Braking distance'] - 'Braking distance' appears twice.",
+   "truth": "js/main.js scores matching by option INDEX, so a student who pairs 'Icy road' with the first, identical-looking 'Braking distance' tile is marked wrong for a correct answer. Made the three options distinct: Tiredness - thinking distance, Worn brakes - braking distance, Driving faster - both thinking and braking distance (spec 2.29b: speed affects both parts).",
+   "evidence": "spec 2.28 and 2.29; js/main.js renderMatch compares the selected index with q.order[i]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 2,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Momentum, conservation of momentum and F = (mv - mu)/t sit inside higher-only divs in the article, but five practice questions, two knowledge checks and seven flashcards examine that material with no tier label.",
+   "truth": "body.tier-foundation .higher-only is display:none, so a Foundation student sees three empty headings and then meets questions on content the page has hidden. Spec 2.24, 2.25, 2.26 and 2.31 are Higher tier only in this specification (bold lost in the markdown, so this rests on knowledge of the spec). Prefixed the affected items '(Higher tier)', matching the convention already used in the sibling science units. The crumple-zone check and flashcard are left alone because the key fact that answers them (n28) sits outside the wrapper.",
+   "evidence": "spec 2.24-2.26 and 2.31; css/style.css 'body.tier-foundation .higher-only { display: none !important; }'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 2,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answers 'momentum = mass \\times velocity (p = mv).' and '200 kg m/s (p = 50 \\times 4).' contain raw LaTeX.",
+   "truth": "Same defect as F2. Rewritten in unicode. The arithmetic itself is right: 50 x 4 = 200 kg m/s.",
+   "evidence": "recomputation: 50 x 4 = 200",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 3,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answers 'v = f \\times \\lambda.' and '3 \\times 10^8 m/s.' contain raw LaTeX.",
+   "truth": "Same defect as F2. Rewritten in unicode as 'v = f x lambda' with the unicode lambda and '3 x 10 to the 8 m/s' with a unicode superscript.",
+   "evidence": "spec 4.6; house rule on plain-text fields",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The lesson teaches the law of reflection, reflection ray diagrams and specular versus diffuse reflection as examinable Combined Science content, and examines them in two practice questions, a knowledge check and two flashcards.",
+   "truth": "None of it is on Combined Science. Reflection ray diagrams and the law of reflection are spec 5.1, specular and diffuse reflection are 5.2, and the spec says both are in the GCSE in Physics only. Refraction is in scope (4.10, the 5.9 core practical, 5.13 and 5.14), so the rest of the lesson stands. Added a scope label above the Reflection heading and prefixed the five affected items '(Separate Physics only)'. The brief says label, not delete.",
+   "evidence": "spec, end of Topic 5: 'Specification points 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.15, 5.16, 5.17, 5.18 and 5.19 are in the GCSE in Physics only.'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "An inner <div class=\"higher-only\"> hides paragraph n22 (atoms absorbing EM radiation, and radio waves produced by or inducing oscillations in electrical circuits) from Foundation students.",
+   "truth": "Spec 5.23 and 5.24 are both-tier content, and the wrapper splits a single statement: 5.24a (atoms generating radiation) sits outside it and 5.24b (absorption) inside. Practice question 6 then asks every student how radio waves are produced and detected in electrical circuits, which is the hidden paragraph. Wrapper removed.",
+   "evidence": "spec 5.23 and 5.24; the lesson's own practice question 6 examines the hidden text at both tiers",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "F9 removes a higher-only wrapper, but the lesson's narration manifest may still carry tier: 'higher' on the n22 chunk.",
+   "truth": "js/main.js filters manifest entries with tier 'higher' out of the audio for Foundation students. If that flag was written when the wrapper was added, Foundation students will now read n22 but not hear it. A manifest re-stamp for lesson 4 would tidy it. No marks at risk, so no edit.",
+   "evidence": "js/main.js narration filter: manifest.filter(entry => entry.tier !== 'higher')",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F11",
+   "lesson": 5,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "The description reads 'Magnets, magnetic fields, electromagnets, the motor effect, and Fleming's left-hand rule.'",
+   "truth": "The lesson contains no motor effect and no Fleming's left-hand rule; both are lesson 6. Rewritten to name what the lesson actually covers.",
+   "evidence": "lesson 5 content: poles and materials, permanent and induced magnets, fields, plotting compasses, solenoids and electromagnets",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 6,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "The description reads 'Electromagnetic induction, transformers, and the National Grid's high-voltage transmission.'",
+   "truth": "It omits the motor effect and Fleming's left-hand rule, which are the first half of the lesson and half its title. Rewritten. Taken with F11 the two descriptions are offset by one lesson.",
+   "evidence": "lesson 6 headings: The Motor Effect, Fleming's Left-Hand Rule, Calculating the Force on a Conductor, How an Electric Motor Works, Electromagnetic Induction, Transformers and the National Grid",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F13",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The motor effect, Fleming's left-hand rule and the whole electric motor section (including the split-ring commutator) are taught with no tier or scope flag; only F = BIl is wrapped in higher-only.",
+   "truth": "Spec 12.14, how the force causes rotation in electric motors, is in the GCSE in Physics only, so motors and the commutator are not examined on Combined Science. Spec 12.10 to 12.13 (a conductor near a magnet experiences a force, magnetic forces as field interactions, Fleming's left-hand rule and F = BIl) are Higher tier only in this specification; the bold is lost in the markdown, so the tier ruling rests on knowledge of the spec. Added a tier and scope note at the top of the lesson and prefixed the affected questions, checks and flashcards.",
+   "evidence": "spec, end of Topic 12: 'Specification point 12.14 is in the GCSE in Physics only'; Paper 6 content overview; spec 12.10-12.13",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F14",
+   "lesson": 6,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answer 'F = B \\times I \\times l.' contains raw LaTeX.",
+   "truth": "Same defect as F2. Rewritten in unicode. The two worked examples in this lesson are both right: 0.3 x 4 x 0.25 = 0.3 N, and 0.4 x 5 x 0.20 = 0.4 N. The transformer example is right too: 230 x 10 = 2300, 2300 / 11500 = 0.2 A.",
+   "evidence": "recomputation of all three worked examples against spec 12.13 and 13.10",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F15",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Paragraph n23 says electromagnetic induction 'is the principle behind generators and transformers', and defines induction as moving a conductor through a magnetic field.",
+   "truth": "For Combined Science the spec keeps only 13.2, 13.5, 13.6, 13.8, 13.9 and 13.10. Producing a current by relative movement of a magnet and a conductor (13.1), alternators and dynamos (13.3) and the microphone and loudspeaker (13.4) are all in the GCSE in Physics only, so generators are out of scope here. The sentence is not wrong physics and is useful context, so no edit; the transformer material that follows is in scope and correctly gated.",
+   "evidence": "spec, end of Topic 13: 'Specification points 13.1, 13.3, 13.4, 13.7 and 13.11 are in the GCSE in Physics only.'",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F16",
+   "lesson": 7,
+   "field": "slug",
+   "severity": "MEDIUM",
+   "claim": "Lesson 7 (Particle Model of Matter) has the slug 'the-solar-system-and-the-life-cycle-of-stars' and lesson 8 (Forces & Matter) has 'red-shift-the-big-bang-and-the-expanding-universe'.",
+   "truth": "Both slugs belong to Topic 7 Astronomy, which is in the GCSE in Physics only and appears on neither Combined paper. The two rows were repurposed from astronomy lessons and the slugs were never restamped. Lesson routing is by number, so nothing breaks on the page, but the slug leaks into anything keyed on it. Slug is not one of the fields the edit applier can write, so this needs a separate one-line update: 'particle-model-of-matter' and 'forces-and-matter'.",
+   "evidence": "raw dump headers for L7 and L8; spec Paper 5 and Paper 6 content overviews omit Topic 7",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F17",
+   "lesson": 7,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answers 'density = mass / volume (\\rho = m/V).' and 'Q = m \\times L.' contain raw LaTeX, and a third writes units as 'kg/m^3 or g/cm^3'.",
+   "truth": "Same defect as F2. Rewritten in unicode. Every number in this lesson checks out: iron 7874 kg/m3, water 1000, air 1.2, water's specific heat capacity 4200 J/kg degC, absolute zero -273 degC, 540 / 200 = 2.7 g/cm3, and the six-mark answer 2 x 4200 x 80 = 672 000 J plus 2 x 2 260 000 = 4 520 000 J, total 5 192 000 J.",
+   "evidence": "recomputation; spec 14.2, 14.8, 14.9, 14.14",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'In this required practical, you investigate the relationship between force and extension for a spring'.",
+   "truth": "Edexcel calls them core practicals; 'required practical' is the AQA term, and the heading directly above this sentence already says Core Practical. Changed to core practical.",
+   "evidence": "spec 15.6: 'Core Practical: Investigate the extension and work done when applying forces to a spring'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F19",
+   "lesson": 8,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answers 'F = k \\times x.' and 'E = \\frac{1}{2} k x^2.' contain raw LaTeX.",
+   "truth": "Same defect as F2. Rewritten in unicode. Both worked examples are right: 40 x 0.15 = 6 N, and 0.5 x 80 x 0.01 = 0.4 J; so are the practice answers 8 / 50 = 0.16 m and 0.5 x 60 x 0.04 = 1.2 J.",
+   "evidence": "recomputation against spec 15.3 and 15.4",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F20",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "E = 0.5 x k x x squared (spec 15.4) is taught with a worked example, a key fact, a practice question, two knowledge checks and two flashcards, none of them tier flagged.",
+   "truth": "Spec 15.4 is, to my knowledge, a Higher-tier-only equation in this specification and sits in Appendix 4 list b, the equations given on the formulae sheet, with the note that Higher-only equations are not given on the Foundation sheet. I am not certain enough to edit, because the bold is lost in the markdown and the both-tier core practical 15.6 asks for work done in stretching. Options: (a) confirm against the printed spec and, if 15.4 is bold, wrap the 'Energy Stored in a Stretched Spring' section and prefix its question, checks and flashcards '(Higher tier)'; (b) leave it. Hooke's law itself (15.3) is in Appendix 4 list a and is both-tier, so the rest of the lesson is fine.",
+   "evidence": "spec Appendix 4 list b, 15.4; 'Equations required for higher tier only are shown in bold text' with the bold lost in this markdown",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F21",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "MEDIUM",
+   "claim": "The unit is named Physics Paper 2, but lessons 1 to 4 (Forces and Newton's laws, Momentum, Waves, Light) are Topics 2, 4 and 5, which sit on the first physics paper.",
+   "truth": "For Combined Science, Paper 5 (Physics 1) is Topics 1-6 and Paper 6 (Physics 2) is Topics 1, 8, 9, 10, 12, 13, 14 and 15. Lesson by lesson: L1 and L2 are Topic 2, L3 is Topic 4, L4 is Topic 5, so all four belong on the FIRST physics paper; L5 and L6 are Topics 12 and 13, L7 is Topic 14 and L8 is Topic 15, which are correct for the second paper. The sibling unit science-edexcel/physics-paper-1 is the mirror image: its L1-L2 are Topic 3 (first paper, correct) while its L3-L5 are Topic 10, L6 is Topic 11 and L7-L8 are Topic 14, all of which belong on the second paper. A simple re-grouping fixes both: move this unit's L1-L4 into the paper-1 unit and that unit's L3-L5 and L7-L8 into this one. Two problems survive the swap. Topic 14 would then be taught three times (that unit's Particle Model & Density and Changes of State & Internal Energy, plus this unit's Particle Model of Matter, which duplicates both), so one of the three should be retired or merged. And even after the swap the pair covers no Topic 6 (radioactivity), no Topic 8 (work and power) and no Topic 9 (forces and their effects), so three topics are missing outright. No lesson body states a paper number, a duration or a mark total, so no in-lesson exam claim needs correcting; the fault is the unit naming and the lesson placement, and it needs Tom's call. This finding is the mirror of F18 in the physics-paper-1 report.",
+   "evidence": "spec Paper 5 and Paper 6 content overviews; spec headings 'Topics for Paper 5' and 'Topics for Paper 6'",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F22",
+   "lesson": 0,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "All eight lessons carry the identical exam tip opening 'In Edexcel Physics questions'.",
+   "truth": "This unit is Combined Science, not the separate GCSE Physics, and the phrase could push a student towards the wrong specification content. The advice itself is sound. Changing it in eight lessons would re-narrate a block each for no gain in accuracy, so it is recorded rather than edited. Same call as F20 in the physics-paper-1 report.",
+   "evidence": "brief: the unit's qualification is combined",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F23",
+   "lesson": 0,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "The six-mark question in lessons 5, 6, 7 and 8 is marked with a 'Mastering (5-6 marks) / Secure (3-4 marks) / Developing (1-2 marks)' ladder, while the same slot in lessons 1 to 4 uses a bulleted mark scheme.",
+   "truth": "The house ladder is Top band / Upper-mid band / Mid band / Lower-mid band / Low band. Neither the ladder names nor the bullet lists are wrong facts, and the retro programme already carries a band-ladder workstream, so this is left for that sweep rather than edited here. No banned string appears: no Level 1 to Level 9 band names, no 'Award N marks for', no 'Nothing worthy of credit'.",
+   "evidence": "house band ladder in the checker brief; unit scan for banned strings returned nothing",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F24",
+   "lesson": 0,
+   "field": "conclusion_html",
+   "severity": "LOW",
+   "claim": "Every lesson's Key Takeaways repeats one filler line per heading: '<section name> - revise the key definitions, processes and equations from this section.'",
+   "truth": "Forty bullets across the unit that teach nothing, and they stop at five so the later sections of lessons 4, 6, 7 and 8 get no takeaway at all. Rewriting them is authoring, not fact-checking, and it re-narrates six blocks a lesson. Recorded, as in the physics-paper-1 report.",
+   "evidence": "conclusion_html of all eight lessons",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [],
+ "summary": "One hard error: the lesson 2 match check lists 'Braking distance' twice, and index-based scoring marks a correct pairing wrong. The unit's real problem is scope and tier. Lessons 1 to 4 are Topics 2, 4 and 5, which sit on the FIRST physics paper, and the sibling physics-paper-1 unit holds this paper's Topics 10 and 14, so a straight re-grouping would fix both units, leaving Topic 14 taught three times and Topics 6, 8 and 9 missing. Lesson 4 teaches the law of reflection and specular versus diffuse reflection, which the spec puts in the separate GCSE Physics only, and lesson 6 does the same for electric motors; the motor effect, Fleming's left-hand rule and F = BIl are Higher tier only and were untagged, as were fourteen momentum items in lesson 2. Also g taught as 9.8 N/kg where Edexcel gives 10, one higher-only wrapper hiding both-tier radio-wave content that the lesson's own question examines, an AQA 'required practical' in lesson 8, two lesson descriptions offset by one lesson, two lessons still carrying astronomy slugs, and twelve flashcard fields showing raw LaTeX to students. Every worked example, constant and answer key recomputed clean.",
+ "renarration": {
+  "run_at": "2026-09-04T11:28:52Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n19",
+    "key": "science-edexcel/physics-paper-2/narration_lesson-01_n19.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/physics-paper-2/narration_lesson-01_n19.mp3",
+    "voice": "Ollie",
+    "duration": 12.02,
+    "bytes": 144288,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 11:28:51 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n30",
+    "key": "science-edexcel/physics-paper-2/narration_lesson-08_n30.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/physics-paper-2/narration_lesson-08_n30.mp3",
+    "voice": "Ada",
+    "duration": 7.34,
+    "bytes": 88128,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 11:28:53 GMT"
+   }
+  ],
+  "verified_ok": 2,
+  "total": 2
+ }
+}
