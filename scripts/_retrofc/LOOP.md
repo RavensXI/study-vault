@@ -200,8 +200,11 @@ Science board anchors (verify in the spec before asserting):
   Papers 5-8. Higher-only statements in BOLD (bold files exist). Chapters are
   named (B1 You and your genes ...), outcomes coded B1.1 etc. Our units are
   named biology-paper-1/2 Gateway-style although J260 has ONE biology paper -
-  label, do not rename. Separate J257/J258/J259: read the spec's assessment
-  section before asserting.
+  label, do not rename. Separate J257/J258/J259 (verified 5 Sep on J257): TWO
+  papers per tier, Breadth (01 F / 03 H) and Depth (02 F / 04 H), each 90 marks,
+  1h45, 50%, BOTH assess all chapters (no chapter-to-paper split); Depth carries
+  the 6-mark extended responses. Units are chapter-named; topics are e.g. B1.1-B1.3
+  (no B1.4). Bold = Higher only.
 - Edexcel 1SC0 / 1BI0 / 1CH0 / 1PH0: the markitdown specs lost their bold, and
   bold is Edexcel's only Higher-tier marker. Bold-preserved extractions live
   beside them as `specs/edexcel/<name>-bold.md` (made with
