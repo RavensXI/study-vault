@@ -183,6 +183,14 @@ Science board anchors (verify in the spec before asserting):
   each, 1h45, 100 marks.
 - OCR Gateway A J250: 6 papers, 1h10, 60 marks; separate J247/J248/J249: 2
   papers each, 1h45, 90 marks.
+  Bio P1 = B1-B3 (+CS7), Bio P2 = B4-B6; same pattern for chemistry (C1-C3 /
+  C4-C6) and physics (P1-P4 / P5-P8) - verify in the spec. Practicals are PAGs,
+  never "required" or "core" practicals. Highest tariff 6 marks. OCR marks
+  Higher-tier statements in BOLD like Edexcel: bold-preserved extractions exist
+  for all 8 OCR specs as `specs/ocr/<name>-bold.md` (made 4 Sep with
+  `_spec_bold_extract.py`; specs/ is gitignored). Point every OCR checker at
+  both files; only content STATEMENTS in bold are tier evidence (headings and
+  table headers are bold too).
 - OCR 21st Century B J260 and J257/J258/J259: read the spec (different
   structure - do not assert from memory).
 - Edexcel 1SC0 / 1BI0 / 1CH0 / 1PH0: the markitdown specs lost their bold, and
