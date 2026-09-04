@@ -266,9 +266,10 @@ lesson content (pay for reasoning in Claude, not in the image model). The
 
 ```
 {diagram_form} of {subject}: {content sentence or two}.
-Label exactly these, spelled exactly like this, and nothing else: {label list}.
+These labels must appear, spelled exactly like this: {label list}.
 The diagram must show: {2-3 facts the vision gate will check}.
-Do not include: a title, a caption, a key or legend, any other text.
+Do not include a title, a caption or a key. Any lettering on drawn objects must be real,
+correctly spelled words in English or the period language, appropriate to the date shown.
 
 Style: a modern GCSE textbook illustration on a warm off-white paper background
 (#faf8f5), clean vector-like line work with soft flat colour fills and gentle
@@ -298,8 +299,11 @@ clutter, no logos, no real people, no exam-board names.
 ### Vision gate (mandatory, same as heroes)
 
 A Claude vision pass receives the label list and the fact list and answers
-three questions: every label present and spelled correctly? no extra labels?
-each fact true in the picture? Any "no" rejects the image and the retry prompt
+three questions: every label present and spelled correctly? every OTHER word in
+the picture legible, correctly spelled, right for the date and suitable for a
+GCSE audience (unverifiable text is flagged for Tom, not rejected)? each fact
+true in the picture? Period insignia are allowed where accurate (Tom, 4 Sep):
+the gate does not sanitise history. Any "no" rejects the image and the retry prompt
 carries the gate's note ("the aorta arrows pointed into the heart"). Even
 GPT-Image-2 medium drew a sector with its apex off-centre and MAI-2.6 reversed
 the aorta, so nothing ships ungated. Budget one retry in three.
