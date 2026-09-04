@@ -1,0 +1,299 @@
+{
+ "unit": "separate-sciences-edexcel/biology-paper-1",
+ "checked_at": "2026-09-04",
+ "spec_used": "specs/edexcel/biology-1BI0.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "Practice question 2 mark scheme opens 'Award 1 mark for: contains cell sap ...'.",
+   "truth": "Rewritten as 'Contains cell sap / keeps the cell turgid / supports the cell structure. [1 mark]'.",
+   "evidence": "House validator: the rubric phrase 'Award N mark(s) for' is a banned string in any lesson field.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Calorimetry: 'c is the specific heat capacity of water (4.2 J g<sup>1</sup> &deg;C<sup>1</sup>)'.",
+   "truth": "The negative signs have been lost from the indices. It should read 4.2 J g−1 °C−1, which renders as 'J g minus one degC minus one'. As written it renders 'J g1 degC1', which is a different (and meaningless) unit.",
+   "evidence": "Settled value: the specific heat capacity of water is 4200 J/kg °C = 4.2 J g−1 °C−1.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'glucose diffuses from the gut into blood cells'.",
+   "truth": "Glucose is absorbed from the gut into the blood (the plasma), not into blood cells. A student who wrote 'into blood cells' would not be credited.",
+   "evidence": "Spec 1.15 (transport into and out of cells); settled physiology.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Osmosis core practical: 'The concentration at which there is no change in mass is the water potential of the potato cells.'",
+   "truth": "A concentration is not a water potential. At that point the solution and the potato cells have the SAME water potential. Rewritten to say so.",
+   "evidence": "Spec 1.16 / 1.17 (osmosis in potatoes, percentage change in mass); category error.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The whole 'Food Tests (Triple Only)' section, including the four food tests and calorimetry, sits inside <div class=\"higher-only\">.",
+   "truth": "Food tests are core practical 1.13B and calorimetry is 1.14B: Biology-only, but assessed at BOTH tiers. The wrapper hides them from every Foundation student and stamps them with a 'Higher Tier' badge for everyone else. Wrapper removed. This is the unit's systematic fault: .higher-only has been used to mean 'separate science only'.",
+   "evidence": "specs/edexcel/biology-1BI0.md lines 1-1774: 1.13B and 1.14B carry a B (Biology-only) but no bold; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file. css: body.tier-foundation .higher-only { display:none }.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 0,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Six practice questions (L2 Q6, L3 Q6, L4 Q6, L5 Q6, L6 Q6, L8 Q4) are typed '9 marks — Evaluate' with a 9 / 6-8 / 3-5 / 1-2 band ladder.",
+   "truth": "This board sets no 9-mark question. Extended open response on this paper tops out at 6 marks. Re-typed to '6 marks — Evaluate' and the ladders re-banded to 6 / 4-5 / 2-3 / 1, matching the 6-mark ladders already used elsewhere in the same lessons.",
+   "evidence": "Spec assessment section (lines 2584-2662): each paper is 1 hour 45 minutes, 100 marks, ten questions, mixture of styles including extended open-response; no 9-mark format. Same fix applied in science-aqa and separate-sciences units.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The entire 'The Brain (Triple Only)' section — cerebral hemispheres, cerebellum, medulla oblongata AND the CT/PET collapsible — sits inside one <div class=\"higher-only\">.",
+   "truth": "The brain regions are 2.10B: Biology-only, both tiers. CT and PET scanning is 2.11B: Higher tier only. The gate has been narrowed so it covers only the CT/PET collapsible; the three brain regions are now visible to Foundation students, who are examined on them.",
+   "evidence": "Spec 2.10B vs 2.11B; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file. Supporting signal in the file: 2.11B and 2.12B wrap at 52-54 characters against 59-60 for the adjacent 2.10B, which is what bold does to a fixed-width column.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 3,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Two practice questions and three flashcards test CT and PET scanning with no tier marker.",
+   "truth": "Tagged '(Higher tier)' to match the article gate on 2.11B.",
+   "evidence": "Spec 2.11B; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Everything from 'The Eye (Triple Only)' to the end of the lesson — eye structures, accommodation, short- and long-sightedness, cataracts, colour blindness and the closing key fact — sits inside <div class=\"higher-only\">.",
+   "truth": "The eye and its defects are 2.15B, 2.16B and 2.17B: Biology-only, both tiers. Two thirds of the lesson, and four of its five knowledge checks' subject matter, were hidden from Foundation students. Wrapper removed.",
+   "evidence": "Spec 2.15B-2.17B; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The section on Gregor Mendel sits inside <div class=\"higher-only\">, although its heading carries no tier or triple label.",
+   "truth": "Mendel's work is 3.11B: Biology-only, both tiers. A knowledge check ('Mendel conducted his experiments using which organism?') and a flashcard test it, so Foundation students were being asked about content they could not see. Wrapper removed.",
+   "evidence": "Spec 3.11B; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file. The statement wraps at 55-62 characters, in line with the non-bold statements around it.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11",
+   "lesson": 5,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Two practice questions, one knowledge check and two flashcards test ABO blood groups and codominance with no tier marker.",
+   "truth": "Tagged '(Higher tier)' to match the article gate on 3.17B, which is kept.",
+   "evidence": "Spec 3.17B; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 5,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "One practice question and three flashcards test transcription and translation with no tier marker.",
+   "truth": "Tagged '(Higher tier)' to match the article gate on 3.7B-3.10B, which is kept.",
+   "evidence": "Spec 3.7B-3.10B; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F13",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The pentadactyl limb paragraph sits inside <div class=\"higher-only\">.",
+   "truth": "The pentadactyl limb is 4.6B: Biology-only, both tiers. A knowledge check and a flashcard test it. Wrapper removed.",
+   "evidence": "Spec 4.6B; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file. It wraps at 57 characters, matching the non-bold 4.5 next to it rather than the 52-56 bold band.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F14",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Genetic Engineering and GM Crops (Triple Only)' puts the definition of genetic engineering, the three mechanism steps, the Bt crop example and the key fact all inside one <div class=\"higher-only\">.",
+   "truth": "Only the mechanism steps are Higher tier (4.11). The definition is 4.10, which is in Combined Science too, and the Bt crop example is 4.12B — both Foundation content. The gate has been narrowed to the three mechanism paragraphs.",
+   "evidence": "Spec 4.10 / 4.11 / 4.12B; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file. 4.11 wraps at 47 characters against 56-58 for the adjacent 4.10. Consistent with the orchestrator's earlier ruling on 4.11 in science-edexcel__biology-paper-1.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F15",
+   "lesson": 6,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Two practice questions, one knowledge check and three flashcards test restriction enzymes, ligase and vectors with no tier marker.",
+   "truth": "Tagged '(Higher tier)' to match the narrowed article gate on 4.11.",
+   "evidence": "Spec 4.11; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file. Same tagging as science-edexcel__biology-paper-1.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F16",
+   "lesson": 6,
+   "field": "flashcard_questions",
+   "severity": "LOW",
+   "claim": "Flashcard 13 reads 'What Bt crop insert and what does it do?'",
+   "truth": "Missing verb. Corrected to 'What is the Bt crop insert and what does it do?'",
+   "evidence": "Plain-text field must read for a 15-year-old.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The lytic and lysogenic cycle paragraph sits inside <div class=\"higher-only\">.",
+   "truth": "The lifecycle of a virus is 5.7B: Biology-only, both tiers. A 2-mark practice question and a flashcard test it. Wrapper removed.",
+   "evidence": "Spec 5.7B; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file. It wraps at 64 characters, well clear of the bold band.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The plant defences paragraph sits inside <div class=\"higher-only\">.",
+   "truth": "Plant physical and chemical defences are 5.9B and 5.10B: Biology-only, both tiers. Wrapper removed.",
+   "evidence": "Spec 5.9B, 5.10B; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F19",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "The whole 'Vaccination and Herd Immunity' section sits inside <div class=\"higher-only\">.",
+   "truth": "Immunisation is 5.14 — no B, so it is in Combined Science as well — and is not Higher tier. Herd immunity is 5.15B, Biology-only but both tiers. This hid mainstream Foundation content that a knowledge check, a practice question and a flashcard all test. Wrapper removed.",
+   "evidence": "Spec 5.14 (no B suffix, non-bold) and 5.15B; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F20",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "Aseptic technique, the autoclave and the antibiotic-disc core practical sit inside <div class=\"higher-only\">.",
+   "truth": "These are 5.17B and core practical 5.18B: Biology-only, both tiers. A core practical is assessed at both tiers, so it can never be Higher-only — the wrapper hid a required practical, and a 3-mark practice question and three flashcards on it, from Foundation students. Wrapper removed.",
+   "evidence": "Spec 5.17B and 5.18B (italic = core practical); spec lines 620-660 on core practicals; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F21",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The paragraph on obesity as correlation rather than causation sits inside <div class=\"higher-only\">.",
+   "truth": "Lifestyle factors and non-communicable disease is 5.24 — no B, in Combined Science too — and is not Higher tier. Wrapper removed.",
+   "evidence": "Spec 5.24; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F22",
+   "lesson": 8,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Two practice questions, one knowledge check and four flashcards test monoclonal antibodies with no tier marker.",
+   "truth": "Tagged '(Higher tier)' to match the article gate on 5.21B and 5.22B, which is kept.",
+   "evidence": "Spec 5.21B, 5.22B; the spec markdown has lost its bold, and bold is Edexcel's only marker for Higher tier, so this ruling comes from my knowledge of 1BI0 rather than the file. Both wrap at 54-56 characters against 69 for the adjacent 5.20.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F23",
+   "lesson": 0,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The unit presents itself as covering Paper 1 topics 1-5 for separate Biology, but several Biology-only Paper 1 statements are absent.",
+   "truth": "Missing: 2.12B (limits on treating brain and nervous system damage — spinal injuries and brain tumours; L3 is titled '... and the Brain' and stops after CT/PET), 3.1B and 3.2B (advantages and disadvantages of asexual and sexual reproduction), 3.18B (how sex-linked disorders are inherited — only glanced at in L4 for colour blindness), 4.13B (fertilisers and biological control), 5.11B (detecting and identifying plant diseases), 5.19B (cross-sectional area of a clear zone using pi r squared). Also absent, though not Biology-only: 3.3 meiosis, which is a Topic 3 requirement at both tiers. Options: (a) leave as an eight-lesson overview and accept the gaps, (b) add a ninth lesson covering meiosis, reproduction and sex linkage, (c) extend L3 and L7 with the two smaller items. Not edited.",
+   "evidence": "specs/edexcel/biology-1BI0.md, Topics 1-5; grep of all eight raw lessons for each statement's key terms.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F24",
+   "lesson": 5,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "ABO alleles are written in plain-text fields as caret notation: 'I^A I^O', 'I^B I^O'.",
+   "truth": "Not LaTeX and not wrong, but it is markup leaking into a plain-text field. Unicode superscripts would render inconsistently across fonts, so no edit is proposed.",
+   "evidence": "Plain-text fields use unicode; the *_html fields in the same lesson correctly use <sup>.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F25",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "The Key Fact on human non-specific defences lists skin, the mucus-cilia escalator, lysozyme and the inflammatory response.",
+   "truth": "The spec's named chemical defences are lysozymes AND hydrochloric acid in the stomach. Hydrochloric acid is missing. Nothing stated is wrong, so no edit; worth adding on the next content pass.",
+   "evidence": "Spec 5.12b: 'chemical defence, including lysozymes and hydrochloric acid'.",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [],
+ "summary": "The unit's systematic fault is that <div class=\"higher-only\"> has been used to mean 'separate science only': nine gates wrapped Biology-only but both-tier content, including a core practical (aseptic technique and antibiotic discs), vaccination, the whole of the eye, food tests and Mendel, hiding them from every Foundation student. Nine wrappers removed, two narrowed to the genuinely Higher-tier part, and 21 questions, checks and flashcards on the content that stays gated tagged '(Higher tier)'. Also fixed: six 9-mark practice questions re-banded to 6 (this board sets no 9-mark question), a broken specific heat capacity unit, glucose absorbed 'into blood cells', and a concentration described as a water potential. One ADJUDICATE on Biology-only Paper 1 statements the unit omits. The spec markdown has lost its bold, so every tier ruling rests on knowledge of 1BI0 plus the line-wrap width evidence in the file, not on the file's own marking.",
+ "renarration": {
+  "run_at": "2026-09-04T11:43:08Z",
+  "clips": [
+   {
+    "lesson": 2,
+    "id": "n12",
+    "key": "separate-sciences-edexcel/biology-paper-1/narration_lesson-02_n12.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/biology-paper-1/narration_lesson-02_n12.mp3",
+    "voice": "Ada",
+    "duration": 18.6,
+    "bytes": 223200,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 11:42:59 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n19",
+    "key": "separate-sciences-edexcel/biology-paper-1/narration_lesson-02_n19.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/biology-paper-1/narration_lesson-02_n19.mp3",
+    "voice": "Ada",
+    "duration": 26.4,
+    "bytes": 316800,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 11:43:04 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n26",
+    "key": "separate-sciences-edexcel/biology-paper-1/narration_lesson-02_n26.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/biology-paper-1/narration_lesson-02_n26.mp3",
+    "voice": "Ada",
+    "duration": 26.16,
+    "bytes": 313920,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 11:43:09 GMT"
+   }
+  ],
+  "verified_ok": 3,
+  "total": 3
+ }
+}
