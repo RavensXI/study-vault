@@ -1,0 +1,414 @@
+{
+ "unit": "separate-sciences-edexcel/physics-paper-2",
+ "checked_at": "2026-09-04",
+ "spec_used": "specs/edexcel/physics-1PH0.md + specs/edexcel/physics-1PH0-bold.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "There is a second power equation useful when a steady force moves at constant velocity: P = Fv ... (key fact, plus a knowledge check, a flashcard and a 6-mark practice question built on it)",
+   "truth": "P = Fv is nowhere in Edexcel 1PH0. Appendix 2 list a (recall) for Paper 2 is 8.6, 8.8, 8.9, 8.13, 8.15, 9.7P, 10.6, 10.9, 10.13, 10.29, 10.31, 14.2, 15.3, 15.11P; list b (given) is 2.9, 2.26, 10.27, 12.13, 13.7P, 13.10, 14.8, 14.9, 14.19P, 15.4, 15.14P. The derivation is sound, so the fix adds one clause saying it is not on the list rather than removing it.",
+   "evidence": "specs/edexcel/physics-1PH0.md Appendix 2; grep for 'Fv' and 'force x speed' returns nothing",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 1,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "W = F x d (or W = Fd) [1/2 mark]; joule / J [1/2 mark]",
+   "truth": "GCSE mark schemes award whole marks only. Rewritten as one mark for both parts.",
+   "evidence": "settled board practice",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "The whole 'Turning Effect and Moments' section (moment equation, principle of moments, see-saw worked example) sits inside <div class=\"higher-only\">.",
+   "truth": "Statements 9.6P, 9.7P and 9.8P are not bold in the bold spec, so they are examined at both tiers. body.tier-foundation .higher-only is display:none, so Foundation separate-Physics students saw no moments content at all, including the recall equation 9.7P.",
+   "evidence": "specs/edexcel/physics-1PH0-bold.md 9.6P-9.8P unbolded; css/style.css line 5062",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "The 'Levers' and 'Gears' sections sit inside a second <div class=\"higher-only\">.",
+   "truth": "Statement 9.9P (levers and gears) is not bold, so it is both tiers. Same Foundation blackout as F3.",
+   "evidence": "specs/edexcel/physics-1PH0-bold.md 9.9P unbolded",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 2,
+   "field": "exam_tip_html",
+   "severity": "MEDIUM",
+   "claim": "In 6-mark describe-a-method questions about finding the centre of mass, examiners want: suspend object freely from two different points, draw plumb lines ...",
+   "truth": "The phrase 'centre of mass' does not appear anywhere in the 1PH0 specification, so this question cannot be set. Replaced with a genuine lever/moments exam point.",
+   "evidence": "grep -i 'centre' over specs/edexcel/physics-1PH0.md returns only 'centres' (exam-centre) hits",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "The 'Centre of Mass' section (n17-n19: centre of mass, plumb-line method, toppling and stability) and flashcard 6 on the same topic.",
+   "truth": "Out of scope for 1PH0 (see F5). Not edited: deleting it would remove three narration blocks. Keep as enrichment, or replace the section text with 9.10 (reducing unwanted energy transfer through lubrication), which the unit omits.",
+   "evidence": "specs/edexcel/physics-1PH0.md - no centre of mass statement; 9.10 present and uncovered",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F7",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Free-Body Diagrams' and the equilibrium paragraph are taught with no Higher flag in a tier:both lesson.",
+   "truth": "9.3 (vector diagrams, resolution of forces, equilibrium), 9.4 (draw and use free body force diagrams) and 9.5 (resultant force and the balanced-force special case) are all bold, i.e. Higher tier only. This is the inverse of the F3/F4 fault: Higher-only content left open while both-tier content was hidden. Approved as a FIX by the coordinator: the section from the n4 heading through the n7/n8 collapsible is now wrapped in higher-only, and flashcard 4 (free-body diagrams, 9.4) is tagged (Higher tier). No practice question or knowledge check in L2 tests 9.3-9.5 - they all test 9.2 or the moments statements 9.7P-9.9P, which are both tiers.",
+   "evidence": "specs/edexcel/physics-1PH0-bold.md 9.3-9.5 bold",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The three wires have standardised colours introduced with post-2006 wiring regulations",
+   "truth": "Brown / blue / green-and-yellow flex colours were harmonised in the UK in 1970. The 2004-06 change (BS 7671) recoloured fixed wiring, not appliance flex or plugs. Date claim removed.",
+   "evidence": "settled fact; spec 10.37-10.40 states the wires without any date",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Three power equations: P = IV; P = I2R; P = V2/R (key fact, with a revision tip telling students to write all three).",
+   "truth": "Spec 10.31 lists only P = IV and P = I2R, both recall. P = V2/R is in neither Appendix 2 list. Clause added saying it will be given if a question needs it.",
+   "evidence": "specs/edexcel/physics-1PH0.md 10.31 and Appendix 2",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 4,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Question 6 typed '9 marks - Extended Response'.",
+   "truth": "Edexcel 1PH0 Paper 2 is ten questions worth 100 marks with extended open-response items at 6 marks. A 9-mark tariff is an AQA/Eduqas format and does not exist on this paper. Retyped as 6 marks; the same fault appears in L5, L6, L7 and L8.",
+   "evidence": "specs/edexcel/physics-1PH0.md assessment information, Paper 2",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11",
+   "lesson": 4,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard: 'Why do transformers only work with alternating current?' in a tier:both lesson.",
+   "truth": "13.5 and 13.6 are bold (Higher only); only 13.9 (where step-up and step-down transformers are used in the grid) is both tiers. Tagged '(Higher tier)' at the end of the question.",
+   "evidence": "specs/edexcel/physics-1PH0-bold.md 13.5, 13.6 bold; 13.8, 13.9, 13.10 unbolded",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "The entire lesson body is wrapped in a single <div class=\"higher-only\">.",
+   "truth": "Topic 11 (Static electricity) has no bold statement at all: 11.1P to 11.10P are Physics-only but both tiers. The wrapper is the known build fault - 'higher-only' used to mean 'separate-science only'. Removed.",
+   "evidence": "specs/edexcel/physics-1PH0-bold.md Topic 11, lines 1976-2020, no bold",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F13",
+   "lesson": 5,
+   "field": "tier (lesson metadata)",
+   "severity": "HIGH",
+   "claim": "lessons.tier = 'higher' on this lesson.",
+   "truth": "Should be 'both'. browse-loader.js filters out tier='higher' rows for Foundation students and lesson-loader.js blocks the direct URL, so Foundation separate-Physics students cannot reach Topic 11 at all - charging by friction, attraction and repulsion, earthing, electric fields, hazards and uses. Fixing the wrapper (F12) does not help until the row tier is flipped. Not editable from _edits.json.",
+   "evidence": "js/browse-loader.js:695, js/lesson-loader.js:236-251",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F14",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The field is stronger close to the plates and weaker at the edges (edge effects).",
+   "truth": "Between parallel plates the field is uniform - equal strength everywhere - which is why the lines are drawn parallel and evenly spaced, as the same paragraph says. Only the fringe near the plate edges is weaker. The sentence contradicted itself and taught a misconception.",
+   "evidence": "spec 11.9P (relate field strength to concentration of lines); settled fact",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F15",
+   "lesson": 5,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Question 6 typed '9 marks - Evaluate'.",
+   "truth": "See F10. Retyped as 6 marks.",
+   "evidence": "specs/edexcel/physics-1PH0.md assessment information",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17",
+   "lesson": 6,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Q: 'What is the difference between a permanent magnet and an induced magnet?' A: 'A permanent magnet always has its own magnetic field.'",
+   "truth": "The answer covers only half the question - the induced magnet is never mentioned. Second sentence added.",
+   "evidence": "spec 12.3",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18",
+   "lesson": 6,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Q: 'What does Fleming's left-hand rule state?' A: 'Point the thumb, index finger and middle finger of the left hand mutually at right angles.'",
+   "truth": "That is the hand position, not the rule. The answer never says which finger is force, field or current, so a student self-testing on it learns nothing usable.",
+   "evidence": "spec 12.12",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F19",
+   "lesson": 6,
+   "field": "practice_questions / knowledge_checks / flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Motor effect, Fleming's left-hand rule, F = BIl and the d.c. motor are tested by 3 practice questions, 3 knowledge checks and 6 flashcards in a tier:both lesson with no Higher flag.",
+   "truth": "12.10, 12.11, 12.12, 12.13 and 12.14P are all bold - Higher tier only on Edexcel. '(Higher tier)' prefixed on the practice questions and knowledge checks, appended on the flashcard questions.",
+   "evidence": "specs/edexcel/physics-1PH0-bold.md 12.10-12.14P bold; 12.1-12.9 unbolded",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F20",
+   "lesson": 6,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Question 6 typed '9 marks - Evaluate'.",
+   "truth": "See F10. Retyped as 6 marks.",
+   "evidence": "specs/edexcel/physics-1PH0.md assessment information",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F16",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'The Motor Effect', 'Fleming's Left-Hand Rule' and the F = BIl collapsible sit outside the higher-only wrapper; only 'The DC Motor' is wrapped.",
+   "truth": "The existing DC-motor wrapper was correct (12.14P is bold) but too narrow: 12.10, 12.11 (motor effect), 12.12 (Fleming's left-hand rule) and 12.13 (F = BIl) are bold too. Approved as a FIX by the coordinator: the opening tag has moved to the n10 'The Motor Effect' heading and the old opening tag before n20 is removed, so the widened section keeps a single opening and a single closing tag. 12.1-12.9 (permanent and induced magnets, field lines, electromagnetism, solenoids, electromagnets) stay outside the wrapper, correctly, as both-tier content. The three practice questions, three knowledge checks and six flashcards that test 12.10-12.14P were already tagged (Higher tier) under F19.",
+   "evidence": "specs/edexcel/physics-1PH0-bold.md 12.10-12.13 bold",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F21",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "One <div class=\"higher-only\"> runs from 'Electromagnetic Induction' all the way to the end of 'The National Grid and Transmission Losses'.",
+   "truth": "13.1P to 13.7P are bold, so the wrapper is right for induction, the generator effect, microphones, transformers and the turns ratio. But 13.8, 13.9 and 13.10 are not bold: the National Grid explanation, step-up/step-down transformers in the grid, and the transformer power equation Vp x Ip = Vs x Is are all both tiers. Wrapper narrowed to close before 'Power and Efficiency in Transformers'.",
+   "evidence": "specs/edexcel/physics-1PH0-bold.md 13.1P-13.7P bold, 13.8-13.10 unbolded; 13.10 also unbolded in the Appendix 2 list b table",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F22",
+   "lesson": 7,
+   "field": "tier (lesson metadata)",
+   "severity": "MEDIUM",
+   "claim": "lessons.tier = 'higher', so the whole lesson is hidden from Foundation students.",
+   "truth": "Most of the lesson is genuinely Higher, so the row tier is defensible - but 13.10 (Vp x Ip = Vs x Is) is a both-tier equation on the Foundation formulae sheet and it appears in no other lesson in this unit. L4 carries the National Grid material (13.8, 13.9) for Foundation, but not the power equation. Either flip this row to 'both' now that F21 has narrowed the wrapper, or add Vp x Ip = Vs x Is to L4.",
+   "evidence": "specs/edexcel/physics-1PH0.md Appendix 2 list b, 13.10; js/browse-loader.js:695",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F23",
+   "lesson": 7,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Question 6 typed '9 marks - Evaluate'.",
+   "truth": "See F10. Retyped as 6 marks.",
+   "evidence": "specs/edexcel/physics-1PH0.md assessment information",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F24",
+   "lesson": 7,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Q: 'Name two ways to increase the speed of motion can increase what in a generator coil?'",
+   "truth": "The question is garbled - two prompts spliced together - and does not match its answer ('The induced EMF'). Rewritten to match the answer.",
+   "evidence": "spec 13.2",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F32",
+   "lesson": 7,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "The top band of question 6 requires eddy currents and laminated cores.",
+   "truth": "Neither appears in 1PH0. The lesson keeps them in a higher-only enrichment block, which is fine, but they should not be needed for full marks. Not edited - the band text is being retariffed anyway by F23.",
+   "evidence": "grep 'eddy' over specs/edexcel/physics-1PH0.md returns nothing",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F25",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "'Absolute Zero and the Kelvin Scale' and 'Boyle's Law' sit inside <div class=\"higher-only\">.",
+   "truth": "14.14 (absolute zero, -273 degC), 14.15 (convert between kelvin and Celsius), 14.16P-14.19P (gas compression, pressure and volume, P1V1 = P2V2) are all unbolded, so they are both tiers. Only 14.20P (work done on a gas, bicycle pump) is bold, and the lesson does not teach it. Wrapper removed.",
+   "evidence": "specs/edexcel/physics-1PH0-bold.md Topic 14, 14.14-14.19P unbolded, 14.20P bold; 14.19P unbolded in the Appendix 2 list b table",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F26",
+   "lesson": 8,
+   "field": "exam_tip_html",
+   "severity": "MEDIUM",
+   "claim": "For Boyle's law (Higher), state the conditions ...",
+   "truth": "14.19P is not bold, so Boyle's law is examined at both tiers. The '(Higher)' label would make a Foundation student skip a topic they are examined on. Removed.",
+   "evidence": "specs/edexcel/physics-1PH0-bold.md 14.19P unbolded",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F27",
+   "lesson": 8,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Question 6 typed '9 marks - Evaluate'.",
+   "truth": "See F10. Retyped as 6 marks.",
+   "evidence": "specs/edexcel/physics-1PH0.md assessment information",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F28",
+   "lesson": 0,
+   "field": "unit coverage",
+   "severity": "MEDIUM",
+   "claim": "The unit's eight lessons cover topics 8, 9 (part), 10, 11, 12, 13 and 14. Topic 15 - Forces and matter - is absent.",
+   "truth": "Topic 15 is a Paper 2 topic and none of it is taught here: 15.1-15.2 elastic and inelastic distortion, 15.3 F = kx (a recall equation), 15.4 elastic energy, 15.5 linear vs non-linear force-extension, core practical 15.6 (extension and work done on a spring), 15.7P-15.12P atmospheric and fluid pressure with the recall equation 15.11P P = F/A, and 15.13P-15.17P pressure with depth, the column equation and upthrust. The sister unit physics-paper-1 mentions the spring constant only inside its elastic-PE paragraph and names no spring core practical, so 15.6 is named nowhere in the subject. Three of the four Paper 2 core practicals are named correctly here (10.17 in L3, 14.3 and 14.11 in L8, with 14.11 correctly described as water plus a melting-ice graph); 15.6 is the missing fourth. This needs one or two new lessons, not an edit.",
+   "evidence": "specs/edexcel/physics-1PH0.md Topic 15 and core practical list (eight mandatory); grep over both unit raw dirs",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F29",
+   "lesson": 0,
+   "field": "lesson-to-paper mapping",
+   "severity": "LOW",
+   "claim": "Overlap with the physics-paper-1 unit.",
+   "truth": "Confirmed duplication rather than omission: L1 here (work done, power, KE, GPE, efficiency = topic 8) repeats material the paper-1 unit carries in its L3/L4, and L4 here repeats the National Grid and transformer material that L7 also teaches. Nothing in this unit is Paper 1 content taught as Paper 2. No fix proposed - the duplication is harmless once F28 is answered, but if lessons are rebalanced, topic 8 belongs here and not in the paper-1 unit.",
+   "evidence": "brief; scripts/_retrofc/units/separate-sciences-edexcel__physics-paper-1/_brief.json",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F30",
+   "lesson": 0,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "'[1 mark for consistent unit throughout]' appears as a mark point in L1 question 5 and L3 question 6, inflating both to 6 marks.",
+   "truth": "No board awards a mark for unit consistency alone; both are 4-5 mark calculations. Not edited - retariffing would need the marks text rewritten as well, and the arithmetic in both is correct.",
+   "evidence": "settled board practice",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F31",
+   "lesson": 0,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "Extended-response mark schemes use a Mastering / Secure / Developing / Emerging ladder.",
+   "truth": "Not a board's wording, so no copyright issue, but it is not the house ladder (Top band / Upper-mid band / Mid band / Lower-mid band / Low band) either. Eleven questions use it, spread across all eight lessons. Flagged for the programme-wide band-ladder sweep rather than fixed here.",
+   "evidence": "scripts/_retrofc/CHECK_PROMPT_SCIENCE.md house ladder",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F33",
+   "lesson": 0,
+   "field": "checks that came back clean",
+   "severity": "LOW",
+   "claim": "Faults the brief asked me to look for that are not present.",
+   "truth": "L7 and L8 slugs are electromagnetic-induction-and-transformers and particle-model-density-states-and-the-gas-laws - no astronomy residue. No match knowledge check has duplicated options, and every order array resolves correctly against renderMatch in js/main.js (L7 [2,0,1] and L8 [1,2,0] are both right). No raw LaTeX in plain-text fields, no $$ corrupted into digits, no placeholder questions, no article text truncated into exam_tip_html, no banned rubric strings, no spec codes, no 'required practical', no AQA topic numbering, no SPaG. Mains frequency is stated correctly (50 cycles per second, 100 direction changes per second) - not the '50 times per second' error. Every worked example and answer key recomputes correctly: L1 480 J / 10 m/s / 49 m/s / 800 W / 72 kW, L2 1.5 m / 20 N m / 90 N / 100 rpm / 200 rpm, L3 30 C / 30 ohm / 2 A and 4 A, L4 2070 W / 248 kJ / 3.9 A / 200 kW, L6 0.3 N / 0.80 N / 0.6 N, L7 23 V / 500 V / 0.20 A / 100 V / 4600 V / 1.0 A / 60 V / 250 V, L8 2.71 g/cm3 / 45 000 J / 10 000 J / 600 000 Pa twice.",
+   "evidence": "recomputation; js/main.js renderMatch; greps over the raw dir",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [
+  3
+ ],
+ "summary": "The known build fault is here in force: five of the seven higher-only wrappers are wrong. L2 hides moments, levers and gears (9.6P-9.9P), L5 hides the whole of static electricity (Topic 11), L8 hides absolute zero, the kelvin scale and Boyle's law (14.14-14.19P), and L7's wrapper swallows the both-tier National Grid and transformer power equation (13.8-13.10); only L6's d.c.-motor wrapper is right, and it was too narrow. Two wrappers are also added or widened where bold content sat open to Foundation: the free-body diagram section in L2 (9.3-9.5) and the motor-effect half of L6 (12.10-12.13). L5 also carries tier='higher' on the lesson row, so Foundation students cannot reach Topic 11 at all. Beyond tier: five questions carry a 9-mark tariff Edexcel never sets, two off-spec equations (P = Fv, P = V2/R) are taught as required recall, an exam claim rests on centre of mass which is not in 1PH0, a parallel-plate field is described as stronger near the plates, the plug-colour date is wrong, and three flashcards are broken. All arithmetic and every answer key recompute correctly. The one structural gap is Topic 15 (Forces and matter), which is taught nowhere in the subject, taking core practical 15.6 with it.",
+ "renarration": {
+  "run_at": "2026-09-04T13:01:53Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n33",
+    "key": "separate-sciences-edexcel/physics-paper-2/narration_lesson-01_n33.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/physics-paper-2/narration_lesson-01_n33.mp3",
+    "voice": "Ollie",
+    "duration": 26.04,
+    "bytes": 312480,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 13:01:28 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n31",
+    "key": "separate-sciences-edexcel/physics-paper-2/narration_lesson-02_n31.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/physics-paper-2/narration_lesson-02_n31.mp3",
+    "voice": "Ada",
+    "duration": 34.18,
+    "bytes": 410112,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 13:01:35 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n6",
+    "key": "separate-sciences-edexcel/physics-paper-2/narration_lesson-04_n6.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/physics-paper-2/narration_lesson-04_n6.mp3",
+    "voice": "Ada",
+    "duration": 6.7,
+    "bytes": 80352,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 13:01:37 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n20",
+    "key": "separate-sciences-edexcel/physics-paper-2/narration_lesson-04_n20.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/physics-paper-2/narration_lesson-04_n20.mp3",
+    "voice": "Ada",
+    "duration": 27.29,
+    "bytes": 327456,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 13:01:42 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n13",
+    "key": "separate-sciences-edexcel/physics-paper-2/narration_lesson-05_n13.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/physics-paper-2/narration_lesson-05_n13.mp3",
+    "voice": "Ollie",
+    "duration": 26.74,
+    "bytes": 320832,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 13:01:47 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n39",
+    "key": "separate-sciences-edexcel/physics-paper-2/narration_lesson-08_n39.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/physics-paper-2/narration_lesson-08_n39.mp3",
+    "voice": "Ada",
+    "duration": 37.92,
+    "bytes": 455040,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 13:01:53 GMT"
+   }
+  ],
+  "verified_ok": 6,
+  "total": 6
+ }
+}
