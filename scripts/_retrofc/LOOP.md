@@ -103,6 +103,13 @@ C4. Second-reader audit for Codex units: every FIFTH Codex unit for the
     first twenty, then every tenth, same method as the Claude audit; record
     in `codex.audits`. A missed mark-affecting error tightens the wrapper's
     prompt in `_run_codex_checker.py` before the next launch.
+C4b. Shell hygiene (4 Sep, a rollback was counted as a success): `finish`
+    exits 1 on a validator rollback, but a pipe (`finish | grep | tail`)
+    reports the LAST command's status. Use `set -o pipefail` and check
+    `${PIPESTATUS[0]}` before touching `units_done` or dispatching. Codex
+    writes HTML entities into plain-text fields occasionally; the wrapper
+    prompt now forbids it, and `html.unescape` on non-_html edit values is
+    the repair.
 C5. Codex never receives service keys (`shell_environment_policy.inherit=
     "core"`) and writes only inside its unit dir; the finish step is what
     touches Supabase, R2 and git, and it runs with the orchestrator's env.
