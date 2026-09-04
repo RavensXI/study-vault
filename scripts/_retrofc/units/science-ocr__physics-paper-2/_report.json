@@ -1,0 +1,462 @@
+{
+ "unit": "science-ocr/physics-paper-2",
+ "checked_at": "2026-09-04T18:02:07",
+ "spec_used": "specs/ocr/combined-science-a-gateway-J250-bold.md (v5.0, tier authority) and specs/ocr/combined-science-a-gateway-J250.md (v4.3)",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "L1 teaches diffraction as examinable wave behaviour: a bullet in the main text, a 'Why Sound Diffracts Around Corners but Light Does Not' collapsible, a key fact, the exam tip, knowledge check 4 and the whole 6-mark extended-response practice question.",
+   "truth": "The word 'diffraction' does not appear anywhere in the OCR Gateway Combined Science A spec (0 hits in both the v4.3 and v5.0 extractions). P4.1 covers amplitude, wavelength, frequency, period, the wave-speed relationship, transverse versus longitudinal, and evidence that the wave travels; reflection and refraction appear only as ripple-tank / PAG P4 practical suggestions. Diffraction is separate-Physics content. Options: (a) keep the collapsible as clearly labelled enrichment but rebuild the 6-mark question and knowledge check 4 on in-spec P4.1 material (a wave-speed calculation, or evidence that the wave travels and not the water); (b) strip diffraction entirely. Recommend (a) - the explanation is good and harmless, but a 6-mark question a Combined student can never be asked is wasted revision time.",
+   "evidence": "spec P4.1a-P4.1g (bold file lines 5751-5805); grep 'diffract' returns 0 hits in specs/ocr/combined-science-a-gateway-J250-bold.md and in -J250.md",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F2",
+   "lesson": 1,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answer is the literal string 'v = f \\times \\lambda.'",
+   "truth": "Flashcard fields are plain text and render as textContent, so the student sees the backslash commands, not an equation. Plain-text fields must use unicode.",
+   "evidence": "house rule: plain-text fields use unicode, *_html fields use entities; the same fault was found in Paper 1 (18 flashcards)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The 'Uses of Each EM Wave Region' list (narration block n10, not inside a higher-only wrapper) tells every student: 'Can induce oscillations in electrical circuits, which is how aerials receive signals.'",
+   "truth": "That is statement P4.2i, printed in bold in the spec and therefore Higher tier only. The lesson already teaches it properly inside a higher-only wrapper (n25, 'Radio Waves and Electrical Circuits'), so the unwrapped clause is a duplicate that leaks Higher content to Foundation students. Delete the clause.",
+   "evidence": "spec bold file line 5924: '**P4.2i** recall that radio waves can be produced by, or can themselves induce, oscillations in electrical circuits'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 2,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answer is the literal string '3 \\times 10^8 m/s (the speed of light).'",
+   "truth": "Raw LaTeX in a plain-text field; it renders literally.",
+   "evidence": "house rule: plain-text fields use unicode",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 2,
+   "field": "conclusion_html",
+   "severity": "LOW",
+   "claim": "Takeaway n31 restates both Higher-only statements (P4.2i and P4.2j) with no tier flag, although the body text flags them.",
+   "truth": "Worth recording, but the body wrappers already carry the flag and re-narrating the conclusion for a parenthetical is not proportionate. No edit.",
+   "evidence": "spec bold file lines 5924-5931 (P4.2i and P4.2j both bold)",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F6",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The lesson cites spec codes '(P7.1)' and '(P7.1d)'.",
+   "truth": "OCR Gateway Combined Science A has no topic P7. Physics runs P1 to P6 plus CS7 practical skills. The right codes are P4.3d (unstable nuclei emit alpha particles, beta particles, neutrons and gamma rays) and P4.3j (half-life and the random nature of decay).",
+   "evidence": "spec content overview (bold file lines 641-651); statement P4.3d line 5981, P4.3j line 6044",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 3,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answer 'One eighth - (\\tfrac{1}{2})^3.'",
+   "truth": "Raw LaTeX in a plain-text field. The fraction is right; the notation renders literally.",
+   "evidence": "house rule: plain-text fields use unicode",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The lesson cites spec codes '(P7.2a)', '(P7.2b)' and '(P7.2c)'.",
+   "truth": "There is no topic P7 in this qualification. Penetrating power is P4.3l and contamination versus irradiation is P4.3m. No J250 statement covers handling procedures for radioactive sources, so that third citation should simply go.",
+   "evidence": "spec bold file: P4.3l line 6076, P4.3m line 6089; no P7 in the P1-P6 plus CS7 topic list",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The glossary entry 'beta radiation', and the matching dfn data-def in the text, both read: 'A device in manufacturing that uses beta radiation passing through material to monitor and control its thickness.'",
+   "truth": "That defines a thickness gauge, not beta radiation. A student who taps the term learns the wrong definition. Beta radiation is a fast-moving electron emitted from an unstable nucleus, stopped by a few millimetres of aluminium. Both the data-def and the glossary row need the correct definition.",
+   "evidence": "spec P4.3d (line 5981) and P4.3l (line 6076); the lesson also contradicts L3's own glossary entry for beta particles",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 4,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "L4 teaches and tests nuclear fission, nuclear fusion, control rods, chain reactions, medical tracers, smoke alarms, thickness gauges and carbon dating. Practice question 4 (fission versus fusion), practice question 6 (nuclear power station) and knowledge checks 1, 3 and 4 all test this material.",
+   "truth": "None of it is in the OCR Gateway Combined Science A spec: 'fission', 'fusion', 'control rod', 'tracer', 'smoke' and 'carbon dating' all return zero hits in both spec versions. 'Nuclear fuel' appears once, in P6.2a, as one energy resource to compare. The examinable radioactivity content is P4.3a to P4.3m; the only uses-and-dangers hooks are P4.2h (hazardous effects of ultraviolet, X-rays and gamma rays) and P4.3l and P4.3m. Recommend rebuilding practice questions 4 and 6 and knowledge checks 1, 3 and 4 on P4.3l, P4.3m and P4.2h. The applications prose can stay as context but should not be examined.",
+   "evidence": "grep 'fission|fusion|control rod|tracer|smoke|carbon dating' returns 0 hits in specs/ocr/combined-science-a-gateway-J250-bold.md and -J250.md; P6.2a line 6496 lists fossil fuels, nuclear fuel, biofuel, wind, hydroelectricity, tides and the Sun",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F11",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "'where m = mass in kg, g = gravitational field strength (9.8 N/kg on Earth) ... lifting a 5 kg bag to a shelf 2 m high: GPE = 5 x 9.8 x 2 = 98 J'",
+   "truth": "This spec sets g = 10 N/kg at the Earth's surface, and the lesson's own practice questions already use g = 10 N/kg. With g = 10 the worked example is 5 x 10 x 2 = 100 J. Teaching 9.8 in the article and 10 in the questions is exactly the inconsistency that loses marks.",
+   "evidence": "spec P2.3h (bold file line 5151): gravitational field strength is known as g and has a value of 10 N/kg at the Earth's surface; recomputation 5 x 10 x 2 = 100",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The lesson cites '(P6.1a)' for conservation of energy, '(P6.1b)' for work done, '(P6.1c)' for power and '(P6.1d)' for efficiency.",
+   "truth": "P6.1 is 'Physics on the move' (typical speeds, reaction times, stopping distances). The energy statements are P5.1a (no net change to the total energy of a closed system), P5.1d (calculations of energy changes, including work done by forces), P2.2n (power as the rate at which energy is transferred, assumed knowledge from Paper 1) and P5.2d (calculate energy efficiency for any energy transfer).",
+   "evidence": "spec bold file: P5.1a line 6137, P5.1d line 6178, P2.2n line 4958, P5.2d line 6309, P6.1 heading line 6360",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F13",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "A higher-only wrapper hides the whole 'Reducing Wasted Energy' collapsible from Foundation students: lubrication, streamlining, thermal insulation and LED lighting; a combined work, power and efficiency calculation; and the elastic potential energy equation.",
+   "truth": "Only P5.2e ('describe ways to increase efficiency') is printed in bold in the whole of topic P5. Everything the wrapper hides is both-tier: P5.2f explicitly names lubrication and thermal insulation, P5.1d and P5.2d cover the efficiency and power calculations, and P5.1e covers the energy stored in a stretched spring (PM2.3ii is a select-and-apply equation and is not bold). Foundation students are being denied required content, so the wrapper must go.",
+   "evidence": "spec bold file: P5.2e line 6316 is the ONLY bold statement in topic P5; P5.2f line 6318 'explain ways of reducing unwanted energy transfer - through lubrication and thermal insulation'; P5.1e line 6205; PM2.3ii in the select-and-apply list, not bold",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F14",
+   "lesson": 5,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answer 'W = F \\times d.'",
+   "truth": "Raw LaTeX in a plain-text field; it renders literally.",
+   "evidence": "house rule: plain-text fields use unicode",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F15",
+   "lesson": 6,
+   "field": "exam_tip_html",
+   "severity": "HIGH",
+   "claim": "'For OCR Gateway discuss questions (8 marks) on energy resources...'",
+   "truth": "There is no 8-mark question on this qualification. Each physics paper is 60 marks in two sections: Section A multiple choice worth 10 marks, and Section B short-answer styles plus ONE extended six-mark level-of-response question, worth 50 marks. The highest tariff is 6.",
+   "evidence": "spec assessment section (bold file lines 7010-7080): 'an extended six-mark Level of Response question'; Paper 6 and Paper 12 description",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F16",
+   "lesson": 6,
+   "field": "knowledge_checks",
+   "severity": "MEDIUM",
+   "claim": "Match knowledge check: left Coal, Wind, Nuclear; right 'Non-renewable fossil fuel', 'Renewable', 'Non-renewable'.",
+   "truth": "Options 1 and 3 are not distinguishable. Coal is a non-renewable fossil fuel AND non-renewable, so a student who pairs Coal with 'Non-renewable' is marked wrong for a true statement. Make the nuclear option unambiguous.",
+   "evidence": "spec P6.2a: distinguish between renewable and non-renewable sources; house rule: no synonymous options in a match item",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17",
+   "lesson": 6,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Five flashcard fields carry TeX subscript and superscript markup: 'CO_2' in four places and 'P = I^2 R' in one.",
+   "truth": "Flashcards are plain text and render as textContent, so students see CO_2 and I^2 literally. Use the unicode forms.",
+   "evidence": "house rule: plain-text fields use unicode",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18",
+   "lesson": 7,
+   "field": "description",
+   "severity": "MEDIUM",
+   "claim": "Description: 'Stopping distances, braking forces, momentum conservation in safety features.'",
+   "truth": "The lesson never mentions momentum in its article, and conservation of momentum is Higher tier only on this spec (P2.2k is printed in bold, as is the momentum equation PM2.2ii). The description promises content the lesson does not teach and that most of its readers cannot be examined on.",
+   "evidence": "spec bold file line 4921: '**P2.2k** define momentum and describe examples of momentum in collisions ... an idea of the law of conservation of momentum in collisions'; line 8464 '**momentum = mass x velocity**'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F19",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The lesson cites '(P8.1a)', '(P8.1b)', '(P8.1c)' and '(P8.1d)'.",
+   "truth": "There is no topic P8 in this qualification. The right codes are P6.1a (recall typical speeds), PM2.1ii (the acceleration equation), P2.1e (relate motion to distance-time and velocity-time graphs, assumed knowledge from Paper 1) and P6.1e (factors affecting the distance a vehicle needs to come to rest).",
+   "evidence": "spec bold file: P6.1a line 6386, PM2.1ii line 4626 and 8446, P2.1e line 4726, P6.1e line 6414",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F20",
+   "lesson": 7,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Practice question 4 asks a both-tier lesson to compute a crash force from the change in momentum (force = change in momentum divided by time).",
+   "truth": "Momentum is Higher tier only on this spec: PM2.2ii ('momentum = mass x velocity') and P2.2k are both printed in bold. A Foundation student cannot be set this. Prefix the question with '(Higher tier)'.",
+   "evidence": "spec bold file line 8464 (PM2.2ii bold), line 4921 (P2.2k bold)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F21",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'At higher speeds, the braking force needed is greater, which means more energy must be transferred to heat in the brakes.'",
+   "truth": "The braking force available is set by the grip of the tyres and does not grow with speed. The standard explanation is the reverse: greater speed means greater kinetic energy, so for the same braking force the car travels further before it stops. As written it invites the wrong answer to the classic question about why braking distance rises faster than speed - which the lesson's own practice question 3 marks correctly.",
+   "evidence": "spec P6.1e (explain the factors which affect the distance required for road transport vehicles to come to rest); kinetic energy PM2.1iv; internal contradiction with the lesson's own practice question 3 mark scheme",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F22",
+   "lesson": 7,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answers 'The rate of change of velocity, measured in m/s^2.' and 'F = m \\times a.'",
+   "truth": "Raw TeX in plain-text fields; both render literally.",
+   "evidence": "house rule: plain-text fields use unicode",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F23",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "L7 teaches, with no tier flag, that 'the area under the line equals the distance travelled' plus how to compute that area (n16, n17, flashcard 8, takeaway n28), and that 'an object moving in a circle at constant speed has a changing velocity' (n8).",
+   "truth": "Both are bold-only statements: P2.1f 'Interpret enclosed areas in velocity-time graphs' and P2.2p 'explain why an object moving in a circle with a constant speed has a changing velocity'. However both sit in topic P2, which Paper 2 carries only as assumed knowledge, so the Paper 1 motion lesson is their real home and should carry the flag. Options: (a) leave them here and fix the tier flag in the Paper 1 unit; (b) wrap n17 and tag flashcard 8 here as well. Recommend (a), so the flag lives with the teaching rather than with the recap. RULING (coordinator): fixed for P2.1f only. The one item in L7 that tests the area under a velocity-time graph (flashcard 8) now carries the '(Higher tier)' tag at the end of the question. No practice question or knowledge check in L7 tests P2.1f. Circular motion (P2.2p) is left untagged, matching the Paper 1 ruling.",
+   "evidence": "spec bold file line 4702 (**P2.1f**), line 4968 (**P2.2p**); assessment overview: Paper 6 and Paper 12 cover P4-P6 with assumed knowledge of P1-P3",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F24",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "L8 'Global Challenges in Physics' teaches the solar system, satellite orbits (geostationary and polar), space exploration, the life cycle of stars, the Big Bang, red shift and cosmic microwave background radiation. Its six practice questions and five knowledge checks test something completely different: mains voltage and frequency, the earth wire, the national grid, a transformer calculation, cavity wall insulation, thermal conductivity and insulation payback time.",
+   "truth": "Two separate faults in one lesson. (1) Not one word of the article is in this specification. 'Red shift', 'big bang', 'galaxy', 'orbit', 'satellite' and 'solar system' all return zero hits in both spec versions; space physics is separate-Physics content. The article also cites invented codes P8.3a to P8.3d (there is no topic P8), and the description is 101 characters, over the 100-character validator limit. (2) The questions are correct and in scope - they test P6.2c to P6.2i and P5.2g - but the article never teaches any of it, so a student cannot answer them from the lesson. The fix is to rewrite content_html, conclusion_html, exam_tip_html, the description, the flashcards and the glossary on P6.2 Powering Earth: domestic supply a.c. at 50 Hz and about 230 V, the difference between direct and alternating voltage, live, neutral and earth wires and the potential differences between them, why a live wire is dangerous with the switch open, the national grid at high voltage, step-up and step-down transformers, and the transformer relationship (primary p.d. x primary current = secondary p.d. x secondary current), which is an apply, not a recall, equation. The existing questions can stay as they are. This is a rebuild, not a surgical edit. RULING (coordinator): no deletion and no rebuild now. A scope note has been added as the first block of content_html, telling the student that the space physics is not examined on Combined Science and where the P6 content its questions test is actually taught. The rebuild on P6.2 Powering Earth remains the recommendation.",
+   "evidence": "grep 'red-shift|red shift|big bang|galax|orbit|satellite|solar system' returns 0 hits in specs/ocr/combined-science-a-gateway-J250-bold.md; P6.2c-P6.2i lines 6520-6600; PM6.2i line 6480; description length 101 characters",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F25",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "MEDIUM",
+   "claim": "Unit level: the lesson-to-paper mapping and P4-P6 coverage.",
+   "truth": "The paper mapping is right in principle - Paper 6 (Foundation) and Paper 12 (Higher), 1 hour 10 minutes, 60 marks, 16.7 per cent each, covering P4, P5, P6 and CS7 (PAGs P1-P6) with P1-P3 assumed. Coverage is uneven, though. TAUGHT NOWHERE in this unit: P4.3d neutron emission (L3 says 'three main types of radiation' and omits neutrons); P4.3h electron energy levels, excitation and ionisation by loss of outer electrons; P4.3i that changes in atoms and nuclei generate and absorb radiation across a wide frequency range; P5.1c the specific heat capacity route to an energy change; P5.2g how the rate of cooling depends on wall thickness and thermal conductivity (tested in L8 knowledge check 3 but never taught); and all of P6.2f to P6.2i (a.c. at 50 Hz and about 230 V, a.c. versus d.c., live, neutral and earth, live-wire danger) plus PM6.2i, which L8's questions test but no article teaches. DUPLICATED: the national grid and step-up and step-down transformers appear in L6 here, in L8's questions here, and again in Paper 1's L7 - three places for P6.2c to P6.2e. Recommend the L8 rebuild in F24 absorb P6.2f to P6.2i and PM6.2i, L6 keep the grid, and Paper 1's L7 drop it.",
+   "evidence": "spec content overview (bold file lines 740-745); statements P4.3d line 5981, P4.3h line 6018, P4.3i line 6032, P5.1c line 6178, P5.2g line 6331, P6.2f-P6.2i lines 6560-6600, PM6.2i line 6480",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F26",
+   "lesson": 6,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "Practice question 4 (3 kW oven, 2 hours, 15p per kWh) has a four-bullet mark scheme whose third and fourth bullets repeat the first and second.",
+   "truth": "The arithmetic is right (6 kWh, 90p) and 4 marks is defensible for a two-step calculation, but the same credit is described twice. Worth tidying in a copy pass; not a fact error.",
+   "evidence": "recomputation: 3 x 2 = 6 kWh, 6 x 15 = 90p; spec P5.1d covers the use of kW h in the home",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F27",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "LOW",
+   "claim": "The repo holds two versions of this spec: specs/ocr/combined-science-a-gateway-J250.md is Version 4.3 (September 2024) and specs/ocr/combined-science-a-gateway-J250-bold.md is Version 5.0 (May 2026).",
+   "truth": "Tier rulings in this report use the newer v5.0 bold extraction, as instructed. The P4-P6 statement set, the equations list and the assessment structure agree across both versions, so no ruling changes. The plain v4.3 file should be refreshed at the next spec-currency audit.",
+   "evidence": "v4.3 header at line 24 of -J250.md; v5.0 header at line 14 of -J250-bold.md",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [],
+ "summary": "Eight lessons, 27 findings (3 HIGH, 21 MEDIUM, 3 LOW; 21 FIX, 3 ADJUDICATE, 3 NOTE) and 37 surgical edits. P4 and P5 are structurally sound but the unit breaks down at P6: L8's article is off-spec space physics while its questions test the in-spec mains and grid content the article never teaches, and L4 tests fission, fusion, tracers and smoke alarms that are not in J250 at all. Every spec code the lessons cite was wrong (P7.1, P7.2a-c, P8.1a-d, P8.3a-d, and P6.1a-d in L5); all fixable ones are corrected. Tier faults run both ways: L5 hid both-tier P5.2f content behind a higher-only wrapper, while L2 leaked P4.2i and L7 carried an untagged Higher momentum question. One wrong constant (g = 9.8 N/kg where this spec sets 10 N/kg) and one wrong exam claim (an 8-mark question; the top tariff is 6). Coordinator ruling applied: L8 keeps its article but now opens with a scope note (F24 flipped to FIX, rebuild still recommended), and the one L7 flashcard testing P2.1f is tagged Higher tier (F23 flipped to FIX). F1, F10 and F25 stay recorded with no edits.",
+ "renarration": {
+  "run_at": "2026-09-04T17:07:07Z",
+  "clips": [
+   {
+    "lesson": 2,
+    "id": "n10",
+    "key": "science-ocr/physics-paper-2/narration_lesson-02_n10.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-02_n10.mp3",
+    "voice": "Ada",
+    "duration": 6.89,
+    "bytes": 82656,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:06:15 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n6",
+    "key": "science-ocr/physics-paper-2/narration_lesson-03_n6.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-03_n6.mp3",
+    "voice": "Ollie",
+    "duration": 5.62,
+    "bytes": 67392,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:06:17 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n21",
+    "key": "science-ocr/physics-paper-2/narration_lesson-03_n21.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-03_n21.mp3",
+    "voice": "Ollie",
+    "duration": 18.26,
+    "bytes": 219168,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:06:21 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n2",
+    "key": "science-ocr/physics-paper-2/narration_lesson-04_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-04_n2.mp3",
+    "voice": "Ada",
+    "duration": 13.94,
+    "bytes": 167328,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:06:24 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n11",
+    "key": "science-ocr/physics-paper-2/narration_lesson-04_n11.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-04_n11.mp3",
+    "voice": "Ada",
+    "duration": 6.17,
+    "bytes": 74016,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:06:26 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n16",
+    "key": "science-ocr/physics-paper-2/narration_lesson-04_n16.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-04_n16.mp3",
+    "voice": "Ada",
+    "duration": 4.97,
+    "bytes": 59616,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:06:28 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n2",
+    "key": "science-ocr/physics-paper-2/narration_lesson-05_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-05_n2.mp3",
+    "voice": "Ollie",
+    "duration": 21.24,
+    "bytes": 254880,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:06:32 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n6",
+    "key": "science-ocr/physics-paper-2/narration_lesson-05_n6.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-05_n6.mp3",
+    "voice": "Ollie",
+    "duration": 10.66,
+    "bytes": 127872,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:06:35 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n12",
+    "key": "science-ocr/physics-paper-2/narration_lesson-05_n12.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-05_n12.mp3",
+    "voice": "Ollie",
+    "duration": 17.33,
+    "bytes": 207936,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:06:39 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n16",
+    "key": "science-ocr/physics-paper-2/narration_lesson-05_n16.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-05_n16.mp3",
+    "voice": "Ollie",
+    "duration": 6.74,
+    "bytes": 80928,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:06:41 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n23",
+    "key": "science-ocr/physics-paper-2/narration_lesson-05_n23.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-05_n23.mp3",
+    "voice": "Ollie",
+    "duration": 13.22,
+    "bytes": 158688,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:06:44 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n24",
+    "key": "science-ocr/physics-paper-2/narration_lesson-06_n24.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-06_n24.mp3",
+    "voice": "Ada",
+    "duration": 24.79,
+    "bytes": 297504,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:06:49 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n2",
+    "key": "science-ocr/physics-paper-2/narration_lesson-07_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-07_n2.mp3",
+    "voice": "Ollie",
+    "duration": 28.92,
+    "bytes": 347040,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:06:54 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n9",
+    "key": "science-ocr/physics-paper-2/narration_lesson-07_n9.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-07_n9.mp3",
+    "voice": "Ollie",
+    "duration": 4.99,
+    "bytes": 59904,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:06:55 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n15",
+    "key": "science-ocr/physics-paper-2/narration_lesson-07_n15.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-07_n15.mp3",
+    "voice": "Ollie",
+    "duration": 22.22,
+    "bytes": 266688,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:07:00 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n21",
+    "key": "science-ocr/physics-paper-2/narration_lesson-07_n21.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/physics-paper-2/narration_lesson-07_n21.mp3",
+    "voice": "Ollie",
+    "duration": 29.74,
+    "bytes": 356832,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:07:05 GMT"
+   }
+  ],
+  "verified_ok": 16,
+  "total": 16
+ }
+}
