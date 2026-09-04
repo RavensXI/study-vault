@@ -114,6 +114,13 @@ C5. Codex never receives service keys (`shell_environment_policy.inherit=
     "core"`) and writes only inside its unit dir; the finish step is what
     touches Supabase, R2 and git, and it runs with the orchestrator's env.
 
+### C4c. Wrapper edits and <div> balance (added 4 Sep 2026)
+A checker that removes or adds a `higher-only` wrapper writes TWO edits: the opening tag and the closing `</div>`. The
+closing-tag edit is fragile (whitespace-only `find`) and was skipped in 3 of 9 lessons of Edexcel physics-paper-1, leaving
+`<div>` counts unbalanced. `_unit.py finish` now counts `<div` vs `</div>` per html field as a validator KIND, so a NEW
+imbalance rolls the lesson back. When a finish reports `skips` on a wrapper edit, check the field's div balance before moving
+on. Corpus census 4 Sep: 25 fields in 17 lessons, all fixed (`scripts/_retrofc/_div_balance_census.json`).
+
 ## Rate limit
 
 If an Agent launch or any model call fails with a usage-limit message,
