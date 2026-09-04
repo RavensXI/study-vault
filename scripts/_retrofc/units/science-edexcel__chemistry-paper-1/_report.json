@@ -1,0 +1,289 @@
+{
+ "unit": "science-edexcel/chemistry-paper-1",
+ "checked_at": "2026-09-04",
+ "spec_used": "specs/edexcel/combined-science-1SC0.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "Remember: <strong>Positive And Negative = PAN</strong> — Positive goes to the Anode? No! Positive goes to Negative (cathode).",
+   "truth": "The mnemonic is garbled and self-contradicting. “PAN” expands to nothing useful, and the sentence states the wrong rule (“Positive goes to the Anode”) before denying it, so a student skimming the key fact reads the error. Cations (positive) go to the cathode (negative electrode); anions (negative) go to the anode (positive electrode).",
+   "evidence": "spec 3.24 a/b: positively charged cations migrate to the negatively charged cathode; negatively charged anions migrate to the positively charged anode. The two sentences before this one in the same key fact already state it correctly.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 8,
+   "field": "knowledge_checks",
+   "severity": "HIGH",
+   "claim": "Match KC [4]: left = [Metal deposited (if less reactive than H), Halogen gas, Hydrogen gas]; right = [Cathode, Anode, Cathode]; order = [0,1,2].",
+   "truth": "The right-hand list holds the same string twice. js/main.js renderMatch() builds the dropdown from q.right with value = the option's ORIGINAL index and grades with parseInt(sel.value) === q.order[i], so a student who picks the index-2 “Cathode” for “Metal deposited” is marked wrong for a chemically correct answer. Recast the item so the three options are distinct: copper chloride solution at the cathode gives copper; the same solution at the anode gives chlorine; sodium chloride solution at the cathode gives hydrogen.",
+   "evidence": "js/main.js lines 2166-2213 (renderMatch: index-based grading over a shuffled q.right). Chemistry per spec 3.25 a and b, and the lesson's own Examples of Electrolysis Products panel.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "<span>Core Practical — Determining Empirical Formula</span>",
+   "truth": "Heating magnesium in a crucible to find the empirical formula of magnesium oxide is not a core practical on this qualification; it is a Topic 1 suggested practical. The four chemistry core practicals on this paper are the ink composition investigation, the pH change on adding calcium hydroxide or calcium oxide to hydrochloric acid, the preparation of pure dry hydrated copper sulfate crystals, and the electrolysis of copper sulfate solution. Calling this one a core practical tells a student to expect it in a practical-skills question.",
+   "evidence": "spec Topic 1 Suggested practicals: ‘Determine the empirical formula of a simple compound.’ Core practicals are the italicised statements 2.11, 3.6, 3.17 and 3.31; statement 1.46 is not italicised.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "A single <div class=\"higher-only\"> opens before the heading The Mole and closes only at the end of the lesson, so it also hides the concentration panel, the empirical and molecular formulae section and the empirical-formula experiment.",
+   "truth": "On this qualification the Higher-only block starts at the mole (mole defined, mole calculations, limiting reactant, deducing stoichiometry). Concentration in g/dm3, calculating formulae from reacting masses or percentage composition, deducing empirical and molecular formulae, and describing the magnesium oxide experiment are all Foundation-and-Higher content. Foundation students are currently shown none of it. Re-cut the wrapper so it covers the mole section, and separately the limiting reactants section.",
+   "evidence": "spec statements 1.44, 1.45, 1.46 and 1.49 sit above the Higher block, which begins at 1.50 (mole defined as the Avogadro number of particles) and runs 1.50-1.53. KNOWN GAP: this markdown has lost its bold, which is the only tier marker in the file, so the tier boundary here is taken from knowledge of the 1SC0 specification, not read off the file.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The Purifying Copper by Electrolysis panel sits inside the <div class=\"higher-only\"> block that opens at Half Equations & Oxidation-Reduction.",
+   "truth": "Purifying copper with copper electrodes is not Higher-tier-only. The core practical on this paper is the electrolysis of copper sulfate solution with inert electrodes AND copper electrodes, and core practicals are compulsory for both tiers, so a Foundation student must meet this material. Close the Higher wrapper before that panel; the half equations and the cathode/anode reduction-oxidation rule stay Higher.",
+   "evidence": "spec 3.30 (formation of products in the electrolysis of copper sulfate solution using copper electrodes, and how this purifies copper) and core practical 3.31. KNOWN GAP: bold is lost from this markdown, so the tier ruling is taken from knowledge of 1SC0; the core-practical argument is independent of the bold.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 7,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard answers hold raw LaTeX: H^+, OH^-, and H^+ + OH^- \\rightarrow H_2O.",
+   "truth": "Flashcards are plain-text fields. renderKaTeX only converts $$...$$, \\[...\\] and \\(...\\) delimited maths, so undelimited LaTeX prints literally: the student sees H^+ + OH^- \\rightarrow H_2O. instead of the neutralisation equation. Use unicode.",
+   "evidence": "js/main.js renderKaTeX (delimiters list) and the flashcard render path at lines 3229-3230. House rule: *_html fields use entities, plain-text fields use unicode.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 6,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Six flashcard fields hold raw LaTeX (M_r, 6.02 \\times 10^{23}, g/dm^3), and one answer reads: Grams per decimetre cubed (g/dm^3) or mol/dm^3.",
+   "truth": "The LaTeX prints literally, so the Avogadro constant reads 6.02 \\times 10^{23} on the card. Separately, mol/dm3 is not on this qualification: the only concentration statement is concentration in g/dm3, so the answer teaches an out-of-scope unit and is also a two-item list in a short answer.",
+   "evidence": "spec 1.49 ‘Calculate the concentration of solutions in g dm-3’ is the only concentration statement in the chemistry content; a search of the spec finds no mol/dm3. js/main.js renderKaTeX delimiters.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 8,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Two cloze flashcards hold raw LaTeX: Pb^{2+} + ____ e^- \\rightarrow Pb. and 2Br^- \\rightarrow Br_2 + ____., answer 2e^-.",
+   "truth": "Printed literally, so both half equations are unreadable on the card. Use unicode superscripts and arrows. The chemistry itself is right.",
+   "evidence": "js/main.js renderKaTeX delimiters; spec 3.27 half equations.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 4,
+   "field": "flashcard_questions",
+   "severity": "LOW",
+   "claim": "A hollow carbon molecule made of hexagonal and pentagonal rings, such as C_{60}.",
+   "truth": "C_{60} prints literally on the card. The glossary entry in the same lesson already uses unicode subscripts.",
+   "evidence": "js/main.js renderKaTeX delimiters; the lesson's own glossary term fullerenes.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Soluble salts can be made in two ways, depending on whether the base is soluble or insoluble. / Method 1: Using an insoluble base (e.g. metal oxide, carbonate).",
+   "truth": "The lesson defines a base two paragraphs earlier as a substance that reacts with an acid to form a salt and water ONLY. A metal carbonate gives salt, water and carbon dioxide, so listing a carbonate as a base contradicts the lesson's own definition. The spec avoids the clash by calling it an insoluble reactant.",
+   "evidence": "spec 3.9 (base reacts with an acid to form a salt and water only) versus spec 3.15 (‘if soluble salts are prepared from an acid and an insoluble reactant’).",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11",
+   "lesson": 3,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "How ionic and covalent bonds form, dot-and-cross diagrams, and the properties they produce.",
+   "truth": "The lesson teaches ionic bonding only. Covalent bonding is lesson 4. The description promises content the lesson does not carry.",
+   "evidence": "lesson 3 content_html has no covalent bonding section; lesson 4 is Covalent Bonding & Molecular Structures.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 4,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "description is 131 characters and headlines metallic bonding",
+   "truth": "The house validator wants 60-100 characters and tolerates 120. Metallic bonding is lesson 5's subject; lesson 4 only touches it at the end.",
+   "evidence": "scripts/_validate_content_json.py line 146: description length (want 60-100, 120 tolerated).",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F13",
+   "lesson": 5,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "description is 155 characters",
+   "truth": "Over the validator's tolerated maximum of 120 characters.",
+   "evidence": "scripts/_validate_content_json.py line 146.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F14",
+   "lesson": 6,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "description is 141 characters",
+   "truth": "Over the validator's tolerated maximum of 120 characters.",
+   "evidence": "scripts/_validate_content_json.py line 146.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F15",
+   "lesson": 7,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "description is 133 characters",
+   "truth": "Over the validator's tolerated maximum of 120 characters.",
+   "evidence": "scripts/_validate_content_json.py line 146.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F16",
+   "lesson": 8,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "description is 128 characters",
+   "truth": "Over the validator's tolerated maximum of 120 characters.",
+   "evidence": "scripts/_validate_content_json.py line 146.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The article covers only the inside of the atom, the three subatomic particles, and atomic/mass number. It never teaches isotopes, relative atomic mass, or Mendeleev's table.",
+   "truth": "The lesson title names the periodic table, the description promises isotopes, and the assessment assumes both: practice Q3 (why bromine's relative atomic mass is 79.9), Q5 (Mendeleev's arrangement, 6 marks), Q6 (relative atomic mass of copper from abundances), a knowledge check on Mendeleev's ordering, and four flashcards. The article is 4,493 characters against 8.5k-11.8k for the rest of the unit. Options: (a) extend the article with an isotopes and relative-atomic-mass section plus a short Mendeleev section, which is the right answer for a lesson with this title, or (b) move the untaught questions to lesson 2. Not fixable with a surgical edit.",
+   "evidence": "spec 1.9, 1.11, 1.12 (isotopes and relative atomic mass) and 1.13-1.15 (Mendeleev) are all in scope for this paper; the lesson's own practice set and flashcards assess them.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F18",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "MEDIUM",
+   "claim": "The unit's 8 lessons are presented as covering Chemistry Paper 1.",
+   "truth": "Chemistry Paper 1 on this qualification is Topic 1 (Key concepts in chemistry), Topic 2 (States of matter and mixtures), Topic 3 (Chemical changes) and Topic 4 (Extracting metals and equilibria). The unit covers Topic 1 across lessons 1-6 and parts of Topics 3 and 4 in lessons 7-8. Topic 2 is absent in full: the three states and the interconversions, pure substance versus mixture, melting-point data, the five separation techniques, paper chromatography and Rf values, and potable water. Its core practical (composition of inks by simple distillation and paper chromatography) is therefore missing, as is the core practical on the pH change when calcium hydroxide or calcium oxide is added to hydrochloric acid. Topic 4's reversible reactions, dynamic equilibrium and the Haber process conditions are also absent. No sibling unit carries them: chemistry-paper-2 in this subject covers Topics 6-8. This needs new lessons, not edits. Nothing that IS taught falls outside the paper.",
+   "evidence": "spec Paper 3: Chemistry 1 content overview (Topics 1, 2, 3, 4); spec 2.1-2.12 incl. core practical 2.11; core practical 3.6; spec 4.13-4.17. Unit census scripts/_retrofc/_science_census.txt lines 11-20.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F19",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "The section Trends Down a Group, the key fact after it, and practice Q6 teach that Group 1 reactivity increases and Group 7 reactivity decreases down the group.",
+   "truth": "Nothing here is wrong, but this is Topic 6 material and the spec puts Topic 6 on Chemistry Paper 2, not Paper 1. The rest of the lesson (electronic configuration and position, metals versus non-metals) is Topic 1 and belongs here. Options: keep it as pre-teaching that follows naturally from electronic configuration, or move the section and Q6 to the chemistry-paper-2 unit. My recommendation is to keep it: it is one short section, it is taught correctly, and cutting it would leave the electronic-configuration argument unfinished.",
+   "evidence": "spec Paper 4: Chemistry 2 content overview lists Topic 6 - Groups in the periodic table; spec 6.4, 6.5, 6.11, 6.13.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F20",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "The paragraph defining oxidation as loss of electrons and reduction as gain of electrons (OILRIG) is the first paragraph inside the Higher-only block.",
+   "truth": "Explaining oxidation and reduction in terms of loss or gain of electrons is not Higher-tier-only on this qualification, but the very next statement, that reduction happens at the cathode and oxidation at the anode, is. The two ideas are split across this paragraph and the one after it, so separating them needs a further re-cut and re-narration for a small gain. Options: leave as is once F5 is applied, or lift the OILRIG definition above the wrapper. I recommend leaving it, because displacement reactions as redox are themselves Higher on this qualification, so the electron definition has no Foundation home elsewhere in this paper.",
+   "evidence": "spec 3.28 versus 3.29 and 4.2. KNOWN GAP: bold is lost from this markdown, so which of 3.28/3.29 is Higher cannot be read off the file; this is taken from knowledge of 1SC0.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F21",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "The fourth outer electron on each carbon atom is delocalised — free to move between the layers.",
+   "truth": "Graphite conducts along its layers, not across them, and the lesson's own flashcard says the electron can move along the layers. Common GCSE textbooks do describe the delocalised electrons as sitting between the layers, so this is not certain enough to correct and it would not cost a mark.",
+   "evidence": "lesson 4 flashcard ‘Why does graphite conduct electricity?’; spec 1.37 asks only why graphite is used for electrodes and as a lubricant.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F22",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Carbon nanotubes are taught in the Diamond, Graphite & Fullerenes panel, with a glossary term.",
+   "truth": "The spec names only fullerenes including C60 and graphene for this qualification. Nanotubes are extra rather than wrong, and the lesson does not claim they are examined.",
+   "evidence": "spec 1.38 ‘Explain the properties of fullerenes including C60 and graphene in terms of their structures and bonding’.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F23",
+   "lesson": 0,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "Question type labels and band ladders across the unit.",
+   "truth": "Two 4-mark questions are labelled Compare but ask Explain (lesson 6 Q4) and Predict/Explain (lesson 8 Q4); several Calculate questions are labelled 3 marks - Explain (lesson 1 Q6, lesson 6 Q3 and Q6, lesson 7 Q3). Every 6-mark ladder uses Top band / Mid band / Lower band rather than the five-name house ladder. Left for the programme's existing relabel and band-ladder sweeps rather than double-edited here.",
+   "evidence": "read across all eight lessons' practice_questions.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F24",
+   "lesson": 0,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "All eight exam tips are the same generic paragraph.",
+   "truth": "Checked for the fault seen in the sibling Biology Paper 2 unit, where article text had been truncated into exam_tip_html. It is not present here: every exam tip is the identical short generic paragraph, with no article text spilled into it. Recorded so the orchestrator knows the check was run.",
+   "evidence": "exam_tip_html identical across L1-L8.",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [],
+ "summary": "Two HIGH faults: a garbled cathode/anode mnemonic in lesson 8 that states the wrong rule before denying it, and a matching knowledge check whose duplicated Cathode option makes the index-based grader mark a correct pairing wrong. Two Higher-tier wrappers over-reach and hide Foundation content (empirical formulae and concentration in lesson 6, copper purification in lesson 8), and one experiment is mislabelled a core practical. Thirteen plain-text flashcard fields carry undelimited LaTeX that prints literally. Every worked example, formula mass, balanced equation and answer key was recomputed and is correct. The unit's larger problem is scope: Topic 2 is missing in full, so two of the paper's four core practicals are never taught.",
+ "renarration": {
+  "run_at": "2026-09-04T08:26:44Z",
+  "clips": [
+   {
+    "lesson": 7,
+    "id": "n21",
+    "key": "science-edexcel/chemistry-paper-1/narration_lesson-07_n21.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/chemistry-paper-1/narration_lesson-07_n21.mp3",
+    "voice": "Ollie",
+    "duration": 6.19,
+    "bytes": 74304,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 08:26:37 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n22",
+    "key": "science-edexcel/chemistry-paper-1/narration_lesson-07_n22.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/chemistry-paper-1/narration_lesson-07_n22.mp3",
+    "voice": "Ollie",
+    "duration": 21.17,
+    "bytes": 254016,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 08:26:41 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n4",
+    "key": "science-edexcel/chemistry-paper-1/narration_lesson-08_n4.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-edexcel/chemistry-paper-1/narration_lesson-08_n4.mp3",
+    "voice": "Ada",
+    "duration": 17.23,
+    "bytes": 206784,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 08:26:45 GMT"
+   }
+  ],
+  "verified_ok": 3,
+  "total": 3
+ }
+}
