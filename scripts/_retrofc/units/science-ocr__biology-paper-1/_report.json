@@ -1,0 +1,238 @@
+{
+ "unit": "science-ocr/biology-paper-1",
+ "checked_at": "2026-09-04",
+ "spec_used": "specs/ocr/combined-science-a-gateway-J250.md + specs/ocr/combined-science-a-gateway-J250-bold.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "A <div class=\"higher-only\"> wrapper hides both paragraphs on electron microscopy (TEM resolution, cristae, why electron microscopy changed our understanding of organelles) from Foundation-tier readers.",
+   "truth": "B1.1c 'explain how electron microscopy has increased our understanding of sub-cellular structures' is NOT in bold in the spec, so it is assessed in both Foundation and Higher papers. The wrapper is wrong and is removed.",
+   "evidence": "spec B1.1c (not bold in combined-science-a-gateway-J250-bold.md); 'Statements shown in bold type will only be tested in the Higher Tier papers.'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'For OCR Gateway B1.2, you need to understand DNA's structure and how it leads to protein production', then complementary base pairing (A-T, C-G), the triplet code, mRNA, transcription and translation are taught as required B1.2 content.",
+   "truth": "J250 B1.2 requires only B1.2a 'describe DNA as a polymer' and B1.2b 'describe DNA as being made up of two strands forming a double helix'. The words 'mRNA', 'amino acid' (in a DNA context), 'complementary base' and 'triplet' appear nowhere in the J250 spec; base pairing and protein synthesis are separate-Biology (J247) content. Options: (a) keep the material but reframe it as background rather than 'you need to understand' - a one-block edit to n2; (b) cut n3's base-pairing sentence and n4/n7 entirely, which would re-narrate five blocks and change two flashcards. Recommend (a).",
+   "evidence": "grep of specs/ocr/combined-science-a-gateway-J250.md for mRNA / complementary base / triplet / amino acid returns only 'site of protein synthesis' (B1.1b) and 'double helix' (B1.2 underlying knowledge).",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F3",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Note that plants can also carry out anaerobic respiration producing lactic acid in waterlogged roots, but the fungal/yeast pathway is the one most commonly examined.'",
+   "truth": "Plant roots deprived of oxygen ferment glucose to ethanol and carbon dioxide. Lactate appears only briefly before the ethanol pathway takes over. The spec groups plants with fungi for exactly this reason, so a student writing 'lactic acid' for a plant would lose the mark.",
+   "evidence": "spec B1.3c 'compare the processes of aerobic and anaerobic respiration ... in plants/fungi and animals the different conditions, substrates, products and relative yields of ATP'.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 3,
+   "field": "flashcard_questions",
+   "severity": "LOW",
+   "claim": "Two flashcard answers contain 'CO_2'.",
+   "truth": "Flashcard fields are plain text, so the underscore shows on screen. Use the unicode subscript.",
+   "evidence": "house rule: plain-text fields use unicode, *_html fields use entities.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The <div class=\"higher-only\"> wrapper spans both the B1.4f interaction paragraph AND the Key Fact that defines a limiting factor and explains a plateau on a rate graph.",
+   "truth": "B1.4e 'explain the effect of temperature, light intensity and carbon dioxide concentration on the rate of photosynthesis' is not bold, so the definition of a limiting factor is Foundation content. Only B1.4f is bold. The wrapper is narrowed to the B1.4f paragraph; div open/close counts are unchanged.",
+   "evidence": "spec B1.4e (plain) vs B1.4f (bold) in combined-science-a-gateway-J250-bold.md.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The inverse square law is taught, flashcarded and set as an extended-response question with no tier flag.",
+   "truth": "BM1.4v 'Understand and use inverse proportion - the inverse square law and light intensity in the context of factors affecting photosynthesis' is bold, so it is Higher tier only. A Foundation student needs only that light intensity falls as distance rises. The article sentence now says 'At Higher tier', the flashcard carries an end tag and the extended-response question (which also demands the B1.4f interaction) carries a '(Higher tier)' prefix.",
+   "evidence": "spec BM1.4v and B1.4f, both bold.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 4,
+   "field": "flashcard_questions",
+   "severity": "LOW",
+   "claim": "Four flashcard answers carry raw LaTeX: '\\to' twice, '6CO_2 + 6H_2O \\to C_6H_{12}O_6 + 6O_2', 'CO_2' and '(distance)^2'.",
+   "truth": "These fields are plain text and are not run through KaTeX, so students see the backslashes and underscores. Replaced with unicode arrows and subscripts.",
+   "evidence": "house rule: question and flashcard fields are plain text.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 4,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "'always state which factor is limiting , why it is limiting, and what would happen if you increased it .'",
+   "truth": "Two stray spaces before punctuation. (The tip also has no data-narration-id, unlike every other lesson in the unit - narration block n22 is missing from the manifest sequence. Not edited.)",
+   "evidence": "direct read of the field.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 5,
+   "field": "flashcard_questions",
+   "severity": "LOW",
+   "claim": "'Diffusion happens faster - molecules move more quickly toward equilibrium.'",
+   "truth": "A steeper concentration gradient does not make particles move faster. Particle speed depends on temperature. The gradient raises the NET movement. The article text (n3) gets this right; only the flashcard states the misconception.",
+   "evidence": "settled fact; spec B2.1a and the lesson's own concentration-gradient definition.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 6,
+   "field": "flashcard_questions",
+   "severity": "LOW",
+   "claim": "Two flashcard answers use raw '\\to' for the reflex pathway and the synapse sequence.",
+   "truth": "Plain-text field; replaced with unicode arrows.",
+   "evidence": "house rule: plain-text fields use unicode.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "The article cites '(B3.1b)' for the structure of sensory and motor neurones (n8) and for synapses (n10).",
+   "truth": "Both belong to B3.1a, whose 'To include' column names 'sensory, motor and relay neurones, sensory receptors, synapse and effectors, details of the structure of sensory and motor neurones required'. B3.1b is the coordinated-response statement. The science is right; only the code is wrong, and no student loses a mark for it.",
+   "evidence": "spec B3.1a and B3.1b.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F12",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'Reflex arcs produce rapid, automatic responses that bypass the brain' is stated as a Key Fact, yet the same lesson gives the pupil reflex as an example.",
+   "truth": "The pupil reflex is processed in the brain, not the spinal cord. The accurate wording is 'bypasses the CONSCIOUS brain', which the lesson's own flashcard uses. This is the standard GCSE simplification and OCR accepts it, so no edit; worth knowing if the lesson is ever rewritten.",
+   "evidence": "settled fact (pupillary light reflex is a midbrain reflex); spec B3.1c is silent on which reflexes.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F13",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "A <div class=\"higher-only\"> wrapper hides the paragraph that describes what FSH, oestrogen, LH and progesterone each do in the menstrual cycle.",
+   "truth": "B3.2c 'describe the role of hormones in human reproduction including the control of the menstrual cycle - oestrogen, progesterone, FSH and testosterone' is not bold, so Foundation students are examined on it. Only the INTERACTION of the four hormones (B3.2d) is bold. The wrapper is removed; the unwrapped Key Fact immediately below already states the same cycle, so hiding the paragraph achieved nothing except denying Foundation readers the detail.",
+   "evidence": "spec B3.2c (plain) vs B3.2d (bold).",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F14",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "A <div class=\"higher-only\"> wrapper hides the whole contraception section (hormonal methods, non-hormonal methods, and the instruction to evaluate them).",
+   "truth": "B3.2e 'explain the use of hormones in contraception and evaluate hormonal and non-hormonal methods of contraception' is not bold. This is a complete both-tier statement hidden from Foundation students. The wrapper is removed. The two correct wrappers in this lesson (B3.2b thyroxine and adrenaline; B3.2f fertility treatments) are kept.",
+   "evidence": "spec B3.2e (plain); B3.2b and B3.2f (bold).",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F15",
+   "lesson": 7,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Three practice questions, one knowledge check and one flashcard test bold statements with no tier flag: thyroxine negative feedback and adrenaline (B3.2b), and the menstrual-cycle interactions plus fertility treatments (B3.2d, B3.2f).",
+   "truth": "All three statements are bold, so they are Higher tier only. '(Higher tier)' now prefixes the practice questions and the knowledge check, and is appended to the flashcard question.",
+   "evidence": "spec B3.2b, B3.2d, B3.2f, all bold.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F16",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "A 'Plant Hormones (Auxins)' section teaches auxin, phototropism, gravitropism, selective weedkillers and rooting powders; two flashcards test auxin; the lesson description advertises 'plant hormones'.",
+   "truth": "J250 has NO plant hormone learning outcome. 'auxin', 'tropism' and 'phototropism' appear nowhere in the spec. The only mention is one sentence in the B3.2 Summary ('Plant hormones are chemicals that regulate plant growth and development'), which is context, not an outcome. This is separate-Biology (J247) content in a Combined unit. Options: (a) relabel the collapsible as background reading and drop 'plant hormones' from the description - safe, no narration change; (b) delete n17 and n18, which removes two narration blocks and forces a re-narrate; (c) leave it. Recommend (a).",
+   "evidence": "grep of both spec files for auxin / tropism / plant hormone: zero learning outcomes, one summary sentence at B3.2.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F17",
+   "lesson": 8,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "The glucagon paragraph is correctly wrapped as Higher only, but a 1-mark practice question ('State the role of glucagon in the body'), a 3-mark question on negative-feedback glucose control and a glucagon flashcard sit outside any tier flag. The conclusion and glossary also carry glucagon unflagged.",
+   "truth": "B3.3c 'explain how glucagon interacts with insulin to control blood sugar levels in the body' is bold, so it is Higher tier only. B3.3b (insulin) is both tiers. '(Higher tier)' now prefixes the two practice questions and is appended to the flashcard. The conclusion and glossary are left alone: a takeaway list cannot carry a tier flag without breaking the narration block, and knowing the word does no harm.",
+   "evidence": "spec B3.3b (plain) vs B3.3c (bold).",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "A full 'Temperature Regulation' section teaches vasodilation, vasoconstriction, sweating, shivering and hair erection, with one knowledge check, one practice question, two flashcards, two glossary terms and a conclusion takeaway.",
+   "truth": "J250 has no thermoregulation learning outcome. B3.3 runs a (importance of a constant internal environment) - b (insulin) - c (glucagon, bold) - d (diabetes). The words vasodilation, vasoconstriction, sweat, shiver and thermoregulatory appear nowhere in the spec; only 'Research into hypothermia' as a practical suggestion under B3.3a, and 'Internal temperature' in the B3.3 Summary. Two readings are defensible: (a) it is legitimate context for B3.3a, since OCR can set a temperature scenario and ask why a constant internal environment matters; (b) the mechanism detail is separate-Biology content and the practice question 'Describe two responses the body makes when it gets too hot' cannot be set on J250. Recommend keeping the section as context for B3.3a but demoting the practice question to a why-does-it-matter question at Tom's word. Not edited.",
+   "evidence": "grep of specs/ocr/combined-science-a-gateway-J250.md for vasodilat/vasoconstrict/thermoregulat/shiver/sweat: zero hits; hypothermia appears once as a practical suggestion.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F19",
+   "lesson": 8,
+   "field": "title",
+   "severity": "LOW",
+   "claim": "The lesson is titled 'Homeostasis and Reproduction' but contains no reproduction content.",
+   "truth": "Reproduction hormones are all in L7. L8 covers B3.3 only: homeostasis, blood glucose, diabetes, temperature. The description is accurate; the title is not. Title is not an editable field in this pipeline, and a rename ripples into narration, the podcast and the hero caption. Recommend renaming to 'Homeostasis: Maintaining Internal Environments'.",
+   "evidence": "direct read of L8; L7 carries B3.2c-f.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F20",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "LOW",
+   "claim": "Unit-level check of the lesson-to-paper mapping and of coverage gaps in B1-B3.",
+   "truth": "The mapping is correct. J250 has 6 papers (Foundation 1-6, Higher 7-12), each 1 hour 10 minutes, 60 marks, 16.7%. Biology Paper 1 is J250/01 at Foundation and J250/07 at Higher, and covers B1, B2, B3 plus CS7 practical skills (PAGs B1-B5). The eight lessons map cleanly: L1 B1.1, L2 B1.2, L3 B1.3, L4 B1.4, L5 B2.1 and B2.2, L6 B3.1, L7 B3.2, L8 B3.3. No B1-B3 statement is taught nowhere - every outcome from B1.1a to B3.3d appears in one of the eight lessons, including the practical statements B1.2c, B1.4d and B2.2j. No lesson asserts a paper number, duration or mark total, so there is nothing to correct there, and no AQA or Edexcel wording ('required practical', 'core practical', '1 hour 45', '100 marks') and no 9- or 12-mark question appears anywhere in the unit. The only scope problems run the other way (F2, F16, F18: content taught that J250 does not examine). PAG labels are right: PAG B1 microscopy in L1, PAG B3 enzyme rates in L2, PAG B4 photosynthesis in L4, and the L6 ruler-drop is labelled PAG B5, which matches the spec's own practical suggestion.",
+   "evidence": "spec section 2a (assessment overview, lines 669-814) and the PAG table (Practical Activity Groups B1 Microscopy, B2 Sampling techniques, B3 Rates of enzyme-controlled reactions, B4 Photosynthesis, B5 Microbiological techniques).",
+   "verdict": "ADJUDICATE"
+  }
+ ],
+ "lessons_clean": [],
+ "summary": "Eight lessons, 20 findings, 30 edits. The dominant fault is the tier wrapper: three higher-only wrappers hid both-tier statements (B1.1c electron microscopy, B3.2c menstrual-cycle hormones, B3.2e contraception) and one over-reached across a Foundation Key Fact (B1.4e); meanwhile genuinely bold statements (BM1.4v inverse square law, B3.2b thyroxine and adrenaline, B3.2d, B3.2f, B3.3c glucagon) were tested with no Higher flag. One science error: plants were said to ferment to lactic acid in waterlogged roots. Nine plain-text fields carried raw LaTeX. Three scope items (DNA base pairing and mRNA, plant hormones, thermoregulation) are separate-Biology content in a Combined unit and are left for adjudication. No number, equation, worked example or answer key in the unit was wrong.",
+ "renarration": {
+  "run_at": "2026-09-04T13:15:00Z",
+  "clips": [
+   {
+    "lesson": 3,
+    "id": "n16",
+    "key": "science-ocr/biology-paper-1/narration_lesson-03_n16.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/biology-paper-1/narration_lesson-03_n16.mp3",
+    "voice": "Ollie",
+    "duration": 19.75,
+    "bytes": 237024,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 13:14:54 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n13",
+    "key": "science-ocr/biology-paper-1/narration_lesson-04_n13.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science-ocr/biology-paper-1/narration_lesson-04_n13.mp3",
+    "voice": "Ada",
+    "duration": 26.98,
+    "bytes": 323712,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 13:14:59 GMT"
+   }
+  ],
+  "verified_ok": 2,
+  "total": 2
+ }
+}
