@@ -1,0 +1,438 @@
+{
+ "unit": "separate-sciences-ocr/chemistry-paper-2",
+ "checked_at": "2026-09-04T19:11:59",
+ "spec_used": "specs/ocr/chemistry-a-gateway-J248.md + specs/ocr/chemistry-a-gateway-J248-bold.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Lesson 1 teaches redox, acids, the pH scale and salt preparation inside a unit titled Chemistry Paper 2.",
+   "truth": "All of it is topic C3.3, which Paper 1 (Foundation) and Paper 3 (Higher) assess. Coordinator ruling applied: the lesson is not moved; a one-sentence scope note now sits under the first heading saying the content is examined on Paper 1 / Paper 3 and is assumed knowledge for the Paper 2 topics.",
+   "evidence": "spec 2a: 'Paper 1 assesses content from Topics C1-C3 and C7'; 'Paper 2 assesses content from Topics C4-C6 and C7, with assumed knowledge of Topics C1-C3'. C3.3a-k listed under Topic C3.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The pH scale paragraph and the strong-versus-concentrated Key Fact both sat inside a <div class=\"higher-only\">.",
+   "truth": "C3.3c (acids form hydrogen ions, alkalis contain hydroxide ions) and C3.3h (relative acidity and alkalinity are measured by pH) are not bold, so the pH scale itself is assessed at both tiers. Only C3.3g (dilute/concentrated, weak/strong) is bold. body.tier-foundation .higher-only is display:none in css/style.css, so a Foundation student could not see what pH means. The wrapper is narrowed to the Key Fact and the strong/weak sentences carry an in-text Higher Tier flag instead.",
+   "evidence": "bold file: C3.3c, C3.3h plain; **C3.3g**, **C3.3i**, **C3.3j** bold. css/style.css line 5062.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Making Salts by Titration (PAG C2)' and 'In your practical work (PAG C2), you will carry out acid-alkali titrations'.",
+   "truth": "PAG C2 is Electrolysis. Titration is PAG C6. Corrected in both places.",
+   "evidence": "spec Topic C7 PAG table: 6 Titration - 'Titration of a strong acid and strong alkali...'; 2 Electrolysis. Spec practical suggestions: 'Neutralisation reactions. (PAG C6)', 'Determining pH of unknown solutions. (PAG C6)'.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The whole titration and salt-preparation collapsible sat inside a higher-only wrapper.",
+   "truth": "C5.1b (describe the technique of titration) is not bold, and C3.3d (neutralisation to form a salt plus water, PAG C7) is not bold either. Both are assessed at Foundation. Wrapper removed.",
+   "evidence": "bold file: 'C5.1b þ describe the technique of titration' plain; 'C3.3d ... Production of pure dry sample of salt. (PAG C7)' plain.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 1,
+   "field": "knowledge_checks",
+   "severity": "HIGH",
+   "claim": "Match check 'Match each reaction type with its products:' had right = ['Salt + water', 'Salt + hydrogen', 'Salt + water'].",
+   "truth": "The renderer marks by option index, so a student who picks the identical text at the wrong index is marked wrong. The third pair is rebuilt as acid + metal carbonate to 'Salt + water + carbon dioxide', which the same lesson teaches.",
+   "evidence": "duplicate detected by scripted sweep of all 45 knowledge checks; js/main.js renderMatch compares indices.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Lesson 2 teaches electrolysis inside a unit titled Chemistry Paper 2.",
+   "truth": "Electrolysis is C3.4, assessed on Paper 1 / Paper 3. Same coordinator ruling as F1: scope note added, lesson not moved.",
+   "evidence": "spec 2a paper-to-topic mapping; C3.4a-e listed under Topic C3.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Halide ions written as (Cl<sup>2</sup><sup>3</sup>, Br<sup>2</sup><sup>3</sup>, I<sup>2</sup><sup>3</sup>).",
+   "truth": "Character corruption of the superscript minus. It renders as Cl-two-three, which is not a real ion. Replaced with &minus; superscripts.",
+   "evidence": "settled fact: halide ions carry a single negative charge.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 2,
+   "field": "content_html + glossary_terms",
+   "severity": "MEDIUM",
+   "claim": "'Aluminium oxide (Al2O3), the ore from which aluminium is extracted by electrolysis' - in the dfn tooltip and again in the glossary.",
+   "truth": "Aluminium oxide is not an ore. Bauxite is the ore; alumina is purified from bauxite before electrolysis. Both entries corrected.",
+   "evidence": "settled fact; the same lesson already names bauxite correctly in lesson 6.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 2,
+   "field": "practice_questions + flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Practice question 5 part (c) asks for a cathode half-equation and a flashcard is stemmed 'Higher: Write the half-equation...'.",
+   "truth": "Half equations are bold inside C3.4d, so they are Higher Tier only. Part (c) now carries a (Higher tier) prefix; the flashcard tag moves to the end of the question, as flashcards require.",
+   "evidence": "bold file C3.4d: 'the equations and **half equations** of the reactions at the electrodes'.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 3,
+   "field": "content_html + exam_tip_html + conclusion_html + practice_questions",
+   "severity": "HIGH",
+   "claim": "The whole 'Instrumental Methods and Flame Emission Spectroscopy (Higher Tier)' section sat inside a higher-only wrapper, with matching Higher Tier flags in the exam tip, the takeaway and the 6-mark question.",
+   "truth": "C4.2f (advantages of instrumental methods) and C4.2g (interpret an instrumental result) carry the separate-science dagger but are NOT bold, so they are assessed at both tiers in this qualification. The wrapper was misused to mean separate-only and hid the section from Foundation students. Wrapper and all four tier flags removed.",
+   "evidence": "bold file: 'C4.2f þ', 'C4.2g þ' both plain, no asterisks. css/style.css line 5062 hides .higher-only for tier-foundation.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11",
+   "lesson": 3,
+   "field": "content_html + exam_tip_html + conclusion_html + flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "The sodium hydroxide precipitate table teaches aluminium and magnesium (with the amphoteric aluminium hydroxide distinction, called 'frequently tested') and omits zinc.",
+   "truth": "C4.2b names calcium, copper, iron(II), iron(III) and zinc. Aluminium and magnesium are not on the list for this board; zinc is, and was missing everywhere. Replaced with zinc (white precipitate that dissolves in excess sodium hydroxide) contrasted with calcium, in the article, exam tip, takeaway and flashcard.",
+   "evidence": "bold file C4.2b: 'calcium, copper, iron(II), iron(III) and zinc using sodium hydroxide'.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 4,
+   "field": "content_html + conclusion_html + flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "'Practical Methods for Measuring Rate (PAG C5)', 'In your practical work (PAG C5)', 'PAG C5 involves measuring rate...' and a flashcard answer 'PAG C5 - rates of reaction investigation.'",
+   "truth": "PAG C5 is Identification of species. Measuring rates of reaction is PAG C8. Corrected in all four places.",
+   "evidence": "spec Topic C7 PAG table: '8 Measuring rates of reaction - Investigate the effect of surface area or concentration on the rate of an acid/carbonate reaction'. Spec practical suggestions on C5.2a-C5.2c: '(PAG C1, PAG C8)', 'Disappearing cross experiment. (PAG C8)'.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F13",
+   "lesson": 4,
+   "field": "knowledge_checks",
+   "severity": "LOW",
+   "claim": "Match stem 'Match each factor to its effect on collision frequency:' with a third pair 'Adding a catalyst' to 'Provides a lower energy pathway, more successful collisions'.",
+   "truth": "A catalyst does not change collision frequency, so the stem contradicted its own answer. Stem changed to 'Match each factor to how it increases the rate of reaction:'.",
+   "evidence": "C5.2h: 'explain catalytic action in terms of activation energy'; the lesson's own Key Fact says the same.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F14",
+   "lesson": 5,
+   "field": "practice_questions + knowledge_checks + flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Five practice questions, three knowledge checks and five flashcards test Le Chatelier's principle and the Haber compromise conditions with no tier flag, although the article wraps that content correctly.",
+   "truth": "C5.3c (predict the effect of changing reaction conditions on equilibrium position, Le Chatelier) is bold, and C6.1d and C6.1f (the rate-versus-equilibrium trade-off and commercially used conditions, naming the Haber and Contact processes) are bold. A (Higher tier) prefix added to the questions and checks; the flashcard tag goes at the end.",
+   "evidence": "bold file: **C5.3c**, **C6.1d** þ, **C6.1e** þ, **C6.1f** þ all bold; C5.3a and C5.3b plain.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F15",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "The opening 'Atom Economy and Percentage Yield' section (heading, five paragraphs and a Key Fact, narration n1-n8) sat inside a higher-only wrapper.",
+   "truth": "C5.1g (theoretical mass of a product), C5.1h (percentage yield), C5.1i (define atom economy) and C5.1j (calculate atom economy) carry the separate-science dagger but are NOT bold, so they are assessed at both tiers. The wrapper was misused to mean separate-only and hid the whole section from Foundation. Removed.",
+   "evidence": "bold file: 'C5.1g þ', 'C5.1h þ', 'C5.1i þ', 'C5.1j þ' all plain; only **C5.1a**, **C5.1c**, **C5.1d**, **C5.1e**, **C5.1f**, **C5.1k** are bold.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F16",
+   "lesson": 6,
+   "field": "content_html + conclusion_html + practice_questions + knowledge_checks + flashcard_questions",
+   "severity": "HIGH",
+   "claim": "Phytomining and bioleaching (heading, paragraph, a two-paragraph collapsible and a Key Fact, n16-n20) carried no tier flag, while the 'Comparing Extraction Methods' collapsible after it was wrapped as Higher Tier. The tier flags were inverted.",
+   "truth": "C6.1c (evaluate alternative biological methods of metal extraction - bacterial and phytoextraction) IS bold, so biological extraction is Higher Tier only. C6.1a and C6.1b (carbon reduction, electrolysis) are not bold. The wrapper is moved up to open at n16 so one Higher Tier badge covers the whole biological-extraction block including the comparison; two practice questions, two knowledge checks and four flashcards get the tier tag, and the takeaway is flagged.",
+   "evidence": "bold file: **C6.1c** bold; C6.1a, C6.1b plain.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17",
+   "lesson": 7,
+   "field": "content_html + practice_questions + knowledge_checks + flashcard_questions",
+   "severity": "HIGH",
+   "claim": "The ENTIRE article of lesson 7 (crude oil, fractional distillation, alkanes, combustion, cracking, alkenes, alcohols, carboxylic acids, addition and condensation polymers - narration n1-n24) sat inside a single <div class=\"higher-only\">, and the lessons row carries tier 'higher'.",
+   "truth": "Only C6.2e and C6.2f (condensation polymerisation and making a condensation polymer) are bold. C6.2a-C6.2d and C6.2g-C6.2i carry the separate-science dagger but are not bold; C6.2j-C6.2o (fractional distillation, cracking) are not even separate-only. The wrapper was misused to mean separate-only and hid an entire lesson from Foundation students. Outer wrapper removed; a new wrapper placed round the Condensation Polymers collapsible only; the condensation practice question, knowledge check and two flashcards tagged.",
+   "evidence": "bold file: **C6.2e** þ and **C6.2f** þ bold; C6.2a-d, C6.2g-i plain with dagger; C6.2j-o plain, no dagger.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Carbon monoxide ... binds irreversibly to haemoglobin, preventing blood from carrying oxygen.'",
+   "truth": "Carbon monoxide binding is not irreversible. Carboxyhaemoglobin dissociates, which is why oxygen therapy is the treatment; the affinity is roughly two hundred times that of oxygen, not permanent. Reworded to 'binds to haemoglobin far more strongly than oxygen does'.",
+   "evidence": "settled fact; the same misconception is corrected in medical and A-level texts. The spec (C6.3f) only requires the source and the problems caused.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F19",
+   "lesson": 9,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "The 'Haber Process and NPK Fertilisers' section (heading, paragraph and Key Fact, n18-n20) sat inside a higher-only wrapper.",
+   "truth": "C6.1g (importance of the Haber process in agricultural production), C6.1h (compare industrial and laboratory fertiliser production), C6.1i (importance of nitrogen, phosphorus and potassium compounds) and C6.1j (industrial production of fertilisers) all carry the separate-science dagger but are NOT bold, so they are assessed at both tiers. Wrapper removed.",
+   "evidence": "bold file: 'C6.1g þ', 'C6.1h þ', 'C6.1i þ', 'C6.1j þ' all plain.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F20",
+   "lesson": 7,
+   "field": "content_html + exam_tip_html + practice_questions + knowledge_checks + flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Lesson 7 devotes a whole section (n17 plus a Key Fact), an exam-tip sentence, practice question 2, the 6-mark extended response, knowledge check 4 and two flashcards to fermentation of glucose and hydration of ethene.",
+   "truth": "Neither 'fermentation' nor 'hydration' appears anywhere in this specification - a full-text search of the PDF extraction returns nothing. Ethanol production routes are not assessed by this board, so a 6-mark question on 'evaluate fermentation versus hydration of ethene' cannot be set. What C6.2c does require and the lesson omits is the oxidation of alcohols to carboxylic acids using potassium manganate(VII). Options: (a) replace the fermentation section and the 6-mark question with alcohol oxidation and the reactions of alkenes with bromine and hydrogen - a real rewrite that re-narrates n17, n18, n25 and rewrites two questions and two flashcards; (b) keep it as background and only re-point the 6-mark question. Recommend (a) at the next content pass; the chemistry is correct, so nothing here is dangerous, only off-spec.",
+   "evidence": "grep of specs/ocr/chemistry-a-gateway-J248.md for 'ferment', 'hydration', 'ester': no hits except 'polyester'. C6.2c names combustion, addition of bromine and hydrogen across a double bond, oxidation of alcohols with potassium manganate(VII).",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F21",
+   "lesson": 7,
+   "field": "lessons.tier",
+   "severity": "MEDIUM",
+   "claim": "The lessons row for lesson 7 carries tier 'higher'; every other lesson in the unit is 'both'.",
+   "truth": "As F17 shows, organic chemistry is separate-science-only, not Higher-only: only condensation polymerisation is bold. The tier column should read 'both'. This is a metadata column, not one of the eight editable content fields, so it is not in _edits.json - it needs a one-row update alongside the article fix.",
+   "evidence": "bold file C6.2 statement list; _brief.json lesson 7 tier 'higher'.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F22",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "MEDIUM",
+   "claim": "Lesson-to-paper mapping for the unit.",
+   "truth": "Two of the nine lessons are Paper 1 content: lesson 1 (redox, acids, neutralisation, pH, salts = C3.3) and lesson 2 (electrolysis = C3.4). Paper 2 (Foundation) and Paper 4 (Higher) assess C4-C6 with C1-C3 as assumed knowledge, so the material is not wasted, but it is examined on the other paper. Per the coordinator instruction the lessons stay where they are and each now opens with a one-sentence scope note (F1, F6). The alternative, moving both lessons into the Paper 1 unit, would leave that unit's own C3.3 and C3.4 gap filled but would break the two lesson URLs.",
+   "evidence": "spec 2a: 'Paper 1 assesses content from Topics C1-C3 and C7. Paper 2 assesses content from Topics C4-C6 and C7, with assumed knowledge of Topics C1-C3.' Four papers, 90 marks, 1 hour 45 minutes, 50 per cent each; Section A 15 marks multiple choice, Section B 75 marks with one six-mark extended-response question. No lesson in this unit contradicts that structure.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F23",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "MEDIUM",
+   "claim": "Coverage of C4-C6 across the nine lessons, including the separate-science-only statements.",
+   "truth": "Real gaps, all separate-science content that a Combined unit would not carry: (1) C5.1 Monitoring chemical reactions is almost untaught - concentration in mol/dm3 (C5.1a), titration calculations (C5.1c), molar amounts of gases and the 24 dm3 molar gas volume at room temperature and pressure (C5.1d, C5.1e), theoretical mass from a given mass of reactant (C5.1g) and choosing a reaction pathway from yield, rate and equilibrium data (C5.1k) appear nowhere; lesson 6 gives the atom economy and percentage yield formulae but no worked calculation and no A_r arithmetic. (2) C6.1o-C6.1s: alloys (steel, brass, bronze, solder, duralumin), corrosion and its conditions, sacrificial protection and the physical comparison of glass and clay ceramics, polymers, composites and metals - taught nowhere. (3) C6.2p and C6.2q: chemical cells and the hydrogen/oxygen fuel cell - taught nowhere. (4) C6.2h: DNA and other naturally occurring polymers - absent. (5) C4.2g: interpreting a mass spectroscopy chart - the lesson 3 instrumental section describes flame emission spectroscopy instead, which this spec never names. (6) C4.1a-C4.1f (Groups 1, 7 and 0, transition metals, order of reactivity) sit in the Paper 1 unit's lesson 3, so they exist but under the other paper. (7) C5.2b's '1/t is proportional to rate' and gradients of graphs get no worked example. Recommend a scoping decision on whether to build a C5.1 quantitative lesson and a C6.1o-s materials lesson before this unit is claimed complete.",
+   "evidence": "spec statement lists C4.1-C6.3 read against the nine lesson titles and bodies; dagger symbols mark separate-only statements.",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F24",
+   "lesson": 0,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "Slot five of the six-question template is labelled '4 marks - Calculate' in lessons 1, 2, 3, 4, 5 and 9.",
+   "truth": "Only lessons 6 and 7 put an actual calculation there. In lesson 1 it is a word equation and a crystallisation method, in lesson 2 a product-and-half-equation question, in lesson 3 an ion identification, in lesson 4 a variables-and-sketch question, in lesson 5 a Le Chatelier prediction, in lesson 9 an NPK recall. Same template artefact recorded for the Paper 1 unit; belongs to the question-type relabel queue, not to this fact-check.",
+   "evidence": "cross-lesson pattern; mark totals themselves all add up correctly.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F25",
+   "lesson": 0,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "Lessons 3, 6, 7, 8 and 9 use four-step band ladders (Mastering, Secure, Developing, Emerging) as the mark scheme for 2-mark and 3-mark questions.",
+   "truth": "A band ladder is not a sensible scheme for a 3-mark explain; lessons 1, 2, 4 and 5 use point-based schemes for the same slots. Belongs to the programme's band-ladder queue.",
+   "evidence": "cross-lesson pattern.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F26",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "The flame-test Key Fact teaches six colours including barium (apple-green), and a flashcard tests it.",
+   "truth": "C4.2e names lithium, sodium, potassium, calcium and copper only. Barium is extra load rather than an error, and the colour given is right, so it is not edited.",
+   "evidence": "bold file C4.2e: 'the ions of lithium, sodium, potassium, calcium and copper'.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F27",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Atom economy formula written as (Mr of desired product / sum of Mr of all products) x 100.",
+   "truth": "Numerically correct for a balanced equation, but it omits the balancing coefficient on the desired product, so a student calculating for 2CuO + C to 2Cu + CO2 may use 63.5 rather than 127. Not edited because the form itself is standard and the lesson sets no worked example that gets it wrong.",
+   "evidence": "recomputation check; C5.1j requires the calculation from the balanced equation.",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F28",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'flue gas desulfurisation ... reacting SO2 in waste gases with calcium oxide to produce calcium sulfate'.",
+   "truth": "The direct reaction of calcium oxide with sulfur dioxide gives calcium sulfite; the sulfate needs forced oxidation, which modern wet plants do use. Defensible as written and off-spec detail either way, so not edited.",
+   "evidence": "settled chemistry; the spec requires only the sources and problems of SO2 (C6.3f).",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F29",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "LOW",
+   "claim": "Verification sweep for the faults seen in the other OCR science units.",
+   "truth": "Clean. Every chemical equation in the unit balances (2CuO + C, Zn + CuSO4, HCl + NaOH, Zn + H2SO4, CaCO3 + 2HCl, CuO + H2SO4, Pb2+ + 2e-, 2Br-, Al3+ + 3e-, 2O2-, Fe2+ + 2OH-, Fe3+ + 3OH-, Ca(OH)2 + CO2, CH4 + 2O2, C10H22 to C8H18 + C2H4, 6CO2 + 6H2O). Every numeric answer recomputes: 42/56 x 100 = 75 per cent; C10H22 + C2H4 = C12H26 and 2(12)+2 = 26; the Haber value -92 kJ/mol and the 4-to-2 mole count are right; 2SO2 + O2 to 2SO3 is 3 moles to 2. Every test result is right (flame colours, hydroxide precipitate colours, silver halide white/cream/yellow, barium sulfate white, limewater, squeaky pop, glowing splint, bleached litmus). All 45 knowledge check answer keys check out apart from F5. No banned board strings, no 'required practical' or 'core practical', no spec-code strings, no rubric phrases, no raw LaTeX or HTML entities in plain-text fields, no duplicate flashcard answers, no answers over 30 words, and every div count balances before and after the edits.",
+   "evidence": "scripted sweep of all nine lessons plus manual recomputation.",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [],
+ "summary": "Nine lessons checked against OCR Gateway Chemistry A (separate science), Paper 2 = topics C4-C6 plus C7 with C1-C3 assumed. No calculation, equation, definition or test result is wrong and every worked example recomputes; the damage is tiering, practical codes, one broken check and one off-spec section. Five higher-only wrappers were misused to mean separate-only and hid both-tier content from Foundation students - the whole of lesson 7, the atom economy and yield opening of lesson 6, the instrumental methods section of lesson 3, the NPK section of lesson 9 and the pH scale in lesson 1. The fault runs the other way too: phytomining and bioleaching (C6.1c, bold) carried no flag in lesson 6, and Le Chatelier and Haber questions in lesson 5 were untagged. Three PAG citations named the wrong group (C2 for titration, C5 for rates). A lesson 3 precipitate table taught aluminium and magnesium, which are not on this board's cation list, and omitted zinc, which is. A match check offered 'Salt + water' twice. Lesson 8 stated that carbon monoxide binds irreversibly to haemoglobin. Four unit-level calls stay open: fermentation and hydration of ethene are not in this specification at all yet carry a 6-mark question (F20); lesson 7's tier column should read 'both' (F21); lessons 1 and 2 are Paper 1 content, now labelled rather than moved (F22); and C5.1 quantitative chemistry, C6.1o-s materials and corrosion, and C6.2p-q fuel cells are taught nowhere in the unit (F23).",
+ "renarration": {
+  "run_at": "2026-09-04T18:14:08Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n11",
+    "key": "separate-sciences-ocr/chemistry-paper-2/narration_lesson-01_n11.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-2/narration_lesson-01_n11.mp3",
+    "voice": "Ollie",
+    "duration": 43.51,
+    "bytes": 522144,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:13:20 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n19",
+    "key": "separate-sciences-ocr/chemistry-paper-2/narration_lesson-01_n19.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-2/narration_lesson-01_n19.mp3",
+    "voice": "Ollie",
+    "duration": 37.06,
+    "bytes": 444672,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:13:26 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n15",
+    "key": "separate-sciences-ocr/chemistry-paper-2/narration_lesson-02_n15.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-2/narration_lesson-02_n15.mp3",
+    "voice": "Ada",
+    "duration": 13.32,
+    "bytes": 159840,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:13:29 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n14",
+    "key": "separate-sciences-ocr/chemistry-paper-2/narration_lesson-03_n14.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-2/narration_lesson-03_n14.mp3",
+    "voice": "Ollie",
+    "duration": 42.05,
+    "bytes": 504576,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:13:37 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n20",
+    "key": "separate-sciences-ocr/chemistry-paper-2/narration_lesson-03_n20.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-2/narration_lesson-03_n20.mp3",
+    "voice": "Ollie",
+    "duration": 3.82,
+    "bytes": 45792,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:13:38 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n23",
+    "key": "separate-sciences-ocr/chemistry-paper-2/narration_lesson-03_n23.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-2/narration_lesson-03_n23.mp3",
+    "voice": "Ollie",
+    "duration": 40.22,
+    "bytes": 482688,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:13:45 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n26",
+    "key": "separate-sciences-ocr/chemistry-paper-2/narration_lesson-03_n26.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-2/narration_lesson-03_n26.mp3",
+    "voice": "Ollie",
+    "duration": 23.04,
+    "bytes": 276480,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:13:49 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n27",
+    "key": "separate-sciences-ocr/chemistry-paper-2/narration_lesson-03_n27.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-2/narration_lesson-03_n27.mp3",
+    "voice": "Ollie",
+    "duration": 16.49,
+    "bytes": 197856,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:13:52 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n17",
+    "key": "separate-sciences-ocr/chemistry-paper-2/narration_lesson-04_n17.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-2/narration_lesson-04_n17.mp3",
+    "voice": "Ada",
+    "duration": 12.77,
+    "bytes": 153216,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:13:55 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n27",
+    "key": "separate-sciences-ocr/chemistry-paper-2/narration_lesson-04_n27.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-2/narration_lesson-04_n27.mp3",
+    "voice": "Ada",
+    "duration": 16.49,
+    "bytes": 197856,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:13:59 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n28",
+    "key": "separate-sciences-ocr/chemistry-paper-2/narration_lesson-06_n28.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-2/narration_lesson-06_n28.mp3",
+    "voice": "Ada",
+    "duration": 12.22,
+    "bytes": 146592,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:14:01 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n16",
+    "key": "separate-sciences-ocr/chemistry-paper-2/narration_lesson-08_n16.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-ocr/chemistry-paper-2/narration_lesson-08_n16.mp3",
+    "voice": "Ada",
+    "duration": 21.31,
+    "bytes": 255744,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 18:14:05 GMT"
+   }
+  ],
+  "verified_ok": 12,
+  "total": 12
+ }
+}
