@@ -1,0 +1,457 @@
+{
+ "generated_at": "2026-09-04T17:52:35.343Z",
+ "unit_id": "9fd68d3d-e0e5-4abc-93d6-759c5c09ba14",
+ "subject": "electronics-eduqas",
+ "unit": "application-of-electronics",
+ "lessons": [
+  {
+   "id": "ebe03127-fef9-4801-a66e-d5b326e943d5",
+   "lesson_number": 1,
+   "title": "Amplifiers: Gain, Bandwidth and Clipping",
+   "before": {
+    "content_html": "<h2 data-narration-id=\"n1\">What Does an Amplifier Do?</h2>\n<p data-narration-id=\"n2\">An amplifier is a circuit that increases the power of a signal. Almost every electronic system contains one: a microphone produces a tiny voltage that must be boosted before it can drive a loudspeaker. In your exam you will meet two main types &mdash; <dfn class=\"term\" data-def=\"An amplifier stage that raises the voltage of a weak input signal before it reaches a power stage.\">voltage amplifier</dfn> and <dfn class=\"term\" data-def=\"An amplifier stage that supplies the high current needed to drive a loudspeaker or motor.\">power amplifier</dfn>. Voltage amplifiers deal with small signals; power amplifiers deliver the current needed to drive an output device.</p>\n\n<h2 data-narration-id=\"n3\">Voltage Gain</h2>\n<p data-narration-id=\"n4\">The key number for any amplifier is its <dfn class=\"term\" data-def=\"The ratio of output voltage to input voltage for an amplifier, often written as G or A_v.\">voltage gain</dfn>. It tells you how many times larger the output voltage is compared with the input voltage.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n5\" data-revision-tip=\"Cover this and write the voltage gain formula from memory, then state what each symbol means.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Voltage gain is defined as:</p>\n  <p>$$G = \\frac{V_{OUT}}{V_{IN}}$$</p>\n  <p>Gain has no units &mdash; it is a pure ratio. An amplifier with \\(G = 50\\) produces an output 50 times larger than its input.</p>\n</div>\n\n<p data-narration-id=\"n6\">If an amplifier receives an input of 20 mV and produces an output of 1 V, its voltage gain is:</p>\n<p data-narration-id=\"n7\">$$G = \\frac{1\\text{ V}}{0.02\\text{ V}} = 50$$</p>\n<p data-narration-id=\"n8\">You can rearrange the equation to find any missing quantity. To find the output voltage: \\(V_{OUT} = G \\times V_{IN}\\). To find the input voltage: \\(V_{IN} = \\frac{V_{OUT}}{G}\\).</p>\n\n<h2 data-narration-id=\"n9\">Bandwidth and the Gain&ndash;Frequency Graph</h2>\n<p data-narration-id=\"n10\">Real amplifiers do not work equally well at all frequencies. At very low and very high frequencies, the gain falls. A <dfn class=\"term\" data-def=\"A graph showing how an amplifier's gain changes as the input frequency is varied, used to find its bandwidth.\">gain&ndash;frequency graph</dfn> (also called a frequency response graph) shows this. The horizontal axis is frequency (often on a logarithmic scale) and the vertical axis is gain.</p>\n<p data-narration-id=\"n11\">The useful range of frequencies over which the amplifier works effectively is called the <dfn class=\"term\" data-def=\"The range of frequencies over which an amplifier's gain is at least 70% of its maximum value.\">bandwidth</dfn>. The bandwidth is defined between the two frequencies at which the gain drops to 70% of its maximum value. These points are sometimes called the &ldquo;half-power points&rdquo; or &ldquo;&minus;3 dB points.&rdquo;</p>\n\n<div class=\"key-fact\" data-narration-id=\"n12\" data-revision-tip=\"Close this and explain: how do you identify the bandwidth from a gain-frequency graph? Write the 70% rule in your own words.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Bandwidth is the range of frequencies between the lower and upper frequencies at which gain falls to <strong>70% of the maximum gain</strong>. It is measured in hertz (Hz) or kilohertz (kHz).</p>\n</div>\n\n<p data-narration-id=\"n13\">For example, if an amplifier has a maximum gain of 100 and the gain is at or above 70 between 200 Hz and 20 kHz, then the bandwidth is \\(20\\,000 - 200 = 19\\,800\\) Hz, or approximately 19.8 kHz. Audio amplifiers need a bandwidth covering at least 20 Hz to 20 kHz to reproduce the full range of human hearing faithfully.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>The Gain&ndash;Bandwidth Trade-off</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n14\">Amplifiers based on operational amplifiers have a fixed gain&ndash;bandwidth product. This means that if you increase the gain, the bandwidth automatically narrows, and vice versa. This trade-off is an important design constraint.</p>\n    <p data-narration-id=\"n15\">For example, if the gain&ndash;bandwidth product of an op-amp is 1 MHz:\n    <br>&bull; At a gain of 10, the bandwidth is 100 kHz.\n    <br>&bull; At a gain of 100, the bandwidth falls to 10 kHz.\n    <br>&bull; At a gain of 1000, the bandwidth is only 1 kHz.</p>\n    <p data-narration-id=\"n16\">This is why high-gain amplifiers are only used in applications that need a narrow band of frequencies, such as a single radio station. A general-purpose audio amplifier uses a lower gain to keep a wide enough bandwidth for all audio frequencies.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n17\">Signal Waveforms on a Voltage&ndash;Time Graph</h2>\n<p data-narration-id=\"n18\">An amplifier should reproduce the <em>shape</em> of its input signal, just with a larger amplitude. The most common waveforms you will see on a voltage&ndash;time graph are:</p>\n<ul>\n  <li data-narration-id=\"n19\"><strong>Sine wave</strong> &mdash; a smooth, continuously varying curve. Audio signals and AC mains are sine waves.</li>\n  <li data-narration-id=\"n20\"><strong>Square wave</strong> &mdash; alternates sharply between two voltage levels. Used in digital clocking circuits.</li>\n  <li data-narration-id=\"n21\"><strong>Triangular wave</strong> &mdash; rises and falls linearly between two levels. Used in some oscillator and waveform generator circuits.</li>\n</ul>\n\n<h2 data-narration-id=\"n22\">Clipping Distortion</h2>\n<p data-narration-id=\"n23\">Every amplifier is powered by a supply voltage &mdash; typically \\(+V_{CC}\\) and \\(-V_{CC}\\) for a dual-supply op-amp. The output cannot exceed these rails. When the mathematically correct output would be larger than the supply voltage, the top (or bottom) of the waveform is cut flat. This is called <dfn class=\"term\" data-def=\"A form of distortion where the peaks of the output waveform are flattened because the output has hit the supply voltage limits.\">clipping</dfn>.</p>\n<p data-narration-id=\"n24\">On a voltage&ndash;time graph, clipping is easy to spot: a sine wave that should have curved peaks instead has flat tops and/or flat bottoms at the supply rail voltage. For example, an amplifier running from &plusmn;10 V supplies will clip any output that tries to go above +10 V or below &minus;10 V. A common exam error is failing to spot this and drawing the output as a perfectly shaped but oversize sine wave &mdash; always check whether the output amplitude is within the supply rails.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Identifying Clipping</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n25\">An inverting amplifier has a gain of &minus;20 and is powered from &plusmn;10 V supplies. The input is a sine wave with a peak amplitude of 0.8 V.</p>\n    <p data-narration-id=\"n26\">Step 1 &mdash; Calculate the expected output peak: \\(V_{OUT,peak} = |G| \\times V_{IN,peak} = 20 \\times 0.8 = 16\\) V.</p>\n    <p data-narration-id=\"n27\">Step 2 &mdash; Compare with supply rails: the output would need &plusmn;16 V, but the supply is only &plusmn;10 V.</p>\n    <p data-narration-id=\"n28\">Step 3 &mdash; Conclusion: the output is clipped. On the voltage&ndash;time graph, the sine wave peaks are flattened at +10 V and &minus;10 V. The waveform resembles a square wave at the top and bottom, with the sinusoidal shape visible only in the middle portion where the output is within &plusmn;10 V.</p>\n    <p data-narration-id=\"n29\">How to prevent clipping: reduce the input amplitude, reduce the gain, or increase the supply voltage.</p>\n  </div></div>\n</div>\n\n<p data-narration-id=\"n30\">Clipping introduces <dfn class=\"term\" data-def=\"Any unwanted change to the shape of a signal waveform that alters the signal&rsquo;s quality.\">distortion</dfn>. For audio, this produces a harsh, buzzing sound because the flat tops of the clipped wave contain many high-frequency harmonic components not present in the original sine wave. The next lesson explores how op-amp circuits control gain precisely through feedback resistors.</p>"
+   }
+  },
+  {
+   "id": "33022f8c-875d-4b57-a9ac-d46038fb197b",
+   "lesson_number": 3,
+   "title": "Summing Amplifiers and Audio Mixer Systems",
+   "before": {
+    "content_html": "<h2 data-narration-id=\"n1\">Why Combine Signals?</h2>\n<p data-narration-id=\"n2\">Many practical systems need to mix signals from several sources before amplifying them. A public address (PA) system, for example, might take input from a microphone, a keyboard and a guitar simultaneously, blend them into a single audio signal, and then boost it to drive loudspeakers. A single inverting op-amp with multiple input resistors performs this job &mdash; it is called a <dfn class=\"term\" data-def=\"An op-amp circuit with two or more input resistors that adds the input voltages (scaled by resistor ratios) and produces a single combined output.\">summing amplifier</dfn>.</p>\n\n<h2 data-narration-id=\"n3\">How a Summing Amplifier Works</h2>\n<p data-narration-id=\"n4\">The summing amplifier is an extension of the inverting amplifier. Instead of one input resistor \\(R_1\\), it has two or more: \\(R_1, R_2, R_3\\) and so on, each carrying a different input signal. All of these resistors connect to the same point &mdash; the inverting (&ldquo;&minus;&rdquo;) input of the op-amp, which the negative feedback holds at virtual earth (approximately 0 V). The feedback resistor \\(R_f\\) still runs from the output back to the inverting input.</p>\n<p data-narration-id=\"n5\">Because the inverting input is at virtual earth, each input resistor independently controls how much of its voltage appears in the output. The output is the inverted, weighted sum of all inputs. If all input resistors are equal (and equal to \\(R_f\\)), the output is simply the inverted sum of all input voltages.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n6\" data-revision-tip=\"Cover this and write the summing amplifier output equation for two equal inputs from memory. Then explain in one sentence why the output has a negative sign.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>For a summing amplifier with equal input resistors (all equal to \\(R\\)) and feedback resistor \\(R_f\\):</p>\n  <p>$$V_{OUT} = -\\frac{R_f}{R} \\left(V_1 + V_2 + V_3 + \\ldots \\right)$$</p>\n  <p>The output is the inverted, scaled sum of all inputs. The negative sign comes from the inverting input &mdash; the same phase inversion as a single inverting amplifier.</p>\n</div>\n\n<p data-narration-id=\"n7\">The specification requires a minimum of two input signals. Up to four inputs may be used. Each input can have a different resistor value to apply a different weighting (gain) to that channel &mdash; just as a mixing desk fader adjusts how loud each instrument is in the final mix.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Two-Input Summing Amplifier</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n8\">A summing amplifier has \\(R_1 = R_2 = 10\\) k&Omega; and \\(R_f = 10\\) k&Omega;. Two inputs are applied: \\(V_1 = +0.3\\) V and \\(V_2 = +0.5\\) V.</p>\n    <p data-narration-id=\"n9\">Step 1 &mdash; Check that all resistors are equal and equal to \\(R_f\\):</p>\n    <p data-narration-id=\"n10\">Since \\(R_1 = R_2 = R_f = 10\\) k&Omega;, the gain per input is \\(-R_f / R_1 = -1\\).</p>\n    <p data-narration-id=\"n11\">Step 2 &mdash; Calculate the output:</p>\n    <p data-narration-id=\"n12\">$$V_{OUT} = -(V_1 + V_2) = -(0.3 + 0.5) = -0.8\\text{ V}$$</p>\n    <p data-narration-id=\"n13\">If instead \\(R_f = 22\\) k&Omega; (with \\(R_1 = R_2 = 10\\) k&Omega;), the gain per input becomes \\(-22/10 = -2.2\\):</p>\n    <p data-narration-id=\"n14\">$$V_{OUT} = -2.2 \\times (0.3 + 0.5) = -2.2 \\times 0.8 = -1.76\\text{ V}$$</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n15\">The Audio Amplifier Block Diagram</h2>\n<p data-narration-id=\"n16\">A <dfn class=\"term\" data-def=\"A diagram using labelled rectangles to show how subsystems connect together to form a complete system, without showing the internal circuitry of each block.\">block diagram</dfn> represents a complete system as a chain of labelled rectangles. Each block is a subsystem; arrows show the direction of signal flow. The signal chain for a PA system follows a logical sequence from transducer to output.</p>\n\n<p data-narration-id=\"n17\">The full signal path for a typical audio PA system looks like this:</p>\n\n<table data-narration-id=\"n18\">\n  <thead><tr><th>Stage</th><th>Block name</th><th>Function</th></tr></thead>\n  <tbody>\n    <tr><td>1</td><td>Microphone / instrument</td><td>Converts sound to a small electrical signal (typically 1&ndash;100 mV)</td></tr>\n    <tr><td>2</td><td><dfn class=\"term\" data-def=\"A low-noise amplifier stage that boosts a weak transducer signal to a level suitable for further processing.\">Preamplifier</dfn></td><td>Amplifies the weak signal to a usable level (e.g. 100 mV to 1 V)</td></tr>\n    <tr><td>3</td><td>Summing amplifier (mixer)</td><td>Combines signals from multiple preamplified sources into one</td></tr>\n    <tr><td>4</td><td>Power amplifier</td><td>Boosts current to drive the loudspeaker</td></tr>\n    <tr><td>5</td><td>Loudspeaker</td><td>Converts the electrical signal back to sound</td></tr>\n  </tbody>\n</table>\n\n<p data-narration-id=\"n19\">A common exam mistake is placing the mixer before the preamplifiers. This gives the wrong answer. The preamplifiers come first because the raw transducer signal is too weak to mix cleanly; preamplification brings each channel up to a similar level before the mixer combines them.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n20\" data-revision-tip=\"Close this and write the five-block audio chain in order, from microphone to loudspeaker, without looking.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The audio amplifier chain order: <strong>Signal source &rarr; Preamplifier(s) &rarr; Summing amplifier (mixer) &rarr; Power amplifier &rarr; Loudspeaker.</strong> The summing amplifier always sits between the preamps and the power amp.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Common Errors in Block Diagram Questions</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n21\">Examiners have reported that block diagram questions are among the worst answered on both papers. The most common errors are:</p>\n    <ul>\n      <li data-narration-id=\"n22\">Placing the mixer (summing amplifier) before the preamplifiers &mdash; wrong because the signals are too weak to mix first.</li>\n      <li data-narration-id=\"n23\">Placing the power amplifier before the mixer &mdash; wrong because only one combined signal feeds the power amp.</li>\n      <li data-narration-id=\"n24\">Adding a block (such as a pulse generator) that has no purpose in an audio chain &mdash; read the specification carefully and only include blocks that are justified.</li>\n      <li data-narration-id=\"n25\">Forgetting to label each block clearly &mdash; &ldquo;amplifier&rdquo; alone is not sufficient if the question asks you to distinguish preamp from power amp.</li>\n    </ul>\n  </div></div>\n</div>\n\n<p data-narration-id=\"n26\">Summing amplifiers appear across many practical systems beyond audio: data-acquisition circuits combine sensor readings; digital-to-analogue converters (DACs) sum binary-weighted voltages; automatic control systems blend error signals from different sensors. The key skill is recognising when multiple inputs need to be combined before the next processing stage.</p>",
+    "flashcard_questions": [
+     {
+      "a": "It adds (and inverts) multiple input voltages into a single output signal.",
+      "q": "What does a summing amplifier do?"
+     },
+     {
+      "a": "−1.0 V",
+      "q": "A summing amplifier with R1 = R2 = Rf. V1 = 0.4 V, V2 = 0.6 V. What is V_OUT?"
+     },
+     {
+      "a": "After the preamplifiers, before the power amplifier.",
+      "q": "Where in an audio chain does the summing amplifier (mixer) sit?"
+     },
+     {
+      "a": "Transducer signals are too weak to mix cleanly without amplification first.",
+      "q": "Why must preamplifiers come before the mixer in an audio system?"
+     },
+     {
+      "a": "A low-noise amplifier that boosts a weak transducer signal to a usable level.",
+      "q": "What is a preamplifier?"
+     },
+     {
+      "a": "Four",
+      "q": "What is the maximum number of inputs a summing amplifier may have in this specification?"
+     },
+     {
+      "a": "A labelled rectangle with arrows showing signal flow.",
+      "q": "What does a block diagram use to represent each subsystem?"
+     },
+     {
+      "a": "The inverting (−) input.",
+      "q": "In a summing amplifier, which input of the op-amp do all the input resistors connect to?"
+     },
+     {
+      "a": "Microphone → Preamplifier → Mixer (summing amp) → Power amp → Loudspeaker.",
+      "q": "Name the five stages of a PA system signal chain in order."
+     },
+     {
+      "a": "−0.6 V (gain per input = −30/10 = −3)",
+      "q": "A summing amplifier has R1 = 10 kΩ, Rf = 30 kΩ, one input V1 = +0.2 V. What is V_OUT?"
+     }
+    ]
+   }
+  },
+  {
+   "id": "090205a2-1123-47a1-a185-16d8dd4de5c4",
+   "lesson_number": 4,
+   "title": "RC Time Delays and the 555 Monostable",
+   "before": {
+    "practice_questions": [
+     {
+      "text": "A 555 monostable circuit has R = 100 kΩ and C = 47 μF. What is the pulse duration?\nA) 0.052 s\nB) 5.17 s\nC) 4.70 s\nD) 1.10 s",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) 5.17 s [\\(T = 1.1 \\times 100{,}000 \\times 47 \\times 10^{-6} = 5.17\\) s] [1 mark]"
+     },
+     {
+      "text": "State what is meant by the time constant of an RC circuit.",
+      "type": "2 marks — State / Define",
+      "marks": "The time constant is the product of resistance and capacitance [1] and equals the time taken for the capacitor to charge to approximately 63% of the supply voltage [1]."
+     },
+     {
+      "text": "A 555 monostable must produce a pulse of 3.3 seconds. A 100 μF capacitor is available. Calculate the value of R required.",
+      "type": "2 marks — Calculation: Single Step",
+      "marks": "\\(R = T / (1.1 \\times C) = 3.3 / (1.1 \\times 100 \\times 10^{-6}) = 3.3 / (1.1 \\times 10^{-4}) = 30{,}000\\) Ω = 30 kΩ [1 mark for correct rearrangement; 1 mark for 30 kΩ]."
+     },
+     {
+      "text": "A 555 monostable circuit includes a fixed resistor of 22 kΩ in series with a variable resistor. The capacitor is 47 μF. The circuit must produce delays adjustable from 2.42 s to 7.26 s.\n(a) Calculate the total resistance needed for a 2.42 s delay. [2 marks]\n(b) Calculate the total resistance needed for a 7.26 s delay. [2 marks]\n(c) Hence determine the range (minimum and maximum settings) of the variable resistor. [2 marks]",
+      "type": "4 marks — Calculation: Multi-Step",
+      "marks": "(a) \\(R_{total} = 2.42 / (1.1 \\times 47 \\times 10^{-6}) = 46{,}840\\) Ω ≈ 47 kΩ [1 for formula; 1 for value].\n(b) \\(R_{total} = 7.26 / (1.1 \\times 47 \\times 10^{-6}) = 140{,}519\\) Ω ≈ 140 kΩ [1 for formula; 1 for value].\n(c) Variable resistor min = \\(47{,}000 - 22{,}000 = 25\\) kΩ; max = \\(140{,}000 - 22{,}000 = 118\\) kΩ [1 mark per correct subtraction]."
+     },
+     {
+      "text": "Describe the sequence of events in a 555 monostable circuit from the moment a trigger pulse is received until the output returns to its stable state.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "Trigger pulse takes pin 2 below one-third of supply [1]; output switches HIGH and discharge transistor turns off [1]; external capacitor C charges through R towards the supply [1]; when capacitor reaches two-thirds of supply, output resets LOW and discharge transistor turns on, rapidly discharging C [1]."
+     },
+     {
+      "text": "A security light uses a 555 monostable to keep a floodlight on for 60 seconds after a motion sensor triggers it. The circuit uses a fixed 10 kΩ resistor and a variable resistor, with a 470 μF capacitor.\n(a) Calculate the total resistance needed for a 60-second delay. [2 marks]\n(b) Determine the required setting of the variable resistor. [1 mark]\n(c) The designer realises a 60-second delay requires a very large resistor. Suggest one circuit change (other than changing C) that would allow the same delay with a smaller resistance value. [1 mark]\n(d) Explain why using a 555 monostable produces a better-quality output signal than a simple RC delay circuit connected to a transistor switch. [4 marks]",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: (a) R = 60 / (1.1 × 470 × 10⁻⁶) = 60 / 5.17 × 10⁻⁴ ≈ 116 kΩ; (b) variable resistor = 116 − 10 = 106 kΩ; (c) use a larger capacitor; (d) plain RC circuit produces a gradual slope — the transistor switches imprecisely near the threshold; the 555 uses internal comparators to detect 2/3 supply precisely and the bistable produces a sharp digital transition; the 555 output is buffered and can drive loads directly.\nSecure: (a)/(b)/(d) largely correct; (c) vague.\nDeveloping: Timing calculation correct; qualitative comparison incomplete.\nEmerging: Formula applied but incorrect unit handling or subtraction omitted."
+     }
+    ]
+   }
+  },
+  {
+   "id": "1742666e-eb3a-4f41-b044-5b22950a7132",
+   "lesson_number": 5,
+   "title": "555 Astable Oscillators and Mark-Space Ratio",
+   "before": {
+    "conclusion_html": "<h3 data-narration-id=\"n40\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n41\">The 555 astable oscillates continuously; frequency is \\(f = 1.44 / [(R_1 + 2R_2)C]\\) where \\(R_2\\) carries the factor of 2.</li>\n  <li data-narration-id=\"n42\">Mark-space ratio \\(= T_{ON} / T_{OFF} = (R_1 + R_2) / R_2\\); it is always &gt; 1 in a standard astable and equals the duty cycle above 50%.</li>\n  <li data-narration-id=\"n43\">On an oscilloscope, amplitude is read in volts (vertical divisions &times; V/div) and period in time (horizontal divisions &times; time/div) &mdash; never swap the units.</li>\n</ul>"
+   }
+  },
+  {
+   "id": "d80d1b60-25a2-412e-af77-5eb34eb4f1e5",
+   "lesson_number": 6,
+   "title": "D-Type Flip-Flops, Latches and Up-Counters",
+   "before": {
+    "content_html": "<h2 data-narration-id=\"n1\">Storing a Single Bit</h2>\n<p data-narration-id=\"n2\">Logic gates process information instantly &mdash; their output changes as soon as their inputs change. But digital systems also need to <em>store</em> information: a counter must remember its current count between clock pulses, and a memory circuit must hold data after the input is removed. The simplest storage element in digital electronics is the <dfn class=\"term\" data-def=\"A digital circuit that can store one bit of data; its output retains its last state until a clock edge causes it to sample its D input.\">D-type flip-flop</dfn>.</p>\n\n<h2 data-narration-id=\"n3\">The D-Type Flip-Flop</h2>\n<p data-narration-id=\"n4\">A D-type flip-flop has three inputs &mdash; D (data), CLK (clock) &mdash; and two complementary outputs, Q and \\(\\overline{Q}\\) (Q-bar). The key property is that it is <dfn class=\"term\" data-def=\"A flip-flop that only changes its outputs at the moment a clock signal transitions from LOW to HIGH (the rising edge), ignoring the D input at all other times.\">rising-edge triggered</dfn>: the flip-flop samples the D input <em>only</em> at the instant the clock signal transitions from LOW to HIGH. At all other times, changes on D have no effect.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n5\" data-revision-tip=\"Cover this and write the D-type rule in one sentence from memory: what happens at the rising edge, and what happens between clock edges?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>At every rising clock edge: Q copies the value of D. Between rising edges: Q holds its stored value regardless of what D does. \\(\\overline{Q}\\) is always the logical opposite of Q.</p>\n</div>\n\n<p data-narration-id=\"n6\">In symbol form, the D-type is drawn as a rectangle with D and CLK on the left, Q on the right, and \\(\\overline{Q}\\) on the right with a small circle (bubble) to indicate inversion. The clock input is marked with a small triangle to indicate edge-triggering.</p>\n\n<h2 data-narration-id=\"n7\">Timing Diagram for a D-Type Flip-Flop</h2>\n<p data-narration-id=\"n8\">A timing diagram shows the D, CLK, Q and \\(\\overline{Q}\\) signals plotted against time. Reading one systematically is a core exam skill.</p>\n<p data-narration-id=\"n9\">Consider the following sequence (read each rising clock edge left to right):</p>\n\n<table data-narration-id=\"n10\">\n  <thead><tr><th>Rising edge</th><th>D at that moment</th><th>Q after edge</th><th>Q-bar after edge</th></tr></thead>\n  <tbody>\n    <tr><td>1st</td><td>1</td><td>1</td><td>0</td></tr>\n    <tr><td>2nd</td><td>0</td><td>0</td><td>1</td></tr>\n    <tr><td>3rd</td><td>0</td><td>0</td><td>1</td></tr>\n    <tr><td>4th</td><td>1</td><td>1</td><td>0</td></tr>\n  </tbody>\n</table>\n<p data-narration-id=\"n11\">Between any two consecutive rising edges, Q stays constant &mdash; even if D changes. This is the &ldquo;latch&rdquo; behaviour: the flip-flop has stored the bit from the previous rising edge and holds it until the next one.</p>\n\n<h2 data-narration-id=\"n12\">The D-Type as a Data Latch</h2>\n<p data-narration-id=\"n13\">When a D-type flip-flop is used to hold a data bit so it can be read later, it is described as a <dfn class=\"term\" data-def=\"A D-type flip-flop used to store a single bit of data so that it remains available at the output after the input has changed.\">data latch</dfn>. The flip-flop &ldquo;latches on&rdquo; to the value of D at the rising clock edge and holds it. This is useful when a sensor produces a brief pulse that would otherwise be lost before a processor can act on it.</p>\n\n<h2 data-narration-id=\"n14\">Binary Counters from D-Type Flip-Flops</h2>\n<p data-narration-id=\"n15\">If the \\(\\overline{Q}\\) output of a D-type flip-flop is connected back to its own D input, the circuit divides the input clock frequency by 2. Each rising clock edge causes the flip-flop to toggle &mdash; the output alternates between 0 and 1 every clock cycle. This is a 1-bit <dfn class=\"term\" data-def=\"A circuit built from flip-flops that counts upward in binary, advancing by one step on each clock pulse.\">binary up-counter</dfn>.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n16\" data-revision-tip=\"Close this and explain: how do you connect a D-type flip-flop to make it divide the clock frequency by 2? Write the connection from memory.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>To make a 1-bit binary counter: connect \\(\\overline{Q}\\) back to D. Each rising clock edge causes Q to toggle. The output at Q has <strong>half the frequency</strong> of the clock input.</p>\n</div>\n\n<h2 data-narration-id=\"n17\">The 2-Bit Counter</h2>\n<p data-narration-id=\"n18\">Two D-type flip-flops connected in series form a 2-bit counter. The Q output of the first flip-flop (Q0) clocks the second flip-flop. Both flip-flops have their \\(\\overline{Q}\\) connected back to their own D input.</p>\n<p data-narration-id=\"n19\">The result: Q0 toggles on every rising edge of the external clock (CLK). Q1 toggles on every rising edge of Q0. So:</p>\n\n<table data-narration-id=\"n20\">\n  <thead><tr><th>Clock count</th><th>Q1</th><th>Q0</th><th>Binary value</th></tr></thead>\n  <tbody>\n    <tr><td>0</td><td>0</td><td>0</td><td>0</td></tr>\n    <tr><td>1</td><td>0</td><td>1</td><td>1</td></tr>\n    <tr><td>2</td><td>1</td><td>0</td><td>2</td></tr>\n    <tr><td>3</td><td>1</td><td>1</td><td>3</td></tr>\n    <tr><td>4</td><td>0</td><td>0</td><td>0 (reset)</td></tr>\n  </tbody>\n</table>\n<p data-narration-id=\"n21\">The counter cycles through 0, 1, 2, 3, then resets to 0 &mdash; a modulo-4 count. This is a 2-bit binary up-counter. Q0 is the least significant bit (LSB); Q1 is the most significant bit (MSB).</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Frequency Division: Worked Numerical Example</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n22\">A clock with a frequency of 4 Hz feeds a 2-bit counter made from two D-type flip-flops.</p>\n    <p data-narration-id=\"n23\">First flip-flop (Q0): toggles at every rising clock edge. Frequency of Q0 = \\(4 / 2 = 2\\) Hz.</p>\n    <p data-narration-id=\"n24\">Second flip-flop (Q1): toggles at every rising edge of Q0. Frequency of Q1 = \\(2 / 2 = 1\\) Hz.</p>\n    <p data-narration-id=\"n25\">The pattern: each stage divides the previous frequency by 2. If Q0 is connected to an LED, that LED flashes at 2 Hz. If Q1 is connected to an LED, it flashes at 1 Hz &mdash; half the rate of Q0&rsquo;s LED. This frequency-halving at each stage is the key fact examiners test.</p>\n    <p data-narration-id=\"n26\">If the exam asks for the expected frequency of Q0 and Q1 from a 12 Hz clock:\n    <br>Q0 = 12 / 2 = 6 Hz\n    <br>Q1 = 6 / 2 = 3 Hz</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Reading a 2-Bit Counter Timing Diagram</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n27\">A 2-bit counter timing diagram shows four waveforms stacked vertically: CLK (external clock), Q0 (fastest, half CLK frequency), Q1 (slowest, half Q0 frequency).</p>\n    <p data-narration-id=\"n28\">CLK: a square wave toggling continuously. Q0: toggles at each rising edge of CLK &mdash; its period is twice that of CLK. Q1: toggles at each rising edge of Q0 &mdash; its period is twice that of Q0 (four times CLK).</p>\n    <p data-narration-id=\"n29\">To check: count CLK pulses between rising edges of Q1. There should be exactly 4 CLK pulses per Q1 cycle. If you see 4, you have drawn the diagram correctly. Common error: drawing Q1 toggling on Q0&rsquo;s falling edge instead of its rising edge.</p>\n  </div></div>\n</div>",
+    "exam_tip_html": "<p>The 2-bit counter is one of the most poorly answered topics. Drill these two facts: (1) each D-type stage divides the frequency by 2; (2) the second flip-flop clocks from Q0, not from the external clock. If a question asks for the LED flash frequencies, state Q0 = CLK&divide;2 and Q1 = CLK&divide;4 clearly before substituting numbers.</p>",
+    "practice_questions": [
+     {
+      "text": "A D-type flip-flop has D = 1 when the clock rises. What is the state of Q immediately after the rising edge?\nA) 0\nB) Unchanged\nC) 1\nD) Depends on Q-bar",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) 1 [1 mark]"
+     },
+     {
+      "text": "State what is meant by saying a D-type flip-flop is 'rising-edge triggered'.",
+      "type": "2 marks — State / Define",
+      "marks": "The flip-flop only samples (or responds to) its D input [1] at the instant the clock signal transitions from LOW to HIGH [1]."
+     },
+     {
+      "text": "A D-type flip-flop has its Q-bar output connected back to its D input. The external clock runs at 8 Hz. State the frequency of the Q output and the frequency of the Q-bar output.",
+      "type": "2 marks — Calculation: Single Step",
+      "marks": "Q frequency = 8 / 2 = 4 Hz [1]. Q-bar frequency = 4 Hz (Q-bar is the complement of Q and has the same frequency) [1]."
+     },
+     {
+      "text": "A 2-bit binary up-counter is clocked at 20 Hz.\n(a) State the frequency of the Q0 output. [1 mark]\n(b) State the frequency of the Q1 output. [1 mark]\n(c) Complete the count sequence: the counter cycles through states ___, ___, ___, ___ before repeating. [2 marks]",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "(a) Q0 = 20 / 2 = 10 Hz [1].\n(b) Q1 = 10 / 2 = 5 Hz [1].\n(c) 0 (Q1=0,Q0=0), 1 (Q1=0,Q0=1), 2 (Q1=1,Q0=0), 3 (Q1=1,Q0=1) [1 mark for first two; 1 mark for last two in correct order]."
+     },
+     {
+      "text": "Draw and complete the timing diagram for a 2-bit binary counter with a clock running at 4 Hz for 1 second. Show waveforms for CLK, Q0 and Q1. (Describe the waveform you would draw rather than producing an image.)",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "CLK: 4 complete cycles in 1 second (period = 0.25 s) [1]. Q0: 2 complete cycles in 1 second (period = 0.5 s), toggling on each rising edge of CLK [1]. Q1: 1 complete cycle in 1 second (period = 1 s), toggling on each rising edge of Q0 [1]. Q1 is HIGH for the second half of the 1-second interval (from the moment Q0 has its second rising edge) [1]."
+     },
+     {
+      "text": "A 2-bit binary counter is built from two D-type flip-flops. Two LEDs are connected, one to Q0 and one to Q1. The clock is provided by a 555 astable at approximately 10 Hz.\n(a) Calculate the expected flash rate of the Q0 LED. [1 mark]\n(b) Calculate the expected flash rate of the Q1 LED. [1 mark]\n(c) A student observes that the Q1 LED flashes at the same rate as the Q0 LED. Suggest a likely wiring fault and explain why it causes this behaviour. [3 marks]\n(d) Explain why it is important that the Q-bar output is connected back to the D input in each flip-flop stage, rather than the Q output. [3 marks]",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: (a) 10/2 = 5 Hz; (b) 10/4 = 2.5 Hz; (c) Q1 LED flashes at the same rate as Q0 suggests the second flip-flop is being clocked directly from the external clock rather than from Q0 — both then divide the main clock by 2 and run at the same rate; (d) connecting Q-bar to D creates a toggle: at each rising edge, D is the opposite of current Q, so Q flips. If Q were connected back to D instead, D would always equal Q at the clock edge, so Q would never change (it would be stuck at its initial state).\nSecure: (a), (b) correct; (c) fault identified; (d) Q vs Q-bar logic explained but not fully.\nDeveloping: (a), (b) correct; qualitative parts incomplete.\nEmerging: Only (a) and (b) attempted."
+     }
+    ],
+    "flashcard_questions": [
+     {
+      "a": "It copies the value of D to Q.",
+      "q": "What does a rising-edge-triggered D-type flip-flop do at the rising clock edge?"
+     },
+     {
+      "a": "Its previously stored value (it latches the last sampled bit).",
+      "q": "What does Q hold between rising clock edges in a D-type flip-flop?"
+     },
+     {
+      "a": "The logical opposite (complement) of Q.",
+      "q": "What is Q-bar always equal to in a D-type flip-flop?"
+     },
+     {
+      "a": "Connect Q-bar back to the D input.",
+      "q": "How do you connect a D-type flip-flop to make a 1-bit binary counter?"
+     },
+     {
+      "a": "5 Hz (each stage divides frequency by 2).",
+      "q": "A 1-bit binary counter is clocked at 10 Hz. What is the frequency of Q?"
+     },
+     {
+      "a": "The Q0 output of the first flip-flop.",
+      "q": "In a 2-bit binary counter, what clocks the second flip-flop?"
+     },
+     {
+      "a": "Q0 = 6 Hz; Q1 = 3 Hz.",
+      "q": "A clock runs at 12 Hz. In a 2-bit counter, what frequencies do Q0 and Q1 produce?"
+     },
+     {
+      "a": "00 (resets back to 0).",
+      "q": "A 2-bit binary counter counts through states: 00, 01, 10, 11, then ___."
+     },
+     {
+      "a": "A D-type flip-flop used to store a bit so it remains available after the input changes.",
+      "q": "What is meant by a data latch?"
+     },
+     {
+      "a": "D would equal Q at every clock edge, so Q would never change — it gets stuck in its current state.",
+      "q": "Why would connecting Q (not Q-bar) back to D prevent a D-type from toggling?"
+     }
+    ]
+   }
+  },
+  {
+   "id": "65786ec8-4227-46ad-9267-8fd996575531",
+   "lesson_number": 7,
+   "title": "Binary, BCD and Decade Counters with 7-Segment Displays",
+   "before": {
+    "practice_questions": [
+     {
+      "text": "A 4017 decade counter has Q7 connected to its reset pin (MR). How many stable output states does the counter produce before it resets?\nA) 7\nB) 8\nC) 9\nD) 10",
+      "type": "1 mark — Multiple Choice",
+      "marks": "A) 7 [States 0, 1, 2, 3, 4, 5, 6 are stable; Q7 going HIGH fires the reset immediately] [1 mark]"
+     },
+     {
+      "text": "State what is meant by a common-cathode 7-segment display.",
+      "type": "2 marks — State / Define",
+      "marks": "All seven segment cathodes share a common connection to 0 V [1]; a segment lights when its anode is taken to a HIGH logic level [1]."
+     },
+     {
+      "text": "A 4017 decade counter receives a clock at 30 Hz. State the frequency at which the Q0 output produces a HIGH pulse.",
+      "type": "2 marks — Calculation: Single Step",
+      "marks": "Q0 produces one HIGH pulse per complete count cycle [1]; frequency = 30 / 10 = 3 Hz [1]."
+     },
+     {
+      "text": "A 7-segment display shows the digit '3'. State which segments (a to g) are ON and which are OFF.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "Segments ON: a, b, c, d, g [2 marks for all five correct, 1 mark for at least three correct]. Segments OFF: e, f [1 mark for both; 0 if wrong]. Minus one mark for each additional error beyond one [max 4 marks total]."
+     },
+     {
+      "text": "Design a modulo-6 counter using a 4017 decade counter IC. Describe how the reset is achieved and list the output states produced.",
+      "type": "5 marks — Design a Sub-System",
+      "marks": "Connect clock to CLK pin of 4017 [1]. Connect Q6 to the MR (master reset) pin [1]. Explanation: when the counter reaches state 6, Q6 goes HIGH which immediately resets the counter to 0 [1]. Stable output states produced: Q0, Q1, Q2, Q3, Q4, Q5 (states 0 to 5) [1]. Q6 is a reset trigger only and is not a stable state [1]."
+     },
+     {
+      "text": "A digital counting system uses a 4017 decade counter clocked at 20 Hz. Q5 is connected to the MR pin. The ten Q outputs are each connected to an LED.\n(a) State how many LEDs will light in sequence before the counter resets. [1 mark]\n(b) Calculate the flash rate of each LED. [2 marks]\n(c) A student claims that after the counter resets at Q5, the Q5 LED stays lit for one full clock cycle. Evaluate this claim. [3 marks]\n(d) Explain the purpose of the decoder/driver IC when a 4017 counter drives a 7-segment display. [2 marks]",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: (a) 5 LEDs (Q0 to Q4); (b) each LED lights for 1 clock cycle and the sequence takes 5 clock cycles to complete, so each LED is lit for 1 out of 5 cycles = 20/5 = 4 Hz flash rate; (c) incorrect — Q5 going HIGH immediately fires MR which resets the counter before Q5 can remain HIGH for a full clock cycle; Q5 produces only a very brief glitch, not a full HIGH state; (d) the decoder/driver converts the 4-bit BCD output to the 7-segment signals (a–g) and provides sufficient current to drive the LED segments, which the counter output alone cannot supply.\nSecure: (a), (b) correct; (c) claim evaluated but reasoning on reset glitch incomplete; (d) decoder function stated.\nDeveloping: (a), (b) correct; (c) and (d) partially answered.\nEmerging: Only (a) correct; calculation for (b) absent or wrong."
+     }
+    ]
+   }
+  },
+  {
+   "id": "ca4fdc74-f424-4f55-bd3b-1a7a417659ef",
+   "lesson_number": 8,
+   "title": "Schmitt Inverters and Interfacing Analogue to Digital",
+   "before": {
+    "content_html": "<h2 data-narration-id=\"n1\">From Analogue World to Digital Logic</h2>\n<p data-narration-id=\"n2\">Real-world signals are messy. A temperature sensor produces a voltage that drifts slowly; a mechanical switch bounces several times before settling; a radio receiver picks up interference alongside the wanted signal. Logic gates, however, demand a clear HIGH or LOW &mdash; nothing in between. <dfn class=\"term\" data-def=\"A logic inverter with two distinct switching thresholds, so it only changes output when the input clearly crosses one threshold or the other.\">Schmitt inverter</dfn> circuits sit at the boundary between the analogue world and the digital one, converting uncertain voltages into clean, decisive logic levels.</p>\n\n<h2 data-narration-id=\"n3\">What Is a Schmitt Trigger?</h2>\n<p data-narration-id=\"n4\">A standard logic inverter switches output the moment its input crosses one fixed voltage threshold &mdash; roughly half the supply. Any noise near that threshold causes the output to flicker rapidly between HIGH and LOW. A <dfn class=\"term\" data-def=\"A threshold-switching circuit with two separate trigger points (upper and lower), giving it built-in noise immunity.\">Schmitt trigger</dfn> solves this by using <strong>two separate thresholds</strong>:</p>\n<ul>\n  <li data-narration-id=\"n5\">The <strong>upper threshold voltage (V<sub style=\"font-size:0.75em\">T+</sub>)</strong> &mdash; the input must rise <em>above</em> this level to switch the output LOW (since it is an inverter).</li>\n  <li data-narration-id=\"n6\">The <strong>lower threshold voltage (V<sub style=\"font-size:0.75em\">T&minus;</sub>)</strong> &mdash; the input must fall <em>below</em> this level to switch the output HIGH.</li>\n</ul>\n<p data-narration-id=\"n7\">The gap between the two thresholds is called <dfn class=\"term\" data-def=\"The difference between the upper and lower switching thresholds of a Schmitt trigger, giving it immunity to noise signals smaller than this band.\">hysteresis</dfn>. Any noise signal whose amplitude is smaller than the hysteresis band cannot cause a false triggering event. The output only changes when the input makes a definitive excursion past one of the thresholds.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n8\" data-revision-tip=\"Cover this and write down: (1) what upper threshold does, (2) what lower threshold does, (3) what hysteresis means.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A Schmitt inverter has two thresholds: it switches LOW when V<sub style=\"font-size:0.75em\">in</sub> rises above V<sub style=\"font-size:0.75em\">T+</sub> and switches HIGH when V<sub style=\"font-size:0.75em\">in</sub> falls below V<sub style=\"font-size:0.75em\">T&minus;</sub>. The difference (V<sub style=\"font-size:0.75em\">T+</sub> &minus; V<sub style=\"font-size:0.75em\">T&minus;</sub>) is called hysteresis, and it acts as a noise immunity band.</p>\n</div>\n\n<h2 data-narration-id=\"n9\">Reading Thresholds from a Graph</h2>\n<p data-narration-id=\"n10\">Exam questions frequently show a voltage&ndash;time graph of the input signal alongside the output waveform and ask you to identify the threshold voltages. Follow these steps carefully:</p>\n<ol>\n  <li data-narration-id=\"n11\">Use a ruler &mdash; line it up horizontally with the input voltage at the <em>exact moment</em> the output changes state.</li>\n  <li data-narration-id=\"n12\">Read the voltage on the y-axis against that horizontal line. Do this for <em>each</em> transition: one reading when the output goes LOW (this is V<sub style=\"font-size:0.75em\">T+</sub>) and one when it goes HIGH (this is V<sub style=\"font-size:0.75em\">T&minus;</sub>).</li>\n  <li data-narration-id=\"n13\">Check that V<sub style=\"font-size:0.75em\">T+</sub> is always greater than V<sub style=\"font-size:0.75em\">T&minus;</sub>. If your reading gives V<sub style=\"font-size:0.75em\">T&minus;</sub> &gt; V<sub style=\"font-size:0.75em\">T+</sub>, you have swapped them &mdash; re-read the graph.</li>\n</ol>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Reading Thresholds</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n14\">Suppose a graph shows an input voltage rising slowly from 0 V. The output (initially HIGH) suddenly switches LOW when the input reaches 3.5 V. Later, the input falls back down and the output switches HIGH again when the input passes 1.5 V.</p>\n    <p data-narration-id=\"n15\">From these observations: V<sub style=\"font-size:0.75em\">T+</sub> = 3.5 V and V<sub style=\"font-size:0.75em\">T&minus;</sub> = 1.5 V. Hysteresis = 3.5 &minus; 1.5 = <strong>2.0 V</strong>. Any noise spike smaller than 2.0 V cannot cause a false output transition &mdash; the output stays rock steady until the input genuinely crosses a threshold.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n16\">Switch Debouncing</h2>\n<p data-narration-id=\"n17\">When you press a mechanical switch, the metal contacts do not simply close once &mdash; they bounce apart and make contact again several times in the first millisecond. To a digital circuit running at millions of cycles per second, those bounces look like many separate button presses. This is called <dfn class=\"term\" data-def=\"The rapid repeated making and breaking of a mechanical switch's contacts when it is first pressed, producing multiple electrical pulses instead of one clean transition.\">contact bounce</dfn>. It causes counting circuits to register extra counts and microcontrollers to trigger multiple times from a single press.</p>\n<p data-narration-id=\"n18\">A Schmitt inverter fixes this problem. The output only changes state when the input voltage crosses a threshold by a margin larger than the hysteresis band. Because the bounce amplitude is typically small, the input flickers around one threshold level without cleanly crossing the other one. The result: one clean output transition for each deliberate press of the switch.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n19\" data-revision-tip=\"Close this and explain in two sentences how hysteresis stops contact bounce from causing multiple output pulses.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Switch debouncing is one of the most common uses for a Schmitt inverter. The hysteresis band filters out the small-amplitude contact-bounce pulses, so the logic circuit downstream sees only one clean HIGH-to-LOW (or LOW-to-HIGH) transition per press.</p>\n</div>\n\n<h2 data-narration-id=\"n20\">Comparing Three Analogue-to-Digital Interface Methods</h2>\n<p data-narration-id=\"n21\">There are three circuit methods for converting a slowly-changing analogue signal (such as from a sensor) into a digital logic signal. The specification requires you to compare them:</p>\n\n<table style=\"width:100%;border-collapse:collapse;font-size:0.9em\" data-narration-id=\"n22\">\n  <thead>\n    <tr style=\"background:#f0e8da\">\n      <th style=\"padding:8px;border:1px solid #ccc\">Method</th>\n      <th style=\"padding:8px;border:1px solid #ccc\">How it works</th>\n      <th style=\"padding:8px;border:1px solid #ccc\">Key advantage</th>\n      <th style=\"padding:8px;border:1px solid #ccc\">Key limitation</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td style=\"padding:8px;border:1px solid #ccc\"><strong>Transistor switch</strong></td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Base voltage exceeds ~0.7 V &rarr; transistor saturates &rarr; output goes LOW</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Simple; drives a load directly</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Single threshold; susceptible to noise at the switching point</td>\n    </tr>\n    <tr style=\"background:#faf8f5\">\n      <td style=\"padding:8px;border:1px solid #ccc\"><strong>Op-amp comparator</strong></td>\n      <td style=\"padding:8px;border:1px solid #ccc\">V+ &gt; V&minus; &rarr; output HIGH; V+ &lt; V&minus; &rarr; output LOW; threshold set by a voltage-divider reference on one input</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Precise, adjustable threshold; fast response</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Single threshold; output can chatter near the crossover if input is noisy</td>\n    </tr>\n    <tr>\n      <td style=\"padding:8px;border:1px solid #ccc\"><strong>Schmitt inverter</strong></td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Dual thresholds (V<sub style=\"font-size:0.75em\">T+</sub> and V<sub style=\"font-size:0.75em\">T&minus;</sub>); output only changes when input crosses one threshold heading away from the other</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Noise immunity from hysteresis; clean output even with noisy or slow-changing inputs</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Thresholds are fixed by the chip; less adjustable than a comparator with a reference</td>\n    </tr>\n  </tbody>\n</table>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Common Errors to Avoid</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n23\"><strong>Confusing which threshold triggers which transition.</strong> Remember the Schmitt is an <em>inverter</em>: a HIGH input gives a LOW output. So when V<sub style=\"font-size:0.75em\">in</sub> rises above V<sub style=\"font-size:0.75em\">T+</sub>, the output goes LOW &mdash; not HIGH. Sketch the logic truth and check your graph reading makes sense with this inversion.</p>\n    <p data-narration-id=\"n24\"><strong>Missing the ruler.</strong> Examiner reports consistently note that students lose marks by estimating threshold voltages by eye rather than aligning a ruler precisely with the graph gridlines. Use the grid squares as guides and always read off where the output <em>actually</em> changes, not where it looks like it should.</p>\n    <p data-narration-id=\"n25\"><strong>Swapping the hysteresis direction.</strong> Hysteresis is always V<sub style=\"font-size:0.75em\">T+</sub> minus V<sub style=\"font-size:0.75em\">T&minus;</sub>, a positive number. If your answer gives a negative hysteresis, you have the thresholds swapped.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n26\">Slow-Changing Signals and Noise Rejection</h2>\n<p data-narration-id=\"n27\">A thermostat sensor or a light-dependent resistor in a dimming-light circuit produces voltages that drift slowly. If that signal is fed directly into a standard logic gate, any small ripple on the supply or interference from a nearby radio can push the input just over the threshold &mdash; triggering a false output. The Schmitt inverter is the natural choice in these situations: its output stays locked until the input has moved decisively through the full hysteresis window, ignoring incidental noise along the way.</p>\n<p data-narration-id=\"n28\">This makes the Schmitt inverter the preferred building block wherever a sensor signal transitions slowly from one state to another &mdash; light sensors moving from dark to bright, temperature sensors crossing a set-point, or any signal that takes milliseconds or longer to change level. The transistor switch and comparator methods, while useful, require additional filtering components to achieve the same noise immunity that the Schmitt trigger delivers with no extra parts.</p>",
+    "practice_questions": [
+     {
+      "text": "Which one of the following best describes the advantage of a Schmitt inverter over a standard logic inverter when used with a slowly-changing input signal?\nA) It has a higher output voltage\nB) It switches faster\nC) It has two thresholds that prevent false triggering from noise\nD) It amplifies the input signal before switching",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) It has two thresholds that prevent false triggering from noise [1 mark]"
+     },
+     {
+      "text": "State what is meant by the term 'hysteresis' in the context of a Schmitt trigger.",
+      "type": "2 marks — State / Define",
+      "marks": "Hysteresis is the difference between the upper switching threshold (Vᵀ₊) and the lower switching threshold (Vᵀ₋) [1 mark]; this voltage band gives the device immunity to noise signals smaller than the band [1 mark]."
+     },
+     {
+      "text": "A Schmitt inverter is connected to a sensor. The input voltage rises slowly from 0 V. The output switches from HIGH to LOW when the input reaches 3.2 V. The input then falls; the output switches back to HIGH when the input reaches 1.6 V.\n(a) State the upper threshold voltage Vᵀ₊. [1 mark]\n(b) Calculate the hysteresis voltage. [1 mark]\n(c) A noise spike of amplitude 1.0 V is present on the input. State whether this spike will cause a false output transition. Justify your answer. [2 marks]",
+      "type": "4 marks — Calculation: Multi-Step",
+      "marks": "(a) Vᵀ₊ = 3.2 V [1 mark]\n(b) Hysteresis = 3.2 − 1.6 = 1.6 V [1 mark]\n(c) No, the spike will not cause a false transition [1 mark]; because the spike amplitude (1.0 V) is smaller than the hysteresis band (1.6 V), so the input cannot cross both thresholds [1 mark]."
+     },
+     {
+      "text": "Explain how a Schmitt inverter prevents contact bounce from producing multiple output pulses when a push-switch is pressed.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "When the switch closes, the contacts bounce, producing small rapid voltage oscillations [1 mark]; these oscillations are smaller in amplitude than the hysteresis band of the Schmitt inverter [1 mark]; so the input does not cross the lower threshold (Vᵀ₋) during the bouncing [1 mark]; therefore the output makes only one clean transition instead of many pulses [1 mark]."
+     },
+     {
+      "text": "A designer is choosing an analogue-to-digital interface for a temperature-sensing circuit. The thermistor output rises slowly from 0 V to 5 V over several seconds. Compare the transistor switch, op-amp comparator and Schmitt inverter as possible interface methods. Recommend which is most suitable and justify your choice.",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: Describes all three methods accurately, compares them on threshold behaviour and noise immunity, identifies the slow-changing nature of the signal as the key constraint, selects the Schmitt inverter with clear justification referencing hysteresis, and notes that the transistor/comparator methods would require additional filtering.\nSecure: Describes at least two methods, compares them meaningfully, selects the Schmitt inverter with a reference to hysteresis or noise immunity.\nDeveloping: Identifies the Schmitt inverter as best with some relevant comment but comparison with other methods is incomplete.\nEmerging: Names the Schmitt inverter or mentions hysteresis but offers little explanation or comparison."
+     },
+     {
+      "text": "A voltage–time graph shows a Schmitt inverter input rising through a noisy signal. The output switches LOW at t = 2.0 ms when the input is at 4.0 V. The output switches HIGH at t = 5.5 ms when the input is at 1.5 V. Read off the threshold voltages and calculate the hysteresis.",
+      "type": "3 marks — Read Off Graph or Oscilloscope",
+      "marks": "Vᵀ₊ = 4.0 V [1 mark]; Vᵀ₋ = 1.5 V [1 mark]; hysteresis = 4.0 − 1.5 = 2.5 V [1 mark]."
+     }
+    ],
+    "glossary_terms": [
+     {
+      "term": "Schmitt inverter",
+      "definition": "A logic inverter with two distinct switching thresholds, so it only changes output when the input clearly crosses one threshold or the other."
+     },
+     {
+      "term": "Schmitt trigger",
+      "definition": "A threshold-switching circuit with two separate trigger points (upper and lower), giving it built-in noise immunity."
+     },
+     {
+      "term": "hysteresis",
+      "definition": "The difference between the upper and lower switching thresholds of a Schmitt trigger, giving it immunity to noise signals smaller than this band."
+     },
+     {
+      "term": "contact bounce",
+      "definition": "The rapid repeated making and breaking of a mechanical switch's contacts when it is first pressed, producing multiple electrical pulses instead of one clean transition."
+     }
+    ]
+   }
+  },
+  {
+   "id": "71799ed1-228e-4da1-9a4c-78f045d56bd6",
+   "lesson_number": 9,
+   "title": "Microcontrollers and Flowchart Programming",
+   "before": {
+    "content_html": "<h2 data-narration-id=\"n1\">What Is a Microcontroller?</h2>\n<p data-narration-id=\"n2\">A <dfn class=\"term\" data-def=\"A single programmable integrated circuit containing a processor, memory and input/output connections, used to control electronic systems according to a stored program.\">microcontroller</dfn> is a complete computer on a single chip. Unlike a general-purpose processor, it is designed to control a specific electronic system &mdash; reading sensor inputs, making decisions, and driving output devices, all according to a program stored in its internal memory. The PIC (Peripheral Interface Controller) family of microcontrollers is widely used in GCSE Electronics practical work, though the principles apply across any programmable device.</p>\n<p data-narration-id=\"n3\">Microcontrollers sit in the <strong>processing</strong> stage of an electronic system. They replace whole collections of discrete logic gates, timers and counters with a single chip that can be reprogrammed whenever the specification changes. This flexibility is one of the main reasons microcontrollers have displaced dedicated circuits in most consumer and industrial products.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n4\" data-revision-tip=\"Without looking, state three things a microcontroller contains on a single chip and explain why it replaced discrete circuits.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A microcontroller is a <strong>programmable integrated circuit</strong> containing a processor, memory and input/output ports on a single chip. It replaces multiple discrete components and can be reprogrammed to change the system&rsquo;s behaviour without rewiring.</p>\n</div>\n\n<h2 data-narration-id=\"n5\">Inputs and Outputs of a Microcontroller System</h2>\n<p data-narration-id=\"n6\">A microcontroller&rsquo;s pins are configured as either inputs or outputs under program control:</p>\n<ul>\n  <li data-narration-id=\"n7\"><strong>Input pins</strong> read digital signals from sensors. Because microcontroller inputs are digital, analogue sensor voltages must be converted first &mdash; usually via a <dfn class=\"term\" data-def=\"A circuit placed between an analogue sensor and a microcontroller input that converts a continuously-varying voltage into a clean HIGH or LOW digital signal.\">sensor interface</dfn> such as a Schmitt trigger (covered in the previous lesson) or a comparator circuit, or by using the microcontroller&rsquo;s own analogue-to-digital converter (ADC) pin if it has one.</li>\n  <li data-narration-id=\"n8\"><strong>Output pins</strong> drive loads. A microcontroller output pin can typically only supply a few milliamps &mdash; enough to light an LED directly, but not enough to drive a motor or relay. For higher-current loads, the output pin switches a transistor or MOSFET, which then drives the load. This is called an output driver stage.</li>\n</ul>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Interfacing Sensors and Outputs: Signal Flow</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n9\">A typical microcontroller system follows this signal path:</p>\n    <p data-narration-id=\"n10\"><strong>Sensor &rarr; Interface circuit &rarr; Microcontroller input pin &rarr; Program &rarr; Output pin &rarr; Driver &rarr; Output device</strong></p>\n    <p data-narration-id=\"n11\">For example, a light-sensor circuit might have: LDR in a voltage divider &rarr; Schmitt inverter (produces clean HIGH/LOW) &rarr; microcontroller input pin. The program reads that pin, and if it is HIGH (dark detected), it sets an output pin HIGH &rarr; MOSFET gate &rarr; motor or lamp. Without the Schmitt inverter, a slowly-rising LDR voltage could put the input pin at an ambiguous logic level, causing unpredictable program behaviour.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n12\">Programming with Flowcharts</h2>\n<p data-narration-id=\"n13\">Microcontrollers are programmed using a <dfn class=\"term\" data-def=\"A diagram using standardised shapes to represent the sequence of steps and decisions in a program, used to design and communicate the logic of a microcontroller program.\">flowchart</dfn> that describes, step by step, what the program does. Flowchart software (such as the Genie environment used with PIC microcontrollers) translates these diagrams directly into the machine code that the chip executes. Each shape in the flowchart has a specific meaning:</p>\n\n<table style=\"width:100%;border-collapse:collapse;font-size:0.9em\" data-narration-id=\"n14\">\n  <thead>\n    <tr style=\"background:#f0e8da\">\n      <th style=\"padding:8px;border:1px solid #ccc\">Symbol shape</th>\n      <th style=\"padding:8px;border:1px solid #ccc\">Block type</th>\n      <th style=\"padding:8px;border:1px solid #ccc\">What it represents</th>\n      <th style=\"padding:8px;border:1px solid #ccc\">Example</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td style=\"padding:8px;border:1px solid #ccc\">Rounded rectangle (oval)</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Terminator</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Start or End of the program</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">&ldquo;START&rdquo; / &ldquo;END&rdquo;</td>\n    </tr>\n    <tr style=\"background:#faf8f5\">\n      <td style=\"padding:8px;border:1px solid #ccc\">Parallelogram</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Input / Output</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Read an input pin or set an output pin</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">&ldquo;Read switch A&rdquo; / &ldquo;Turn LED on&rdquo;</td>\n    </tr>\n    <tr>\n      <td style=\"padding:8px;border:1px solid #ccc\">Rectangle</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Process</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Perform a calculation, count, time delay or arithmetic operation</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">&ldquo;Add 1 to count&rdquo; / &ldquo;Wait 500 ms&rdquo;</td>\n    </tr>\n    <tr style=\"background:#faf8f5\">\n      <td style=\"padding:8px;border:1px solid #ccc\">Diamond</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Decision</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Test a condition; two exits labelled YES and NO (or TRUE/FALSE)</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">&ldquo;Is switch pressed?&rdquo;</td>\n    </tr>\n  </tbody>\n</table>\n\n<div class=\"key-fact\" data-narration-id=\"n15\" data-revision-tip=\"Cover the table and draw the four flowchart symbols from memory, labelling each with its block type name.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Every flowchart uses exactly four standard block types: <strong>terminator</strong> (rounded rectangle &mdash; Start/End), <strong>input/output</strong> (parallelogram &mdash; read or set a pin), <strong>process</strong> (rectangle &mdash; calculate, count or wait), and <strong>decision</strong> (diamond &mdash; yes/no branch). Every flowchart must start and end with a terminator.</p>\n</div>\n\n<h2 data-narration-id=\"n16\">Key Flowchart Operations</h2>\n<p data-narration-id=\"n17\">Flowchart programs can implement six fundamental operations:</p>\n<ul>\n  <li data-narration-id=\"n18\"><strong>Input/Output</strong> &mdash; reading a sensor pin HIGH or LOW; setting an output pin to turn a device on or off.</li>\n  <li data-narration-id=\"n19\"><strong>Counting</strong> &mdash; a process block increments or decrements a variable each time the program passes through it; a decision block tests whether the count has reached a target value.</li>\n  <li data-narration-id=\"n20\"><strong>Branching</strong> &mdash; a decision diamond splits the flow into two paths depending on whether a condition is true or false; the two paths rejoin further down the flowchart or lead to different actions.</li>\n  <li data-narration-id=\"n21\"><strong>Testing a condition</strong> &mdash; asking &ldquo;Is the input HIGH?&rdquo; or &ldquo;Has the count reached 10?&rdquo; with YES/NO exits.</li>\n  <li data-narration-id=\"n22\"><strong>Time delay</strong> &mdash; a process block that pauses the program for a set number of milliseconds before moving to the next step; used to control flashing rates, wait for a motor to reach speed, or debounce inputs in software.</li>\n  <li data-narration-id=\"n23\"><strong>Loop</strong> &mdash; an arrow that leads back to an earlier point in the flowchart, causing the program to repeat. A loop back to &ldquo;START&rdquo; creates a program that runs forever; a conditional loop keeps repeating until a decision condition becomes true.</li>\n</ul>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Designing a Pedestrian Crossing Flowchart</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n24\">Specification: when a push-button is pressed, a green LED turns off, a red LED turns on, and after a 5-second delay the green LED turns back on. Repeat forever.</p>\n    <p data-narration-id=\"n25\">Flowchart sequence:</p>\n    <ol>\n      <li data-narration-id=\"n26\"><strong>START</strong> (terminator)</li>\n      <li data-narration-id=\"n27\"><strong>Turn GREEN LED on</strong> (output block)</li>\n      <li data-narration-id=\"n28\"><strong>Is button pressed?</strong> (decision block) &mdash; NO loops back to the decision; YES continues.</li>\n      <li data-narration-id=\"n29\"><strong>Turn GREEN LED off / Turn RED LED on</strong> (output block)</li>\n      <li data-narration-id=\"n30\"><strong>Wait 5000 ms</strong> (process block)</li>\n      <li data-narration-id=\"n31\"><strong>Turn RED LED off</strong> (output block) &mdash; arrow loops back to step 2 (Turn GREEN LED on).</li>\n    </ol>\n    <p data-narration-id=\"n32\">This flowchart uses all four block types and demonstrates branching, time delay and a repeating loop. In the exam, read the specification carefully before drawing &mdash; every condition in the spec should map to a decision diamond and every action to an input/output or process block.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n33\">Subroutines</h2>\n<p data-narration-id=\"n34\">A <dfn class=\"term\" data-def=\"A named section of a flowchart program that can be called from multiple places in the main program, avoiding repetition of the same steps.\">subroutine</dfn> is a self-contained block of steps that can be called from several different points in the main flowchart. Instead of repeating the same sequence of blocks every time an action is needed (for example, &ldquo;flash the LED three times&rdquo;), the designer draws the sequence once as a subroutine and then calls it with a single block wherever it is needed. Subroutines make flowcharts shorter, easier to read, and simpler to modify. In the exam, if a description says &ldquo;the alarm sounds for 1 second&rdquo; and this happens in more than one place in the program, a subroutine is the cleaner solution.</p>",
+    "exam_tip_html": "<p data-narration-id=\"n35\">The flowchart question appears on the exam every year and is one of the highest-scoring question types when students prepare for it. Three rules to follow: (1) always start and end with a terminator &mdash; forgetting the START or END oval costs marks immediately; (2) every decision diamond must have exactly two labelled exits (YES and NO); (3) read the specification carefully before drawing &mdash; every condition in the description becomes a decision diamond, every action becomes an input/output block. If the question asks you to modify an existing flowchart, identify which block type needs changing before you write &mdash; adding a counter means adding a process block (add 1) and a decision block (has count reached N?).</p>",
+    "knowledge_checks": [
+     {
+      "q": "Which block type in a flowchart is used to represent 'Wait 500 ms'?",
+      "type": "mcq",
+      "correct": 3,
+      "options": [
+       "Terminator",
+       "Decision",
+       "Input/output",
+       "Process"
+      ]
+     },
+     {
+      "q": "Why does a microcontroller output pin typically need a transistor or MOSFET driver to operate a motor?",
+      "type": "mcq",
+      "correct": 1,
+      "options": [
+       "The output pin voltage is too low for digital logic",
+       "The output pin can only supply a few milliamps, which is insufficient for a motor",
+       "Motors require an AC supply",
+       "The microcontroller cannot generate a PWM signal"
+      ]
+     },
+     {
+      "q": "Every flowchart must start and end with a _____ block, drawn as a rounded rectangle.",
+      "type": "fill",
+      "correct": 2,
+      "options": [
+       "decision",
+       "process",
+       "terminator",
+       "input/output"
+      ]
+     },
+     {
+      "q": "A _____ is a self-contained section of a flowchart that can be called from multiple places in the main program to avoid repeating steps.",
+      "type": "fill",
+      "correct": 2,
+      "options": [
+       "loop",
+       "decision block",
+       "subroutine",
+       "process block"
+      ]
+     },
+     {
+      "q": "Match each flowchart block type to its shape:",
+      "left": [
+       "Terminator",
+       "Decision",
+       "Input / Output"
+      ],
+      "type": "match",
+      "order": [
+       0,
+       1,
+       2
+      ],
+      "right": [
+       "Rounded rectangle (oval)",
+       "Diamond",
+       "Parallelogram"
+      ]
+     }
+    ],
+    "practice_questions": [
+     {
+      "text": "Which flowchart block shape is used to represent a decision?\nA) Rectangle\nB) Parallelogram\nC) Rounded rectangle (oval)\nD) Diamond",
+      "type": "1 mark — Multiple Choice",
+      "marks": "D) Diamond [1 mark]"
+     },
+     {
+      "text": "State what is meant by a 'subroutine' in a flowchart program.",
+      "type": "2 marks — State / Define",
+      "marks": "A subroutine is a named, self-contained block of steps [1 mark] that can be called from multiple points in the main program to avoid repeating the same sequence [1 mark]."
+     },
+     {
+      "text": "A microcontroller system controls a greenhouse fan. The fan must turn on when a temperature sensor input goes HIGH. After 10 seconds the fan turns off and the program checks the sensor again.\nDraw a flowchart for this program. Use correct block types and label all exits from decision blocks.",
+      "type": "5 marks — Design a Sub-System",
+      "marks": "START terminator present [1 mark]; decision block 'Is temperature HIGH?' with YES/NO exits correctly labelled [1 mark]; output block turning fan ON on the YES path [1 mark]; process block 'Wait 10 000 ms' following the fan-on block [1 mark]; output block turning fan OFF, with arrow looping back to the decision block [1 mark]."
+     },
+     {
+      "text": "Explain why an analogue sensor cannot be connected directly to a microcontroller input pin without an interface circuit.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "A microcontroller input pin expects a clear digital HIGH or LOW [1 mark]; an analogue sensor produces a continuously varying voltage [1 mark]; without an interface, the slowly-changing voltage may fall between valid logic levels, causing undefined input behaviour [1 mark]; an interface such as a Schmitt trigger converts the analogue signal to a clean digital level before the microcontroller reads it [1 mark]."
+     },
+     {
+      "text": "A flowchart program for a vending machine must count how many coins have been inserted. When the count reaches 3, the machine dispenses an item and resets the count to zero.\nDescribe, in order, which flowchart block types you would use to implement the counting and dispensing stages of this program. State what each block does.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "Input/output block to read each coin sensor input [1 mark]; process block to increment the counter variable by 1 each time a coin is detected [1 mark]; decision block 'Is count = 3?' with YES/NO exits [1 mark]; output block (on YES path) to dispense item and a process block to reset count to 0, with arrow returning to start [1 mark]."
+     },
+     {
+      "text": "Evaluate the use of a microcontroller to replace a circuit built from discrete logic gates in an automatic door-opening system. In your answer, discuss the advantages and any disadvantages of using a microcontroller.",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: Discusses reprogrammability (no rewiring to change behaviour), smaller physical footprint, lower cost when produced at scale, ability to implement complex sequences (timing, counting, decision logic) that would need many discrete ICs; acknowledges disadvantages such as need for programming skill and software tools, potential single point of failure, and that very simple circuits may be over-engineered by a microcontroller; reaches a justified conclusion referencing the specific context of automatic doors (multiple sensors, timing requirements favour microcontroller).\nSecure: Identifies at least three advantages (reprogrammability, compactness, replaces many ICs) and one disadvantage, with a clear conclusion.\nDeveloping: States two advantages with limited development; disadvantages or conclusion may be missing.\nEmerging: Names the microcontroller as better with one relevant point but little or no justification."
+     }
+    ],
+    "flashcard_questions": [
+     {
+      "a": "A processor, memory, and input/output ports.",
+      "q": "What three things does a microcontroller contain on a single chip?"
+     },
+     {
+      "a": "The processing stage.",
+      "q": "A microcontroller sits in which stage of an electronic system?"
+     },
+     {
+      "a": "A rounded rectangle (oval) — the terminator block.",
+      "q": "What flowchart shape represents a START or END?"
+     },
+     {
+      "a": "A diamond, with YES and NO exits.",
+      "q": "What flowchart shape represents a decision?"
+     },
+     {
+      "a": "A parallelogram — the input/output block.",
+      "q": "What flowchart shape represents reading a sensor or setting an output?"
+     },
+     {
+      "a": "A rectangle — the process block.",
+      "q": "What flowchart shape represents a calculation, count or time delay?"
+     },
+     {
+      "a": "A named block of steps that can be called from multiple places in the main program.",
+      "q": "What is a subroutine in a flowchart program?"
+     },
+     {
+      "a": "The slowly-changing analogue voltage may fall between valid digital logic levels.",
+      "q": "Why can't an analogue sensor be connected directly to a microcontroller input without an interface?"
+     },
+     {
+      "a": "A Schmitt trigger (or comparator).",
+      "q": "What interface circuit converts a slow analogue sensor signal to a clean digital input for a microcontroller?"
+     },
+     {
+      "a": "The output pin can only supply a few milliamps; a motor needs much more current.",
+      "q": "Why does a microcontroller output pin need a MOSFET driver to operate a motor?"
+     },
+     {
+      "a": "A time delay, placed in a process (rectangle) block.",
+      "q": "What flowchart operation pauses the program for a set time before moving to the next step?"
+     },
+     {
+      "a": "An arrow looping back to the START or to an earlier step in the program.",
+      "q": "In a flowchart, what creates a program that repeats forever?"
+     }
+    ]
+   }
+  },
+  {
+   "id": "e0c8a35d-f8e3-48e1-83ac-6347ff5387d0",
+   "lesson_number": 10,
+   "title": "Microcontroller Applications and System Evaluation",
+   "before": {
+    "content_html": "<h2 data-narration-id=\"n1\">Microcontrollers Everywhere</h2>\n<p data-narration-id=\"n2\">In the previous lesson you learned how a <dfn class=\"term\" data-def=\"A programmable integrated circuit containing a processor, memory and I/O ports, used to control electronic systems according to a stored program.\">microcontroller</dfn> is programmed using a flowchart. In this lesson you will see where microcontrollers are actually deployed &mdash; from the engine bay of a modern car to the drum cycle of a domestic washing machine &mdash; and develop the skill of evaluating and improving an existing flowchart program against a design specification.</p>\n<p data-narration-id=\"n3\">Modern vehicles and household appliances rely on dozens or even hundreds of microcontrollers working together. Understanding why engineers choose a programmable device over a hardwired circuit, and being able to spot where a given flowchart falls short of its specification, are both directly examinable skills.</p>\n\n<h2 data-narration-id=\"n4\">Vehicle Applications</h2>\n<p data-narration-id=\"n5\">Cars produced after about 1990 contain multiple microcontroller-based control units. Four key examples appear in the specification:</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Engine Management System</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n6\">An engine management system continuously monitors sensors for engine temperature, air mass flow, throttle position, oxygen content in the exhaust and crankshaft speed. The microcontroller processes these readings thousands of times per second and adjusts fuel injection timing, ignition advance and idle speed to maintain efficient combustion. Without a programmable device, matching all these variables simultaneously would require an impractically complex analogue circuit. The microcontroller can also store fault codes when a sensor reading goes out of range, allowing a technician to diagnose faults quickly.</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>ABS Braking, Airbags and Climate Control</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n7\"><strong>Anti-lock braking (ABS)</strong> &mdash; wheel-speed sensors feed data to a microcontroller. If one wheel decelerates much faster than the others (the signature of a locked wheel), the microcontroller rapidly pulses the brake hydraulics at that wheel to restore rotation. This happens around 15 times per second, far faster than a human can pump the pedal.</p>\n    <p data-narration-id=\"n8\"><strong>Airbag deployment</strong> &mdash; accelerometers detect a sudden large deceleration that matches the pattern of a collision. The microcontroller must distinguish a crash from a pothole in milliseconds. If the deceleration exceeds the programmed threshold, it fires the airbag inflator. Speed is critical: the entire sequence from impact to full inflation takes around 30 milliseconds.</p>\n    <p data-narration-id=\"n9\"><strong>Climate control</strong> &mdash; temperature and humidity sensors feed a microcontroller that adjusts fan speed, heating element power and air distribution flaps to maintain the cabin at a set temperature. The microcontroller runs a continuous control loop, comparing the measured temperature to the target and correcting any difference.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n10\">Domestic Appliance Applications</h2>\n<p data-narration-id=\"n11\">The same technology that manages a car engine also controls everyday household devices:</p>\n<ul>\n  <li data-narration-id=\"n12\"><strong>Washing machine</strong> &mdash; a microcontroller sequences the wash cycle: filling the drum to a set water level (detected by a pressure sensor), heating the water to the correct temperature, rotating the drum at different speeds for wash and spin, and draining at the end. Different programs (cottons, delicates, quick wash) are simply different stored sequences &mdash; no hardware change needed.</li>\n  <li data-narration-id=\"n13\"><strong>Dishwasher</strong> &mdash; similar cycle control: water fill, heat, spray pump, drain and rinse, with a heated drying phase. Temperature sensors prevent over-heating; a turbidity sensor in some models detects how dirty the water is and adjusts the cycle length accordingly.</li>\n  <li data-narration-id=\"n14\"><strong>Central heating system</strong> &mdash; a thermostat microcontroller compares the room temperature from a sensor to the set-point temperature. If the room is too cold, it opens a valve and starts the boiler; when the set temperature is reached, it closes the valve. A time clock sub-program runs a heating schedule so the house is warm at the right times of day.</li>\n</ul>\n\n<div class=\"key-fact\" data-narration-id=\"n15\" data-revision-tip=\"Cover this and list two vehicle applications and two domestic applications of microcontrollers from memory, giving one role of the microcontroller in each.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Vehicle applications: engine management, ABS braking, airbag deployment, climate control. Domestic applications: washing machine, dishwasher, central heating. In every case the microcontroller reads sensor inputs, processes them against a stored program, and drives output devices &mdash; replacing the equivalent analogue or discrete-logic circuit.</p>\n</div>\n\n<h2 data-narration-id=\"n16\">Why Microcontrollers Replaced Discrete Circuits</h2>\n<p data-narration-id=\"n17\">Engineers switched to microcontrollers for four main reasons, all of which are examinable:</p>\n<ol>\n  <li data-narration-id=\"n18\"><strong>Flexibility and <dfn class=\"term\" data-def=\"The ability to change a microcontroller system's behaviour by updating its software without any hardware modifications or rewiring.\">reprogrammability</dfn></strong> &mdash; changing the system&rsquo;s behaviour requires only a software update, not a new circuit board. A car manufacturer can issue a &ldquo;recall&rdquo; software fix or add a feature to next year&rsquo;s model without redesigning hardware.</li>\n  <li data-narration-id=\"n19\"><strong>Lower cost at scale</strong> &mdash; a single microcontroller chip costs far less than an equivalent collection of discrete logic ICs, timers and counters. When millions of washing machines are produced each year, the savings are significant.</li>\n  <li data-narration-id=\"n20\"><strong>Smaller physical footprint</strong> &mdash; one chip replaces a circuit board full of components, reducing size and weight. In a car, this matters for packaging; in a domestic appliance, it allows more compact designs.</li>\n  <li data-narration-id=\"n21\"><strong>Ability to integrate sensors</strong> &mdash; many microcontrollers include built-in analogue-to-digital converters, timers, and communication interfaces on the same chip, reducing the number of external components further.</li>\n</ol>\n\n<div class=\"key-fact\" data-narration-id=\"n22\" data-revision-tip=\"Without looking, write down the four reasons engineers chose microcontrollers over discrete circuits, using only key words.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Four reasons microcontrollers replaced discrete circuits: <strong>reprogrammability</strong> (change software, not hardware), <strong>cost at scale</strong> (one chip cheaper than many ICs), <strong>smaller footprint</strong> (one chip replaces a board of components), and <strong>integrated peripherals</strong> (ADC, timers, comms on chip).</p>\n</div>\n\n<h2 data-narration-id=\"n23\">Evaluating a Flowchart Program</h2>\n<p data-narration-id=\"n24\">Exam questions regularly give you a partially correct flowchart and ask you to: (a) identify what it does correctly, (b) spot where it does not meet the specification, and (c) describe or draw the modification needed. This is the <dfn class=\"term\" data-def=\"The process of comparing a flowchart program's behaviour step-by-step against a written design specification to identify any differences or omissions.\">flowchart evaluation</dfn> technique. Use this three-step method:</p>\n<ol>\n  <li data-narration-id=\"n25\"><strong>Trace through the flowchart</strong> &mdash; follow the arrows step by step. Write down what the program actually does for a given set of input conditions. Be systematic: go through each branch of every decision diamond.</li>\n  <li data-narration-id=\"n26\"><strong>Compare to the specification</strong> &mdash; read the written specification line by line and check whether the flowchart implements each requirement. Common omissions: a missing decision diamond (condition never tested), a missing output block (action never taken), a loop arrow pointing to the wrong step, or a counter that is never reset.</li>\n  <li data-narration-id=\"n27\"><strong>Describe the modification</strong> &mdash; state precisely which block type to add or change and where to insert it in the flow. &ldquo;Add a decision diamond after the delay block asking &lsquo;Is count = 5?&rsquo; with YES leading to reset and NO looping back to the increment block&rdquo; is a complete answer. &ldquo;Add a counter somewhere&rdquo; is not.</li>\n</ol>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Evaluating a Central Heating Flowchart</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n28\">Specification: The boiler should turn on when the room temperature falls below 18 &deg;C. It should turn off when the temperature reaches 21 &deg;C. The system should repeat this cycle continuously.</p>\n    <p data-narration-id=\"n29\">Flowchart provided (with a fault):</p>\n    <ol>\n      <li data-narration-id=\"n30\">START &rarr; Read temperature sensor &rarr; Is temperature &lt; 18 &deg;C? YES: Turn boiler ON &rarr; loop back to &ldquo;Read temperature sensor&rdquo;. NO: Turn boiler OFF &rarr; loop back to &ldquo;Read temperature sensor&rdquo;.</li>\n    </ol>\n    <p data-narration-id=\"n31\"><strong>Fault identified:</strong> The flowchart turns the boiler OFF whenever temperature is 18 &deg;C or above, including at 19 &deg;C and 20 &deg;C. This means the boiler switches off before the room reaches 21 &deg;C, wasting energy. The specification requires the boiler to run until 21 &deg;C is reached.</p>\n    <p data-narration-id=\"n32\"><strong>Modification:</strong> When the YES branch turns the boiler ON, add a new decision diamond: &ldquo;Is temperature &ge; 21 &deg;C?&rdquo;. The NO exit loops back to &ldquo;Read temperature sensor&rdquo; (keeping the boiler on). The YES exit leads to &ldquo;Turn boiler OFF&rdquo; and then loops back to the first decision. This creates two separate thresholds, matching the specification.</p>\n  </div></div>\n</div>"
+   }
+  }
+ ]
+}

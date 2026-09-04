@@ -1,0 +1,279 @@
+{
+ "unit": "application-of-electronics",
+ "checked_at": "2026-09-04T17:41:54.2494750Z",
+ "spec_used": "specs/eduqas/electronics-C490QS.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Audio signals and AC mains are sine waves.",
+   "truth": "A sine wave represents a single-frequency pure tone. Audio signals can contain many frequencies, so they are not generally sine waves.",
+   "evidence": "Wikipedia Audio signal and Sine wave pages fetched",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The specification requires a minimum of two input signals. Up to four inputs may be used.",
+   "truth": "The specification requires learners to analyse mixer circuits based on a summing op-amp but gives no four-input maximum. A summing amplifier can combine two or more inputs.",
+   "evidence": "spec 2.2 Operational amplifiers; Wikipedia Operational amplifier applications, summing amplifier section, fetched",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 3,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "The maximum number of inputs a summing amplifier may have in this specification is Four.",
+   "truth": "The specification sets no maximum number of summing-amplifier inputs.",
+   "evidence": "spec 2.2 Operational amplifiers; Wikipedia Operational amplifier applications, summing amplifier section, fetched",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 4,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "The question excludes changing C but its supplied answer says to use a larger capacitor.",
+   "truth": "For T = 1.1RC, increasing C allows the same delay with a smaller R. The question must permit a change to C for its supplied answer to be valid.",
+   "evidence": "spec 2.2 Timing circuits, monostable equation",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 5,
+   "field": "conclusion_html",
+   "severity": "MEDIUM",
+   "claim": "Mark-space ratio equals the duty cycle above 50%.",
+   "truth": "Mark-space ratio is mark time divided by space time. In a standard 555 astable it is greater than 1, so the duty cycle is above 50%; the two quantities are not equal.",
+   "evidence": "spec 2.2 Timing circuits, mark/space-ratio equation",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "A rising-edge-triggered 2-bit up-counter clocks the second flip-flop from Q0 and then sequences 00, 01, 10, 11.",
+   "truth": "With rising-edge-triggered D flip-flops configured to toggle, clocking the second stage from Q0 gives a down sequence. Clock it from Q-bar of the first stage, so the second stage clocks when Q0 falls, to obtain the stated up sequence.",
+   "evidence": "spec 2.2 Sequential systems; Nexperia 74HC74 datasheet (positive-edge triggering), fetched; Wikipedia Counter (digital), fetched",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 7,
+   "field": "practice_questions",
+   "severity": "HIGH",
+   "claim": "A decoder/driver is described as converting a 4017 counter output to a 7-segment display.",
+   "truth": "The specification's decimal-display system is a 4-bit BCD counter, decoder/driver and 7-segment display. The 4017 is specified separately as a sequencer, so the decoder question must name a BCD counter.",
+   "evidence": "spec 2.2 Sequential systems",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Any noise signal smaller than the hysteresis band cannot cause a false triggering event.",
+   "truth": "Hysteresis prevents repeated switching: after one threshold is crossed, the input must cross the other threshold for another transition. Whether one noise pulse causes a transition also depends on the input's starting voltage.",
+   "evidence": "Nexperia 74HC14 datasheet, hysteresis transfer characteristics, fetched; Wikipedia Schmitt trigger, noise-immunity section, fetched",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 9,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Every flowchart uses exactly four standard block types and must start and end with a terminator.",
+   "truth": "The four blocks are useful common blocks for this lesson, but standard flowcharts have other symbols. A program that loops indefinitely has no End terminator.",
+   "evidence": "Wikipedia Flowchart, common symbols and other symbols sections, fetched; spec 2.2 Control circuits requires flowchart design and analysis without prescribing four exclusive blocks",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 9,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "An analogue sensor cannot be connected directly to a microcontroller input pin without an interface circuit.",
+   "truth": "An analogue signal can be read by an analogue-to-digital converter. A digital-only input needs a conditioning interface that produces a valid logic signal.",
+   "evidence": "lesson 9 content_html correctly distinguishes a Schmitt/comparator interface from an ADC input; spec 2.2 Control circuits requires interfacing sensing circuits",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11",
+   "lesson": 10,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Four named vehicle examples and four named reasons are presented as specification-prescribed examinable lists.",
+   "truth": "The specification requires applications and reasons for adopting microcontrollers in vehicle and domestic-appliance industries, but it does not prescribe either named list.",
+   "evidence": "spec 2.2 Control circuits",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Both resistors must be at least 1 kΩ in any op-amp circuit design.",
+   "truth": "Option A: retain it only if a board source establishes a task-specific minimum. Option B: remove the universal rule; the specification requires resistor selection for a given gain but states no universal 1 kΩ minimum. Recommendation: use option B unless a board source is supplied.",
+   "evidence": "spec 2.2 Operational amplifiers; no board source for the claimed universal minimum was available",
+   "verdict": "ADJUDICATE"
+  }
+ ],
+ "lessons_clean": [],
+ "summary": "Verified fixes address waveform terminology, summing inputs, timing, counter design, display interfacing, hysteresis and flowchart claims. One unsupported universal op-amp-resistor rule requires adjudication.",
+ "renarration": {
+  "run_at": "2026-09-04T17:53:27Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n19",
+    "key": "electronics-eduqas/application-of-electronics/narration_lesson-01_n19.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/application-of-electronics/narration_lesson-01_n19.mp3",
+    "voice": "Ollie",
+    "duration": 7.68,
+    "bytes": 92160,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:52:43 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n7",
+    "key": "electronics-eduqas/application-of-electronics/narration_lesson-03_n7.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/application-of-electronics/narration_lesson-03_n7.mp3",
+    "voice": "Ollie",
+    "duration": 14.02,
+    "bytes": 168192,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:52:47 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n42",
+    "key": "electronics-eduqas/application-of-electronics/narration_lesson-05_n42.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/application-of-electronics/narration_lesson-05_n42.mp3",
+    "voice": "Ollie",
+    "duration": 12.05,
+    "bytes": 144576,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:52:49 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n18",
+    "key": "electronics-eduqas/application-of-electronics/narration_lesson-06_n18.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/application-of-electronics/narration_lesson-06_n18.mp3",
+    "voice": "Ada",
+    "duration": 13.94,
+    "bytes": 167328,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:52:52 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n19",
+    "key": "electronics-eduqas/application-of-electronics/narration_lesson-06_n19.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/application-of-electronics/narration_lesson-06_n19.mp3",
+    "voice": "Ada",
+    "duration": 12.29,
+    "bytes": 147456,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:52:55 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n28",
+    "key": "electronics-eduqas/application-of-electronics/narration_lesson-06_n28.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/application-of-electronics/narration_lesson-06_n28.mp3",
+    "voice": "Ada",
+    "duration": 19.73,
+    "bytes": 236736,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:52:59 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n29",
+    "key": "electronics-eduqas/application-of-electronics/narration_lesson-06_n29.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/application-of-electronics/narration_lesson-06_n29.mp3",
+    "voice": "Ada",
+    "duration": 18.94,
+    "bytes": 227232,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:53:03 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n7",
+    "key": "electronics-eduqas/application-of-electronics/narration_lesson-08_n7.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/application-of-electronics/narration_lesson-08_n7.mp3",
+    "voice": "Ada",
+    "duration": 14.98,
+    "bytes": 179712,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:53:07 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n15",
+    "key": "electronics-eduqas/application-of-electronics/narration_lesson-08_n15.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/application-of-electronics/narration_lesson-08_n15.mp3",
+    "voice": "Ada",
+    "duration": 17.5,
+    "bytes": 209952,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:53:10 GMT"
+   },
+   {
+    "lesson": 9,
+    "id": "n15",
+    "key": "electronics-eduqas/application-of-electronics/narration_lesson-09_n15.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/application-of-electronics/narration_lesson-09_n15.mp3",
+    "voice": "Ollie",
+    "duration": 23.26,
+    "bytes": 279072,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:53:16 GMT"
+   },
+   {
+    "lesson": 9,
+    "id": "n35",
+    "key": "electronics-eduqas/application-of-electronics/narration_lesson-09_n35.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/application-of-electronics/narration_lesson-09_n35.mp3",
+    "voice": "Ollie",
+    "duration": 39.34,
+    "bytes": 472032,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:53:22 GMT"
+   },
+   {
+    "lesson": 10,
+    "id": "n5",
+    "key": "electronics-eduqas/application-of-electronics/narration_lesson-10_n5.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/application-of-electronics/narration_lesson-10_n5.mp3",
+    "voice": "Ada",
+    "duration": 6.6,
+    "bytes": 79200,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:53:24 GMT"
+   },
+   {
+    "lesson": 10,
+    "id": "n17",
+    "key": "electronics-eduqas/application-of-electronics/narration_lesson-10_n17.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/electronics-eduqas/application-of-electronics/narration_lesson-10_n17.mp3",
+    "voice": "Ada",
+    "duration": 3.89,
+    "bytes": 46656,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 17:53:26 GMT"
+   }
+  ],
+  "verified_ok": 13,
+  "total": 13
+ }
+}
