@@ -48,7 +48,9 @@ def main():
     subj = data["unit"].get("subject_slug") or os.path.basename(os.path.dirname(D.rstrip("/\\")))  # canary dir name = unit label
     unit_slug = data["unit"]["slug"]
     r2 = None if a.dry_run else get_r2_client()
-    backup = {"lessons": []}; log = []
+    bp = os.path.join(D, "_insert_backup.json")
+    backup = json.load(open(bp, encoding="utf-8")) if os.path.exists(bp) else {"lessons": []}
+    log = []
     for l in data["lessons"]:
         n = l["lesson_number"]; key = f"L{n}"; b = briefs.get(n); g = gate.get(key, {})
         if not b or b["visual_form"] == "none" or g.get("verdict") != "accept" or not results.get(key, {}).get("ok"):
@@ -68,18 +70,22 @@ def main():
         if new is None:
             log.append(f"{key}: anchor heading not found, skipped"); continue
         pre = validator(row); post_row = dict(row); post_row["content_html"] = new; post = validator(post_row)
-        new_viol = [v for v in post if v not in pre]
+        import re as _re
+        kind = lambda v: _re.sub(r"\d+", "N", v)
+        pre_kinds = {kind(v) for v in pre}
+        new_viol = [v for v in post if kind(v) not in pre_kinds]
         if new_viol:
             log.append(f"{key}: NEW validator violation, skipped: {new_viol[:2]}"); continue
         if a.dry_run:
             log.append(f"{key}: would upload {r2_key} and insert after '{b['anchor_heading'][:40]}'"); continue
         upload_file_to_r2(r2, IMAGES_BUCKET, results[key]["jpg"], r2_key, content_type="image/jpeg")
-        backup["lessons"].append({"id": row["id"], "lesson_number": n, "before": {"content_html": row["content_html"]}})
+        if not any(x["id"] == row["id"] for x in backup["lessons"]):
+            backup["lessons"].append({"id": row["id"], "lesson_number": n, "before": {"content_html": row["content_html"]}})
         urllib.request.urlopen(urllib.request.Request(f"{U}/rest/v1/lessons?id=eq.{row['id']}",
                                data=json.dumps({"content_html": new}).encode(), headers=H, method="PATCH"))
         log.append(f"{key}: inserted {url}")
     if backup["lessons"]:
-        json.dump(backup, open(os.path.join(D, "_insert_backup.json"), "w", encoding="utf-8"), ensure_ascii=False)
+        json.dump(backup, open(bp, "w", encoding="utf-8"), ensure_ascii=False)
     print("\n".join(log) or "nothing to insert")
 
 
