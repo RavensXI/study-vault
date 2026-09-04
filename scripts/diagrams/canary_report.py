@@ -56,7 +56,7 @@ summary = f'''<div class="pills">
 <div class="pill"><b>£{toks*RATE/1e6:.2f}</b><span>spent at £30 per million tokens</span></div>
 <div class="pill"><b>{(toks*RATE/1e6/max(n_acc,1))*100:.0f}p</b><span>per accepted image</span></div>
 </div>'''
-page = f'''<title>Diagram Canary: Germany 1919-1939</title>
+page = f'''<title>Diagram Canary: {html.escape(data["unit"]["name"])}</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
 <style>
 :root{{--bg:#faf8f5;--ink:#2d2a26;--mute:#5b564e;--rule:#e8e3db;--card:#fff;--ok-bg:#eaf2ec;--ok:#3f6f52;--warn-bg:#fdf6e3;--warn:#8a6d1a;--bad-bg:#fbeee9;--bad:#9a3a25;--radius:16px}}
@@ -84,7 +84,7 @@ figcaption p{{margin:.3rem 0 0;color:var(--mute)}}.flag{{color:var(--warn)}}
 .chip.ok{{background:var(--ok-bg);color:var(--ok)}}.chip.warn{{background:var(--warn-bg);color:var(--warn)}}.chip.bad{{background:var(--bad-bg);color:var(--bad)}}.chip.mute{{background:var(--rule);color:var(--mute)}}
 </style>
 <div class="wrap">
-<h1>Diagram Canary: Germany 1919-1939</h1>
+<h1>Diagram Canary: {html.escape(data["unit"]["name"])}</h1>
 <p class="lede">One unit end to end: a brief agent chose a visual form per lesson from the lesson text, GPT-Image-2 (medium, 1536×1024) drew it on Foundry, a Claude vision gate checked every label, figure and word, rejects went back with the gate's note, and accepted figures were inserted after the section they illustrate. Every attempt is shown so the misses are as visible as the hits.</p>
 {summary}
 {"".join(cards)}
