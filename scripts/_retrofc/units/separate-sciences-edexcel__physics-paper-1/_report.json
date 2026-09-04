@@ -1,0 +1,396 @@
+{
+ "unit": "separate-sciences-edexcel / physics-paper-1",
+ "checked_at": "2026-09-04",
+ "spec_used": "specs/edexcel/physics-1PH0.md (tier rulings from specs/edexcel/physics-1PH0-bold.md)",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The core practical paragraph lists 'identifying the independent variable (force or mass), controlling the dependent variable (acceleration)'.",
+   "truth": "Acceleration is the dependent variable, so it is measured, not controlled. The controlled variables in core practical 2.19 are the total mass of the system, the runway and the friction compensation.",
+   "evidence": "spec 2.19 core practical; a dependent variable is by definition measured",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 1,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "Question 2 mark scheme ends '(Award 1 mark for correct time conversion even if final answer wrong.)'",
+   "truth": "'Award N mark(s) for' is a board rubric phrase on the house banned list, and the whole unit fails the validator on it. Say the same thing in house words.",
+   "evidence": "CHECK_PROMPT_SCIENCE banned strings; scripts/_retrofc/_bakeoff_compare.py BANNED regex 'Award \\d+ marks? for'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 1,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "Description is 106 characters.",
+   "truth": "The validator limit is under 100 characters. L1 is 106, L2 is 112 and L3 is 116.",
+   "evidence": "CHECK_PROMPT_SCIENCE validator limits",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 1,
+   "field": "knowledge_checks",
+   "severity": "MEDIUM",
+   "claim": "Knowledge check 3 and flashcard 11 test 'an object moving in a circle at constant speed has a changing velocity' with no tier flag, in a lesson whose tier is 'both'.",
+   "truth": "Spec 2.20 and 2.21 are bold, so generic circular motion is Higher tier only. But 7.6P ('Explain for circular orbits how the force of gravity can lead to changing velocity of a planet but unchanged speed') is not bold, so the same idea is Foundation content for orbits, and L9 teaches it unflagged and correctly. Tagging the L1 items '(Higher tier)' would contradict L9 and would steer Foundation students away from an orbit idea they do need. Options: (a) leave untagged (recommended); (b) tag both and accept the clash with L9.",
+   "evidence": "bold spec 2.20 and 2.21 (bold) against 7.6P (not bold)",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F5",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "'Newton's second law states that the resultant force on an object is directly proportional to its acceleration and inversely proportional to its mass'.",
+   "truth": "The law is the other way round: the acceleration is directly proportional to the resultant force and inversely proportional to the mass. As written, force is said to fall as mass rises, which contradicts F = ma printed two lines below.",
+   "evidence": "spec 2.15, force = mass x acceleration",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Core practical box: 'Plotting force (y-axis) against acceleration (x-axis) gives a straight line through the origin ... The gradient equals the mass of the trolley.'",
+   "truth": "The gradient of F against a is the total mass being accelerated, which is the trolley plus every mass in the system. The same paragraph says masses are moved from the trolley to the hanger to keep the total mass constant, so the trolley alone is not the accelerating mass.",
+   "evidence": "spec 2.15 and 2.19; F = ma gives gradient = m for the whole accelerated system",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "A higher-only div wraps n25, the paragraph on total stopping distance and on braking distance growing with speed squared.",
+   "truth": "Spec 2.28 (stopping distance = thinking + braking) and 2.33P (braking distance depends on initial velocity squared) are both unbold, so both tiers are examined on this. The wrapper hides Foundation content from Foundation students. This is the known build fault: 'higher-only' was used to mean 'separate-science only'.",
+   "evidence": "bold spec 2.28 and 2.33P (neither bold)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The whole momentum section (n26 to n35), practice question 5, knowledge check 4 and two flashcards teach momentum with no Higher tier flag.",
+   "truth": "Spec 2.24 (define momentum, p = mv), 2.25 (examples in collisions), 2.26 (force = change in momentum / time) and the collision half of 2.23 are all bold, so momentum is Higher tier only. Both equations are bold in the equations appendix too. The section needs a higher-only wrapper and the questions need a tier tag.",
+   "evidence": "bold spec 2.23, 2.24, 2.25 and 2.26; Appendix 2 lists 2.24 and 2.26 in bold",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 2,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "Description is 112 characters.",
+   "truth": "Over the 100 character validator limit.",
+   "evidence": "CHECK_PROMPT_SCIENCE validator limits",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "The power equation renders as '490647P = \\frac{E}{t} = \\frac{W}{t}490647'.",
+   "truth": "The two display delimiters have been overwritten with the digits 490647, so KaTeX never runs and the student sees the raw string and two six-digit numbers instead of the power equation.",
+   "evidence": "every other display equation in this unit uses the standard display delimiters",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Core Practical: Specific Heat Capacity' ... 'A metal block is heated electrically using a known power supply'.",
+   "truth": "The Edexcel core practical is 14.11: investigate the properties of water by determining the specific heat capacity of water and obtaining a temperature-time graph for melting ice. There is no metal block version, and the practical belongs to the particle model topic, which is examined on the second paper. Topic 3 has no core practical at all; its suggested practical is 'investigate conservation of energy'.",
+   "evidence": "spec core practical list, 14.11; Topic 3 suggested practicals",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'For a force moving an object at constant speed, power can also be written as P = Fv ... useful when calculating engine power output.'",
+   "truth": "P = Fv is not in Appendix 2 of this spec, in either the recall list or the given formulae sheet, so it will never be required and will never be supplied. Harmless as context but not examinable here.",
+   "evidence": "spec Appendix 2 lists a and b; no force times velocity entry",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F13",
+   "lesson": 3,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "Description is 116 characters.",
+   "truth": "Over the 100 character validator limit.",
+   "evidence": "CHECK_PROMPT_SCIENCE validator limits",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F14",
+   "lesson": 4,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Question 6 is typed '9 marks - Evaluate'.",
+   "truth": "There is no 9 mark item on this paper. Each paper is 1 hour 45 minutes and 100 marks of multiple choice, short answer, calculation and extended open response; the house convention for the extended item is 6 marks.",
+   "evidence": "spec assessment overview for Paper 1; house convention used in the sibling science units",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F15",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "A higher-only div wraps the key fact 'During refraction: speed changes, wavelength changes, frequency stays the same.'",
+   "truth": "Spec 4.16P, how velocity, frequency and wavelength are inter-related when sound passes from one medium to another, is not bold, so this is both-tier content. The unwrapped paragraph directly above already states the same facts, so the wrapper only hides a summary of visible Foundation content.",
+   "evidence": "bold spec 4.16P (not bold); 4.10 has only 'and speed' in bold",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F16",
+   "lesson": 5,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard 8, 'Above what frequency is sound classified as ultrasound?', carries no tier tag, although the matching content paragraph is correctly inside a higher-only wrapper.",
+   "truth": "Spec 4.13P, 4.14P and 4.15P (ultrasound, infrasound and their uses) are all bold, so this is Higher tier only. The flashcard needs the tag at the end of the question.",
+   "evidence": "bold spec 4.13P, 4.14P and 4.15P",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17",
+   "lesson": 5,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Paragraph n34 and the whole 4 mark practice question 6 teach that P-waves and S-waves give evidence for the internal structure of the Earth, with S-waves blocked by a liquid outer core and P-waves refracted at the core boundary.",
+   "truth": "Seismic waves appear once in this spec, at 4.5, purely as an example of longitudinal and transverse waves. Nothing asks for the shadow zone, the liquid outer core or refraction at the core boundary; that is another board's content. The physics is right but it is not examined here, and it takes one of only six practice slots. Options: (a) replace question 6 with an on-spec 4 mark item on the wave core practical or on refraction (recommended); (b) keep it as enrichment and drop the paragraph's claim that it is evidence for internal structure.",
+   "evidence": "spec 4.5 is the only seismic reference; a grep of the whole spec for seismic, S-wave and outer core returns one hit",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F18",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "A higher-only paragraph teaches Snell's law with refractive indices for air and glass, the exam tip promises 'higher-tier Snell's law questions', and there is a matching glossary entry.",
+   "truth": "Refractive index and Snell's law are nowhere in this spec. Topic 5 'Use of mathematics' says ray diagrams are qualitative and equations are not needed. So the paragraph teaches an off-spec equation, the Higher flag implies it is examined at Higher, and the exam tip promises a question type that cannot appear. What the lesson does omit is 5.1P, total internal reflection and the critical angle, which is both-tier and on this paper.",
+   "evidence": "a grep of the spec for Snell, refractive index and sin returns nothing; spec 5.1P; Topic 5 Use of mathematics",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F19",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "The higher-only wrapper opened before n25 does not close until after the Leslie cube box, so it also hides 'Core Practical: Investigating Surface and Infrared Absorption (Triple-only 5.19P)'.",
+   "truth": "5.19P is one of the eight mandatory core practicals and is not bold, so every student sits it and can be asked about it on either tier. Hiding it from Foundation removes a required practical. 5.15P, on intensity and wavelength distribution depending on temperature, is also unbold. Only the Earth energy balance half of the paragraph, 5.18P, is genuinely Higher.",
+   "evidence": "spec core practical list, 5.19P; bold spec 5.15P and 5.19P (not bold) against 5.18P (bold)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F20",
+   "lesson": 6,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Question 6 is typed '9 marks - Extended Response' with a band ladder running 8-9 / 5-7 / 3-4 / 1-2.",
+   "truth": "There is no 9 mark item on this paper. The question also tests 5.16P, 5.17P and 5.18P, which are bold, so it is a Higher tier question and needs the tag.",
+   "evidence": "spec assessment overview; bold spec 5.16P, 5.17P and 5.18P",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F21",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'Radio waves can be produced by oscillating electrical circuits and can also induce oscillations in aerial circuits when they are received.'",
+   "truth": "Spec 5.23 is bold, so this sentence is Higher tier only. It is one clause of context inside a collapsible and no question tests it, so it is not worth splitting a narration block to flag it.",
+   "evidence": "bold spec 5.23",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F22",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "The Leslie cube is described with 'four different surface finishes: matt black, shiny black, matt white, shiny white' but the result names 'shiny silver (or white)'.",
+   "truth": "The two sentences name different fourth faces. Real Leslie cubes usually carry matt black, shiny black, matt white and polished silver. Not mark-affecting, but the inconsistency will confuse.",
+   "evidence": "internal inconsistency inside one paragraph",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F23",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Paragraph n24 runs both-tier and Higher-only content together: 'All bodies emit infrared radiation. The hotter an object, the more infrared it emits...' (5.15P, both tiers) then 'For a body to remain at a constant temperature, the average power it radiates must equal the average power it absorbs. If it absorbs more than it emits, it warms up...' (5.16P and 5.17P, both bold).",
+   "truth": "The Higher half cannot be wrapped without splitting the narration block, which the edit rules forbid. Options: (a) leave as it is, so Foundation students meet two Higher sentences (recommended, they are short and harmless); (b) re-author the lesson so n24 carries only 5.15P and a new block carries the radiation balance, which needs a fresh narration pass.",
+   "evidence": "bold spec 5.15P (not bold) against 5.16P and 5.17P (bold)",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F24",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Key fact: 'Three types of ionising radiation are emitted from unstable nuclei: alpha, beta-minus, beta-plus and gamma. Also, neutron emission is possible. All four are ionising.'",
+   "truth": "Four are listed and the next sentence says 'all four', so 'Three types' is simply wrong. Spec 6.11 names exactly four ionising radiations: alpha, beta-minus, beta-plus and gamma.",
+   "evidence": "spec 6.10 and 6.11",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F25",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'In 1897, J.J. Thomson discovered the electron and proposed the plum pudding model.' and 'In 1909, Rutherford, Geiger and Marsden fired alpha particles at a thin gold foil.'",
+   "truth": "Thomson discovered the electron in 1897 but proposed the plum pudding model in 1904. Geiger and Marsden ran the scattering experiment in 1909; Rutherford published the nuclear interpretation in 1911. The spec asks only for the sequence of models, not dates, so no marks turn on this.",
+   "evidence": "spec 6.17 asks for the change over time, not dates; settled history of science",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F26",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "Four higher-only divs cover the uses of radioactivity (n1 to n7), radiotherapy (n9), PET scanning (n10 and n11) and the whole of nuclear fission and fusion (n19 to n29).",
+   "truth": "None of the statements behind these sections is bold: 6.28P uses of radioactivity, 6.33P treatment of tumours, 6.34P and 6.35P PET scanners and why the isotope is made nearby, and 6.36P to 6.46P fission, chain reactions, reactors and fusion. They are separate-Physics statements, marked with a P, which is not the same as Higher tier. As built, a Foundation student sees only contamination against irradiation plus the safety paragraph, and the exam tip discusses reactor components they can no longer see. All four wrappers must go.",
+   "evidence": "bold spec 6.28P, 6.33P, 6.34P, 6.35P and 6.36P to 6.46P (none bold); the spec's own note that a P in a statement number means Physics-only, not Higher",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F27",
+   "lesson": 8,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Question 5 is typed '9 marks - Evaluate' with a band ladder running 8-9 / 5-7 / 3-4 / 1-2.",
+   "truth": "There is no 9 mark item on this paper.",
+   "evidence": "spec assessment overview for Paper 1",
+   "verdict": "FIX"
+  },
+  {
+   "id": "A1",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "MEDIUM",
+   "claim": "The unit is named Physics Paper 1, but L3 teaches mechanical work done, power and elastic potential energy and carries a specific heat capacity core practical, and L4 teaches P = E/t and the National Grid.",
+   "truth": "Paper 1 is topics 1 to 7. Work done is 8.6, power is 8.13 and 10.29, elastic potential energy is 15.4, the specific heat capacity core practical is 14.11, and the National Grid sits in topics 10 and 13. All of that is second paper content. The physics is on the course, so none of it is wrong to teach, but a student revising for the first paper is given second paper material without being told. Options: (a) add one sentence to L3 and L4 saying which equations belong to the second paper, a small narration edit (recommended); (b) move those sections into the Paper 2 unit. Only the energy resources half of L4 (3.13 and 3.14) and the kinetic energy, gravitational potential energy and efficiency equations of L3 (3.1, 3.2 and 3.11) are genuinely first paper.",
+   "evidence": "spec content overview for Paper 1 and Paper 2; statements 8.6, 8.13, 10.29, 14.11 and 15.4",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "A2",
+   "lesson": 0,
+   "field": "unit",
+   "severity": "MEDIUM",
+   "claim": "Coverage gaps against topics 1 to 7.",
+   "truth": "Topic 1, Key concepts of physics (SI units, the prefixes giga to nano, converting units including hours to seconds, significant figures and standard form) is taught nowhere in the unit, although it is examined on both papers. Most of the separate-Physics optics in topic 5 is also missing: 5.2P specular against diffuse reflection, 5.3P colour by absorption and filters, and 5.4P to 5.6P lens power, focal length, converging and diverging lenses and real against virtual images. 5.1P total internal reflection and critical angle was missing too; F18 adds a paragraph on it in L6. 4.12P, how the ear converts sound waves into vibrations, is also absent. Recommend a tenth lesson on light and lenses, and folding Topic 1 into L1.",
+   "evidence": "spec Topic 1 statements 1.1 to 1.4; spec 5.1P to 5.6P; spec 4.12P; the unit lesson list",
+   "verdict": "ADJUDICATE"
+  }
+ ],
+ "lessons_clean": [
+  9
+ ],
+ "summary": "Two systemic faults. First, the higher-only wrapper is used as a separate-science marker: eight of the nine wrappers in the unit hide both-tier content, and in L8 all four hide the uses of radioactivity, radiotherapy, PET scanning and the whole of fission and fusion, leaving a Foundation student almost nothing, while the genuinely Higher content, momentum in L2, carries no flag at all. Second, three questions are typed 9 marks on a paper that has no 9 mark item. Also fixed: Newton's second law stated backwards (L2), the power equation rendered as a raw string because its display delimiters were overwritten with digits (L3), a core practical described with a metal block when the spec says water (L3), Snell's law and refractive index taught although neither appears anywhere in this spec (L6), a mandatory core practical hidden from Foundation (L6), 'Three types of ionising radiation' followed by four (L7), and a banned board rubric phrase (L1). Every worked example, mark scheme calculation and knowledge check key recomputes correctly, and every match knowledge check has unique right-hand options.",
+ "renarration": {
+  "run_at": "2026-09-04T12:45:02Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n38",
+    "key": "separate-sciences-edexcel/physics-paper-1/narration_lesson-01_n38.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/physics-paper-1/narration_lesson-01_n38.mp3",
+    "voice": "Ollie",
+    "duration": 23.18,
+    "bytes": 278208,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 12:44:30 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n6",
+    "key": "separate-sciences-edexcel/physics-paper-1/narration_lesson-02_n6.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/physics-paper-1/narration_lesson-02_n6.mp3",
+    "voice": "Ada",
+    "duration": 8.69,
+    "bytes": 104256,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 12:44:32 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n10",
+    "key": "separate-sciences-edexcel/physics-paper-1/narration_lesson-02_n10.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/physics-paper-1/narration_lesson-02_n10.mp3",
+    "voice": "Ada",
+    "duration": 22.61,
+    "bytes": 271296,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 12:44:36 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n37",
+    "key": "separate-sciences-edexcel/physics-paper-1/narration_lesson-03_n37.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/physics-paper-1/narration_lesson-03_n37.mp3",
+    "voice": "Ollie",
+    "duration": 4.75,
+    "bytes": 57024,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 12:44:38 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n39",
+    "key": "separate-sciences-edexcel/physics-paper-1/narration_lesson-03_n39.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/physics-paper-1/narration_lesson-03_n39.mp3",
+    "voice": "Ollie",
+    "duration": 44.9,
+    "bytes": 538848,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 12:44:45 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n22",
+    "key": "separate-sciences-edexcel/physics-paper-1/narration_lesson-06_n22.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/physics-paper-1/narration_lesson-06_n22.mp3",
+    "voice": "Ada",
+    "duration": 32.3,
+    "bytes": 387648,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 12:44:51 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n27",
+    "key": "separate-sciences-edexcel/physics-paper-1/narration_lesson-06_n27.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/physics-paper-1/narration_lesson-06_n27.mp3",
+    "voice": "Ada",
+    "duration": 36.82,
+    "bytes": 441792,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 12:44:56 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n10",
+    "key": "separate-sciences-edexcel/physics-paper-1/narration_lesson-07_n10.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/separate-sciences-edexcel/physics-paper-1/narration_lesson-07_n10.mp3",
+    "voice": "Ollie",
+    "duration": 24.46,
+    "bytes": 293472,
+    "verify_status": 206,
+    "last_modified": "Fri, 04 Sep 2026 12:45:01 GMT"
+   }
+  ],
+  "verified_ok": 8,
+  "total": 8
+ }
+}
