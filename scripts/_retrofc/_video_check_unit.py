@@ -39,7 +39,8 @@ for r in rows:
         results.append(json.load(open(rp, encoding="utf-8"))); say(f"L{n} cached"); continue
     for attempt in (1, 2, 3):
         pr = subprocess.run([sys.executable, os.path.join(HERE, "_video_check.py"), subject, unit, str(n)],
-                            capture_output=True, text=True, encoding="utf-8", cwd=HERE)
+                            capture_output=True, text=True, encoding="utf-8", cwd=HERE,
+                            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))   # no console pop-up per lesson (Tom, 6 Sep)
         if pr.returncode == 0 and os.path.exists(rp):
             res = json.load(open(rp, encoding="utf-8")); results.append(res)
             say(f"L{n} {res['cost_p']}p regenerate={res['regenerate']} MA={len(res['mark_affecting'])} ped={len(res['pedantry'])}")
