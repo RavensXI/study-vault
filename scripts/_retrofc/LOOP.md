@@ -121,6 +121,15 @@ closing-tag edit is fragile (whitespace-only `find`) and was skipped in 3 of 9 l
 imbalance rolls the lesson back. When a finish reports `skips` on a wrapper edit, check the field's div balance before moving
 on. Corpus census 4 Sep: 25 fields in 17 lessons, all fixed (`scripts/_retrofc/_div_balance_census.json`).
 
+### C4d. Ruling edits written by hand (added 5 Sep 2026)
+When I turn an ADJUDICATE into a FIX myself, never locate the sentence by
+searching back to the nearest full stop: a `.` inside a `data-def="..."` or
+`data-revision-tip="..."` attribute is not a sentence end, and the film-form L5
+Todorov note landed inside a tooltip that way. Either (a) send the ruling back
+to the checker agent, which has the raw text open, or (b) build the `find` from
+a plain substring I have printed and eyeballed, and put an added sentence at
+the paragraph's `</p>` (find the `</p>` after the phrase), never at a `.`.
+
 ## Rate limit
 
 If an Agent launch or any model call fails with a usage-limit message,
