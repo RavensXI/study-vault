@@ -18,6 +18,7 @@ Stages (run in order; each is resumable/idempotent via the run dir):
     python driver.py --config ... poll            # poll batch; on end: download + validate
     python driver.py --config ... fix             # resubmit validation failures
     python driver.py --config ... factcheck       # Opus + web search verification batch
+    python driver.py --config ... unitcheck       # one Opus pass over the whole unit
     python driver.py --config ... applyfixes      # apply HIGH/MEDIUM corrections
     python driver.py --config ... insert          # write lessons to Supabase (pending_review)
     python driver.py --config ... costs           # spend report from the ledger
@@ -788,6 +789,21 @@ If a SOURCE TEXT document is provided after this prompt (e.g. the full text of s
 
 BOARD CONTEXT: the user message states which exam board this lesson targets and lists that board's registered question tariffs. Do NOT flag question mark tariffs, command words, or question formats that match the stated board — different boards use different tariffs, and judging this lesson by another board's format is a false positive.
 
+ASSESSMENT RULES: if the user message contains an <assessment_rules> block, that block is quoted from the board's own specification and is the ONLY authority on exam structure. Check every claim the lesson makes about the exam — question types, wording, number of parts, what each part asks for, mark tariffs, timings, weightings, closed/open book, assessment objectives — against <assessment_rules>, NOT against the registered tariff list and NOT against your own memory of the board. Flag as HIGH any exam claim that contradicts <assessment_rules>, and flag as HIGH any exam claim that <assessment_rules> does not state at all — an invented per-part mark split, an invented per-AO mark split, an invented question count or an invented timing is a fabrication even when it sounds plausible. If the specification is silent on a detail, the lesson must be silent on it too.
+
+SCOPE: the user message names the board, the qualification and (for anthology or set-text units) the studied cluster or text. Flag as HIGH any content that is out of scope for that board, cluster or text — a poem, set text, topic or case study that is not on this board's list for this unit, taught as though it were. Teaching students material they will not be assessed on, presented as assessed material, costs them revision time.
+
+INVENTED EXAMINER CLAIMS: flag as MEDIUM any unevidenced assertion about examiner behaviour or exam frequency — "examiners deduct marks for...", "examiners want...", "the examiner is looking for...", "this is commonly tested", "this comes up every year", "most candidates lose marks here" — unless the stated assessment rules or a published board document actually says it. Likewise flag claims about spelling, punctuation and grammar marks where the assessment rules award none for that component.
+
+FLASHCARD RULES (check flashcard_questions against these):
+- every question must be a substantive question, not a bare fragment or a one- or two-word prompt
+- an answer must be 30 words or fewer
+- a bare one-word answer is only acceptable when the question invites one (What/Who/When/Which/Name/Give/State) or the answer is a number or date
+- no two cards may share the same answer
+- an answer must not be a list of items ("X, Y and Z") — that belongs in separate cards
+- an answer must not simply restate the question
+Report each breach as a MEDIUM finding on field "flashcard_questions", quoting the offending card in "claim" and giving the rewritten card in "correction", unless the card is also factually wrong (then use the factual severity).
+
 VERIFY WITH WEB SEARCH every checkable claim:
 - Named studies: researcher names, year, procedure, findings, sample details (e.g. a study's condition counts, percentages, age ranges)
 - Named theories and their attribution (the theorist actually proposed what the lesson says)
@@ -817,10 +833,22 @@ Return ONLY a JSON object, no code fences:
 An empty findings array means the lesson verified clean."""
 
 
+def assessment_rules_block(cfg):
+    """Optional: the board specification's own assessment text for this
+    component, quoted verbatim. When present it — not the plan's tariff list —
+    is the authority the checker judges exam claims against."""
+    p = cfg.get("assessment_rules_doc")
+    if not p or not os.path.exists(p):
+        return ""
+    return "<assessment_rules>\n" + read(p) + "\n</assessment_rules>\n\n"
+
+
 def stage_factcheck(cfg):
     st = load_state(cfg)
     plan = json.load(io.open(os.path.join(cfg["run_dir"], "plan.json"), encoding="utf-8"))
     lessons_dir = os.path.join(cfg["run_dir"], "lessons")
+    rules = assessment_rules_block(cfg)
+    scope = cfg.get("scope_statement", "")
     cl = client()
     reqs = []
     for cid in st.get("content_ok", []):
@@ -829,10 +857,13 @@ def stage_factcheck(cfg):
                    ("content_html", "exam_tip_html", "conclusion_html",
                     "knowledge_checks", "flashcard_questions", "glossary_terms",
                     "practice_questions")}
-        user = ("LESSON: %s\nTARGET BOARD: %s GCSE %s — question tariffs on this board: %s\n\n"
+        user = ("LESSON: %s\nTARGET BOARD: %s GCSE %s — question tariffs on this board: %s\n"
+                "%s\n%s"
                 "%s\n\nFact-check this lesson. Return the findings JSON."
                 % (cid, cfg["exam_board"], cfg["subject_name"],
                    " | ".join(plan.get("question_type_names", [])),
+                   ("SCOPE FOR THIS UNIT: " + scope) if scope else "",
+                   rules,
                    json.dumps(payload, ensure_ascii=False)))
         reqs.append({"custom_id": cid, "params": {
             "model": MODEL_FACTCHECK, "max_tokens": 8000,
@@ -913,6 +944,123 @@ def finish_factcheck(cfg, findings):
     save_state(cfg, st)
     print("factcheck complete: HIGH=%d MED=%d LOW=%d across %d lessons"
           % (counts["high"], counts["medium"], counts["low"], len(findings)))
+
+
+# ---------------------------------------------------------------- stage: unitcheck
+
+UNITCHECK_SYSTEM = """You are reviewing a whole unit of GCSE revision lessons AS A SET. Each lesson has already been fact-checked on its own, so do NOT repeat single-lesson checking: ignore style, coverage, tone, pedagogical simplification, and anything you would only notice by reading one lesson in isolation.
+
+Report ONLY these two things:
+
+1. CONTRADICTIONS BETWEEN LESSONS — two lessons state incompatible things about the same poem, text, term, date, technique, exam rule, or mark tariff. Name both lessons and say which one is wrong (or that both are, if neither matches the truth).
+
+2. REPEATED WRONG CLAIMS — a claim that is wrong or unevidenced and recurs across two or more lessons, so fixing one copy would leave the others. This includes an invented exam rule, an invented examiner behaviour, a misattributed poem or quotation, or a definition used inconsistently.
+
+Where the user message supplies an <assessment_rules> block, it is quoted from the board's specification and is the only authority on exam structure; a claim about the exam that the block does not state is a fabrication even if every lesson repeats it.
+
+Severity: high = mark-affecting (a student revising from these lessons would learn something false); medium = confusing inconsistency that is not directly mark-affecting; low = cosmetic drift.
+
+Return ONLY a JSON object, no code fences:
+{
+  "findings": [
+    {
+      "severity": "high" | "medium" | "low",
+      "lessons": ["<lesson id>", "<lesson id>"],
+      "field": "content_html" | "exam_tip_html" | "conclusion_html" | "knowledge_checks" | "flashcard_questions" | "glossary_terms" | "practice_questions",
+      "claim": "the exact wording at issue, as it appears in the lessons",
+      "problem": "what the contradiction or repeated error is, and which lesson is wrong",
+      "correction": "the corrected wording, ready to substitute in every lesson listed"
+    }
+  ]
+}
+An empty findings array means the unit is internally consistent."""
+
+
+def strip_html(s):
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", s or "")).strip()
+
+
+def stage_unitcheck(cfg):
+    """One Opus pass over EVERY lesson at once: cross-lesson contradictions and
+    repeated wrong claims only. Folds its findings into factcheck.json (tagged
+    source=unitcheck, and re-runnable — prior unitcheck findings are replaced)."""
+    st = load_state(cfg)
+    lessons_dir = os.path.join(cfg["run_dir"], "lessons")
+    cids = [c for c in st.get("content_ok", [])
+            if os.path.exists(os.path.join(lessons_dir, c + ".json"))]
+    if not cids:
+        print("unitcheck: no validated lessons")
+        return
+    parts = []
+    for cid in sorted(cids):
+        obj = json.load(io.open(os.path.join(lessons_dir, cid + ".json"), encoding="utf-8"))
+        parts.append(
+            "=== LESSON %s ===\n%s\n\nEXAM TIP: %s\n\nCONCLUSION: %s\n\n"
+            "PRACTICE QUESTIONS: %s\n\nGLOSSARY: %s\n\nFLASHCARDS: %s\n"
+            % (cid, strip_html(obj.get("content_html")),
+               strip_html(obj.get("exam_tip_html")),
+               strip_html(obj.get("conclusion_html")),
+               json.dumps(obj.get("practice_questions") or [], ensure_ascii=False),
+               json.dumps(obj.get("glossary_terms") or [], ensure_ascii=False),
+               json.dumps(obj.get("flashcard_questions") or [], ensure_ascii=False)))
+    user = ("UNIT: %s — %s GCSE %s\n%s\nLESSON IDS IN THIS UNIT: %s\n\n%s\n\n%s\n\n"
+            "Review the unit as a set. Return the findings JSON."
+            % (cfg.get("unit_name", cfg["slug"]), cfg["exam_board"], cfg["subject_name"],
+               ("SCOPE FOR THIS UNIT: " + cfg["scope_statement"] + "\n")
+               if cfg.get("scope_statement") else "",
+               json.dumps(sorted(cids), ensure_ascii=False),
+               assessment_rules_block(cfg),
+               "\n\n".join(parts)))
+    print("unitcheck: %d lessons, %dk chars" % (len(cids), len(user) // 1000))
+    cl = client()
+    with cl.messages.stream(
+        model=MODEL_FACTCHECK, max_tokens=12000,
+        system=[{"type": "text", "text": UNITCHECK_SYSTEM}],
+        messages=[{"role": "user", "content": user}],
+    ) as stream:
+        msg = stream.get_final_message()
+    rec = log_usage(cfg, "unitcheck", MODEL_FACTCHECK, "unit", msg.usage)
+    text = "".join(b.text for b in msg.content if b.type == "text")
+    io.open(os.path.join(cfg["run_dir"], "unitcheck_raw.txt"), "w", encoding="utf-8").write(text)
+    found = parse_json_reply(text).get("findings", [])
+
+    # Fan one cross-lesson finding out to a per-lesson finding so applyfixes,
+    # which is keyed on a single "lesson", corrects every copy.
+    flat = []
+    for f in found:
+        targets = f.get("lessons") or ([f["lesson"]] if f.get("lesson") else sorted(cids))
+        for t in targets:
+            if t not in cids:
+                continue
+            g = dict(f)
+            g.pop("lessons", None)
+            g["lesson"] = t
+            g["source"] = "unitcheck"
+            flat.append(g)
+
+    fc_path = os.path.join(cfg["run_dir"], "factcheck.json")
+    if os.path.exists(fc_path):
+        fc = json.load(io.open(fc_path, encoding="utf-8"))
+    else:
+        fc = {"subject": cfg["slug"], "checked": 0, "counts": {}, "findings": []}
+    fc["findings"] = [f for f in fc["findings"] if f.get("source") != "unitcheck"] + flat
+    counts = {"high": 0, "medium": 0, "low": 0}
+    for f in fc["findings"]:
+        counts[f.get("severity", "low")] = counts.get(f.get("severity", "low"), 0) + 1
+    fc["counts"] = counts
+    fc["unitcheck_findings"] = len(found)
+    write_json(fc_path, fc)
+    write_json(os.path.join(cfg["run_dir"], "unitcheck.json"),
+               {"findings": found, "fanned_out": len(flat)})
+    st["unitcheck_counts"] = {"raw": len(found), "fanned": len(flat)}
+    save_state(cfg, st)
+    print("unitcheck: %d cross-lesson findings -> %d per-lesson corrections ($%.3f). "
+          "factcheck.json now HIGH=%d MED=%d LOW=%d"
+          % (len(found), len(flat), cost_of(rec),
+             counts["high"], counts["medium"], counts["low"]))
+    for f in found:
+        print("  [%s] %s: %s" % (f.get("severity"), ",".join(f.get("lessons") or []),
+                                 (f.get("problem") or "")[:150]))
 
 
 # ---------------------------------------------------------------- stage: applyfixes
@@ -1265,6 +1413,7 @@ STAGES = {
     "prep": stage_prep, "submit": stage_submit, "poll": stage_poll,
     "fix": stage_fix, "pollfix": stage_pollfix,
     "factcheck": stage_factcheck, "pollfactcheck": stage_pollfactcheck,
+    "unitcheck": stage_unitcheck,
     "applyfixes": stage_applyfixes, "pollapplyfixes": stage_pollapplyfixes,
     "media": stage_media, "pollmedia": stage_pollmedia, "insertmedia": stage_insertmedia,
     "guides": stage_guides, "pollguides": stage_pollguides,
