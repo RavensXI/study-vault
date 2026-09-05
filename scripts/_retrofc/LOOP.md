@@ -176,6 +176,15 @@ BACK-FILL AT THE END (Tom, 5 Sep): once the queue is empty, run `_video_check_un
 `_loop.json.log` and `_loop.json.codex.log` finished before 5 Sep 20:00 (about 148 + 63 units, ~£45), then
 report the worklist totals with the final PushNotification.
 
+## Parallel Claude checkers (Tom, 5 Sep 23:50, after the 20x plan upgrade)
+
+`_loop.json.in_progress` may be a LIST of units. Up to three Opus checkers run at once (each writes only its
+own unit dir). Finishes stay strictly sequential: one `_unit.py finish` at a time (Supabase writes, narration,
+one git commit), then count, then the next. Rulings happen before each finish as before. When one checker's
+notification arrives, finish that unit, then `next` + `prep` + launch a replacement so three stay in flight.
+A 429 kills all three: set resume_after = reset + 3 min and relaunch every entry whose _report.json is missing.
+Cold-read audits still fall on every tenth Claude unit by units_done at the moment of counting.
+
 ## Stop
 
 Queue empty after priority 9 (`next` returns done and every family has
