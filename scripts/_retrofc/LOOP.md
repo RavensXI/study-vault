@@ -159,6 +159,23 @@ builder prints its spec mapping; if it reports UNRESOLVED specs it refuses
 to save - fix the mapping by hand (`--subjects a,b --family X`) and rerun.
 Publish the tracker and send a PushNotification at each family boundary.
 
+## Video check (folded in 5 Sep 2026, Tom's ruling)
+
+Every `_unit.py finish` that commits now spawns `_video_check_unit.py <subject> <unit>` detached (interpreter
+`_venv_genai/Scripts/python.exe`, google-genai >= 2.0; skip with `--no-video`). It sends each lesson's R2
+explainer video plus the corrected text and the unit's FIX findings to Gemini 3.8 Flash (static mode, ~3p a
+video, ~30p a unit) and grades every stale claim by GCSE STAKES, not strict accuracy: `mark_affecting` (a
+student repeating it would lose marks or learn a wrong examinable fact) or `pedantry` (accepted simplification -
+an extra minor participant, "weapons technology" for "weapons", a teletype called a phone). Only mark_affecting
+flags a regeneration. Results: `units/<s>__<u>/_video/L<n>.json`, `units/<s>__<u>/_video_check.json`, and the
+banked list `_video_regen_worklist.json` (one entry per flagged lesson; totals block). Canary 5 Sep: 31 videos,
+3 flagged (~10%), 96p. The loop runner does NOT wait for it; on a tick, glance at `_video_check.log` for errors.
+Never regenerate videos from the loop - the worklist is Tom's to release to the explainer pipeline.
+
+BACK-FILL AT THE END (Tom, 5 Sep): once the queue is empty, run `_video_check_unit.py` over every unit in
+`_loop.json.log` and `_loop.json.codex.log` finished before 5 Sep 20:00 (about 148 + 63 units, ~£45), then
+report the worklist totals with the final PushNotification.
+
 ## Stop
 
 Queue empty after priority 9 (`next` returns done and every family has

@@ -243,7 +243,7 @@ def fetch_rows(unit_id):
     return json.loads(urllib.request.urlopen(req, timeout=120).read())
 
 
-def cmd_finish(subject, unit, narrate=True):
+def cmd_finish(subject, unit, narrate=True, video=True):
     d = unit_dir(subject, unit)
     raw = load(os.path.join(d, "_raw.json"))
     report = load(os.path.join(d, "_report.json"), {})
@@ -328,6 +328,17 @@ def cmd_finish(subject, unit, narrate=True):
            f"Claude-Session: https://claude.ai/code/session_018B8Mk83MzFFhMoVFwvirTs\n")
     r = run(["git", "commit", "-q", "-m", msg], check=False)
     summary["committed"] = r.returncode == 0
+    # Video check (5 Sep 2026): after a successful commit, check the unit's explainer videos against the corrected
+    # text with Gemini 3.8 Flash, detached so finish does not block. Flagged lessons land in _video_regen_worklist.json.
+    if summary["committed"] and video and os.environ.get("GEMINI_API_KEY"):
+        py = os.path.join(HERE, "_venv_genai", "Scripts", "python.exe")
+        if os.path.exists(py):
+            flags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
+            subprocess.Popen([py, os.path.join(HERE, "_video_check_unit.py"), subject, unit], cwd=ROOT,
+                             stdout=open(os.path.join(d, "_video_launcher.txt"), "w"), stderr=subprocess.STDOUT, creationflags=flags)
+            summary["video_check"] = "launched"
+        else:
+            summary["video_check"] = "venv missing"
     print(json.dumps(summary))
 
 
@@ -356,7 +367,7 @@ if __name__ == "__main__":
     elif a[0] == "prep":
         cmd_prep(a[1], a[2], pool)
     elif a[0] == "finish":
-        cmd_finish(a[1], a[2], narrate="--no-narrate" not in a)
+        cmd_finish(a[1], a[2], narrate="--no-narrate" not in a, video="--no-video" not in a)
     elif a[0] == "restore":
         restore_from_backup(unit_dir(a[1], a[2]))
     else:

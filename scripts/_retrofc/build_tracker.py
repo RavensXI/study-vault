@@ -8,7 +8,7 @@ batches), re-run this, republish the artifact to the SAME url.
 Status vocabulary: unchecked | in-progress | checked | partial |
 gate-built | exempt-practice.
 """
-import io, json, os, sys
+import io, json, json, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 state = json.load(io.open(os.path.join(HERE, '_state.json'), encoding='utf-8'))
@@ -52,6 +52,9 @@ log = '\n'.join('<tr><td>%s</td><td>%s</td><td class="num">%s</td><td class="num
                 % (b['date'], b['what'], b.get('findings', ''), b.get('fixed', ''))
                 for b in reversed(state['batches']))
 
+_wp = os.path.join(HERE, '_video_regen_worklist.json')
+vid = json.load(io.open(_wp, encoding='utf-8')).get('totals', {}) if os.path.exists(_wp) else {}
+vid = {'videos': vid.get('videos', 0), 'regenerate': vid.get('regenerate', 0)}
 page = """<title>Retro Fact-Check Tracker</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;600&display=swap">
 <style>
@@ -88,6 +91,7 @@ page = """<title>Retro Fact-Check Tracker</title>
   <div class="pill"><b>%(part)s</b><span>lessons in partially-checked subjects</span></div>
   <div class="pill"><b style="color:#9a3a25">%(todo)s</b><span>lessons still to check</span></div>
   <div class="pill"><b>%(findings)d / %(fixed)d</b><span>findings / edits applied (one finding often needs many edits)</span></div>
+  <div class="pill"><b>%(vid_regen)s / %(vid_checked)s</b><span>explainer videos to regenerate / checked (Gemini video check, GCSE-stakes gate)</span></div>
 </div>
 <div class="bar"><i></i></div>
 <p class="barnote">%(pct)d%% of the corpus fully covered (practice-first subjects are separately machine-verified and excluded from the bar).</p>
@@ -105,7 +109,7 @@ page = """<title>Retro Fact-Check Tracker</title>
 </table></div>
 
 <footer>StudyVault \u00b7 updated %(updated)s \u00b7 state: scripts/_retrofc/_state.json</footer>
-</div>""" % {'pct': pct, 'done': format(done_l, ','), 'part': format(part_l, ','),
+</div>""" % {'pct': pct, 'done': format(done_l, ','), 'part': format(part_l, ','), 'vid_regen': vid['regenerate'], 'vid_checked': vid['videos'],
              'todo': format(todo_l, ','), 'findings': findings, 'fixed': fixed,
              'rows': '\n'.join(rows), 'log': log, 'updated': state['updated']}
 
