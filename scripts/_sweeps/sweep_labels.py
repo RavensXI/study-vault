@@ -610,7 +610,18 @@ def run_subject(slug, sid, unit_ids, dry, narrate, totals, worklist, narrated_hi
         api(f"lessons?id=eq.{r['id']}", method="PATCH", body=patch)
 
     # re-narrate lessons whose exam tip (a narrated field) changed
-    tip_rows = [(r, b) for r, _p, b in plan if "exam_tip_html" in b]
+    # Only lessons that actually carry audio: a lesson with an empty
+    # narration_manifest has no clip to refresh, and the re-narrate script
+    # aborts the whole batch when it cannot derive an R2 key for one.
+    tip_rows = []
+    for r, _p, b in plan:
+        if "exam_tip_html" not in b:
+            continue
+        got = api(f"lessons?id=eq.{r['id']}&select=narration_manifest")
+        if got and (got[0].get("narration_manifest") or []):
+            tip_rows.append((r, b))
+        else:
+            st.setdefault("tips_without_audio", []).append(r["id"])
     if tip_rows and narrate:
         nb = os.path.join(OUT, f"{slug}_backup.json")
         with open(nb, "w", encoding="utf-8") as f:
