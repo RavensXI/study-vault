@@ -145,6 +145,16 @@
 
   // ---- Not authenticated — hide page and show login ----
 
+  /* Teacher pages have ONE sign-in surface: /teacher/login. With no valid
+     session we go there (and come back via ?next=) rather than render an
+     in-page form or the shared-password gate. The shared TEACHER_PASSWORD
+     was retired on 6 Sep 2026; the admin password remains for /admin/ only. */
+  if (isTeacherAuth) {
+    var back = location.pathname + location.search;
+    location.replace('/teacher/login?next=' + encodeURIComponent(back));
+    return;
+  }
+
   // Inject CSS immediately (before body parses)
   var gateCSS = document.createElement('style');
   gateCSS.id = 'auth-gate-css';

@@ -38,8 +38,19 @@ module.exports = async function handler(req, res) {
 
   const { data: classes, error } = await q;
   if (error) return res.status(500).json({ error: 'Could not load your classes.', detail: error.message });
+
+  /* Content tools (review, editor) are for staff who hold edit rights on at
+     least one subject, or for the platform admin - not for every teacher who
+     signs in to see class progress (Tom, 6 Sep 2026). */
+  let canEdit = role === 'platform_admin';
+  if (!canEdit && role === 'teacher') {
+    const { data: ts } = await supabase.from('teacher_subjects').select('can_edit, can_publish')
+      .eq('teacher_id', auth.profile.id).or('can_edit.eq.true,can_publish.eq.true').limit(1);
+    canEdit = !!(ts && ts.length);
+  }
+
   if (!classes || !classes.length) {
-    return res.status(200).json({ classes: [], canBuild: !!auth.profile.school_id,
+    return res.status(200).json({ classes: [], canBuild: !!auth.profile.school_id, canEdit,
                                   subjects: await subjectList(auth) });
   }
 
@@ -64,6 +75,7 @@ module.exports = async function handler(req, res) {
        teacher's inbox and is lost the moment they leave, which is the failure
        we designed the class-derived access to avoid. */
     canBuild: !!auth.profile.school_id,
+    canEdit,
     classes: classes.map(function (c) {
       return {
         id: c.id,
