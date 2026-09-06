@@ -36,7 +36,9 @@ def strip(h):
     return re.sub(r"\s+", " ", h).strip()
 
 
-sid = get(f"subjects?slug=eq.{subject}&select=id")[0]["id"]
+# a slug can exist twice (free tier + a school build): pick the subject that owns this unit
+sid = next(s["id"] for s in get(f"subjects?slug=eq.{subject}&select=id")
+           if get(f"units?subject_id=eq.{s['id']}&slug=eq.{unit}&select=id"))
 uid = get(f"units?subject_id=eq.{sid}&slug=eq.{unit}&select=id")[0]["id"]
 row = get(f"lessons?unit_id=eq.{uid}&lesson_number=eq.{ln}&select=id,title,content_html,conclusion_html,youtube_video_id")[0]
 video_url = row["youtube_video_id"]

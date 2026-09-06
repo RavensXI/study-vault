@@ -25,7 +25,9 @@ def say(s):
 U, K = os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"]
 H = {"apikey": K, "Authorization": "Bearer " + K}
 get = lambda p: json.load(urllib.request.urlopen(urllib.request.Request(f"{U}/rest/v1/{p}", headers=H), timeout=60))
-sid = get(f"subjects?slug=eq.{subject}&select=id")[0]["id"]
+# a slug can exist twice (free tier + a school build): pick the subject that owns this unit
+sid = next(s["id"] for s in get(f"subjects?slug=eq.{subject}&select=id")
+           if get(f"units?subject_id=eq.{s['id']}&slug=eq.{unit}&select=id"))
 uid = get(f"units?subject_id=eq.{sid}&slug=eq.{unit}&select=id")[0]["id"]
 rows = get(f"lessons?unit_id=eq.{uid}&select=lesson_number,youtube_video_id&order=lesson_number")
 say(f"start {subject}/{unit}: {len(rows)} lessons")
