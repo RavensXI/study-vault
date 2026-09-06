@@ -219,7 +219,12 @@
     var lockedSubjectIds = [];
 
     function boardOf(s) {
-      if (s.exam_board) return s.exam_board;
+      if (s.exam_board) {
+        /* The column mixes house names: "Pearson Edexcel" and "Edexcel",
+           "Eduqas / WJEC" and "Eduqas". One label per board on screen;
+           the A/B suffixes (Geography, Science) are real and stay. */
+        return s.exam_board.replace(/^Pearson\s+/i, '').replace(/\s*\/\s*WJEC$/i, '');
+      }
       var m = /(^|-)(aqa|ocr|edexcel|eduqas|wjec)(-|$)/.exec(s.slug || '');
       if (m) return m[2].toUpperCase();
       if (/^cambridge-nationals/.test(s.slug || '')) return 'OCR';
