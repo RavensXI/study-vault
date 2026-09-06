@@ -212,16 +212,17 @@
     /* ---- Subject picker -------------------------------------------------
        The school's own subjects first (they are what "Geography" means to
        a teacher at that school), then every generic subject with its board
-       read off the slug, so the three Business Studies rows tell apart. */
+       from exam_board (slug as fallback), so the three Business Studies rows tell apart. */
     var subjectListEl = document.getElementById('subjectList');
     var subjectFilterEl = document.getElementById('subjectFilter');
     var subjectCountEl = document.getElementById('subjectCount');
     var lockedSubjectIds = [];
 
-    function boardOf(slug) {
-      var m = /(^|-)(aqa|ocr|edexcel|eduqas|wjec)(-|$)/.exec(slug || '');
+    function boardOf(s) {
+      if (s.exam_board) return s.exam_board;
+      var m = /(^|-)(aqa|ocr|edexcel|eduqas|wjec)(-|$)/.exec(s.slug || '');
       if (m) return m[2].toUpperCase();
-      if (/^cambridge-nationals/.test(slug || '')) return 'OCR';
+      if (/^cambridge-nationals/.test(s.slug || '')) return 'OCR';
       return '';
     }
 
@@ -234,7 +235,7 @@
     async function loadSubjects(schoolId, assigned) {
       lockedSubjectIds = assigned.slice();
       try {
-        var q = sb.from('subjects').select('id, name, slug, school_id')
+        var q = sb.from('subjects').select('id, name, slug, school_id, exam_board')
           .eq('status', 'live').order('name');
         q = schoolId ? q.or('school_id.is.null,school_id.eq.' + schoolId) : q.is('school_id', null);
         var resp = await q;
@@ -250,7 +251,7 @@
       var gen = rows.filter(function (s) { return !s.school_id; });
       function item(s) {
         var locked = lockedSubjectIds.indexOf(s.id) !== -1;
-        var board = s.school_id ? '' : boardOf(s.slug);
+        var board = s.school_id ? '' : boardOf(s);
         return '<label class="subj-item' + (locked ? ' is-locked' : '') + '" data-name="' +
           escapeHtml((s.name + ' ' + board).toLowerCase()) + '">' +
           '<input type="checkbox" name="subject" value="' + escapeHtml(s.id) + '"' +
