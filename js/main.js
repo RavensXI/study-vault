@@ -2572,6 +2572,11 @@ function initLessonProgress() {
   // the 4,100 lessons that have no widget. Flagged for Tom, not fixed here.
   var TASK_WEIGHTS = { 'practice-question': 40, 'flashcards': 15, 'revision-task': 15,
     'knowledge-check': 10, 'video': 10, 'podcast': 10, 'interactive': 10 };
+  // Listening lessons (Music set works) offer four things and the whole-piece
+  // listen is the point of the page, so it carries the most (Tom, 6 Sep 2026).
+  var LISTEN_WEIGHTS = { 'listen': 35, 'practice-question': 30, 'knowledge-check': 20, 'flashcards': 15 };
+  var isListeningLesson = !!document.querySelector('.sv-listening');
+  if (isListeningLesson) TASK_WEIGHTS = LISTEN_WEIGHTS;
   // exported so the sidebar weight tags (reader-skin.js) can never drift
   // from the completion maths
   window.svTaskWeights = TASK_WEIGHTS;
@@ -2684,6 +2689,13 @@ function initLessonProgress() {
   var videoSection = document.getElementById('sidebar-video-section');
   if (videoSection && videoSection.style.display !== 'none') {
     tasks.push({ id: 'video', label: 'Watch the video', icon: icons.video, iconClass: 'lesson-progress-icon--video', auto: false });
+  }
+
+  // Full listen — the docked study-piece player reports 85% of the piece heard
+  if (document.querySelector('.sv-annotated-player')) {
+    tasks.push({ id: 'listen', label: 'Listen to the whole piece',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>',
+      iconClass: 'lesson-progress-icon--listen', auto: true });
   }
 
   // Knowledge check
@@ -2965,6 +2977,14 @@ function initLessonProgress() {
       });
     });
   }).observe(document.body, { childList: true, subtree: true });
+
+  // Auto-tick the full listen — initListeningLesson fires this at 85% heard
+  document.addEventListener('listen-completed', function () {
+    if (state['listen']) return;
+    state['listen'] = true;
+    saveState(state);
+    syncAll();
+  });
 
   // Auto-tick flashcards on completion
   document.addEventListener('flashcards-completed', function () {
@@ -3548,6 +3568,7 @@ function initListeningLesson() {
   fin.innerHTML = '<h2>Now prove it</h2>' +
     '<p>You have heard the whole movement and read the ideas behind it. Lock it in before you move on.</p>' +
     '<div class="sv-finish-actions">' +
+    (document.querySelector('.sv-annotated-player') ? '<button type="button" data-act="listen">Listen to the whole piece</button>' : '') +
     '<button type="button" data-act="quiz">Quick Quiz</button>' +
     '<button type="button" data-act="cards">Flashcards</button>' +
     '<button type="button" data-act="practice">Practice questions</button></div>';
@@ -3563,14 +3584,36 @@ function initListeningLesson() {
     var wrap = document.createElement('div'); wrap.className = 'sv-finish-progress';
     wrap.appendChild(sec);
     var note = document.createElement('p'); note.className = 'sv-finish-note';
-    note.textContent = 'Each activity counts towards completion. The lesson is complete once you have done half of what it offers.';
+    note.textContent = 'Listening to the whole piece counts 35%, the exam question 30%, the quiz 20% and flashcards 15%. Half marks the lesson complete.';
     wrap.appendChild(note);
     fin.appendChild(wrap);
+    // Compact form (short screens): the action buttons ARE the checklist —
+    // each shows a tick when its task is done; the rows are hidden and only
+    // the bar and count remain.
+    wrap.classList.add('sv-finish-progress--compact');
+    var actMap = { listen: 'listen', quiz: 'knowledge-check', cards: 'flashcards', practice: 'practice-question' };
+    var count = document.createElement('div'); count.className = 'sv-finish-count';
+    wrap.insertBefore(count, note);
+    function syncBtns() {
+      var total = 0, done = 0;
+      Object.keys(actMap).forEach(function (act) {
+        var b = fin.querySelector('[data-act="' + act + '"]');
+        var it = sec.querySelector('.lesson-progress-item[data-task="' + actMap[act] + '"]');
+        if (!it) return;
+        total++; if (it.classList.contains('completed')) done++;
+        if (b) b.classList.toggle('is-done', it.classList.contains('completed'));
+      });
+      // the reader skin's own count only sees visible rows, which are hidden here
+      count.textContent = done + ' of ' + total + ' done · ' + (sec.dataset.svPct || 0) + '%';
+    }
+    new MutationObserver(syncBtns).observe(sec, { attributes: true, subtree: true, attributeFilter: ['class'] });
+    syncBtns();
   })(16);
   fin.querySelector('.sv-finish-actions').addEventListener('click', function (e) {
     var b = e.target.closest('button');
     if (!b) return;
     var act = b.getAttribute('data-act');
+    if (act === 'listen') { goTo(0); var f0 = document.querySelector('.sv-annotated-player'); if (f0 && f0._ap) f0._ap.play(); }
     if (act === 'quiz') { var k = document.getElementById('knowledge-check-btn'); if (k) k.click(); }
     if (act === 'cards') { if (typeof openFlashcardModal === 'function') openFlashcardModal(); }
     if (act === 'practice') {
@@ -3750,6 +3793,32 @@ function initListeningLesson() {
     fig.addEventListener('click', function (e) {
       if (e.target.closest('.sv-ap-play, .sv-ap-pin, .sv-ap-canvas, .sv-ap-track, .sv-ap-trackbtn')) stopRead();
     });
+  }
+
+  // ---- Full listen (Tom, 6 Sep 2026): 85% of the piece's seconds heard, in
+  // any order, ticks "Listen to the whole piece". Seconds heard are kept per
+  // lesson so a reload does not restart the count. Multi-track lessons count
+  // every track towards one total.
+  if (fig) {
+    var seenKey = 'sv-listen-seen-' + (fig.getAttribute('data-lesson-id') || location.pathname.replace(/\W+/g, '_'));
+    var seen = {};
+    try { (JSON.parse(localStorage.getItem(seenKey)) || []).forEach(function (s) { seen[s] = 1; }); } catch (e) {}
+    var seenCount = Object.keys(seen).length, listenFired = false, tickN = 0;
+    var listenDur = 0;
+    Array.prototype.forEach.call(fig.querySelectorAll('.sv-ap-trackbtn'), function (b) { listenDur += parseFloat(b.getAttribute('data-dur')) || 0; });
+    if (!listenDur) listenDur = parseFloat(fig.getAttribute('data-dur')) || 0;
+    setInterval(function () {
+      if (!fig._ap || fig._ap.paused()) return;
+      var on = fig.querySelector('.sv-ap-trackbtn--on');
+      var key = (on ? on.getAttribute('data-track') : 't') + ':' + Math.floor(fig._ap.time());
+      if (!seen[key]) { seen[key] = 1; seenCount++; }
+      if (++tickN % 10 === 0) { try { localStorage.setItem(seenKey, JSON.stringify(Object.keys(seen))); } catch (e) {} }
+      if (!listenFired && listenDur && seenCount >= 0.85 * listenDur) {
+        listenFired = true;
+        try { localStorage.setItem(seenKey, JSON.stringify(Object.keys(seen))); } catch (e) {}
+        try { document.dispatchEvent(new CustomEvent('listen-completed')); } catch (e) {}
+      }
+    }, 1000);
   }
 
   function size() {

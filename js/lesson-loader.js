@@ -374,7 +374,17 @@
         examNav.style.display = 'none';
       }
     }
-    document.getElementById('nav-revision-technique').href = '/guide/' + subjectSlug + '/revision-technique';
+    var revNav = document.getElementById('nav-revision-technique');
+    revNav.href = '/guide/' + subjectSlug + '/revision-technique';
+    // 21 live subjects have no revision-technique hub (Maths and MFL practice
+    // subjects, Music, Cambridge Nationals) and the link led to "hub not
+    // found". Show it only when the hub row exists (Tom, 6 Sep 2026).
+    if (subject && subject.id) {
+      sb.from('guide_pages').select('id').eq('subject_id', subject.id)
+        .eq('guide_type', 'revision-technique').eq('slug', 'index').limit(1)
+        .then(function (r) { if (!r.data || !r.data.length) revNav.style.display = 'none'; })
+        .catch(function () {});
+    }
 
     if (data.prevLesson) {
       var prevLink = document.getElementById('nav-prev-lesson');

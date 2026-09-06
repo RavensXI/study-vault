@@ -48,7 +48,7 @@
     'sv-flashcard-tutorial-done', 'sv-highlight-tutorial-done',
     'sv_collapsible_hint'
   ];
-  var PREFIXES = ['sv-podcast-pos-'];
+  var PREFIXES = ['sv-podcast-pos-', 'sv-listen-seen-'];
   var META_KEY = 'sv-sync-meta';    // {key: localWriteTsMs} — never synced
   var OWNER_KEY = 'sv-sync-owner';  // user id the device's data belongs to
 
