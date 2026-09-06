@@ -359,6 +359,13 @@
     }
     var r = await fetch(path, opts);
     var d = await r.json();
+    if (r.status === 401) {
+      /* No usable session (expired, signed out elsewhere, or arrived here
+         without signing in): go to the sign-in page rather than show the
+         API's raw "Not authenticated" text (Tom hit this on 6 Sep 2026). */
+      window.location.replace('/teacher/login');
+      throw new Error('Sign in to see your classes.');
+    }
     if (!r.ok) throw new Error(d.error || d.detail || ('Request failed (' + r.status + ')'));
     return d;
   }

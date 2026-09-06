@@ -243,7 +243,27 @@
           return;
         }
 
-        // Redirect to login with success message
+        // The API signs the new account in and returns the session: adopt it
+        // here so the teacher lands on their classes without typing the
+        // password again. Fall back to the sign-in page if that fails.
+        try {
+          if (data.session && data.session.access_token && data.session.refresh_token) {
+            var set = await sb.auth.setSession({
+              access_token: data.session.access_token,
+              refresh_token: data.session.refresh_token
+            });
+            if (!set.error) {
+              sessionStorage.setItem('studyvault-auth', JSON.stringify({
+                role: 'teacher',
+                teacher_id: (data.profile && data.profile.id) || (set.data && set.data.user && set.data.user.id) || null,
+                school_id: (data.profile && data.profile.school_id) || null,
+                full_name: fullName
+              }));
+              window.location.href = '/teacher/classes';
+              return;
+            }
+          }
+        } catch (e) {}
         window.location.href = '/teacher/login?signup=success';
 
       } catch (err) {

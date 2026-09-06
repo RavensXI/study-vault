@@ -100,7 +100,7 @@ module.exports = async (req, res) => {
   // --- Mark invitation as accepted ---
   await supabase
     .from('teacher_invitations')
-    .update({ accepted_at: new Date().toISOString(), accepted_by: userId })
+    .update({ accepted_at: new Date().toISOString() })   // no accepted_by column: the old call failed silently, leaving tokens reusable (6 Sep 2026)
     .eq('id', invitation.id);
 
   // --- Sign the user in to get a session ---
