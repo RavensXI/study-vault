@@ -1,0 +1,358 @@
+{
+ "generated_at": "2026-09-06T10:26:41.332Z",
+ "unit_id": "2cdb4be5-cc8d-4e74-970f-e77556577d13",
+ "subject": "computer-science-eduqas",
+ "unit": "data-representation-storage",
+ "lessons": [
+  {
+   "id": "7b83fee7-2ad1-4004-a975-d56188f1ed4c",
+   "lesson_number": 2,
+   "title": "Signed Binary, Addition, Subtraction and Shifts",
+   "before": {
+    "practice_questions": [
+     {
+      "text": "Which one of the following is the 8-bit two's complement representation of -13?\nA) 10001101\nB) 11110011\nC) 01110011\nD) 11110010",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) 11110011. Working: +13 = 00001101, invert = 11110010, add 1 = 11110011. [1 mark]"
+     },
+     {
+      "text": "State what is meant by overflow in the context of binary addition.",
+      "type": "1 mark — State/Identify",
+      "marks": "Overflow occurs when the result of an addition is too large to be stored in the available number of bits [1 mark]. Accept: the result exceeds the maximum value the bit width can represent, causing the value to wrap around or be recorded incorrectly."
+     },
+     {
+      "text": "Convert the 8-bit two's complement number 11001010 to its denary value.",
+      "type": "2 marks — Convert (Binary/Hex/Denary)",
+      "marks": "MSB is 1, so the number is negative. Invert: 00110101. Add 1: 00110110 = 54. Therefore the denary value is -54. [2 marks: 1 mark for correct invert-and-add-1 process, 1 mark for correct answer -54.]"
+     },
+     {
+      "text": "Carry out the binary addition of 01011001 and 00110111. Show your working. State whether overflow has occurred if the result is to be stored as an 8-bit unsigned integer.",
+      "type": "4 marks — Explain",
+      "marks": "01011001 + 00110111: working column by column with carries gives 10010000 (144 in denary: 64+16+0+0+0+0+0+0 = wait, 10010000 = 128+16 = 144). [1 mark for correct carry work, 1 mark for result 10010000, 1 mark for correctly stating 144 is within 0-255 unsigned range, 1 mark for concluding no overflow in unsigned 8-bit.]"
+     },
+     {
+      "text": "The 8-bit binary value 00011000 is stored in a register. Show the result of an arithmetic right shift by 2 positions and state the denary value of the result.",
+      "type": "3 marks — Describe",
+      "marks": "00011000 shifted right 2 positions arithmetically (sign bit 0, so 0s fill from left): 00000110. [1 mark for correct shift direction with two positions, 1 mark for correct result 00000110, 1 mark for correct denary value 6.] Note: equivalent to dividing 24 by 4."
+     },
+     {
+      "text": "Compare sign and magnitude with two's complement as methods of representing negative integers in binary. In your answer, refer to the range of values each can represent and how each handles the representation of zero.",
+      "type": "6 marks — Compare",
+      "marks": "Mastering: Accurate contrast of range (sign and magnitude: -127 to +127 in 8 bits; two's complement: -128 to +127 in 8 bits), clear explanation of the double-zero problem in sign and magnitude vs single zero in two's complement, and a comment on why two's complement is preferred by hardware (same addition circuit works for subtraction).\nSecure: Both representations described correctly, at least one contrast made explicitly (e.g. range or zero), some comment on hardware implications.\nDeveloping: One representation described well; the other partially correct; comparison implicit rather than explicit.\nEmerging: Some correct facts about one representation; little or no comparison."
+     }
+    ]
+   }
+  },
+  {
+   "id": "743ab11a-e2a0-4cc5-a985-b1a7427cac7e",
+   "lesson_number": 3,
+   "title": "Characters: ASCII and Unicode",
+   "before": {
+    "content_html": "<h2 data-narration-id=\"n1\">Why Do Characters Need a Code?</h2>\n<p data-narration-id=\"n2\">Computers only store binary numbers. To store a letter like &lsquo;A&rsquo; or a symbol like &lsquo;&amp;&rsquo;, every possible character must be assigned a unique number, and that number is then stored in binary. The complete collection of characters a system can represent, together with the numeric codes assigned to each, is called a <dfn class=\"term\" data-def=\"A defined set of characters and the unique numeric codes assigned to each, used by a computer to store and display text.\">character set</dfn>. Without an agreed character set, text sent from one computer to another would be garbled.</p>\n\n<h2 data-narration-id=\"n3\">ASCII: The Original Standard</h2>\n<p data-narration-id=\"n4\"><dfn class=\"term\" data-def=\"American Standard Code for Information Interchange: a 7-bit character encoding standard that assigns numeric codes 0-127 to letters, digits, punctuation and control characters.\">ASCII</dfn> (American Standard Code for Information Interchange) was developed in the 1960s and became the dominant early standard. Standard ASCII uses <strong>7 bits</strong> per character, giving \\(2^7 = 128\\) possible codes (0 to 127). These 128 codes cover:</p>\n<ul>\n  <li data-narration-id=\"n5\">Upper-case letters A&ndash;Z (codes 65&ndash;90)</li>\n  <li data-narration-id=\"n6\">Lower-case letters a&ndash;z (codes 97&ndash;122)</li>\n  <li data-narration-id=\"n7\">Digits 0&ndash;9 (codes 48&ndash;57)</li>\n  <li data-narration-id=\"n8\">Punctuation and special symbols (e.g. space = 32, &lsquo;!&rsquo; = 33)</li>\n  <li data-narration-id=\"n9\">Control characters (e.g. newline, carriage return, tab &mdash; used by printers and early terminals)</li>\n</ul>\n\n<div class=\"key-fact\" data-narration-id=\"n10\" data-revision-tip=\"Cover this and recall from memory: ASCII 'A' = ?, 'a' = ?, '0' = ?. Write the three values without looking.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Three ASCII codes you must know: <strong>&lsquo;A&rsquo; = 65</strong>, <strong>&lsquo;a&rsquo; = 97</strong>, <strong>&lsquo;0&rsquo; = 48</strong>. Note that upper-case letters always have lower codes than their lower-case equivalents &mdash; there is a gap of exactly 32 between &lsquo;A&rsquo; (65) and &lsquo;a&rsquo; (97). The digit &lsquo;0&rsquo; is code 48, not 0.</p>\n</div>\n\n<h2 data-narration-id=\"n11\">Extended ASCII</h2>\n<p data-narration-id=\"n12\">As computers spread internationally, 128 codes proved insufficient. Extended ASCII uses <strong>8 bits</strong> (one full byte), giving \\(2^8 = 256\\) codes (0 to 255). The extra 128 codes (128&ndash;255) were used for accented letters, currency symbols and graphics characters. Different manufacturers implemented the upper range differently, which caused compatibility problems &mdash; the same code could mean a different character on different systems.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>ASCII in Practice &mdash; Worked Encoding Example</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n13\">To store the word &ldquo;Cat&rdquo; in memory using ASCII:</p>\n    <p data-narration-id=\"n14\">&lsquo;C&rsquo; = 67 = <code>01000011</code></p>\n    <p data-narration-id=\"n15\">&lsquo;a&rsquo; = 97 = <code>01100001</code></p>\n    <p data-narration-id=\"n16\">&lsquo;t&rsquo; = 116 = <code>01110100</code></p>\n    <p data-narration-id=\"n17\">Three bytes of storage are needed &mdash; one byte per character. The string &ldquo;Cat&rdquo; is stored as the sequence of binary codes <code>01000011 01100001 01110100</code>.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n18\">Unicode: A Global Solution</h2>\n<p data-narration-id=\"n19\"><dfn class=\"term\" data-def=\"An international character encoding standard that assigns a unique code point to every character in every language and symbol set in the world, supporting over a million characters.\">Unicode</dfn> was created to solve the limitations of ASCII. It assigns a unique <strong>code point</strong> to every character in every writing system in the world &mdash; Latin, Cyrillic, Arabic, Chinese, emoji and thousands more. Unicode currently defines over 140,000 characters (and the range can extend to over 1 million).</p>\n<p data-narration-id=\"n20\">Unicode itself is a standard, not an encoding. The encoding &mdash; how the code points are stored as bytes &mdash; is specified separately. Three common encodings are:</p>\n<ul>\n  <li data-narration-id=\"n21\"><strong>UTF-8:</strong> variable length, 1 to 4 bytes per character. ASCII characters use exactly 1 byte (backward compatible). The most widely used encoding on the web.</li>\n  <li data-narration-id=\"n22\"><strong>UTF-16:</strong> variable length, 2 or 4 bytes per character. Used internally by Windows and Java.</li>\n  <li data-narration-id=\"n23\"><strong>UTF-32:</strong> fixed 4 bytes per character. Simple but uses more storage than UTF-8 for mostly-ASCII text.</li>\n</ul>\n\n<div class=\"key-fact\" data-narration-id=\"n24\" data-revision-tip=\"Close this and explain to someone why Unicode was needed and how UTF-8 remains backward compatible with ASCII.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Unicode uses more bits per character than ASCII, which means Unicode files are larger. However, <strong>UTF-8 is backward compatible with ASCII</strong>: the first 128 Unicode code points match the ASCII codes exactly, so any pure ASCII text file is also a valid UTF-8 file. This is why UTF-8 replaced ASCII without breaking existing systems.</p>\n</div>\n\n<h2 data-narration-id=\"n25\">Comparing ASCII and Unicode</h2>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>ASCII vs Unicode: Key Comparison</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <table data-narration-id=\"n26\">\n      <thead><tr><th>Feature</th><th>ASCII (7-bit)</th><th>Unicode (UTF-8)</th></tr></thead>\n      <tbody>\n        <tr><td>Number of characters</td><td>128 (standard); 256 (extended 8-bit)</td><td>Over 140,000 (extendable to 1 million+)</td></tr>\n        <tr><td>Bits per character</td><td>7 (or 8 for extended)</td><td>8 to 32 (variable in UTF-8)</td></tr>\n        <tr><td>Languages supported</td><td>English and basic Western symbols only</td><td>All world languages including emoji</td></tr>\n        <tr><td>File size</td><td>Smaller for English text</td><td>Larger for non-ASCII scripts; same as ASCII for English in UTF-8</td></tr>\n        <tr><td>Backward compatibility</td><td>N/A</td><td>UTF-8 fully compatible with ASCII for the first 128 codes</td></tr>\n      </tbody>\n    </table>\n    <p data-narration-id=\"n27\">The trade-off is clear: ASCII is compact but limited. Unicode is comprehensive but uses more storage for non-ASCII scripts. For modern software that must work in any language, Unicode is the only practical choice.</p>\n  </div></div>\n</div>\n\n<p data-narration-id=\"n28\">A key practical point: <dfn class=\"term\" data-def=\"The process of converting between different character set standards, for example from ASCII to Unicode, which can cause errors if characters outside the original set are present.\">character encoding</dfn> errors arise when a file saved in one encoding is opened assuming a different encoding. You have probably seen garbled symbols or question marks appear in a document &mdash; that is a mismatch between the encoding used to save and the encoding used to read.</p>\n\n<h2 data-narration-id=\"n29\">Why Encoding Choice Matters</h2>\n<p data-narration-id=\"n30\">An encoding is only useful if both the program writing the file and the program reading it agree on which scheme is in use. A file saved in UTF-8 but opened as Windows-1252 will display garbled symbols where multi-byte characters used to be. This is called <dfn class=\"term\" data-def=\"The corruption of text caused by interpreting bytes with the wrong character encoding, producing nonsense glyphs in place of intended characters.\">mojibake</dfn>, and it remains one of the most common bugs in software that handles text from multiple sources. Modern web standards address this by requiring documents to declare their encoding in the HTTP header or, for HTML, in the document head, so the browser always knows which scheme to apply.</p>\n<p data-narration-id=\"n31\">UTF-8 has become the dominant encoding on the web because it remains backward-compatible with ASCII while extending naturally to every script. A file containing only English text takes exactly the same number of bytes whether it is encoded in ASCII or in UTF-8, but the same encoding can also hold Greek, Japanese, emoji and historical scripts without further work. This combination of compatibility and reach is why nearly all new file formats, network protocols and source code now default to UTF-8 rather than ASCII alone.</p>",
+    "glossary_terms": [
+     {
+      "term": "character set",
+      "definition": "A defined set of characters and the unique numeric codes assigned to each, used by a computer to store and display text."
+     },
+     {
+      "term": "ASCII",
+      "definition": "American Standard Code for Information Interchange: a 7-bit character encoding standard that assigns numeric codes 0-127 to letters, digits, punctuation and control characters."
+     },
+     {
+      "term": "Unicode",
+      "definition": "An international character encoding standard that assigns a unique code point to every character in every language and symbol set in the world, supporting over a million characters."
+     },
+     {
+      "term": "character encoding",
+      "definition": "The process of converting between different character set standards, for example from ASCII to Unicode, which can cause errors if characters outside the original set are present."
+     }
+    ]
+   }
+  },
+  {
+   "id": "e7e12162-ae99-4d77-8180-1c3d5adf3d08",
+   "lesson_number": 4,
+   "title": "Graphics: Pixels, Resolution and Colour Depth",
+   "before": {
+    "content_html": "<h2 data-narration-id=\"n1\">How Images Are Stored as Bitmaps</h2>\n<p data-narration-id=\"n2\">A digital image is made up of a grid of tiny coloured squares called <dfn class=\"term\" data-def=\"The smallest addressable element of a digital image; each pixel stores a colour value as a binary number.\">pixels</dfn> (short for &ldquo;picture elements&rdquo;). When a computer stores a <dfn class=\"term\" data-def=\"A type of digital image that stores colour information for each pixel individually as a grid of binary values.\">bitmap</dfn> image, it records the colour of every single pixel as a binary number. The whole image is then nothing more than a long sequence of binary codes &mdash; one for each pixel, row by row from top-left to bottom-right.</p>\n\n<p data-narration-id=\"n3\">A bitmap image file also includes <dfn class=\"term\" data-def=\"Additional data stored alongside the image content, such as image width, height, colour depth and creation date.\">metadata</dfn>: information about the image itself, such as its width in pixels, its height in pixels, its colour depth, and the date it was created. The metadata tells software how to interpret the stream of pixel data that follows it.</p>\n\n<h2 data-narration-id=\"n4\">Resolution</h2>\n<p data-narration-id=\"n5\">The <dfn class=\"term\" data-def=\"The number of pixels in an image, usually expressed as width x height (e.g. 1920 x 1080), or as pixels per inch (ppi) when printing.\">resolution</dfn> of an image describes how many pixels it contains. It is usually given as <strong>width &times; height</strong> in pixels (for example, 1920 &times; 1080). A higher resolution means more pixels and therefore more detail &mdash; but also a larger file size, because there is more pixel data to store.</p>\n<p data-narration-id=\"n6\">Resolution can also be expressed in pixels per inch (ppi) when describing how sharply an image will print. A higher ppi means smaller pixels printed more densely, producing a sharper result. However, on screen, the physical size of pixels is fixed by the display hardware, so ppi matters less for on-screen display than total pixel count.</p>\n\n<h2 data-narration-id=\"n7\">Colour Depth (Bit Depth)</h2>\n<p data-narration-id=\"n8\"><dfn class=\"term\" data-def=\"The number of bits used to represent the colour of a single pixel; more bits allow more distinct colours to be stored.\">Colour depth</dfn> (sometimes called bit depth) is the number of bits used to store the colour of each pixel. The more bits per pixel, the greater the number of possible colours:</p>\n<ul>\n  <li data-narration-id=\"n9\"><strong>1-bit</strong> &mdash; \\(2^1 = 2\\) colours (black or white only).</li>\n  <li data-narration-id=\"n10\"><strong>8-bit</strong> &mdash; \\(2^8 = 256\\) colours. Used in early graphics and GIF files.</li>\n  <li data-narration-id=\"n11\"><strong>24-bit</strong> &mdash; \\(2^{24} = 16{,}777{,}216\\) colours (&ldquo;true colour&rdquo;). Eight bits each for red, green and blue channels.</li>\n</ul>\n\n<div class=\"key-fact\" data-narration-id=\"n12\" data-revision-tip=\"Cover this and write the formula for bitmap file size in bits from memory. Then convert to bytes and KiB for a 200x150 pixel, 24-bit image.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The formula for the uncompressed size of a bitmap image is:<br>\n  <strong>File size (bits) = width (pixels) &times; height (pixels) &times; colour depth (bits per pixel)</strong><br>\n  To convert to bytes, divide by 8. To convert bytes to KiB (kibibytes), divide by 1024. Always use base-2 prefixes (KiB = 1024 bytes) in this course, not base-10 (KB = 1000 bytes).</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Calculating Image File Size</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n13\">An image is 640 &times; 480 pixels with a colour depth of 24 bits per pixel. Calculate its uncompressed file size in KiB.</p>\n    <p data-narration-id=\"n14\"><strong>Step 1 &mdash; total bits:</strong> 640 &times; 480 &times; 24 = 7,372,800 bits.</p>\n    <p data-narration-id=\"n15\"><strong>Step 2 &mdash; convert to bytes:</strong> 7,372,800 &divide; 8 = 921,600 bytes.</p>\n    <p data-narration-id=\"n16\"><strong>Step 3 &mdash; convert to KiB:</strong> 921,600 &divide; 1024 = <strong>900 KiB</strong>.</p>\n    <p data-narration-id=\"n17\">This is the uncompressed (raw bitmap) size. Saving as a JPEG would reduce this significantly through lossy compression, but some image quality would be lost.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n18\">Effect of Resolution and Colour Depth on Quality and File Size</h2>\n<p data-narration-id=\"n19\">Increasing either the resolution or the colour depth increases both image quality and file size. These relationships are directly proportional:</p>\n<ul>\n  <li data-narration-id=\"n20\">Double the width and height &rarr; four times the number of pixels &rarr; four times the file size.</li>\n  <li data-narration-id=\"n21\">Double the colour depth (e.g. from 8-bit to 16-bit) &rarr; file size doubles.</li>\n</ul>\n<p data-narration-id=\"n22\">Designers must balance quality against file size. A high-resolution 24-bit photograph looks stunning on screen but takes longer to download and uses more storage. A low-resolution 8-bit image loads quickly but may look pixelated or washed out.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n23\" data-revision-tip=\"Explain to someone: why does doubling both the width and height of an image quadruple the file size, not double it?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A 24-bit colour image uses <strong>three bytes per pixel</strong> (8 bits for red + 8 for green + 8 for blue). This RGB model allows over 16 million colour combinations, which is enough that the human eye cannot distinguish individual gradations &mdash; hence the term &ldquo;true colour.&rdquo;</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Common Misconceptions About Image Storage</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n24\"><strong>Misconception 1: &ldquo;Resolution is the same as quality.&rdquo;</strong> &mdash; Resolution is the number of pixels; quality also depends on colour depth. A 4K image with 1-bit colour would look terrible.</p>\n    <p data-narration-id=\"n25\"><strong>Misconception 2: &ldquo;KiB and KB are the same.&rdquo;</strong> &mdash; They are not. 1 KiB = 1024 bytes (base-2, used in this specification). 1 KB = 1000 bytes (base-10, used in marketing). Using KB instead of KiB in a calculation question will cost you a mark.</p>\n    <p data-narration-id=\"n26\"><strong>Misconception 3: &ldquo;More colours always means a bigger file.&rdquo;</strong> &mdash; True for uncompressed bitmaps, but compression algorithms can reduce file size regardless of colour depth. Always check whether the question says &ldquo;uncompressed&rdquo;.</p>\n  </div></div>\n</div>",
+    "conclusion_html": "<h3 data-narration-id=\"n28\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n29\">A bitmap image stores a colour value for every pixel as a binary number; metadata records the image dimensions and colour depth so software knows how to display it.</li>\n  <li data-narration-id=\"n30\">File size (bits) = width &times; height &times; colour depth. Divide by 8 for bytes, then by 1024 for KiB (base-2 prefix, not base-10).</li>\n  <li data-narration-id=\"n31\">Increasing resolution or colour depth improves image quality but increases file size proportionally; 24-bit &ldquo;true colour&rdquo; uses 8 bits each for red, green and blue channels.</li>\n</ul>",
+    "exam_tip_html": "<p data-narration-id=\"n27\">For the storage calculation question, show each step: (1) width &times; height &times; colour depth in bits, (2) divide by 8 to get bytes, (3) divide by 1024 to get KiB (not by 1000). Examiners commonly award a mark for the correct method even if your arithmetic slips. Note the key formula uses <em>colour depth in bits</em>, not in bytes &mdash; if you are given colour depth as a number of colours (e.g. 256 colours), you must first find the number of bits required (\\(\\log_2 256 = 8\\) bits) before plugging into the formula. Always use base-2 prefixes (KiB/MiB/GiB) throughout, not base-10 (KB/MB/GB).</p>",
+    "practice_questions": [
+     {
+      "text": "Which one of the following correctly describes the term 'pixel'?\nA) The number of colours an image can contain\nB) The smallest addressable element of a digital image, each storing a colour value\nC) The file format used to store a bitmap\nD) The amount of memory an image uses",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) The smallest addressable element of a digital image, each storing a colour value [1 mark]"
+     },
+     {
+      "text": "State what is meant by the colour depth of a bitmap image.",
+      "type": "1 mark — State/Identify",
+      "marks": "The number of bits used to store the colour of a single pixel [1 mark]. Accept: the number of bits per pixel."
+     },
+     {
+      "text": "A bitmap image is 800 pixels wide and 600 pixels tall with a colour depth of 8 bits per pixel. Calculate the uncompressed file size of the image in KiB. Show all working.",
+      "type": "3 marks — Calculate Storage",
+      "marks": "Step 1: 800 × 600 × 8 = 3,840,000 bits [1 mark for correct multiplication]. Step 2: 3,840,000 ÷ 8 = 480,000 bytes [1 mark]. Step 3: 480,000 ÷ 1024 = 468.75 KiB [1 mark — must divide by 1024, not 1000, for this mark]. Accept 468.75 KiB or equivalent rounded value with correct method shown."
+     },
+     {
+      "text": "Explain how increasing the colour depth of a bitmap image affects both image quality and file size.",
+      "type": "4 marks — Explain",
+      "marks": "Award marks for: Increasing colour depth means more bits are used to represent each pixel [1], so more distinct colours can be stored (e.g. 8-bit gives 256 colours; 24-bit gives over 16 million) [1]. This allows smoother gradients and more accurate colour reproduction, improving image quality [1]. It also increases the file size because more data must be stored for each pixel — a 24-bit image uses three times as much storage as an 8-bit image at the same resolution [1]. Maximum 4 marks."
+     },
+     {
+      "text": "A student claims that a 1920 × 1080 image with 24-bit colour has a file size of 5,760 KB. Identify and correct the error in the student's calculation.",
+      "type": "4 marks — Explain",
+      "marks": "The student has used KB (base-10, 1000 bytes) instead of KiB (base-2, 1024 bytes) [1 mark for identifying the error]. Correct calculation: 1920 × 1080 × 24 = 49,766,400 bits [1]. ÷ 8 = 6,220,800 bytes [1]. ÷ 1024 = 6,075 KiB (approximately) [1 mark for correct final answer using base-2 division]. Accept 5,932.5 KiB if divided twice by 1024 to give MiB first then noted."
+     },
+     {
+      "text": "Compare the effect of increasing resolution and increasing colour depth on the storage requirements and visual quality of a bitmap image.",
+      "type": "6 marks — Compare",
+      "marks": "Mastering: Both resolution and colour depth increases raise storage proportionally; contrast of effect on quality (resolution affects sharpness/detail; colour depth affects colour accuracy and smoothness of gradients); example calculation values to illustrate; reasoned conclusion about which factor has more impact for a given use case.\nSecure: Both factors described correctly, at least one explicit comparison made, correct relationship between factor and file size.\nDeveloping: Both factors mentioned but comparison is implicit or one-sided.\nEmerging: One factor partially described."
+     }
+    ],
+    "flashcard_questions": [
+     {
+      "a": "The smallest addressable element of a digital image, storing a colour value as binary.",
+      "q": "What is a pixel?"
+     },
+     {
+      "a": "An image that stores colour information for each pixel individually as a grid of binary values.",
+      "q": "What is a bitmap image?"
+     },
+     {
+      "a": "Width x height x colour depth (bits per pixel).",
+      "q": "What formula gives the uncompressed size of a bitmap in bits?"
+     },
+     {
+      "a": "Divide by 8 (to get bytes), then divide by 1024 (to get KiB).",
+      "q": "How do you convert an image's size from bits to KiB?"
+     },
+     {
+      "a": "2 to the power 24 = 16,777,216 (over 16 million).",
+      "q": "How many colours can a 24-bit image represent?"
+     },
+     {
+      "a": "It has over 16 million colours — more than the human eye can distinguish.",
+      "q": "Why is 24-bit colour called 'true colour'?"
+     },
+     {
+      "a": "24 bits total — 8 bits allocated to each colour channel of the RGB model.",
+      "q": "In a 24-bit RGB image, how many bits are used for each colour channel?"
+     },
+     {
+      "a": "File size quadruples (four times as many pixels).",
+      "q": "What happens to file size when you double both the width and height of an image?"
+     },
+     {
+      "a": "Data stored alongside image content, such as width, height, colour depth and creation date.",
+      "q": "What is image metadata?"
+     },
+     {
+      "a": "KiB is a base-2 prefix: 1 KiB = 1024 bytes, not 1000 bytes.",
+      "q": "Why must you divide by 1024 (not 1000) when converting bytes to KiB?"
+     },
+     {
+      "a": "256 (2 to the power 8).",
+      "q": "An 8-bit colour image can store how many distinct colours?"
+     }
+    ]
+   }
+  },
+  {
+   "id": "19c7e0d8-2c32-44d8-9db7-078ca0fb61fc",
+   "lesson_number": 5,
+   "title": "Sound: Sampling and File Size",
+   "before": {
+    "content_html": "<h2 data-narration-id=\"n1\">From Sound Waves to Digital Data</h2>\n<p data-narration-id=\"n2\">Sound in the real world is an analogue signal &mdash; a continuous wave of air pressure that varies smoothly over time. Computers can only store discrete binary values, so to record sound digitally, the continuous wave must be converted into a series of snapshots. This process is called <dfn class=\"term\" data-def=\"The process of measuring an analogue sound wave at regular intervals and storing each measurement as a binary number.\">sampling</dfn>.</p>\n<p data-narration-id=\"n3\">An analogue-to-digital converter (ADC) is the hardware component that performs sampling. It reads the amplitude (height) of the sound wave at a fixed rate and stores each reading as a binary number. On playback, a digital-to-analogue converter (DAC) reconstructs the wave from those stored numbers. The reconstructed wave is an approximation &mdash; how close it is to the original depends on how often measurements are taken and how precisely each one is stored.</p>\n\n<h2 data-narration-id=\"n4\">Sample Rate (Sampling Frequency)</h2>\n<p data-narration-id=\"n5\">The <dfn class=\"term\" data-def=\"The number of samples taken per second when digitising an analogue signal, measured in hertz (Hz).\">sample rate</dfn> (or sampling frequency) is the number of samples taken every second, measured in hertz (Hz). A sample rate of 44,100 Hz (44.1 kHz) means 44,100 measurements are recorded every second &mdash; this is the standard for CD-quality audio.</p>\n<p data-narration-id=\"n6\">A higher sample rate captures more of the original wave shape, which means the reconstructed audio sounds closer to the original. Low sample rates &mdash; say 8,000 Hz used in some telephone systems &mdash; make audio sound &ldquo;tinny&rdquo; or robotic because the measurements are too sparse to faithfully reproduce high frequencies.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n7\" data-revision-tip=\"Cover this and write from memory: (1) the unit of sample rate, (2) the CD-quality sample rate, (3) what happens to quality if sample rate is halved.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p><strong>CD-quality audio</strong> uses a sample rate of 44,100 Hz and a bit depth of 16 bits per sample. Common sample rates to know: <strong>8,000 Hz</strong> (telephone), <strong>22,050 Hz</strong> (radio quality), <strong>44,100 Hz</strong> (CD audio), <strong>48,000 Hz</strong> (professional video). Higher rates mean better quality but larger file sizes.</p>\n</div>\n\n<h2 data-narration-id=\"n8\">Bit Depth (Sample Resolution)</h2>\n<p data-narration-id=\"n9\">Each sample is stored as a binary number. The <dfn class=\"term\" data-def=\"The number of bits used to store each audio sample, determining the range of amplitude values that can be recorded.\">bit depth</dfn> (also called sample resolution) determines how many bits are used for each measurement. More bits means more possible amplitude values:</p>\n<ul>\n  <li data-narration-id=\"n10\"><strong>8-bit</strong> &mdash; \\(2^8 = 256\\) possible amplitude levels. Sufficient for voice recording but noticeably &ldquo;hissy&rdquo;.</li>\n  <li data-narration-id=\"n11\"><strong>16-bit</strong> &mdash; \\(2^{16} = 65{,}536\\) amplitude levels. Standard for CD audio.</li>\n  <li data-narration-id=\"n12\"><strong>24-bit</strong> &mdash; \\(2^{24} \\approx 16.7\\) million levels. Used in professional studio recording.</li>\n</ul>\n<p data-narration-id=\"n13\">A higher bit depth reduces <strong>quantisation error</strong> &mdash; the difference between the actual analogue amplitude and the nearest stored value. With only 8 bits, the &ldquo;staircase&rdquo; approximation is quite coarse; with 16 bits it is so fine the ear cannot detect the steps.</p>\n\n<h2 data-narration-id=\"n14\">Calculating Sound File Size</h2>\n<p data-narration-id=\"n15\">The formula for the uncompressed size of a digital audio file is:</p>\n<p data-narration-id=\"n16\"><strong>File size (bits) = sample rate (Hz) &times; bit depth (bits) &times; number of channels &times; duration (seconds)</strong></p>\n<p data-narration-id=\"n17\">Divide by 8 to get bytes, then by 1024 to get KiB, and so on. <em>Number of channels</em> is 1 for mono and 2 for stereo. Stereo doubles the file size compared to mono because two separate streams of samples are recorded simultaneously.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Calculating Audio File Size</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n18\">A 3-minute stereo recording at CD quality (44,100 Hz sample rate, 16-bit depth). Calculate the uncompressed file size in MiB.</p>\n    <p data-narration-id=\"n19\"><strong>Step 1:</strong> Convert duration to seconds: 3 &times; 60 = 180 seconds.</p>\n    <p data-narration-id=\"n20\"><strong>Step 2:</strong> Total bits = 44,100 &times; 16 &times; 2 (stereo) &times; 180 = 254,016,000 bits.</p>\n    <p data-narration-id=\"n21\"><strong>Step 3:</strong> Bytes = 254,016,000 &divide; 8 = 31,752,000 bytes.</p>\n    <p data-narration-id=\"n22\"><strong>Step 4:</strong> KiB = 31,752,000 &divide; 1024 = 31,007.8 KiB.</p>\n    <p data-narration-id=\"n23\"><strong>Step 5:</strong> MiB = 31,007.8 &divide; 1024 = <strong>30.3 MiB</strong> (approximately).</p>\n    <p data-narration-id=\"n24\">An MP3 file of the same track might be around 3&ndash;5 MiB &mdash; lossy compression reduces it to roughly one-tenth the size, at the cost of some quality.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n25\" data-revision-tip=\"Test yourself: write the audio file size formula, including the channel factor. Check you can identify which value to use for stereo vs mono.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The two key variables that affect audio quality are <strong>sample rate</strong> (how often per second the wave is measured) and <strong>bit depth</strong> (how precisely each measurement is stored). Increasing either improves quality but increases file size proportionally. A stereo file is always <strong>twice the size</strong> of the equivalent mono file.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Common Misconceptions About Digital Sound</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n26\"><strong>Misconception 1: &ldquo;Sample rate and bit depth are the same thing.&rdquo;</strong> &mdash; They are not. Sample rate is how often per second a measurement is taken (Hz). Bit depth is how precisely each individual measurement is stored (bits). They are independent: you could have a high sample rate with a low bit depth, or vice versa.</p>\n    <p data-narration-id=\"n27\"><strong>Misconception 2: &ldquo;Stereo doubles the quality.&rdquo;</strong> &mdash; Stereo doubles the <em>file size</em> by recording two channels simultaneously (left and right speaker). Quality (how faithfully the sound is captured per channel) is set by the sample rate and bit depth, which are the same for both channels.</p>\n    <p data-narration-id=\"n28\"><strong>Misconception 3: &ldquo;Higher sample rate always sounds better.&rdquo;</strong> &mdash; Human hearing tops out at around 20,000 Hz. The Nyquist theorem states that a sample rate of at least twice the highest frequency is needed to reproduce it. At 44,100 Hz, all frequencies up to around 22,050 Hz can be captured &mdash; above the human hearing limit. Increasing further has diminishing returns for human listeners.</p>\n  </div></div>\n</div>",
+    "exam_tip_html": "<p data-narration-id=\"n29\">The most common error in audio file size questions is forgetting to include the number of channels &mdash; if the question says &ldquo;stereo&rdquo; you must multiply by 2. Always show your working step by step and use base-2 division (1024 per step, not 1000) when converting to KiB, MiB etc. If a question asks you to &ldquo;explain the effect of increasing the sample rate on file size and quality&rdquo;, you need both: quality improves (more faithful reproduction) AND file size increases (more samples per second means more data). A one-sided answer will cap your marks.</p>",
+    "practice_questions": [
+     {
+      "text": "Which one of the following describes the sample rate of a digital audio recording?\nA) The number of bits used to store each measurement of the sound wave\nB) The number of times per second the amplitude of the sound wave is measured\nC) The number of audio channels recorded simultaneously\nD) The total number of samples in the audio file",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) The number of times per second the amplitude of the sound wave is measured [1 mark]"
+     },
+     {
+      "text": "State the unit used to measure sample rate.",
+      "type": "1 mark — State/Identify",
+      "marks": "Hertz (Hz) [1 mark]. Accept kHz or kilohertz with correct conversion stated."
+     },
+     {
+      "text": "A mono audio recording is made at a sample rate of 22,050 Hz with a bit depth of 16 bits. The recording lasts 60 seconds. Calculate the uncompressed file size in KiB. Show all working.",
+      "type": "3 marks — Calculate Storage",
+      "marks": "22,050 × 16 × 1 × 60 = 21,168,000 bits [1 mark]. ÷ 8 = 2,646,000 bytes [1 mark]. ÷ 1024 = 2,584.0 KiB (approximately 2,584 KiB) [1 mark — must use 1024 not 1000 for this mark]."
+     },
+     {
+      "text": "Explain how increasing the bit depth of a sound recording affects the quality of the audio and the size of the file.",
+      "type": "4 marks — Explain",
+      "marks": "Award marks for: Increasing bit depth means each sample stores more amplitude levels (e.g. 16-bit gives 65,536 levels vs 8-bit giving 256) [1]. This reduces quantisation error — the difference between the actual and stored amplitude values [1], producing a more accurate, higher-quality reproduction of the original sound [1]. More bits per sample means more data to store, so file size increases proportionally (a 16-bit file is twice the size of an 8-bit file at the same sample rate and duration) [1]. Maximum 4 marks."
+     },
+     {
+      "text": "A student records a 10-second stereo audio clip at 44,100 Hz with a bit depth of 16 bits. The student then records the same clip again in mono at the same settings. Compare the file sizes of the two recordings.",
+      "type": "4 marks — Explain",
+      "marks": "Stereo file: 44,100 × 16 × 2 × 10 = 14,112,000 bits [1]. Mono file: 44,100 × 16 × 1 × 10 = 7,056,000 bits [1]. The stereo file is exactly twice the size of the mono file [1], because stereo records two independent channels (left and right) simultaneously while mono records a single channel [1]. Maximum 4 marks."
+     },
+     {
+      "text": "Discuss the impact of increasing sample rate and bit depth on the quality and storage requirements of digital audio. In your answer, consider practical limits on quality improvement and storage trade-offs.",
+      "type": "8 marks — Discuss Impacts",
+      "marks": "Mastering: Balanced discussion of quality benefits (higher sample rate captures higher frequencies; higher bit depth reduces quantisation error), storage costs (both increase file size proportionally), practical limits (human hearing ceiling ~20 kHz means sample rates beyond ~44.1 kHz yield diminishing returns; similar argument for bit depth beyond 16-bit for consumer audio), and a reasoned conclusion about where the trade-off sits for different use cases (e.g. streaming vs professional studio work).\nSecure: Quality and storage impacts addressed for both variables; some attempt at a practical limit or trade-off; a conclusion reached.\nDeveloping: Both variables mentioned; impacts mostly correct but comparison is one-sided or limits not addressed.\nEmerging: One variable discussed; limited or no storage impact mentioned; no conclusion."
+     }
+    ]
+   }
+  },
+  {
+   "id": "8b88e85a-490f-4cd0-a423-4f23a65b7475",
+   "lesson_number": 6,
+   "title": "Storage Units, Capacity and Compression",
+   "before": {
+    "content_html": "<h2 data-narration-id=\"n1\">Units of Digital Storage</h2>\n<p data-narration-id=\"n2\">Every piece of data in a computer is ultimately made of <dfn class=\"term\" data-def=\"The smallest unit of digital data, holding a single binary value: 0 or 1.\">bits</dfn>. Bits are grouped into larger units so that storage capacity can be expressed at a human-readable scale. Your exam uses <strong>base-2 (binary) prefixes</strong>, which are defined in powers of 2, not powers of 10. This distinction matters: answers using base-10 values will lose marks in storage calculation questions.</p>\n\n<table data-narration-id=\"n3\">\n  <caption>Storage units &mdash; base-2 (binary) prefix definitions</caption>\n  <thead><tr><th>Unit</th><th>Abbreviation</th><th>Exact value</th></tr></thead>\n  <tbody>\n    <tr><td>Bit</td><td>b</td><td>1 binary digit (0 or 1)</td></tr>\n    <tr><td>Nibble</td><td>&mdash;</td><td>4 bits = 1 hex digit</td></tr>\n    <tr><td>Byte</td><td>B</td><td>8 bits</td></tr>\n    <tr><td>Kibibyte</td><td>KiB</td><td>1024 bytes = \\(2^{10}\\) bytes</td></tr>\n    <tr><td>Mebibyte</td><td>MiB</td><td>1024 KiB = \\(2^{20}\\) bytes</td></tr>\n    <tr><td>Gibibyte</td><td>GiB</td><td>1024 MiB = \\(2^{30}\\) bytes</td></tr>\n    <tr><td>Tebibyte</td><td>TiB</td><td>1024 GiB = \\(2^{40}\\) bytes</td></tr>\n    <tr><td>Pebibyte</td><td>PiB</td><td>1024 TiB = \\(2^{50}\\) bytes</td></tr>\n  </tbody>\n</table>\n\n<p data-narration-id=\"n4\">In everyday consumer products, manufacturers often use the base-10 prefix KB (1000 bytes), MB (1,000,000 bytes), and so on &mdash; this is why a &ldquo;500 GB&rdquo; hard drive appears as around 465 GiB when formatted. Your exam uses the base-2 definitions: <strong>1 KiB = 1024 bytes, 1 MiB = 1024 KiB</strong> etc. Always use these in calculations.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n5\" data-revision-tip=\"Without looking, write the sequence: bit, nibble, byte, KiB, MiB, GiB, TiB, PiB. State how many bytes each step represents relative to the one before it.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Each step up the base-2 prefix scale multiplies by <strong>1024</strong>: 1 KiB = 1024 B, 1 MiB = 1024 KiB, 1 GiB = 1024 MiB, and so on. A <dfn class=\"term\" data-def=\"A group of four binary bits, equal to one hexadecimal digit, and half a byte.\">nibble</dfn> is 4 bits (half a byte) and is useful because it matches exactly one hexadecimal digit.</p>\n</div>\n\n<h2 data-narration-id=\"n6\">Calculating Storage Capacity</h2>\n<p data-narration-id=\"n7\">Storage capacity questions often involve converting between units or working out how many files fit in a given space. The general method is to express both the capacity and the file size in the same unit, then divide. Always work in base-2 (multiply or divide by 1024 at each prefix step).</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: How Many Files Fit?</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n8\">A USB drive has a capacity of 8 GiB. Each audio file has an uncompressed size of 40 MiB. How many files fit on the drive?</p>\n    <p data-narration-id=\"n9\"><strong>Step 1:</strong> Convert the drive capacity to MiB: 8 GiB &times; 1024 = 8192 MiB.</p>\n    <p data-narration-id=\"n10\"><strong>Step 2:</strong> Divide: 8192 &divide; 40 = 204.8, so <strong>204 files</strong> fit (round down &mdash; you can&rsquo;t store a partial file).</p>\n    <p data-narration-id=\"n11\">If the same files were compressed to 4 MiB each (10:1 compression): 8192 &divide; 4 = 2048 files. Compression allows ten times as many files on the same drive.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n12\">What Is Compression?</h2>\n<p data-narration-id=\"n13\"><dfn class=\"term\" data-def=\"The process of encoding data using fewer bits than the original representation, reducing file size for storage or transmission.\">Compression</dfn> reduces file size by encoding data more efficiently. There are two fundamentally different types: <strong>lossy</strong> and <strong>lossless</strong>. The right choice depends on whether the exact original data must be recovered.</p>\n\n<h2 data-narration-id=\"n14\">Lossy Compression</h2>\n<p data-narration-id=\"n15\"><dfn class=\"term\" data-def=\"A compression method that permanently removes some data to achieve a smaller file size; the original cannot be perfectly reconstructed.\">Lossy compression</dfn> permanently discards some data to achieve a much smaller file. The algorithm exploits limits of human perception: it removes detail that the eye or ear is unlikely to notice. Common lossy formats are <strong>JPEG</strong> (images) and <strong>MP3</strong> (audio).</p>\n<p data-narration-id=\"n16\">A JPEG might store a photograph at one-tenth the size of an uncompressed bitmap by discarding subtle colour variations in smooth gradients. An MP3 removes audio frequencies below the threshold of human hearing and reduces detail in frequencies masked by louder sounds. The reduction in quality is &ldquo;lossy&rdquo; because you can never recover the removed data &mdash; each time a lossy file is re-compressed, more data is lost.</p>\n\n<h2 data-narration-id=\"n17\">Lossless Compression</h2>\n<p data-narration-id=\"n18\"><dfn class=\"term\" data-def=\"A compression method that reduces file size without discarding any data; the original can be perfectly reconstructed from the compressed file.\">Lossless compression</dfn> reduces file size without losing any information. When the file is decompressed, the output is <em>bit-for-bit identical</em> to the original. Common lossless formats include <strong>PNG</strong> (images) and <strong>FLAC</strong> (audio), as well as <strong>ZIP</strong> for general data.</p>\n<p data-narration-id=\"n19\">A simple lossless technique is <strong>run-length encoding (RLE)</strong>: instead of storing &ldquo;AAAAAABBB&rdquo; as 9 separate characters, RLE stores &ldquo;6A3B&rdquo; (6 copies of A, then 3 copies of B). The compressed version is shorter, and the original can be reconstructed exactly. Lossless compression works best when there is a lot of repeated or predictable data.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n20\" data-revision-tip=\"Cover this and give one example each of a lossy and a lossless image format. Then explain when you would choose each.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Use <strong>lossy compression</strong> (JPEG, MP3) when a small file size matters more than perfect quality &mdash; for example, streaming video, social media images, downloaded music. Use <strong>lossless compression</strong> (PNG, FLAC, ZIP) when the original data must be reconstructed exactly &mdash; for example, text files, medical images, software executables, or master audio files. Using lossy compression on a text file would corrupt the text.</p>\n</div>\n\n<h2 data-narration-id=\"n21\">Compression Ratio</h2>\n<p data-narration-id=\"n22\">The <dfn class=\"term\" data-def=\"A measure of how much a compression algorithm has reduced a file's size, calculated as original size divided by compressed size.\">compression ratio</dfn> expresses how much smaller a compressed file is compared to the original:</p>\n<p data-narration-id=\"n23\"><strong>Compression ratio = original size &divide; compressed size</strong></p>\n<p data-narration-id=\"n24\">A ratio of 4:1 means the compressed file is one-quarter the size of the original. For example, if a 20 MiB WAV audio file is compressed to a 2 MiB MP3, the compression ratio is 20 &divide; 2 = <strong>10:1</strong>. A higher ratio means greater size reduction, which usually also means greater quality loss for lossy formats.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Lossy vs Lossless: When to Choose Each</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <table data-narration-id=\"n25\">\n      <thead><tr><th>Feature</th><th>Lossy (JPEG, MP3)</th><th>Lossless (PNG, FLAC, ZIP)</th></tr></thead>\n      <tbody>\n        <tr><td>Data recovery</td><td>Cannot recover removed data</td><td>Identical to original on decompression</td></tr>\n        <tr><td>File size reduction</td><td>Very large (often 10:1 or more)</td><td>Moderate (typically 2:1 to 5:1)</td></tr>\n        <tr><td>Quality</td><td>Reduced; worsens with each re-compression</td><td>No quality loss</td></tr>\n        <tr><td>Use case</td><td>Streaming, social media, casual listening</td><td>Text, software, medical images, master files</td></tr>\n      </tbody>\n    </table>\n    <p data-narration-id=\"n26\">A key exam point: when comparing lossy and lossless, you must always state which data <em>can</em> or <em>cannot</em> be recovered. Simply saying &ldquo;lossy loses quality&rdquo; is not sufficient &mdash; explain that the discarded data is permanently removed and the original cannot be reconstructed.</p>\n  </div></div>\n</div>",
+    "conclusion_html": "<h3 data-narration-id=\"n28\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n29\">Storage units use base-2 prefixes: 1 KiB = 1024 B, 1 MiB = 1024 KiB, 1 GiB = 1024 MiB. Each step multiplies by 1024, not 1000.</li>\n  <li data-narration-id=\"n30\">Lossy compression (JPEG, MP3) permanently removes data for large file size reductions; lossless compression (PNG, FLAC, ZIP) reduces size without losing any data, allowing perfect reconstruction.</li>\n  <li data-narration-id=\"n31\">Compression ratio = original size &divide; compressed size. A 10:1 ratio means the file is ten times smaller; higher ratios in lossy formats usually mean greater quality loss.</li>\n</ul>",
+    "practice_questions": [
+     {
+      "text": "Which one of the following correctly defines 1 KiB in a base-2 (binary) prefix system?\nA) 1000 bytes\nB) 1024 bits\nC) 1024 bytes\nD) 1000 bits",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) 1024 bytes [1 mark]. This specification uses base-2 prefixes; 1 KiB = 2^10 = 1024 bytes."
+     },
+     {
+      "text": "State the difference between lossy and lossless compression.",
+      "type": "2 marks — Define",
+      "marks": "Lossy compression permanently removes some data to reduce file size and the original cannot be fully recovered [1]. Lossless compression reduces file size without losing any data, allowing the original to be reconstructed exactly [1]."
+     },
+     {
+      "text": "A 150 MiB video file is compressed to 15 MiB using lossy compression. Calculate the compression ratio.",
+      "type": "3 marks — Calculate Storage",
+      "marks": "Compression ratio = original size ÷ compressed size [1 mark for formula]. 150 ÷ 15 = 10 [1 mark for calculation]. Compression ratio = 10:1 [1 mark for expressing as a ratio]."
+     },
+     {
+      "text": "A hard drive has a capacity of 2 TiB. Convert this to GiB.",
+      "type": "2 marks — Convert (Binary/Hex/Denary)",
+      "marks": "1 TiB = 1024 GiB [1 mark]. 2 TiB = 2 × 1024 = 2048 GiB [1 mark]."
+     },
+     {
+      "text": "Explain why lossy compression is used for MP3 audio files but lossless compression is used for ZIP archives.",
+      "type": "4 marks — Explain",
+      "marks": "Lossy compression discards some audio data that the ear is unlikely to notice (such as very high or very low frequencies, or quieter sounds masked by louder ones) [1], producing a much smaller file that is acceptable for casual listening [1]. A ZIP archive contains text, software or other data where every bit must be preserved exactly — removing any data would corrupt the file or make software fail to execute [1], so lossless compression is used to reduce size while guaranteeing that the original can be perfectly reconstructed [1]. Maximum 4 marks."
+     },
+     {
+      "text": "Compare lossy and lossless compression techniques. In your answer, refer to how each works, the compression ratios typically achieved, and suitable use cases for each.",
+      "type": "6 marks — Compare",
+      "marks": "Mastering: Accurate explanation of how each works (lossy discards perceptually unimportant data; lossless encodes patterns more efficiently e.g. run-length encoding), explicit comparison of typical ratios (lossy often 10:1 or more; lossless typically 2:1 to 5:1), correct use cases contrasted (lossy for streaming/social media; lossless for documents/software/master files), and a justified conclusion about when each is preferable.\nSecure: Both techniques explained correctly, at least two explicit contrasts, suitable use cases given.\nDeveloping: Both techniques defined but comparison is implicit; use cases may be partially correct.\nEmerging: One technique described; limited or no comparison."
+     }
+    ],
+    "knowledge_checks": [
+     {
+      "q": "How many bytes are in 1 MiB using base-2 prefixes?",
+      "type": "mcq",
+      "correct": 2,
+      "options": [
+       "1,000,000",
+       "1,024,000",
+       "1,048,576",
+       "1,000,024"
+      ]
+     },
+     {
+      "q": "Which of the following is an example of a lossless compression format for images?",
+      "type": "mcq",
+      "correct": 2,
+      "options": [
+       "JPEG",
+       "MP3",
+       "PNG",
+       "MPEG"
+      ]
+     },
+     {
+      "q": "Lossy compression permanently _____ some data to achieve a smaller file size.",
+      "type": "fill",
+      "correct": 3,
+      "options": [
+       "duplicates",
+       "recovers",
+       "encrypts",
+       "removes"
+      ]
+     },
+     {
+      "q": "Compression ratio is calculated as original size _____ compressed size.",
+      "type": "fill",
+      "correct": 3,
+      "options": [
+       "plus",
+       "minus",
+       "multiplied by",
+       "divided by"
+      ]
+     },
+     {
+      "q": "Match each storage unit to its base-2 value in bytes:",
+      "left": [
+       "1 KiB",
+       "1 MiB",
+       "1 GiB"
+      ],
+      "type": "match",
+      "order": [
+       0,
+       1,
+       2
+      ],
+      "right": [
+       "1024 bytes",
+       "1,048,576 bytes",
+       "1,073,741,824 bytes"
+      ]
+     }
+    ],
+    "flashcard_questions": [
+     {
+      "a": "The smallest unit of digital data, holding a single binary value: 0 or 1.",
+      "q": "What is a bit in digital storage?"
+     },
+     {
+      "a": "8 bits.",
+      "q": "How many bits are in a byte?"
+     },
+     {
+      "a": "1024 bytes.",
+      "q": "How many bytes are in 1 KiB (base-2)?"
+     },
+     {
+      "a": "4 bits (half a byte), equal to one hexadecimal digit.",
+      "q": "What is a nibble?"
+     },
+     {
+      "a": "Encoding data using fewer bits than the original, reducing file size.",
+      "q": "What is compression?"
+     },
+     {
+      "a": "A method that permanently removes data to reduce file size; the original cannot be reconstructed.",
+      "q": "What is lossy compression?"
+     },
+     {
+      "a": "Lossy: JPEG. Lossless: PNG.",
+      "q": "Give one example each of a lossy and a lossless image format."
+     },
+     {
+      "a": "A method that reduces file size without losing any data; the original can be reconstructed exactly.",
+      "q": "What is lossless compression?"
+     },
+     {
+      "a": "Original size divided by compressed size (e.g. 20 MiB / 2 MiB = 10:1).",
+      "q": "How is compression ratio calculated?"
+     },
+     {
+      "a": "Any data loss would corrupt files or make software fail to execute.",
+      "q": "Why must ZIP archives use lossless rather than lossy compression?"
+     },
+     {
+      "a": "1024",
+      "q": "Each step up the base-2 prefix scale multiplies by ___ ."
+     },
+     {
+      "a": "A lossless technique that stores repeated values as a count and a value, e.g. 6A instead of AAAAAA.",
+      "q": "What is run-length encoding (RLE)?"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,338 @@
+{
+ "unit": "computer-science-eduqas/data-representation-storage",
+ "checked_at": "2026-09-06",
+ "spec_used": "specs/eduqas/computer-science-C500QS.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 2,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Mark scheme for the binary addition question: \"gives 10010000 (144 in denary: 64+16+0+0+0+0+0+0 = wait, 10010000 = 128+16 = 144)\".",
+   "truth": "01011001 (89) + 00110111 (55) = 10010000, which is 128 + 16 = 144. The first sum shown to the student, 64 + 16, gives 80 and uses the wrong place value for the leading 1. The \"= wait,\" text is generation residue left in a student-facing mark scheme.",
+   "evidence": "recomputation: 89 + 55 = 144; 10010000 = 128 + 16",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 3,
+   "field": "glossary_terms",
+   "severity": "MEDIUM",
+   "claim": "\"character encoding\" defined (in the glossary and in the matching data-def) as \"The process of converting between different character set standards, for example from ASCII to Unicode\".",
+   "truth": "A character encoding is the scheme that maps each character in a character set to a binary code. Converting between two standards is transcoding, not encoding. The lesson's own flashcard already gives the correct definition, so the glossary contradicted the rest of the lesson.",
+   "evidence": "spec p.9 'the digital storage of characters'; lesson's own flashcard 'converting characters to binary using an agreed character set standard'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "\"Always use base-2 prefixes (KiB = 1024 bytes) in this course, not base-10 (KB = 1000 bytes)\"; \"1 KiB = 1024 bytes (base-2, used in this specification). 1 KB = 1000 bytes... Using KB instead of KiB in a calculation question will cost you a mark\"; answers given as 900 KiB, 468.75 KiB.",
+   "truth": "The spec defines the units as bit, nibble, byte, kilobyte (i.e. 1,024 bytes), megabyte (1,024 kilobytes), gigabyte, terabyte, petabyte. It never uses kibibyte or KiB. So a kilobyte IS 1,024 bytes here, and the rule taught is backwards: a student who writes KB is right, and one who is told KB means 1000 bytes may divide by 1000 in the exam and lose the accuracy mark. The arithmetic in every worked example is correct; only the unit names and the invented rule are wrong.",
+   "evidence": "spec 'Storage requirements', Data representation and storage: 'the relationship between data storage units using the Base 2 prefixes... kilobyte (i.e. 1,024 bytes)'; no occurrence of kibi/KiB anywhere in the spec",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 4,
+   "field": "practice_questions",
+   "severity": "HIGH",
+   "claim": "\"A student claims that a 1920 x 1080 image with 24-bit colour has a file size of 5,760 KB. Identify and correct the error\" - mark scheme then accepts \"5,932.5 KiB if divided twice by 1024 to give MiB first\".",
+   "truth": "1920 x 1080 x 24 = 49,766,400 bits = 6,220,800 bytes = 6,075 KB (base-2) or 6,220.8 if wrongly divided by 1000. 5,760 is reachable by no route, so the stated error did not exist. 5,932.5 is also impossible: 6,075 / 1024 = 5.93 MB, not 5,932.5 of anything.",
+   "evidence": "recomputation of every step",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "Sound file sizes given and asked for in KiB and MiB (\"30.3 MiB\", \"2,584.0 KiB\"), with the exam tip telling students to convert \"to KiB, MiB etc.\".",
+   "truth": "Same unit-name error as F3. The values are right (44,100 x 16 x 2 x 180 = 254,016,000 bits = 31,752,000 bytes = 31,007.8 KB = 30.3 MB; 22,050 x 16 x 1 x 60 = 21,168,000 bits = 2,646,000 bytes = 2,584 KB); only the unit names contradict the spec.",
+   "evidence": "spec storage units list; recomputation of both file sizes",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "The storage units table lists Kibibyte/KiB, Mebibyte/MiB, Gibibyte/GiB, Tebibyte/TiB, Pebibyte/PiB, and the text states \"Your exam uses the base-2 definitions: 1 KiB = 1024 bytes, 1 MiB = 1024 KiB\" while framing KB and MB as base-10 marketing units.",
+   "truth": "The spec's own list is bit, nibble, byte, kilobyte (1,024 bytes), megabyte, gigabyte, terabyte, petabyte, all base-2. This lesson replaces every unit name a student will meet in the exam with a name that does not appear in the course, and teaches them that the exam's own abbreviations mean something else. The multipliers, the 8 GB / 40 MB capacity example (204 files), the 2 TB = 2048 GB conversion and 1 MB = 1,048,576 bytes are all correct and unchanged.",
+   "evidence": "spec 'Storage requirements' bullet list; recomputation of 8192/40 = 204.8, 2 x 1024 = 2048, 2^20 = 1,048,576, 500 x 10^9 / 2^30 = 465.7",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 1,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "\"the mark scheme may award a method mark even if your final answer is wrong\" (L1) and \"Examiners commonly award a mark for the correct method even if your arithmetic slips\" (L4).",
+   "truth": "The spec prints no mark schemes and no question ladder, so neither claim can be verified. Both are hedged, standard advice for show-your-working calculation questions, and the unit's own mark schemes are built that way, so they are left as written.",
+   "evidence": "spec assessment section: two components, 100 and 80 marks, no question-type or mark-scheme detail",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F8",
+   "lesson": 1,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "Question tariffs and type labels across the unit (1, 2, 3, 4, 6 and 8 marks; \"Compare\", \"Discuss Impacts\", \"Calculate Storage\").",
+   "truth": "Unverifiable rather than wrong. The spec fixes only the component structure (written exam 1 hour 45 minutes, 100 marks, 50%; on-screen exam 2 hours, 80 marks, 50%; AO1 30 / AO2 40 / AO3 30) and prints no question ladder. Nothing in the unit contradicts those facts, and no tariff shown is impossible for a 100-mark paper.",
+   "evidence": "spec assessment section, lines 239-256",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F9",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "\"every mainstream CPU since the 1970s has used two's complement for signed integer storage\"; logical shifts described as one of \"two types relevant to your exam\".",
+   "truth": "The two's complement claim is right for the 1970s onward, though earlier machines used one's complement and sign-and-magnitude - the sentence is already hedged with \"mainstream\". The spec names only arithmetic shifts, so logical shift is extra context rather than examinable content; it supports the arithmetic-shift explanation and costs a student nothing.",
+   "evidence": "spec 'arithmetic shift functions and their effect' (no logical shift)",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F10",
+   "lesson": 3,
+   "field": "glossary_terms",
+   "severity": "LOW",
+   "claim": "Unicode \"supporting over a million characters\".",
+   "truth": "Unicode reserves 1,114,112 code points but has assigned about 155,000 characters. The lesson body already says \"over 140,000 characters (and the range can extend to over 1 million)\", which is accurate, so the loose glossary wording is not worth an edit.",
+   "evidence": "Unicode code space 17 planes x 65,536 = 1,114,112 code points",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [
+  1
+ ],
+ "summary": "The mathematics in this unit is sound - every conversion, two's complement negation, shift, addition, image and sound file size and compression ratio recomputes correctly, and all 30 knowledge-check keys are right. The unit's systematic error is storage-unit vocabulary: lessons 4-6 teach the kibibyte scale (KiB/MiB/GiB) and tell students that KB means 1000 bytes and would cost them a mark, whereas the spec defines the kilobyte itself as 1,024 bytes and never mentions kibibytes. Also fixed: an impossible image-size question premise (5,760 KB) with an arithmetically impossible acceptance line, a garbled mark scheme showing 144 as 64+16, and a wrong definition of character encoding.",
+ "renarration": {
+  "run_at": "2026-09-06T10:28:36Z",
+  "clips": [
+   {
+    "lesson": 4,
+    "id": "n12",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-04_n12.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-04_n12.mp3",
+    "voice": "Ada",
+    "duration": 25.25,
+    "bytes": 302976,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:26:55 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n13",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-04_n13.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-04_n13.mp3",
+    "voice": "Ada",
+    "duration": 10.32,
+    "bytes": 123840,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:26:58 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n16",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-04_n16.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-04_n16.mp3",
+    "voice": "Ada",
+    "duration": 9.58,
+    "bytes": 114912,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:27:01 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n25",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-04_n25.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-04_n25.mp3",
+    "voice": "Ada",
+    "duration": 23.71,
+    "bytes": 284544,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:27:06 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n27",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-04_n27.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-04_n27.mp3",
+    "voice": "Ada",
+    "duration": 43.99,
+    "bytes": 527904,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:27:15 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n30",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-04_n30.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-04_n30.mp3",
+    "voice": "Ada",
+    "duration": 11.81,
+    "bytes": 141696,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:27:18 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n17",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-05_n17.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-05_n17.mp3",
+    "voice": "Ollie",
+    "duration": 16.03,
+    "bytes": 192384,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:27:22 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n18",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-05_n18.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-05_n18.mp3",
+    "voice": "Ollie",
+    "duration": 11.42,
+    "bytes": 137088,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:27:26 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n22",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-05_n22.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-05_n22.mp3",
+    "voice": "Ollie",
+    "duration": 10.18,
+    "bytes": 122112,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:27:29 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n23",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-05_n23.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-05_n23.mp3",
+    "voice": "Ollie",
+    "duration": 9.74,
+    "bytes": 116928,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:27:31 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n24",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-05_n24.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-05_n24.mp3",
+    "voice": "Ollie",
+    "duration": 9.53,
+    "bytes": 114336,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:27:35 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n29",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-05_n29.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-05_n29.mp3",
+    "voice": "Ollie",
+    "duration": 34.78,
+    "bytes": 417312,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:27:43 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n3",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-06_n3.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-06_n3.mp3",
+    "voice": "Ada",
+    "duration": 37.51,
+    "bytes": 450144,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:27:51 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n4",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-06_n4.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-06_n4.mp3",
+    "voice": "Ada",
+    "duration": 31.46,
+    "bytes": 377568,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:27:58 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n5",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-06_n5.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-06_n5.mp3",
+    "voice": "Ada",
+    "duration": 23.23,
+    "bytes": 278784,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:28:04 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n8",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-06_n8.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-06_n8.mp3",
+    "voice": "Ada",
+    "duration": 10.13,
+    "bytes": 121536,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:28:08 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n9",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-06_n9.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-06_n9.mp3",
+    "voice": "Ada",
+    "duration": 10.06,
+    "bytes": 120672,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:28:10 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n11",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-06_n11.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-06_n11.mp3",
+    "voice": "Ada",
+    "duration": 14.26,
+    "bytes": 171072,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:28:15 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n24",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-06_n24.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-06_n24.mp3",
+    "voice": "Ada",
+    "duration": 22.94,
+    "bytes": 275328,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:28:20 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n29",
+    "key": "computer-science-eduqas/data-representation-storage/narration_lesson-06_n29.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/data-representation-storage/narration_lesson-06_n29.mp3",
+    "voice": "Ada",
+    "duration": 17.71,
+    "bytes": 212544,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:28:25 GMT"
+   }
+  ],
+  "verified_ok": 20,
+  "total": 20
+ }
+}
