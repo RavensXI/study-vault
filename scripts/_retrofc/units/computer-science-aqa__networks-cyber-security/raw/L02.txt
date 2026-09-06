@@ -1,0 +1,249 @@
+=== L2 Network Security and the TCP/IP Model ===
+id: 33162e9f-caf4-4e20-8ec2-41f35612231a
+slug: network-security-and-the-tcp-ip-model
+status: live tier:both updated:2026-08-19T11:13:10.85951+00:00
+narration_manifest: array len 25
+
+--- DESCRIPTION ---
+Authentication, encryption, firewalls, MAC filtering and how the four-layer TCP/IP model organises traffic.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">Why Network Security Matters</h2>
+<p data-narration-id="n2">Every device connected to a network is a potential target. A school network holds thousands of student records; a hospital network carries patient data; a retail network processes payment details. <dfn class="term" data-def="The processes, practices and technologies designed to protect network infrastructure, devices and data from unauthorised access, damage or attack.">Network security</dfn> refers to the combination of measures used to protect these systems. No single measure is perfect, so effective security uses multiple layers working together.</p>
+
+<div class="key-fact" data-narration-id="n3" data-revision-tip="Cover this and recall: name the four methods of network security from the specification and write one sentence about each.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The four network security methods you must know are: <strong>authentication</strong> (verifying who a user is), <strong>encryption</strong> (scrambling data so it cannot be read if intercepted), <strong>firewalls</strong> (monitoring and filtering network traffic), and <strong>MAC address filtering</strong> (allowing or blocking devices based on their hardware address).</p>
+</div>
+
+<h2 data-narration-id="n4">Authentication</h2>
+<p data-narration-id="n5"><dfn class="term" data-def="The process of verifying the identity of a user or device before granting access to a network or system.">Authentication</dfn> is the first line of defence. Before a user can access a network, the system must confirm who they are. The simplest form is a username and password: the username identifies the user, and the password proves it is really them. Stronger authentication uses multiple factors &mdash; for example, a password combined with a one-time code sent to a mobile phone (two-factor authentication). Authentication ensures that only authorised users can access resources, even if an attacker knows the network exists.</p>
+
+<h2 data-narration-id="n6">Encryption</h2>
+<p data-narration-id="n7"><dfn class="term" data-def="The process of converting data into a coded form (ciphertext) using a key, so it cannot be read by anyone who does not have the decryption key.">Encryption</dfn> protects data in transit and in storage. When data is encrypted, it is transformed into ciphertext &mdash; an unreadable scramble of characters. Only someone with the correct decryption key can restore it to its original form. On networks, encryption is used by HTTPS (which encrypts web traffic between a browser and a server) and by secure email systems. Even if an attacker intercepts encrypted data travelling across a network, they cannot read it without the key.</p>
+
+<h2 data-narration-id="n8">Firewalls</h2>
+<p data-narration-id="n9">A <dfn class="term" data-def="A network security device that monitors incoming and outgoing network traffic and decides whether to allow or block specific traffic based on a defined set of security rules.">firewall</dfn> acts as a gatekeeper between a trusted internal network and an untrusted external network such as the internet. It examines each packet of data and decides whether to allow it through or block it, based on predefined rules. For example, a school might configure its firewall to block traffic to certain categories of website, or to block all incoming connections on ports not needed for school systems. Firewalls can be hardware devices, software running on a computer, or a combination of both.</p>
+
+<h2 data-narration-id="n10">MAC Address Filtering</h2>
+<p data-narration-id="n11">Every network interface card (NIC) has a unique <dfn class="term" data-def="A unique hardware address permanently assigned to a network interface card by the manufacturer. It is used to identify devices at the network hardware level.">MAC address</dfn> (Media Access Control address) assigned by its manufacturer. MAC address filtering uses this address to control which devices can connect to a network. A network administrator creates a list of approved MAC addresses; only devices on the list can access the network. This is useful for restricting access to a wireless network in a school, preventing unauthorised devices from connecting even if they know the Wi-Fi password. A limitation is that MAC addresses can be changed in software (called MAC spoofing), so it should not be relied upon as the sole security measure.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>How Security Measures Work Together</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n12">A well-secured network layers its defences. Authentication prevents unauthorised users from logging in. MAC address filtering prevents unauthorised devices from connecting. A firewall blocks suspicious traffic that does reach the network. Encryption protects data even if it is intercepted in transit. Each layer compensates for the weaknesses of the others. For example, a firewall cannot protect against an attacker who already has valid credentials &mdash; but authentication can. Together, they provide a much stronger defence than any single measure alone.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n13">The Four-Layer TCP/IP Model</h2>
+<p data-narration-id="n14">When data travels across a network, the process is organised into four distinct layers. Each layer handles a specific job, and data passes through all four layers on its way from sender to receiver. This is the <dfn class="term" data-def="A four-layer model that describes how data is transmitted across a network. The layers are: Application, Transport, Internet, and Link. Each layer has a specific role in preparing data for transmission.">TCP/IP model</dfn>, named after its two key protocols. Using layers means each component can be developed and updated independently: a new application protocol can be added without changing how packets are routed.</p>
+
+<div class="key-fact" data-narration-id="n15" data-revision-tip="Write the four layers from top to bottom, then name one protocol or piece of hardware that belongs at each layer.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The four layers of the TCP/IP model, from top to bottom: <strong>Application</strong> (where network applications operate &mdash; HTTP, HTTPS, SMTP, IMAP), <strong>Transport</strong> (sets up communication and manages packets &mdash; TCP), <strong>Internet</strong> (addressing and routing packets &mdash; IP), <strong>Link</strong> (network hardware and drivers &mdash; NIC, OS device drivers).</p>
+</div>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Each Layer Explained</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n16"><strong>Application layer</strong> &mdash; this is where network applications operate. Web browsers, email clients, and file transfer tools all sit at this layer. The protocols at this layer &mdash; HTTP, HTTPS, SMTP, and IMAP &mdash; define how those applications format and exchange data.</p>
+    <p data-narration-id="n17"><strong>Transport layer</strong> &mdash; sets up the communication session between two hosts and agrees settings such as the size of data packets. TCP operates at this layer, providing reliable, ordered delivery by breaking data into packets, numbering them, and checking they all arrive correctly. If a packet is lost, TCP requests it again.</p>
+    <p data-narration-id="n18"><strong>Internet layer</strong> &mdash; handles addressing and routing. IP operates at this layer: it assigns a source and destination IP address to each packet and determines the best path through the network of routers to reach the destination.</p>
+    <p data-narration-id="n19"><strong>Link layer</strong> &mdash; the lowest layer, responsible for the physical transmission of data across a single link. The network interface card (NIC) sits here, along with the operating system&rsquo;s device drivers that communicate with it. This layer handles the actual electrical or optical signals on the cable or wireless channel.</p>
+    <p data-narration-id="n20">When data is sent, it passes <em>down</em> through the layers on the sender&rsquo;s device (Application &rarr; Transport &rarr; Internet &rarr; Link), crosses the network physically, and then passes <em>up</em> through the layers on the receiver&rsquo;s device (Link &rarr; Internet &rarr; Transport &rarr; Application) to be reassembled and delivered to the application.</p>
+  </div></div>
+</div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n22">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n23">The four network security methods are: authentication (verifying identity), encryption (protecting data in transit), firewalls (filtering traffic by rules), and MAC address filtering (allowing only approved hardware addresses).</li>
+  <li data-narration-id="n24">The TCP/IP model has four layers: Application (where protocols like HTTP, HTTPS, SMTP, IMAP operate), Transport (TCP &mdash; reliable packet delivery), Internet (IP &mdash; addressing and routing), and Link (NIC and OS drivers).</li>
+  <li data-narration-id="n25">Using multiple security layers is more effective than relying on any single measure, as each compensates for the limitations of the others.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n21">For TCP/IP model questions, learn which protocols sit at which layer and the function of each layer. The most common mistakes are: placing IP at the Transport layer (it belongs at the Internet layer), or placing TCP at the Application layer (it belongs at Transport). Remember: HTTP, HTTPS, SMTP and IMAP are all at the Application layer; TCP is at Transport; IP is at Internet; and the NIC and OS drivers are at the Link layer. When explaining network security measures, link each method to what it protects against &mdash; do not just define the term.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Which one of the following protocols operates at the Internet layer of the TCP/IP model?\nA) HTTP\nB) SMTP\nC) TCP\nD) IP",
+  "type": "1 mark — Multiple Choice",
+  "marks": "D) IP [1 mark]"
+ },
+ {
+  "text": "Name two protocols that operate at the Application layer of the TCP/IP model.",
+  "type": "1 mark — Give/Name",
+  "marks": "One mark for any two of: HTTP, HTTPS, SMTP, IMAP. [1 mark for two correct answers]"
+ },
+ {
+  "text": "State one difference between a firewall and MAC address filtering as network security measures.",
+  "type": "2 marks — State a Difference",
+  "marks": "Mastering: A firewall monitors and filters data packets based on rules about the content and source/destination of traffic; MAC address filtering controls which devices can connect to the network based on their hardware address, operating before data is transmitted.\nSecure: Correct contrast identifying the different aspect each measure targets.\nDeveloping: Describes one measure accurately, the other vaguely.\nEmerging: Names both without meaningful comparison. [2 marks]"
+ },
+ {
+  "text": "Explain what encryption does to data and why it is important for network security.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: Encryption converts data into ciphertext using a key so it cannot be read by anyone who intercepts it in transit. Only the holder of the correct decryption key can restore it. This is critical for protecting sensitive data such as passwords, financial details and messages on a network, even if an attacker gains access to the data stream.\nSecure: Correct explanation of encryption with a clear security benefit.\nDeveloping: States data is scrambled/unreadable but does not explain the key mechanism or security benefit clearly.\nEmerging: Vague description — e.g. 'makes data safe' without explanation. [4 marks]"
+ },
+ {
+  "text": "Describe the role of each of the four layers of the TCP/IP model. Name at least one protocol or hardware component associated with each layer.",
+  "type": "8 marks — Extended Response",
+  "marks": "Mastering: All four layers accurately described with correct protocols/hardware: Application (HTTP, HTTPS, SMTP, IMAP — where applications operate), Transport (TCP — sets up communication, manages packets, ensures delivery), Internet (IP — addressing and routing packets), Link (NIC, OS drivers — physical transmission). Explains the flow of data down through layers on send and up on receive.\nSecure: All four layers identified with accurate roles; some protocols/hardware correctly placed.\nDeveloping: Three layers described with mostly correct protocols; one layer confused or missing.\nEmerging: Two or fewer layers described; protocols placed at incorrect layers. [8 marks]"
+ },
+ {
+  "text": "A school wants to prevent unauthorised devices from connecting to its wireless network. Explain how MAC address filtering works and identify one limitation of this approach.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: Every NIC has a unique MAC address assigned by its manufacturer. The network administrator creates a list of approved MAC addresses; only devices on the list are permitted to connect, even if they know the Wi-Fi password. Limitation: MAC addresses can be changed in software (MAC spoofing), allowing an attacker to impersonate an approved device.\nSecure: Correct explanation of how filtering works and a valid limitation.\nDeveloping: Explains that only approved devices can connect but does not explain how the filtering is applied; or explains correctly without identifying a limitation.\nEmerging: Vague description of blocking devices. [4 marks]"
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "At which layer of the TCP/IP model does TCP operate?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "Application",
+   "Transport",
+   "Internet",
+   "Link"
+  ]
+ },
+ {
+  "q": "A network administrator creates a list of approved hardware addresses to control which devices can join the school Wi-Fi. Which security method is this?",
+  "type": "mcq",
+  "correct": 3,
+  "options": [
+   "Encryption",
+   "Authentication",
+   "Firewall",
+   "MAC address filtering"
+  ]
+ },
+ {
+  "q": "Encryption converts data into _____, which cannot be read without the correct decryption key.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "plaintext",
+   "ciphertext",
+   "binary",
+   "packets"
+  ]
+ },
+ {
+  "q": "The _____ layer of the TCP/IP model is where the NIC and OS device drivers are located, handling physical transmission of data.",
+  "type": "fill",
+  "correct": 3,
+  "options": [
+   "Application",
+   "Transport",
+   "Internet",
+   "Link"
+  ]
+ },
+ {
+  "q": "Match each TCP/IP layer to its description:",
+  "left": [
+   "Application",
+   "Internet",
+   "Link"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   1,
+   2
+  ],
+  "right": [
+   "Where network applications such as web browsers operate; HTTP, HTTPS, SMTP, IMAP",
+   "Handles addressing and routing of packets across the network using IP",
+   "Network hardware including the NIC and OS device drivers"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "Verifies the identity of a user or device before granting access.",
+  "q": "What does authentication do in network security?"
+ },
+ {
+  "a": "It makes intercepted data unreadable without the decryption key.",
+  "q": "Why is encryption important for data sent across a network?"
+ },
+ {
+  "a": "Monitors and filters network traffic, blocking traffic that breaks its security rules.",
+  "q": "What does a firewall do?"
+ },
+ {
+  "a": "A unique hardware address permanently assigned to a network interface card by its manufacturer.",
+  "q": "What is a MAC address?"
+ },
+ {
+  "a": "MAC addresses can be changed in software (MAC spoofing).",
+  "q": "Name a limitation of MAC address filtering."
+ },
+ {
+  "a": "Application, Transport, Internet, Link.",
+  "q": "Name the four layers of the TCP/IP model in order from top to bottom."
+ },
+ {
+  "a": "Application layer — the layer where network applications interact using protocols such as HTTP, HTTPS, SMTP and IMAP.",
+  "q": "At which layer of the TCP/IP model do web browsers, email clients and file transfer apps operate?"
+ },
+ {
+  "a": "TCP.",
+  "q": "Which protocol operates at the Transport layer?"
+ },
+ {
+  "a": "IP.",
+  "q": "Which protocol operates at the Internet layer?"
+ },
+ {
+  "a": "The NIC (network interface card) and OS device drivers.",
+  "q": "What hardware is located at the Link layer of the TCP/IP model?"
+ },
+ {
+  "a": "Each layer can be developed and updated independently without affecting the others.",
+  "q": "Why does the TCP/IP model use separate layers?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "network security",
+  "definition": "The processes, practices and technologies designed to protect network infrastructure, devices and data from unauthorised access, damage or attack."
+ },
+ {
+  "term": "authentication",
+  "definition": "The process of verifying the identity of a user or device before granting access to a network or system."
+ },
+ {
+  "term": "encryption",
+  "definition": "The process of converting data into a coded form (ciphertext) using a key, so it cannot be read by anyone who does not have the decryption key."
+ },
+ {
+  "term": "firewall",
+  "definition": "A network security device that monitors incoming and outgoing network traffic and decides whether to allow or block specific traffic based on a defined set of security rules."
+ },
+ {
+  "term": "MAC address",
+  "definition": "A unique hardware address permanently assigned to a network interface card by the manufacturer. It is used to identify devices at the network hardware level."
+ },
+ {
+  "term": "TCP/IP model",
+  "definition": "A four-layer model that describes how data is transmitted across a network. The layers are: Application, Transport, Internet, and Link. Each layer has a specific role in preparing data for transmission."
+ }
+]
