@@ -1,0 +1,375 @@
+{
+ "unit": "computer-science-eduqas/algorithms-programming-software",
+ "checked_at": "2026-09-06T00:00:00Z",
+ "spec_used": "specs/eduqas/computer-science-C500QS.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"Your exam uses a set of specific pseudocode conventions - learn them\", followed by a table giving SET, OUTPUT, RECEIVE name FROM (STRING), IF/ELSE/END IF, FOR/NEXT, WHILE/END WHILE, REPEAT/UNTIL, PROCEDURE/END PROCEDURE, FUNCTION/END FUNCTION, RETURN.",
+   "truth": "The spec's own appendix prints: set counter = 0; output \"...\"; myvariable is integer; if ... else ... end if; for i ... next i; while ... repeat; repeat ... until; do ... loop; Declare <name> ... End Subroutine; call <name>; myarray[99]; len/mid/left/right/val/int/trim; DIV and MOD; logical operators and TRUE/FALSE in upper case. RECEIVE ... FROM (TYPE), END WHILE, PROCEDURE, FUNCTION and RETURN appear nowhere in it. Table replaced with the appendix conventions, and a sentence added saying the paper prints keywords in lower case and ends a while loop with repeat.",
+   "evidence": "spec Appendix A, Note 3 (pseudo-code convention table) and Note 2 (operators)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "RECEIVE num1 FROM (INTEGER) etc. used in the worked example, the prose, the takeaway, the exam tip, the answer key for the input-keyword question and a flashcard.",
+   "truth": "This is another board's notation, not this spec's. The FROM (TYPE) suffix in particular is not used here; the spec names input as an algorithm element and declares types with 'myvariable is integer'. Changed to INPUT throughout, keeping the lesson's capitalised house style.",
+   "evidence": "spec Appendix A Note 3; spec section 8 Algorithms amplification (input, output, sequence, selection, iteration)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "RECEIVE length FROM (INTEGER), RECEIVE grade FROM (INTEGER), RECEIVE password FROM (STRING), RECEIVE number FROM (INTEGER) in four code blocks plus the model answer in practice question 4.",
+   "truth": "Same as F1/F2: not this spec's notation. Changed to INPUT.",
+   "evidence": "spec Appendix A Note 3",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 3,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Mark scheme for the linear-search writing question credits 'RECEIVE target'.",
+   "truth": "Same as F1/F2. Changed to INPUT.",
+   "evidence": "spec Appendix A Note 3",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"a type check (implicit in RECEIVE ... FROM (INTEGER))\" plus the validation code block and the month-validation model answer.",
+   "truth": "Same as F1/F2. Changed to INPUT, and the prose now says the type check is implicit in reading the score as an integer.",
+   "evidence": "spec Appendix A Note 3",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"While examiners usually award marks for logically correct code, there are two risks. First, Python's print() is not the same as OUTPUT - if your Python is wrong, you score zero.\"",
+   "truth": "Self-contradictory and false. Credit is for logic, and a wrong line of Python does not void an answer. Rewritten to say a syntax slip can hide the logic and a marker can only credit logic they can follow.",
+   "evidence": "internal contradiction; no mark-scheme source supports 'you score zero'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 1,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "\"the mark scheme awards a mark for each correct intermediate state, not just the final output\" (repeated as 'marks are awarded per row').",
+   "truth": "Plausible but not verifiable from the spec, which prints no question ladder or tariff detail. Left as written.",
+   "evidence": "spec section 2.1 / assessment pages carry no per-question mark detail",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F8",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Subroutines are shown only as PROCEDURE ... END PROCEDURE and FUNCTION ... END FUNCTION.",
+   "truth": "The procedure/function distinction itself is sound and matters for the on-screen Python paper, but the written paper prints every subroutine as 'Declare <name> ... End Subroutine' and calls it with 'call <name>'. One sentence added so the student recognises that form.",
+   "evidence": "spec Appendix A Note 3 (Declare subroutines / Call a subroutine)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"Binary search, by halving the list each time, needs at most \\ (\\log_2 n \\) comparisons.\"",
+   "truth": "Two faults. The KaTeX delimiters are broken (a space inside '\\ (' and '\\ )'), so the formula renders as raw text. And 'at most' is wrong: the worst case is floor(log2 n) + 1, so a sorted list of 8 items can need 4 comparisons, not 3 (traced on the lesson's own pseudocode with the target at the last index). Changed to 'about'.",
+   "evidence": "hand trace of the lesson's binary-search pseudocode on 8 items; KaTeX inline delimiter convention",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 3,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "\"3 comparisons [1 mark] (since log2 8 = 3). Accept 4 if working shown with rounding up.\"",
+   "truth": "Incoherent: log2 8 is exactly 3, so rounding up cannot produce 4. The 4th comparison is the check of the single item left at the end. Reworded to show the halving 8 - 4 - 2 - 1 and to explain what the accepted 4 counts.",
+   "evidence": "recomputation",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"linked lists do not [support random access] ... When the spec asks why binary search is unsuitable in a particular scenario, an answer that mentions either 'the data is unsorted' or 'the structure does not allow random access' will earn the mark.\"",
+   "truth": "Linked lists are not in this spec's data structures (records, one- and two-dimensional arrays, lists, tuples, dictionaries), so 'random access' is not a creditable route here, and the claim that it 'will earn the mark' is invented. Rewritten in plain terms around arrays, with the unsorted-data reason as the answer.",
+   "evidence": "spec section 6 Data structures (lines 620-642); spec Component 2 Implementation (lists, tuples, dictionaries)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 4,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "\"Split (divide) phase [0.5] and merge (combine) phase [0.5]. Award 1 mark for both named.\"",
+   "truth": "GCSE marks are whole marks; half marks are never awarded. The phrasing also trips the house banned-string rule. Rewritten as '[1 mark for both named]'.",
+   "evidence": "spec section 4.2 grading; house banned-string rule in the checker brief",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F13",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Big-O notation is taught as examinable throughout: two key facts, the comparison table, the exam tip (\"State the complexity of each algorithm - bubble sort: O(n^2), merge sort: O(n log n)\"), knowledge check 1, practice question 1 and four flashcards. Lesson 3 does the same with log2 n.",
+   "truth": "The spec asks only for 'the characteristics of sort algorithms, including merge sort, bubble sort' and 'the characteristics of search algorithms'. It never mentions time complexity or Big-O anywhere, so a question of the form 'which is the worst-case time complexity of bubble sort?' cannot appear. Options: (a) keep Big-O as enrichment but soften the exam tip's instruction to state it, and rebuild knowledge check 1 and practice question 1 around characteristics (speed on large lists, memory use, ease of implementation); (b) leave as is. Recommend (a) - the content is true and useful, but the lesson should not tell a student to write O(n log n) in place of a plain efficiency comparison.",
+   "evidence": "spec section 8 Sorting / Searching amplification (lines 758-769); no complexity content anywhere in the spec",
+   "verdict": "NOTE",
+   "ruling": "NOTE: Big-O kept as enrichment; rebuilding KC1/Q1 around the spec's characteristics is an authoring task, recorded."
+  },
+  {
+   "id": "F14",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "The key fact says the best case is O(n) 'when the list is already sorted (one pass with no swaps confirms it is sorted)', and the trace says 'Continue until no swaps occur in a pass' - but the pseudocode above them has no swap flag and always runs n-1 passes.",
+   "truth": "Both statements describe the optimised version. The code shown is the unoptimised one, whose best case is still n-1 passes. Not wrong in itself, only incomplete. Left as written.",
+   "evidence": "hand trace of the lesson's own bubble-sort pseudocode",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F15",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"IDEs typically include the following tools. You need to know what each one does\" - six tools: code editor, syntax error detection, debugger, breakpoint, variable watch, memory inspector. The takeaway repeats the six as the set.",
+   "truth": "The spec names nineteen IDE tools: editor, automatic formatting, automatic line numbering, automatic colour coding, linker, libraries, routines/subroutines, standard functions, loader, debugger, syntax error detection, error diagnostics, trace, break point, variable watch, memory inspector, statement completion, code optimisation, and compilation and interpretation of code. Thirteen are untaught, and this is the only unit in the subject covering software development. Options: (a) add rows for trace, error diagnostics, statement completion, the automatic formatting / line numbering / colour coding group and the linker / loader / libraries / standard functions group, then update the takeaway; (b) leave the gap. Recommend (a) - each is a one-line row and any of them can be asked directly.",
+   "evidence": "spec section 9 Software development, Software tools amplification (lines 800-820)",
+   "verdict": "NOTE",
+   "ruling": "NOTE: IDE tool coverage (6 of the spec's 19) recorded for an authoring pass."
+  },
+  {
+   "id": "F16",
+   "lesson": 6,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "\"What an IDE provides, the role of compilers, interpreters and assemblers, and types of programming error.\" (105 characters)",
+   "truth": "Over the 100-character limit for a lesson description. Shortened to 93 characters with the same meaning.",
+   "evidence": "house validator limit",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17",
+   "lesson": 3,
+   "field": "knowledge_checks",
+   "severity": "LOW",
+   "claim": "The matching item lists 'Binary search' twice in its right-hand column; lesson 4's matching item lists 'Bubble sort' twice.",
+   "truth": "The mappings are correct in both, but duplicated right-hand text makes the drag target ambiguous on screen. Not a content error. Left as written.",
+   "evidence": "recheck of the order arrays against the left/right lists",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [],
+ "summary": "Every algorithm traced clean: the bubble-sort passes on [5,3,8,1,4] and [7,2,9,4,6], the merge-sort split and merge on [5,3,8,1] and [3,7]+[1,5], both binary-search traces, the linear-search trace, the counting-loop trace, the rogue-value loop, and all 30 knowledge-check keys and 5 match orders are correct. The unit's real defect is systemic notation: it teaches another board's pseudocode (RECEIVE ... FROM (TYPE), END WHILE, PROCEDURE/FUNCTION/RETURN) as 'the conventions your exam uses', while this spec's appendix prints set / output / while ... repeat / Declare ... End Subroutine / call. Alongside that: a broken KaTeX formula and an understated binary-search worst case, an out-of-spec linked-list claim with an invented mark statement, a false 'you score zero' marking claim, half marks in one answer key, and an over-length description.",
+ "renarration": {
+  "run_at": "2026-09-06T10:37:38Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n7",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n7.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n7.mp3",
+    "voice": "Ollie",
+    "duration": 13.39,
+    "bytes": 160704,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:36:15 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n8",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n8.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n8.mp3",
+    "voice": "Ollie",
+    "duration": 31.7,
+    "bytes": 380448,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:36:22 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n10",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n10.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n10.mp3",
+    "voice": "Ollie",
+    "duration": 9.38,
+    "bytes": 112608,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:36:25 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n11",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n11.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n11.mp3",
+    "voice": "Ollie",
+    "duration": 11.38,
+    "bytes": 136512,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:36:29 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n16",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n16.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n16.mp3",
+    "voice": "Ollie",
+    "duration": 22.2,
+    "bytes": 266400,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:36:35 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n17",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n17.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n17.mp3",
+    "voice": "Ollie",
+    "duration": 19.08,
+    "bytes": 228960,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:36:40 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n24",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n24.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n24.mp3",
+    "voice": "Ollie",
+    "duration": 29.83,
+    "bytes": 357984,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:36:47 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n27",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n27.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-01_n27.mp3",
+    "voice": "Ollie",
+    "duration": 9.98,
+    "bytes": 119808,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:36:50 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n5",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-02_n5.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-02_n5.mp3",
+    "voice": "Ada",
+    "duration": 6.0,
+    "bytes": 72000,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:36:53 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n8",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-02_n8.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-02_n8.mp3",
+    "voice": "Ada",
+    "duration": 9.84,
+    "bytes": 118080,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:36:57 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n15",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-02_n15.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-02_n15.mp3",
+    "voice": "Ada",
+    "duration": 7.58,
+    "bytes": 91008,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:37:00 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n17",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-02_n17.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-02_n17.mp3",
+    "voice": "Ada",
+    "duration": 9.24,
+    "bytes": 110880,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:37:03 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n21",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-02_n21.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-02_n21.mp3",
+    "voice": "Ada",
+    "duration": 20.88,
+    "bytes": 250560,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:37:09 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n7",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-03_n7.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-03_n7.mp3",
+    "voice": "Ollie",
+    "duration": 17.88,
+    "bytes": 214560,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:37:15 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n22",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-03_n22.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-03_n22.mp3",
+    "voice": "Ollie",
+    "duration": 16.75,
+    "bytes": 201024,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:37:19 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n7",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-05_n7.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-05_n7.mp3",
+    "voice": "Ollie",
+    "duration": 10.34,
+    "bytes": 124128,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:37:24 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n8",
+    "key": "computer-science-eduqas/algorithms-programming-software/narration_lesson-05_n8.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/algorithms-programming-software/narration_lesson-05_n8.mp3",
+    "voice": "Ollie",
+    "duration": 12.67,
+    "bytes": 152064,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:37:28 GMT"
+   }
+  ],
+  "verified_ok": 17,
+  "total": 17
+ }
+}
