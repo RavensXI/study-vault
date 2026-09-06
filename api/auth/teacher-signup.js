@@ -103,7 +103,9 @@ module.exports = async (req, res) => {
   }
 
   const subjectRows = [
-    ...[...assigned].map(sid => ({ teacher_id: userId, subject_id: sid })),
+    // Explicit, not defaulted: a multi-row insert with mixed shapes sends null
+    // for the keys a row lacks, and null is not "true" to the canEdit check.
+    ...[...assigned].map(sid => ({ teacher_id: userId, subject_id: sid, can_edit: true, can_publish: true })),
     ...picked.map(sid => ({ teacher_id: userId, subject_id: sid, can_edit: false, can_publish: false })),
   ];
 
