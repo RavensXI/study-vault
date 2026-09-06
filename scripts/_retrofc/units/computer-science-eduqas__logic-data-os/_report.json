@@ -1,0 +1,291 @@
+{
+ "unit": "computer-science-eduqas/logic-data-os",
+ "checked_at": "2026-09-06",
+ "spec_used": "specs/eduqas/computer-science-C500QS.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "exam_tip_html",
+   "severity": "MEDIUM",
+   "claim": "Truth table questions award one mark per correct output cell — not one mark for the whole table. (repeated in content_html: \"The mark scheme awards one mark per correct cell, including intermediate columns.\", \"each cell can earn an independent mark\", and in conclusion_html: \"each cell earns an independent mark\")",
+   "truth": "The spec prints no question ladder or per-cell tariff. The lesson contradicts itself: its own practice question 3 marks the same truth-table task one mark per column (2 marks for eight cells), not one mark per cell. The safe advice is to complete every column without asserting how the marks are split.",
+   "evidence": "specs/eduqas/computer-science-C500QS.md assessment block (written examination 1 hour 45 minutes, 100 marks, 50%) prints no question ladder; internal contradiction with L1 practice_questions[2].marks",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Two additional gates appear in this course: NAND and NOR.",
+   "truth": "The spec names four logical operators only: AND, OR, NOT and XOR. NAND and NOR are never mentioned anywhere in the spec, including the Appendix A operator list and the Appendix B Boolean conventions table. They are useful background, not named course content. The rest of the NAND/NOR section stays as extension material; only the false claim about the course is corrected.",
+   "evidence": "spec section 2 Logical operators bullets (AND, OR, NOT, XOR); Appendix A \"Logical operators AND, OR, NOT and XOR will be in upper case\"; Appendix B conventions table lists AND, OR, NOT, XOR only; grep for NAND/NOR returns no hits",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "De Morgan's laws are taught as required content: a heading, a key-fact box, a worked example, a glossary term, two flashcards, one knowledge check and two practice questions (including a 4-mark simplification).",
+   "truth": "The spec says \"The simplification of Boolean expressions using Boolean identities and rules (see Appendix B)\", and Appendix B's rule list is closed: Annulment, Identity, Commutative, Complement, Idempotent, Distribution, Absorption, Association. De Morgan is absent. The lesson's own eight-law table matches Appendix B exactly, so the eight-law framing is right; De Morgan sits outside it. Options: (a) keep the material but label it as an extension that helps with NOT over a bracket, leaving the questions as stretch practice; (b) leave it entirely as is, since De Morgan is widely taught and understanding NOT over a bracket supports the Complement and Distribution work that IS named; (c) strip it, which would cost a key fact, a glossary term, two flashcards, a knowledge check and two practice questions.",
+   "evidence": "spec section 2 Boolean logic (\"see Appendix B\"); Appendix B Boolean Algebra Rules table; grep for \"morgan\" returns no hits",
+   "verdict": "NOTE",
+   "ruling": "NOTE: De Morgan kept as extension material beyond Appendix B's rule list."
+  },
+  {
+   "id": "F4",
+   "lesson": 2,
+   "field": "exam_tip_html",
+   "severity": "MEDIUM",
+   "claim": "The 2024 examiners’ report flagged Boolean simplification as a weak area, with students stopping at a partial simplification and missing the Absorption or Complement law that finishes the job.",
+   "truth": "No such report is cited anywhere in the source material and the attribution cannot be verified. The advice itself is sound, so it is kept without the invented citation.",
+   "evidence": "fabricated attribution; the spec is the only authority available and prints no examiners' report",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 2,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "practice_questions[3].marks: \"Result: NOT(B) + A (via Commutative)\"",
+   "truth": "Recomputation: NOT(A OR B) OR A = A + (NOT A . NOT B) = (A + NOT A).(A + NOT B) by Distribution = 1.(A + NOT B) by Complement = A + NOT B. The final step, dropping the 1, is the Identity law (A . 1 = A), not Commutative. Verified against the truth table: A=0,B=0 gives 1; A=0,B=1 gives 0; A=1,B=0 gives 1; A=1,B=1 gives 1, which matches A + NOT B. The answer is right; the named law is wrong, and the question asks the student to name the law at each stage.",
+   "evidence": "recomputation plus spec Appendix B Identity rule (A . 1 = A)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "\"Each correctly applied law can earn a mark\" (content_html n2) and flashcard 12 \"Each correctly named law earns a mark — partial credit is awarded per step.\"",
+   "truth": "Unverifiable tariff claim. The spec prints no question ladder, so how simplification marks are split cannot be confirmed. Left as is because showing each step is good practice either way.",
+   "evidence": "spec assessment block prints no question ladder",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F7",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "\"You cannot mix data types in a single array.\" — stated in a section that demonstrates arrays with Python lists.",
+   "truth": "Python lists can hold mixed types, so the statement is false of the code shown. It is, however, the correct theory position for the array data structure and the answer the exam expects. Left uncorrected because correcting it would push students towards a weaker exam answer.",
+   "evidence": "Python language semantics; spec Component 2 line \"create new and extend lists, tuples and dictionaries (arrays)\"",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F8",
+   "lesson": 3,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "Model answer: \"because all 12 values are the same data type (integer) and can be accessed by a loop using a single index.\"",
+   "truth": "The lesson's own 12-value example is monthly rainfall, which it states is real numbers, not integers. The template is generic, so the mismatch is cosmetic rather than mark-affecting.",
+   "evidence": "internal comparison with content_html n20 (\"all the same type (real numbers)\")",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F9",
+   "lesson": 3,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "practice_questions[2] is headed \"3 marks\" but the mark scheme lists four field bullets each tagged [1] before stating \"Three marks total\".",
+   "truth": "The cap is stated twice (\"up to three marks\", \"Three marks total\"), so the scheme is internally consistent, but the four [1] tags read as four marks at a glance.",
+   "evidence": "internal reading of the mark scheme",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F10",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"Inactive pages are moved to a reserved area of the hard drive called the backing store (virtual memory)\", with the glossary defining \"backing store (virtual memory)\" as \"An area of secondary storage used by the OS to temporarily store memory pages that do not currently fit in RAM\".",
+   "truth": "The spec treats the two as separate things: virtual memory is a primary-storage characteristic in the Hardware section, while backing store is one of the resources the OS manages, alongside memory, peripherals and security. The backing store is the secondary storage itself; virtual memory is the use of a reserved part of it to extend RAM. The lesson also contradicts itself: its own key fact calls backing store management \"file system management\", then the memory section redefines backing store as the swap area. A student asked how the OS manages the backing store would answer about paging instead of file storage.",
+   "evidence": "spec Hardware / Primary storage bullet \"virtual memory\"; spec Operating systems bullet list \"CPU, multi-tasking, interrupts, memory, backing store, peripherals, interface, security\"; internal contradiction with content_html n4",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"Beyond the six main utilities above, the specification also references:\" followed by archiver, partition editor, clipboard manager, system profiler, cryptographic utility and revision control — twelve utilities in total.",
+   "truth": "The spec names fourteen utilities. Disk checkers and disk formatters are named in the spec and appear nowhere in the lesson, even though the lesson twice signals that its lists are the full set. A disk checker scans a drive for file system errors and bad sectors and repairs what it can; a disk formatter prepares a partition by writing a file system to it, erasing what was there.",
+   "evidence": "spec Utility software bullets: anti-virus, clipboard manager, system profiles, backup software, disk checkers, disk compression, disk defragmenters, disk formatters, disk partition editors, archivers, cryptographic utilities, data recovery, revision control, file managers",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 4,
+   "field": "exam_tip_html",
+   "severity": "MEDIUM",
+   "claim": "In discussion questions about impacts of technology, the 2024 examiners’ report noted that balanced answers (one-sided responses score lower) are needed.",
+   "truth": "No such report is cited in the source material and the attribution cannot be verified. The advice is kept without the invented citation.",
+   "evidence": "fabricated attribution; the spec prints no examiners' report",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F13",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Round-robin and First-Come-First-Served scheduling are taught with a named heading, a conclusion bullet and a 4-mark practice question comparing them.",
+   "truth": "The spec names no scheduling algorithms. It asks only how the OS manages the CPU, multi-tasking and interrupts, all of which the lesson covers correctly elsewhere. Round-robin and FCFS are correct computer science and are the usual way of explaining time-slicing, so they cost no marks; the question is whether a 4-mark practice question should sit on unnamed content. Options: (a) keep both, since they make time-slicing concrete and answer the multi-tasking bullet; (b) keep the prose but re-point the 4-mark question at multi-tasking and interrupts, which the spec does name.",
+   "evidence": "spec Operating systems bullets (CPU, multi-tasking, interrupts, memory, backing store, peripherals, interface, security); grep for \"schedul\" and \"round-robin\" returns no hits",
+   "verdict": "NOTE",
+   "ruling": "NOTE: round-robin/FCFS kept as concrete illustration of multitasking; no spec contradiction."
+  },
+  {
+   "id": "F14",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "\"An operating system manages six key areas: CPU scheduling, memory management, backing store (file system) management, peripheral management, the user interface, and security.\"",
+   "truth": "The spec lists eight things the OS manages: CPU, multi-tasking, interrupts, memory, backing store, peripherals, interface and security. Multi-tasking and interrupts are folded into the CPU section, so the content is covered; only the count of six understates the spec list.",
+   "evidence": "spec Operating systems amplification bullets",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F15",
+   "lesson": 4,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "“the OS manages memory” scores zero; “the OS uses paging to divide RAM into fixed-size blocks and swaps inactive pages to the backing store when RAM is full” scores full marks.",
+   "truth": "Unverifiable tariff claim. The spec prints no question ladder or mark descriptors. The underlying advice (name the function and explain it) is sound, so it is left in place.",
+   "evidence": "spec assessment block prints no question ladder",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [
+  3
+ ],
+ "summary": "Every truth table, every Boolean simplification and every array index recomputes correctly, and all twenty knowledge-check keys are right, so the unit carries no HIGH findings. The corrections are three fabricated mark-scheme or examiners'-report claims, two scope overstatements (NAND/NOR named as course content, backing store defined as virtual memory), two spec-named utilities missing from the utility list, and one mark scheme naming Commutative where the step is Identity. Lesson 3 needs no edits.",
+ "renarration": {
+  "run_at": "2026-09-06T10:32:00Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n20",
+    "key": "computer-science-eduqas/logic-data-os/narration_lesson-01_n20.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/logic-data-os/narration_lesson-01_n20.mp3",
+    "voice": "Ollie",
+    "duration": 11.45,
+    "bytes": 137376,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:30:46 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n22",
+    "key": "computer-science-eduqas/logic-data-os/narration_lesson-01_n22.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/logic-data-os/narration_lesson-01_n22.mp3",
+    "voice": "Ollie",
+    "duration": 16.97,
+    "bytes": 203616,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:30:51 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n25",
+    "key": "computer-science-eduqas/logic-data-os/narration_lesson-01_n25.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/logic-data-os/narration_lesson-01_n25.mp3",
+    "voice": "Ollie",
+    "duration": 27.24,
+    "bytes": 326880,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:30:58 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n28",
+    "key": "computer-science-eduqas/logic-data-os/narration_lesson-01_n28.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/logic-data-os/narration_lesson-01_n28.mp3",
+    "voice": "Ollie",
+    "duration": 34.8,
+    "bytes": 417600,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:31:07 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n31",
+    "key": "computer-science-eduqas/logic-data-os/narration_lesson-01_n31.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/logic-data-os/narration_lesson-01_n31.mp3",
+    "voice": "Ollie",
+    "duration": 6.14,
+    "bytes": 73728,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:31:10 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n31",
+    "key": "computer-science-eduqas/logic-data-os/narration_lesson-02_n31.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/logic-data-os/narration_lesson-02_n31.mp3",
+    "voice": "Ada",
+    "duration": 31.15,
+    "bytes": 373824,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:31:19 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n12",
+    "key": "computer-science-eduqas/logic-data-os/narration_lesson-04_n12.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/logic-data-os/narration_lesson-04_n12.mp3",
+    "voice": "Ada",
+    "duration": 30.19,
+    "bytes": 362304,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:31:28 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n14",
+    "key": "computer-science-eduqas/logic-data-os/narration_lesson-04_n14.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/logic-data-os/narration_lesson-04_n14.mp3",
+    "voice": "Ada",
+    "duration": 19.94,
+    "bytes": 239328,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:31:33 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n29",
+    "key": "computer-science-eduqas/logic-data-os/narration_lesson-04_n29.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/logic-data-os/narration_lesson-04_n29.mp3",
+    "voice": "Ada",
+    "duration": 27.26,
+    "bytes": 327168,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:31:39 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n36",
+    "key": "computer-science-eduqas/logic-data-os/narration_lesson-04_n36.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/logic-data-os/narration_lesson-04_n36.mp3",
+    "voice": "Ada",
+    "duration": 40.2,
+    "bytes": 482400,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:31:49 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n40",
+    "key": "computer-science-eduqas/logic-data-os/narration_lesson-04_n40.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-eduqas/logic-data-os/narration_lesson-04_n40.mp3",
+    "voice": "Ada",
+    "duration": 20.69,
+    "bytes": 248256,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:31:53 GMT"
+   }
+  ],
+  "verified_ok": 11,
+  "total": 11
+ }
+}
