@@ -1,0 +1,337 @@
+=== L5 Input, Output, Files and Validation ===
+id: cd538591-88b4-4cc3-89a8-ccc747ce7faa
+slug: input-output-files-and-validation
+status: live tier:both updated:2026-07-30T22:51:19.006057+00:00
+narration_manifest: array len 37
+
+--- DESCRIPTION ---
+Reading user input, working with CSV files, and writing validation routines in Python.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">Getting Data In and Out</h2>
+<p data-narration-id="n2">Every useful program exchanges data with the outside world. In Python, <dfn class="term" data-def="The built-in Python function that displays text to the screen.">print()</dfn> sends output to the screen and <dfn class="term" data-def="The built-in Python function that pauses the program and waits for the user to type a value, returning it as a string.">input()</dfn> reads a value from the keyboard. These are the two most fundamental input/output operations. Beyond the keyboard, programs also read from and write to files &mdash; essential for storing data that persists between program runs.</p>
+
+<pre data-narration-id="n3"># Basic input and output
+name = input(&quot;What is your name? &quot;)
+age = int(input(&quot;How old are you? &quot;))
+print(&quot;Hello,&quot;, name, &quot;- you will be&quot;, age + 1, &quot;next year.&quot;)</pre>
+
+<p data-narration-id="n4">The string passed to <code>input()</code> is the <strong>prompt</strong> &mdash; it appears on screen before the cursor so the user knows what to type. The function always returns a string, so numeric values must be converted with <code>int()</code> or <code>float()</code> before arithmetic can be performed.</p>
+
+<h2 data-narration-id="n5">CSV Files &mdash; Reading Comma-Separated Data</h2>
+<p data-narration-id="n6">A <dfn class="term" data-def="A plain-text file where each line represents one row of data and each value in the row is separated by a comma.">CSV file</dfn> (comma-separated values) stores tabular data as plain text. Each line is a row; values within a row are separated by commas. CSV is widely used because every spreadsheet application, database and programming language can read and write it. A student grade file might look like:</p>
+
+<pre data-narration-id="n7">name,score,grade
+Ali Hassan,78,Pass
+Beth Clarke,92,Distinction
+Carlos Reyes,54,Pass</pre>
+
+<p data-narration-id="n8">Python can read a CSV file using the built-in <code>open()</code> function. When you open a file, you specify a <dfn class="term" data-def="The parameter passed to open() that specifies whether the file should be read ('r'), written ('w') or appended ('a').">file mode</dfn>: <code>'r'</code> for reading, <code>'w'</code> for writing (overwrites existing content), <code>'a'</code> for appending (adds to the end).</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example &mdash; Reading a CSV File</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n9">Reading grades.csv line by line, splitting each line on commas:</p>
+    <pre data-narration-id="n10">with open(&quot;grades.csv&quot;, &quot;r&quot;) as f:
+    header = f.readline()    # Skip the header row
+    for line in f:
+        line = line.strip()  # Remove trailing newline
+        fields = line.split(&quot;,&quot;)
+        name = fields[0]
+        score = int(fields[1])
+        grade = fields[2]
+        print(name, &quot;-&quot;, score, &quot;(&quot; + grade + &quot;)&quot;)</pre>
+    <p data-narration-id="n11"><strong>Key steps:</strong> (1) <code>open()</code> opens the file in read mode. (2) <code>with</code> ensures the file is closed automatically when the block ends. (3) <code>.readline()</code> reads and discards the header. (4) <code>for line in f</code> processes each remaining row. (5) <code>.strip()</code> removes the invisible <code>\n</code> at the end of each line. (6) <code>.split(&quot;,&quot;)</code> splits the line into a list of fields.</p>
+  </div></div>
+</div>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example &mdash; Writing to a CSV File</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n12">Creating a new CSV file and writing a header plus data rows:</p>
+    <pre data-narration-id="n13">with open(&quot;results.csv&quot;, &quot;w&quot;) as f:
+    f.write(&quot;name,score\n&quot;)    # Header row
+    students = [[&quot;Ali&quot;, 78], [&quot;Beth&quot;, 92], [&quot;Carlos&quot;, 54]]
+    for student in students:
+        f.write(student[0] + &quot;,&quot; + str(student[1]) + &quot;\n&quot;)</pre>
+    <p data-narration-id="n14">Each row ends with <code>\n</code> (newline character) to move to the next line. Opening in <code>&quot;w&quot;</code> mode <strong>overwrites</strong> the file if it already exists. Use <code>&quot;a&quot;</code> mode to append new rows without deleting existing data.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n15">Validation Routines</h2>
+<p data-narration-id="n16"><dfn class="term" data-def="A check performed on data before it is accepted by a program, to ensure it is reasonable, sensible and within acceptable limits.">Validation</dfn> ensures that data entered by a user is reasonable before the program uses it. It does not guarantee the data is correct &mdash; a user could enter the wrong date of birth and it might still pass all checks &mdash; but it filters out obviously bad data. There are four types of validation check you need to know.</p>
+
+<div class="key-fact" data-narration-id="n17" data-revision-tip="Cover this and name all four validation types. For each, give one example of data it would reject.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The four validation types are: <strong>presence check</strong> (is the field empty?), <strong>length check</strong> (is the data the right number of characters?), <strong>range check</strong> (is the value within acceptable numeric bounds?), and <strong>pattern check</strong> (does the data match an expected format?). A password system might use all four.</p>
+</div>
+
+<p data-narration-id="n18">A <dfn class="term" data-def="A validation check that ensures a field is not left empty.">presence check</dfn> confirms that a field has been filled in:</p>
+
+<pre data-narration-id="n19">username = input(&quot;Enter username: &quot;)
+if username == &quot;&quot;:
+    print(&quot;Error: username cannot be empty&quot;)</pre>
+
+<p data-narration-id="n20">A <dfn class="term" data-def="A validation check that ensures the data is the correct number of characters — not too long and not too short.">length check</dfn> ensures the data is neither too short nor too long:</p>
+
+<pre data-narration-id="n21">password = input(&quot;Enter password: &quot;)
+if len(password) &lt; 8 or len(password) &gt; 20:
+    print(&quot;Password must be 8 to 20 characters&quot;)</pre>
+
+<p data-narration-id="n22">A <dfn class="term" data-def="A validation check that ensures a numeric value falls within an acceptable minimum and maximum bound.">range check</dfn> tests whether a numeric value is within acceptable bounds:</p>
+
+<pre data-narration-id="n23">age = int(input(&quot;Enter age: &quot;))
+if age &lt; 0 or age &gt; 120:
+    print(&quot;Age must be between 0 and 120&quot;)</pre>
+
+<h2 data-narration-id="n24">Pattern Check</h2>
+<p data-narration-id="n25">A <dfn class="term" data-def="A validation check that ensures data matches an expected format, such as a postcode having specific characters in specific positions.">pattern check</dfn> verifies that data matches a particular format. This is the fourth validation type and is unique to this specification &mdash; it goes beyond simply checking whether a value is present, the right length or in range. A simple pattern check can be written using string operations to test the structure of data.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example &mdash; Postcode Pattern Check</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n26">A simplified UK postcode check: the postcode must be between 6 and 8 characters, contain no spaces for simplicity, and start with letters before digits. A basic pattern check might verify: no spaces, at least 6 characters, and the first two characters are alphabetic:</p>
+    <pre data-narration-id="n27">postcode = input(&quot;Enter postcode (no spaces): &quot;).upper()
+
+def is_valid_postcode(code):
+    if len(code) &lt; 5 or len(code) &gt; 7:
+        return False
+    if not code[0].isalpha() or not code[1].isalpha():
+        return False
+    return True
+
+if is_valid_postcode(postcode):
+    print(&quot;Valid format&quot;)
+else:
+    print(&quot;Invalid postcode format&quot;)</pre>
+    <p data-narration-id="n28">Python&rsquo;s <code>.isalpha()</code> returns <code>True</code> if all characters are alphabetic. <code>.isdigit()</code> returns <code>True</code> if all characters are digits. These built-in methods are enough for a simple pattern check &mdash; full regular expressions are not required in your exam.</p>
+  </div></div>
+</div>
+
+<div class="key-fact" data-narration-id="n29" data-revision-tip="Test yourself: write a one-sentence definition of authentication and describe one way a simple Python program could implement it.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Validation and authentication are not the same thing. <strong>Validation</strong> checks that data is in an acceptable format or range &mdash; it makes no claim about whether the data is true. <strong>Authentication</strong> verifies identity by checking credentials against a stored record. A programme may need both: validate the password format first, then check it against the stored value.</p>
+</div>
+
+<h2 data-narration-id="n30">Authentication</h2>
+<p data-narration-id="n31"><dfn class="term" data-def="The process of verifying that a user is who they claim to be, typically by checking a username and password against stored credentials.">Authentication</dfn> checks that a user&rsquo;s identity matches a stored record. A simple authentication routine compares entered credentials against a list of known users:</p>
+
+<pre data-narration-id="n32"># Simple in-memory authentication
+users = {&quot;admin&quot;: &quot;pass123&quot;, &quot;teacher&quot;: &quot;gcse2026&quot;}
+
+username = input(&quot;Username: &quot;)
+password = input(&quot;Password: &quot;)
+
+if username in users and users[username] == password:
+    print(&quot;Access granted&quot;)
+else:
+    print(&quot;Invalid credentials&quot;)</pre>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n34">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n35">Python reads files with <code>open('file', 'r')</code>, writes with <code>'w'</code> (overwrites) or <code>'a'</code> (appends). The <code>with</code> statement ensures files are closed automatically. CSV rows are split with <code>.split(',')</code>.</li>
+  <li data-narration-id="n36">There are four validation types: presence check (not empty), length check (correct number of characters), range check (within numeric bounds), and pattern check (matches expected format).</li>
+  <li data-narration-id="n37">Authentication verifies identity by comparing entered credentials to stored values. A simple implementation uses a dictionary of username-password pairs.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n33">For CSV questions, you are expected to know how to open a file with <code>open()</code>, iterate over lines, and split on commas. Always use the <code>with</code> keyword &mdash; it automatically closes the file and earns marks in &ldquo;Write&rdquo; questions. For validation questions, name the check precisely: presence, length, range, or pattern. Don&rsquo;t describe them vaguely as &ldquo;checking the input.&rdquo; A pattern check is distinct from the other three &mdash; it tests the format, not just the value.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Name the four types of validation check.",
+  "type": "4 marks — Describe",
+  "marks": "Mastering: Presence check (1), length check (1), range check (1), pattern check (1).\nSecure: Three correct.\nDeveloping: Two correct.\nEmerging: One or none correct."
+ },
+ {
+  "text": "Explain the difference between a range check and a pattern check. Give an example of each.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: Range check verifies a numeric value is within acceptable minimum and maximum bounds (1), e.g. age between 0 and 120 (1); pattern check verifies data matches an expected format or structure (1), e.g. postcode starts with two letters (1).\nSecure: Both described with one example missing.\nDeveloping: One type described correctly.\nEmerging: Confuses range and pattern checks."
+ },
+ {
+  "text": "Write Python code to open a file called scores.csv in read mode, skip the header line, and print the first field (name) of each remaining row.",
+  "type": "6 marks — Complete an Algorithm",
+  "marks": "Mastering: open() with 'r' and with statement (1); .readline() to skip header (1); for loop over remaining lines (1); .strip() to remove newline (1); .split(',') to separate fields (1); print(fields[0]) to output name (1).\nSecure: Correct overall structure with one step missing.\nDeveloping: File opened and loop present but parsing incorrect.\nEmerging: No file-handling code present."
+ },
+ {
+  "text": "A program asks a user to enter a username. Write a Python validation routine that checks:\n(a) the username is not empty\n(b) the username is between 3 and 15 characters\nIf either check fails, print an appropriate error message.",
+  "type": "6 marks — Write a Subprogram",
+  "marks": "Mastering: input() assigned to variable (1); presence check: if username == '' (1); error message for empty (1); length check: if len(username) < 3 or len(username) > 15 (1); error message for length (1); meaningful identifier names (1).\nSecure: Both checks present with one minor error.\nDeveloping: One check implemented correctly.\nEmerging: No validation logic present."
+ },
+ {
+  "text": "Define what a CSV file is and explain one advantage of using CSV format for storing data.",
+  "type": "2 marks — Define",
+  "marks": "Mastering: A plain-text file where values are separated by commas and each line represents a row of data (1); advantage — it can be read by any program, spreadsheet or programming language without special software (1).\nSecure: Correct definition with vague advantage.\nDeveloping: Identifies it relates to commas without full definition.\nEmerging: Describes it as a spreadsheet file."
+ },
+ {
+  "text": "Discuss the limitations of validation. Refer to the difference between validation and verification in your answer.",
+  "type": "6 marks — Discuss",
+  "marks": "Mastering: Validation checks data is reasonable/sensible but not necessarily correct (1); example — a user's correct age of 17 and a wrong age of 15 might both pass a range check (1); verification checks data was entered as intended, e.g. double-entry of a password (1); neither guarantees data accuracy — a user can deliberately enter false information that passes all checks (1); two-sided argument: validation reduces obviously wrong data (1) but is not sufficient alone for critical data such as medical records (1).\nSecure: Four points with partial two-sided argument.\nDeveloping: Defines validation but not verification.\nEmerging: One vague point."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which file mode in open() would overwrite an existing file?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "'r'",
+   "'a'",
+   "'w'",
+   "'rw'"
+  ]
+ },
+ {
+  "q": "A validation check that ensures a value is between 0 and 100 is called a _____.",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "Presence check",
+   "Pattern check",
+   "Range check",
+   "Length check"
+  ]
+ },
+ {
+  "q": "The Python method _____ splits a string into a list using a specified separator character.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   ".strip()",
+   ".split()",
+   ".slice()",
+   ".join()"
+  ]
+ },
+ {
+  "q": "In Python, the _____ statement ensures a file is automatically closed when the block ends.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "for",
+   "with",
+   "try",
+   "open"
+  ]
+ },
+ {
+  "q": "Match each validation type to what it checks.",
+  "left": [
+   "Presence check",
+   "Length check",
+   "Pattern check"
+  ],
+  "type": "match",
+  "order": [
+   1,
+   2,
+   0
+  ],
+  "right": [
+   "Data matches an expected format (e.g. postcode)",
+   "Field is not empty",
+   "Data is the correct number of characters"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "Tabular data as plain text — each value separated by a comma.",
+  "q": "What does a CSV file store and how are values separated?"
+ },
+ {
+  "a": "Writing — creates the file if it doesn't exist and overwrites it if it does.",
+  "q": "What is the file mode 'w' used for in Python's open() function?"
+ },
+ {
+  "a": ".strip()",
+  "q": "Which Python method removes the invisible newline (\\n) from the end of a file line?"
+ },
+ {
+  "a": "Presence, length, range, pattern.",
+  "q": "Name the four types of input validation check."
+ },
+ {
+  "a": "Not empty.",
+  "q": "A presence check verifies that a field is _____."
+ },
+ {
+  "a": "Verifies the format or structure of data, not just whether it is within numeric bounds.",
+  "q": "What does a pattern check do that a range check cannot?"
+ },
+ {
+  "a": "All characters in the string are alphabetic letters.",
+  "q": "Python's .isalpha() method returns True when _____."
+ },
+ {
+  "a": "Verifying a user's identity by checking their credentials against stored values.",
+  "q": "What is authentication?"
+ },
+ {
+  "a": "Validation checks data is reasonable; verification checks data was entered as intended (e.g. double entry).",
+  "q": "What is the difference between validation and verification?"
+ },
+ {
+  "a": "Append — adds data to the end of the file without overwriting existing content.",
+  "q": "File mode 'a' in open() means _____."
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "print()",
+  "definition": "The built-in Python function that displays text to the screen."
+ },
+ {
+  "term": "input()",
+  "definition": "The built-in Python function that pauses the program and waits for the user to type a value, returning it as a string."
+ },
+ {
+  "term": "CSV file",
+  "definition": "A plain-text file where each line represents one row of data and each value in the row is separated by a comma."
+ },
+ {
+  "term": "file mode",
+  "definition": "The parameter passed to open() that specifies whether the file should be read ('r'), written ('w') or appended ('a')."
+ },
+ {
+  "term": "validation",
+  "definition": "A check performed on data before it is accepted by a program, to ensure it is reasonable, sensible and within acceptable limits."
+ },
+ {
+  "term": "presence check",
+  "definition": "A validation check that ensures a field is not left empty."
+ },
+ {
+  "term": "length check",
+  "definition": "A validation check that ensures the data is the correct number of characters — not too long and not too short."
+ },
+ {
+  "term": "range check",
+  "definition": "A validation check that ensures a numeric value falls within an acceptable minimum and maximum bound."
+ },
+ {
+  "term": "pattern check",
+  "definition": "A validation check that ensures data matches an expected format, such as a postcode having specific characters in specific positions."
+ },
+ {
+  "term": "authentication",
+  "definition": "The process of verifying that a user is who they claim to be, typically by checking a username and password against stored credentials."
+ }
+]

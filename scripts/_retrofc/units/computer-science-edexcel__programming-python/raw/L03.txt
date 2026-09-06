@@ -1,0 +1,328 @@
+=== L3 Operators and String Manipulation ===
+id: 8adf7e1d-2768-4e06-96a7-1f953fcd88a6
+slug: operators-and-string-manipulation
+status: live tier:both updated:2026-07-30T22:40:42.566453+00:00
+narration_manifest: array len 37
+
+--- DESCRIPTION ---
+Arithmetic, relational and logical operators in Python, plus string slicing and case conversion.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">Operators &mdash; The Tools of Calculation</h2>
+<p data-narration-id="n2">An <dfn class="term" data-def="A symbol or keyword that tells Python to perform an operation on one or two values, producing a result.">operator</dfn> tells Python how to combine or compare values. There are three categories you must know: arithmetic, relational, and logical. Understanding them precisely matters because exam questions often test the output of specific expressions &mdash; especially for relational operators where the expected output is <code>True</code> or <code>False</code>, not &ldquo;yes&rdquo; or &ldquo;no&rdquo;.</p>
+
+<h2 data-narration-id="n3">Arithmetic Operators</h2>
+<p data-narration-id="n4">Python supports six arithmetic operators. Four are familiar: <code>+</code> (addition), <code>-</code> (subtraction), <code>*</code> (multiplication), <code>/</code> (real division &mdash; the result can be a decimal). The other two are <dfn class="term" data-def="The integer division operator in Python, written //, which divides two numbers and returns only the whole-number quotient, discarding any remainder.">integer division</dfn> (<code>//</code>) and <dfn class="term" data-def="The modulus operator in Python, written %, which returns the remainder after integer division.">modulus</dfn> (<code>%</code>), plus <dfn class="term" data-def="The exponentiation operator in Python, written **, which raises the left value to the power of the right value.">exponentiation</dfn> (<code>**</code>).</p>
+
+<pre data-narration-id="n5">print(17 // 5)    # Integer division: 3 (5 goes into 17 three full times)
+print(17 % 5)     # Modulus: 2 (17 = 3*5 + 2, remainder is 2)
+print(2 ** 8)     # Exponentiation: 256 (2 to the power of 8)
+print(7 / 2)      # Real division: 3.5</pre>
+
+<div class="key-fact" data-narration-id="n6" data-revision-tip="Cover this and state: what does 19 % 4 give, and what does 19 // 4 give? Verify by writing 19 = (quotient x 4) + remainder.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The modulus operator (<code>%</code>) returns the <strong>remainder</strong> after integer division. A classic use is testing whether a number is odd or even: <code>n % 2 == 0</code> is <code>True</code> if <code>n</code> is even. It also appears in creating circular patterns, validating credit card numbers, and extracting individual digits.</p>
+</div>
+
+<h2 data-narration-id="n7">Relational Operators</h2>
+<p data-narration-id="n8"><dfn class="term" data-def="An operator that compares two values and returns a Boolean result of True or False.">Relational operators</dfn> compare two values and always return a Boolean: <code>True</code> or <code>False</code>. This is a common exam error &mdash; students write &ldquo;yes&rdquo; or &ldquo;1&rdquo; when the correct answer is <code>True</code>.</p>
+
+<pre data-narration-id="n9">print(10 == 10)   # True
+print(10 != 5)    # True
+print(3 &lt; 2)      # False
+print(5 &gt;= 5)     # True</pre>
+
+<p data-narration-id="n10">The six relational operators are: <code>==</code> (equal to), <code>!=</code> (not equal to), <code>&lt;</code> (less than), <code>&gt;</code> (greater than), <code>&lt;=</code> (less than or equal to), <code>&gt;=</code> (greater than or equal to). Note that <code>==</code> tests equality; a single <code>=</code> in Python is assignment, not comparison.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Critical: Relational Operators Always Return True or False</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n11">This is one of the most common errors in exam answers. If a question asks &ldquo;what is the output of <code>print(7 &gt; 3)</code>?&rdquo;, the answer is <code>True</code> (capital T, no quotes). Writing &ldquo;yes&rdquo; or &ldquo;1&rdquo; is wrong. The result of any comparison in Python is a Boolean value &mdash; either <code>True</code> or <code>False</code>.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n12">Logical Operators</h2>
+<p data-narration-id="n13"><dfn class="term" data-def="An operator that combines or inverts Boolean conditions: AND requires both to be True; OR requires at least one to be True; NOT inverts a Boolean value.">Logical operators</dfn> combine or invert Boolean conditions. Python uses <code>and</code>, <code>or</code>, and <code>not</code> (all lowercase).</p>
+
+<pre data-narration-id="n14">age = 17
+has_consent = True
+
+if age &gt;= 16 and has_consent:
+    print(&quot;Eligible for trip&quot;)
+
+if age &lt; 13 or age &gt; 65:
+    print(&quot;Reduced price ticket&quot;)
+
+if not has_consent:
+    print(&quot;Permission required&quot;)</pre>
+
+<div class="key-fact" data-narration-id="n15" data-revision-tip="Test yourself: write a Python condition that checks whether a number n is between 1 and 100 inclusive using and.">
+  <div class="key-fact-label">Key Fact</div>
+  <p><code>and</code> requires <strong>all</strong> combined conditions to be <code>True</code>. <code>or</code> requires <strong>at least one</strong> to be <code>True</code>. <code>not</code> inverts: <code>not True</code> gives <code>False</code>. These match the Boolean logic used in search queries, access controls, and input validation throughout real systems.</p>
+</div>
+
+<h2 data-narration-id="n16">String Operations</h2>
+<p data-narration-id="n17">Python has powerful built-in tools for working with strings. The <dfn class="term" data-def="The number of characters in a string, returned by Python's len() function.">length</dfn> of a string is found with <code>len()</code>. <dfn class="term" data-def="Accessing individual characters in a string by their position, starting at index 0 for the first character.">Indexing</dfn> retrieves a single character by position, starting at 0. <dfn class="term" data-def="Extracting a portion of a string using Python's slice notation s[start:end], which returns characters from start up to but not including end.">Slicing</dfn> extracts a section of the string.</p>
+
+<pre data-narration-id="n18">name = &quot;Computer&quot;
+print(len(name))       # 8
+print(name[0])         # &quot;C&quot; (first character, index 0)
+print(name[3])         # &quot;p&quot; (index 3)
+print(name[0:4])       # &quot;Comp&quot; (index 0 up to but not including 4)</pre>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example &mdash; String Indexing and Slicing</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n19">For the string <code>s = &quot;GCSE2026&quot;</code>:</p>
+    <ul>
+      <li data-narration-id="n20"><code>len(s)</code> &rarr; <code>8</code></li>
+      <li data-narration-id="n21"><code>s[0]</code> &rarr; <code>'G'</code> (first character)</li>
+      <li data-narration-id="n22"><code>s[-1]</code> &rarr; <code>'6'</code> (last character, using negative indexing)</li>
+      <li data-narration-id="n23"><code>s[4:8]</code> &rarr; <code>'2026'</code> (characters at positions 4, 5, 6, 7)</li>
+      <li data-narration-id="n24"><code>s[0:4]</code> &rarr; <code>'GCSE'</code> (positions 0, 1, 2, 3)</li>
+    </ul>
+    <p data-narration-id="n25">Remember: Python counts from 0, and the end index in a slice is <em>excluded</em>. So <code>s[0:4]</code> gives characters at positions 0, 1, 2, 3 &mdash; not position 4.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n26">Case Conversion and Concatenation</h2>
+<p data-narration-id="n27">Python provides two methods for changing a string&rsquo;s case: <code>.upper()</code> returns a version with all letters capitalised; <code>.lower()</code> returns a version with all letters in lowercase. These are useful when comparing user input regardless of how it was typed.</p>
+
+<pre data-narration-id="n28">city = &quot;London&quot;
+print(city.upper())    # &quot;LONDON&quot;
+print(city.lower())    # &quot;london&quot;
+
+# Safe comparison:
+response = input(&quot;Enter yes or no: &quot;)
+if response.lower() == &quot;yes&quot;:
+    print(&quot;Confirmed&quot;)</pre>
+
+<p data-narration-id="n29"><dfn class="term" data-def="Joining two strings together using the + operator to form a single longer string.">Concatenation</dfn> joins strings together using <code>+</code>. Only strings can be concatenated &mdash; trying to add a string and an integer gives a <code>TypeError</code>. Use <code>str()</code> to convert a number to a string first: <code>&quot;Score: &quot; + str(85)</code>.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Putting It All Together &mdash; A Username Formatter</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n30">A school system creates a username from the first letter of a student&rsquo;s first name plus their full surname, all in lowercase:</p>
+    <pre data-narration-id="n31">first_name = input(&quot;First name: &quot;)
+surname = input(&quot;Surname: &quot;)
+username = first_name[0].lower() + surname.lower()
+print(&quot;Username:&quot;, username)</pre>
+    <p data-narration-id="n32">If the student enters &ldquo;Priya&rdquo; and &ldquo;Sharma&rdquo;, the username becomes &ldquo;psharma&rdquo;. This uses indexing (<code>[0]</code>), case conversion (<code>.lower()</code>), and concatenation (<code>+</code>) in a single line.</p>
+  </div></div>
+</div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n34">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n35">Python arithmetic operators include <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> (real), <code>//</code> (integer), <code>%</code> (modulus) and <code>**</code> (power). Relational operators always return <code>True</code> or <code>False</code>, not yes or no.</li>
+  <li data-narration-id="n36">Logical operators <code>and</code>, <code>or</code>, and <code>not</code> combine Boolean conditions. <code>and</code> requires all to be True; <code>or</code> requires at least one.</li>
+  <li data-narration-id="n37">String operations: <code>len()</code> for length, <code>s[i]</code> for a character at index i (0-based), <code>s[a:b]</code> for a slice (b excluded), <code>.upper()</code>/<code>.lower()</code> for case, <code>+</code> for concatenation.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n33">For &ldquo;Identify&rdquo; or &ldquo;Give&rdquo; questions about relational operator output, always write <code>True</code> or <code>False</code> &mdash; not &ldquo;yes&rdquo;, &ldquo;1&rdquo; or &ldquo;correct&rdquo;. For string questions, remember Python counts from index 0 and the end index in a slice is excluded. If asked to explain the difference between <code>/</code> and <code>//</code>, give a numeric example: <code>7 / 2 = 3.5</code> but <code>7 // 2 = 3</code>.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "State the output of the following Python expression: print(17 % 5)",
+  "type": "1 mark — Give/State/Name",
+  "marks": "Mastering: 2 (1). 17 = 3 x 5 + 2; the remainder is 2.\nSecure: Correct.\nDeveloping: 3 (confuses modulus with integer division).\nEmerging: 3.4 or another incorrect value."
+ },
+ {
+  "text": "Identify the output of the following Python code:\nword = \"Science\"\nprint(word[0:3])",
+  "type": "1 mark — Identify",
+  "marks": "Mastering: Sci (1). Characters at indices 0, 1, 2 — index 3 is excluded.\nSecure: Correct.\nDeveloping: Scie (includes index 3 by mistake).\nEmerging: sci (incorrect case) or a different portion."
+ },
+ {
+  "text": "Explain the difference between the / operator and the // operator in Python. Give one example of each.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: / performs real (floating-point) division and can return a decimal (1), e.g. 7 / 2 = 3.5 (1); // performs integer division and returns only the whole-number quotient (1), e.g. 7 // 2 = 3 (1).\nSecure: Both operators described correctly with one example.\nDeveloping: One operator explained correctly.\nEmerging: Confuses the two or provides no examples."
+ },
+ {
+  "text": "Write Python code that takes a full name as input and prints only the first three characters in uppercase.",
+  "type": "6 marks — Complete an Algorithm",
+  "marks": "Mastering: input() used and assigned to variable (1); slice [0:3] to extract first three characters (1); .upper() to convert to uppercase (1); print() outputs result (1); meaningful identifier names (1); code runs without error (1).\nSecure: Correct logic with minor naming or syntax issue.\nDeveloping: Either slice or upper() present but not both.\nEmerging: Attempts but neither slicing nor case conversion used."
+ },
+ {
+  "text": "State the output of the following Python expression:\nprint(5 > 3 and 10 < 8)",
+  "type": "1 mark — Give/State/Name",
+  "marks": "Mastering: False (1). (5 > 3) is True and (10 < 8) is False; True and False = False.\nSecure: Correct.\nDeveloping: True (misapplies and logic).\nEmerging: Yes or No instead of True or False."
+ },
+ {
+  "text": "A program stores usernames in uppercase. Explain how Python's string methods could be used to ensure a user's input matches a stored username regardless of how they typed it. Write the Python code for the comparison.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: Explains .upper() or .lower() normalises case (1); both the input and stored value should be converted to the same case (1); example: if input_name.upper() == stored_name (1); this means typing 'ali' or 'ALI' or 'Ali' all match the stored value 'ALI' (1).\nSecure: Correct idea with working code but partial explanation.\nDeveloping: Mentions .upper() or .lower() without explaining why.\nEmerging: No use of case conversion."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "What is the output of print(15 // 4) in Python?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "3.75",
+   "3",
+   "4",
+   "1"
+  ]
+ },
+ {
+  "q": "What is the output of the expression 10 > 3 in Python?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "Yes",
+   "1",
+   "True",
+   "10"
+  ]
+ },
+ {
+  "q": "The Python operator _____ returns the remainder after integer division.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "//",
+   "**",
+   "%",
+   "/"
+  ]
+ },
+ {
+  "q": "For the string s = \"Python\", s[0:3] returns _____.",
+  "type": "fill",
+  "correct": 0,
+  "options": [
+   "Pyt",
+   "Pyth",
+   "yth",
+   "Py"
+  ]
+ },
+ {
+  "q": "Match each operator to its description.",
+  "left": [
+   "//",
+   "%",
+   "**",
+   "=="
+  ],
+  "type": "match",
+  "order": [
+   3,
+   1,
+   0,
+   2
+  ],
+  "right": [
+   "Exponentiation (power)",
+   "Remainder after division",
+   "Tests equality",
+   "Integer division quotient"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "The remainder after integer division.",
+  "q": "What does the % operator return in Python?"
+ },
+ {
+  "a": "3 — integer division discards the decimal.",
+  "q": "What is the result of 13 // 4 in Python?"
+ },
+ {
+  "a": "True or False (a Boolean value).",
+  "q": "What does a relational operator always return in Python?"
+ },
+ {
+  "a": "Even",
+  "q": "Name the kind of integer for which n % 2 == 0 returns True in Python."
+ },
+ {
+  "a": ".lower()",
+  "q": "What Python method converts a string to all lowercase?"
+ },
+ {
+  "a": "Comp — indices 0, 1, 2, 3 (index 4 is excluded).",
+  "q": "For s = 'Computing', what does s[0:4] return?"
+ },
+ {
+  "a": "5.",
+  "q": "What does len('hello') return?"
+ },
+ {
+  "a": "+ (the plus operator).",
+  "q": "In Python, what symbol is used for concatenation (joining strings)?"
+ },
+ {
+  "a": "= assigns a value; == tests whether two values are equal.",
+  "q": "What is the difference between = and == in Python?"
+ },
+ {
+  "a": "All combined conditions must be True.",
+  "q": "What does the and operator require for an expression to evaluate to True?"
+ },
+ {
+  "a": "** (double asterisk), e.g. 2 ** 8 = 256.",
+  "q": "What Python operator raises a number to a power?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "operator",
+  "definition": "A symbol or keyword that tells Python to perform an operation on one or two values, producing a result."
+ },
+ {
+  "term": "integer division",
+  "definition": "The // operator in Python, which divides two numbers and returns only the whole-number quotient, discarding any remainder."
+ },
+ {
+  "term": "modulus",
+  "definition": "The % operator in Python, which returns the remainder after integer division."
+ },
+ {
+  "term": "exponentiation",
+  "definition": "The ** operator in Python, which raises the left value to the power of the right value."
+ },
+ {
+  "term": "relational operator",
+  "definition": "An operator that compares two values and returns a Boolean result of True or False."
+ },
+ {
+  "term": "logical operator",
+  "definition": "An operator that combines or inverts Boolean conditions: and requires both to be True; or requires at least one to be True; not inverts a Boolean value."
+ },
+ {
+  "term": "length",
+  "definition": "The number of characters in a string, returned by Python's len() function."
+ },
+ {
+  "term": "indexing",
+  "definition": "Accessing individual characters in a string by their position, starting at index 0 for the first character."
+ },
+ {
+  "term": "slicing",
+  "definition": "Extracting a portion of a string using Python's slice notation s[start:end], which returns characters from start up to but not including end."
+ },
+ {
+  "term": "concatenation",
+  "definition": "Joining two strings together using the + operator to form a single longer string."
+ }
+]
