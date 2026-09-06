@@ -226,8 +226,9 @@
            Sign out control. Without one of its two class names the button is
            never added, and a stale session admits you forever. -->
       <nav class="admin-nav">
-        <a href="/teacher/review">Review content</a>
-        <a href="/teacher/editor">Edit lessons</a>
+        <!-- Content tools appear only for staff with edit rights (my-classes canEdit) -->
+        <a href="/teacher/review" id="lnk-review" hidden>Review content</a>
+        <a href="/teacher/editor" id="lnk-editor" hidden>Edit lessons</a>
       </nav>
     </div>
   </header>
@@ -633,6 +634,10 @@
          whole screen down. Nothing in this function should be able to do that. */
       var bb = document.getElementById('buildbar');
       if (bb) bb.hidden = !d.canBuild;
+      ['lnk-review', 'lnk-editor'].forEach(function (id) {
+        var a = document.getElementById(id);
+        if (a) a.hidden = !d.canEdit;
+      });
       paintSubjects(d.subjects || []);
 
       if (!CLASSES.length) {

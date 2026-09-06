@@ -242,13 +242,29 @@
           /* Offer the choice rather than redirecting. Someone who deliberately
              navigated to the SIGN IN page may well want a different account,
              and bouncing them to the dashboard makes that impossible. */
-          document.getElementById('whoami').textContent =
-            (res.data.session.user && res.data.session.user.email) || 'another account';
+          var email = (res.data.session.user && res.data.session.user.email) || 'another account';
+          var uid = res.data.session.user && res.data.session.user.id;
+          document.getElementById('whoami').textContent = email;
           document.getElementById('alreadyIn').style.display = '';
           loginFormEl.style.display = 'none';
           forgotLink.style.display = 'none';
           document.querySelector('.card-title').textContent = 'Already signed in';
           document.querySelector('.card-subtitle').style.display = 'none';
+          /* A student session is not a teacher session: say so and offer only
+             sign-out. Before this, a student account was offered "Go to your
+             classes" and landed on a 401 (Tom, 6 Sep 2026). */
+          if (uid) {
+            sb.from('profiles').select('role').eq('id', uid).single().then(function (p) {
+              var role = p.data && p.data.role;
+              if (role !== 'teacher' && role !== 'platform_admin' && role !== 'school_admin') {
+                document.getElementById('continueBtn').style.display = 'none';
+                document.querySelector('#alreadyIn .card-subtitle').innerHTML =
+                  'You are signed in as <strong>' + email.replace(/</g, '&lt;') +
+                  '</strong>, which is a student account, not a teacher account.';
+                document.getElementById('signOutLink').textContent = 'Sign out and use a teacher account';
+              }
+            });
+          }
         }
       });
     }
