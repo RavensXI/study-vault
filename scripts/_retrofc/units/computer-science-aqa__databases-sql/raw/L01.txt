@@ -1,0 +1,283 @@
+=== L1 Relational Databases: Tables, Keys and Relationships ===
+id: cca15945-6471-47ff-a7dc-82928c82a4b7
+slug: relational-databases-tables-keys-and-relationships
+status: live tier:both updated:2026-08-19T11:12:59.251136+00:00
+narration_manifest: array len 37
+
+--- DESCRIPTION ---
+Tables, records, fields, primary keys and foreign keys — why relations beat one big spreadsheet.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">What Is a Database?</h2>
+<p data-narration-id="n2">A <dfn class="term" data-def="An organised collection of data stored and accessed electronically, designed for efficient retrieval and management.">database</dfn> is an organised collection of data. Unlike a simple spreadsheet, a database is designed to store large amounts of information and allow it to be searched, sorted and updated quickly. Schools use databases to store pupil records; hospitals use them to track patient appointments; online shops use them to manage product stock. Anywhere large amounts of structured data need to be managed, a database is the tool of choice.</p>
+
+<h2 data-narration-id="n3">Relational Databases</h2>
+<p data-narration-id="n4">A <dfn class="term" data-def="A type of database that organises data into two or more linked tables, removing repeated data and connecting information through key fields.">relational database</dfn> stores data in multiple linked tables rather than one large list. Each table holds data about a single topic (for example, students, or courses). The tables are connected to each other using special key fields. This structure was developed to solve two serious problems that arise when you try to keep everything in one place: <strong>data redundancy</strong> and <strong>data inconsistency</strong>.</p>
+
+<div class="key-fact" data-narration-id="n5" data-revision-tip="Cover this and recall: what two problems does a relational database solve, and what does each term mean?">
+  <div class="key-fact-label">Key Fact</div>
+  <p><dfn class="term" data-def="The unnecessary repetition of the same data in multiple places within a database, which wastes storage and makes updates harder.">Data redundancy</dfn> means storing the same piece of data in more than one place. <dfn class="term" data-def="A problem that occurs when copies of the same data in different places go out of step with each other, so one record shows one value and another shows a different value for the same fact.">Data inconsistency</dfn> means different copies of the same data ending up with different values. Relational databases tackle both by storing each piece of data in exactly one place.</p>
+</div>
+
+<h2 data-narration-id="n6">Tables, Records and Fields</h2>
+<p data-narration-id="n7">Every relational database is made up of <dfn class="term" data-def="A structured grid in a database that stores data about one topic, made up of rows and columns.">tables</dfn>. Each table has a name (for example, <em>Students</em>) and is divided into columns called <strong>fields</strong> (or attributes) and rows called <strong>records</strong> (or tuples).</p>
+<ul>
+<li data-narration-id="n8">A <strong>field</strong> (also called an attribute) is a single category of data &mdash; for example, <em>student_name</em> or <em>year_group</em>. Each field has a specified data type: text, integer, date, Boolean and so on.</li>
+<li data-narration-id="n9">A <dfn class="term" data-def="A single row in a database table, representing one complete set of information about one item or person.">record</dfn> (also called a tuple or row) is one complete entry in the table &mdash; all the data about one particular student, for example.</li>
+</ul>
+<p data-narration-id="n10">Think of a table like a grid: the column headings are the fields, and each row is a record. Here is a sample <em>Students</em> table:</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example &mdash; the Students Table</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n11">The <strong>Students</strong> table has four fields: <em>student_id</em>, <em>student_name</em>, <em>year_group</em>, <em>tutor_group</em>.</p>
+    <p data-narration-id="n12">Sample records:</p>
+    <p data-narration-id="n13"><code>1 | Aisha Khan | 10 | 10A</code><br>
+    <code>2 | Ben Okafor | 11 | 11B</code><br>
+    <code>3 | Chloe Davis | 10 | 10A</code></p>
+    <p data-narration-id="n14">Here <em>student_id</em> is the primary key &mdash; each student has a unique number that is never repeated or reused. The other fields store descriptive information about the student. Notice that <em>10A</em> appears twice: this is fine because it is just a tutor group label, not the student&rsquo;s main identifier.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n15">Primary Keys</h2>
+<p data-narration-id="n16">Every table must have a <dfn class="term" data-def="A field (or combination of fields) in a database table that uniquely identifies each record. No two records can share the same primary key value, and it cannot be empty.">primary key</dfn>. This is a field whose value is different for every record, so it can be used to pinpoint exactly one row. In the Students table, <em>student_id</em> is the primary key. You cannot use <em>student_name</em> as a primary key because two students could share the same name.</p>
+<p data-narration-id="n17">Primary keys are often auto-generated integers (1, 2, 3&hellip;) although they can be any unique value &mdash; an NHS number, a National Insurance number, a barcode. The key point is that no two records can ever have the same primary key value, and the field must always have a value (it cannot be left blank).</p>
+
+<h2 data-narration-id="n18">Foreign Keys</h2>
+<p data-narration-id="n19">A second table&mdash;say, an <em>Enrolments</em> table&mdash;needs to know which student each enrolment belongs to. Rather than copy the student&rsquo;s full name and year group into the Enrolments table (which would create redundancy), we store only the student&rsquo;s <em>student_id</em>. In the Enrolments table, this field is called a <dfn class="term" data-def="A field in one table that references the primary key in another table, creating a link between the two tables.">foreign key</dfn>.</p>
+<p data-narration-id="n20">The foreign key &ldquo;points to&rdquo; the primary key in the other table. This is how the two tables are linked. If you want to find a student&rsquo;s name for a given enrolment, you look up the <em>student_id</em> in the Students table using the foreign key as a reference.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example &mdash; Linking Students to Courses</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n21">We have two tables:</p>
+    <p data-narration-id="n22"><strong>Students</strong> (<em>student_id</em> [PK], <em>student_name</em>, <em>year_group</em>)<br>
+    <strong>Courses</strong> (<em>course_id</em> [PK], <em>course_title</em>)<br>
+    <strong>Enrolments</strong> (<em>enrolment_id</em> [PK], <em>student_id</em> [FK], <em>course_id</em> [FK])</p>
+    <p data-narration-id="n23">The Enrolments table uses <em>student_id</em> as a foreign key linking back to Students, and <em>course_id</em> as a foreign key linking back to Courses. This means:</p>
+    <ul>
+      <li data-narration-id="n24">Aisha&rsquo;s name is stored <em>once</em> in Students &mdash; there is no need to write &ldquo;Aisha Khan&rdquo; in every enrolment row for her.</li>
+      <li data-narration-id="n25">If Aisha&rsquo;s name is ever corrected, you update it in <em>one</em> place and it is immediately correct everywhere &mdash; no inconsistency possible.</li>
+    </ul>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n26">Relationships Between Tables</h2>
+<p data-narration-id="n27">The most common relationship at GCSE is a <strong>one-to-many</strong> relationship. In our example, one student can have many enrolments, but each enrolment belongs to exactly one student. The foreign key always sits in the &ldquo;many&rdquo; side of the relationship (the Enrolments table), pointing back to the primary key on the &ldquo;one&rdquo; side (the Students table).</p>
+
+<div class="key-fact" data-narration-id="n28" data-revision-tip="Write from memory: what is a primary key, what is a foreign key, and which table holds the foreign key in a one-to-many relationship?">
+  <div class="key-fact-label">Key Fact</div>
+  <p>A <strong>primary key</strong> uniquely identifies a record in its own table. A <strong>foreign key</strong> in one table references the primary key in another table, linking the two tables together. In a one-to-many relationship, the foreign key is always in the &ldquo;many&rdquo; table.</p>
+</div>
+
+<h2 data-narration-id="n29">Why Not Just Use One Big Table?</h2>
+<p data-narration-id="n30">Imagine trying to store all student and course information in a single flat table with columns like: <em>student_id, student_name, year_group, course_title, teacher_name, room_number</em>. Every time a student takes two courses, you would need two rows &mdash; with the student&rsquo;s name and year group repeated in both. This is data redundancy. Now imagine the student changes year group: you would need to update every row for that student. Miss one, and you now have inconsistent data. The relational approach solves both problems by splitting data across properly linked tables.</p>
+
+<h2 data-narration-id="n31">Vocabulary Equivalence Note</h2>
+<p data-narration-id="n32">The same concepts appear with different names depending on context. When discussing an abstract data model: an <strong>entity</strong> maps to a table; an <strong>attribute</strong> maps to a field; an <strong>entity identifier</strong> maps to a primary key. Your exam may use either set of terms &mdash; you need to recognise both.</p>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n34">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n35">A relational database stores data in linked tables, each containing records (rows) and fields (columns). Primary keys uniquely identify each record; foreign keys link one table to another.</li>
+  <li data-narration-id="n36">Data redundancy (repeated data) and data inconsistency (conflicting copies) are the two core problems that relational databases solve by storing each piece of data in exactly one place.</li>
+  <li data-narration-id="n37">The terms entity, attribute and entity identifier are abstract equivalents of table, field and primary key &mdash; you need to recognise both sets.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n33">When a question asks you to &ldquo;define primary key&rdquo; or &ldquo;explain the purpose of a foreign key&rdquo;, be precise: a primary key <em>uniquely identifies</em> a record (not just &ldquo;identifies&rdquo;) and a foreign key <em>references the primary key in another table</em> (not just &ldquo;links tables&rdquo;). For a 4-mark explain question, name the key concept, say what it does, explain the benefit (e.g. eliminates redundancy), and give an example from the scenario in the question.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "What is meant by a primary key in a relational database?",
+  "type": "2 marks — Define",
+  "marks": "Mastering: A field (or combination of fields) that uniquely identifies each record in a table; no two records can share the same primary key value and it cannot be empty. Secure: A field that uniquely identifies a record / ensures every row is different. Developing: A field used to identify records (partial — doesn't stress uniqueness or no-null rule). Emerging: A key in a table (vague, insufficient)."
+ },
+ {
+  "text": "Explain what is meant by data redundancy and describe one problem it causes.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: Data redundancy is the unnecessary repetition of the same data in multiple places (1); storing a student's name in both the Students table and the Enrolments table is an example (1); if the name needs to change, every copy must be updated (1); missing any copy leads to data inconsistency, where different records show different values for the same fact (1). Secure: Defines redundancy correctly and identifies one clear problem. Developing: Identifies redundancy as repeated data but problem explanation is vague. Emerging: Repeating data named; no consequence explained."
+ },
+ {
+  "text": "A school database has a Students table and an Enrolments table. The Students table contains the field student_id as a primary key. State the name given to the field student_id when it appears in the Enrolments table, and explain its purpose.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: The field is a foreign key (1); it references the primary key in the Students table (1); this creates a link between the two tables (1); allowing enrolment rows to be associated with the correct student without repeating all the student's details (1). Secure: Names foreign key and explains that it links to the Students table. Developing: Names foreign key but purpose is vague. Emerging: Names it a key but doesn't use the correct term."
+ },
+ {
+  "text": "A database designer is considering whether to store all student and course information in a single flat table or to use a relational database with separate linked tables. Compare these two approaches, referring to data redundancy and data inconsistency.",
+  "type": "6 marks — Compare and Contrast",
+  "marks": "Mastering: Flat table requires repeating student details for every course they take (redundancy) whereas a relational database stores student details once, referenced by a foreign key (no redundancy); flat table risks inconsistency if one copy of a student's name is updated but another is not, whereas a relational database updates the single source record so inconsistency cannot occur; relational database requires more complex design but scales better for large datasets. Secure: Identifies redundancy and inconsistency differences with clear comparison language. Developing: Identifies problems with flat tables but comparison is one-sided. Emerging: Mentions redundancy or inconsistency but no direct comparison."
+ },
+ {
+  "text": "Identify the data type most appropriate for the field year_group in a Students table if it stores values such as 10, 11.",
+  "type": "1 mark — Give/Name",
+  "marks": "Mastering/Secure: Integer (accept whole number). Developing: Number (accept if context makes integer clear). Emerging: Any other data type."
+ },
+ {
+  "text": "Explain what is meant by a one-to-many relationship in a relational database and give an example using Students and Courses tables.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: One record in the first table can be associated with many records in the second table, but each record in the second table is associated with only one record in the first (1); example: one student can be enrolled on many courses (1); each enrolment record belongs to exactly one student (1); the foreign key (student_id) sits in the Enrolments/many-side table (1). Secure: Correct definition with a clear example. Developing: Example given without precise definition of the relationship. Emerging: Mentions one table having more records than another — vague."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which term describes the unnecessary repetition of the same data in multiple places in a database?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "Data inconsistency",
+   "Data redundancy",
+   "Data duplication",
+   "Data corruption"
+  ]
+ },
+ {
+  "q": "In a Students table, which field is most suitable to use as a primary key?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "student_name",
+   "year_group",
+   "student_id",
+   "tutor_group"
+  ]
+ },
+ {
+  "q": "A field in one table that references the primary key in another table is called a _____ key.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "candidate",
+   "foreign",
+   "composite",
+   "secondary"
+  ]
+ },
+ {
+  "q": "In an abstract data model, the term _____ is used instead of the word 'table'.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "record",
+   "attribute",
+   "entity",
+   "schema"
+  ]
+ },
+ {
+  "q": "Match each database term to its definition.",
+  "left": [
+   "Primary key",
+   "Foreign key",
+   "Record"
+  ],
+  "type": "match",
+  "order": [
+   2,
+   1,
+   0
+  ],
+  "right": [
+   "A row containing all data about one item",
+   "References the primary key in another table",
+   "Uniquely identifies each row in its own table"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "A database that organises data into linked tables, removing redundancy by connecting information through key fields.",
+  "q": "What is a relational database?"
+ },
+ {
+  "a": "A field that uniquely identifies each record in a table — no two records share the same value.",
+  "q": "What is a primary key?"
+ },
+ {
+  "a": "A field in one table that references the primary key in another table, linking the two tables.",
+  "q": "What is a foreign key?"
+ },
+ {
+  "a": "Unnecessary repetition of the same data in multiple places within a database.",
+  "q": "What is data redundancy?"
+ },
+ {
+  "a": "When different copies of the same data hold different values, so records contradict each other.",
+  "q": "What is data inconsistency?"
+ },
+ {
+  "a": "The 'many' side table.",
+  "q": "In a one-to-many relationship, which table holds the foreign key?"
+ },
+ {
+  "a": "A single row representing one complete set of data about one item or person.",
+  "q": "What is a record in a database table?"
+ },
+ {
+  "a": "A single column representing one category of data, with a specified data type.",
+  "q": "What is a field in a database table?"
+ },
+ {
+  "a": "Entity.",
+  "q": "What abstract model term is equivalent to 'table'?"
+ },
+ {
+  "a": "Attribute.",
+  "q": "What abstract model term is equivalent to 'field'?"
+ },
+ {
+  "a": "Two students could share the same name, so the field is not guaranteed to be unique.",
+  "q": "Why can a student's name not be used as a primary key?"
+ },
+ {
+  "a": "Each piece of data is stored in exactly one place; all other tables reference it rather than copy it.",
+  "q": "How does a relational database prevent data inconsistency?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "database",
+  "definition": "An organised collection of data stored and accessed electronically, designed for efficient retrieval and management."
+ },
+ {
+  "term": "relational database",
+  "definition": "A type of database that organises data into two or more linked tables, removing repeated data and connecting information through key fields."
+ },
+ {
+  "term": "data redundancy",
+  "definition": "The unnecessary repetition of the same data in multiple places within a database, which wastes storage and makes updates harder."
+ },
+ {
+  "term": "data inconsistency",
+  "definition": "A problem that occurs when copies of the same data in different places go out of step with each other, showing different values for the same fact."
+ },
+ {
+  "term": "table",
+  "definition": "A structured grid in a database that stores data about one topic, made up of rows and columns."
+ },
+ {
+  "term": "record",
+  "definition": "A single row in a database table, representing one complete set of information about one item or person."
+ },
+ {
+  "term": "primary key",
+  "definition": "A field (or combination of fields) in a database table that uniquely identifies each record; no two records can share the same value and it cannot be empty."
+ },
+ {
+  "term": "foreign key",
+  "definition": "A field in one table that references the primary key in another table, creating a link between the two tables."
+ }
+]

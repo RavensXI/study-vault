@@ -1,0 +1,288 @@
+=== L2 SQL: Retrieving Data with SELECT, FROM, WHERE, ORDER BY ===
+id: 09d60f23-ae6f-4e7d-b51b-1282e3bd1332
+slug: sql-retrieving-data-with-select-from-where-order-by
+status: live tier:both updated:2026-08-19T11:12:59.215483+00:00
+narration_manifest: array len 49
+
+--- DESCRIPTION ---
+Writing SQL queries to retrieve data, filter with WHERE conditions and sort results with ORDER BY.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">What Is SQL?</h2>
+<p data-narration-id="n2"><dfn class="term" data-def="Structured Query Language — a standard language used to create, retrieve, update and delete data in a relational database.">SQL</dfn> (Structured Query Language) is the language used to communicate with a relational database. When a website shows you a list of products, when a teacher pulls up your grades, or when a bank checks your balance, SQL is running behind the scenes. In this lesson, we focus on retrieving data &mdash; asking the database to show us records that match certain criteria.</p>
+<p data-narration-id="n3">We will use the same three tables introduced in the previous lesson throughout all our examples:</p>
+<ul>
+  <li data-narration-id="n4"><strong>Students</strong> &mdash; student_id (PK), student_name, year_group</li>
+  <li data-narration-id="n5"><strong>Courses</strong> &mdash; course_id (PK), course_title</li>
+  <li data-narration-id="n6"><strong>Enrolments</strong> &mdash; enrolment_id (PK), student_id (FK), course_id (FK)</li>
+</ul>
+
+<h2 data-narration-id="n7">SELECT and FROM</h2>
+<p data-narration-id="n8">Every retrieval query begins with <dfn class="term" data-def="The SQL keyword that specifies which columns should be shown in the results of a query.">SELECT</dfn>, followed by the column names you want to see. Then comes <dfn class="term" data-def="The SQL keyword that names the table (or tables) from which data should be retrieved.">FROM</dfn>, followed by the table name. If you want all columns, use a star (<code>*</code>) instead of listing them.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example 1 &mdash; Simple SELECT</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n9"><strong>Query:</strong> Show all data from the Students table.</p>
+    <p data-narration-id="n10"><code>SELECT *<br>FROM Students;</code></p>
+    <p data-narration-id="n11">The <code>*</code> means &ldquo;all columns&rdquo;. The database returns every row and every field from the Students table. The semicolon marks the end of the query.</p>
+    <p data-narration-id="n12"><strong>Query:</strong> Show only the student_name column from the Students table.</p>
+    <p data-narration-id="n13"><code>SELECT student_name<br>FROM Students;</code></p>
+    <p data-narration-id="n14">This time only one column is returned. You can list multiple columns separated by commas: <code>SELECT student_name, year_group FROM Students;</code></p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n15">Filtering with WHERE</h2>
+<p data-narration-id="n16">Most of the time you don&rsquo;t want every row &mdash; you want rows that meet a condition. The <dfn class="term" data-def="The SQL keyword that filters rows, returning only those where the specified condition is true.">WHERE</dfn> clause lets you set that condition. The database checks each row and only includes it in the results if the condition is true.</p>
+<p data-narration-id="n17">You can use these comparison operators in a WHERE clause: <code>=</code> (equal), <code>&lt;&gt;</code> (not equal), <code>&lt;</code> (less than), <code>&gt;</code> (greater than), <code>&lt;=</code> (less than or equal to), <code>&gt;=</code> (greater than or equal to). You can also combine conditions with <code>AND</code> and <code>OR</code>, and use <code>LIKE</code> with a <code>%</code> wildcard for partial text matches.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example 2 &mdash; WHERE with Comparisons, AND, OR and LIKE</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n18"><strong>Equal to (text value):</strong></p>
+    <p data-narration-id="n19"><code>SELECT *<br>FROM Students<br>WHERE student_name = &lsquo;Aisha Khan&rsquo;;</code></p>
+    <p data-narration-id="n20">Text values are wrapped in single quotes. This returns only the row where the student&rsquo;s name is exactly &lsquo;Aisha Khan&rsquo;.</p>
+    <p data-narration-id="n21"><strong>Greater than (numeric value):</strong></p>
+    <p data-narration-id="n22"><code>SELECT *<br>FROM Students<br>WHERE year_group &gt; 10;</code></p>
+    <p data-narration-id="n23">Returns only students in year 11 (or above, if higher year groups exist). Numbers do not need quotes.</p>
+    <p data-narration-id="n24"><strong>Combining conditions with AND:</strong></p>
+    <p data-narration-id="n25"><code>SELECT *<br>FROM Students<br>WHERE year_group = 10 AND student_name LIKE &lsquo;A%&rsquo;;</code></p>
+    <p data-narration-id="n26">Both conditions must be true. LIKE &lsquo;A%&rsquo; matches any name that starts with the letter A. The <code>%</code> is a wildcard meaning &ldquo;any characters here&rdquo;.</p>
+    <p data-narration-id="n27"><strong>Either condition with OR:</strong></p>
+    <p data-narration-id="n28"><code>SELECT *<br>FROM Students<br>WHERE year_group = 10 OR year_group = 11;</code></p>
+    <p data-narration-id="n29">Returns students in year 10 OR year 11 &mdash; either condition being true is enough to include the row.</p>
+  </div></div>
+</div>
+
+<div class="key-fact" data-narration-id="n30" data-revision-tip="Cover this and write a WHERE clause that finds all students whose name starts with 'B' and who are in year group 10.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>In a WHERE clause: text values go inside single quotes; numbers do not. The wildcard character <code>%</code> is used with LIKE: <code>LIKE &lsquo;%son&rsquo;</code> matches anything ending in &lsquo;son&rsquo;; <code>LIKE &lsquo;A%&rsquo;</code> matches anything starting with &lsquo;A&rsquo;; <code>LIKE &lsquo;%art%&rsquo;</code> matches anything containing &lsquo;art&rsquo;.</p>
+</div>
+
+<h2 data-narration-id="n31">Sorting with ORDER BY</h2>
+<p data-narration-id="n32">By default, rows come back in no guaranteed order. To sort the results, add an <dfn class="term" data-def="The SQL clause that sorts the results of a query in ascending (ASC) or descending (DESC) order based on one or more columns.">ORDER BY</dfn> clause at the end of the query, followed by the column name. Use <code>ASC</code> for ascending order (A to Z, lowest to highest) or <code>DESC</code> for descending order (Z to A, highest to lowest). If you leave out ASC or DESC, the database defaults to ascending.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example 3 &mdash; ORDER BY</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n33"><strong>Alphabetical order:</strong></p>
+    <p data-narration-id="n34"><code>SELECT student_name<br>FROM Students<br>ORDER BY student_name ASC;</code></p>
+    <p data-narration-id="n35">Returns all student names sorted A to Z.</p>
+    <p data-narration-id="n36"><strong>Filtered and sorted together:</strong></p>
+    <p data-narration-id="n37"><code>SELECT student_name, year_group<br>FROM Students<br>WHERE year_group = 10<br>ORDER BY student_name DESC;</code></p>
+    <p data-narration-id="n38">Returns only year 10 students, but sorted Z to A by name. Notice the clause order: SELECT &mdash; FROM &mdash; WHERE &mdash; ORDER BY. This order is fixed and must not be changed.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n39">Querying Across Two Tables</h2>
+<p data-narration-id="n40">Exam questions may ask you to retrieve data from two tables at once. You can do this by listing both tables after FROM and adding a WHERE condition that matches the primary key in one table to the foreign key in the other. This effectively joins the tables by finding rows where the key values match.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example 4 &mdash; Two-Table Query</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n41"><strong>Task:</strong> Find the names of all students enrolled on course number 3.</p>
+    <p data-narration-id="n42"><code>SELECT Students.student_name<br>FROM Students, Enrolments<br>WHERE Students.student_id = Enrolments.student_id<br>AND Enrolments.course_id = 3;</code></p>
+    <p data-narration-id="n43">Step by step: <code>FROM Students, Enrolments</code> tells the database to look at both tables. <code>WHERE Students.student_id = Enrolments.student_id</code> links the two tables through matching key values (primary key = foreign key). The second AND condition filters to course 3 only. You can use <code>TableName.ColumnName</code> notation when the same column name appears in both tables, to avoid ambiguity.</p>
+  </div></div>
+</div>
+
+<div class="key-fact" data-narration-id="n44" data-revision-tip="Write from memory: the correct order of SQL clauses when using all four keywords &mdash; SELECT, FROM, WHERE, ORDER BY.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The four retrieval keywords must appear in this order: <strong>SELECT</strong> (what columns) &rarr; <strong>FROM</strong> (which table or tables) &rarr; <strong>WHERE</strong> (which rows, optional) &rarr; <strong>ORDER BY</strong> (what sort order, optional). Swapping the order causes a syntax error.</p>
+</div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n46">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n47">SELECT names the columns you want; FROM names the table. Use <code>*</code> for all columns. Clause order is fixed: SELECT &rarr; FROM &rarr; WHERE &rarr; ORDER BY.</li>
+  <li data-narration-id="n48">WHERE filters rows using comparison operators (<code>=</code>, <code>&lt;&gt;</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>), combined with AND/OR, or LIKE with % for partial text matches. Text values need single quotes; numbers do not.</li>
+  <li data-narration-id="n49">ORDER BY sorts results ASC (ascending) or DESC (descending). To query two tables, list both in FROM and use a WHERE condition that matches the primary key to the foreign key.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n45">In a 5-mark SQL question, examiners typically award one mark each for: correct SELECT with named columns, correct FROM with correct table(s), correct WHERE condition, correct comparison operator, and correct ORDER BY. Common errors: forgetting single quotes around text values; using <code>=</code> instead of <code>LIKE</code> for wildcard matching; putting ORDER BY before WHERE; writing a column name that doesn&rsquo;t exist in the given table. Always re-read the table schema in the question before writing your query.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Write an SQL query to retrieve the student_name and year_group of all students from a table called Students.",
+  "type": "5 marks — Write SQL",
+  "marks": "Mastering: SELECT student_name, year_group FROM Students; — all five marks (SELECT correct columns (1), FROM correct table (1), no spurious WHERE (1), syntactically correct (1), semicolon / overall structure (1)). Secure: SELECT and FROM correct, minor syntax issue. Developing: SELECT present, wrong column names or table name. Emerging: SQL attempted but fundamentally incorrect structure."
+ },
+ {
+  "text": "Write an SQL query to find the student_name of every student in year group 10, sorted in descending alphabetical order by student_name.",
+  "type": "5 marks — Write SQL",
+  "marks": "Mastering: SELECT student_name FROM Students WHERE year_group = 10 ORDER BY student_name DESC; — SELECT (1), FROM (1), WHERE year_group = 10 (1), ORDER BY student_name (1), DESC (1). Secure: All clauses present, minor error in one (e.g. quotes around 10). Developing: WHERE and ORDER BY present but one clause wrong. Emerging: Only SELECT/FROM correct."
+ },
+ {
+  "text": "Explain the purpose of the WHERE clause in an SQL SELECT query.",
+  "type": "2 marks — Define",
+  "marks": "Mastering: WHERE filters rows, returning only those where the specified condition is true, so the query results contain only relevant records. Secure: WHERE filters results to rows matching a condition. Developing: WHERE selects certain rows (vague about condition). Emerging: It's part of the query (no explanation of filtering)."
+ },
+ {
+  "text": "State the difference between using AND and OR to combine conditions in a WHERE clause.",
+  "type": "2 marks — State a Difference",
+  "marks": "Mastering: AND requires both conditions to be true for a row to be included; OR requires only one of the conditions to be true. Secure: AND = both true, OR = at least one true. Developing: AND is stricter / OR gives more results (partially correct, no precision). Emerging: One named but not distinguished from the other."
+ },
+ {
+  "text": "Write an SQL query to find the student_name of all students whose name contains the letters 'son', from a table called Students.",
+  "type": "5 marks — Write SQL",
+  "marks": "Mastering: SELECT student_name FROM Students WHERE student_name LIKE '%son%'; — SELECT (1), FROM Students (1), WHERE (1), LIKE (1), '%son%' with correct wildcard placement (1). Secure: LIKE used correctly but wildcard position wrong (e.g. 'son%'). Developing: WHERE present but = used instead of LIKE. Emerging: Query attempted, no LIKE or wildcard."
+ },
+ {
+  "text": "A student writes the following SQL query to find all students enrolled on course 5:\n\nSELECT student_name FROM Enrolments WHERE course_id = 5;\n\nThe query runs without error but returns no student names. Explain why, and write a corrected query.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: The Students table is not included — student_name is in Students, not Enrolments (1); both tables must be listed in FROM (1); a WHERE condition must link Students.student_id = Enrolments.student_id (1); corrected: SELECT Students.student_name FROM Students, Enrolments WHERE Students.student_id = Enrolments.student_id AND Enrolments.course_id = 5; (1). Secure: Identifies the missing table and writes a working two-table query. Developing: Identifies the problem but correction is incomplete. Emerging: Notes something is wrong but no clear fix."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "In an SQL query, what symbol is used in a SELECT clause to retrieve all columns from a table?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "#",
+   "@",
+   "*",
+   "&"
+  ]
+ },
+ {
+  "q": "Which SQL operator would you use to find all students whose name ends in 'Smith'?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "= 'Smith'",
+   "LIKE '%Smith'",
+   "LIKE 'Smith%'",
+   "CONTAINS 'Smith'"
+  ]
+ },
+ {
+  "q": "To sort query results from Z to A, you add _____ after the column name in an ORDER BY clause.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "ASC",
+   "DESC",
+   "SORT",
+   "REVERSE"
+  ]
+ },
+ {
+  "q": "In an SQL query, text values in a WHERE clause must be surrounded by _____ quotes.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "double",
+   "curly",
+   "single",
+   "no"
+  ]
+ },
+ {
+  "q": "Match each SQL keyword to its purpose.",
+  "left": [
+   "SELECT",
+   "WHERE",
+   "ORDER BY"
+  ],
+  "type": "match",
+  "order": [
+   1,
+   0,
+   2
+  ],
+  "right": [
+   "Filters rows based on a condition",
+   "Names the columns to display",
+   "Sorts the results"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "Specifies which columns should appear in the query results.",
+  "q": "What does the SELECT keyword do in an SQL query?"
+ },
+ {
+  "a": "Names the table (or tables) from which data should be retrieved.",
+  "q": "What does the FROM keyword do in an SQL query?"
+ },
+ {
+  "a": "Filters rows, returning only those where the specified condition is true.",
+  "q": "What does the WHERE clause do in an SQL query?"
+ },
+ {
+  "a": "Results are sorted in ascending order — A to Z or lowest to highest.",
+  "q": "What does ORDER BY ASC mean in an SQL query?"
+ },
+ {
+  "a": "Results are sorted in descending order — Z to A or highest to lowest.",
+  "q": "What does ORDER BY DESC mean in an SQL query?"
+ },
+ {
+  "a": "SELECT, FROM, WHERE, ORDER BY.",
+  "q": "What is the correct clause order in an SQL SELECT query?"
+ },
+ {
+  "a": "Any value that starts with the letter A.",
+  "q": "In a WHERE clause, what does LIKE 'A%' match?"
+ },
+ {
+  "a": "Any sequence of characters (zero or more).",
+  "q": "In SQL, what does the % wildcard represent?"
+ },
+ {
+  "a": "Yes — text values are wrapped in single quotes; numbers are not.",
+  "q": "In a WHERE clause, do text values need quotes?"
+ },
+ {
+  "a": "<>",
+  "q": "What SQL operator tests 'not equal to'?"
+ },
+ {
+  "a": "List both tables in FROM and add a WHERE condition matching the primary key to the foreign key.",
+  "q": "How do you retrieve data from two tables at once using only SELECT, FROM and WHERE?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "SQL",
+  "definition": "Structured Query Language — a standard language used to create, retrieve, update and delete data in a relational database."
+ },
+ {
+  "term": "SELECT",
+  "definition": "The SQL keyword that specifies which columns should be shown in the results of a query."
+ },
+ {
+  "term": "FROM",
+  "definition": "The SQL keyword that names the table (or tables) from which data should be retrieved."
+ },
+ {
+  "term": "WHERE",
+  "definition": "The SQL keyword that filters rows, returning only those where the specified condition is true."
+ },
+ {
+  "term": "ORDER BY",
+  "definition": "The SQL clause that sorts the results of a query in ascending (ASC) or descending (DESC) order based on one or more columns."
+ }
+]

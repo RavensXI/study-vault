@@ -1,0 +1,121 @@
+[
+ {
+  "lesson": 1,
+  "field": "content_html",
+  "find": "Your exam may use either set of terms &mdash; you need to recognise both.",
+  "replace": "Exam papers use <em>table</em>, <em>field</em> and <em>primary key</em> for both real databases and abstract models, so use those words in your answers. Learn the abstract set as well, so you recognise it if you meet it elsewhere.",
+  "severity": "MEDIUM",
+  "note": "F1: spec 3.7.1 says the board's terms are used for abstract models too, so entity/attribute is not an alternative answer vocabulary."
+ },
+ {
+  "lesson": 2,
+  "field": "exam_tip_html",
+  "find": "In a 5-mark SQL question, examiners typically award one mark each for: correct SELECT with named columns, correct FROM with correct table(s), correct WHERE condition, correct comparison operator, and correct ORDER BY.",
+  "replace": "Build an SQL answer one clause at a time: the right columns after SELECT, the right table after FROM, the right condition after WHERE, and the right sort direction after ORDER BY. Check each clause on its own before you move on.",
+  "severity": "MEDIUM",
+  "note": "F3: removes an invented per-clause mark allocation attributed to examiners; keeps the clause-by-clause method."
+ },
+ {
+  "lesson": 2,
+  "field": "practice_questions",
+  "path": "[5].text",
+  "expect": "A student writes the following SQL query to find all students enrolled on course 5:\n\nSELECT student_name FROM Enrolments WHERE course_id = 5;\n\nThe query runs without error but returns no student names. Explain why, and write a corrected query.",
+  "value": "A student writes the following SQL query to find all students enrolled on course 5:\n\nSELECT student_name FROM Enrolments WHERE course_id = 5;\n\nThe database rejects the query. Explain why, and write a corrected query.",
+  "severity": "HIGH",
+  "note": "F2: student_name is not a column of Enrolments, so the statement errors; it cannot run and return nothing. The mark scheme already explains the real fault and needs no change."
+ },
+ {
+  "lesson": 2,
+  "field": "practice_questions",
+  "path": "[0].type",
+  "expect": "5 marks — Write SQL",
+  "value": "2 marks — Write SQL",
+  "severity": "MEDIUM",
+  "note": "F4: a two-clause query carries two creditable points."
+ },
+ {
+  "lesson": 2,
+  "field": "practice_questions",
+  "path": "[0].marks",
+  "expect": "Mastering: SELECT student_name, year_group FROM Students; — all five marks (SELECT correct columns (1), FROM correct table (1), no spurious WHERE (1), syntactically correct (1), semicolon / overall structure (1)). Secure: SELECT and FROM correct, minor syntax issue. Developing: SELECT present, wrong column names or table name. Emerging: SQL attempted but fundamentally incorrect structure.",
+  "value": "Mastering: SELECT student_name, year_group FROM Students; — SELECT with both column names (1), FROM Students (1). Secure: Both clauses correct with a small spelling slip. Developing: SELECT present but the column names are wrong, or * is used when named columns were asked for. Emerging: SQL attempted but the structure is wrong.",
+  "severity": "MEDIUM",
+  "note": "F4: drops the invented marks for not writing a WHERE clause and for a semicolon."
+ },
+ {
+  "lesson": 3,
+  "field": "exam_tip_html",
+  "find": "Examiners will penalise this directly &mdash; and in some mark schemes, omitting WHERE on a DELETE question loses all marks because the command would wipe the entire table.",
+  "replace": "A DELETE without a WHERE clause wipes the whole table, so leaving WHERE out gives a wrong answer, not a partly right one.",
+  "severity": "MEDIUM",
+  "note": "F5: replaces a fabricated mark-scheme claim with the fact about the SQL itself."
+ },
+ {
+  "lesson": 3,
+  "field": "practice_questions",
+  "path": "[0].type",
+  "expect": "5 marks — Write SQL",
+  "value": "4 marks — Write SQL",
+  "severity": "MEDIUM",
+  "note": "F6: four creditable points in the INSERT answer."
+ },
+ {
+  "lesson": 3,
+  "field": "practice_questions",
+  "path": "[0].marks",
+  "expect": "Mastering: INSERT INTO Students (student_id, student_name, year_group) VALUES (5, 'Ellie Marsh', 11); — INSERT INTO Students (1), correct column list (1), VALUES keyword (1), correct values with 'Ellie Marsh' in quotes and integers without (1), syntactically correct / semicolon (1). Secure: All elements present, minor syntax error. Developing: INSERT INTO present and most values correct, column list missing or wrong. Emerging: INSERT attempted but fundamentally incorrect.",
+  "value": "Mastering: INSERT INTO Students (student_id, student_name, year_group) VALUES (5, 'Ellie Marsh', 11); — INSERT INTO Students (1), correct column list (1), VALUES with a value list that matches the columns in number and order (1), 'Ellie Marsh' in quotes and the integers without (1). Secure: All elements present with a small syntax slip. Developing: INSERT INTO present and most values correct, column list missing or wrong. Emerging: INSERT attempted but the structure is wrong.",
+  "severity": "MEDIUM",
+  "note": "F6: drops the semicolon mark and states the matching rule the fourth mark tests."
+ },
+ {
+  "lesson": 3,
+  "field": "practice_questions",
+  "path": "[1].type",
+  "expect": "5 marks — Write SQL",
+  "value": "4 marks — Write SQL",
+  "severity": "MEDIUM",
+  "note": "F6: four creditable points in the UPDATE answer."
+ },
+ {
+  "lesson": 3,
+  "field": "practice_questions",
+  "path": "[1].marks",
+  "expect": "Mastering: UPDATE Students SET year_group = 11 WHERE student_id = 3; — UPDATE Students (1), SET year_group = 11 (1), WHERE (1), student_id = 3 (1), overall syntax (1). Secure: Correct structure, minor error. Developing: UPDATE and SET present, WHERE missing or wrong condition. Emerging: Only UPDATE or SET present.",
+  "value": "Mastering: UPDATE Students SET year_group = 11 WHERE student_id = 3; — UPDATE Students (1), SET year_group = 11 (1), WHERE clause present (1), condition student_id = 3 (1). Secure: Correct structure with a small slip. Developing: UPDATE and SET present, WHERE missing or the condition wrong. Emerging: Only UPDATE or SET present.",
+  "severity": "MEDIUM",
+  "note": "F6: drops the invented 'overall syntax' mark."
+ },
+ {
+  "lesson": 3,
+  "field": "practice_questions",
+  "path": "[3].type",
+  "expect": "5 marks — Write SQL",
+  "value": "3 marks — Write SQL",
+  "severity": "MEDIUM",
+  "note": "F6: three creditable points in the DELETE answer."
+ },
+ {
+  "lesson": 3,
+  "field": "practice_questions",
+  "path": "[3].marks",
+  "expect": "Mastering: DELETE FROM Enrolments WHERE course_id = 7; — DELETE FROM Enrolments (1), WHERE (1), course_id = 7 (1), no quotes on integer (1), overall syntax (1). Secure: Correct query, minor issue. Developing: DELETE FROM correct, condition wrong (e.g. quotes around 7). Emerging: Only DELETE FROM Enrolments present.",
+  "value": "Mastering: DELETE FROM Enrolments WHERE course_id = 7; — DELETE FROM Enrolments (1), WHERE clause present (1), condition course_id = 7 (1). Secure: Correct query with a small slip. Developing: DELETE FROM correct but the condition is wrong. Emerging: Only DELETE FROM Enrolments written, with no WHERE.",
+  "severity": "MEDIUM",
+  "note": "F6: drops the semicolon and 'no quotes on integer' marks; a quoted integer still compares correctly."
+ },
+ {
+  "lesson": 2,
+  "field": "exam_tip_html",
+  "find": " using <code>=</code> instead of <code>LIKE</code> for wildcard matching;",
+  "replace": "",
+  "finding": "F7"
+ },
+ {
+  "lesson": 2,
+  "field": "content_html",
+  "find": "<code>LIKE &lsquo;%art%&rsquo;</code> matches anything containing &lsquo;art&rsquo;.</p>\n</div>",
+  "replace": "<code>LIKE &lsquo;%art%&rsquo;</code> matches anything containing &lsquo;art&rsquo;. LIKE goes beyond the four commands the specification names (SELECT, FROM, WHERE, ORDER BY), so treat it as useful extra rather than a guaranteed exam skill.</p>\n</div>",
+  "finding": "F7"
+ }
+]

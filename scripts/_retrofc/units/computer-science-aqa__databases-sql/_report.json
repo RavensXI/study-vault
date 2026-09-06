@@ -1,0 +1,151 @@
+{
+ "unit": "computer-science-aqa/databases-sql",
+ "checked_at": "2026-09-06T10:47:24",
+ "spec_used": "specs/aqa/computer-science-8525-8525.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Vocabulary note: \"Your exam may use either set of terms — you need to recognise both\" (entity / attribute / entity identifier vs table / field / primary key).",
+   "truth": "The spec's 3.7.1 note says the opposite: entity, attribute and entity identifier are the words more commonly used for an abstract model, but \"the terms given here\" (table, record, field, data type, primary key, foreign key) \"will be used for both implementations of and abstract models of databases\". Papers therefore use table/field/primary key throughout, so entity/attribute is not an alternative answer vocabulary.",
+   "evidence": "specs/aqa/computer-science-8525-8525.md, 3.7.1 Additional information note",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 2,
+   "field": "practice_questions",
+   "severity": "HIGH",
+   "claim": "Q6 stem: for SELECT student_name FROM Enrolments WHERE course_id = 5; — \"The query runs without error but returns no student names.\"",
+   "truth": "Hand-run against the unit's own schema (Enrolments — enrolment_id, student_id, course_id): student_name is not a column of Enrolments, so the database rejects the statement with an unknown-column error. It cannot run and return an empty result. The question's own mark scheme says student_name is in Students, not Enrolments, so the stem contradicts its own answer key and the stated symptom is impossible.",
+   "evidence": "recomputation against the schema given in L2 content_html; mark scheme of the same question",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 2,
+   "field": "exam_tip_html",
+   "severity": "MEDIUM",
+   "claim": "\"In a 5-mark SQL question, examiners typically award one mark each for: correct SELECT with named columns, correct FROM with correct table(s), correct WHERE condition, correct comparison operator, and correct ORDER BY.\"",
+   "truth": "An invented mark allocation attributed to examiners. The spec publishes no per-clause tariff for SQL questions, and the marks for an SQL item depend on the task, not on a fixed five-way split. Advice on building the query clause by clause is sound; the claim about how examiners award the marks is not.",
+   "evidence": "specs/aqa/computer-science-8525-8525.md 2.2 Assessments and 3.7.2 (no mark breakdown published); house rule on fabricated examiner claims",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 2,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Q1 \"Write an SQL query to retrieve the student_name and year_group of all students\" is tagged \"5 marks\", with credit for \"no spurious WHERE (1)\" and \"semicolon / overall structure (1)\".",
+   "truth": "The answer is a two-clause query (SELECT two columns, FROM one table). There are only two creditable points. Marks for not writing an unwanted clause, and for a terminating semicolon, are invented: SQL answers are not credited for punctuation. The inflated tariff also miscalibrates how much a short SQL item is worth.",
+   "evidence": "recomputation of the answer's creditable content; spec 3.7.2 names no semicolon requirement",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 3,
+   "field": "exam_tip_html",
+   "severity": "MEDIUM",
+   "claim": "\"Examiners will penalise this directly — and in some mark schemes, omitting WHERE on a DELETE question loses all marks because the command would wipe the entire table.\"",
+   "truth": "A fabricated mark-scheme claim; no published mark scheme is quoted or quotable here. The underlying point is true and can be stated as a fact about the SQL: a DELETE with no WHERE removes every row, so the answer is simply wrong rather than partly right.",
+   "evidence": "spec 3.7.2 (DELETE FROM table_name WHERE condition); house rule on fabricated examiner claims",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 3,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Q1 (INSERT), Q2 (UPDATE) and Q4 (DELETE) are each tagged \"5 marks\", the fifth mark being \"syntactically correct / semicolon\" or \"overall syntax\". Q4 also credits \"no quotes on integer (1)\".",
+   "truth": "Each of these queries has three or four creditable points, not five. A mark for a semicolon or for unspecified \"overall syntax\" is invented. \"No quotes on integer\" is wrong as a mark point too: WHERE course_id = '7' compares correctly in the common engines, so quoting an integer is not an error to penalise.",
+   "evidence": "recomputation of each answer's creditable content; spec 3.7.2 statement forms",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "LIKE and the % wildcard are taught in the main text and a Key Fact, tested in a knowledge check, carry a 5-mark practice question (Q5), and the exam tip lists \"using = instead of LIKE for wildcard matching\" as a common exam error.",
+   "truth": "Spec 3.7.2 names only SELECT, FROM, WHERE and ORDER BY...ASC|DESC for retrieval. LIKE is not a named command, so presenting it as an exam requirement overstates the spec. Two options: (a) keep the teaching, which is genuinely useful, but add one sentence flagging LIKE as beyond the named commands and drop the \"= instead of LIKE\" line from the exam tip; or (b) leave as is and accept that about a sixth of this lesson's practice sits outside the named commands. Recommendation: (a).",
+   "evidence": "specs/aqa/computer-science-8525-8525.md, 3.7.2 Content column",
+   "verdict": "FIX",
+   "ruling": "Exam-tip '= instead of LIKE' line dropped; Key Fact now flags LIKE as beyond the four named commands."
+  },
+  {
+   "id": "F8",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Every SQL string literal inside <code> blocks in L2 and L3 uses curly quotes (&lsquo;Aisha Khan&rsquo;, &lsquo;A%&rsquo;, &lsquo;Dani Osei&rsquo;), while the practice mark schemes use straight quotes.",
+   "truth": "Curly quotes are not valid SQL string delimiters, so the displayed code would not run if copied. Handwritten exam answers are unaffected and the shape of the quote is not credited, so this costs no marks. Worth a typography pass with wider code-rendering work rather than a content edit.",
+   "evidence": "inspection of L2 and L3 content_html",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F9",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Worked Example 2: \"Rename student_id 2 and move them to year 11\", then UPDATE Students SET student_name = 'Benjamin Okafor', year_group = 11 WHERE student_id = 2; described as \"Two columns are updated\".",
+   "truth": "Hand-run against L1's sample rows, student_id 2 is Ben Okafor and is already in year group 11, so the year_group assignment changes nothing. The SQL is valid and its result is well defined; only the narrative \"move them to year 11\" is loose. L3 restates the schema but not the rows, so few students will meet the clash.",
+   "evidence": "L1 sample records (2 | Ben Okafor | 11 | 11B) vs L3 Worked Example 2",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [],
+ "summary": "Every SQL statement in all three lessons was run by hand against the unit's Students/Courses/Enrolments schema and L1's sample rows: syntax, WHERE conditions, ORDER BY directions, INSERT column/value pairings, UPDATE and DELETE row targeting, the two-table comma join, and all 15 knowledge-check keys (including the three match orders) are correct. The damage sits in the assessment metadata: one L2 practice question states an impossible symptom that contradicts its own mark scheme, both exam tips invent examiner behaviour, and four Write SQL questions are over-tariffed with credit for a semicolon or unspecified syntax. One vocabulary claim in L1 is the reverse of the spec's own note.",
+ "renarration": {
+  "run_at": "2026-09-06T10:52:44Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n32",
+    "key": "computer-science-aqa/databases-sql/narration_lesson-01_n32.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-aqa/databases-sql/narration_lesson-01_n32.mp3",
+    "voice": "Ollie",
+    "duration": 26.02,
+    "bytes": 312192,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:52:21 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n30",
+    "key": "computer-science-aqa/databases-sql/narration_lesson-02_n30.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-aqa/databases-sql/narration_lesson-02_n30.mp3",
+    "voice": "Ada",
+    "duration": 29.78,
+    "bytes": 357408,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:52:30 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n45",
+    "key": "computer-science-aqa/databases-sql/narration_lesson-02_n45.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-aqa/databases-sql/narration_lesson-02_n45.mp3",
+    "voice": "Ada",
+    "duration": 28.56,
+    "bytes": 342720,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:52:37 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n43",
+    "key": "computer-science-aqa/databases-sql/narration_lesson-03_n43.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-aqa/databases-sql/narration_lesson-03_n43.mp3",
+    "voice": "Ollie",
+    "duration": 26.54,
+    "bytes": 318528,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:52:43 GMT"
+   }
+  ],
+  "verified_ok": 4,
+  "total": 4
+ }
+}
