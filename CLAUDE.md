@@ -246,7 +246,7 @@ All in environment variables — never commit.
 | Unsplash | `UNSPLASH_ACCESS_KEY` | hero search |
 | ElevenLabs | `ELEVENLABS_API_KEY` | unused fallback |
 | Admin auth | `ADMIN_PASSWORD` | gates /admin/* |
-| Teacher auth | `TEACHER_PASSWORD` | legacy shared fallback |
+| Teacher auth | ~~`TEACHER_PASSWORD`~~ | RETIRED 6 Sep 2026 — teachers use their own accounts; delete the Vercel var |
 | Resend | `RESEND_API_KEY` + `NOTIFY_TO`, `NOTIFY_FROM` | bug reports, subject requests, audit alerts |
 | AWS | (Vercel env) | Bedrock eu-west-2 for AI routes |
 

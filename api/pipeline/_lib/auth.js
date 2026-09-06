@@ -28,7 +28,7 @@ async function requireTeacher(req, res) {
   if (adminPw) {
     let role = null;
     if (process.env.ADMIN_PASSWORD && adminPw === process.env.ADMIN_PASSWORD) role = 'platform_admin';
-    if (process.env.TEACHER_PASSWORD && adminPw === process.env.TEACHER_PASSWORD) role = 'teacher';
+    // TEACHER_PASSWORD retired 6 Sep 2026: teachers sign in with their own accounts.
 
     if (role) {
       // Look up the school_id for Unity College (default school for admin/teacher)
