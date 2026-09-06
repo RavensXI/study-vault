@@ -72,10 +72,11 @@ units, Geography Skills. Mixed-format subjects list practice units in
 rows whose `content_html` carries the `sv-listening` stage. The page docks a
 card carousel over a listening player and hides the sidebar, audio player,
 practice section and reader tour, so they need NO podcast, explainer video
-or narration. The marker is the classification: `batch_podcasts.py`,
-`batch_explainer_videos.py` and `/admin/build-status` all test
-`content_html ILIKE '%sv-listening%'` and count them as "listening", not
-article. Any new consumer of "article lessons" must apply the same test.
+or narration. The marker is the classification, exposed as the stored
+generated column `lessons.is_listening` (indexed; migration 20260906130000).
+`batch_podcasts.py`, `batch_explainer_videos.py` and `/admin/build-status`
+skip or separately count them. Any new consumer of "article lessons" must
+exclude `is_listening`.
 
 **Tier gaps (accurate 29 Aug 2026):**
 - **Diagrams**: Unity-only (Gemini diagrams stripped from free tier Apr 2026;

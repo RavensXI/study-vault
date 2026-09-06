@@ -713,12 +713,14 @@
       // over the article and hides the sidebar, audio player and practice
       // section, so podcasts, explainer videos and narration are never shown
       // there. They are counted separately and excluded from asset coverage.
-      var LISTENING = '%sv-listening%';
+      // lessons.is_listening is a stored generated column derived from that
+      // marker (migration 20260906130000) — filtering on it is indexed; an
+      // ILIKE over content_html hit the statement timeout.
       var L = function () { return sb.from('lessons').select('unit_id'); };
-      var A = function () { return L().or(ARTICLE).not('content_html', 'ilike', LISTENING); };
+      var A = function () { return L().or(ARTICLE).eq('is_listening', false); };
       var metricDefs = {
         article:   function (f, t) { return A().range(f, t); },
-        listening: function (f, t) { return L().or(ARTICLE).ilike('content_html', LISTENING).range(f, t); },
+        listening: function (f, t) { return L().or(ARTICLE).eq('is_listening', true).range(f, t); },
         practice:  function (f, t) { return L().not('practice_data', 'is', null).neq('practice_data', '{}').range(f, t); },
         content:   function (f, t) { return A().not('content_html', 'is', null).range(f, t); },
         heroes:    function (f, t) { return A().not('hero_image_url', 'is', null).range(f, t); },
