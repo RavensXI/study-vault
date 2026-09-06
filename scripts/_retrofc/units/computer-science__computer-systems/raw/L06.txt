@@ -1,0 +1,297 @@
+=== L6 Data Representation (Binary, Hex & Character Sets) ===
+id: 5a2d6204-b99e-4b1e-bc94-2a7eb8bb3567
+slug: data-representation
+status: live tier:both updated:2026-07-30T22:33:26.756928+00:00
+narration_manifest: array len 24
+
+--- DESCRIPTION ---
+Number bases, binary addition and shifts, and how ASCII and Unicode store text as binary.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">Why Computers Work in Binary</h2>
+<p data-narration-id="n2">Deep inside every computer are billions of tiny electronic switches. Each switch can only ever be in one of two states: on or off. Because of this, a computer stores and processes everything &mdash; numbers, text, images and sound &mdash; using just two digits, 0 and 1. This two-digit system is called <dfn class="term" data-def="A number system using only the digits 0 and 1, matching the two states of a computer&rsquo;s electronic circuits.">binary</dfn>, or base 2. The numbers you use every day are made from the digits 0 to 9 and belong to a different system called <dfn class="term" data-def="The everyday base-10 number system, using the digits 0 to 9.">denary</dfn>, or base 10. To be useful, a computer must be able to move smoothly between the two.</p>
+
+<div class="key-fact" data-narration-id="n3" data-revision-tip="Cover this and recall: how many different patterns can you make from a single group of eight binary digits?">
+<div class="key-fact-label">Key Fact</div>
+<p>A single binary digit, called a bit, can be 0 or 1. Group eight bits together and you can make 256 different patterns, from 00000000 up to 11111111, which represent the denary values 0 to 255.</p>
+</div>
+
+<h2 data-narration-id="n4">Reading and Writing Binary Numbers</h2>
+<p data-narration-id="n5">An 8-bit binary number has eight columns, and each column has a place value that doubles as you move left: 1, 2, 4, 8, 16, 32, 64 and 128. The far-left column, worth 128, is the <dfn class="term" data-def="The bit with the highest place value in a binary number, found on the far left.">most significant bit</dfn>, because it makes the biggest difference to the value. The far-right column, worth 1, is the <dfn class="term" data-def="The bit with the lowest place value in a binary number, found on the far right.">least significant bit</dfn>. To find the denary value of a binary number, you simply add up the place values wherever there is a 1.</p>
+<p data-narration-id="n6">Converting the other way, from denary to binary, works by subtraction. Take the denary number 156. The largest place value that fits is 128, so write a 1 in that column and subtract, leaving 28. Next, 64 and 32 are both too big, so write 0 for each. Then 16 fits into 28, leaving 12; 8 fits, leaving 4; 4 fits, leaving 0; and 2 and 1 are not needed. Reading the columns gives 10011100.</p>
+
+<div class="collapsible">
+<button class="collapsible-toggle" aria-expanded="false">
+<span>Turning binary back into denary</span>
+<svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+</button>
+<div class="collapsible-content"><div class="collapsible-inner">
+<p data-narration-id="n7">Suppose you are given 10011100 and asked for its denary value. Write the place values above the digits: 128, 64, 32, 16, 8, 4, 2, 1. Wherever there is a 1, add that place value. Here the 1s sit under 128, 16, 8 and 4, so the total is 128 + 16 + 8 + 4 = 156. Adding the columns that hold a 1 is all there is to it.</p>
+</div></div>
+</div>
+
+<h2 data-narration-id="n8">Units of Data</h2>
+<p data-narration-id="n9">The smallest unit of data is a single bit, one 0 or 1. Four bits together make a <dfn class="term" data-def="A group of 4 bits, which is exactly half a byte and matches one hexadecimal digit.">nibble</dfn>, and eight bits make a <dfn class="term" data-def="A group of 8 bits, the standard unit for storing a single character of text.">byte</dfn>. A byte matters because it is just enough to store one character of text. Larger amounts of storage are measured by multiplying up in steps of one thousand.</p>
+<p data-narration-id="n10">A kilobyte (KB) is 1,000 bytes, a megabyte (MB) is 1,000 kilobytes, a gigabyte (GB) is 1,000 megabytes, a terabyte (TB) is 1,000 gigabytes, and a petabyte (PB) is 1,000 terabytes. Each step up multiplies the amount of storage by a thousand, so a one terabyte hard drive holds roughly a trillion bytes of data.</p>
+
+<div class="key-fact" data-narration-id="n11" data-revision-tip="Close this and list the units of data storage in order from smallest to largest.">
+<div class="key-fact-label">Key Fact</div>
+<p>The units of data storage, from smallest to largest, are: bit, nibble, byte, kilobyte, megabyte, gigabyte, terabyte and petabyte. Some devices use 1,024 rather than 1,000 for each step, and either figure is accepted.</p>
+</div>
+
+<h2 data-narration-id="n12">Adding Binary Numbers</h2>
+<p data-narration-id="n13">Computers add binary using four simple rules: 0 + 0 = 0; 0 + 1 = 1; 1 + 1 = 0, carry 1; and 1 + 1 + 1 = 1, carry 1. You work from right to left and carry into the next column, exactly as you do when adding in denary. A problem appears when the answer needs more columns than are available. If two 8-bit numbers add up to more than 255, the result will not fit in 8 bits and the extra carry is lost. This is called an <dfn class="term" data-def="An error that occurs when a calculation produces a result too large to fit in the available number of bits.">overflow error</dfn>.</p>
+
+<div class="collapsible">
+<button class="collapsible-toggle" aria-expanded="false">
+<span>A worked addition, and an overflow</span>
+<svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+</button>
+<div class="collapsible-content"><div class="collapsible-inner">
+<p data-narration-id="n14">Add 00110101, which is 53, to 00010110, which is 22. Working from the right, a carry is created each time two 1s meet, and the final answer is 01001011. Checking in denary, 53 + 22 = 75, and 01001011 really is 64 + 8 + 2 + 1 = 75.</p>
+<p data-narration-id="n15">Now try 11111111 + 00000001. In denary this is 255 + 1 = 256. The answer 100000000 needs nine bits, but only eight are available, so the leading 1 is lost and the byte wrongly reads 00000000. The computer has run out of room, and this overflow makes the stored result incorrect.</p>
+</div></div>
+</div>
+
+<h2 data-narration-id="n16">Binary Shifts</h2>
+<p data-narration-id="n17">A <dfn class="term" data-def="Moving all the bits in a binary number left or right, which multiplies or divides its value by a power of two.">binary shift</dfn> moves every bit a set number of places to the left or right, filling the empty columns with 0s. A shift to the left multiplies the number by two for each place moved, while a shift to the right divides it by two for each place. For example, shifting 00010100, which is 20, two places to the left gives 01010000. Each place doubled the value, so 20 became 20 &times; 4 = 80, and 01010000 is 64 + 16 = 80. Shift too far and 1s are pushed off the end, where they are lost, which changes the answer.</p>
+
+<h2 data-narration-id="n18">Hexadecimal</h2>
+<p data-narration-id="n19">Long strings of 0s and 1s are hard for people to read without slipping up, so programmers often use <dfn class="term" data-def="A base-16 number system using the digits 0 to 9 and the letters A to F, used as a short way to write binary.">hexadecimal</dfn>, or base 16, as a shorthand. Hexadecimal uses sixteen digit symbols: 0 to 9 as normal, then A, B, C, D, E and F standing for the values 10, 11, 12, 13, 14 and 15. It is popular because it is compact and it lines up neatly with binary.</p>
+<p data-narration-id="n20">The link is simple: one hexadecimal digit represents exactly one nibble of 4 bits, so a whole byte becomes just two hexadecimal digits. To convert, split a byte into two nibbles and turn each into its hex digit. The byte 10011100 splits into 1001 and 1100, which are 9 and 12, or 9 and C, giving the hexadecimal value 9C. Hexadecimal is widely used for the colour codes on web pages and for memory addresses.</p>
+
+<h2 data-narration-id="n21">Storing Text: Character Sets</h2>
+<p data-narration-id="n22">Computers store text by giving every letter, digit and symbol its own binary code. The full list of characters a computer can use, together with their codes, is called a <dfn class="term" data-def="The complete collection of characters, and their binary codes, that a computer can represent.">character set</dfn>. The codes are ordered logically, so the letters follow one another in sequence: if the code for &lsquo;A&rsquo; is 65, then &lsquo;B&rsquo; is 66 and &lsquo;C&rsquo; is 67. This tidy ordering makes it easy to sort text alphabetically and to switch between upper and lower case.</p>
+<p data-narration-id="n23">The oldest common character set is <dfn class="term" data-def="A character set that uses 7 bits to represent 128 characters, mainly English letters, digits and symbols.">ASCII</dfn>, which uses 7 bits per character and can therefore represent 128 different characters &mdash; enough for English letters, digits, punctuation and some control codes. That is not nearly enough for every writing system, so <dfn class="term" data-def="A character set that uses more bits per character than ASCII, able to represent over a million characters from the world&rsquo;s languages.">Unicode</dfn> was created. Unicode uses more bits per character, commonly 16 or 32, letting it represent well over a million characters, including alphabets from around the world and emoji. The rule behind both is the same: a set with n bits per character can represent \(2^n\) different characters, so more bits mean more characters but larger files.</p>
+
+<div class="key-fact" data-narration-id="n24" data-revision-tip="Test yourself: write down how many characters 8 bits can represent, and the formula that gives the answer.">
+<div class="key-fact-label">Key Fact</div>
+<p>The number of characters a set can hold is found with \(2^n\), where n is the number of bits per character. So 7-bit ASCII holds \(2^7 = 128\) characters and 8 bits hold \(2^8 = 256\). A 200-character message stored in 8-bit codes therefore needs 200 &times; 8 = 1,600 bits, or 200 bytes.</p>
+</div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n26">Key Takeaways</h3>
+<ul>
+<li data-narration-id="n27">Computers store all data in binary because their circuits have only two states; denary and hexadecimal are convenient ways for people to read and write those binary values.</li>
+<li data-narration-id="n28">Binary can be added, producing carries and sometimes an overflow error, and shifted left or right to multiply or divide by powers of two.</li>
+<li data-narration-id="n29">Text is stored using a character set: ASCII uses 7 bits for 128 characters, while Unicode uses more bits to cover over a million characters from every language.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n25">Command words matter here. &lsquo;Convert&rsquo; wants you to show your working, not just an answer, so line up your place values or nibbles clearly and let the marker follow your method. &lsquo;Explain&rsquo; an overflow error means saying both what it is and why it happens &mdash; a result too big for the bits available. A very common slip is muddling the direction of a binary shift: left multiplies, right divides. Always check that your final binary answer has the right number of bits, padding with leading 0s where needed.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "What is the denary value of the binary number 00101010? A) 21  B) 42  C) 84  D) 168",
+  "type": "1 mark — Multiple Choice",
+  "marks": "Correct response: B (42). Secure: adds the place values under each 1 (32 + 8 + 2) to reach 42. Developing or Emerging: selects a value from a miscount of the columns or from doubling or halving the correct answer."
+ },
+ {
+  "text": "Convert the denary number 217 into (a) an 8-bit binary number and (b) a two-digit hexadecimal number.",
+  "type": "2 marks — Convert",
+  "marks": "Secure: (a) 11011001 and (b) D9, both correct with working shown. Developing: one part correct, or the right method with a single place-value slip. Emerging: a partial attempt such as correct place values identified but not combined into the final answer."
+ },
+ {
+  "text": "Describe how a computer adds the two 8-bit binary numbers 00110101 and 00010110 together, and state the final 8-bit result.",
+  "type": "3 marks — Describe",
+  "marks": "Mastering or Secure: describes working from the least significant bit to the most significant bit, carrying a 1 into the next column when two 1s are added, and gives the result 01001011. Developing: describes the carrying process but the final answer is wrong, or gives the right answer with a thin description. Emerging: a vague reference to adding the numbers with no clear method or result."
+ },
+ {
+  "text": "Explain what is meant by an overflow error, and explain why one can occur when a computer adds two 8-bit binary numbers.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: states that an overflow error happens when a result is too large to fit in the available number of bits, and explains that two 8-bit numbers can total more than 255, so the answer needs a ninth bit that cannot be stored and the carry is lost. Secure: correct definition and a mostly clear reason. Developing: correct definition but a weak or missing explanation of the cause. Emerging: only a partial idea, such as 'the number is too big', with no link to the number of bits."
+ },
+ {
+  "text": "A program shifts the 8-bit binary number 00010100 two places to the left. Describe the effect this has on the value and state the resulting 8-bit number.",
+  "type": "3 marks — Describe",
+  "marks": "Mastering or Secure: explains that a left shift multiplies the value by two for each place, so a shift of two places multiplies by four, taking 20 to 80, and gives the result 01010000. Developing: identifies that the value is multiplied but gets the factor or the final number wrong. Emerging: states that the bits move left with no correct explanation of the effect on the value."
+ },
+ {
+  "text": "Compare the ASCII and Unicode character sets. In your answer, refer to the number of bits each uses per character and the range of characters each can represent.",
+  "type": "6 marks — Compare",
+  "marks": "Mastering: compares both sets in detail, noting that ASCII uses 7 bits per character and represents 128 characters suited to English, while Unicode uses more bits (commonly 16 or 32) and represents well over a million characters from many languages, and links more bits to larger file sizes. Secure: a clear comparison of bits and character range for both sets. Developing: describes each set separately but the comparison is limited. Emerging: a basic point about one set only, with little or no comparison."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "What is the denary value of the hexadecimal number 2F?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "31",
+   "47",
+   "62",
+   "215"
+  ]
+ },
+ {
+  "q": "How many different characters can be represented using 8 bits per character?",
+  "type": "mcq",
+  "correct": 3,
+  "options": [
+   "8",
+   "128",
+   "255",
+   "256"
+  ]
+ },
+ {
+  "q": "The leftmost bit in a binary number, which has the highest place value, is called the _____ bit.",
+  "type": "fill",
+  "correct": 0,
+  "options": [
+   "most significant",
+   "least significant",
+   "parity",
+   "carry"
+  ]
+ },
+ {
+  "q": "When a calculation produces a result too big to fit in the number of bits available, an _____ error occurs.",
+  "type": "fill",
+  "correct": 0,
+  "options": [
+   "overflow",
+   "rounding",
+   "syntax",
+   "underflow"
+  ]
+ },
+ {
+  "q": "Match each unit of data storage to its size:",
+  "left": [
+   "Nibble",
+   "Byte",
+   "Kilobyte",
+   "Megabyte"
+  ],
+  "type": "match",
+  "order": [
+   1,
+   3,
+   2,
+   0
+  ],
+  "right": [
+   "1,000 KB",
+   "4 bits",
+   "1,000 bytes",
+   "8 bits"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "Four bits.",
+  "q": "How many bits are in a nibble?"
+ },
+ {
+  "a": "Eight bits.",
+  "q": "How many bits are in a byte?"
+ },
+ {
+  "a": "255.",
+  "q": "What is the largest denary number a single byte can store?"
+ },
+ {
+  "a": "Base 16.",
+  "q": "What number base does hexadecimal use?"
+ },
+ {
+  "a": "15.",
+  "q": "What denary value does the hexadecimal digit F represent?"
+ },
+ {
+  "a": "Their circuits have only two states: on and off.",
+  "q": "Why do computers store all data in binary?"
+ },
+ {
+  "a": "The leftmost bit, with the highest place value.",
+  "q": "Which bit in a binary number is the most significant bit?"
+ },
+ {
+  "a": "A result too large to fit in the available bits.",
+  "q": "What causes an overflow error?"
+ },
+ {
+  "a": "It doubles the value.",
+  "q": "What effect does a left shift of one place have on a binary number's value?"
+ },
+ {
+  "a": "It halves the value.",
+  "q": "What effect does a right shift of one place have on a binary number's value?"
+ },
+ {
+  "a": "128.",
+  "q": "How many characters can 7-bit ASCII represent?"
+ },
+ {
+  "a": "Unicode.",
+  "q": "Which character set can represent over a million characters?"
+ },
+ {
+  "a": "Two.",
+  "q": "How many hexadecimal digits are needed to write one byte?"
+ },
+ {
+  "a": "It is one greater.",
+  "q": "In ASCII, how does the code for 'B' compare with the code for 'A'?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "binary",
+  "definition": "A number system using only the digits 0 and 1, matching the two states of a computer's electronic circuits."
+ },
+ {
+  "term": "denary",
+  "definition": "The everyday base-10 number system, using the digits 0 to 9."
+ },
+ {
+  "term": "hexadecimal",
+  "definition": "A base-16 number system using the digits 0 to 9 and the letters A to F, used as a short way to write binary."
+ },
+ {
+  "term": "nibble",
+  "definition": "A group of 4 bits, which is exactly half a byte and matches one hexadecimal digit."
+ },
+ {
+  "term": "byte",
+  "definition": "A group of 8 bits, the standard unit for storing a single character of text."
+ },
+ {
+  "term": "most significant bit",
+  "definition": "The bit with the highest place value in a binary number, found on the far left."
+ },
+ {
+  "term": "least significant bit",
+  "definition": "The bit with the lowest place value in a binary number, found on the far right."
+ },
+ {
+  "term": "overflow error",
+  "definition": "An error that occurs when a calculation produces a result too large to fit in the available number of bits."
+ },
+ {
+  "term": "binary shift",
+  "definition": "Moving all the bits in a binary number left or right, which multiplies or divides its value by a power of two."
+ },
+ {
+  "term": "character set",
+  "definition": "The complete collection of characters, and their binary codes, that a computer can represent."
+ },
+ {
+  "term": "ASCII",
+  "definition": "A character set that uses 7 bits to represent 128 characters, mainly English letters, digits and symbols."
+ },
+ {
+  "term": "Unicode",
+  "definition": "A character set that uses more bits per character than ASCII, able to represent over a million characters from the world's languages."
+ }
+]

@@ -1,0 +1,229 @@
+=== L1 CPU Architecture & the Fetch-Execute Cycle ===
+id: aac83e71-beb0-4d4d-a5c4-086573024db3
+slug: cpu-architecture
+status: live tier:both updated:2026-07-30T22:45:21.503509+00:00
+narration_manifest: array len 21
+
+--- DESCRIPTION ---
+How registers, the ALU and the control unit run the CPU's fetch-execute cycle.
+
+--- CONTENT_HTML ---
+<p data-narration-id="n1">Inside every computer, from a phone to a games console, sits the <dfn class="term" data-def="The main processor of a computer that carries out the instructions of a program.">central processing unit</dfn>, or CPU. Its single job is to process instructions: it takes the instructions that make up a program and carries them out, one after another, to make the machine do useful work.</p><p data-narration-id="n2">The CPU does this by repeating the same routine over and over, billions of times every second. That routine is called the <dfn class="term" data-def="The repeating process a CPU follows to fetch, decode and carry out each instruction of a program.">fetch-execute cycle</dfn>. To understand how a processor works, you need to know the parts inside it and the steps of this cycle.</p><h2 data-narration-id="n3">The main parts of the CPU</h2><p data-narration-id="n4">The <dfn class="term" data-def="The part of the CPU that carries out arithmetic and logic operations.">Arithmetic Logic Unit</dfn>, usually shortened to ALU, is where the actual calculations happen. It performs arithmetic such as addition and subtraction, and logic operations such as comparing two values to see which is larger or whether they are equal.</p><p data-narration-id="n5">The <dfn class="term" data-def="The part of the CPU that decodes instructions and sends control signals to coordinate the other components.">Control Unit</dfn>, or CU, is the manager of the processor. It decodes each instruction to work out what needs to happen, then sends out control signals that tell the other parts of the computer what to do and when. In this way it coordinates the flow of data around the CPU.</p><p data-narration-id="n6">The <dfn class="term" data-def="A small, very fast block of memory inside or near the CPU that stores frequently used data and instructions.">cache</dfn> is a small amount of very fast memory built into, or very close to, the CPU. It keeps copies of the data and instructions the processor uses most often, so the CPU can grab them almost instantly instead of waiting for the slower main memory each time.</p><p data-narration-id="n7">Finally, the CPU contains a handful of <dfn class="term" data-def="A tiny, extremely fast storage location inside the CPU that holds a single piece of data or an address.">registers</dfn>. These are tiny storage locations, each able to hold just one value at a time, but they are the fastest storage in the whole computer. The CPU uses them to hold the exact pieces of data and addresses it is working with at that instant.</p><div class="key-fact" data-narration-id="n8" data-revision-tip="Cover this and state the job of the ALU, the control unit, the cache and the registers."><div class="key-fact-label">Key Fact</div><p>The ALU does the calculations, the control unit decodes instructions and coordinates the other parts, the cache stores frequently used data for fast access, and registers hold the single values the CPU is using right now.</p></div><h2 data-narration-id="n9">Von Neumann architecture</h2><p data-narration-id="n10">Most computers are built using <dfn class="term" data-def="A computer design in which program instructions and data are stored together in the same memory and handled one instruction at a time.">Von Neumann architecture</dfn>, named after the mathematician John von Neumann. Its key idea is that both the program instructions and the data they work on are stored together in the same memory, and the CPU fetches and carries out those instructions one at a time, in order.</p><p data-narration-id="n11">This design relies on a set of special registers. The <dfn class="term" data-def="The register that holds the memory address of the next instruction to be fetched.">Program Counter</dfn> holds the address of the next instruction the CPU will fetch. The <dfn class="term" data-def="The register that holds the address of the memory location the CPU is about to read from or write to.">Memory Address Register</dfn>, or MAR, holds the address of the memory location the CPU wants to use next.</p><p data-narration-id="n12">The <dfn class="term" data-def="The register that holds the data or instruction just read from, or about to be written to, memory.">Memory Data Register</dfn>, or MDR, holds the actual data or instruction that has just been read from memory, or that is about to be written to it. The <dfn class="term" data-def="The register that stores the result of calculations carried out by the ALU.">Accumulator</dfn> stores the result of the calculations the ALU has just performed.</p><div class="key-fact" data-narration-id="n13" data-revision-tip="Close this and write down which registers store an address and which store data."><div class="key-fact-label">Key Fact</div><p>A register stores either an address or a piece of data. The Program Counter and the MAR store addresses; the MDR and the Accumulator store data. Knowing which each one holds is the key to register questions.</p></div><h2 data-narration-id="n14">The fetch-execute cycle</h2><p data-narration-id="n15">Everything the CPU does is built from three repeating stages: fetch, decode and execute. The processor runs through these stages for every single instruction in a program, then loops straight back to the start for the next one.</p><div class="collapsible"><button class="collapsible-toggle" aria-expanded="false"><span>The three stages step by step</span><svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button><div class="collapsible-content"><div class="collapsible-inner"><p data-narration-id="n16">In the <strong>fetch</strong> stage, the Program Counter gives the address of the next instruction. The instruction is copied from memory into the CPU, and the Program Counter is then increased by one so that it points to the following instruction, ready for next time.</p><p data-narration-id="n17">In the <strong>decode</strong> stage, the Control Unit examines the instruction and works out exactly what it means and which parts of the computer will be needed to carry it out.</p><p data-narration-id="n18">In the <strong>execute</strong> stage, the instruction is actually carried out. This might mean the ALU performing a calculation and placing the result in the Accumulator, or data being loaded from or saved to memory. The cycle then begins again with the next fetch.</p></div></div></div><div class="collapsible"><button class="collapsible-toggle" aria-expanded="false"><span>Why does the CPU only handle one instruction at a time?</span><svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button><div class="collapsible-content"><div class="collapsible-inner"><p data-narration-id="n19">Because instructions and data share the same memory and travel to the CPU along the same route, the processor deals with them in order, one at a time. Working step by step like this keeps the computer predictable and reliable, even though it means a single processor can only ever be part-way through one instruction at any moment.</p></div></div></div><div class="key-fact" data-narration-id="n20" data-revision-tip="Cover this and list the three stages of the fetch-execute cycle in the correct order."><div class="key-fact-label">Key Fact</div><p>The fetch-execute cycle has three stages that repeat continuously: fetch the next instruction, decode it, then execute it. The CPU carries out this cycle for every instruction in a program.</p></div><p data-narration-id="n21">Put together, these ideas explain how a processor turns a stored program into action. The components each have a clear role, the registers each hold either an address or a value, and the fetch-execute cycle ties them together into the steady rhythm that drives the whole computer.</p>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n23">Key Takeaways</h3><ul><li data-narration-id="n24">The CPU processes instructions by repeating the fetch-execute cycle: fetch, decode and execute.</li><li data-narration-id="n25">The ALU handles calculations, the control unit decodes and coordinates, the cache speeds up access to frequent data, and registers hold the values in use.</li><li data-narration-id="n26">In Von Neumann architecture, instructions and data share the same memory, and registers such as the Program Counter, MAR, MDR and Accumulator each store a specific address or piece of data.</li></ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n22">Questions on this topic usually ask you to describe the purpose of a component or a register, so learn a one-line role for each of the ALU, control unit, cache, Program Counter, MAR, MDR and Accumulator. A very common mistake is to muddle the MAR and the MDR &mdash; remember the MAR handles an <em>address</em> while the MDR handles the <em>data</em>. If you are asked what happens at a stage of the cycle, name the stage and say what the CPU actually does, rather than just listing the parts involved.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "State the purpose of the CPU in a computer system.",
+  "type": "1 mark — State",
+  "marks": "1 mark for stating that the CPU processes (carries out) the instructions of a program."
+ },
+ {
+  "text": "Describe the role of the Control Unit within the CPU.",
+  "type": "2 marks — Describe",
+  "marks": "Up to 2 marks. Creditable points: it decodes instructions to work out what must happen (1); it sends out control signals that coordinate and direct the other components (1). Secure: two clear, linked points. Developing: one relevant point. Emerging: a vague reference to controlling the CPU."
+ },
+ {
+  "text": "Describe what happens during the fetch stage of the fetch-execute cycle.",
+  "type": "3 marks — Describe",
+  "marks": "Up to 3 marks: the Program Counter holds the address of the next instruction (1); the instruction is copied from memory into the CPU (1); the Program Counter is then increased so it points to the following instruction (1). Secure: a clear, ordered description. Developing: two correct points. Emerging: one relevant point."
+ },
+ {
+  "text": "Explain the difference between the Memory Address Register (MAR) and the Memory Data Register (MDR).",
+  "type": "4 marks — Explain",
+  "marks": "Up to 4 marks, up to 2 per register. The MAR holds an address (1) of the memory location the CPU wants to read from or write to (1); the MDR holds data or an instruction (1) that has just been read from, or is about to be written to, memory (1). Secure: both registers explained with the address-versus-data distinction clear. Developing: one register explained, or both stated without expansion. Emerging: a single relevant point."
+ },
+ {
+  "text": "Explain how the CPU uses its registers and the ALU to carry out an instruction during the fetch-execute cycle.",
+  "type": "6 marks — Explain",
+  "marks": "Mastering: a clear, well-sequenced explanation that the Program Counter provides the address of the next instruction, that the instruction is fetched from memory, that the Control Unit decodes it, and that during execution the ALU performs any calculation with the result placed in the Accumulator before the cycle repeats. Secure: most of these steps explained in a sensible order with correct component and register roles. Developing: some correct steps but gaps or muddled order. Emerging: knows a few components but cannot link them into the cycle."
+ },
+ {
+  "text": "A computer runs a program made up of many instructions. Discuss how the components of the CPU and the fetch-execute cycle work together to carry out this program.",
+  "type": "8 marks — Discuss",
+  "marks": "Mastering: a sustained discussion covering the purpose of the CPU (processing instructions), the roles of the ALU, Control Unit, cache and registers, the storage of instructions and data together under Von Neumann architecture, and the way the fetch, decode and execute stages repeat for each instruction to run the whole program. Secure: several relevant, connected points covering both the components and the cycle. Developing: some correct points but limited linking or one-sided coverage. Emerging: isolated, partly correct points with no clear reasoning."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which CPU component carries out arithmetic and logical operations?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "Control Unit",
+   "ALU",
+   "Cache",
+   "Program Counter"
+  ]
+ },
+ {
+  "q": "What does the Program Counter hold?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "The result of a calculation",
+   "The address of the next instruction to be fetched",
+   "The instruction currently being decoded",
+   "A copy of frequently used data"
+  ]
+ },
+ {
+  "q": "In the Von Neumann model, program instructions and data are stored together in the same _____.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "register",
+   "cache",
+   "memory",
+   "accumulator"
+  ]
+ },
+ {
+  "q": "After an instruction has been fetched and decoded, the next stage of the cycle is to _____ it.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "store",
+   "execute",
+   "compile",
+   "translate"
+  ]
+ },
+ {
+  "q": "Match each register to what it stores.",
+  "left": [
+   "Program Counter",
+   "MAR",
+   "MDR",
+   "Accumulator"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "right": [
+   "Address of the next instruction to be fetched",
+   "Address of the memory location being accessed",
+   "Data or instruction just fetched from memory",
+   "Result of a calculation from the ALU"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "To carry out the instructions of a program by repeating the fetch-execute cycle.",
+  "q": "What is the main job of the CPU?"
+ },
+ {
+  "a": "The decode stage.",
+  "q": "In the fetch-execute cycle, which stage comes immediately after the fetch stage?"
+ },
+ {
+  "a": "The decoded instruction is carried out, such as a calculation or moving data.",
+  "q": "What happens during the execute stage of the fetch-execute cycle?"
+ },
+ {
+  "a": "It carries out arithmetic and logic operations, such as adding numbers or comparing values.",
+  "q": "What does the ALU inside the CPU do?"
+ },
+ {
+  "a": "It decodes instructions and sends out control signals to coordinate the other components.",
+  "q": "What does the control unit inside the CPU do?"
+ },
+ {
+  "a": "Storing frequently used data and instructions so the CPU avoids slower trips to main memory.",
+  "q": "What is cache memory in a CPU used for?"
+ },
+ {
+  "a": "A tiny, extremely fast storage location inside the CPU that holds one value at a time.",
+  "q": "What is a register in the CPU?"
+ },
+ {
+  "a": "The Program Counter.",
+  "q": "Which register holds the address of the next instruction to be fetched?"
+ },
+ {
+  "a": "The address of the memory location to be read from or written to.",
+  "q": "What does the MAR (Memory Address Register) hold?"
+ },
+ {
+  "a": "The data or instruction just read from, or about to be written to, memory.",
+  "q": "What does the MDR (Memory Data Register) hold?"
+ },
+ {
+  "a": "The result of calculations carried out by the ALU.",
+  "q": "What does the accumulator store?"
+ },
+ {
+  "a": "A design where instructions and data are stored together in the same memory.",
+  "q": "What is Von Neumann architecture?"
+ },
+ {
+  "a": "The control unit.",
+  "q": "In the cycle, after an instruction is fetched, which part works out what it means?"
+ },
+ {
+  "a": "Cache is smaller and sits inside or very close to the CPU.",
+  "q": "Why can the CPU reach data in cache faster than data in main memory?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "central processing unit",
+  "definition": "The main processor of a computer that carries out the instructions of a program."
+ },
+ {
+  "term": "fetch-execute cycle",
+  "definition": "The repeating process a CPU follows to fetch, decode and carry out each instruction of a program."
+ },
+ {
+  "term": "Arithmetic Logic Unit",
+  "definition": "The part of the CPU that carries out arithmetic and logic operations."
+ },
+ {
+  "term": "Control Unit",
+  "definition": "The part of the CPU that decodes instructions and sends control signals to coordinate the other components."
+ },
+ {
+  "term": "cache",
+  "definition": "A small, very fast block of memory inside or near the CPU that stores frequently used data and instructions."
+ },
+ {
+  "term": "registers",
+  "definition": "A tiny, extremely fast storage location inside the CPU that holds a single piece of data or an address."
+ },
+ {
+  "term": "Von Neumann architecture",
+  "definition": "A computer design in which program instructions and data are stored together in the same memory and handled one instruction at a time."
+ },
+ {
+  "term": "Program Counter",
+  "definition": "The register that holds the memory address of the next instruction to be fetched."
+ },
+ {
+  "term": "Memory Address Register",
+  "definition": "The register that holds the address of the memory location the CPU is about to read from or write to."
+ },
+ {
+  "term": "Memory Data Register",
+  "definition": "The register that holds the data or instruction just read from, or about to be written to, memory."
+ },
+ {
+  "term": "Accumulator",
+  "definition": "The register that stores the result of calculations carried out by the ALU."
+ }
+]

@@ -1,0 +1,294 @@
+=== L7 Representing Images & Sound ===
+id: 0a857c57-9d8b-4574-9a37-f57f896d972f
+slug: images-and-sound
+status: live tier:both updated:2026-07-30T22:21:10.902853+00:00
+narration_manifest: array len 26
+
+--- DESCRIPTION ---
+How images are stored as pixels and sound as samples, and why quality drives up file size.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">How Computers Store Pictures</h2>
+<p data-narration-id="n2">A computer can only hold data as binary &mdash; long strings of 0s and 1s &mdash; so a photograph must be turned into numbers before it can be saved. The most common way to do this is with a <dfn class="term" data-def="An image made from a grid of individually coloured pixels.">bitmap</dfn> image, which is simply a grid of tiny coloured squares. Each square is a <dfn class="term" data-def="The smallest element of a bitmap image; short for picture element.">pixel</dfn> (short for &lsquo;picture element&rsquo;), the smallest element of a digital image. Every pixel is given a binary code that stands for its colour, so the whole picture becomes a long list of colour codes that the computer reads row by row to rebuild the image.</p>
+
+<div class="key-fact" data-narration-id="n3" data-revision-tip="Cover this and work out: how many colours can be stored with a colour depth of 4 bits?">
+<div class="key-fact-label">Key Fact</div>
+<p>Colour depth is the number of bits used to store the colour of each pixel. With a colour depth of \(n\) bits, an image can use \(2^n\) different colours &mdash; every extra bit doubles the number of colours available.</p>
+</div>
+
+<h2 data-narration-id="n4">Colour Depth</h2>
+<p data-narration-id="n5">The <dfn class="term" data-def="The number of bits used to represent the colour of each pixel in an image.">colour depth</dfn> of an image is the number of bits used to represent the colour of a single pixel. Because each extra bit doubles the patterns available, an image with a colour depth of \(n\) bits can display \(2^n\) colours. A colour depth of just 1 bit gives only \(2^1 = 2\) colours, which are usually black and white.</p>
+<p data-narration-id="n6">Raising the colour depth quickly widens the range of colours. An 8-bit colour depth stores \(2^8 = 256\) colours, while 24-bit colour &mdash; often called &lsquo;true colour&rsquo; &mdash; stores \(2^{24}\), which is over 16 million shades. That is more than the human eye can easily tell apart, so it produces smooth, realistic images. The catch is that more bits per pixel means every pixel takes up more storage.</p>
+
+<h2 data-narration-id="n7">Resolution</h2>
+<p data-narration-id="n8">The <dfn class="term" data-def="The number of pixels in an image, usually given as width times height.">resolution</dfn> of a bitmap image is the number of pixels it contains, usually written as width times height, such as 1920 by 1080. A higher resolution packs in more pixels, so the image holds more detail and looks sharper. A low-resolution image stretched across a large screen looks blocky, because each pixel is enlarged until you can see the individual squares.</p>
+<p data-narration-id="n9">Colour depth and resolution each affect two things at once: the <strong>quality</strong> of the picture and the <strong>size</strong> of its file. Turning either one up makes the image look better but also makes the file bigger, because there is simply more information to record. Balancing that trade-off is a choice designers make every time they save an image.</p>
+
+<div class="key-fact" data-narration-id="n10" data-revision-tip="Close this and explain in one sentence why a higher-resolution photo takes up more storage.">
+<div class="key-fact-label">Key Fact</div>
+<p>Increasing the colour depth or the resolution improves image quality but increases the file size, because each change adds more binary data that has to be stored.</p>
+</div>
+
+<div class="collapsible">
+<button class="collapsible-toggle" aria-expanded="false">
+<span>Working out an image&rsquo;s file size</span>
+<svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+</button>
+<div class="collapsible-content"><div class="collapsible-inner">
+<p data-narration-id="n11">The size of a bitmap image in bits is found by multiplying the colour depth by the number of pixels:</p>
+<p data-narration-id="n12">$$\text{file size (bits)} = \text{colour depth} \times \text{width} \times \text{height}$$</p>
+<p data-narration-id="n13">For example, take an image that is 200 pixels wide and 300 pixels high with a colour depth of 8 bits. Its size is \(8 \times 200 \times 300\), which comes to 480,000 bits. To change bits into bytes you divide by 8, giving 60,000 bytes, or roughly 60 kilobytes. Notice that doubling either the colour depth or the resolution would double the file size.</p>
+</div></div>
+</div>
+
+<h2 data-narration-id="n14">Metadata</h2>
+<p data-narration-id="n15">When an image is saved, the file also stores <dfn class="term" data-def="Extra data stored with a file that describes it, such as an image's width, height and colour depth.">metadata</dfn>, which means &lsquo;data about the data&rsquo;. Metadata is the extra information the computer needs in order to open and display the picture correctly, such as the image&rsquo;s width, height and colour depth. It often records other details too, like the date the photo was taken and the camera settings, and many phones add the location where it was captured. Without the width and height, the computer would not know the shape of the pixel grid, so it could not rebuild the image at all.</p>
+
+<div class="key-fact" data-narration-id="n16" data-revision-tip="Test yourself: write down three pieces of information that an image&rsquo;s metadata might store.">
+<div class="key-fact-label">Key Fact</div>
+<p>Metadata is data stored alongside an image that describes it &mdash; for example its width, height and colour depth. The computer relies on this information to reconstruct and display the image correctly.</p>
+</div>
+
+<h2 data-narration-id="n17">How Computers Store Sound</h2>
+<p data-narration-id="n18">Sound in the real world is <dfn class="term" data-def="A continuous signal that varies smoothly and can take any value, such as a natural sound wave.">analogue</dfn>: it is a continuous wave that changes smoothly and can take any value. A computer cannot store a continuous wave, because it works only in binary, so the sound must first be converted into numbers. This is done by <dfn class="term" data-def="Measuring the amplitude of a sound wave at regular intervals and recording each measurement as a binary number.">sampling</dfn> &mdash; measuring the height, or amplitude, of the wave at regular moments and recording each measurement as a binary number.</p>
+<p data-narration-id="n19">Two settings control how faithfully the wave is captured. The <dfn class="term" data-def="The number of samples taken each second when recording sound, measured in Hertz.">sample rate</dfn> is how many samples are taken every second, measured in <strong>Hertz</strong> (Hz). Music on a CD, for instance, uses a sample rate of 44,100 Hz, meaning the wave is measured 44,100 times a second. Taking more samples each second captures quicker changes in the sound, so the recording stays closer to the original.</p>
+<p data-narration-id="n20">The <dfn class="term" data-def="The number of bits used to store each individual sound sample.">bit depth</dfn> is the number of bits used to store each individual sample, such as 16 bits. A larger bit depth lets each sample record the amplitude more precisely, giving a wider range of volumes and a cleaner sound. The <strong>duration</strong> is simply how many seconds of audio the file contains; a longer recording needs more samples and therefore more storage.</p>
+
+<div class="key-fact" data-narration-id="n21" data-revision-tip="Cover this and recall: what two settings decide how accurately a sound wave is captured?">
+<div class="key-fact-label">Key Fact</div>
+<p>A higher sample rate and a greater bit depth both make a digital recording sound closer to the original, but both also increase the size of the sound file.</p>
+</div>
+
+<h2 data-narration-id="n22">Quality versus File Size</h2>
+<p data-narration-id="n23">Just like images, sound files involve a trade-off between quality and size. Raising the sample rate, raising the bit depth, or recording for longer all improve or lengthen the audio, yet each one increases the number of bits that must be stored. That is why a short, low-quality voice memo takes up far less space than a long, high-quality music track.</p>
+
+<div class="collapsible">
+<button class="collapsible-toggle" aria-expanded="false">
+<span>Working out a sound file&rsquo;s size</span>
+<svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+</button>
+<div class="collapsible-content"><div class="collapsible-inner">
+<p data-narration-id="n24">The size of a sound file in bits is found by multiplying its three settings together:</p>
+<p data-narration-id="n25">$$\text{file size (bits)} = \text{sample rate} \times \text{duration (s)} \times \text{bit depth}$$</p>
+<p data-narration-id="n26">For example, a 30-second clip recorded at a sample rate of 44,100 Hz with a bit depth of 16 bits has a size of \(44100 \times 30 \times 16\), which comes to 21,168,000 bits. Dividing by 8 gives 2,646,000 bytes, or about 2.6 megabytes.</p>
+</div></div>
+</div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n28">Key Takeaways</h3>
+<ul>
+<li data-narration-id="n29">Bitmap images are grids of pixels: colour depth sets the bits per pixel (giving 2 to the power of the depth colours) and resolution sets the number of pixels.</li>
+<li data-narration-id="n30">Sound is stored by sampling an analogue wave, with sample rate (in Hertz), bit depth and duration deciding how accurate the recording is.</li>
+<li data-narration-id="n31">Turning up colour depth, resolution, sample rate or bit depth improves quality but always increases the file size.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n27">In calculation questions, always show your working: state the formula, substitute the numbers, then give the answer with its unit &mdash; method marks are still available even if the final figure is wrong. Answers come out in bits, so if a question asks for bytes, remember to divide by 8. When you are asked to describe or explain the effect of colour depth, resolution, sample rate or bit depth, name both consequences &mdash; the change in quality <em>and</em> the change in file size &mdash; because a one-sided answer will not earn full marks.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "How many different colours can be stored using a colour depth of 3 bits? A) 3  B) 6  C) 8  D) 9",
+  "type": "1 mark — Multiple Choice",
+  "marks": "Correct response: C (8). Secure: applies the rule that n bits store 2 to the power of n colours, so 3 bits give 2 cubed = 8. Developing or Emerging: multiplies the bits (for example 3 × 2 = 6) or misreads the doubling rule, showing it is not yet secure."
+ },
+ {
+  "text": "Define the term 'sample rate' and state the unit in which it is measured.",
+  "type": "2 marks — Define",
+  "marks": "Secure: defines sample rate as the number of samples (measurements of the sound wave) taken each second, and correctly gives the unit as Hertz (Hz). Developing: correct definition but the unit is missing or wrong. Emerging: only a vague idea such as 'how fast the sound plays', with no unit."
+ },
+ {
+  "text": "Describe how an analogue sound wave is converted so that it can be stored in digital form on a computer.",
+  "type": "3 marks — Describe",
+  "marks": "Mastering or Secure: explains that the wave is sampled — its amplitude is measured at regular intervals — and that each measurement is stored as a binary number, noting that more samples per second give a more accurate recording. Developing: mentions sampling but gives only one or two of these points. Emerging: states that the sound is turned into binary without describing how sampling works."
+ },
+ {
+  "text": "An image is 50 pixels wide and 40 pixels high with a colour depth of 4 bits. Calculate the size of the image file in bits. Show your working.",
+  "type": "3 marks — Calculate",
+  "marks": "Secure: multiplies colour depth × width × height (4 × 50 × 40) to reach 8,000 bits, with clear working shown. Developing: uses the correct method but makes an arithmetic slip, or gives 8,000 bits with no working. Emerging: recalls the formula but does not substitute the values correctly."
+ },
+ {
+  "text": "Explain the effect of increasing an image's colour depth on both the quality of the image and the size of its file.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: explains that a greater colour depth means more bits per pixel, so more colours (2 to the power of the colour depth) can be shown, improving quality and giving smoother shading; and that because each pixel now uses more bits, the overall file size increases. Secure: makes both the quality point and the file-size point with some reasoning. Developing: covers only one of the two effects, or states both without reasons. Emerging: a vague comment such as 'it looks better' with no link to bits or file size."
+ },
+ {
+  "text": "A music streaming service must choose the sample rate and bit depth for the songs it stores. Discuss the factors its developers should weigh up when balancing sound quality against file size.",
+  "type": "6 marks — Discuss",
+  "marks": "Mastering: discusses both sides — a higher sample rate and bit depth capture the wave more accurately for better playback quality, but they multiply the file size (sample rate × duration × bit depth), using more storage and download data; and reaches a justified conclusion about a sensible balance. Secure: covers the quality and file-size effects with some justification. Developing: describes one effect clearly but the discussion stays one-sided. Emerging: a few basic points with no real weighing of the two factors."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "In what unit is the sample rate of a sound recording measured?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "Bytes",
+   "Hertz",
+   "Pixels",
+   "Decibels"
+  ]
+ },
+ {
+  "q": "Which change would make an image's file larger?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "Lowering the resolution",
+   "Reducing the colour depth",
+   "Increasing the resolution",
+   "Saving it in black and white"
+  ]
+ },
+ {
+  "q": "Storing sound by measuring the amplitude of the wave at regular intervals is called _____.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "compression",
+   "sampling",
+   "casting",
+   "rendering"
+  ]
+ },
+ {
+  "q": "An image with a higher _____ contains more pixels and therefore more detail.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "colour depth",
+   "resolution",
+   "bit depth",
+   "sample rate"
+  ]
+ },
+ {
+  "q": "Match each colour depth to the number of colours it can store:",
+  "left": [
+   "1 bit",
+   "2 bits",
+   "4 bits",
+   "8 bits"
+  ],
+  "type": "match",
+  "order": [
+   1,
+   3,
+   0,
+   2
+  ],
+  "right": [
+   "16 colours",
+   "2 colours",
+   "256 colours",
+   "4 colours"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "A pixel.",
+  "q": "What is the smallest part of a bitmap image called?"
+ },
+ {
+  "a": "A bitmap image.",
+  "q": "What kind of image is made from a grid of coloured pixels?"
+ },
+ {
+  "a": "The number of bits used per pixel.",
+  "q": "What does colour depth measure?"
+ },
+ {
+  "a": "Raise 2 to the power of the colour depth.",
+  "q": "How do you find the number of colours from a colour depth?"
+ },
+ {
+  "a": "Over 16 million.",
+  "q": "How many colours does 24-bit 'true colour' give?"
+ },
+ {
+  "a": "It can show more colours, improving quality, but increases the file size.",
+  "q": "How does a greater colour depth affect an image?"
+ },
+ {
+  "a": "Data stored with an image file that describes it.",
+  "q": "What is metadata in an image file?"
+ },
+ {
+  "a": "The image's width or height.",
+  "q": "Give one example of information stored in image metadata?"
+ },
+ {
+  "a": "Computers can only store data in binary.",
+  "q": "Why must analogue sound be converted before a computer stores it?"
+ },
+ {
+  "a": "How many samples are taken each second.",
+  "q": "What does the sample rate of a recording measure?"
+ },
+ {
+  "a": "The number of bits used to store each sample.",
+  "q": "What is bit depth?"
+ },
+ {
+  "a": "How many seconds of audio it contains.",
+  "q": "What does the duration of a sound file mean?"
+ },
+ {
+  "a": "It captures the wave more accurately, but increases the file size.",
+  "q": "How does a higher sample rate affect a sound recording?"
+ },
+ {
+  "a": "Colour depth × width × height.",
+  "q": "Which formula gives an image's file size in bits?"
+ },
+ {
+  "a": "Sample rate × duration × bit depth.",
+  "q": "Which formula gives a sound file's size in bits?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "bitmap",
+  "definition": "An image made from a grid of individually coloured pixels."
+ },
+ {
+  "term": "pixel",
+  "definition": "The smallest element of a bitmap image; short for picture element."
+ },
+ {
+  "term": "colour depth",
+  "definition": "The number of bits used to represent the colour of each pixel in an image."
+ },
+ {
+  "term": "resolution",
+  "definition": "The number of pixels in an image, usually given as width times height."
+ },
+ {
+  "term": "metadata",
+  "definition": "Extra data stored with a file that describes it, such as an image's width, height and colour depth."
+ },
+ {
+  "term": "analogue",
+  "definition": "A continuous signal that varies smoothly and can take any value, such as a natural sound wave."
+ },
+ {
+  "term": "sampling",
+  "definition": "Measuring the amplitude of a sound wave at regular intervals and recording each measurement as a binary number."
+ },
+ {
+  "term": "sample rate",
+  "definition": "The number of samples taken each second when recording sound, measured in Hertz."
+ },
+ {
+  "term": "bit depth",
+  "definition": "The number of bits used to store each individual sound sample."
+ }
+]

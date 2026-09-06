@@ -1,0 +1,267 @@
+=== L8 Data Compression ===
+id: f5546976-6cd7-4431-85c8-127e5c7a7fcf
+slug: compression
+status: live tier:both updated:2026-07-30T22:56:44.769243+00:00
+narration_manifest: array len 19
+
+--- DESCRIPTION ---
+Why files are compressed and how lossless and lossy compression differ in what they keep.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">Why We Compress Files</h2>
+<p data-narration-id="n2">Modern files can be enormous. A single high-quality photo, song or video can take up millions of bytes, and moving all of that data across a network takes time and uses up capacity. <dfn class="term" data-def="The process of reducing the number of bytes a file uses so it takes up less storage and can be sent more quickly.">Compression</dfn> is the answer: it shrinks a file so it uses less storage space and travels faster. Compressed files download and upload more quickly, they use less <dfn class="term" data-def="The maximum amount of data that can be sent across a network connection in a given time.">bandwidth</dfn>, web pages containing them load sooner, and more of them fit inside an email attachment limit or a backup drive. In short, compression saves both space and time.</p>
+
+<div class="key-fact" data-narration-id="n3" data-revision-tip="Cover this and list three real situations where a file would need compressing before it is sent or stored.">
+<div class="key-fact-label">Key Fact</div>
+<p>Files are compressed to save storage space and to move them faster over a network. Everyday examples include streaming music and video, sending email attachments, loading images on a web page, and backing up large amounts of data.</p>
+</div>
+
+<h2 data-narration-id="n4">Two Families: Lossless and Lossy</h2>
+<p data-narration-id="n5">There are two main approaches to compression, and the difference between them comes down to a single question: is any of the original data thrown away? A <strong>lossless</strong> method keeps every bit; a <strong>lossy</strong> method deletes some data for good. Choosing between them is one of the most important decisions when storing or sending a file.</p>
+
+<h2 data-narration-id="n6">Lossless Compression</h2>
+<p data-narration-id="n7"><dfn class="term" data-def="Compression in which no data is lost, so the original file can be rebuilt exactly, bit for bit.">Lossless compression</dfn> makes a file smaller without losing any information at all. It works by spotting <dfn class="term" data-def="Repeated or predictable data in a file that can be stored more efficiently without losing information.">redundancy</dfn> &mdash; data that is repeated or predictable &mdash; and recording it in a more efficient way. A matching program can then reverse the process and reconstruct the original file perfectly. Because nothing is thrown away, lossless compression is essential wherever every character matters, such as text documents, spreadsheets and program files. Familiar lossless formats include ZIP archives, PNG images and FLAC audio.</p>
+<p data-narration-id="n8">The trade-off is that lossless compression usually cannot shrink a file as much as lossy compression can, because it is only allowed to reorganise data, never to remove it. What you gain is certainty: the restored file is identical to the one you started with.</p>
+
+<div class="collapsible">
+<button class="collapsible-toggle" aria-expanded="false">
+<span>A closer look: run-length and Huffman</span>
+<svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+</button>
+<div class="collapsible-content"><div class="collapsible-inner">
+<p data-narration-id="n9">One simple lossless method is <dfn class="term" data-def="A lossless technique that replaces a run of repeated values with the value and a count of how many times it repeats.">run-length encoding</dfn>. Instead of listing a run of the same value over and over, it stores the value once together with a count of how many times it repeats. A line of forty identical white pixels can be recorded as &lsquo;white, 40&rsquo; rather than writing &lsquo;white&rsquo; forty times. This works brilliantly on images with large blocks of a single colour, but poorly on detailed photographs where colours rarely repeat.</p>
+<p data-narration-id="n10">Another method is <dfn class="term" data-def="A lossless technique that gives the most common symbols the shortest binary codes and rarer symbols longer ones.">Huffman coding</dfn>, which gives the most common characters the shortest binary codes and the rarer ones longer codes, so the whole file needs fewer bits overall. Both methods are fully reversible, and that reversibility is exactly what makes them lossless.</p>
+</div></div>
+</div>
+
+<div class="key-fact" data-narration-id="n11" data-revision-tip="Close this and explain in one sentence why a lossless-compressed file can be restored exactly.">
+<div class="key-fact-label">Key Fact</div>
+<p>Lossless compression loses no data. The original file can be rebuilt perfectly, bit for bit, which is why it is used for text, spreadsheets and program code where a single wrong character could ruin the file.</p>
+</div>
+
+<h2 data-narration-id="n12">Lossy Compression</h2>
+<p data-narration-id="n13"><dfn class="term" data-def="Compression that permanently removes some data to make a file much smaller, so the original cannot be rebuilt exactly.">Lossy compression</dfn> takes a bolder approach: it permanently removes some of the data to make the file far smaller. The detail it discards is chosen carefully &mdash; usually parts that humans are unlikely to notice. The catch is that once this data is gone, it is gone for good, so the original file can never be recovered exactly.</p>
+<p data-narration-id="n14">Lossy compression is ideal for photos, music and video, where a small drop in quality is a fair price for a huge saving in size. JPEG images and MP3 audio are the best-known examples. An MP3, for instance, removes sounds that are hard for the human ear to pick out, such as very quiet notes that are drowned out by louder ones, shrinking a song to a small fraction of the size of the uncompressed original.</p>
+
+<div class="collapsible">
+<button class="collapsible-toggle" aria-expanded="false">
+<span>The trade-off: quality and repeated saving</span>
+<svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+</button>
+<div class="collapsible-content"><div class="collapsible-inner">
+<p data-narration-id="n15">With lossy compression you choose a balance between file size and quality. Compress a little and the loss is almost invisible; compress heavily and pictures turn blocky or blurry and audio sounds muddy. The right amount depends on how the file will be used.</p>
+<p data-narration-id="n16">Because the process is not reversible, editing a lossy file and re-saving it as lossy again removes even more detail, so quality gets steadily worse with each save. This is why photographers and musicians keep a lossless or uncompressed master copy and only export a lossy version at the very end.</p>
+</div></div>
+</div>
+
+<h2 data-narration-id="n17">Choosing the Right Type</h2>
+<p data-narration-id="n18">The safest way to decide is to ask whether losing any data would matter. For a legal document, a spreadsheet of exam marks or a program&rsquo;s code, you must use lossless compression, because a single changed value could corrupt the whole file. For photographs on a website, music streaming or a video call, lossy compression is usually the better choice: the enormous size saving matters more than perfect detail, and the loss is hard to notice anyway.</p>
+
+<div class="key-fact" data-narration-id="n19" data-revision-tip="Test yourself: for each type, state what happens to the file size and whether the original can be recovered.">
+<div class="key-fact-label">Key Fact</div>
+<p>Lossy compression makes a much smaller file but permanently loses some detail, so the original cannot be recovered. Lossless compression saves less space but keeps every bit, so the original can always be restored exactly.</p>
+</div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n21">Key Takeaways</h3>
+<ul>
+<li data-narration-id="n22">Compression shrinks files so they use less storage and transfer faster &mdash; vital for streaming, email attachments and web pages.</li>
+<li data-narration-id="n23">Lossless compression removes no data and can be reversed perfectly, so it suits text, spreadsheets and program files.</li>
+<li data-narration-id="n24">Lossy compression permanently deletes detail for a much bigger size saving, so it suits photos, music and video where the loss is hard to notice.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n20">A common trap is thinking that &lsquo;lossless&rsquo; means a file has not been compressed &mdash; it has been, just without throwing any data away. If a question asks you to <em>compare</em> the two types, make two linked points, for example that lossy gives a much smaller file but permanently loses detail, whereas lossless saves less space but keeps every bit. When you are given a scenario, always justify your choice by asking whether losing data would actually matter for that particular file.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Identify which one of these file formats uses lossless compression: JPEG, MP3, PNG or MP4.",
+  "type": "1 mark — Identify",
+  "marks": "Correct response: PNG. Secure: identifies PNG as the lossless format that stores an image without discarding data. Developing or Emerging: selects a lossy format (JPEG, MP3 or MP4), showing the lossless and lossy distinction is not yet secure."
+ },
+ {
+  "text": "State two reasons why a large file might need to be compressed before it is sent over a network.",
+  "type": "2 marks — State",
+  "marks": "Secure: states two valid reasons, such as reducing the time taken to transfer the file and using less bandwidth or storage space. Developing: states one valid reason. Emerging: gives a vague answer that is not a genuine reason to compress a file."
+ },
+ {
+  "text": "Describe how lossless compression is able to reduce the size of a file without losing any information.",
+  "type": "3 marks — Describe",
+  "marks": "Secure: describes that lossless compression finds redundancy (repeated or predictable data) and records it more efficiently, so the process can be reversed to rebuild the original exactly. Developing: makes one or two relevant points, for example that no data is lost, but the mechanism is unclear. Emerging: states only that the file becomes smaller, with no valid explanation of how."
+ },
+ {
+  "text": "A student wants to email a folder containing a coursework document and several holiday photos. Explain why the document should be compressed using a lossless method while the photos could be compressed using a lossy method.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: explains that the document must keep every character because losing data could corrupt the text, so lossless is required, while the photos can lose fine detail the eye barely notices, so lossy gives a much larger size saving at little cost. Secure: makes the correct choice for each file with some justification. Developing: correct choices but weak or one-sided reasoning. Emerging: identifies one appropriate method without a clear reason."
+ },
+ {
+  "text": "Explain the main advantages and disadvantages of using lossy compression rather than lossless compression for storing a large music library.",
+  "type": "6 marks — Explain",
+  "marks": "Mastering: explains that lossy compression makes each track far smaller, so many more songs fit in the same storage and they stream faster, but that some audio detail is permanently lost and quality falls if the file is heavily compressed or re-saved, whereas lossless would preserve full quality at the cost of much larger files. Secure: gives clear advantages and disadvantages with some development. Developing: states an advantage or a disadvantage with limited explanation. Emerging: a basic point about size or quality only."
+ },
+ {
+  "text": "A photographer keeps original photographs and also uploads smaller versions to a website. Discuss the factors they should consider when choosing between lossy and lossless compression for each of these two purposes.",
+  "type": "8 marks — Discuss",
+  "marks": "Mastering: discusses both purposes in a balanced way — the master copies should be kept lossless (or uncompressed) so no detail is lost and future edits stay sharp, while the website versions can be lossy to reduce file size, speed up page loading and save bandwidth, accepting a small and hard-to-notice drop in quality — and weighs the trade-off between file size, image quality and whether the original can be recovered. Secure: considers both purposes and the main trade-offs with clear reasoning. Developing: makes relevant points about one purpose, or lists advantages without applying them to the scenario. Emerging: basic points about compression with little link to the photographer's needs."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which of these is an example of a lossless image file format?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "JPEG",
+   "MP3",
+   "PNG",
+   "MP4"
+  ]
+ },
+ {
+  "q": "What is the main disadvantage of lossy compression?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "The file cannot be made any smaller",
+   "Some of the original data is lost forever",
+   "It only works on plain text",
+   "It always makes the file larger"
+  ]
+ },
+ {
+  "q": "_____ compression permanently removes data that humans are unlikely to notice.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "Lossless",
+   "Lossy",
+   "Run-length",
+   "Huffman"
+  ]
+ },
+ {
+  "q": "Compression that lets the original file be rebuilt exactly is called _____ compression.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "lossy",
+   "lossless",
+   "binary",
+   "sampled"
+  ]
+ },
+ {
+  "q": "Match each term to its description:",
+  "left": [
+   "Lossless compression",
+   "Lossy compression",
+   "Run-length encoding"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   1,
+   2
+  ],
+  "right": [
+   "The original file can be restored exactly",
+   "Some data is permanently discarded",
+   "Stores a repeated value with a count of its repeats"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "Makes it smaller so it uses less storage and transfers faster.",
+  "q": "What does data compression do to a file?"
+ },
+ {
+  "a": "Nothing is lost; the file can be restored exactly.",
+  "q": "In lossless compression, what happens to the original data?"
+ },
+ {
+  "a": "It is permanently deleted and cannot be recovered.",
+  "q": "In lossy compression, what happens to the removed data?"
+ },
+ {
+  "a": "Lossy compression.",
+  "q": "Which compression type gives the bigger reduction in file size?"
+ },
+ {
+  "a": "Lossless compression.",
+  "q": "Which compression type must be used for a text document or program code?"
+ },
+ {
+  "a": "JPEG.",
+  "q": "Name a common file format that uses lossy compression for images."
+ },
+ {
+  "a": "PNG.",
+  "q": "Name a common file format that uses lossless compression for images."
+ },
+ {
+  "a": "MP3.",
+  "q": "What audio format is a well-known example of lossy compression?"
+ },
+ {
+  "a": "The repeated value and a count of how many times it repeats.",
+  "q": "What does run-length encoding store instead of a long run of repeats?"
+ },
+ {
+  "a": "Images with large areas of a single colour.",
+  "q": "What type of image does run-length encoding compress best?"
+ },
+ {
+  "a": "No; it is lossless and fully reversible.",
+  "q": "Does Huffman coding lose any data?"
+ },
+ {
+  "a": "More detail is lost with each further compression.",
+  "q": "Why does re-saving a lossy file again and again harm it?"
+ },
+ {
+  "a": "To fit within an email attachment size limit.",
+  "q": "Give one reason a file is compressed before emailing it."
+ },
+ {
+  "a": "Repeated or predictable data that can be stored more efficiently.",
+  "q": "What is redundancy in a file?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "Compression",
+  "definition": "The process of reducing the number of bytes a file uses so it takes up less storage and can be sent more quickly."
+ },
+ {
+  "term": "bandwidth",
+  "definition": "The maximum amount of data that can be sent across a network connection in a given time."
+ },
+ {
+  "term": "lossless compression",
+  "definition": "Compression in which no data is lost, so the original file can be rebuilt exactly, bit for bit."
+ },
+ {
+  "term": "redundancy",
+  "definition": "Repeated or predictable data in a file that can be stored more efficiently without losing information."
+ },
+ {
+  "term": "run-length encoding",
+  "definition": "A lossless technique that replaces a run of repeated values with the value and a count of how many times it repeats."
+ },
+ {
+  "term": "Huffman coding",
+  "definition": "A lossless technique that gives the most common symbols the shortest binary codes and rarer symbols longer ones."
+ },
+ {
+  "term": "lossy compression",
+  "definition": "Compression that permanently removes some data to make a file much smaller, so the original cannot be rebuilt exactly."
+ }
+]
