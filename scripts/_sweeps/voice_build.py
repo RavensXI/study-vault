@@ -59,11 +59,20 @@ for n, old, new in spec.get("pairs", []):
         rep = rep.replace(o, nw, 1)
     edits.append({"lesson_id": r["lesson_id"], "field": r["field"], "n": n,
                   "find": find, "replace": rep})
+# A worklist sentence is truncated at 300 plain chars, so a few hits carry the
+# examiner clause past the located span. `extra` addresses those directly:
+# [n, literal find, literal replace] against the hit's lesson and field.
+for n, find, rep in spec.get("extra", []):
+    r = recs[n]
+    edits.append({"lesson_id": r["lesson_id"], "field": r["field"], "n": n,
+                  "find": find, "replace": rep})
+
 skipped = [{"lesson_id": recs[n]["lesson_id"], "lesson_number": recs[n]["lesson_number"],
             "field": recs[n]["field"], "reason": why, "sentence": recs[n]["plain"]}
            for n, why in spec.get("skipped", [])]
 
-covered = {e["n"] for e in edits} | {n for n, _ in spec.get("skipped", [])}
+covered = {e["n"] for e in edits} | {n for n, _ in spec.get("skipped", [])} \
+    | {n for n, _f, _r in spec.get("extra", [])}
 missing = sorted(set(recs) - covered)
 if problems:
     print("PROBLEMS:\n" + "\n".join(problems))
