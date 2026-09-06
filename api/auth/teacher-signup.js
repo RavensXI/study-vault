@@ -17,6 +17,7 @@ module.exports = async (req, res) => {
   }
 
   const { token, name, password } = req.body || {};
+  const pickedSubjectIds = Array.isArray((req.body || {}).subject_ids) ? req.body.subject_ids : [];
 
   if (!token || !name || !password) {
     return res.status(400).json({ error: 'Token, name, and password are required' });
@@ -81,12 +82,32 @@ module.exports = async (req, res) => {
   }
 
   // --- Create teacher_subjects rows ---
-  if (subject_ids && subject_ids.length > 0) {
-    const subjectRows = subject_ids.map(sid => ({
-      teacher_id: userId,
-      subject_id: sid,
-    }));
+  // Two sources, two levels of trust. Subjects on the invitation were chosen
+  // by the school admin and carry the table's default edit/publish rights.
+  // Subjects the teacher ticked on the sign-up form are a declaration of what
+  // they teach: they scope the class screen, but grant no content rights.
+  // A picked id is only accepted if it names a live subject that is generic
+  // or belongs to this invitation's school (6 Sep 2026).
+  const assigned = new Set(subject_ids || []);
+  let picked = [];
+  const candidates = pickedSubjectIds
+    .filter(x => typeof x === 'string' && /^[0-9a-f-]{36}$/i.test(x) && !assigned.has(x))
+    .slice(0, 60);
+  if (candidates.length) {
+    const { data: okRows } = await supabase
+      .from('subjects').select('id, school_id')
+      .in('id', candidates).eq('status', 'live');
+    picked = (okRows || [])
+      .filter(r => r.school_id === null || r.school_id === school_id)
+      .map(r => r.id);
+  }
 
+  const subjectRows = [
+    ...[...assigned].map(sid => ({ teacher_id: userId, subject_id: sid })),
+    ...picked.map(sid => ({ teacher_id: userId, subject_id: sid, can_edit: false, can_publish: false })),
+  ];
+
+  if (subjectRows.length > 0) {
     const { error: subjectError } = await supabase
       .from('teacher_subjects')
       .insert(subjectRows);

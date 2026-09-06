@@ -76,6 +76,21 @@
             <label class="form-label" for="fullName">Full name</label>
             <input class="form-input" id="fullName" type="text" placeholder="e.g. Ms Taylor" autocomplete="name" required>
           </div>
+
+          <!-- Subjects. A teacher declares what they teach so their class
+               screen and review queue start on the right subjects. Subjects
+               the school assigned on the invitation are ticked and locked;
+               anything the teacher adds here is a teaching declaration only
+               and carries no edit rights (those stay with the school). -->
+          <fieldset class="form-group subj-pick" id="subjectPick">
+            <legend class="form-label">Subjects you teach</legend>
+            <p class="form-hint subj-pick-hint" id="subjectHint">Tick the ones you teach. You can change this later.</p>
+            <input class="form-input subj-filter" id="subjectFilter" type="search" placeholder="Find a subject" aria-label="Find a subject" autocomplete="off">
+            <div class="subj-list" id="subjectList" role="group" aria-labelledby="subjectHint">
+              <p class="subj-empty">Loading subjects&hellip;</p>
+            </div>
+            <p class="form-hint subj-count" id="subjectCount" aria-live="polite"></p>
+          </fieldset>
           <div class="form-group">
             <label class="form-label" for="password">Password</label>
             <input class="form-input" id="password" type="password" autocomplete="new-password" required minlength="8" aria-describedby="passwordHint">
@@ -187,11 +202,102 @@
         schoolNameBadge.textContent = inv.school_name || 'Your school';
         showView(formView);
         fullNameInput.focus();
+        loadSubjects(inv.school_id, inv.subject_ids || []);
 
       } catch (err) {
         showView(errorView);
       }
     }
+
+    /* ---- Subject picker -------------------------------------------------
+       The school's own subjects first (they are what "Geography" means to
+       a teacher at that school), then every generic subject with its board
+       read off the slug, so the three Business Studies rows tell apart. */
+    var subjectListEl = document.getElementById('subjectList');
+    var subjectFilterEl = document.getElementById('subjectFilter');
+    var subjectCountEl = document.getElementById('subjectCount');
+    var lockedSubjectIds = [];
+
+    function boardOf(slug) {
+      var m = /(^|-)(aqa|ocr|edexcel|eduqas|wjec)(-|$)/.exec(slug || '');
+      if (m) return m[2].toUpperCase();
+      if (/^cambridge-nationals/.test(slug || '')) return 'OCR';
+      return '';
+    }
+
+    function escapeHtml(t) {
+      return String(t).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+
+    async function loadSubjects(schoolId, assigned) {
+      lockedSubjectIds = assigned.slice();
+      try {
+        var q = sb.from('subjects').select('id, name, slug, school_id')
+          .eq('status', 'live').order('name');
+        q = schoolId ? q.or('school_id.is.null,school_id.eq.' + schoolId) : q.is('school_id', null);
+        var resp = await q;
+        if (resp.error) throw resp.error;
+        paintSubjects(resp.data || []);
+      } catch (err) {
+        subjectListEl.innerHTML = '<p class="subj-empty">Subjects could not be loaded. You can pick them later from your classes screen.</p>';
+      }
+    }
+
+    function paintSubjects(rows) {
+      var own = rows.filter(function (s) { return s.school_id; });
+      var gen = rows.filter(function (s) { return !s.school_id; });
+      function item(s) {
+        var locked = lockedSubjectIds.indexOf(s.id) !== -1;
+        var board = s.school_id ? '' : boardOf(s.slug);
+        return '<label class="subj-item' + (locked ? ' is-locked' : '') + '" data-name="' +
+          escapeHtml((s.name + ' ' + board).toLowerCase()) + '">' +
+          '<input type="checkbox" name="subject" value="' + escapeHtml(s.id) + '"' +
+          (locked ? ' checked disabled' : '') + '>' +
+          '<span class="subj-name">' + escapeHtml(s.name) + '</span>' +
+          (board ? '<span class="subj-board">' + escapeHtml(board) + '</span>' : '') +
+          (locked ? '<span class="subj-board subj-assigned">Assigned by your school</span>' : '') +
+          '</label>';
+      }
+      var html = '';
+      if (own.length) html += '<div class="subj-group" data-group="own"><p class="subj-group-label">Your school</p>' + own.map(item).join('') + '</div>';
+      html += '<div class="subj-group" data-group="gen"><p class="subj-group-label">' + (own.length ? 'All GCSE subjects' : 'GCSE subjects') + '</p>' + gen.map(item).join('') + '</div>';
+      subjectListEl.innerHTML = html;
+      updateSubjectCount();
+    }
+
+    function chosenSubjectIds() {
+      return Array.prototype.map.call(
+        subjectListEl.querySelectorAll('input[name="subject"]:checked:not(:disabled)'),
+        function (i) { return i.value; });
+    }
+
+    function updateSubjectCount() {
+      var n = subjectListEl.querySelectorAll('input[name="subject"]:checked').length;
+      subjectCountEl.textContent = n ? (n === 1 ? '1 subject selected' : n + ' subjects selected') : 'No subjects selected yet';
+    }
+
+    subjectListEl.addEventListener('change', updateSubjectCount);
+
+    subjectFilterEl.addEventListener('input', function () {
+      var needle = subjectFilterEl.value.trim().toLowerCase();
+      var items = subjectListEl.querySelectorAll('.subj-item');
+      var shown = 0;
+      Array.prototype.forEach.call(items, function (el) {
+        var hit = !needle || el.getAttribute('data-name').indexOf(needle) !== -1;
+        el.hidden = !hit;
+        if (hit) shown++;
+      });
+      Array.prototype.forEach.call(subjectListEl.querySelectorAll('.subj-group'), function (g) {
+        g.hidden = !g.querySelector('.subj-item:not([hidden])');
+      });
+      var empty = subjectListEl.querySelector('.subj-none');
+      if (!shown) {
+        if (!empty) { empty = document.createElement('p'); empty.className = 'subj-empty subj-none'; subjectListEl.appendChild(empty); }
+        empty.textContent = 'No subject matches "' + subjectFilterEl.value.trim() + '".';
+      } else if (empty) { empty.remove(); }
+    });
 
     signupForm.addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -231,7 +337,8 @@
           body: JSON.stringify({
             token: token,
             name: fullName,
-            password: password
+            password: password,
+            subject_ids: chosenSubjectIds()
           })
         });
 
