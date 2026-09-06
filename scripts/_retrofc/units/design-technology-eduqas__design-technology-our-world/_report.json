@@ -1,0 +1,163 @@
+{
+ "unit": "design-technology-eduqas/design-technology-our-world",
+ "checked_at": "2026-09-06T00:00:00Z",
+ "spec_used": "specs/eduqas/design-and-technology-C600QS.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "flashcard_questions",
+   "severity": "HIGH",
+   "claim": "Flashcard [11] asks: \"Apple's industrial design under Jonathan Ive is cited in the spec for which reason?\"",
+   "truth": "The specification names no company or designer. A grep of the whole spec file finds no 'Apple', 'Ive' or 'Jonathan'. The card drills a false statement about what the spec sets, so a student could waste an answer citing a required case study that does not exist.",
+   "evidence": "specs/eduqas/design-and-technology-C600QS.md - full-file grep for apple/ive/jonathan returns no company or designer reference; the core content list at lines 447-520 names no branded example",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 1,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard [9] asks: \"Why do examiners reject 'make it more eco-friendly' as a sustainability suggestion?\"",
+   "truth": "No published mark scheme is quoted or cited for this. The teaching point (a vague answer earns no credit) is sound, but stating it as a fact about examiner behaviour is an invented claim about a real awarding body. Neutral phrasing keeps the point and drops the fabrication.",
+   "evidence": "no source; house rule on fabricated examiner claims in the unit brief",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Recurring fabricated examiner voice across the unit: L1 content 'Examiners look for specific, actionable improvements... The more precise and technically grounded the suggestion, the higher the mark'; L1 exam tip 'Examiners award marks for precision'; L2 key fact 'Examiners look for specific design actions'; L4 content 'The key examiner point is that SMA is a metal' and 'stating this contrast earns the mark'.",
+   "truth": "Two options. (a) Leave them: each is generic revision-guide advice that is true in substance, and no mark-scheme wording is quoted, so nothing here would mislead a student about content. (b) Sweep them: they assert what a named awarding body's examiners do, which is unsourced, and the same phrasing pattern will recur across every subject built by the same generator. My recommendation is (b) as a fleet-wide phrasing sweep ('answers that name a specific action earn credit' rather than 'examiners look for'), not as five unit-local edits here - a one-unit fix leaves the pattern everywhere else.",
+   "evidence": "raw/L01.txt n18 and n22, raw/L02.txt n10, raw/L04.txt n5 and n21",
+   "verdict": "NOTE",
+   "ruling": "Leave: fleet-wide examiner-voice phrasing sweep."
+  },
+  {
+   "id": "F4",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"A full LCA has four stages: (1) Raw material extraction; (2) Manufacturing; (3) Use phase; (4) End of life\", two paragraphs after the lesson has said an LCA \"maps every stage of a product's life: extracting raw materials, processing, manufacturing, distribution, use and end-of-life disposal\" (six items).",
+   "truth": "The lesson contradicts itself, and the practice mark scheme credits only the four. A student who learns the six-item list from the earlier paragraph loses the 2-mark 'name the four stages' answer. The four-stage grouping is a teaching simplification, not what a full LCA contains, so the word 'full' is the error.",
+   "evidence": "internal contradiction between raw/L02.txt n12 and n14; practice_questions [1] mark scheme credits four stages",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 2,
+   "field": "knowledge_checks",
+   "severity": "LOW",
+   "claim": "Knowledge check [1] stem: \"Which of the following is a specific, examiner-creditable sustainability suggestion?\"",
+   "truth": "Same fabricated-examiner-voice pattern as F3, but the question itself works and the keyed answer is right. Recorded so the sweep in F3 picks it up; not worth a standalone edit.",
+   "evidence": "raw/L02.txt knowledge_checks [1]",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F6",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "\"Nomex is a heat-resistant para-aramid fibre used in protective clothing for firefighters, racing drivers and military personnel.\"",
+   "truth": "Nomex is a META-aramid. Kevlar is the para-aramid, and the same lesson correctly calls Kevlar 'para-aramid fibre' a few paragraphs earlier - so the lesson puts two different fibres in the same category and hides the reason they behave differently. The meta linkage stops the chains aligning, which is why Nomex has low tensile strength (about 340 MPa) but excellent heat resistance, while para-aramid Kevlar is the high-tensile-strength fibre.",
+   "evidence": "Wikipedia 'Nomex': \"Nomex is an example of a meta variant of the aramids (Kevlar is a para aramid).\"",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"Micro-fibres are synthetic fibres with a diameter of less than one denier - finer than a strand of silk.\"",
+   "truth": "Denier is not a diameter. It is a linear density: the mass in grams of 9000 metres of the fibre. A micro-fibre is finer than one denier (a diameter under about ten micrometres). Teaching denier as a length measurement gives a student a wrong unit to write down.",
+   "evidence": "Wikipedia 'Microfiber': \"synthetic fiber finer than one denier or decitex/thread, having a diameter of less than ten micrometres\"; denier defined as grams per 9000 m",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"Selective Laser Sintering (SLS), which fuses polymer or metal powder with a laser and is suitable for production-grade engineering parts without support material. Airbus uses metal SLS to produce titanium brackets and connectors for aircraft cabins.\"",
+   "truth": "Wrong process named for metal. SLS sinters polymer powder (polyamide, PS, TPE, PAEK); metal powder is fully melted by the related process selective laser melting (SLM/DMLS). Wikipedia states metals are not commonly used in SLS since SLM was developed. The no-support-material property is true of polymer SLS, where the loose powder bed holds the part, and does not carry over to metal printing, which does need supports. The Airbus titanium brackets are structural airframe parts made by metal powder-bed melting, not cabin parts made by SLS.",
+   "evidence": "Wikipedia 'Selective laser sintering': commercial SLS materials are \"polymers such as polyamides (PA), polystyrenes (PS), thermoplastic elastomers (TPE), and polyaryletherketones (PAEK)\"; \"Metal materials are not commonly used in SLS since the development of selective laser melting.\"",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 6,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard [11] answer: \"Selective Laser Sintering (SLS) - fusing metal powder with a laser to build production-grade components.\"",
+   "truth": "Same error as F8, drilled as a memorised answer. The named process for titanium is metal powder-bed melting (SLM/DMLS), not SLS.",
+   "evidence": "Wikipedia 'Selective laser sintering', as F8",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 6,
+   "field": "glossary_terms",
+   "severity": "LOW",
+   "claim": "CNC defined as \"A numerically controlled machine tool driven by a computer program, which removes material from a workpiece by rotating cutting tools across multiple axes.\"",
+   "truth": "CNC is the control method, not one cutting action. Laser cutters, vinyl cutters, CNC embroidery machines and 3D printers are all computer numerically controlled and none uses a rotating cutting tool. The definition describes CNC milling or routing only. It reads as a routing definition in a lesson that also teaches laser cutting as CAM, so it is confusing rather than mark-costing.",
+   "evidence": "raw/L06.txt glossary_terms; the same lesson lists laser cutting, vinyl cutting and CNC embroidery as CAM processes",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [
+  3
+ ],
+ "summary": "Ten findings across five of six lessons; L3 (Energy Generation and Storage) is clean. Two HIGH: Nomex called a para-aramid when it is a meta-aramid (L4), and a flashcard claiming the spec cites Apple and Jonathan Ive when it names no company at all (L1). The rest are a wrong process for metal 3D printing (SLS for SLM, L6), denier taught as a diameter (L5), a self-contradicting four-stage LCA claim (L2) and a recurring fabricated examiner voice raised for adjudication. No board named in prose anywhere, no exam-structure claims made, and every knowledge-check key and practice mark scheme in the unit checked out.",
+ "renarration": {
+  "run_at": "2026-09-06T09:07:15Z",
+  "clips": [
+   {
+    "lesson": 2,
+    "id": "n14",
+    "key": "design-technology-eduqas/design-technology-our-world/narration_lesson-02_n14.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/design-technology-our-world/narration_lesson-02_n14.mp3",
+    "voice": "Ada",
+    "duration": 34.94,
+    "bytes": 419328,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 09:06:54 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n20b",
+    "key": "design-technology-eduqas/design-technology-our-world/narration_lesson-04_n20b.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/design-technology-our-world/narration_lesson-04_n20b.mp3",
+    "voice": "Ada",
+    "duration": 32.74,
+    "bytes": 392832,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 09:07:00 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n18",
+    "key": "design-technology-eduqas/design-technology-our-world/narration_lesson-05_n18.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/design-technology-our-world/narration_lesson-05_n18.mp3",
+    "voice": "Ollie",
+    "duration": 34.78,
+    "bytes": 417312,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 09:07:08 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n24",
+    "key": "design-technology-eduqas/design-technology-our-world/narration_lesson-06_n24.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/design-technology-our-world/narration_lesson-06_n24.mp3",
+    "voice": "Ada",
+    "duration": 36.89,
+    "bytes": 442656,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 09:07:15 GMT"
+   }
+  ],
+  "verified_ok": 4,
+  "total": 4
+ }
+}
