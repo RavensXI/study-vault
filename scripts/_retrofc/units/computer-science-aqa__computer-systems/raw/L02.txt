@@ -1,0 +1,262 @@
+=== L2 CPU Architecture and the Fetch-Execute Cycle ===
+id: 066cb22b-3a26-4ba1-aa82-8fde638bfc4d
+slug: cpu-architecture-and-the-fetch-execute-cycle
+status: live tier:both updated:2026-07-30T22:20:39.431718+00:00
+narration_manifest: array len 28
+
+--- DESCRIPTION ---
+The ALU, control unit, clock, bus and registers — and how the CPU fetches, decodes and executes instructions.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">What Is the CPU?</h2>
+<p data-narration-id="n2">The <dfn class="term" data-def="Central Processing Unit — the primary component of a computer that processes instructions and coordinates the operation of all other components.">CPU</dfn> is the component that carries out every instruction a program contains. It processes data, performs calculations, makes comparisons and controls the flow of information between all other parts of the system. Without the CPU, no program can run.</p>
+<p data-narration-id="n3">Most CPUs follow the design principles of <dfn class="term" data-def="A computer architecture in which both program instructions and data are stored in the same memory and accessed through a single pathway.">Von Neumann architecture</dfn>, named after the mathematician John von Neumann whose work in the 1940s described storing both instructions and data in the same memory. This is the foundation of the vast majority of computers made since then, from desktop PCs to smartphones.</p>
+
+<div class="key-fact" data-narration-id="n4" data-revision-tip="Cover this and name the five main components of the CPU. Write one sentence describing what each one does.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The main components inside the CPU are: the <strong>ALU</strong> (performs arithmetic and logic operations), the <strong>control unit</strong> (directs data flow and manages the fetch-execute cycle), the <strong>clock</strong> (generates timing pulses), <strong>registers</strong> (small, fast storage locations inside the CPU) and the <strong>bus</strong> (a collection of wires for transmitting signals between components).</p>
+</div>
+
+<h2 data-narration-id="n5">Inside the CPU: Key Components</h2>
+<p data-narration-id="n6">The <dfn class="term" data-def="Arithmetic Logic Unit — the part of the CPU that performs arithmetic calculations and logical comparisons.">ALU</dfn> carries out two categories of operation. <strong>Arithmetic operations</strong> include addition, subtraction and related calculations. <strong>Logical operations</strong> include comparisons (is A greater than B?) and Boolean operations (AND, OR, NOT). Every time an app performs a maths calculation, checks a condition in a loop, or compares two values, the ALU is doing the work.</p>
+<p data-narration-id="n7">The <dfn class="term" data-def="The part of the CPU that manages and coordinates all activity, directing data between the CPU, memory and input/output devices.">control unit</dfn> does not process data itself. Instead, it orchestrates everything else &mdash; sending control signals to tell the ALU to start calculating, telling memory to send data, and directing results to the right place. It decodes each instruction and determines which components need to act and in what order.</p>
+<p data-narration-id="n8">The <dfn class="term" data-def="A component that generates regular electrical pulses to synchronise the activities of the CPU. Clock speed is measured in hertz (Hz).">clock</dfn> generates a continuous stream of pulses. Each pulse triggers the next step in a process. The faster the clock, the more operations the CPU can perform per second. Modern consumer CPUs typically operate at several gigahertz &mdash; billions of clock pulses per second.</p>
+<p data-narration-id="n9"><dfn class="term" data-def="Small, extremely fast storage locations inside the CPU used to temporarily hold data and instructions being processed.">Registers</dfn> are tiny storage areas built directly into the CPU. They hold data or addresses that the CPU is currently working with. Because they are physically on the processor chip itself, registers can be accessed far faster than main memory. You do not need to know the names of individual registers for this course.</p>
+<p data-narration-id="n10">A <dfn class="term" data-def="A collection of wires along which data or signals are transmitted between components inside a computer system.">bus</dfn> is a set of parallel wires that carry signals between parts of the system. Different buses carry different types of information: data, addresses and control signals. Data travels along the bus in parallel, with each wire carrying one bit at a time.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Cache Memory — Fast Access Close to the CPU</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n11"><dfn class="term" data-def="A small amount of very fast memory located on or very close to the CPU, used to store frequently accessed instructions and data.">Cache</dfn> sits between the CPU and main memory (RAM). When the CPU needs data, it checks the cache first. If the data is there (a &ldquo;cache hit&rdquo;), it is retrieved much faster than fetching from RAM. If not (a &ldquo;cache miss&rdquo;), the CPU fetches from RAM and copies the data to cache for next time. Cache is much more expensive per byte than RAM, so systems have relatively small amounts of it &mdash; typically measured in megabytes. Many modern CPUs have multiple levels of cache (L1, L2, L3), each larger but slightly slower than the last.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n12">The Fetch-Execute Cycle</h2>
+<p data-narration-id="n13">The CPU works by repeating the same three-stage process continuously for every instruction in a program. This is the <dfn class="term" data-def="The continuous three-stage process by which the CPU processes instructions: fetch (retrieve from memory), decode (interpret the instruction) and execute (carry it out).">fetch-execute cycle</dfn>:</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>The Three Stages in Detail</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n14"><strong>1. Fetch</strong> &mdash; The next instruction is retrieved from main memory and brought into the CPU. The CPU knows where to look because it tracks which instruction comes next. The instruction travels to the CPU along the data bus.</p>
+    <p data-narration-id="n15"><strong>2. Decode</strong> &mdash; The control unit interprets the instruction to work out what operation is needed and what data is required. Different instructions require different actions &mdash; the control unit figures out which components need to be involved and what they must do.</p>
+    <p data-narration-id="n16"><strong>3. Execute</strong> &mdash; The instruction is carried out. This might mean the ALU performs a calculation, data is moved between memory locations, or the result is written back to main memory. Once execution is complete, the cycle repeats for the next instruction.</p>
+    <p data-narration-id="n17">This cycle repeats billions of times per second in a modern processor. A common exam error is writing only two stages (&ldquo;fetch and execute&rdquo;). There are always <em>three</em> stages: fetch, decode and execute. The decode stage is separate and must be stated.</p>
+  </div></div>
+</div>
+
+<div class="key-fact" data-narration-id="n18" data-revision-tip="Describe the three stages of the fetch-execute cycle without looking. Start each stage with its name.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The fetch-execute cycle has three stages: <strong>Fetch</strong> (instruction retrieved from memory), <strong>Decode</strong> (control unit interprets what the instruction means), <strong>Execute</strong> (instruction is carried out, which may include reading or writing to main memory). This repeats for every instruction.</p>
+</div>
+
+<h2 data-narration-id="n19">CPU Performance Factors</h2>
+<p data-narration-id="n20">Three factors have the greatest effect on how fast a CPU can process instructions:</p>
+<p data-narration-id="n21"><strong>Clock speed</strong> &mdash; measured in hertz (Hz), typically gigahertz (GHz) in modern CPUs. A higher clock speed means more fetch-execute cycles per second. Doubling the clock speed roughly doubles the number of instructions the CPU processes per second, all else being equal.</p>
+<p data-narration-id="n22"><strong>Number of cores</strong> &mdash; a core is an independent processing unit. A dual-core CPU has two cores; a quad-core has four. Multiple cores allow the CPU to work on different tasks simultaneously (parallel processing). Modern phones and computers typically have 4 to 16 cores. More cores improve performance for programmes written to take advantage of them.</p>
+<p data-narration-id="n23"><strong>Cache size</strong> &mdash; a larger cache stores more frequently used data closer to the CPU, reducing the number of slower RAM accesses needed. Applications that repeatedly access the same data (such as games or video editing) benefit most from larger cache.</p>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n25">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n26">The CPU contains the ALU (calculations and logic), control unit (directs activity and manages the cycle), clock (timing pulses), registers (fast on-chip storage) and buses (wires for signal transmission). Most CPUs follow Von Neumann architecture: instructions and data share the same memory.</li>
+  <li data-narration-id="n27">The fetch-execute cycle has three stages: Fetch (instruction retrieved from memory), Decode (control unit interprets it), Execute (action carried out). This repeats continuously for every instruction.</li>
+  <li data-narration-id="n28">CPU performance is affected by clock speed (cycles per second), number of cores (parallel processing) and cache size (faster access to frequently used data). Increasing any of these generally improves performance.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n24">A common exam mistake is describing the fetch-execute cycle as two stages. There are always three: fetch, decode, execute &mdash; and the decode stage is what the control unit does, not the ALU. When asked to &ldquo;explain the effect of increasing clock speed on CPU performance&rdquo;, always link back to the fetch-execute cycle: &ldquo;a faster clock means more fetch-execute cycles per second, so more instructions are processed per second.&rdquo; For questions about CPU components, distinguish clearly between what the ALU does (arithmetic and logic) and what the control unit does (directs data flow, manages the cycle) &mdash; they are different components with different roles. You do not need to know the names of specific registers (such as MAR, MDR, PC or CIR) for this course.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Describe the role of the control unit within the CPU.",
+  "type": "2 marks — Define",
+  "marks": "Two marks for: the control unit manages/coordinates the fetch-execute cycle; it directs the flow of data between the CPU, memory and input/output devices (or: it sends control signals to other components to tell them what to do and when).\nOne mark for: identifies the control unit as a managing/coordinating component without explaining what it manages."
+ },
+ {
+  "text": "Describe the three stages of the fetch-execute cycle.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: All three stages clearly described with accurate detail. Fetch — instruction retrieved from main memory and brought into the CPU. Decode — control unit interprets the instruction to determine what action is needed. Execute — the instruction is carried out (e.g. ALU performs calculation, data is written to memory). Cycle repeats for the next instruction.\nSecure: All three stages named and described but one stage lacks detail.\nDeveloping: Two stages described correctly.\nEmerging: One stage described, or all three named but with no description."
+ },
+ {
+  "text": "Explain how increasing the number of processor cores can improve computer performance.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: Multiple cores allow different instructions or tasks to be processed simultaneously (parallel processing). If a program is written to use multiple cores, different parts of the program can execute at the same time, reducing overall execution time. Links to real-world context (e.g. video editing, multitasking).\nSecure: States that multiple cores allow simultaneous processing and that this speeds up overall performance.\nDeveloping: States that more cores = faster performance but gives no mechanism.\nEmerging: Vague statement that more cores is better."
+ },
+ {
+  "text": "State two differences between the ALU and the control unit.",
+  "type": "2 marks — State a Difference",
+  "marks": "One mark each for any two of: ALU performs arithmetic and logical operations / control unit directs data flow and manages the fetch-execute cycle; ALU processes data / control unit sends control signals without processing data; ALU carries out calculations / control unit decodes instructions."
+ },
+ {
+  "text": "Explain the effect of increasing cache size on CPU performance.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: A larger cache means more frequently used instructions and data can be stored closer to the CPU. The CPU checks cache before RAM; if data is in cache (cache hit), it is retrieved much faster than from RAM. More cache means fewer slower RAM accesses (fewer cache misses), reducing the time the CPU spends waiting for data. Overall processing speed increases for data-intensive tasks.\nSecure: States that more cache reduces the number of times the CPU needs to access RAM and that this is faster.\nDeveloping: States that more cache improves speed but does not explain why (cache vs RAM speed difference).\nEmerging: Vague reference to cache being fast."
+ },
+ {
+  "text": "Which component of the CPU performs arithmetic and logical operations?\nA) Control unit\nB) Clock\nC) ALU\nD) Bus",
+  "type": "1 mark — Multiple Choice",
+  "marks": "C) ALU [1 mark]"
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which component manages the fetch-execute cycle and directs data between CPU components?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "ALU",
+   "Register",
+   "Control unit",
+   "Clock"
+  ]
+ },
+ {
+  "q": "What is the second stage of the fetch-execute cycle?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "Execute",
+   "Store",
+   "Decode",
+   "Retrieve"
+  ]
+ },
+ {
+  "q": "A bus is a collection of _____ through which data or signals are transmitted between components.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "transistors",
+   "registers",
+   "wires",
+   "processors"
+  ]
+ },
+ {
+  "q": "Increasing _____ speed means the CPU can complete more fetch-execute cycles per second.",
+  "type": "fill",
+  "correct": 3,
+  "options": [
+   "bus",
+   "cache",
+   "core",
+   "clock"
+  ]
+ },
+ {
+  "q": "Match each component to its role:",
+  "left": [
+   "ALU",
+   "Control unit",
+   "Cache"
+  ],
+  "type": "match",
+  "order": [
+   1,
+   2,
+   0
+  ],
+  "right": [
+   "Fast on-chip memory storing frequently accessed data",
+   "Performs arithmetic and logical operations",
+   "Manages the fetch-execute cycle and directs data flow"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "Arithmetic Logic Unit.",
+  "q": "What does ALU stand for?"
+ },
+ {
+  "a": "Arithmetic (e.g. addition) and logical (e.g. comparisons).",
+  "q": "What two types of operation does the ALU perform?"
+ },
+ {
+  "a": "Manages the fetch-execute cycle and directs data between CPU components.",
+  "q": "What is the role of the control unit?"
+ },
+ {
+  "a": "A collection of wires that transmit data or signals between components.",
+  "q": "What is a bus in a computer system?"
+ },
+ {
+  "a": "Fetch, decode, execute.",
+  "q": "Name the three stages of the fetch-execute cycle in order."
+ },
+ {
+  "a": "The next instruction is retrieved from main memory into the CPU.",
+  "q": "What happens during the fetch stage?"
+ },
+ {
+  "a": "The control unit interprets the instruction to determine what action is needed.",
+  "q": "What happens during the decode stage?"
+ },
+ {
+  "a": "Von Neumann architecture.",
+  "q": "What architecture stores instructions and data in the same memory?"
+ },
+ {
+  "a": "More clock pulses per second means more fetch-execute cycles per second.",
+  "q": "How does increasing clock speed improve CPU performance?"
+ },
+ {
+  "a": "They allow different tasks to be processed simultaneously (parallel processing).",
+  "q": "How do multiple cores improve performance?"
+ },
+ {
+  "a": "More frequently used data is stored close to the CPU, reducing slower RAM accesses.",
+  "q": "Why does larger cache improve CPU performance?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "CPU",
+  "definition": "Central Processing Unit — the primary component of a computer that processes instructions and coordinates the operation of all other components."
+ },
+ {
+  "term": "Von Neumann architecture",
+  "definition": "A computer architecture in which both program instructions and data are stored in the same memory and accessed through a single pathway."
+ },
+ {
+  "term": "ALU",
+  "definition": "Arithmetic Logic Unit — the part of the CPU that performs arithmetic calculations and logical comparisons."
+ },
+ {
+  "term": "control unit",
+  "definition": "The part of the CPU that manages and coordinates all activity, directing data between the CPU, memory and input/output devices."
+ },
+ {
+  "term": "clock",
+  "definition": "A component that generates regular electrical pulses to synchronise the activities of the CPU. Clock speed is measured in hertz (Hz)."
+ },
+ {
+  "term": "registers",
+  "definition": "Small, extremely fast storage locations inside the CPU used to temporarily hold data and instructions being processed."
+ },
+ {
+  "term": "bus",
+  "definition": "A collection of wires along which data or signals are transmitted between components inside a computer system."
+ },
+ {
+  "term": "fetch-execute cycle",
+  "definition": "The continuous three-stage process by which the CPU processes instructions: fetch (retrieve from memory), decode (interpret the instruction) and execute (carry it out)."
+ },
+ {
+  "term": "cache",
+  "definition": "A small amount of very fast memory located on or very close to the CPU, used to store frequently accessed instructions and data."
+ }
+]

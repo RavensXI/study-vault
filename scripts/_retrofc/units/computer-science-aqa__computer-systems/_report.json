@@ -1,0 +1,174 @@
+{
+ "unit": "computer-science-aqa/computer-systems",
+ "checked_at": "2026-09-06",
+ "spec_used": "specs/aqa/computer-science-8525-8525.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "NOT A is printed as the entity &Acirc; (Â, A-circumflex) in two places: \"In Boolean notation, NOT A is written with an overbar: &Acirc;.\" and the notation list item \"<strong>&Acirc;</strong> (A with an overbar above it) means NOT A.\"",
+   "truth": "AQA 3.4.2 lists the overbar as the NOT operator that students must understand and use. A circumflex is not the NOT symbol. The sentence says \"overbar\" but shows a circumflex, so a student copying the page writes the wrong operator.",
+   "evidence": "spec 3.4.2, lines 1345-1357: \"Overbar to represent the NOT gate ... the expression (A AND B) OR (NOT C) would be represented as: A . B + C̅\"",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "The worked Boolean expression for (A AND B) OR (NOT C) is printed as \"A &middot; B + &Ccedil;\" (Ç, C-cedilla) in two places: the Boolean Notation section and the three-input worked example.",
+   "truth": "The expression is A . B + C with an overbar on the C. A cedilla is not Boolean notation. This is the exact example AQA prints in the specification, so the wrong glyph is directly mark-affecting.",
+   "evidence": "spec 3.4.2, lines 1354-1357",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 1,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Questions [0] and [3] are typed \"4 marks — Complete a Trace Table\". Both questions ask the student to complete a truth table (A ⊕ B, and (A AND B) XOR C).",
+   "truth": "A trace table is an algorithm-tracing tool in 3.1/3.2, examined on Paper 1. A truth table is 3.4.2 content, examined on Paper 2. The label names the wrong skill and the wrong paper.",
+   "evidence": "spec 3.4.2 (truth tables) vs 3.1 Fundamentals of algorithms; assessment section lines 245-282. Type strings are display-only for this subject: js/main.js getGuideUrl() returns null unless window._hasExamGuides is set, which is Unity-bespoke only.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"Primary storage (also called main memory) is directly accessible by the CPU\", with the definition \"Memory that the CPU can access directly, including RAM, ROM, cache and registers. Also called main memory.\" (repeated verbatim in glossary_terms[0]).",
+   "truth": "AQA defines main memory as any memory directly accessible by the CPU EXCEPT cache and registers. Equating main memory with a set that includes cache and registers contradicts the board's own definition, so a student answering \"cache is main memory\" would be marked wrong.",
+   "evidence": "spec 3.4.5, lines 1595-1597: \"Main memory will be considered to be any form of memory that is directly accessible by the CPU (except for cache and registers).\"",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 3,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Multiple-choice question [5] \"Which type of memory loses its contents when the power is switched off?\" offers \"D) Cache on a USB drive\" as a distractor; the key is \"B) RAM\".",
+   "truth": "Cache is volatile, which the unit teaches. A student who has learnt that cache loses its contents without power can defend D, so the distractor punishes correct knowledge. A non-volatile distractor (flash memory on a USB drive) makes the key unambiguous and still tests the volatility idea.",
+   "evidence": "L2 content_html and L3 key fact both teach cache as fast volatile memory; spec 3.4.5 lists cache among the memory types and requires the volatile / non-volatile distinction.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 4,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Question [1] \"Name two functions of an operating system.\" is typed \"1 mark — Give/Name\" and its mark scheme reads \"One mark for any two of: ... [1 mark for two correct answers]\".",
+   "truth": "AQA awards one mark per creditable point, so a question asking for two functions carries 2 marks. The stated tariff trains students to expect half credit for a correct pair.",
+   "evidence": "spec 3.4.3 (five OS management areas); AQA GCSE Computer Science question tariffs run 1-9 marks with one mark per point on Give/Name items.",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "The unit never defines an embedded system. L4 mentions only that assembly language is \"most commonly used when developing software for embedded systems\"; L4 knowledge check [0] offers \"Embedded software\" as a distractor for a term never taught.",
+   "truth": "AQA 3.4.5 requires students to understand the term embedded system, to explain how it differs from a non-embedded system, and to give examples of both. No other AQA Computer Science unit covers it either (checked all seven unit dumps). Options: (a) add a short embedded-systems section plus one knowledge check and one flashcard to L4, which is the natural home; (b) add it to L2 next to CPU architecture; (c) leave the gap and log it to the build backlog. Recommendation: (a).",
+   "evidence": "spec 3.4.5, lines 1612-1617; grep of scripts/_retrofc/units/computer-science-aqa__*/raw/*.txt returns only the assembly-language aside in this unit and one incidental mention in data-representation L1.",
+   "verdict": "NOTE",
+   "ruling": "NOTE: embedded systems (spec 3.4.5) absent from the subject - coverage gap recorded for an authoring pass."
+  },
+  {
+   "id": "F8",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "RAM vs ROM comparison box: \"ROM: ... Contents are fixed at manufacture.\"",
+   "truth": "Modern ROM is flash-based firmware and can be rewritten by a firmware update. The lesson's own earlier sentence, \"read-only in normal use\", is the accurate form. Not mark-affecting, because AQA credits \"read only / cannot normally be changed\".",
+   "evidence": "internal inconsistency with the preceding paragraph; spec 3.4.5 requires only the RAM/ROM difference",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F9",
+   "lesson": 2,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "L2 description is 109 characters and L4 description is 105 characters.",
+   "truth": "Both exceed the 100-character description limit the applier validator enforces. Pre-existing, not a fact error, but the validator may reject the unit when these edits are applied.",
+   "evidence": "character count of the two description fields in raw/L02.txt and raw/L04.txt",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F10",
+   "lesson": 1,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "Several question-type labels name the wrong command word: L1 [2] \"2 marks — Define\" on a \"Write the Boolean expression\" task, L1 [4] \"4 marks — Explain\" on a \"State the symbols\" task, L2 [0] \"2 marks — Define\" on a \"Describe the role\" task.",
+   "truth": "The labels are display-only for this subject (no exam guides on the free tier), so nothing breaks, but they belong in the programme-wide question-type relabel queue.",
+   "evidence": "js/main.js getGuideUrl(); docs/QUESTIONS_PIPELINE.md guide mapping table",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [
+  2
+ ],
+ "summary": "Every truth table, logic expression and answer key in the unit recomputes correctly, and the compiler / interpreter / assembler properties match AQA 3.4.4 exactly. The real damage is notation: NOT is printed as a circumflex and NOT C as a cedilla in four places, including the worked example AQA itself prints. Also fixed: two truth tables labelled trace tables, the main-memory definition that contradicts AQA's own exclusion of cache and registers, an ambiguous volatility distractor, and a two-point question tariffed at one mark. Embedded systems, required by 3.4.5, is absent from the whole subject.",
+ "renarration": {
+  "run_at": "2026-09-06T10:43:19Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n5",
+    "key": "computer-science-aqa/computer-systems/narration_lesson-01_n5.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-aqa/computer-systems/narration_lesson-01_n5.mp3",
+    "voice": "Ollie",
+    "duration": 16.25,
+    "bytes": 194976,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:43:02 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n20",
+    "key": "computer-science-aqa/computer-systems/narration_lesson-01_n20.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-aqa/computer-systems/narration_lesson-01_n20.mp3",
+    "voice": "Ollie",
+    "duration": 4.03,
+    "bytes": 48384,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:43:05 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n21",
+    "key": "computer-science-aqa/computer-systems/narration_lesson-01_n21.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-aqa/computer-systems/narration_lesson-01_n21.mp3",
+    "voice": "Ollie",
+    "duration": 11.5,
+    "bytes": 137952,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:43:08 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n24",
+    "key": "computer-science-aqa/computer-systems/narration_lesson-01_n24.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-aqa/computer-systems/narration_lesson-01_n24.mp3",
+    "voice": "Ollie",
+    "duration": 5.93,
+    "bytes": 71136,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:43:11 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n2",
+    "key": "computer-science-aqa/computer-systems/narration_lesson-03_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-aqa/computer-systems/narration_lesson-03_n2.mp3",
+    "voice": "Ollie",
+    "duration": 25.15,
+    "bytes": 301824,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 10:43:17 GMT"
+   }
+  ],
+  "verified_ok": 5,
+  "total": 5
+ }
+}
