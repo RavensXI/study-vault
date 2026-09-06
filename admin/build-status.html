@@ -235,6 +235,7 @@
       n = n.replace(/\s+[AB]$/, '');                         // Geography A → Geography
       // Cross-board name aliases — same subject, different boards label it differently.
       if (/^food and nutrition$/i.test(n)) n = 'Food Preparation and Nutrition'; // WJEC
+      if (/^english language 2\.0$/i.test(n)) n = 'English Language'; // Edexcel 1EN2 → same family as 1EN0
       return n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
     }
 
@@ -352,7 +353,8 @@
         '8061':     { tag: 'alias',   text: 'AQA Short Course (8061): WIRED (20 May 2026). Pure alias of AQA Spec A — same Supabase row, 4 religions × Beliefs only + Theme A + Theme D (which is "Religion, Peace & Conflict" — relettered to "Theme B" in 8061 wording). Wizard board key "AQA Short Course" saves course_type:"short"; reAqaFilter in js/free-user-filters.js skips -practices units. Subject row spec_code updated to "8062 / 8061" so build-status counts both specs as built.' },
         '8063':     { tag: 'skip',    text: 'AQA Spec B (Catholic-focused): Component 1 = Catholic Christianity in much greater depth than Spec A. Component 2 = perspectives on one other religion, or Textual Studies on Islam/Judaism. Catholic schools only, ~5–10% of AQA RS uptake. Low priority.' },
         'J625':     { tag: 'build',   text: 'OCR Religious Studies (Full Course): different structure from AQA/Edexcel/Eduqas. English-market, real ~40–60 lesson build.' },
-        'J125':     { tag: 'alias',   text: 'OCR Short Course: TRUE alias derived from J625 as a subset. Build OCR Full Course (J625) first, then a short-course mode serves J125 from the same content. No new lessons.' }
+        'J125':     { tag: 'alias',   text: 'OCR Short Course: TRUE alias derived from J625 as a subset. Build OCR Full Course (J625) first, then a short-course mode serves J125 from the same content. No new lessons.' },
+        '1RB0':     { tag: 'build',   text: 'Pearson\'s larger RS spec — 23,481 entries June 2025 vs 17,143 on 1RA0 which we built' }
       },
       'business-studies': {
         'C510QS':   { tag: 'port',    text: 'Eduqas Business: 2-component structure (Business Dynamics + Business Considerations). PORT job — new Supabase row with restructured units, but content overlap with existing AQA/Edexcel/OCR Business is high (60–70% — pricing/marketing/finance/motivation/growth are universal GCSE concepts). NOT a zero-content alias. Lower priority — Eduqas Business is a minority board.' },
@@ -378,7 +380,8 @@
 
       'english-language': {
         '_general': { tag: 'general', text: 'Built across AQA, Edexcel, Eduqas, OCR (180 lessons, practice-first). Only WJEC remains and is Wales-only with mandatory Welsh thematic content.' },
-        '3700QS':   { tag: 'skip',    text: 'WJEC English Language: "not available to centres in England" (Qualifications Wales-regulated). Spec mandates Wales-themed reading/writing across units and references Welsh Baccalaureate alignment. Genuine Welsh-content requirement, not just regulator branding — cannot alias from Eduqas. Park — no English-cohort demand.' }
+        '3700QS':   { tag: 'skip',    text: 'WJEC English Language: "not available to centres in England" (Qualifications Wales-regulated). Spec mandates Wales-themed reading/writing across units and references Welsh Baccalaureate alignment. Genuine Welsh-content requirement, not just regulator branding — cannot alias from Eduqas. Park — no English-cohort demand.' },
+        '1EN2':     { tag: 'build',   text: 'Pearson\'s larger English Language spec — 66,425 entries June 2025 vs 41,565 on 1EN0 which we built; found 7 Sep 2026 by the entry-data rescope' }
       },
       'english-literature': {
         '_general': { tag: 'general', text: 'Built across AQA, Edexcel, Eduqas, OCR (775 lessons). WJEC remains and is firmly SKIP.' },
