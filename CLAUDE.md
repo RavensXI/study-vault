@@ -177,7 +177,7 @@ R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), video on R2
 | StudyVault - Daily Podcast Build | `scripts/daily_podcast_build.ps1` | NLM podcasts for units whose last lesson flipped live; unit-complete gated; logs `scripts/_podcast_daily_logs/` |
 | StudyVault - Daily Explainer Build | `scripts/daily_explainer_build.ps1` | NLM explainer videos; logs `scripts/_explainer_daily_logs/` |
 | StudyVaultShorts | sandbox worktree `scripts/daily_shorts_build.ps1` | shorts feed, cap 100/day; yields ≤35 video slots to explainer demand |
-| StudyVault - Weekly YouTube Audit | `scripts/weekly_yt_audit.ps1` (Sun 04:00) | full link audit; Resend email on dead links; accepted-list + placeholder denylist + wrong-channel check (`scripts/_yt_audit_accepted.json`) |
+| StudyVault - Weekly YouTube Audit | `scripts/weekly_yt_audit.ps1` (Sun 04:00) | full link audit; **auto-prunes** a related-media link dead on two consecutive Sundays with a hard reason (private/removed; watch-page playabilityStatus), backup in `scripts/_yt_audit_prunes/`, never below 8 items, video slot + in-body embeds only flagged; Resend email says what was pruned and what is Held; accepted-list + placeholder denylist + wrong-channel check (`scripts/_yt_audit_accepted.json`); history in `_yt_audit_dead_history.json` (Tom, 7 Sep 2026) |
 | StudyVaultBackup | (Sun 03:00) | OneDrive backup; R2→B2 mirror (30-day lock) |
 
 ⚠ **2 Sep 2026: Gemini Notebook (ex-NotebookLM) switches to compute-based

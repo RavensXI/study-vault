@@ -11,8 +11,8 @@ Add-Content -Path "$repo\scripts\_yt_audit_runs.log" -Encoding utf8 -Value ("[{0
 
 if ($code -ne 0 -and $env:RESEND_API_KEY -and $env:NOTIFY_TO -and $env:NOTIFY_FROM) {
   $body = @{ from = $env:NOTIFY_FROM; to = @($env:NOTIFY_TO);
-             subject = "StudyVault: weekly YouTube audit found dead links";
-             text = "The weekly sweep found dead links.`n`n$tail`n`nFull report: scripts\_yt_audit_report.md" } | ConvertTo-Json
+             subject = "StudyVault: weekly YouTube audit - " + ($out | Select-Object -Last 1);
+             text = "Repeat hard failures were pruned automatically (backups in scripts\_yt_audit_prunes). Anything under Held needs your decision.`n`n$tail`n`nFull report: scripts\_yt_audit_report.md" } | ConvertTo-Json
   try {
     Invoke-RestMethod -Uri "https://api.resend.com/emails" -Method Post `
       -Headers @{ Authorization = "Bearer $($env:RESEND_API_KEY)" } `
