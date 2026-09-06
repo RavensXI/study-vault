@@ -156,6 +156,8 @@ class Deck(object):
         if max(ts) > self.dur:
             errs.append("pin beyond video length")
 
+        for m in re.finditer(r"%[sdr](?![a-zA-Z])", content):
+            errs.append("unsubstituted format placeholder %r in content_html" % m.group(0))
         low = (content + extra_text).lower()
         if "video walkthrough" in low:
             errs.append('contains "Video walkthrough"')

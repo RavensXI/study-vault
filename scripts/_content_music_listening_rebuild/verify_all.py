@@ -64,6 +64,8 @@ for r in rows:
     if len(words) != len(pins):
         errs.append("%d statement cards for %d pins" % (len(words), len(pins)))
 
+    for m in re.finditer(r"%[sdr](?![a-zA-Z])", c + (l["exam_tip_html"] or "") + (l["conclusion_html"] or "")):
+        errs.append("unsubstituted format placeholder %r" % m.group(0))
     low = (c + (l["exam_tip_html"] or "") + (l["conclusion_html"] or "")).lower()
     if "video walkthrough" in low:
         errs.append("Video walkthrough")

@@ -37,9 +37,9 @@ d.add_cover(
        dfn("ground bass", "A short bass pattern repeated continuously beneath changing music above; also called a basso ostinato"),
        dfn("ternary", "Three-part form, A B A, where the opening returns after a contrasting middle")),
     "Purcell wrote it as %s for a revival of Dryden and Lee&rsquo;s tragedy <em>Oedipus</em>. In the play the song is "
-    "sung to raise the spirit of a murdered king, so it has to be beautiful and slightly uncanny at the same time.",
-    "Press play and the cards follow the music. Tap any number to jump to that moment."
-    % (),
+    "sung to raise the spirit of a murdered king, so it has to be beautiful and slightly uncanny at the same time."
+    % dfn("incidental music", "Music written to accompany a spoken play, used during or between scenes"),
+    "Press play and the cards follow the music. Tap any number to jump to that moment.",
   ])
 
 d.add_statement(1, "The ground alone", "1 &middot; The pattern, on its own",
