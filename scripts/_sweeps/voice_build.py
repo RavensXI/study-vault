@@ -39,18 +39,18 @@ for n, old, new in spec.get("pairs", []):
     # NEXT sentence pronominalises); the find then stretches to cover it
     window = raw + (r.get("after") or "")
     swaps = list(zip(old, new)) if isinstance(old, list) else [(old, new)]
-    end, bad = len(raw), False
+    end, bad, inside = len(raw), False, False
     for o, _nw in swaps:
         if window.count(o) != 1:
             problems.append(f"#{n}: fragment occurs {window.count(o)}x in the sentence: {o!r}\n     {raw!r}")
             bad = True
             continue
         i = window.index(o)
-        if i >= len(raw):
-            problems.append(f"#{n}: fragment starts outside the flagged sentence: {o!r}")
-            bad = True
-            continue
+        inside = inside or i < len(raw)
         end = max(end, i + len(o))
+    if not bad and not inside:
+        problems.append(f"#{n}: no fragment touches the flagged sentence")
+        bad = True
     if bad:
         continue
     find = window[:end]
