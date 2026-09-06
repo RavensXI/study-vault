@@ -1,0 +1,255 @@
+=== L3 Searching Algorithms: Linear and Binary Search ===
+id: 2a376618-3cbe-45b5-a0ea-a632541963ca
+slug: searching-algorithms-linear-and-binary-search
+status: live tier:both updated:2026-08-30T01:45:49.787791+00:00
+narration_manifest: array len 35
+
+--- DESCRIPTION ---
+How linear and binary search work, when each is appropriate, and how to compare their efficiency in time.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">Why Search Algorithms Matter</h2>
+<p data-narration-id="n2">Searching is one of the most common operations in computing. Every time you look up a contact on your phone, find a product on a retail site, or ask a search engine a question, a <dfn class="term" data-def="A step-by-step process for locating a specific item within a collection of data.">search algorithm</dfn> is at work. The specification requires you to know two: linear search and binary search. Crucially, you must be able to compare them &mdash; choosing the right algorithm for a given situation is a practical engineering skill.</p>
+
+<h2 data-narration-id="n3">Linear Search</h2>
+<p data-narration-id="n4"><dfn class="term" data-def="A search algorithm that checks each item in a list one by one, starting from the first, until the target item is found or the end of the list is reached.">Linear search</dfn> is the simplest approach. Starting at the beginning of the list, it checks each item in turn: does this match the target? If yes, return its position. If no, move to the next item. If the end of the list is reached without a match, the target is not present.</p>
+<p data-narration-id="n5">Linear search works on <strong>any</strong> list &mdash; sorted or unsorted. This makes it very flexible. You do not need to sort the data first, which saves time when you only need to search once.</p>
+
+<div class="key-fact" data-narration-id="n6" data-revision-tip="Cover this and recall: two advantages and two disadvantages of linear search.">
+  <div class="key-fact-label">Key Fact</div>
+  <p><strong>Advantages of linear search:</strong> Simple to understand and implement. Works on unsorted data. <strong>Disadvantages:</strong> Slow for large datasets &mdash; in the worst case, every item must be checked. For a list of one million items, up to one million comparisons may be needed.</p>
+</div>
+
+<h2 data-narration-id="n7">Binary Search</h2>
+<p data-narration-id="n8"><dfn class="term" data-def="A search algorithm that works only on sorted data by repeatedly halving the search area, comparing the target with the middle item and discarding the half that cannot contain it.">Binary search</dfn> is far more efficient than linear search, but it has one important requirement: <strong>the data must already be sorted</strong>. Binary search works by repeatedly halving the search area.</p>
+<p data-narration-id="n9"><strong>The mechanics:</strong> Find the middle item of the current search area. If it equals the target, the search is done. If the target is smaller, discard the right half and repeat on the left. If the target is larger, discard the left half and repeat on the right. Continue until found or the search area is empty.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Binary Search Step-by-Step Trace &mdash; Searching for 23</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n10">Sorted list: [3, 7, 11, 15, 19, 23, 27, 31, 35]</p>
+    <p data-narration-id="n11"><strong>Step 1:</strong> Search area indices 0&ndash;8. Middle index = 4, value = 19. Is 23 = 19? No. Is 23 &gt; 19? Yes. Discard left half. New search area: [23, 27, 31, 35] (indices 5&ndash;8).</p>
+    <p data-narration-id="n12"><strong>Step 2:</strong> Search area indices 5&ndash;8. Middle index = 6, value = 27. Is 23 = 27? No. Is 23 &lt; 27? Yes. Discard right half. New search area: [23] (index 5).</p>
+    <p data-narration-id="n13"><strong>Step 3:</strong> Search area index 5. Middle = 23. Match found at index 5. Done in 3 comparisons.</p>
+    <p data-narration-id="n14">Linear search on this list would have needed 6 comparisons to reach the same item. On a list of 9 items the saving is modest &mdash; the advantage becomes dramatic as the list grows.</p>
+  </div></div>
+</div>
+
+<div class="key-fact" data-narration-id="n15" data-revision-tip="Test yourself: Explain in your own words why binary search is faster than linear search, and state its one essential requirement.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Binary search halves the search area with every comparison. A sorted list of 1,000 items needs at most 10 comparisons with binary search, versus up to 1,000 with linear search. A list of one million items needs at most 20 comparisons. <strong>The data must be sorted first &mdash; binary search cannot work on unsorted data.</strong></p>
+</div>
+
+<h2 data-narration-id="n16">Comparing the Two Algorithms</h2>
+<p data-narration-id="n17">The spec requires you to compare and contrast these algorithms in terms of <strong>time efficiency</strong>. Note that formal analysis (such as Big O notation) is not required &mdash; you only need to explain which is faster and why, in plain English.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Comparison Table: Linear vs Binary Search</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n18"><strong>Linear search:</strong></p>
+    <ul>
+      <li data-narration-id="n19">Works on sorted or unsorted data</li>
+      <li data-narration-id="n20">Simple to implement</li>
+      <li data-narration-id="n21">Slow for large lists &mdash; checks items one by one</li>
+      <li data-narration-id="n22">Best choice for small lists or lists that change frequently (re-sorting would cost more than a linear scan)</li>
+    </ul>
+    <p data-narration-id="n23"><strong>Binary search:</strong></p>
+    <ul>
+      <li data-narration-id="n24">Requires sorted data</li>
+      <li data-narration-id="n25">More complex to implement</li>
+      <li data-narration-id="n26">Very fast for large lists &mdash; halves the search area each step</li>
+      <li data-narration-id="n27">Best choice for large, stable (rarely changing) sorted datasets where fast repeated searches are needed</li>
+    </ul>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n28">Choosing the Right Algorithm</h2>
+<p data-narration-id="n29">If someone asks &ldquo;which algorithm is better?&rdquo;, the honest answer is: it depends. A phonebook app with 80 million entries benefits enormously from binary search &mdash; but the phonebook is kept in alphabetical order precisely to enable this. A small list of five items that changes every second is better served by linear search. Understanding this trade-off is what separates a competent programmer from someone who just follows a textbook.</p>
+
+<div class="key-fact" data-narration-id="n30" data-revision-tip="Cover this and state two situations where linear search is the better choice, and two where binary search is preferred.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Use <strong>linear search</strong> when: the list is small (the efficiency advantage of binary search is negligible), the data is unsorted and sorting it would cost more time than a single scan, or the list changes so frequently that maintaining a sorted order is impractical. Use <strong>binary search</strong> when: the dataset is large, the data is already sorted or is sorted once and searched many times, and fast repeated look-ups are a priority. In real systems, databases maintain sorted indexes precisely so that binary-style search can be used at speed.</p>
+</div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n31">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n32">Linear search checks every item one by one; it works on any list but is slow for large datasets.</li>
+  <li data-narration-id="n33">Binary search repeatedly halves the search area; it is far faster but requires the data to be sorted first.</li>
+  <li data-narration-id="n34">Choosing between them depends on the size of the dataset, whether it is sorted, and how often it changes.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n35">For a 6-mark &lsquo;Compare and Contrast&rsquo; question on linear versus binary search, structure your answer as direct comparisons, not two separate lists. For example: &ldquo;Linear search works on unsorted data, whereas binary search requires sorted data.&rdquo; Each paired comparison earns more marks than describing one algorithm then the other separately. Always include the time efficiency comparison (binary search is faster for large lists) and the sorted-data requirement for binary search.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Explain how a linear search algorithm works.",
+  "type": "2 marks — Define",
+  "marks": "Mastering: Checks each item in the list one by one (1), from the start, until the target is found or the list is exhausted (1).\nSecure: Correct idea with one component missing.\nDeveloping: Vague — 'goes through the list'.\nEmerging: Describes binary search instead."
+ },
+ {
+  "text": "State one advantage and one disadvantage of binary search compared to linear search.",
+  "type": "2 marks — State a Difference",
+  "marks": "Mastering: Advantage — faster / fewer comparisons needed for large datasets (1). Disadvantage — data must be sorted before binary search can be used (1).\nSecure: Both identified but not clearly expressed as advantage/disadvantage.\nDeveloping: One of the two parts correct.\nEmerging: Advantage and disadvantage reversed or both wrong."
+ },
+ {
+  "text": "A sorted list of student names is: [Ahmed, Bhatt, Clarke, Daly, Evans, Frost, Green].\nShow the steps a binary search would take to find 'Daly'. State the index checked at each step (use 0 as the first index).",
+  "type": "4 marks — Complete a Trace Table",
+  "marks": "Mastering: Step 1 — middle index 3 = Daly; match found immediately (1 mark). Full trace: low=0, high=6, mid=3, list[3]=Daly = target, found in 1 comparison. 4/4 for correct single-step trace with all values shown.\nSecure: Correct method, minor indexing error.\nDeveloping: Correct first step only.\nEmerging: Uses linear search method instead."
+ },
+ {
+  "text": "A developer is building a music streaming app. The app has a library of 50 million songs, stored in alphabetical order by title. When a user searches for a song, explain which search algorithm the app should use and why.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: Binary search (1), because data is sorted/alphabetical (1), and it halves the search area with each comparison (1), meaning far fewer comparisons are needed for 50 million items than linear search would require (1).\nSecure: Correct algorithm and one clear reason.\nDeveloping: Correct algorithm but reasoning is vague.\nEmerging: Wrong algorithm chosen."
+ },
+ {
+  "text": "Compare and contrast linear search and binary search algorithms. In your answer, refer to how each algorithm works, its efficiency, and when each is most appropriate.",
+  "type": "6 marks — Compare and Contrast",
+  "marks": "Mastering: Direct comparison of how each works (1), efficiency comparison with explanation (halving vs checking one by one) (2), sorted-data requirement for binary (1), appropriate use cases for each (1), structured comparison not two separate lists (1). 6 marks.\nSecure: 4–5 points made with some direct comparison. 4–5 marks.\nDeveloping: Describes each algorithm separately without direct comparison. 2–3 marks.\nEmerging: One algorithm described. 1 mark."
+ },
+ {
+  "text": "Explain what is meant by 'time efficiency' when comparing algorithms. Describe how the time efficiency of linear search and binary search differ as the size of the dataset increases.",
+  "type": "8 marks — Extended Response",
+  "marks": "Mastering: Time efficiency defined as the number of comparisons/steps needed (1–2), linear search scales linearly with dataset size (1), binary search scales much more slowly — each comparison halves remaining items (1–2), concrete example showing difference for large n (1), conclusion about when each is preferable (1), note that formal efficiency analysis is not required but the principle is clear (1). 7–8 marks.\nSecure: Correct explanation of both with partial quantification. 5–6 marks.\nDeveloping: Correct trend described without clear explanation of mechanism. 3–4 marks.\nEmerging: Vague or single point. 1–2 marks."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which of the following is a requirement of binary search that linear search does not have?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "The list must contain only numbers",
+   "The list must be sorted before searching",
+   "The list must contain fewer than 100 items",
+   "The target must be in the middle of the list"
+  ]
+ },
+ {
+  "q": "A sorted list has 8 items. What is the maximum number of comparisons needed by binary search to find any item?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "2",
+   "3",
+   "4",
+   "8"
+  ]
+ },
+ {
+  "q": "Linear search starts at the _____ of the list and checks each item one by one.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "end",
+   "middle",
+   "beginning",
+   "largest value"
+  ]
+ },
+ {
+  "q": "Binary search works by repeatedly _____ the search area until the target is found or not.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "doubling",
+   "scanning",
+   "halving",
+   "sorting"
+  ]
+ },
+ {
+  "q": "Match each algorithm to its key characteristic.",
+  "left": [
+   "Linear search",
+   "Binary search"
+  ],
+  "type": "match",
+  "order": [
+   1,
+   0
+  ],
+  "right": [
+   "Requires sorted data; halves search area each step",
+   "Works on unsorted data; checks items one by one"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "The data must be sorted.",
+  "q": "What is the one essential requirement for binary search to work?"
+ },
+ {
+  "a": "Discards the right half and searches the left half.",
+  "q": "What does binary search do when the middle item is greater than the target?"
+ },
+ {
+  "a": "1,000 / 10.",
+  "q": "A list has 1,000 items. Linear search may need up to _____ comparisons; binary search needs at most _____ comparisons."
+ },
+ {
+  "a": "Linear search works on unsorted data; binary search requires sorting first.",
+  "q": "What is the main advantage of linear search over binary search?"
+ },
+ {
+  "a": "It halves the search area with each comparison, so comparisons grow very slowly.",
+  "q": "Why is binary search faster than linear search for large sorted datasets?"
+ },
+ {
+  "a": "When the list is small, unsorted, or changes frequently — re-sorting would cost more than scanning.",
+  "q": "When would linear search be the better choice despite binary search being faster?"
+ },
+ {
+  "a": "No — only time efficiency comparisons in plain terms are required.",
+  "q": "Does the specification require knowledge of formal efficiency notation (such as Big O)?"
+ },
+ {
+  "a": "The search is complete — the item has been found at that position.",
+  "q": "What does a binary search do if the middle item exactly equals the target?"
+ },
+ {
+  "a": "The target item is not in the list.",
+  "q": "What happens in a binary search when the search area becomes empty?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "search algorithm",
+  "definition": "A step-by-step process for locating a specific item within a collection of data."
+ },
+ {
+  "term": "linear search",
+  "definition": "A search algorithm that checks each item in a list one by one, starting from the first, until the target item is found or the end of the list is reached."
+ },
+ {
+  "term": "binary search",
+  "definition": "A search algorithm that works only on sorted data by repeatedly halving the search area, comparing the target with the middle item and discarding the half that cannot contain it."
+ },
+ {
+  "term": "time efficiency",
+  "definition": "A measure of how quickly an algorithm completes its task, expressed as the number of steps or comparisons needed relative to the size of the dataset."
+ },
+ {
+  "term": "sorted data",
+  "definition": "Data arranged in a defined order — for example, numbers in ascending order or names in alphabetical order."
+ },
+ {
+  "term": "comparison",
+  "definition": "In the context of searching, a single check to determine whether an item in the list matches the target value."
+ }
+]

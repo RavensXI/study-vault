@@ -1,0 +1,261 @@
+=== L4 Sorting Algorithms: Bubble Sort and Merge Sort ===
+id: e2a729a1-4e17-4f1a-8c05-007f9338f8c0
+slug: sorting-algorithms-bubble-sort-and-merge-sort
+status: live tier:both updated:2026-07-30T22:54:37.786888+00:00
+narration_manifest: array len 37
+
+--- DESCRIPTION ---
+Walking through bubble sort and merge sort, plus how to compare them on time and approach.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">Why Sort Data?</h2>
+<p data-narration-id="n2">Sorting data into order is a fundamental computing task. Binary search requires sorted data. Databases display results in a meaningful order. A music app shows albums alphabetically. A leaderboard ranks scores from highest to lowest. The specification requires you to know two <dfn class="term" data-def="An algorithm that arranges data into a specified order, such as ascending numerical order or alphabetical order.">sorting algorithms</dfn>: bubble sort and merge sort. You must understand how each works and be able to compare them.</p>
+
+<h2 data-narration-id="n3">Bubble Sort</h2>
+<p data-narration-id="n4"><dfn class="term" data-def="A sorting algorithm that makes repeated passes through a list, comparing adjacent pairs of items and swapping them if they are in the wrong order. Each pass moves the largest unsorted item to its correct position at the end of the unsorted portion.">Bubble sort</dfn> works by repeatedly comparing adjacent pairs of items and swapping them if they are in the wrong order. After the first pass, the largest item has &ldquo;bubbled&rdquo; to the last position. After the second pass, the second largest is in place. The algorithm continues until a complete pass produces no swaps &mdash; which means the list is sorted.</p>
+<p data-narration-id="n5"><strong>The mechanics, step by step:</strong> Compare items at positions 1 and 2 &mdash; swap if needed. Compare positions 2 and 3 &mdash; swap if needed. Continue to the end of the list. That completes one pass. Repeat passes until no swaps occur.</p>
+
+<div class="key-fact" data-narration-id="n6" data-revision-tip="Cover this and recall: two advantages and two disadvantages of bubble sort.">
+  <div class="key-fact-label">Key Fact</div>
+  <p><strong>Advantages of bubble sort:</strong> Simple to understand and implement. Sorts in place (no extra memory needed). Can detect an already-sorted list early (zero swaps on the first pass). <strong>Disadvantages:</strong> Very slow for large datasets &mdash; many passes and many comparisons are needed. Inefficient even in the average case.</p>
+</div>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Bubble Sort Trace &mdash; Sorting [5, 3, 8, 1, 4]</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n7"><strong>Start:</strong> [5, 3, 8, 1, 4]</p>
+    <p data-narration-id="n8"><strong>Pass 1:</strong><br/>Compare 5,3 &rarr; swap &rarr; [3, 5, 8, 1, 4]<br/>Compare 5,8 &rarr; no swap &rarr; [3, 5, 8, 1, 4]<br/>Compare 8,1 &rarr; swap &rarr; [3, 5, 1, 8, 4]<br/>Compare 8,4 &rarr; swap &rarr; [3, 5, 1, 4, 8]<br/>End of pass 1: largest item (8) is now in position 5.</p>
+    <p data-narration-id="n9"><strong>Pass 2:</strong><br/>Compare 3,5 &rarr; no swap<br/>Compare 5,1 &rarr; swap &rarr; [3, 1, 5, 4, 8]<br/>Compare 5,4 &rarr; swap &rarr; [3, 1, 4, 5, 8]<br/>End of pass 2: [3, 1, 4, 5, 8]</p>
+    <p data-narration-id="n10"><strong>Pass 3:</strong><br/>Compare 3,1 &rarr; swap &rarr; [1, 3, 4, 5, 8]<br/>Compare 3,4 &rarr; no swap<br/>End of pass 3: [1, 3, 4, 5, 8]</p>
+    <p data-narration-id="n11"><strong>Pass 4:</strong> No swaps &mdash; list is sorted. Algorithm stops. Final list: [1, 3, 4, 5, 8]</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n12">Merge Sort</h2>
+<p data-narration-id="n13"><dfn class="term" data-def="A sorting algorithm that uses a divide-and-conquer approach: repeatedly splitting a list in half until each sub-list contains one item, then merging the sub-lists back together in sorted order.">Merge sort</dfn> uses a <strong>divide-and-conquer</strong> approach. It repeatedly splits the list in half until each sub-list contains a single item. A list of one item is inherently sorted. It then merges pairs of sub-lists back together, placing items in the correct order during each merge. The merge phase is where the actual sorting happens.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Merge Sort Trace &mdash; Sorting [38, 27, 43, 3, 9, 82, 10]</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n14"><strong>Split phase:</strong><br/>Pass 1: [38, 27, 43, 3] and [9, 82, 10]<br/>Pass 2: [38, 27] | [43, 3] | [9, 82] | [10]<br/>Pass 3: [38] | [27] | [43] | [3] | [9] | [82] | [10]</p>
+    <p data-narration-id="n15"><strong>Merge phase (working back up):</strong><br/>Merge [38] and [27] &rarr; [27, 38]<br/>Merge [43] and [3] &rarr; [3, 43]<br/>Merge [9] and [82] &rarr; [9, 82]<br/>[10] remains [10]</p>
+    <p data-narration-id="n16">Merge [27, 38] and [3, 43] &rarr; [3, 27, 38, 43]<br/>Merge [9, 82] and [10] &rarr; [9, 10, 82]</p>
+    <p data-narration-id="n17">Final merge: [3, 27, 38, 43] and [9, 10, 82] &rarr; [3, 9, 10, 27, 38, 43, 82]</p>
+    <p data-narration-id="n18">The list is now fully sorted. Note how each merge step compares the first elements of the two sub-lists and picks the smaller one.</p>
+  </div></div>
+</div>
+
+<div class="key-fact" data-narration-id="n19" data-revision-tip="Test yourself: Explain the key advantage of merge sort over bubble sort, and the one disadvantage it has.">
+  <div class="key-fact-label">Key Fact</div>
+  <p><strong>Advantages of merge sort:</strong> Much faster than bubble sort for large datasets. Consistent performance regardless of how the data is initially ordered. <strong>Disadvantages:</strong> Requires extra memory to store the temporary sub-lists during the merging process. More complex to implement than bubble sort.</p>
+</div>
+
+<h2 data-narration-id="n20">Comparing Bubble Sort and Merge Sort</h2>
+<p data-narration-id="n21">The two algorithms make a direct trade-off between simplicity and speed. Bubble sort is easy to code and uses no extra memory, but it becomes impractical for lists with more than a few hundred items. Merge sort is consistently fast even on very large lists, but it requires extra memory for the sub-lists and is harder to implement correctly.</p>
+<p data-narration-id="n22">As with searching algorithms, the right choice depends on the context. For a small list of exam results in a classroom app, bubble sort is perfectly adequate. For sorting millions of customer records in a bank&rsquo;s database overnight, merge sort (or a similar efficient algorithm) is essential.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Comparison Table: Bubble Sort vs Merge Sort</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n23"><strong>Bubble sort:</strong></p>
+    <ul>
+      <li data-narration-id="n24">Simple to implement</li>
+      <li data-narration-id="n25">Sorts in place &mdash; no extra memory required</li>
+      <li data-narration-id="n26">Can detect already-sorted list early</li>
+      <li data-narration-id="n27">Slow for large or randomly ordered data</li>
+    </ul>
+    <p data-narration-id="n28"><strong>Merge sort:</strong></p>
+    <ul>
+      <li data-narration-id="n29">More complex to implement</li>
+      <li data-narration-id="n30">Requires extra memory for sub-lists</li>
+      <li data-narration-id="n31">Consistent performance regardless of initial order</li>
+      <li data-narration-id="n32">Much faster for large datasets</li>
+    </ul>
+  </div></div>
+</div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n34">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n35">Bubble sort makes repeated passes comparing adjacent pairs, swapping as needed until no swaps occur. It is simple and in-place, but slow for large datasets.</li>
+  <li data-narration-id="n36">Merge sort splits the list to individual items then merges them back in order. It is much faster for large data but uses extra memory and is more complex to write.</li>
+  <li data-narration-id="n37">The choice between them depends on dataset size, available memory, and whether implementation simplicity matters more than speed.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n33">For a 6-mark &lsquo;Compare and Contrast&rsquo; question on bubble sort versus merge sort, structure your answer as direct paired comparisons. For example: &ldquo;Bubble sort is simple to implement, whereas merge sort is more complex but considerably faster for large datasets.&rdquo; Avoid listing all of bubble sort&rsquo;s features then all of merge sort&rsquo;s &mdash; direct comparisons earn more marks. Always address: how each algorithm works, time efficiency, memory use, and a conclusion about which is suited to which scenario.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Describe how bubble sort works.",
+  "type": "2 marks — Define",
+  "marks": "Mastering: Makes repeated passes through the list (1), comparing adjacent pairs and swapping if in wrong order, until no swaps occur (1).\nSecure: Correct idea with one component missing.\nDeveloping: Vague — 'swaps items around'.\nEmerging: Describes merge sort instead."
+ },
+ {
+  "text": "State one advantage and one disadvantage of merge sort compared to bubble sort.",
+  "type": "2 marks — State a Difference",
+  "marks": "Mastering: Advantage — faster for large datasets / more time-efficient (1). Disadvantage — requires extra memory to store temporary sub-lists during merging (1).\nSecure: Both identified but imprecisely expressed.\nDeveloping: One part correct.\nEmerging: Both wrong or reversed."
+ },
+ {
+  "text": "Show all the steps of bubble sort on the following list: [6, 2, 9, 4, 1]\nList the state of the array after each pass.",
+  "type": "4 marks — Complete a Trace Table",
+  "marks": "Mastering: Pass 1: [2, 6, 4, 1, 9] (1). Pass 2: [2, 4, 1, 6, 9] (1). Pass 3: [2, 1, 4, 6, 9] (1). Pass 4: [1, 2, 4, 6, 9] — no swaps needed in pass 5 (1).\nSecure: Three passes correct.\nDeveloping: Two passes correct.\nEmerging: One pass or methodology incorrect."
+ },
+ {
+  "text": "Describe the merge sort algorithm, including the split phase and the merge phase.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: Split — list repeatedly divided in half (1) until each sub-list has one item (1). Merge — sub-lists merged pairwise (1) placing items in sorted order during each merge (1).\nSecure: Both phases described with one detail missing.\nDeveloping: One phase described correctly.\nEmerging: Confuses merge sort with bubble sort."
+ },
+ {
+  "text": "Compare and contrast bubble sort and merge sort. In your answer, include how each algorithm works, time efficiency for large datasets, memory use, and a recommendation of when each is appropriate.",
+  "type": "6 marks — Compare and Contrast",
+  "marks": "Mastering: Direct comparison of mechanics (1), time efficiency (bubble slow, merge fast for large data) (1–2), memory (bubble in-place, merge needs extra space) (1), complexity (bubble simpler to implement) (1), appropriate use case for each (1). 6 marks.\nSecure: 4–5 marks with direct comparisons on most points.\nDeveloping: Mostly separate descriptions; limited direct comparison. 2–3 marks.\nEmerging: Single point. 1 mark."
+ },
+ {
+  "text": "Explain why a developer working on a social media platform with 500 million user accounts would choose merge sort over bubble sort to sort account creation dates. Include specific reasons related to the algorithm's properties.",
+  "type": "8 marks — Extended Response",
+  "marks": "Mastering: Merge sort is faster for large datasets (1–2), dataset size (500m) makes bubble sort impractical — far too many comparisons/passes (1), merge sort's performance is consistent regardless of initial order (1), memory trade-off acknowledged (merge needs extra space but this is manageable at scale) (1), practical consequence — bubble sort could take hours/days on 500m records (1), merge sort completes in a much smaller number of steps (1), conclusion (1). 7–8 marks.\nSecure: Correct reasoning with most points. 5–6 marks.\nDeveloping: Correct algorithm chosen with basic justification. 3–4 marks.\nEmerging: Algorithm named with little or no justification. 1–2 marks."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "After the first complete pass of bubble sort on a list of 6 items, which item is guaranteed to be in its correct final position?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "The smallest item",
+   "The first item",
+   "The largest item",
+   "The middle item"
+  ]
+ },
+ {
+  "q": "Merge sort uses which approach to sort data?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "Compare adjacent pairs and swap",
+   "Insert each item into a sorted section",
+   "Divide and conquer — split then merge",
+   "Repeatedly find the minimum and place it first"
+  ]
+ },
+ {
+  "q": "Bubble sort stops when a complete pass produces _____ swaps.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "one",
+   "no",
+   "many",
+   "adjacent"
+  ]
+ },
+ {
+  "q": "Merge sort requires _____ memory than bubble sort because it creates temporary sub-lists during the merge phase.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "less",
+   "the same",
+   "more",
+   "no"
+  ]
+ },
+ {
+  "q": "Match each algorithm to its key property.",
+  "left": [
+   "Bubble sort",
+   "Merge sort"
+  ],
+  "type": "match",
+  "order": [
+   1,
+   0
+  ],
+  "right": [
+   "Splits list to single items then merges back in order; fast on large data",
+   "Compares adjacent pairs and swaps; simple but slow on large data"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "The largest unsorted item moves to the end of the unsorted portion.",
+  "q": "After each pass of bubble sort, which item moves to its correct position?"
+ },
+ {
+  "a": "A complete pass produces zero swaps.",
+  "q": "How does bubble sort know the list is fully sorted?"
+ },
+ {
+  "a": "Split phase — divides the list in half repeatedly until every sub-list has one item.",
+  "q": "What is the first phase of merge sort called, and what does it do?"
+ },
+ {
+  "a": "Merge phase — combines sub-lists pairwise, placing items in sorted order as it goes.",
+  "q": "What is the second phase of merge sort called, and what does it do?"
+ },
+ {
+  "a": "Merge sort — it is much faster because it requires far fewer comparisons than bubble sort.",
+  "q": "Which sorting algorithm is better suited to very large datasets, and why?"
+ },
+ {
+  "a": "Extra memory to store temporary sub-lists during the merge phase.",
+  "q": "What extra resource does merge sort require that bubble sort does not?"
+ },
+ {
+  "a": "It sorts the data within the original list, requiring no additional memory.",
+  "q": "Bubble sort is described as an 'in-place' algorithm. What does this mean?"
+ },
+ {
+  "a": "For small lists or when implementation simplicity matters more than speed.",
+  "q": "When is bubble sort a reasonable choice over merge sort?"
+ },
+ {
+  "a": "Sorting algorithms — they arrange data into a specified order.",
+  "q": "Bubble sort and merge sort are both described as what type of algorithm?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "sorting algorithm",
+  "definition": "An algorithm that arranges data into a specified order, such as ascending numerical order or alphabetical order."
+ },
+ {
+  "term": "bubble sort",
+  "definition": "A sorting algorithm that makes repeated passes through a list, comparing adjacent pairs of items and swapping them if they are in the wrong order. Each pass moves the largest unsorted item to its correct position at the end of the unsorted portion."
+ },
+ {
+  "term": "merge sort",
+  "definition": "A sorting algorithm that uses a divide-and-conquer approach: repeatedly splitting a list in half until each sub-list contains one item, then merging the sub-lists back together in sorted order."
+ },
+ {
+  "term": "divide and conquer",
+  "definition": "A problem-solving strategy where a problem is repeatedly split into smaller sub-problems, each solved independently, and the results combined to give the overall solution."
+ },
+ {
+  "term": "in-place sorting",
+  "definition": "A sorting method that rearranges data within the original list without requiring significant additional memory."
+ },
+ {
+  "term": "pass",
+  "definition": "In bubble sort, one complete traversal of the list during which adjacent pairs are compared and swapped if necessary."
+ }
+]

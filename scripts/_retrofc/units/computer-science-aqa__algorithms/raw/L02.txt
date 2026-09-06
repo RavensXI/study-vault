@@ -1,0 +1,269 @@
+=== L2 Representing Algorithms: Pseudo-code, Flowcharts and Trace Tables ===
+id: b7f01e5d-3e44-45f3-b3ae-6711fd8e7735
+slug: representing-algorithms-pseudo-code-flowcharts-and-trace-tables
+status: live tier:both updated:2026-07-30T22:47:24.798483+00:00
+narration_manifest: array len 38
+
+--- DESCRIPTION ---
+Reading and writing pseudo-code and flowcharts and using trace tables to determine an algorithm's purpose.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">Three Ways to Write an Algorithm</h2>
+<p data-narration-id="n2">Once you have designed an algorithm using decomposition and abstraction, you need a way to write it down clearly. There are three standard representations: <dfn class="term" data-def="A way of writing an algorithm using structured, English-like statements that follow a defined set of keywords and constructs, not tied to any single programming language.">pseudo-code</dfn>, <dfn class="term" data-def="A diagram representing an algorithm using standard shapes connected by arrows, showing the flow of execution through a problem.">flowcharts</dfn>, and actual program code. Your exam may ask you to read, complete or write in any of these forms &mdash; always check what format the question requires before answering.</p>
+
+<div class="key-fact" data-narration-id="n3" data-revision-tip="Cover this and name all four standard flowchart shapes, plus one construct each represents.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Standard flowchart symbols: <strong>oval/rounded rectangle</strong> (start or stop), <strong>rectangle</strong> (process or action), <strong>diamond</strong> (decision &mdash; has yes/no exits), <strong>parallelogram</strong> (input or output). Arrows show the direction of flow.</p>
+</div>
+
+<h2 data-narration-id="n4">Flowcharts</h2>
+<p data-narration-id="n5">A flowchart gives you a visual picture of how an algorithm flows. Every step is drawn as a shape; arrows connect them in order. The diamond shape is particularly important &mdash; it represents a decision with two exits (usually labelled Yes and No). Decisions are used to model <strong>selection</strong> (if/else) and the loop condition in <strong>iteration</strong>. A flowchart for a loop has an arrow that curves back upward from the &ldquo;No&rdquo; exit of the diamond to an earlier step.</p>
+<p data-narration-id="n6">In an exam you might be asked to trace through a flowchart and state its output, add a missing shape, or correct an error. Always follow the arrows carefully &mdash; it is easy to take the wrong branch from a diamond.</p>
+
+<h2 data-narration-id="n7">AQA Standard Pseudo-code</h2>
+<p data-narration-id="n8">Your exam will always present pseudo-code questions using the current version of the AQA standard pseudo-code. You must be able to read and write it confidently. The key constructs are shown below. Note that AQA uses <code>&larr;</code> for assignment (not <code>=</code>), and keywords such as <code>THEN</code>, <code>ENDIF</code>, <code>ENDWHILE</code>, <code>ENDFOR</code>, <code>UNTIL</code> that clearly mark where structures end.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>AQA Pseudo-code Constructs Reference</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n9"><strong>Assignment:</strong><br/><code>score &larr; 0</code><br/>The arrow means &ldquo;assign the value on the right to the variable on the left.&rdquo;</p>
+    <p data-narration-id="n10"><strong>Output:</strong><br/><code>OUTPUT score</code></p>
+    <p data-narration-id="n11"><strong>Input:</strong><br/><code>name &larr; USERINPUT</code></p>
+    <p data-narration-id="n12"><strong>Selection (IF):</strong><br/><code>IF score &gt;= 50 THEN<br/>&nbsp;&nbsp;OUTPUT &ldquo;Pass&rdquo;<br/>ELSE<br/>&nbsp;&nbsp;OUTPUT &ldquo;Fail&rdquo;<br/>ENDIF</code></p>
+    <p data-narration-id="n13"><strong>Count-controlled loop (FOR):</strong><br/><code>FOR i &larr; 1 TO 5<br/>&nbsp;&nbsp;OUTPUT i<br/>ENDFOR</code></p>
+    <p data-narration-id="n14"><strong>Condition-controlled loop (WHILE):</strong><br/><code>WHILE answer &ne; &ldquo;quit&rdquo;<br/>&nbsp;&nbsp;answer &larr; USERINPUT<br/>ENDWHILE</code></p>
+    <p data-narration-id="n15"><strong>Condition-controlled loop (REPEAT&hellip;UNTIL):</strong><br/><code>REPEAT<br/>&nbsp;&nbsp;answer &larr; USERINPUT<br/>UNTIL answer = &ldquo;quit&rdquo;</code><br/>The condition is checked <em>after</em> each iteration, so the body always runs at least once.</p>
+  </div></div>
+</div>
+
+<div class="key-fact" data-narration-id="n16" data-revision-tip="Test yourself: Write AQA pseudo-code for a loop that counts from 1 to 10 and outputs each number, then write a REPEAT UNTIL version that keeps asking for a password until the user enters 'open'.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>AQA pseudo-code uses <code>&larr;</code> for assignment and requires closing keywords: <code>ENDIF</code>, <code>ENDWHILE</code>, <code>ENDFOR</code>. The <code>REPEAT&hellip;UNTIL</code> loop always executes its body <em>at least once</em> because the condition is tested <em>after</em> the body runs &mdash; unlike <code>WHILE</code>, which tests the condition first.</p>
+</div>
+
+<h2 data-narration-id="n17">Trace Tables</h2>
+<p data-narration-id="n18">A <dfn class="term" data-def="A table used to record the values of variables as an algorithm executes step by step, with each column representing a variable and each row showing the state after one step.">trace table</dfn> is used to track the values of variables as an algorithm runs. Each column represents a variable (or the output); each row records the variable values after one execution step. Trace tables let you check whether an algorithm produces the correct output and are the standard method for finding logic errors.</p>
+<p data-narration-id="n19">In the exam, trace-table questions are worth 4 marks and are one of the most commonly dropped mark areas. The two most frequent errors are: adding extra rows (tracing steps that didn&rsquo;t actually happen), and forgetting to update a counter or comparison variable on every iteration.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Trace Table Worked Example &mdash; Step by Step</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n20">Consider this AQA pseudo-code algorithm:</p>
+    <p data-narration-id="n21"><code>total &larr; 0<br/>FOR i &larr; 1 TO 4<br/>&nbsp;&nbsp;total &larr; total + i<br/>ENDFOR<br/>OUTPUT total</code></p>
+    <p data-narration-id="n22">Trace table (columns: i, total, OUTPUT):</p>
+    <p data-narration-id="n23"><strong>Before loop:</strong> total = 0</p>
+    <p data-narration-id="n24"><strong>i = 1:</strong> total = 0 + 1 = 1</p>
+    <p data-narration-id="n25"><strong>i = 2:</strong> total = 1 + 2 = 3</p>
+    <p data-narration-id="n26"><strong>i = 3:</strong> total = 3 + 3 = 6</p>
+    <p data-narration-id="n27"><strong>i = 4:</strong> total = 6 + 4 = 10</p>
+    <p data-narration-id="n28"><strong>Loop ends (i would be 5, greater than 4).</strong> OUTPUT: 10</p>
+    <p data-narration-id="n29">The algorithm adds the integers 1 to 4 and outputs their sum. Its <em>purpose</em>: sum the integers from 1 to n (here n=4).</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n30">Determining the Purpose of an Algorithm</h2>
+<p data-narration-id="n31">After completing a trace table, you should be able to describe what the algorithm does. Rather than just listing the outputs, identify the <em>pattern</em>: is it counting, summing, searching, filtering? A well-worded purpose statement names the <dfn class="term" data-def="The data values supplied to an algorithm for it to process.">inputs</dfn>, describes the <dfn class="term" data-def="The operations performed on inputs to produce a result.">processing</dfn>, and states the <dfn class="term" data-def="The results or data produced by an algorithm after processing its inputs.">outputs</dfn>.</p>
+<p data-narration-id="n32">For example: &ldquo;The algorithm takes a list of names as input, searches through them one by one (processing), and outputs the position of a target name if found.&rdquo; This is clearer than &ldquo;it finds a name.&rdquo;</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Visual Inspection &mdash; Reading an Algorithm Without Tracing</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n33">For simpler algorithms, <strong>visual inspection</strong> &mdash; reading through the code and reasoning about what it does &mdash; is faster than filling a full trace table. Look for: the loop condition (to know when the loop stops), which variables are updated in the loop body, and what is outputted. Visual inspection saves time on short sequences; trace tables are safer for anything involving nested loops or complex conditions.</p>
+  </div></div>
+</div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n35">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n36">Algorithms can be expressed as pseudo-code, flowcharts or program code. Your exam specifies which form to use &mdash; follow the instruction.</li>
+  <li data-narration-id="n37">AQA pseudo-code uses the assignment arrow (&larr;), and keywords ENDIF, ENDWHILE, ENDFOR to close structures. REPEAT&hellip;UNTIL always runs at least once.</li>
+  <li data-narration-id="n38">Trace tables record variable values step by step. Use them to find logic errors or to determine an algorithm&rsquo;s purpose by identifying its inputs, processing and outputs.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n34">For trace-table questions (4 marks), complete <em>every</em> cell for every iteration &mdash; do not leave blank cells for values that did not change. Only add a new row when the algorithm actually executes another step; never add extra rows for iterations the loop does not perform. For &lsquo;state the purpose&rsquo; questions, name the inputs, the operation performed, and the output &mdash; a one-line description that is specific to the algorithm shown, not a generic &ldquo;it processes data.&rdquo;</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "State what a trace table is used for.",
+  "type": "2 marks — Define",
+  "marks": "Mastering: A table used to track/record (1) the values of variables as an algorithm executes, step by step (1).\nSecure: Correct idea but missing either 'step by step' or the variable-tracking aspect.\nDeveloping: Vague — 'shows what happens in a program'.\nEmerging: Confuses trace table with flowchart."
+ },
+ {
+  "text": "State one difference between a WHILE loop and a REPEAT...UNTIL loop.",
+  "type": "2 marks — State a Difference",
+  "marks": "Mastering: In a WHILE loop the condition is tested before the body executes (1); in REPEAT...UNTIL the condition is tested after the body executes, so the body always runs at least once (1).\nSecure: One side clearly correct with weak comparison on the other.\nDeveloping: States only that one uses WHILE and the other UNTIL without explaining the timing of the condition check.\nEmerging: Describes both as identical or reverses the positions."
+ },
+ {
+  "text": "Complete a trace table for the following algorithm. Show the values of i, total and any output after each step.\ntotal ← 0\nFOR i ← 1 TO 3\n  total ← total + (i * 2)\nENDFOR\nOUTPUT total",
+  "type": "4 marks — Complete a Trace Table",
+  "marks": "Mastering: i=1 total=2; i=2 total=6; i=3 total=12; OUTPUT 12. All four rows correct (1 mark each).\nSecure: Three rows correct.\nDeveloping: Two rows correct.\nEmerging: One row or fewer correct."
+ },
+ {
+  "text": "A student writes the following pseudo-code to check if a PIN is correct:\npin ← 0\nREPEAT\n  pin ← USERINPUT\nUNTIL pin = 1234\nOUTPUT \"Access granted\"\nExplain why a REPEAT...UNTIL loop is more appropriate here than a WHILE loop.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: A REPEAT...UNTIL checks the condition after the body (1), so the user is always prompted at least once (1); with WHILE, if pin started as 1234 before the first check the user would never be prompted — but here we need at least one input attempt (1); REPEAT guarantees the body runs at least once (1).\nSecure: Correct reasoning about condition-check timing with one point missing.\nDeveloping: States REPEAT runs at least once but does not link this to why it suits a login scenario.\nEmerging: Confuses the two loop types."
+ },
+ {
+  "text": "Write AQA pseudo-code for a program that asks the user for ten numbers, one at a time, and outputs their total.",
+  "type": "6 marks — Write a Subroutine",
+  "marks": "Mastering: Correct FOR loop (1) with correct range 1 to 10 (1), USERINPUT inside loop (1), running total updated correctly (1), OUTPUT after loop (1), meaningful identifier names (1).\nSecure: Loop and total correct; minor error in range or missing OUTPUT.\nDeveloping: Loop structure present but body or total logic incorrect.\nEmerging: Sequential (non-loop) solution or blank."
+ },
+ {
+  "text": "Explain the difference between using a trace table and using visual inspection to determine the purpose of an algorithm. Include when each method is more appropriate.",
+  "type": "8 marks — Extended Response",
+  "marks": "Mastering: Trace table defined precisely (variable-by-variable, step-by-step) (1-2), appropriate for complex or nested logic (1), visual inspection defined as reading and reasoning without tracking every variable (1), appropriate for short/simple algorithms (1), trade-off (trace table is thorough but slow; inspection is fast but error-prone for complex code) (1-2), conclusion linked to algorithm complexity (1). 7–8 marks for full comparison.\nSecure: Both methods described correctly with partial comparison. 5–6 marks.\nDeveloping: One method described well; other weak. 3–4 marks.\nEmerging: One vague point. 1–2 marks."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which flowchart shape represents a decision?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "Rectangle",
+   "Oval",
+   "Diamond",
+   "Parallelogram"
+  ]
+ },
+ {
+  "q": "In AQA pseudo-code, which symbol is used for assignment?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "=",
+   "==",
+   "←",
+   "->"
+  ]
+ },
+ {
+  "q": "In a REPEAT...UNTIL loop, the condition is checked _____ the body of the loop executes.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "before",
+   "during",
+   "after",
+   "instead of when"
+  ]
+ },
+ {
+  "q": "A trace table records the values of _____ as an algorithm executes, step by step.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "flowcharts",
+   "variables",
+   "outputs only",
+   "pseudo-code lines"
+  ]
+ },
+ {
+  "q": "Match each AQA pseudo-code keyword to its correct use.",
+  "left": [
+   "ENDFOR",
+   "UNTIL",
+   "ENDIF",
+   "ENDWHILE"
+  ],
+  "type": "match",
+  "order": [
+   1,
+   2,
+   3,
+   0
+  ],
+  "right": [
+   "Closes a condition-controlled WHILE loop",
+   "Closes a count-controlled FOR loop",
+   "Closes a REPEAT loop with its condition",
+   "Closes an IF selection structure"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "Diamond.",
+  "q": "What shape in a flowchart represents a decision with yes/no exits?"
+ },
+ {
+  "a": "Parallelogram.",
+  "q": "What shape in a flowchart represents input or output?"
+ },
+ {
+  "a": "ENDFOR.",
+  "q": "What pseudo-code keyword ends a FOR loop?"
+ },
+ {
+  "a": "ENDWHILE.",
+  "q": "What pseudo-code keyword ends a WHILE loop?"
+ },
+ {
+  "a": "ENDIF.",
+  "q": "What pseudo-code keyword ends an IF statement?"
+ },
+ {
+  "a": "Once — the condition is only checked after the body executes.",
+  "q": "A REPEAT...UNTIL loop always runs its body at least _____ time(s)."
+ },
+ {
+  "a": "The state of all variables after one step of the algorithm.",
+  "q": "What does each row in a trace table represent?"
+ },
+ {
+  "a": "Inputs, processing performed, and outputs.",
+  "q": "What three things should a 'state the purpose' answer include?"
+ },
+ {
+  "a": "Reading through code and reasoning about its purpose without a full trace table.",
+  "q": "What is visual inspection of an algorithm?"
+ },
+ {
+  "a": "count ← 10",
+  "q": "In AQA pseudo-code, how do you assign the value 10 to a variable called 'count'?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "pseudo-code",
+  "definition": "A way of writing an algorithm using structured, English-like statements that follow a defined set of keywords and constructs, not tied to any single programming language."
+ },
+ {
+  "term": "flowchart",
+  "definition": "A diagram representing an algorithm using standard shapes connected by arrows, showing the flow of execution through a problem."
+ },
+ {
+  "term": "trace table",
+  "definition": "A table used to record the values of variables as an algorithm executes step by step, with each column representing a variable and each row showing the state after one step."
+ },
+ {
+  "term": "inputs",
+  "definition": "The data values supplied to an algorithm for it to process."
+ },
+ {
+  "term": "processing",
+  "definition": "The operations performed on inputs to produce a result."
+ },
+ {
+  "term": "outputs",
+  "definition": "The results or data produced by an algorithm after processing its inputs."
+ }
+]
