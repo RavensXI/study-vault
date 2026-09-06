@@ -85,6 +85,16 @@
     return '/guide/' + subjectSlug + '/' + guideType;
   }
 
+  // Does this subject have a hub page of the given type? Used to hide the
+  // cross-link to a guide type that was never built for the subject.
+  async function hasHub(subjectId, guideType) {
+    try {
+      var r = await sb.from('guide_pages').select('id')
+        .eq('subject_id', subjectId).eq('guide_type', guideType).eq('slug', 'index').limit(1);
+      return !r.error && r.data && r.data.length > 0;
+    } catch (e) { return false; }
+  }
+
   // ---- Render hub index page ----
   async function renderHub(params) {
     var subjectSlug = params.subjectSlug;
@@ -134,11 +144,14 @@
     document.body.dataset.unit = guideType;
     document.getElementById('header-unit-label').textContent = label;
 
-    // Nav
+    // Nav — the other guide type is only linked when that hub actually exists
+    // (exam-technique hubs were built for a minority of subjects; a dead link
+    // landed on "Hub not found").
+    var otherExists = await hasHub(subject.id, otherType);
     var nav = document.getElementById('header-nav');
     nav.innerHTML = '<a href="/">Home</a>' +
       '<a href="/browse/' + subjectSlug + '">Unit Overview</a>' +
-      '<a href="' + guideUrl(subjectSlug, otherType) + '">' + otherLabel + '</a>';
+      (otherExists ? '<a href="' + guideUrl(subjectSlug, otherType) + '">' + otherLabel + '</a>' : '');
 
     // The hub content_html includes the unit-page-header, guide-hub, etc.
     contentEl.innerHTML = hubResult.data.content_html;
@@ -220,11 +233,12 @@
     document.body.classList.add(bodyClass);
     document.getElementById('header-unit-label').textContent = label;
 
-    // Nav
+    // Nav — link the other guide type only when its hub exists (see hub route)
+    var otherExists = await hasHub(subject.id, otherType);
     var nav = document.getElementById('header-nav');
     nav.innerHTML = '<a href="/">Home</a>' +
       '<a href="' + guideUrl(subjectSlug, guideType) + '">All Guides</a>' +
-      '<a href="' + guideUrl(subjectSlug, otherType) + '">' + otherLabel + '</a>';
+      (otherExists ? '<a href="' + guideUrl(subjectSlug, otherType) + '">' + otherLabel + '</a>' : '');
 
     // Init nav icons immediately after setting nav HTML
     if (typeof window.initNavIcons === 'function') window.initNavIcons();
