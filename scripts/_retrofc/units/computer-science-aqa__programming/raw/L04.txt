@@ -1,0 +1,296 @@
+=== L4 Arrays, Records and String Handling ===
+id: 7201761c-0b37-4f56-b75a-1202280b2685
+slug: arrays-records-and-string-handling
+status: live tier:both updated:2026-07-30T22:37:04.824739+00:00
+narration_manifest: array len 37
+
+--- DESCRIPTION ---
+One- and two-dimensional arrays, records of mixed-type fields and the standard string operations.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">Storing Collections of Data</h2>
+<p data-narration-id="n2">A simple variable holds one value. But real programs need to store collections &mdash; a class of thirty student names, a grid of pixel colours, the items in a shopping basket. <dfn class="term" data-def="A way of organising multiple related values so they can be stored, accessed and manipulated together in a program.">Data structures</dfn> solve this problem. The two you need for this course are <strong>arrays</strong> and <strong>records</strong>.</p>
+
+<h2 data-narration-id="n3">One-Dimensional Arrays</h2>
+<p data-narration-id="n4">An <dfn class="term" data-def="A data structure that stores multiple values of the same data type under a single name, accessed by a numbered index.">array</dfn> stores multiple values of the <strong>same data type</strong> in a single named structure. Each value sits at a numbered position called an <dfn class="term" data-def="The position number of an element in an array, used to access that specific element.">index</dfn>. In most languages (and in the standard pseudo-code), indexing starts at 0, so the first element is at index 0, the second at index 1, and so on.</p>
+<p data-narration-id="n5">Declaring and using a 1D array in the standard pseudo-code:</p>
+<pre data-narration-id="n6">scores &larr; [72, 85, 61, 90, 78]
+OUTPUT scores[0]   // outputs 72 (first element)
+OUTPUT scores[4]   // outputs 78 (fifth element)
+scores[2] &larr; 65   // changes the third element to 65</pre>
+
+<div class="key-fact" data-narration-id="n7" data-revision-tip="Cover this and recall: what data type restriction applies to arrays, and how do you access a specific element?">
+  <div class="key-fact-label">Key Fact</div>
+  <p>An array stores multiple values of the <strong>same data type</strong>. Access individual elements using the array name followed by the index in square brackets &mdash; for example, <code>names[0]</code> gives the first element. Only <strong>one-dimensional and two-dimensional</strong> arrays are required.</p>
+</div>
+
+<h2 data-narration-id="n8">Two-Dimensional Arrays</h2>
+<p data-narration-id="n9">A 2D array adds a second dimension &mdash; think of it as a grid or table. You need two indices to access an element: the row first, then the column. A 2D array is ideal for storing a seating plan, a game board, or a small spreadsheet of results.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example &mdash; 2D Array for a Seating Plan</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n10">A classroom has 3 rows and 4 seats per row. We store the seat numbers in a 2D array:</p>
+    <pre data-narration-id="n11">seats &larr; [[1,2,3,4],[5,6,7,8],[9,10,11,12]]
+OUTPUT seats[0][0]   // row 0, seat 0 &rarr; outputs 1
+OUTPUT seats[1][2]   // row 1, seat 2 &rarr; outputs 7
+OUTPUT seats[2][3]   // row 2, seat 3 &rarr; outputs 12</pre>
+    <p data-narration-id="n12">The first index selects the row; the second selects the column within that row. Changing <code>seats[0][3] &larr; 99</code> would update the fourth seat in the first row to 99.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n13">Records</h2>
+<p data-narration-id="n14">An array stores values of the <em>same</em> type. A <dfn class="term" data-def="A data structure that groups related fields of different data types under a single name, similar to one row in a database table.">record</dfn> stores related values of <strong>different</strong> data types together. Each piece of data inside a record is called a <dfn class="term" data-def="A named, typed piece of data within a record, for example a name (String) or a price (Real).">field</dfn>. You access a field by its name, not a number.</p>
+<p data-narration-id="n15">The specification uses this exact example for defining a record:</p>
+<pre data-narration-id="n16">RECORD Car
+   make : String
+   model : String
+   reg : String
+   price : Real
+   noOfDoors : Integer
+ENDRECORD</pre>
+<p data-narration-id="n17">To use the record, create a variable of that record type and then access fields by name:</p>
+<pre data-narration-id="n18">myCar.make &larr; "Toyota"
+myCar.model &larr; "Corolla"
+myCar.price &larr; 18500.00
+myCar.noOfDoors &larr; 5
+OUTPUT myCar.make   // outputs Toyota</pre>
+
+<div class="key-fact" data-narration-id="n19" data-revision-tip="Test yourself: explain the difference between an array and a record, then give one example of when each would be the better choice.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>An <strong>array</strong> stores many values of the <em>same</em> type, accessed by index. A <strong>record</strong> stores related values of <em>different</em> types, accessed by field name. Use arrays for lists; use records for objects with multiple properties.</p>
+</div>
+
+<h2 data-narration-id="n20">String Handling Operations</h2>
+<p data-narration-id="n21"><dfn class="term" data-def="A data type that stores a sequence of characters such as letters, digits and symbols.">String</dfn> operations let you inspect and manipulate text. Examiner reports show that many students lose marks by applying string functions incorrectly &mdash; especially <code>length</code> and <code>substring</code>. Work through each one carefully with the examples below.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>String Operations &mdash; Step-by-Step Examples</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n22">Let <code>name &larr; "London"</code> for all examples below.</p>
+    <p data-narration-id="n23"><strong>Length</strong> &mdash; returns the number of characters in a string.<br>
+    <code>LEN(name)</code> returns <code>6</code>. (L, o, n, d, o, n &mdash; count all six.)</p>
+    <p data-narration-id="n24"><strong>Position / Character access</strong> &mdash; returns the character at a given index.<br>
+    <code>name[0]</code> returns <code>&ldquo;L&rdquo;</code>. <code>name[3]</code> returns <code>&ldquo;d&rdquo;</code>.</p>
+    <p data-narration-id="n25"><strong>Substring</strong> &mdash; extracts part of a string. The call is typically <code>SUBSTRING(string, startIndex, length)</code>.<br>
+    <code>SUBSTRING(name, 1, 3)</code> returns <code>&ldquo;ond&rdquo;</code>. (Start at index 1, take 3 characters.)</p>
+    <p data-narration-id="n26"><strong>Concatenation</strong> &mdash; joins two or more strings together using <code>+</code>.<br>
+    <code>&ldquo;Big &rdquo; + name</code> returns <code>&ldquo;Big London&rdquo;</code>.</p>
+    <p data-narration-id="n27"><strong>Character to character code</strong> &mdash; returns the ASCII/Unicode code for a character.<br>
+    <code>ASC(&ldquo;A&rdquo;)</code> returns <code>65</code>.</p>
+    <p data-narration-id="n28"><strong>Character code to character</strong> &mdash; returns the character for a given code.<br>
+    <code>CHR(65)</code> returns <code>&ldquo;A&rdquo;</code>.</p>
+    <p data-narration-id="n29"><strong>String conversion</strong> &mdash; converts between strings and numeric types.<br>
+    <code>INT(&ldquo;42&rdquo;)</code> returns the integer <code>42</code>. <code>STR(42)</code> returns the string <code>&ldquo;42&rdquo;</code>. This is essential because user input arrives as a string by default &mdash; you must convert before doing maths.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n30">Input, Output and Random Numbers</h2>
+<p data-narration-id="n31">Programs interact with users through <code>INPUT</code> and <code>OUTPUT</code>. The value from <code>INPUT</code> is always a string &mdash; cast it to the correct type before using it in calculations. Random number generation lets programs produce unpredictable values within a range. A dice simulator, a quiz question shuffler, and a password generator all rely on this.</p>
+<pre data-narration-id="n32">// Input and cast
+age &larr; INT(INPUT("Enter your age: "))
+
+// Random number between 1 and 6 (inclusive)
+die &larr; RANDOM_INT(1, 6)</pre>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n34">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n35">Arrays store multiple values of the <em>same</em> type, accessed by index. Two-dimensional arrays use two indices (row, then column). Records store related values of <em>different</em> types, accessed by field name using the <code>RECORD &hellip; ENDRECORD</code> syntax.</li>
+  <li data-narration-id="n36">String operations include length, position, substring, concatenation, character&ndash;code conversion and type conversion. Always cast input from a string before performing arithmetic.</li>
+  <li data-narration-id="n37">Random number generation (e.g. <code>RANDOM_INT(1, 6)</code>) is used wherever a program needs unpredictable values within a defined range.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n33">For questions involving string operations, always check which index the question is using &mdash; exam examples use 0-based indexing. When asked to &ldquo;state the output&rdquo; of a substring or position call, write out the string with index numbers above each character first, then count carefully. For records, remember to use field names (e.g. <code>myCar.price</code>), not indices. A common error is writing <code>myCar[2]</code> for a record field &mdash; that syntax is for arrays only. If a question asks you to declare a record type, use the <code>RECORD &hellip; ENDRECORD</code> block with each field&rsquo;s name and data type.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "An array called colours is defined as ['red', 'blue', 'green', 'yellow'].\nWhat is the output of: OUTPUT colours[2]",
+  "type": "1 mark — Multiple Choice",
+  "marks": "'green' [1 mark] — index 2 is the third element, 'green'."
+ },
+ {
+  "text": "State the value returned by LEN(\"Manchester\").",
+  "type": "1 mark — Give/Name",
+  "marks": "10 [1 mark]"
+ },
+ {
+  "text": "Explain the difference between an array and a record.",
+  "type": "2 marks — State a Difference",
+  "marks": "One mark for each distinct point up to two:\n• An array stores values of the same data type; a record stores values of different data types.\n• An array uses a numeric index to access elements; a record uses named fields. [2 marks]"
+ },
+ {
+  "text": "A program stores information about library books. Each book has a title (text), an ISBN (text), a year of publication (whole number) and a price (decimal number).\n(a) State which data structure would be best to store the information for a single book. [1 mark]\n(b) Write the definition of this data structure in pseudo-code for the book described above. [3 marks]",
+  "type": "4 marks — Explain",
+  "marks": "(a) A record [1 mark]\n(b) One mark each for:\n• RECORD...ENDRECORD keyword pair [1 mark]\n• All four fields with appropriate names [1 mark]\n• Correct data types for all four fields (e.g. title : String, isbn : String, year : Integer, price : Real) [1 mark]"
+ },
+ {
+  "text": "A string variable word is assigned the value \"programming\".\nTrace the value returned by each of the following expressions:\n(a) LEN(word)\n(b) word[3]\n(c) SUBSTRING(word, 0, 4)\n(d) \"I enjoy \" + word",
+  "type": "4 marks — Complete a Trace Table",
+  "marks": "(a) 11 [1 mark]\n(b) 'g' (index 0=p, 1=r, 2=o, 3=g) [1 mark]\n(c) 'prog' (start index 0, length 4) [1 mark]\n(d) 'I enjoy programming' [1 mark]"
+ },
+ {
+  "text": "Write a subroutine in pseudo-code called initialLetter that takes a string name as a parameter and returns the first character of the string as a capital letter. You may assume the input is always a non-empty string.",
+  "type": "6 marks — Write a Subroutine",
+  "marks": "Mastering: Correct subroutine with parameter, uses character access at index 0 or equivalent, uses CHR/ASC or direct index correctly, RETURN used, ENDSUBROUTINE present.\nSecure: Correct overall structure and return value, minor syntax issue or slightly incorrect index handling.\nDeveloping: Subroutine header and some attempt at character access present, but logic or RETURN incomplete.\nEmerging: Subroutine header only or isolated string operation without full subroutine structure."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "What is the index of the third element in an array that uses 0-based indexing?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "1",
+   "2",
+   "3",
+   "4"
+  ]
+ },
+ {
+  "q": "Which data structure would best store a car's make, model, price and number of doors?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "A 1D array",
+   "A 2D array",
+   "A record",
+   "A string"
+  ]
+ },
+ {
+  "q": "An array stores multiple values of the same _____ type.",
+  "type": "fill",
+  "correct": 0,
+  "options": [
+   "data",
+   "index",
+   "record",
+   "scope"
+  ]
+ },
+ {
+  "q": "The string operation that joins two strings together is called _____.",
+  "type": "fill",
+  "correct": 3,
+  "options": [
+   "substring",
+   "length",
+   "casting",
+   "concatenation"
+  ]
+ },
+ {
+  "q": "Match each string operation to what it does:",
+  "left": [
+   "LEN",
+   "SUBSTRING",
+   "ASC"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   1,
+   2
+  ],
+  "right": [
+   "Returns the number of characters in a string",
+   "Extracts part of a string given a start index and length",
+   "Returns the character code for a given character"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "All elements must be the same data type.",
+  "q": "What data type restriction applies to all elements in an array?"
+ },
+ {
+  "a": "scores[0]",
+  "q": "How do you access the first element of an array called scores in the standard pseudo-code?"
+ },
+ {
+  "a": "Two — one for the row and one for the column.",
+  "q": "How many index values are needed to access an element in a 2D array?"
+ },
+ {
+  "a": "A record stores values of different data types, accessed by field name.",
+  "q": "What makes a record different from an array?"
+ },
+ {
+  "a": "Real.",
+  "q": "What data type does the AQA specification use for the price field in the Car record example?"
+ },
+ {
+  "a": "6",
+  "q": "What does LEN('London') return?"
+ },
+ {
+  "a": "'ond'",
+  "q": "What does SUBSTRING('London', 1, 3) return?"
+ },
+ {
+  "a": "65",
+  "q": "What does ASC('A') return in ASCII?"
+ },
+ {
+  "a": "Input arrives as a string by default; arithmetic operations require a numeric type.",
+  "q": "Why must you convert user input before using it in arithmetic?"
+ },
+ {
+  "a": "'A'",
+  "q": "What does CHR(65) return?"
+ },
+ {
+  "a": "RECORD and ENDRECORD.",
+  "q": "What the standard pseudo-code keywords define a record type?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "data structures",
+  "definition": "A way of organising multiple related values so they can be stored, accessed and manipulated together in a program."
+ },
+ {
+  "term": "array",
+  "definition": "A data structure that stores multiple values of the same data type under a single name, accessed by a numbered index."
+ },
+ {
+  "term": "index",
+  "definition": "The position number of an element in an array, used to access that specific element."
+ },
+ {
+  "term": "record",
+  "definition": "A data structure that groups related fields of different data types under a single name, similar to one row in a database table."
+ },
+ {
+  "term": "field",
+  "definition": "A named, typed piece of data within a record, for example a name (String) or a price (Real)."
+ },
+ {
+  "term": "string",
+  "definition": "A data type that stores a sequence of characters such as letters, digits and symbols."
+ },
+ {
+  "term": "concatenation",
+  "definition": "The operation of joining two or more strings together into a single string."
+ },
+ {
+  "term": "substring",
+  "definition": "A portion of a string extracted using a start index and a length value."
+ }
+]

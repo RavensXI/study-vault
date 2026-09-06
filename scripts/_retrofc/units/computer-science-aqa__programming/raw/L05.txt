@@ -1,0 +1,288 @@
+=== L5 Robust Programming: Validation, Authentication and Testing ===
+id: 87241e96-2fd7-4f83-8e3b-5dda0b151b34
+slug: robust-programming-validation-authentication-and-testing
+status: live tier:both updated:2026-07-30T22:40:05.652232+00:00
+narration_manifest: array len 32
+
+--- DESCRIPTION ---
+Writing simple data validation and authentication routines and choosing normal, boundary and erroneous test data.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">What Is Robust Programming?</h2>
+<p data-narration-id="n2">A <dfn class="term" data-def="A program that handles unexpected or invalid inputs without crashing, by checking data before processing it and verifying user identity where needed.">robust program</dfn> does not crash when something goes wrong. Users make mistakes &mdash; they enter text where a number is expected, leave fields blank, or type a value that is out of range. A robust program anticipates these problems and deals with them gracefully. Writing robust code means building in three things: <strong>data validation</strong>, <strong>authentication</strong>, and <strong>testing</strong>.</p>
+
+<h2 data-narration-id="n3">Data Validation</h2>
+<p data-narration-id="n4"><dfn class="term" data-def="Checking that data entered by a user meets specified criteria before the program processes it. Validation checks if data is reasonable, not whether it is correct.">Data validation</dfn> checks that input data is sensible and within the expected rules before the program uses it. Validation does <em>not</em> guarantee the data is accurate or true &mdash; it only confirms it meets the required format or range. For example, a date of birth field can be validated to ensure the year is between 1900 and 2025, but validation cannot check whether that is your <em>real</em> date of birth.</p>
+<p data-narration-id="n5">The specification identifies three specific validation checks you need to be able to write:</p>
+<ul>
+  <li data-narration-id="n6"><strong>Minimum length check</strong> &mdash; confirms the entered string has at least a required number of characters. For example, a username might need at least three characters.</li>
+  <li data-narration-id="n7"><strong>Empty string check (presence check)</strong> &mdash; confirms the user has entered something at all rather than leaving the field blank.</li>
+  <li data-narration-id="n8"><strong>Range check</strong> &mdash; confirms that a number falls within an acceptable range, for example between 1 and 10.</li>
+</ul>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example &mdash; Validation Routine in Pseudo-code</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n9">Below is a routine that repeatedly asks for a score between 1 and 10. It combines an <strong>empty string check</strong> and a <strong>range check</strong>. The REPEAT&ndash;UNTIL loop keeps asking until valid input is received.</p>
+    <pre data-narration-id="n10">SUBROUTINE getValidScore()
+   REPEAT
+      score &larr; INPUT("Enter a score (1&ndash;10): ")
+      score &larr; INT(score)
+   UNTIL score &gt;= 1 AND score &lt;= 10
+   RETURN score
+ENDSUBROUTINE</pre>
+    <p data-narration-id="n11">A minimum length check for a username would look like this:</p>
+    <pre data-narration-id="n12">SUBROUTINE getUsername()
+   REPEAT
+      username &larr; INPUT("Enter username (min 3 chars): ")
+   UNTIL LEN(username) &gt;= 3
+   RETURN username
+ENDSUBROUTINE</pre>
+  </div></div>
+</div>
+
+<div class="key-fact" data-narration-id="n13" data-revision-tip="Cover this and write from memory the three validation checks in the specification: minimum length, empty string, and range check. Give a code example for each.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The three validation checks required by the specification are: <strong>minimum length</strong> (LEN check), <strong>empty string</strong> (presence check), and <strong>range check</strong> (value between two bounds). Validation ensures data is <em>reasonable</em> &mdash; not necessarily <em>correct</em>.</p>
+</div>
+
+<h2 data-narration-id="n14">Authentication Routines</h2>
+<p data-narration-id="n15"><dfn class="term" data-def="A routine that verifies a user&rsquo;s identity, typically by checking a username and password against stored values before granting access.">Authentication</dfn> is the process of confirming that a user is who they claim to be. You need to be able to write a simple authentication routine that checks a username and password. In exam questions, passwords are stored as plain text &mdash; you are not expected to encrypt them.</p>
+<p data-narration-id="n16">A simple authentication routine compares the username and password entered by the user with stored values. If both match, access is granted. Most real systems also limit the number of attempts to prevent someone trying thousands of combinations, but even a simple three-attempt limit is good practice and may appear in exam questions.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example &mdash; Authentication Routine</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n17">This routine allows three attempts before locking out the user:</p>
+    <pre data-narration-id="n18">storedUser &larr; "admin"
+storedPass &larr; "pass123"
+attempts &larr; 0
+access &larr; FALSE
+
+REPEAT
+   user &larr; INPUT("Username: ")
+   pass &larr; INPUT("Password: ")
+   attempts &larr; attempts + 1
+   IF user = storedUser AND pass = storedPass THEN
+      access &larr; TRUE
+   ENDIF
+UNTIL access = TRUE OR attempts = 3
+
+IF access THEN
+   OUTPUT "Access granted"
+ELSE
+   OUTPUT "Account locked"
+ENDIF</pre>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n19">Testing: Types of Test Data</h2>
+<p data-narration-id="n20">Testing checks that a program behaves correctly for all possible inputs, not just the obvious cases. You must be able to describe and select three types of <dfn class="term" data-def="Values used to test a program, chosen to check correct behaviour under normal conditions, at boundary points, and with invalid inputs.">test data</dfn>:</p>
+<ul>
+  <li data-narration-id="n21"><strong>Normal (typical) data</strong> &mdash; values that are well within the valid range. They should be accepted and processed correctly. For a range of 1&ndash;10, normal data might be 5 or 7.</li>
+  <li data-narration-id="n22"><strong>Boundary (extreme) data</strong> &mdash; values at the very edge of the valid range, <em>and just outside it</em>. For a range of 1&ndash;10, boundary data is <strong>0, 1, 10 and 11</strong> &mdash; both sides of each boundary. Boundary data catches off-by-one errors that are easy to introduce when writing conditions.</li>
+  <li data-narration-id="n23"><strong>Erroneous data</strong> &mdash; values that are completely outside the expected range or of the wrong type altogether. For a number field, entering the word &ldquo;banana&rdquo; or a negative number like &minus;5 is erroneous data. The program should reject this without crashing.</li>
+</ul>
+
+<div class="key-fact" data-narration-id="n24" data-revision-tip="Test yourself: for a valid age range of 0 to 120, state one example of normal, two examples of boundary and one example of erroneous test data.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Boundary data is <strong>both sides of each limit</strong>. For the range 1&ndash;10, the boundary values are 0, 1, 10 and 11. A common mistake is to give only one boundary value &mdash; you need all four to test both bounds fully.</p>
+</div>
+
+<h2 data-narration-id="n25">Types of Error</h2>
+<p data-narration-id="n26">When a program does not work as expected, the fault is usually one of two types. A <dfn class="term" data-def="An error in the grammar or spelling of the programming language, which prevents the program from running.">syntax error</dfn> breaks the rules of the programming language &mdash; a missing bracket, a misspelled keyword, or incorrect indentation. The program will not run at all until syntax errors are fixed. A <dfn class="term" data-def="An error where the program runs without crashing but produces incorrect results because the logic of the code is wrong.">logic error</dfn> allows the program to run but produces wrong results. For example, using &ldquo;&gt;&rdquo; instead of &ldquo;&gt;=&rdquo; in a boundary check, or calculating the average by dividing by the wrong value.</p>
+<p data-narration-id="n27">Logic errors are harder to find than syntax errors because the program does not tell you something is wrong &mdash; it just silently gives the wrong answer. Careful testing with all three types of test data is the best way to expose logic errors before a program is released.</p>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n29">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n30">Robust programs use data validation (minimum length, empty string, range check) to reject bad input before processing it, and authentication (username + password check) to verify user identity.</li>
+  <li data-narration-id="n31">Test data comes in three types: normal (within range), boundary (both sides of each limit &mdash; for range 1&ndash;10 that means 0, 1, 10, 11), and erroneous (completely invalid).</li>
+  <li data-narration-id="n32">Syntax errors stop a program running; logic errors let it run but produce wrong results. Systematic testing with all three data types is how you find logic errors before users do.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n28">For questions asking you to &ldquo;select suitable test data&rdquo;, always provide all four boundary values for a range question (both sides of both limits). Writing only &ldquo;10&rdquo; for a 1&ndash;10 range loses marks. For &ldquo;Write a validation routine&rdquo; questions, use REPEAT&ndash;UNTIL so the program keeps asking until valid data is entered &mdash; examiners expect a loop, not a single check. Remember: validation checks data is <em>reasonable</em>, not correct. For authentication, you only need plain text username and password comparison &mdash; do not attempt to add hashing or encryption.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Which one of the following best describes a syntax error?\nA) The program runs but produces the wrong output\nB) The program runs but crashes when given large input\nC) The program cannot run because it breaks the rules of the programming language\nD) The program produces output that is off by one",
+  "type": "1 mark — Multiple Choice",
+  "marks": "C) The program cannot run because it breaks the rules of the programming language [1 mark]"
+ },
+ {
+  "text": "A program accepts whole number scores in the range 1 to 100. State two boundary values that must be included in the test data.",
+  "type": "1 mark — Give/Name",
+  "marks": "One mark for any two of: 0, 1, 100, 101. Both values from a single boundary (e.g. 0 and 1 for the lower bound, or 100 and 101 for the upper bound) together earn the mark. [1 mark]"
+ },
+ {
+  "text": "Explain the difference between a syntax error and a logic error.",
+  "type": "2 marks — State a Difference",
+  "marks": "One mark each up to two:\n• A syntax error prevents the program from running because it breaks the grammar rules of the language; a logic error allows the program to run but produces incorrect results. [2 marks]"
+ },
+ {
+  "text": "A program asks the user to enter their age, which must be between 16 and 65 (inclusive). A validation routine should keep asking until a valid age is entered.\n\nComplete the pseudo-code below by filling in the blank lines:\n\nREPEAT\n   age ← INT(INPUT(\"Enter your age: \"))\nUNTIL _____________________________\n\n(a) Write the correct condition for the UNTIL line. [2 marks]\n(b) State one example of erroneous test data for this routine, and explain what should happen. [2 marks]",
+  "type": "4 marks — Explain",
+  "marks": "(a) age >= 16 AND age <= 65 [2 marks — 1 for each correct part of the compound condition]\n(b) Example: entering 'seventeen' (a string rather than an integer) OR any number outside 16–65, e.g. -1. The program should not crash; it should reject the value and ask again [2 marks — 1 for valid erroneous example, 1 for correct expected behaviour]"
+ },
+ {
+  "text": "A school website asks students to create a username. The username must be at least 5 characters long and must not be blank.\n\nWrite a subroutine in pseudo-code called getUsername that:\n• Asks the user to enter a username\n• Validates that the username is not empty and is at least 5 characters\n• Keeps asking until the username is valid\n• Returns the valid username",
+  "type": "6 marks — Write a Subroutine",
+  "marks": "Mastering: Correct subroutine with REPEAT-UNTIL loop, combined condition checking LEN >= 5 AND username != '', INPUT inside loop, RETURN of valid username, ENDSUBROUTINE.\nSecure: Correct loop and at least one validation condition; minor issues such as missing the empty check or slightly wrong LEN condition.\nDeveloping: Subroutine header and some attempt at loop or validation, but condition or RETURN incomplete.\nEmerging: Subroutine header attempted or isolated INPUT/validation without full structure."
+ },
+ {
+  "text": "Explain what is meant by robust programming and describe, with examples, how data validation and authentication contribute to making a program robust.",
+  "type": "8 marks — Extended Response",
+  "marks": "Mastering: Clear definition of robust programming, detailed explanation of at least two validation types with code-level or scenario examples, explanation of authentication with a username-password example, explicit link between each technique and how it prevents crashes or misuse.\nSecure: Definition present, two techniques explained with examples, some development of why each makes the program more robust.\nDeveloping: Basic definition and one technique described, limited examples or development.\nEmerging: Simple statement that validation checks data, minimal development."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "For a valid range of 1 to 10, which set of values represents correct boundary test data?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "5 and 6",
+   "0, 1, 10 and 11",
+   "1 and 10 only",
+   "0 and 11 only"
+  ]
+ },
+ {
+  "q": "What does a range check validate?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "That the user has entered something rather than leaving the field blank",
+   "That the entered value falls within an acceptable set of bounds",
+   "That the string is long enough",
+   "That the data type is correct"
+  ]
+ },
+ {
+  "q": "A _____ error prevents a program from running because it breaks the rules of the programming language.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "logic",
+   "runtime",
+   "syntax",
+   "boundary"
+  ]
+ },
+ {
+  "q": "Validation checks that data is _____, not whether it is correct.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "encrypted",
+   "reasonable",
+   "sorted",
+   "unique"
+  ]
+ },
+ {
+  "q": "Match each type of test data to its description:",
+  "left": [
+   "Normal data",
+   "Boundary data",
+   "Erroneous data"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   1,
+   2
+  ],
+  "right": [
+   "Values well within the valid range that should be accepted",
+   "Values at the edges of the valid range and just outside each boundary",
+   "Values that are completely invalid or of the wrong type"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "That data meets specified criteria before being processed — not whether it is correct.",
+  "q": "What does data validation check?"
+ },
+ {
+  "a": "Each checks that input data meets a specific criterion before the program processes it, without verifying whether the data is factually correct.",
+  "q": "What do the three specification validation checks — minimum length, empty string, and range — have in common?"
+ },
+ {
+  "a": "REPEAT...UNTIL",
+  "q": "What loop structure is typically used to keep asking until valid data is entered?"
+ },
+ {
+  "a": "A routine that verifies a user's identity, typically by checking a username and password.",
+  "q": "What is authentication?"
+ },
+ {
+  "a": "Both sides of each limit must be tested — just below (0), lowest valid (1), highest valid (10), and just above (11) — to expose off-by-one errors.",
+  "q": "Why are four boundary values needed when testing a range of 1 to 10?"
+ },
+ {
+  "a": "Values well within the valid range that the program should accept and process correctly.",
+  "q": "What is normal test data?"
+ },
+ {
+  "a": "Values that are completely invalid or of the wrong type, which the program should reject.",
+  "q": "What is erroneous test data?"
+ },
+ {
+  "a": "An error in the grammar of the programming language that prevents the program from running.",
+  "q": "What is a syntax error?"
+ },
+ {
+  "a": "An error where the program runs but produces incorrect results due to faulty logic.",
+  "q": "What is a logic error?"
+ },
+ {
+  "a": "The program runs without stopping — it silently gives the wrong answer.",
+  "q": "Why is a logic error harder to find than a syntax error?"
+ },
+ {
+  "a": "No — plain text passwords are used in exam-level authentication routines.",
+  "q": "In the specification, do students need to encrypt passwords in authentication routines?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "robust program",
+  "definition": "A program that handles unexpected or invalid inputs without crashing, by checking data before processing it and verifying user identity where needed."
+ },
+ {
+  "term": "data validation",
+  "definition": "Checking that data entered by a user meets specified criteria before the program processes it. Validation checks if data is reasonable, not whether it is correct."
+ },
+ {
+  "term": "authentication",
+  "definition": "A routine that verifies a user's identity, typically by checking a username and password against stored values before granting access."
+ },
+ {
+  "term": "test data",
+  "definition": "Values used to test a program, chosen to check correct behaviour under normal conditions, at boundary points, and with invalid inputs."
+ },
+ {
+  "term": "syntax error",
+  "definition": "An error in the grammar or spelling of the programming language, which prevents the program from running."
+ },
+ {
+  "term": "logic error",
+  "definition": "An error where the program runs without crashing but produces incorrect results because the logic of the code is wrong."
+ }
+]

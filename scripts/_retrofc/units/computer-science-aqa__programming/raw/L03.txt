@@ -1,0 +1,279 @@
+=== L3 Subroutines, Parameters and Local Variables ===
+id: 03bdeeee-139f-4430-a9aa-0d4d03280c81
+slug: subroutines-parameters-and-local-variables
+status: live tier:both updated:2026-07-30T22:20:19.320002+00:00
+narration_manifest: array len 33
+
+--- DESCRIPTION ---
+Procedures, functions, parameters, return values and why local variables make code easier to maintain.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">Why Break Code into Subroutines?</h2>
+<p data-narration-id="n2">As a program grows, writing everything in one long block becomes unmanageable. A <dfn class="term" data-def="A named block of code that performs a specific task and can be called from anywhere in a program. Subroutines include procedures and functions.">subroutine</dfn> is a named, self-contained block of code that carries out one clear job. You call it by name whenever you need it, rather than writing the same code again. This makes programs shorter, easier to read, and much simpler to fix.</p>
+<p data-narration-id="n3">Breaking a large program into subroutines is called the <dfn class="term" data-def="An approach to programming that divides a program into smaller, independent subroutines, each with a clear purpose and well-defined interface.">structured approach</dfn>. Professional software teams rely on it daily &mdash; the NHS Patient Record system, for example, is built from thousands of small modules, each handling one task. If a bug appears in the date-validation module, engineers fix that module alone without touching the rest of the system.</p>
+
+<div class="key-fact" data-narration-id="n4" data-revision-tip="Cover this and list three advantages of using subroutines in a program.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Subroutines make programs easier to <strong>write</strong> (tackle one task at a time), easier to <strong>test</strong> (check each block in isolation), easier to <strong>reuse</strong> (call the same subroutine many times), and easier to <strong>maintain</strong> (change one block without breaking others).</p>
+</div>
+
+<h2 data-narration-id="n5">Procedures and Functions</h2>
+<p data-narration-id="n6">Subroutines come in two forms. A <dfn class="term" data-def="A subroutine that performs a task but does not return a value to the code that called it.">procedure</dfn> performs a task and then simply stops &mdash; it does not hand a result back. A <dfn class="term" data-def="A subroutine that performs a task and returns a value to the line of code that called it.">function</dfn> performs a task and <strong>returns a value</strong> to the calling code. That returned value can be stored in a variable or used directly in an expression.</p>
+<p data-narration-id="n7">A classic example: a procedure might display a welcome banner on screen (it acts, produces output, and finishes). A function might calculate the total cost of a shopping basket and return the number so the rest of the program can display it, compare it to a budget, or store it in a database.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example &mdash; Procedure and Function in Pseudo-code</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n8">Here is a <strong>procedure</strong> that prints a greeting. It takes one parameter and carries out an action &mdash; no value is returned.</p>
+    <pre data-narration-id="n9">SUBROUTINE greetUser(name)
+   OUTPUT "Hello, " + name
+ENDSUBROUTINE
+
+greetUser("Priya")   // outputs: Hello, Priya</pre>
+    <p data-narration-id="n10">Here is a <strong>function</strong> that calculates the area of a rectangle. It takes two parameters and hands the result back with <code>RETURN</code>.</p>
+    <pre data-narration-id="n11">SUBROUTINE calculateArea(width, height)
+   area &larr; width * height
+   RETURN area
+ENDSUBROUTINE
+
+result &larr; calculateArea(5, 3)
+OUTPUT result   // outputs: 15</pre>
+    <p data-narration-id="n12">Both use the same <code>SUBROUTINE &hellip; ENDSUBROUTINE</code> keyword pair. The only structural difference is the <code>RETURN</code> statement in the function.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n13">Parameters</h2>
+<p data-narration-id="n14">A <dfn class="term" data-def="A variable listed in a subroutine definition that receives a value when the subroutine is called. The exam uses the word &lsquo;parameter&rsquo; for both the definition variable and the value passed in.">parameter</dfn> is a variable in the subroutine&rsquo;s definition. When you call the subroutine, you pass in values that fill those parameter slots. The values travel into the subroutine and are available inside it for the duration of the call.</p>
+<p data-narration-id="n15">A subroutine can have more than one parameter. For instance, a subroutine that checks whether a student&rsquo;s score lies within a valid range needs both the score and the maximum allowed score &mdash; two parameters. The order you list the parameters in the definition must match the order you pass values in the call.</p>
+
+<div class="key-fact" data-narration-id="n16" data-revision-tip="Test yourself: write from memory a function in pseudo-code that takes a score and returns true if it is above 50, false otherwise.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>In exam material, the word <strong>parameter</strong> is used for both the variable in the subroutine definition and the value passed in at the call. You do not need to distinguish between &ldquo;parameter&rdquo; and &ldquo;argument&rdquo; in your answers.</p>
+</div>
+
+<h2 data-narration-id="n17">Return Values</h2>
+<p data-narration-id="n18">A function sends a value back to the calling code using <code>RETURN</code>. Once the program reaches the <code>RETURN</code> statement, the subroutine ends and the returned value replaces the function call in the expression. You can assign it to a variable, pass it straight into another calculation, or use it in a condition.</p>
+<p data-narration-id="n19">A common exam task is to trace what a function returns for given inputs. Work through the body of the function step by step, substituting the parameter values, until you reach <code>RETURN</code>.</p>
+
+<h2 data-narration-id="n20">Local Variables and Scope</h2>
+<p data-narration-id="n21"><dfn class="term" data-def="The area of a program in which a variable can be accessed. A local variable exists only inside the subroutine where it was declared.">Scope</dfn> describes which parts of a program can see and use a particular variable. A <dfn class="term" data-def="A variable declared inside a subroutine that only exists while the subroutine is running and cannot be accessed from outside it.">local variable</dfn> is created inside a subroutine. It springs into existence when the subroutine is called and is destroyed when it finishes. Nothing outside the subroutine can read or change it.</p>
+<p data-narration-id="n22">A <dfn class="term" data-def="A variable declared outside any subroutine that can be accessed from any part of the program.">global variable</dfn> is declared outside all subroutines and is visible everywhere. That sounds convenient, but it creates serious maintenance problems in large programs: any part of the code can accidentally change a global, and tracking down where an unexpected change happened becomes very difficult.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Why Local Variables Are Better Practice</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n23">Consider a banking app with a global variable called <code>balance</code>. Every subroutine &mdash; withdrawals, interest calculations, fee deductions &mdash; can modify it. If the balance ends up wrong, the programmer must check every single subroutine to find the fault. Using a local variable that is passed in as a parameter and returned means only that subroutine can change it. The problem is isolated immediately.</p>
+    <p data-narration-id="n24">Local variables also save memory. They exist only while the subroutine is running. When a hundred users are simultaneously running the same login check, each gets their own isolated local copy of the username and password &mdash; they cannot interfere with each other&rsquo;s data.</p>
+    <p data-narration-id="n25">Good practice: declare variables local wherever possible. Use globals only for values that genuinely need to be shared across the whole program (for example, a configuration setting loaded once at start-up).</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n26">The Structured Approach in Practice</h2>
+<p data-narration-id="n27">The structured approach means dividing a program into subroutines with clear, documented interfaces. Each subroutine receives its inputs through parameters, does its specific job, and returns any output through a return value or by modifying nothing beyond its local variables. This makes individual subroutines independently testable: write a subroutine, test it with known inputs, verify the output, and move on. If a later change is needed, you alter one well-labelled block rather than hunting through thousands of lines.</p>
+<p data-narration-id="n28">In an exam, if you are asked to write a subroutine, start with the signature (name and parameters), then write the body, then add <code>RETURN</code> at the end if it is a function. Examiners award marks for correct parameter passing and return values &mdash; do not leave these out.</p>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n30">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n31">A subroutine is a named block of code called by name. Procedures perform a task; functions perform a task and return a value. Both use <code>SUBROUTINE &hellip; ENDSUBROUTINE</code> in the standard pseudo-code.</li>
+  <li data-narration-id="n32">Parameters pass data into a subroutine; return values pass data back out. Use local variables inside subroutines to prevent accidental changes from elsewhere in the program.</li>
+  <li data-narration-id="n33">The structured approach &mdash; breaking programs into subroutines with clear interfaces &mdash; makes code easier to write, test, reuse and maintain.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n29">For 6-mark &ldquo;Write a Subroutine&rdquo; questions, structure your answer in three steps: write the subroutine signature with parameters first, then the body logic, then the <code>RETURN</code> statement. Examiners mark each element separately &mdash; a correct signature with an incorrect body still earns marks. Remember that in exam material the word &ldquo;parameter&rdquo; covers both the variable in the definition and the value passed in &mdash; you do not need to write &ldquo;argument&rdquo; to gain marks. For &ldquo;Explain the advantages of subroutines&rdquo; questions, go beyond listing &mdash; explain the benefit: not just &ldquo;reusable&rdquo; but &ldquo;the subroutine can be called multiple times without copying the code, reducing the chance of errors.&rdquo;</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Which one of the following best describes a function?\nA) A block of code that performs a task and returns a value\nB) A block of code that performs a task and displays output\nC) A block of code that can only be called once\nD) A block of code that stores global variables",
+  "type": "1 mark — Multiple Choice",
+  "marks": "A) A block of code that performs a task and returns a value [1 mark]"
+ },
+ {
+  "text": "State one advantage of using local variables instead of global variables in a subroutine.",
+  "type": "1 mark — Give/Name",
+  "marks": "One mark for any one of the following:\n• Local variables cannot be accidentally changed by other parts of the program.\n• Local variables only use memory while the subroutine is running.\n• Errors are easier to trace because the variable is only accessible within the subroutine.\n[1 mark]"
+ },
+ {
+  "text": "Explain the difference between a procedure and a function.",
+  "type": "2 marks — State a Difference",
+  "marks": "Award one mark for each valid difference up to two marks:\n• A procedure performs a task but does not return a value; a function performs a task and returns a value to the calling code. [2 marks]"
+ },
+ {
+  "text": "The following subroutine is intended to calculate and return the perimeter of a rectangle.\n\nSUBROUTINE calcPerimeter(length, width)\n   perimeter ← 2 + length + 2 + width\n   RETURN perimeter\nENDSUBROUTINE\n\n(a) Identify the error in the subroutine. [1 mark]\n(b) Write a corrected version of the subroutine. [1 mark]",
+  "type": "4 marks — Explain",
+  "marks": "(a) The expression uses addition where multiplication is needed — it should be (2 * length) + (2 * width) or 2 * (length + width). [1 mark]\n(b) Corrected version:\nSUBROUTINE calcPerimeter(length, width)\n   perimeter ← 2 * (length + width)\n   RETURN perimeter\nENDSUBROUTINE\n[1 mark for correct formula; 1 mark for RETURN; 1 mark for correct syntax]"
+ },
+ {
+  "text": "Explain the advantages of using the structured approach to programming, referring to subroutines, parameters and local variables in your answer.",
+  "type": "8 marks — Extended Response",
+  "marks": "Mastering: Detailed explanation covering all three elements (subroutines, parameters, local variables) with clear reasons for each and a developed conclusion about maintainability or reusability. Three or more linked points.\nSecure: Clear explanation of at least two elements with reasons. Some development of the benefits.\nDeveloping: At least one element explained with a basic reason. Limited development.\nEmerging: Simple identification of subroutines or parameters without explanation of why they are beneficial."
+ },
+ {
+  "text": "Write a subroutine in pseudo-code called checkPass that takes two parameters, score and passMark. The subroutine should return true if score is greater than or equal to passMark, and false otherwise.",
+  "type": "6 marks — Write a Subroutine",
+  "marks": "Mastering: Correct subroutine with both parameters declared, correct conditional using >= or equivalent, RETURN true and RETURN false in correct branches, ENDSUBROUTINE present. Clean syntax throughout.\nSecure: Correct logic and RETURN values but minor syntax issue (e.g. missing ENDSUBROUTINE or slightly incorrect operator).\nDeveloping: Subroutine header with parameters present and conditional attempted, but RETURN missing or logic incorrect.\nEmerging: Subroutine header attempted or conditional alone, without full structure."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "What is the difference between a procedure and a function?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "A procedure uses parameters; a function does not",
+   "A function returns a value; a procedure does not",
+   "A procedure is faster than a function",
+   "A function can only have one parameter"
+  ]
+ },
+ {
+  "q": "Which keyword is used in the standard pseudo-code to send a value back from a function?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "OUTPUT",
+   "SEND",
+   "RETURN",
+   "ENDSUBROUTINE"
+  ]
+ },
+ {
+  "q": "A variable declared inside a subroutine is called a _____ variable.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "global",
+   "shared",
+   "local",
+   "constant"
+  ]
+ },
+ {
+  "q": "The structured approach to programming involves dividing a program into smaller _____ with clear interfaces.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "files",
+   "loops",
+   "subroutines",
+   "constants"
+  ]
+ },
+ {
+  "q": "Match each programming term to its description:",
+  "left": [
+   "Subroutine",
+   "Parameter",
+   "Return value"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   1,
+   2
+  ],
+  "right": [
+   "A named block of code that performs a specific task",
+   "A variable in a subroutine definition that receives a value when called",
+   "Data passed back to the calling code when a function finishes"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "A named block of code that performs a specific task and can be called from anywhere in the program.",
+  "q": "What is a subroutine?"
+ },
+ {
+  "a": "A function returns a value to the calling code; a procedure does not.",
+  "q": "What is the key difference between a procedure and a function?"
+ },
+ {
+  "a": "SUBROUTINE and ENDSUBROUTINE.",
+  "q": "In the standard pseudo-code, what keywords wrap a subroutine?"
+ },
+ {
+  "a": "A variable in the subroutine definition that receives a value when the subroutine is called.",
+  "q": "What is a parameter in a subroutine?"
+ },
+ {
+  "a": "RETURN.",
+  "q": "What keyword sends a result back from a function in the standard pseudo-code?"
+ },
+ {
+  "a": "A variable declared inside a subroutine that only exists while that subroutine is running.",
+  "q": "What is a local variable?"
+ },
+ {
+  "a": "When the subroutine finishes executing.",
+  "q": "When does a local variable stop existing?"
+ },
+ {
+  "a": "A variable declared outside all subroutines, accessible from anywhere in the program.",
+  "q": "What is a global variable?"
+ },
+ {
+  "a": "They cannot be accidentally changed by other parts of the program, making bugs easier to trace.",
+  "q": "Give one reason why local variables are preferred over global variables."
+ },
+ {
+  "a": "Code is divided into subroutines that are easier to write, test, reuse and maintain independently.",
+  "q": "What is the key benefit of the structured approach to programming?"
+ },
+ {
+  "a": "Dividing a program into subroutines with clear, documented interfaces.",
+  "q": "What is the structured approach to programming?"
+ },
+ {
+  "a": "Parameter.",
+  "q": "What single word do AQA exam questions use for both the variable in a subroutine definition and the value passed in at the call?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "subroutine",
+  "definition": "A named block of code that performs a specific task and can be called from anywhere in a program. Includes procedures and functions."
+ },
+ {
+  "term": "procedure",
+  "definition": "A subroutine that performs a task but does not return a value to the code that called it."
+ },
+ {
+  "term": "function",
+  "definition": "A subroutine that performs a task and returns a value to the line of code that called it."
+ },
+ {
+  "term": "parameter",
+  "definition": "A variable listed in a subroutine definition that receives a value when the subroutine is called. The exam uses this word for both the definition variable and the value passed in."
+ },
+ {
+  "term": "scope",
+  "definition": "The area of a program in which a variable can be accessed. A local variable exists only inside the subroutine where it was declared."
+ },
+ {
+  "term": "local variable",
+  "definition": "A variable declared inside a subroutine that only exists while the subroutine is running and cannot be accessed from outside it."
+ },
+ {
+  "term": "global variable",
+  "definition": "A variable declared outside any subroutine that can be accessed from any part of the program."
+ },
+ {
+  "term": "structured approach",
+  "definition": "An approach to programming that divides a program into smaller, independent subroutines, each with a clear purpose and well-defined interface."
+ }
+]

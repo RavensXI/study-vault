@@ -1,0 +1,255 @@
+=== L2 Iteration, Selection and Operators ===
+id: c04a701f-a5f4-419e-99c3-354b98d2e595
+slug: iteration-selection-and-operators
+status: live tier:both updated:2026-07-30T22:49:13.185559+00:00
+narration_manifest: array len 35
+
+--- DESCRIPTION ---
+Definite and indefinite iteration, nested structures, and arithmetic, relational and Boolean operators.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">Iteration: Repeating Instructions</h2>
+<p data-narration-id="n2"><dfn class="term" data-def="A programming construct that repeats a block of instructions, using either a fixed count or a condition to determine when to stop.">Iteration</dfn> allows a program to repeat a block of code without the programmer writing it out multiple times. There are two categories: <strong>definite iteration</strong>, where the number of repetitions is known in advance, and <strong>indefinite iteration</strong>, where the loop continues until a condition becomes true or false. You need a theoretical understanding of all four loop types, even if your school&rsquo;s chosen programming language does not support all of them.</p>
+
+<h2 data-narration-id="n3">Definite Iteration &mdash; The FOR Loop</h2>
+<p data-narration-id="n4"><dfn class="term" data-def="A count-controlled loop that repeats a fixed number of times, with the number of iterations determined before the loop begins.">Definite iteration</dfn> uses a <code>FOR</code> loop. The loop variable counts from a start value to an end value, incrementing by one on each pass. In AQA pseudo-code:</p>
+<p data-narration-id="n5"><code>FOR i &larr; 1 TO 5<br/>&nbsp;&nbsp;OUTPUT i<br/>ENDFOR</code><br/>This outputs 1, 2, 3, 4, 5 &mdash; five iterations, one for each value of <code>i</code>.</p>
+<p data-narration-id="n6">Use a FOR loop when you know exactly how many times the loop should run &mdash; for example, processing each of ten exam answers, or generating a times table from 1 to 12.</p>
+
+<h2 data-narration-id="n7">Indefinite Iteration &mdash; Condition at the Start: WHILE</h2>
+<p data-narration-id="n8"><dfn class="term" data-def="A condition-controlled loop that checks its condition before executing the loop body; if the condition is false from the start, the body may never execute.">Indefinite iteration</dfn> continues until a condition changes. The <code>WHILE</code> loop checks its condition <strong>before</strong> each iteration. If the condition is false when the loop is first reached, the body never executes at all.</p>
+<p data-narration-id="n9"><code>WHILE password &ne; &ldquo;secret&rdquo;<br/>&nbsp;&nbsp;password &larr; USERINPUT<br/>ENDWHILE<br/>OUTPUT &ldquo;Access granted&rdquo;</code><br/>This keeps asking for input while the password is wrong. If the user gets it right on the first attempt, the loop body runs once; if they never get it right, it runs indefinitely.</p>
+
+<h2 data-narration-id="n10">Indefinite Iteration &mdash; Condition at the End: REPEAT...UNTIL and DO...WHILE</h2>
+<p data-narration-id="n11">Two loop forms check their condition <em>after</em> the body has run, which guarantees the body executes <strong>at least once</strong>.</p>
+<p data-narration-id="n12"><strong>REPEAT&hellip;UNTIL</strong> continues the body until the condition becomes <em>true</em>:</p>
+<p data-narration-id="n13"><code>REPEAT<br/>&nbsp;&nbsp;pin &larr; USERINPUT<br/>UNTIL pin = 1234<br/>OUTPUT &ldquo;PIN accepted&rdquo;</code><br/>The user is always asked for a PIN at least once, then again until they enter the correct value.</p>
+<p data-narration-id="n14"><strong>DO&hellip;WHILE</strong> continues the body while the condition remains <em>true</em>:</p>
+<p data-narration-id="n15"><code>DO<br/>&nbsp;&nbsp;answer &larr; USERINPUT<br/>WHILE answer &ne; &ldquo;quit&rdquo;</code><br/>This is logically identical to REPEAT&hellip;UNTIL except for whether the condition is expressed as &ldquo;stop when X&rdquo; or &ldquo;continue while X&rdquo;.</p>
+
+<div class="key-fact" data-narration-id="n16" data-revision-tip="Cover this and recall: Which loop types check the condition before executing the body, and which check it after? Name all four loop types.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Condition checked <strong>before</strong> body: WHILE (may never execute). Condition checked <strong>after</strong> body: REPEAT&hellip;UNTIL and DO&hellip;WHILE (always execute at least once). Count-controlled: FOR (fixed number of iterations). All four are part of the specification even if Python (which lacks DO&hellip;WHILE and REPEAT&hellip;UNTIL natively) is your school&rsquo;s chosen language.</p>
+</div>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example: Choosing the Right Loop</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n17"><strong>Scenario 1 &mdash; Print a 5-question quiz score card.</strong> You know exactly how many scores to print (5). Use a FOR loop.</p>
+    <p data-narration-id="n18"><strong>Scenario 2 &mdash; Keep asking for a valid age until a number between 0 and 120 is entered.</strong> You don&rsquo;t know how many attempts the user will need. The user must enter at least once. Use REPEAT&hellip;UNTIL or DO&hellip;WHILE.</p>
+    <p data-narration-id="n19"><strong>Scenario 3 &mdash; Keep reading GPS data while the car is moving.</strong> The car might already be stopped when the program starts, so the reading loop might never need to run. Use WHILE (so the body can be skipped if the condition is immediately false).</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n20">Nested Iteration and Nested Selection</h2>
+<p data-narration-id="n21">Loops and conditionals can be placed inside other loops and conditionals. This is called <dfn class="term" data-def="A programming structure where one loop or selection construct is placed inside another, creating multiple levels of control flow.">nesting</dfn>. Nested structures are used for grid operations, table printing, and multi-condition checks.</p>
+<p data-narration-id="n22">A common exam mistake is incorrectly handling the boundary condition in a nested IF. For example:</p>
+<p data-narration-id="n23"><code>IF score &gt;= 40 THEN<br/>&nbsp;&nbsp;OUTPUT &ldquo;Pass&rdquo;<br/>&nbsp;&nbsp;IF score &gt;= 70 THEN<br/>&nbsp;&nbsp;&nbsp;&nbsp;OUTPUT &ldquo;Merit&rdquo;<br/>&nbsp;&nbsp;ENDIF<br/>ENDIF</code><br/>Students often accidentally output &ldquo;Merit&rdquo; without checking that the outer IF&rsquo;s condition was also met first. Always trace through nested conditions carefully.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Operators Reference &mdash; Arithmetic, Relational and Boolean</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n24"><strong>Arithmetic operators:</strong> <code>+</code> (add), <code>&minus;</code> (subtract), <code>&times;</code> (multiply), <code>/</code> (real division &mdash; result can be decimal), <code>DIV</code> (integer division &mdash; whole quotient only), <code>MOD</code> (remainder after integer division).</p>
+    <p data-narration-id="n25"><strong>Relational operators</strong> (for comparisons in conditions): <code>=</code> (equal to), <code>&ne;</code> (not equal to), <code>&lt;</code> (less than), <code>&gt;</code> (greater than), <code>&le;</code> (less than or equal to), <code>&ge;</code> (greater than or equal to). These return a Boolean result (true or false).</p>
+    <p data-narration-id="n26"><strong>Boolean operators</strong> combine conditions: <code>AND</code> (both conditions must be true), <code>OR</code> (at least one must be true), <code>NOT</code> (inverts a condition). Example: <code>IF age &ge; 16 AND hasConsent = TRUE THEN</code> &mdash; both conditions must hold.</p>
+  </div></div>
+</div>
+
+<div class="key-fact" data-narration-id="n27" data-revision-tip="Test yourself: Write a condition using AND that checks whether a number stored in 'n' is greater than 0 and less than 100.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Boolean operators are used to combine multiple conditions in a single IF or WHILE statement. <strong>AND</strong> requires all combined conditions to be true. <strong>OR</strong> requires at least one to be true. <strong>NOT</strong> inverts a Boolean value: <code>NOT gameOver</code> is true when <code>gameOver</code> is false.</p>
+</div>
+
+<h2 data-narration-id="n28">Putting It Together &mdash; A Real Example</h2>
+<p data-narration-id="n29">Consider a simple number-guessing game. The target number is 42. The player keeps guessing until they get it right or run out of attempts. This combines a WHILE loop (indefinite, condition at start), selection (IF to check the guess), Boolean operators, and counter variables:</p>
+<p data-narration-id="n30"><code>target &larr; 42<br/>attempts &larr; 0<br/>maxAttempts &larr; 5<br/>guess &larr; 0<br/>WHILE guess &ne; target AND attempts &lt; maxAttempts<br/>&nbsp;&nbsp;guess &larr; USERINPUT<br/>&nbsp;&nbsp;attempts &larr; attempts + 1<br/>ENDWHILE<br/>IF guess = target THEN<br/>&nbsp;&nbsp;OUTPUT &ldquo;Correct!&rdquo;<br/>ELSE<br/>&nbsp;&nbsp;OUTPUT &ldquo;Out of attempts&rdquo;<br/>ENDIF</code></p>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n32">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n33">Definite iteration (FOR) uses a fixed count. Indefinite iteration (WHILE, REPEAT&hellip;UNTIL, DO&hellip;WHILE) uses a condition. WHILE checks before; REPEAT&hellip;UNTIL and DO&hellip;WHILE check after &mdash; guaranteeing at least one execution.</li>
+  <li data-narration-id="n34">Nesting places loops or selections inside each other. Trace nested conditions carefully &mdash; boundary errors in nested IFs are the most common exam mistake in this topic.</li>
+  <li data-narration-id="n35">Arithmetic operators (+, &minus;, &times;, /, DIV, MOD), relational operators (=, &ne;, &lt;, &gt;, &le;, &ge;) and Boolean operators (AND, OR, NOT) are all used to build conditions and perform calculations in programs.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n31">For questions about iteration, always state which loop type you are using and why &mdash; examiners want to see that you have made a deliberate choice, not just used a FOR loop by default. If a question specifies pseudo-code, use AQA syntax with the correct closing keywords (ENDFOR, ENDWHILE, UNTIL). Remember: REPEAT&hellip;UNTIL and DO&hellip;WHILE always run at least once; WHILE may not run at all. For nested selection questions, trace through every branch carefully &mdash; missing the inner ENDIF is a very common error.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "State one difference between a FOR loop and a WHILE loop.",
+  "type": "2 marks — State a Difference",
+  "marks": "Mastering: FOR loop is count-controlled / runs a fixed number of times known in advance (1); WHILE loop is condition-controlled / runs while a condition is true, number of iterations not known in advance (1).\nSecure: Both sides described but not as a direct comparison.\nDeveloping: One loop described correctly without comparison.\nEmerging: Both described identically or neither correct."
+ },
+ {
+  "text": "Explain why a REPEAT...UNTIL loop would be more appropriate than a WHILE loop for asking a user to enter a valid password.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: REPEAT checks condition after body (1), so body always runs at least once (1), meaning the user is always prompted for a password (1); WHILE could skip the body if condition is false on entry, though in a login context the initial variable would be invalid anyway — REPEAT is more natural/safer design (1).\nSecure: Correct reasoning about condition timing with one detail missing.\nDeveloping: States REPEAT runs at least once but does not connect to the password scenario.\nEmerging: Describes the wrong loop or reverses the comparison."
+ },
+ {
+  "text": "What is the output of the following algorithm?\nFOR i ← 1 TO 3\n  FOR j ← 1 TO i\n    OUTPUT j\n  ENDFOR\nENDFOR",
+  "type": "4 marks — Complete a Trace Table",
+  "marks": "Mastering: i=1: outputs 1. i=2: outputs 1, 2. i=3: outputs 1, 2, 3. Full output: 1 1 2 1 2 3 (1 mark per correct outer iteration, total 4 if all correct; 1 mark each for i=1, i=2, i=3 plus correct identification of nested structure).\nSecure: Two outer iterations fully correct.\nDeveloping: One outer iteration correct.\nEmerging: Misunderstands nested loop structure entirely."
+ },
+ {
+  "text": "Write AQA pseudo-code for a program that reads ten exam scores from a user, calculates their total, and then outputs the total and the average score.",
+  "type": "6 marks — Write a Subroutine",
+  "marks": "Mastering: FOR loop from 1 to 10 (1), USERINPUT inside loop (1), running total updated (1), average calculated after loop by dividing total by 10 (1), OUTPUT total (1), OUTPUT average (1).\nSecure: Correct loop and total; average calculation or OUTPUT missing.\nDeveloping: Loop present but body or total incorrect.\nEmerging: No loop structure."
+ },
+ {
+  "text": "A program checks whether a student is eligible for a school trip. The student must be in Year 10 or 11 AND have parental consent. Write the AQA pseudo-code condition that would be used in an IF statement to test these two requirements at once.",
+  "type": "1 mark — Multiple Choice",
+  "marks": "Mastering: IF (year = 10 OR year = 11) AND consent = TRUE THEN — 1 mark. Accept equivalent correct Boolean expression.\nSecure: Correct logic but minor syntax variation.\nDeveloping: Only one condition tested.\nEmerging: AND and OR confused."
+ },
+ {
+  "text": "Describe the difference between real division and integer division in a program. Give one programming scenario where integer division (DIV) would be more appropriate than real division, and explain why.",
+  "type": "8 marks — Extended Response",
+  "marks": "Mastering: Real division — result can be decimal (1), e.g. 7 / 2 = 3.5 (1). Integer division (DIV) — discards the decimal, returns only the whole quotient (1), e.g. 7 DIV 2 = 3 (1). MOD returns remainder (1). Scenario — e.g. dividing students into teams of 4: you need the integer number of full teams, not 3.5 teams (1). Justification — a fraction of a team is meaningless in context (1). Conclusion (1). 7–8 marks.\nSecure: Both division types explained; scenario with partial justification. 5–6 marks.\nDeveloping: One division type only or scenario without justification. 3–4 marks.\nEmerging: Vague. 1–2 marks."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which loop type guarantees the body will execute at least once?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "FOR loop",
+   "WHILE loop",
+   "REPEAT...UNTIL loop",
+   "Both FOR and WHILE"
+  ]
+ },
+ {
+  "q": "What is the result of the Boolean expression: (5 > 3) AND (10 < 8)?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "True",
+   "False",
+   "True AND False",
+   "Error"
+  ]
+ },
+ {
+  "q": "A FOR loop is an example of _____ iteration because the number of repetitions is known before the loop starts.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "indefinite",
+   "definite",
+   "conditional",
+   "Boolean"
+  ]
+ },
+ {
+  "q": "In a WHILE loop, the condition is checked _____ the loop body executes.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "after",
+   "during",
+   "before",
+   "without checking when"
+  ]
+ },
+ {
+  "q": "Match each operator type to an example.",
+  "left": [
+   "Arithmetic",
+   "Relational",
+   "Boolean"
+  ],
+  "type": "match",
+  "order": [
+   1,
+   0,
+   2
+  ],
+  "right": [
+   "age >= 16",
+   "total + score",
+   "isLoggedIn AND hasPermission"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "Definite iteration — implemented with a FOR loop.",
+  "q": "What type of iteration uses a fixed count of repetitions known in advance?"
+ },
+ {
+  "a": "WHILE loop.",
+  "q": "Which loop type checks its condition before the body executes?"
+ },
+ {
+  "a": "REPEAT...UNTIL and DO...WHILE.",
+  "q": "Which two loop types guarantee the body runs at least once?"
+ },
+ {
+  "a": "ENDWHILE.",
+  "q": "What pseudo-code keyword ends a WHILE loop?"
+ },
+ {
+  "a": "Inverts it — NOT TRUE gives FALSE, NOT FALSE gives TRUE.",
+  "q": "What does the NOT operator do to a Boolean value?"
+ },
+ {
+  "a": "AND requires all conditions to be true; OR requires at least one to be true.",
+  "q": "What is the difference between AND and OR in a combined condition?"
+ },
+ {
+  "a": "3.",
+  "q": "What is the result of 15 DIV 4?"
+ },
+ {
+  "a": "2 — the remainder after dividing 17 by 5.",
+  "q": "What is the result of 17 MOD 5?"
+ },
+ {
+  "a": "Nested iteration.",
+  "q": "What term describes placing one loop inside another?"
+ },
+ {
+  "a": "Yes — a theoretical understanding of all four is required.",
+  "q": "Spec requirement: must you know all four loop types even if your language doesn't support them all?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "iteration",
+  "definition": "A programming construct that repeats a block of instructions, using either a fixed count or a condition to determine when to stop."
+ },
+ {
+  "term": "definite iteration",
+  "definition": "A count-controlled loop that repeats a fixed number of times, with the number of iterations determined before the loop begins."
+ },
+ {
+  "term": "indefinite iteration",
+  "definition": "A condition-controlled loop that continues until a condition becomes true or false, where the number of iterations is not known in advance."
+ },
+ {
+  "term": "nesting",
+  "definition": "A programming structure where one loop or selection construct is placed inside another, creating multiple levels of control flow."
+ },
+ {
+  "term": "relational operator",
+  "definition": "An operator that compares two values and returns a Boolean result (true or false), such as equal to, not equal to, less than, or greater than."
+ },
+ {
+  "term": "Boolean operator",
+  "definition": "An operator used to combine or invert Boolean conditions, including AND (both true), OR (at least one true) and NOT (inverts a condition)."
+ }
+]
