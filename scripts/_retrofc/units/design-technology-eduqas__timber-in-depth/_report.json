@@ -1,6 +1,175 @@
 {
+ "unit": "design-technology-eduqas / timber-in-depth",
+ "checked_at": "2026-09-06T00:00:00Z",
+ "spec_used": "specs/eduqas/design-and-technology-C600QS.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "MDF bullet: \"MDF (Medium Density Fibreboard) - Change 'wood fibres broken down to a fine powder' to 'wood chips broken down into individual wood fibres by steam-softening and mechanical defibration'. wood chips steam-softened and mechanically defibrated...\"",
+   "truth": "A fact-check instruction was pasted into the live lesson on 2 Sep instead of replacing the wrong wording. The bullet should read \"wood chips steam-softened and mechanically defibrated into individual fibres, mixed with urea-formaldehyde resin and compressed under heat and pressure\". The n20 narration clip was regenerated with the leaked text, so this lesson needs re-narrating.",
+   "evidence": "unit _fix.log 2026-09-02 and _renarrate.log (clip n20 text)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"In a Eduqas design exam, a selection justification must link a named property...\"",
+   "truth": "House rule: an Eduqas/WJEC lesson never names the board in student-facing prose. Use \"In the exam\".",
+   "evidence": "CHECK_PROMPT_GENERIC.md banned strings; feedback_eduqas_wjec_neutral_phrasing",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "\"Lamination - thin strips of timber glued together with grain alternating between layers\" (repeated as \"gluing thin layers together with grain alternating\").",
+   "truth": "In laminating (and glulam) the grain of every lamination runs the same way, along the length of the member; grain alternating at right angles is plywood. The lesson's own 6-mark mark scheme contradicts the bullet: \"the grain of each laminate follows the curve\". The spec keeps the two ideas apart: \"Reinforcement of natural timber by laminating\" vs \"The strength of plywood will depend upon the number of layers and the wood grain being at right angles\".",
+   "evidence": "spec p.22 in-depth timber content 3; Wikipedia Glued laminated timber: \"the wood grain in each layer runs parallel to the member's length\"",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"the cross-grain construction of plywood and the uniform density of OSB and MDF provide greater in-plane stiffness than an equivalent solid-timber panel\"",
+   "truth": "Manufactured boards are more even in every direction, not stiffer overall. MDF has a modulus of elasticity of about 3 GPa against about 10 GPa for solid softwood along the grain. Solid timber is stiffer along the grain and much weaker across it.",
+   "evidence": "Wikipedia Medium-density fibreboard (MOE 3 GPa); standard timber MOE values",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"hard knots interrupt the grain and can fall out in dry conditions\"",
+   "truth": "A hard (live, intergrown) knot stays put. It is the dead or encased knot, attached only at its base, that drops out of a sawn board and leaves a hole.",
+   "evidence": "Wikipedia Wood knot: \"The dead branch may not be attached to the trunk wood except at its base and can drop out after the tree has been sawn into boards.\"",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "Knock-down fittings definition, in both the data-def attribute and glossary term 3: \"Change definition to: 'Mechanical fasteners that allow furniture to be assembled and disassembled without adhesive...', enabling flat-pack construction and easy transport.\"",
+   "truth": "Another leaked fact-check instruction. The student sees the instruction, not a definition, in the glossary and in the pop-up definition.",
+   "evidence": "raw L04 content_html n18 and glossary_terms[2]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "Section \"Frame Joints\" lists butt, mitre, dowel, mortise and tenon, housing and lap; the butt and housing joints are taught as frame joints.",
+   "truth": "The spec classifies joints as frame or box construction. Frame: mitre, dowel, mortise and tenon, halving and bridle. Box/carcass: butt, lap, housing, dovetail and comb. A classification question would mark the lesson's grouping wrong. The bridle joint was also missing; the fix names it.",
+   "evidence": "spec p.23 in-depth timber content 6: \"Classification of wood joints as frame or box construction\"",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "\"Finger (box) joint\" - the spec's own name, comb joint, never appears.",
+   "truth": "The spec names the joint a comb joint. The student should recognise both names.",
+   "evidence": "spec p.23: \"Box/carcass: butt, lap, housing, dovetail and comb joint\"",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "\"oval wire nails for furniture (oval head minimises splitting)\"",
+   "truth": "The oval cross-section of the shank reduces splitting when the nail is driven with its long axis along the grain. The head of an oval wire nail is small and plays no part.",
+   "evidence": "standard joinery practice; oval wire nail shank geometry",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"the trees absorbed CO&sub;2; during their growth\" and \"1.8 tonnes of CO&sub;2;\"",
+   "truth": "&sub; is the subset entity, so the panel renders as \"CO(subset)2;\". It should be CO with a subscript 2.",
+   "evidence": "HTML entity table; raw L05 key-fact panel",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"Mentioning CLT's carbon sequestration in an exam answer on timber sustainability consistently earns the highest mark band.\"",
+   "truth": "Invented marking claim. No single fact carries a band. The point is worth making, but as content, not as a marking guarantee.",
+   "evidence": "spec assessment section (2-hour written paper, 100 marks, untiered, no SPaG); no such rule exists",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F12",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "\"Softwoods ... account for around 80% of the world's commercially harvested timber.\"",
+   "truth": "A common textbook figure, but FAO roundwood data put coniferous production nearer two thirds of industrial roundwood and about three quarters of sawnwood. Could not verify 80% within the search budget, and no mark depends on it.",
+   "evidence": "FAO forest products statistics (not fetched - budget)",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F13",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "OSB: \"Stronger and cheaper than chipboard.\"",
+   "truth": "OSB is stronger than chipboard, but UK sheet prices put OSB at or above standard chipboard. Left alone because no price source was verified.",
+   "evidence": "no verified source within budget",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F14",
+   "lesson": 1,
+   "field": "exam_tip_html",
+   "severity": "LOW",
+   "claim": "Invented marking rules across the unit: \"Simply naming the material scores zero on justify questions\" (L1), \"Vague answers such as 'wood is strong' score nothing\" (L2), \"will score one mark at most on a 3-mark describe question\" (L3), \"Many students lose marks by recommending PVA\" (L4).",
+   "truth": "None of these come from a published mark scheme. They are sound advice dressed as marking rules. Left as they are because each is defensible teaching and none states a wrong fact about the paper; the L5 example was stronger and has been fixed (F11).",
+   "evidence": "spec assessment section",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F15",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "PEFC is \"considered equally credible\" / has \"equivalent sustainability standards\" to FSC.",
+   "truth": "Both are the two main certification schemes, but the claim of equivalence is contested by several environmental NGOs. Not a mark-bearing point at GCSE.",
+   "evidence": "general knowledge; no settled source",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F16",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Spec-named timbers parana pine (softwood) and jelutong (hardwood) never appear in the unit.",
+   "truth": "The spec names beech, oak, mahogany, balsa and jelutong as hardwoods and scots pine, western red cedar and parana pine as softwoods. The unit covers the others but substitutes spruce, larch and ash. Missing rather than wrong, so no edit; worth a content pass later.",
+   "evidence": "spec p.22 in-depth timber content 1",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [
+  3
+ ],
+ "summary": "Two leaked fact-check instructions are still live in student text (L1 MDF bullet, L4 knock-down definition in both the pop-up and the glossary) - the 2 Sep repair pasted the instruction in rather than applying it, and the L1 n20 narration was rebuilt from the leaked text. Beyond that: lamination described as cross-grain (it is not - that is plywood), butt and housing joints classed as frame rather than box against the spec's own classification, a wrong stiffness comparison, a knot-defect error, and two broken CO2 entities. All 30 knowledge-check keys and every practice mark scheme recompute clean; no exam-structure claim contradicts the 2-hour, 100-mark, untiered paper.",
  "renarration": {
-  "run_at": "2026-09-02T18:41:42Z",
+  "run_at": "2026-09-06T09:19:59Z",
   "clips": [
    {
     "lesson": 1,
@@ -8,10 +177,10 @@
     "key": "design-technology-eduqas/timber-in-depth/narration_lesson-01_n20.mp3",
     "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/timber-in-depth/narration_lesson-01_n20.mp3",
     "voice": "Ollie",
-    "duration": 29.98,
-    "bytes": 359712,
+    "duration": 21.24,
+    "bytes": 254880,
     "verify_status": 206,
-    "last_modified": "Wed, 02 Sep 2026 18:41:38 GMT"
+    "last_modified": "Sun, 06 Sep 2026 09:19:11 GMT"
    },
    {
     "lesson": 1,
@@ -22,10 +191,120 @@
     "duration": 16.63,
     "bytes": 199584,
     "verify_status": 206,
-    "last_modified": "Wed, 02 Sep 2026 18:41:41 GMT"
+    "last_modified": "Sun, 06 Sep 2026 09:19:13 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n11",
+    "key": "design-technology-eduqas/timber-in-depth/narration_lesson-02_n11.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/timber-in-depth/narration_lesson-02_n11.mp3",
+    "voice": "Ada",
+    "duration": 21.77,
+    "bytes": 261216,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 09:19:18 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n25",
+    "key": "design-technology-eduqas/timber-in-depth/narration_lesson-02_n25.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/timber-in-depth/narration_lesson-02_n25.mp3",
+    "voice": "Ada",
+    "duration": 24.94,
+    "bytes": 299232,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 09:19:24 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n29",
+    "key": "design-technology-eduqas/timber-in-depth/narration_lesson-02_n29.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/timber-in-depth/narration_lesson-02_n29.mp3",
+    "voice": "Ada",
+    "duration": 19.75,
+    "bytes": 237024,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 09:19:28 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n30",
+    "key": "design-technology-eduqas/timber-in-depth/narration_lesson-02_n30.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/timber-in-depth/narration_lesson-02_n30.mp3",
+    "voice": "Ada",
+    "duration": 18.6,
+    "bytes": 223200,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 09:19:32 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n3",
+    "key": "design-technology-eduqas/timber-in-depth/narration_lesson-04_n3.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/timber-in-depth/narration_lesson-04_n3.mp3",
+    "voice": "Ada",
+    "duration": 2.06,
+    "bytes": 24768,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 09:19:34 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n4",
+    "key": "design-technology-eduqas/timber-in-depth/narration_lesson-04_n4.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/timber-in-depth/narration_lesson-04_n4.mp3",
+    "voice": "Ada",
+    "duration": 21.55,
+    "bytes": 258624,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 09:19:40 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n12",
+    "key": "design-technology-eduqas/timber-in-depth/narration_lesson-04_n12.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/timber-in-depth/narration_lesson-04_n12.mp3",
+    "voice": "Ada",
+    "duration": 1.7,
+    "bytes": 20448,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 09:19:41 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n15",
+    "key": "design-technology-eduqas/timber-in-depth/narration_lesson-04_n15.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/timber-in-depth/narration_lesson-04_n15.mp3",
+    "voice": "Ada",
+    "duration": 18.55,
+    "bytes": 222624,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 09:19:46 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n28",
+    "key": "design-technology-eduqas/timber-in-depth/narration_lesson-04_n28.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/timber-in-depth/narration_lesson-04_n28.mp3",
+    "voice": "Ada",
+    "duration": 18.91,
+    "bytes": 226944,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 09:19:50 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n26",
+    "key": "design-technology-eduqas/timber-in-depth/narration_lesson-05_n26.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/design-technology-eduqas/timber-in-depth/narration_lesson-05_n26.mp3",
+    "voice": "Ollie",
+    "duration": 24.0,
+    "bytes": 288000,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 09:19:55 GMT"
    }
   ],
-  "verified_ok": 2,
-  "total": 2
+  "verified_ok": 12,
+  "total": 12
  }
 }
