@@ -3807,11 +3807,23 @@ function initListeningLesson() {
     var listenDur = 0;
     Array.prototype.forEach.call(fig.querySelectorAll('.sv-ap-trackbtn'), function (b) { listenDur += parseFloat(b.getAttribute('data-dur')) || 0; });
     if (!listenDur) listenDur = parseFloat(fig.getAttribute('data-dur')) || 0;
+    setTimeout(function () {
+      var lb0 = stage.querySelector('.sv-finish-actions [data-act="listen"]');
+      if (lb0 && listenDur && seenCount && !lb0.classList.contains('is-done')) {
+        lb0.textContent = 'Listen to the whole piece · ' + Math.min(100, Math.round(seenCount / listenDur * 100)) + '% heard';
+      }
+    }, 1500);
     setInterval(function () {
       if (!fig._ap || fig._ap.paused()) return;
       var on = fig.querySelector('.sv-ap-trackbtn--on');
       var key = (on ? on.getAttribute('data-track') : 't') + ':' + Math.floor(fig._ap.time());
       if (!seen[key]) { seen[key] = 1; seenCount++; }
+      // show the rule on the finish button: heard so far, as a share of the piece
+      var lbtn = stage.querySelector('.sv-finish-actions [data-act="listen"]');
+      if (lbtn && listenDur && !lbtn.classList.contains('is-done')) {
+        var heard = Math.min(100, Math.round(seenCount / listenDur * 100));
+        lbtn.textContent = 'Listen to the whole piece · ' + heard + '% heard';
+      }
       if (++tickN % 10 === 0) { try { localStorage.setItem(seenKey, JSON.stringify(Object.keys(seen))); } catch (e) {} }
       if (!listenFired && listenDur && seenCount >= 0.85 * listenDur) {
         listenFired = true;
