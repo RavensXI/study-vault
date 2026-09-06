@@ -9347,11 +9347,31 @@ body.sv-listening-mode .conclusion, body.sv-listening-mode .sv-legal-footer { di
 .sv-ll-prev { left: 20px; } .sv-ll-next { right: 20px; }
 .sv-ll-arrow:hover { background: #2d2a26; color: #fff; }
 .sv-ll-arrow:disabled { opacity: 0.25; pointer-events: none; }
-.sv-card--finish { display: flex; flex-direction: column; justify-content: center; text-align: center; }
+.sv-card--finish { display: flex; flex-direction: column; justify-content: safe center; text-align: center; }
 .sv-finish-actions { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; margin-top: 1.2rem; }
 .sv-finish-actions button { font: 600 0.95rem Inter, sans-serif; padding: 0.85rem 1.6rem;
   border: 1.5px solid #2d2a26; border-radius: 12px; background: #fff; cursor: pointer; transition: all 0.15s; }
 .sv-finish-actions button:hover { background: #2d2a26; color: #fff; }
+.sv-finish-progress { max-width: 440px; margin: 1.5rem auto 0; text-align: left; }
+.sv-finish-progress .sidebar-progress-section { padding: 0; background: transparent; border: 0; box-shadow: none; }
+.sv-finish-progress .sidebar-section-title { font: 600 0.78rem Inter, sans-serif; letter-spacing: 0.08em;
+  text-transform: uppercase; opacity: 0.6; margin-bottom: 0.6rem; text-align: center; }
+.sv-finish-progress .lesson-progress-card { gap: 0.45rem; }
+.sv-finish-progress .lesson-progress-item { padding: 0.45rem 0.6rem; }
+.sv-finish-note { font: 400 0.8rem/1.45 Inter, sans-serif; opacity: 0.7; text-align: center; margin: 0.7rem 0 0; }
+/* Inside the finish card the checklist reads as a list with labels, not the
+   reader skin's icon rail (which hides labels and ticks to fit the panel). */
+body[data-skin="reader"] .sv-finish-progress .lesson-progress-card { flex-direction: column; align-items: stretch; gap: 0.45rem; }
+body[data-skin="reader"] .sv-finish-progress .lesson-progress-item { display: flex; width: auto; opacity: 1;
+  padding: 0.45rem 0.6rem; border: 1px solid var(--border-light) !important; background: var(--bg-card) !important; border-radius: 10px; }
+body[data-skin="reader"] .sv-finish-progress .lesson-progress-item.completed { border-color: #16a34a !important; }
+body[data-skin="reader"] .sv-finish-progress .lesson-progress-label { display: inline; font-size: 0.9rem; }
+body[data-skin="reader"] .sv-finish-progress .lesson-progress-check { display: flex; }
+body[data-skin="reader"] .sv-finish-progress .lesson-progress-icon { width: 20px; height: auto; }
+body[data-skin="reader"] .sv-finish-progress .lesson-progress-bar { order: 8; margin-top: 0.4rem; }
+/* tasks a listening page cannot offer (no lightbulbs, no highlighter) */
+body.sv-listening-mode .lesson-progress-item[data-task="revision-task"],
+body.sv-listening-mode .lesson-progress-item[data-task="highlight-mode"] { display: none; }
 .sv-ap-tutor { font: 600 0.78rem Inter, sans-serif; padding: 0.35rem 0.8rem; margin-left: 0.8rem;
   border: 1.5px solid #2d2a26; border-radius: 999px; background: #fff; cursor: pointer; flex: none; }
 .sv-ap-tutor:hover { background: #2d2a26; color: #fff; }

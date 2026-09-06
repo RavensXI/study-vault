@@ -2712,8 +2712,11 @@ function initLessonProgress() {
     });
   }
 
-  // Revision task
-  tasks.push({ id: 'revision-task', label: 'Complete a revision task', icon: icons.revision, iconClass: 'lesson-progress-icon--revision', auto: false });
+  // Revision task — not on listening pages, which have no lightbulbs; it
+  // would sit in the denominator as a task the student can never do.
+  if (!document.querySelector('.sv-listening')) {
+    tasks.push({ id: 'revision-task', label: 'Complete a revision task', icon: icons.revision, iconClass: 'lesson-progress-icon--revision', auto: false });
+  }
 
   // Highlight mode — clicking enters mode (sets sv-hl-mode flag, switches
   // cursor to a marker pen, lets the student drag-select to highlight).
@@ -3550,6 +3553,20 @@ function initListeningLesson() {
     '<button type="button" data-act="practice">Practice questions</button></div>';
   stage.appendChild(fin);
   cards.push(fin);
+  // The lesson checklist is built into the sidebar, which listening mode
+  // hides. Adopt the SAME node into the finish card so main.js keeps ticking
+  // it live (Tom, 6 Sep 2026). It may be built after us: retry briefly.
+  (function adoptChecklist(n) {
+    var sec = document.querySelector('.sidebar-progress-section');
+    if (!sec) { if (n > 0) setTimeout(function () { adoptChecklist(n - 1); }, 250); return; }
+    if (sec.closest('.sv-card--finish')) return;
+    var wrap = document.createElement('div'); wrap.className = 'sv-finish-progress';
+    wrap.appendChild(sec);
+    var note = document.createElement('p'); note.className = 'sv-finish-note';
+    note.textContent = 'Each activity counts towards completion. The lesson is complete once you have done half of what it offers.';
+    wrap.appendChild(note);
+    fin.appendChild(wrap);
+  })(16);
   fin.querySelector('.sv-finish-actions').addEventListener('click', function (e) {
     var b = e.target.closest('button');
     if (!b) return;
