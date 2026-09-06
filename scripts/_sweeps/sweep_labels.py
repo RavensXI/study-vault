@@ -559,9 +559,19 @@ def git(args):
                           encoding="utf-8", errors="replace")
 
 
-def run_subject(slug, sid, unit_ids, dry, narrate, totals, worklist, narrated_hits):
+def subject_key(s, dupes):
+    """Three slugs (computer-science, design-technology, separate-sciences) exist
+    TWICE: a Unity row and a free-tier row. Keying resume state or backup files
+    on the slug alone silently skips the second row, so disambiguate."""
+    if s["slug"] not in dupes:
+        return s["slug"]
+    return f"{s['slug']}__{'school' if s.get('school_id') else 'free'}"
+
+
+def run_subject(slug, sid, unit_ids, dry, narrate, totals, worklist, narrated_hits, key=None):
+    key = key or slug
     rows = fetch_lessons(unit_ids)
-    st = {"subject": slug, "lessons_scanned": len(rows), "band_renames": 0, "band_questions": 0,
+    st = {"subject": slug, "key": key, "lessons_scanned": len(rows), "band_renames": 0, "band_questions": 0,
           "tag_fixes": 0, "ev_rewrites": 0, "rows_changed": 0, "rows_skipped_validator": 0,
           "skipped": False, "reason": None, "renarrated_clips": None}
     plan = []
@@ -603,7 +613,7 @@ def run_subject(slug, sid, unit_ids, dry, narrate, totals, worklist, narrated_hi
     backup = {"subject": slug, "subject_id": sid,
               "lessons": [{"id": r["id"], "lesson_number": r.get("lesson_number"), "before": b}
                           for r, _p, b in plan]}
-    with open(os.path.join(OUT, f"_backup_{slug}.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(OUT, f"_backup_{key}.json"), "w", encoding="utf-8") as f:
         json.dump(backup, f, ensure_ascii=False, indent=1)
 
     for r, patch, _b in plan:
@@ -623,7 +633,7 @@ def run_subject(slug, sid, unit_ids, dry, narrate, totals, worklist, narrated_hi
         else:
             st.setdefault("tips_without_audio", []).append(r["id"])
     if tip_rows and narrate:
-        nb = os.path.join(OUT, f"{slug}_backup.json")
+        nb = os.path.join(OUT, f"{key}_backup.json")
         with open(nb, "w", encoding="utf-8") as f:
             json.dump({"subject": slug, "unit": "label-sweep",
                        "lessons": [{"id": r["id"], "lesson_number": r["lesson_number"],
@@ -654,6 +664,8 @@ def main():
         ap.error("pass --subject <slug> or --all")
 
     subs, units_by_subject = load_index()
+    import collections as _c
+    dupes = {k for k, v in _c.Counter(x["slug"] for x in subs).items() if v > 1}
     if args.subject:
         subs = [s for s in subs if s["slug"] == args.subject]
         if not subs:
@@ -668,15 +680,16 @@ def main():
         done = set(json.load(open(done_path, encoding="utf-8")))
 
     for s in subs:
-        if s["slug"] in done:
-            print(f"-- {s['slug']}: already done, skipping")
+        skey = subject_key(s, dupes)
+        if skey in done:
+            print(f"-- {skey}: already done, skipping")
             continue
         uids = units_by_subject.get(s["id"], [])
         if not uids:
             continue
         st, plan = run_subject(s["slug"], s["id"], uids, args.dry_run,
-                               not args.no_narrate, totals, worklist, narrated_hits)
-        print(f"{'[dry] ' if args.dry_run else ''}{s['slug']}: {st['lessons_scanned']} live, "
+                               not args.no_narrate, totals, worklist, narrated_hits, key=skey)
+        print(f"{'[dry] ' if args.dry_run else ''}{skey}: {st['lessons_scanned']} live, "
               f"{st['band_renames']} band renames ({st['band_questions']} q), {st['tag_fixes']} tag fixes, "
               f"{st['ev_rewrites']} examiner rewrites, {st['rows_changed']} rows patched"
               + (f", SKIPPED: {st['reason']}" if st["skipped"] else "")
@@ -685,12 +698,12 @@ def main():
               flush=True)
         if not args.dry_run and plan and not args.no_commit:
             git(["add", "scripts/_sweeps"])
-            msg = (f"Label sweep: {s['slug']} - {st['band_renames']} band renames, "
+            msg = (f"Label sweep: {skey} - {st['band_renames']} band renames, "
                    f"{st['tag_fixes']} tag fixes, {st['ev_rewrites']} examiner-voice rewrites\n\n"
                    "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>")
             git(["commit", "-q", "-m", msg])
         if not args.dry_run:
-            done.add(s["slug"])
+            done.add(skey)
             with open(done_path, "w", encoding="utf-8") as f:
                 json.dump(sorted(done), f, indent=1)
 
