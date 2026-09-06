@@ -8,7 +8,7 @@ Outputs: units/<subject>__<unit>/_video_check.json (unit summary), _video_check.
 to scripts/_retrofc/_video_regen_worklist.json (the list of explainer videos to regenerate; one entry per lesson,
 replaced if re-checked). Uses the interpreter it is launched with (must be _venv_genai).
 """
-import json, os, subprocess, sys, time, urllib.request
+import json, msvcrt, os, subprocess, sys, time, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 subject, unit = sys.argv[1], sys.argv[2]
@@ -60,8 +60,15 @@ summary = {"subject": subject, "unit": unit, "checked_at": time.strftime("%Y-%m-
            "flagged": [{"lesson": x["lesson"], "title": x["title"], "reason": x["reason"], "mark_affecting": x["mark_affecting"]} for x in flagged]}
 json.dump(summary, open(os.path.join(udir, "_video_check.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
-# bank the worklist (one entry per lesson, replaced on re-check)
+# bank the worklist (one entry per lesson, replaced on re-check). Exclusive lock (6 Sep 2026): several unit checks
+# can finish at once during the back-fill, and an unlocked read-modify-write would drop a unit's entries.
 wp = os.path.join(HERE, "_video_regen_worklist.json")
+lk = open(wp + ".lock", "a+")
+for _ in range(600):   # up to 60 s
+    try:
+        msvcrt.locking(lk.fileno(), msvcrt.LK_NBLCK, 1); break
+    except OSError:
+        time.sleep(0.1)
 wl = json.load(open(wp, encoding="utf-8")) if os.path.exists(wp) else {"items": [], "units_checked": []}
 wl["items"] = [i for i in wl["items"] if not (i["subject"] == subject and i["unit"] == unit)]
 for x in flagged:
@@ -72,5 +79,12 @@ wl["units_checked"].append({"subject": subject, "unit": unit, "videos": len(chec
                             "cost_p": summary["total_cost_p"], "checked_at": summary["checked_at"]})
 wl["totals"] = {"units": len(wl["units_checked"]), "videos": sum(u["videos"] for u in wl["units_checked"]),
                 "regenerate": len(wl["items"]), "cost_p": round(sum(u["cost_p"] for u in wl["units_checked"]), 1)}
-json.dump(wl, open(wp, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+tmp = wp + f".tmp{os.getpid()}"
+json.dump(wl, open(tmp, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+os.replace(tmp, wp)
+try:
+    msvcrt.locking(lk.fileno(), msvcrt.LK_UNLCK, 1)
+except OSError:
+    pass
+lk.close()
 say(f"DONE {subject}/{unit}: {len(checked)} videos, {len(flagged)} to regenerate, {summary['total_cost_p']}p; worklist now {wl['totals']}")
