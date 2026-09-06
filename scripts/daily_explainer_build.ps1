@@ -114,7 +114,7 @@ if (Test-Path $lastLaunchFile) {
 Write-Log "=== Daily explainer build START ==="
 
 # Bail early if queue is empty so we don't burn API time
-$dry = Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--daily-cap", "35", "--dry-run") -TimeoutMin 10
+$dry = Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--daily-cap", "100", "--dry-run") -TimeoutMin 10
 if ($dry -match "No lessons pending") {
     Write-Log "Queue empty. Done."
     Write-Log "=== END ==="
@@ -130,7 +130,7 @@ try {
 
 # Phase 1: launch up to 180 new generations
 Write-Log "Phase 1: launching..."
-Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--daily-cap", "35") | Out-Null
+Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--daily-cap", "100") | Out-Null
 
 # Phase 2: poll up to 4 hours, downloading completed jobs as they come in.
 # Smoke test showed ~20 min cook time for 10 lessons; 180 should land well under 1h.
