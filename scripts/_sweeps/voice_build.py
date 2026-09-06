@@ -21,12 +21,14 @@ try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except (AttributeError, OSError):
     pass
+# the spec arrives on stdin and carries curly quotes / en dashes verbatim
+spec_text = sys.stdin.buffer.read().decode("utf-8")
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "voice")
 
 slug = sys.argv[1]
-spec = json.load(sys.stdin)
+spec = json.loads(spec_text)
 recs = {r["n"]: r for r in json.load(open(os.path.join(OUT, f"_raw_{slug}.json"), encoding="utf-8"))}
 
 edits, problems = [], []
