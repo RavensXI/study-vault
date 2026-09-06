@@ -1,667 +1,2075 @@
 {
- "_readme": "Exam-board share of GCSE entries, keyed by build-status subject-family slug. Shares are DERIVED: the four boards each publish their own per-specification entry counts, and the share is that board's entries over the four-board sum. No board or regulator publishes a share directly. Ofqual's entries release carries England subject totals only, with no awarding-organisation column. A family absent from `shares` is reported as 'share unknown' and uses a flagged equal split - never an invented figure. The WJEC key is 0 throughout: WJEC specs are Qualifications Wales-regulated and not available to centres in England; the Eduqas figure is the England arm.",
- "_sources": {
-  "aqa2026": {
+ "_readme": "Exam-board share of GCSE entries by build-status subject-family slug. PRIMARY column is June 2025 - the same exam series the DfE 2024/25 KS4 dataset counts. `boards` holds the 2025 shares used for every calculation; `boards_2026` and `delta_pp` show the direction of travel only. Shares are DERIVED: each board publishes its own per-specification entries and the share is that board's entries over the England-accessible board sum. No board or regulator publishes a share. WJEC is excluded throughout: its specs are Qualifications Wales-regulated and not available to centres in England.",
+ "_sources_2025": {
+  "AQA": {
+   "title": "AQA - GCSE Results statistics June 2025 (provisional)",
+   "url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "page": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
+   "specs": 44
+  },
+  "Edexcel": {
+   "title": "Pearson - Grade Statistics (Provisional), June 2025 GCSE (9-1) Specifications, UK Only (withdrawn from pearson.com; served from the Internet Archive snapshot of 31 Jan 2026)",
+   "url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "page": "https://qualifications.pearson.com/en/support/support-topics/results-certification/grade-statistics.html",
+   "specs": 44
+  },
+  "OCR": {
+   "title": "OCR - GCSE, Cambridge Nationals and Entry Level provisional results statistics, June 2025",
+   "url": "https://www.ocr.org.uk/Images/739518-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2025.pdf",
+   "page": "https://www.ocr.org.uk/administration/results-and-post-results/results/",
+   "specs": 39
+  },
+  "Eduqas": {
+   "title": "WJEC Eduqas - Provisional GCSE Results June 2025",
+   "url": "https://www.eduqas.co.uk/media/a33nq5bz/eduqas-gcse-provisional-results-2025.pdf",
+   "page": "https://www.eduqas.co.uk/home/results-and-grade-boundaries/",
+   "specs": 29
+  }
+ },
+ "_sources_2026": {
+  "AQA": {
    "title": "AQA - GCSE Results statistics June 2026 (provisional)",
    "url": "https://www.aqa.org.uk/files/O4uKDQoYRUXkVFZ2MUl0F7/ed0a9ba76dcc3378655f3765543b96275f9fdc7e.xlsx",
    "page": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "verified": "2026-09-06, per-spec entry column read directly from the workbook"
+   "specs": 44
   },
-  "pearson2026": {
+  "Edexcel": {
    "title": "Pearson - Grade Statistics (Provisional), June 2026 GCSE (9-1) Specifications, UK Only",
-   "url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf"
+   "url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
+   "page": "https://qualifications.pearson.com/en/support/support-topics/results-certification/grade-statistics.html",
+   "specs": 44
   },
-  "ocr2026": {
+  "OCR": {
    "title": "OCR - GCSE, Cambridge Nationals and Entry Level provisional results statistics, June 2026",
-   "url": "https://ocr.org.uk/Images/760870-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2026.pdf"
+   "url": "https://ocr.org.uk/Images/760870-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2026.pdf",
+   "page": "https://www.ocr.org.uk/administration/results-and-post-results/results/",
+   "specs": 39
   },
-  "eduqas2026": {
+  "Eduqas": {
    "title": "WJEC Eduqas - Provisional GCSE Results June 2026",
-   "url": "https://www.eduqas.co.uk/media/5mvobewy/gcse-eduqas-provisional-results-june-2026.pdf"
-  },
-  "ofqual2026": {
-   "title": "Ofqual - Data tables for provisional entries for GCSE, AS and A level: summer 2026 (England totals only, used as a cross-check)",
-   "url": "https://assets.publishing.service.gov.uk/media/6a26cb1056e988a798b387a5/Data_tables_for_provisional_entries_for_GCSE_AS_and_A_level_summer_2026.ods",
-   "release": "https://www.gov.uk/government/statistics/provisional-entries-for-gcse-as-and-a-level-summer-2026-exam-series"
-  },
-  "internal": {
-   "title": "StudyVault memory note - GCSE Exam Board Market Share (2024/25)",
-   "url": "memory/exam-market-share.md"
+   "url": "https://www.eduqas.co.uk/media/5mvobewy/gcse-eduqas-provisional-results-june-2026.pdf",
+   "page": "https://www.eduqas.co.uk/home/results-and-grade-boundaries/",
+   "specs": 26
   }
  },
  "_caveats": [
-  "Shares are the June 2026 series; the entry counts they are applied to are DfE 2024/25. Board share moves slowly, but the two years are not the same year.",
-  "Geographic scope differs slightly by board: Pearson publishes UK only; AQA, OCR and Eduqas publish all their entries. Cross-checked against the Ofqual England totals, coverage is 0.97-1.02 for every subject with an Ofqual row.",
-  "Figures are provisional, before enquiries about results.",
-  "Eduqas withdrew French, German and Spanish after 2025. OCR does not offer modern foreign languages at all."
+  "Cohort aligned: June 2025 shares against DfE 2024/25 (summer 2025) entries. The 2026 column is a different cohort and is never used in a calculation.",
+  "Geographic scope differs slightly by board: Pearson publishes HOME candidates; AQA, OCR and Eduqas publish all their entries. The DfE cross-check quantifies the effect per subject.",
+  "Board figures are provisional, before enquiries about results.",
+  "Reformed MFL specifications changed code for June 2026 (AQA 8658 to 8652, Pearson 1FR0 to 1FR1 and so on). The 2025 entries sit on the outgoing code; both are joined here.",
+  "Eduqas short-course tables are excluded: the DfE query covers full course only."
  ],
  "shares": {
-  "english-literature": {
-   "source_label": "internal note, 2024/25 (no board-level source found for English)",
-   "source_url": "memory/exam-board-market-share.md",
-   "boards": {
-    "AQA": 0.817,
-    "Eduqas": 0.097,
-    "Edexcel": 0.076,
-    "OCR": 0.01,
-    "WJEC": 0.0
-   }
-  },
-  "english-language": {
-   "source_label": "internal note, 2024/25 (no board-level source found for English)",
-   "source_url": "memory/exam-board-market-share.md",
-   "boards": {
-    "AQA": 0.8,
-    "Eduqas": 0.12,
-    "Edexcel": 0.07,
-    "OCR": 0.01,
-    "WJEC": 0.0
-   }
-  },
-  "mathematics": {
-   "source_label": "internal note, 2024/25 (no board-level source found for Maths)",
-   "source_url": "memory/exam-board-market-share.md",
-   "boards": {
-    "Edexcel": 0.625,
-    "AQA": 0.32,
-    "OCR": 0.04,
-    "Eduqas": 0.015,
-    "WJEC": 0.0
-   }
-  },
-  "combined-science": {
-   "source_label": "derived from the four boards' June 2026 results statistics",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.839,
-    "Edexcel": 0.128,
-    "OCR": 0.032,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "biology": {
-   "source_label": "derived from the four boards' June 2026 results statistics",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.828,
-    "Edexcel": 0.121,
-    "OCR": 0.051,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "chemistry": {
-   "source_label": "derived from the four boards' June 2026 results statistics",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.827,
-    "Edexcel": 0.122,
-    "OCR": 0.051,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "physics": {
-   "source_label": "derived from the four boards' June 2026 results statistics",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.829,
-    "Edexcel": 0.121,
-    "OCR": 0.05,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "geography": {
-   "source_label": "derived from the four boards' June 2026 results statistics (AQA 202,653 / Edexcel 44,989 / OCR 24,869 / Eduqas 14,334)",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.706,
-    "Edexcel": 0.157,
-    "OCR": 0.087,
-    "Eduqas": 0.05,
-    "WJEC": 0.0
-   }
-  },
-  "history": {
-   "source_label": "derived from the four boards' June 2026 results statistics (Edexcel 169,307 / AQA 91,075 / OCR 20,544 / Eduqas 9,725)",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
-   "boards": {
-    "Edexcel": 0.583,
-    "AQA": 0.313,
-    "OCR": 0.071,
-    "Eduqas": 0.033,
-    "WJEC": 0.0
-   }
-  },
-  "religious-studies": {
-   "source_label": "derived from the four boards' June 2026 results statistics, full course only (AQA 127,465 / Eduqas 49,204 / Edexcel 39,538 / OCR 3,148)",
-   "source_url": "https://www.eduqas.co.uk/media/5mvobewy/gcse-eduqas-provisional-results-june-2026.pdf",
-   "boards": {
-    "AQA": 0.581,
-    "Eduqas": 0.224,
-    "Edexcel": 0.18,
-    "OCR": 0.014,
-    "WJEC": 0.0
-   }
-  },
-  "religious-education": {
-   "source_label": "derived from the four boards' June 2026 results statistics, full course only",
-   "source_url": "https://www.eduqas.co.uk/media/5mvobewy/gcse-eduqas-provisional-results-june-2026.pdf",
-   "boards": {
-    "AQA": 0.581,
-    "Eduqas": 0.224,
-    "Edexcel": 0.18,
-    "OCR": 0.014,
-    "WJEC": 0.0
-   }
-  },
-  "computer-science": {
-   "source_label": "derived from the four boards' June 2026 results statistics (OCR 61,312 / AQA 11,838 / Edexcel 9,764 / Eduqas 587)",
-   "source_url": "https://ocr.org.uk/Images/760870-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2026.pdf",
-   "boards": {
-    "OCR": 0.734,
-    "AQA": 0.142,
-    "Edexcel": 0.117,
-    "Eduqas": 0.007,
-    "WJEC": 0.0
-   }
-  },
-  "business": {
-   "source_label": "derived from the four boards' June 2026 results statistics (Edexcel 80,789 / AQA 29,632 / OCR 25,121 / Eduqas 4,765)",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
-   "boards": {
-    "Edexcel": 0.576,
-    "AQA": 0.211,
-    "OCR": 0.179,
-    "Eduqas": 0.034,
-    "WJEC": 0.0
-   }
-  },
-  "business-studies": {
-   "source_label": "derived from the four boards' June 2026 results statistics",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
-   "boards": {
-    "Edexcel": 0.576,
-    "AQA": 0.211,
-    "OCR": 0.179,
-    "Eduqas": 0.034,
-    "WJEC": 0.0
-   }
-  },
-  "psychology": {
-   "source_label": "derived from the three boards offering it, June 2026 (AQA 12,019 / OCR 5,709 / Edexcel 3,767)",
-   "source_url": "https://ocr.org.uk/Images/760870-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2026.pdf",
-   "boards": {
-    "AQA": 0.559,
-    "OCR": 0.266,
-    "Edexcel": 0.175,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "sociology": {
-   "source_label": "derived from the two boards offering it, June 2026 (AQA 23,593 / Eduqas 8,996)",
-   "source_url": "https://www.eduqas.co.uk/media/5mvobewy/gcse-eduqas-provisional-results-june-2026.pdf",
-   "boards": {
-    "AQA": 0.724,
-    "Eduqas": 0.276,
-    "Edexcel": 0.0,
-    "OCR": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "media-studies": {
-   "source_label": "derived from the three boards offering it, June 2026 (Eduqas 19,791 / AQA 5,484 / OCR 3,588)",
-   "source_url": "https://www.eduqas.co.uk/media/5mvobewy/gcse-eduqas-provisional-results-june-2026.pdf",
-   "boards": {
-    "Eduqas": 0.686,
-    "AQA": 0.19,
-    "OCR": 0.124,
-    "Edexcel": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "music": {
-   "source_label": "derived from the four boards' June 2026 results statistics (Eduqas 14,367 / Edexcel 7,972 / OCR 7,290 / AQA 4,449)",
-   "source_url": "https://www.eduqas.co.uk/media/5mvobewy/gcse-eduqas-provisional-results-june-2026.pdf",
-   "boards": {
-    "Eduqas": 0.422,
-    "Edexcel": 0.234,
-    "OCR": 0.214,
-    "AQA": 0.131,
-    "WJEC": 0.0
-   }
-  },
-  "drama": {
-   "source_label": "derived from the four boards' June 2026 results statistics (AQA 18,629 / Eduqas 12,840 / Edexcel 10,820 / OCR 6,026)",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.386,
-    "Eduqas": 0.266,
-    "Edexcel": 0.224,
-    "OCR": 0.125,
-    "WJEC": 0.0
-   }
-  },
-  "design-and-technology": {
-   "source_label": "derived from the four boards' June 2026 results statistics (AQA 51,236 / Eduqas 10,965 / Edexcel 9,584 / OCR 4,796)",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.669,
-    "Eduqas": 0.143,
-    "Edexcel": 0.125,
-    "OCR": 0.063,
-    "WJEC": 0.0
-   }
-  },
-  "food-preparation-and-nutrition": {
-   "source_label": "derived from the three boards offering it, June 2026 (AQA 31,938 / Eduqas 18,117 / OCR 4,562)",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.585,
-    "Eduqas": 0.332,
-    "OCR": 0.084,
-    "Edexcel": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "food-and-nutrition": {
-   "source_label": "derived from the three boards offering it, June 2026",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.585,
-    "Eduqas": 0.332,
-    "OCR": 0.084,
-    "Edexcel": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "physical-education": {
-   "source_label": "derived from the four boards' June 2026 results statistics, full course only (AQA 38,175 / OCR 23,542 / Edexcel 19,555 / Eduqas 2,022)",
-   "source_url": "https://ocr.org.uk/Images/760870-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2026.pdf",
-   "boards": {
-    "AQA": 0.458,
-    "OCR": 0.283,
-    "Edexcel": 0.235,
-    "Eduqas": 0.024,
-    "WJEC": 0.0
-   }
-  },
-  "citizenship-studies": {
-   "source_label": "derived from the three boards offering it, June 2026 (AQA 11,470 / Edexcel 7,948 / OCR 2,160)",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.532,
-    "Edexcel": 0.368,
-    "OCR": 0.1,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "french": {
-   "source_label": "derived from the two boards offering it in 2026 (AQA 68,706 / Edexcel 52,159). Eduqas withdrew French after 2025; OCR does not offer MFL.",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.568,
-    "Edexcel": 0.432,
-    "Eduqas": 0.0,
-    "OCR": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "spanish": {
-   "source_label": "derived from the two boards offering it in 2026 (AQA 75,073 / Edexcel 57,387). Eduqas withdrew Spanish after 2025.",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.567,
-    "Edexcel": 0.433,
-    "Eduqas": 0.0,
-    "OCR": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "german": {
-   "source_label": "derived from the two boards offering it in 2026 (AQA 17,301 / Edexcel 15,163). Eduqas withdrew German after 2025.",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.533,
-    "Edexcel": 0.467,
-    "Eduqas": 0.0,
-    "OCR": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "statistics": {
-   "source_label": "derived from the two boards offering it, June 2026 (Edexcel 31,836 / AQA 6,332)",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
-   "boards": {
-    "Edexcel": 0.834,
-    "AQA": 0.166,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "film-studies": {
-   "source_label": "single-board subject: Eduqas only, 6,283 entries June 2026",
-   "source_url": "https://www.eduqas.co.uk/media/5mvobewy/gcse-eduqas-provisional-results-june-2026.pdf",
-   "boards": {
-    "Eduqas": 1.0,
-    "AQA": 0.0,
-    "Edexcel": 0.0,
-    "OCR": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "classical-civilisation": {
-   "source_label": "single-board subject: OCR only, 4,708 entries June 2026",
-   "source_url": "https://ocr.org.uk/Images/760870-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2026.pdf",
-   "boards": {
-    "OCR": 1.0,
-    "AQA": 0.0,
-    "Edexcel": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "latin": {
-   "source_label": "derived from the two boards offering it, June 2026 (OCR 4,679 / Eduqas 3,291)",
-   "source_url": "https://ocr.org.uk/Images/760870-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2026.pdf",
-   "boards": {
-    "OCR": 0.587,
-    "Eduqas": 0.413,
-    "AQA": 0.0,
-    "Edexcel": 0.0,
-    "WJEC": 0.0
-   }
-  },
   "ancient-history": {
-   "source_label": "single-board subject: OCR only, 1,627 entries June 2026",
-   "source_url": "https://ocr.org.uk/Images/760870-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2026.pdf",
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (OCR 1,553)",
+   "source_url": "https://www.ocr.org.uk/Images/739518-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2025.pdf",
+   "board_entries_2025": {
+    "OCR": 1553
+   },
+   "board_total_2025": 1553,
    "boards": {
+    "AQA": 0.0,
+    "Edexcel": 0.0,
     "OCR": 1.0,
-    "AQA": 0.0,
-    "Edexcel": 0.0,
     "Eduqas": 0.0,
     "WJEC": 0.0
-   }
-  },
-  "classical-greek": {
-   "source_label": "single-board subject: OCR only, 839 entries June 2026",
-   "source_url": "https://ocr.org.uk/Images/760870-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2026.pdf",
-   "boards": {
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 0.0,
     "OCR": 1.0,
-    "AQA": 0.0,
-    "Edexcel": 0.0,
     "Eduqas": 0.0,
     "WJEC": 0.0
-   }
-  },
-  "astronomy": {
-   "source_label": "single-board subject: Edexcel only, 1,024 entries June 2026",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
-   "boards": {
-    "Edexcel": 1.0,
-    "AQA": 0.0,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "geology": {
-   "source_label": "single-board subject: Eduqas only, 500 entries June 2026",
-   "source_url": "https://www.eduqas.co.uk/media/5mvobewy/gcse-eduqas-provisional-results-june-2026.pdf",
-   "boards": {
-    "Eduqas": 1.0,
-    "AQA": 0.0,
-    "Edexcel": 0.0,
-    "OCR": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "electronics": {
-   "source_label": "single-board subject: Eduqas only, 827 entries June 2026",
-   "source_url": "https://www.eduqas.co.uk/media/5mvobewy/gcse-eduqas-provisional-results-june-2026.pdf",
-   "boards": {
-    "Eduqas": 1.0,
-    "AQA": 0.0,
-    "Edexcel": 0.0,
-    "OCR": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "engineering": {
-   "source_label": "single-board subject: AQA only, 2,137 entries June 2026",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 1.0,
-    "Edexcel": 0.0,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "economics": {
-   "source_label": "derived from the two boards offering it, June 2026 (OCR 4,254 / AQA 3,197)",
-   "source_url": "https://ocr.org.uk/Images/760870-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2026.pdf",
-   "boards": {
-    "OCR": 0.571,
-    "AQA": 0.429,
-    "Edexcel": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "chinese": {
-   "source_label": "derived from the two boards offering it, June 2026 (AQA Chinese Spoken Mandarin 4,052 / Edexcel Chinese 3,853)",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.513,
-    "Edexcel": 0.487,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "chinese-mandarin": {
-   "source_label": "derived from the two boards offering it, June 2026 (AQA 4,052 / Edexcel 3,853)",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.513,
-    "Edexcel": 0.487,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "italian": {
-   "source_label": "derived from the two boards offering it, June 2026 (AQA 2,266 / Edexcel 960)",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.702,
-    "Edexcel": 0.298,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "urdu": {
-   "source_label": "derived from the two boards offering it, June 2026 (AQA 2,556 / Edexcel 1,647)",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 0.608,
-    "Edexcel": 0.392,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "polish": {
-   "source_label": "single-board subject: AQA only, 8,597 entries June 2026",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 1.0,
-    "Edexcel": 0.0,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "bengali": {
-   "source_label": "single-board subject: AQA only, 325 entries June 2026",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 1.0,
-    "Edexcel": 0.0,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "panjabi": {
-   "source_label": "single-board subject: AQA only, 1,021 entries June 2026",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 1.0,
-    "Edexcel": 0.0,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "hebrew": {
-   "source_label": "single-board subject: AQA Modern Hebrew only, 739 entries June 2026",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 1.0,
-    "Edexcel": 0.0,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "hebrew-modern": {
-   "source_label": "single-board subject: AQA Modern Hebrew only, 739 entries June 2026",
-   "source_url": "https://www.aqa.org.uk/exams-administration/results-days/results-statistics",
-   "boards": {
-    "AQA": 1.0,
-    "Edexcel": 0.0,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
+   },
+   "board_entries_2026": {
+    "OCR": 1627
+   },
+   "board_total_2026": 1627,
+   "delta_pp": {
+    "OCR": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
   },
   "arabic": {
-   "source_label": "single-board subject: Edexcel only, 5,169 entries June 2026",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 5,325)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "Edexcel": 5325
+   },
+   "board_total_2025": 5325,
    "boards": {
     "AQA": 0.0,
     "Edexcel": 1.0,
     "OCR": 0.0,
     "Eduqas": 0.0,
     "WJEC": 0.0
-   }
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "Edexcel": 5169
+   },
+   "board_total_2026": 5169,
+   "delta_pp": {
+    "Edexcel": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
   },
-  "greek": {
-   "source_label": "single-board subject: Edexcel Greek (modern) only, 559 entries June 2026",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
+  "astronomy": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 1,388)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "Edexcel": 1388
+   },
+   "board_total_2025": 1388,
    "boards": {
     "AQA": 0.0,
     "Edexcel": 1.0,
     "OCR": 0.0,
     "Eduqas": 0.0,
     "WJEC": 0.0
-   }
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "Edexcel": 1024
+   },
+   "board_total_2026": 1024,
+   "delta_pp": {
+    "Edexcel": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
   },
-  "gujarati": {
-   "source_label": "single-board subject: Edexcel only, 254 entries June 2026",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
+  "bengali": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 392)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 392
+   },
+   "board_total_2025": 392,
    "boards": {
-    "AQA": 0.0,
-    "Edexcel": 1.0,
+    "AQA": 1.0,
+    "Edexcel": 0.0,
     "OCR": 0.0,
     "Eduqas": 0.0,
     "WJEC": 0.0
-   }
-  },
-  "japanese": {
-   "source_label": "single-board subject: Edexcel only, 840 entries June 2026",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
-   "boards": {
-    "AQA": 0.0,
-    "Edexcel": 1.0,
+   },
+   "boards_2026": {
+    "AQA": 1.0,
+    "Edexcel": 0.0,
     "OCR": 0.0,
     "Eduqas": 0.0,
     "WJEC": 0.0
-   }
-  },
-  "persian": {
-   "source_label": "single-board subject: Edexcel only, 1,023 entries June 2026",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
-   "boards": {
-    "AQA": 0.0,
-    "Edexcel": 1.0,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "portuguese": {
-   "source_label": "single-board subject: Edexcel only, 2,486 entries June 2026",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
-   "boards": {
-    "AQA": 0.0,
-    "Edexcel": 1.0,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "russian": {
-   "source_label": "single-board subject: Edexcel only, 3,510 entries June 2026",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
-   "boards": {
-    "AQA": 0.0,
-    "Edexcel": 1.0,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
-  },
-  "turkish": {
-   "source_label": "single-board subject: Edexcel only, 2,475 entries June 2026",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
-   "boards": {
-    "AQA": 0.0,
-    "Edexcel": 1.0,
-    "OCR": 0.0,
-    "Eduqas": 0.0,
-    "WJEC": 0.0
-   }
+   },
+   "board_entries_2026": {
+    "AQA": 325
+   },
+   "board_total_2026": 325,
+   "delta_pp": {
+    "AQA": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
   },
   "biblical-hebrew": {
-   "source_label": "single-board subject: Edexcel only",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 609)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "Edexcel": 609
+   },
+   "board_total_2025": 609,
    "boards": {
     "AQA": 0.0,
     "Edexcel": 1.0,
     "OCR": 0.0,
     "Eduqas": 0.0,
     "WJEC": 0.0
-   }
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "Edexcel": 637
+   },
+   "board_total_2026": 637,
+   "delta_pp": {
+    "Edexcel": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "biology": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 141,274 / Edexcel 21,830 / OCR 9,278)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 141274,
+    "Edexcel": 21830,
+    "OCR": 9278
+   },
+   "board_total_2025": 172382,
+   "boards": {
+    "AQA": 0.8195,
+    "Edexcel": 0.1266,
+    "OCR": 0.0538,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.8278,
+    "Edexcel": 0.121,
+    "OCR": 0.0512,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 140096,
+    "Edexcel": 20476,
+    "OCR": 8658
+   },
+   "board_total_2026": 169230,
+   "delta_pp": {
+    "AQA": 0.8,
+    "Edexcel": -0.6,
+    "OCR": -0.3
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "business": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 73,184 / AQA 29,094 / OCR 23,198 / Eduqas 4,537)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "AQA": 29094,
+    "Edexcel": 73184,
+    "Eduqas": 4537,
+    "OCR": 23198
+   },
+   "board_total_2025": 130013,
+   "boards": {
+    "AQA": 0.2238,
+    "Edexcel": 0.5629,
+    "OCR": 0.1784,
+    "Eduqas": 0.0349,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.2112,
+    "Edexcel": 0.5758,
+    "OCR": 0.179,
+    "Eduqas": 0.034,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 29632,
+    "Edexcel": 80789,
+    "Eduqas": 4765,
+    "OCR": 25121
+   },
+   "board_total_2026": 140307,
+   "delta_pp": {
+    "AQA": -1.3,
+    "Edexcel": 1.3,
+    "Eduqas": -0.1,
+    "OCR": 0.1
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "chemistry": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 134,482 / Edexcel 20,909 / OCR 8,727)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 134482,
+    "Edexcel": 20909,
+    "OCR": 8727
+   },
+   "board_total_2025": 164118,
+   "boards": {
+    "AQA": 0.8194,
+    "Edexcel": 0.1274,
+    "OCR": 0.0532,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.8265,
+    "Edexcel": 0.1222,
+    "OCR": 0.0513,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 133020,
+    "Edexcel": 19662,
+    "OCR": 8258
+   },
+   "board_total_2026": 160940,
+   "delta_pp": {
+    "AQA": 0.7,
+    "Edexcel": -0.5,
+    "OCR": -0.2
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "chinese": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 4,051 / AQA 3,911)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "AQA": 3911,
+    "Edexcel": 4051
+   },
+   "board_total_2025": 7962,
+   "boards": {
+    "AQA": 0.4912,
+    "Edexcel": 0.5088,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.5126,
+    "Edexcel": 0.4874,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 4052,
+    "Edexcel": 3853
+   },
+   "board_total_2026": 7905,
+   "delta_pp": {
+    "AQA": 2.1,
+    "Edexcel": -2.1
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "citizenship-studies": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 11,201 / Edexcel 8,099 / OCR 1,728)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 11201,
+    "Edexcel": 8099,
+    "OCR": 1728
+   },
+   "board_total_2025": 21028,
+   "boards": {
+    "AQA": 0.5327,
+    "Edexcel": 0.3852,
+    "OCR": 0.0822,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.5316,
+    "Edexcel": 0.3683,
+    "OCR": 0.1001,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 11470,
+    "Edexcel": 7948,
+    "OCR": 2160
+   },
+   "board_total_2026": 21578,
+   "delta_pp": {
+    "AQA": -0.1,
+    "Edexcel": -1.7,
+    "OCR": 1.8
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "classical-civilisation": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (OCR 5,187)",
+   "source_url": "https://www.ocr.org.uk/Images/739518-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2025.pdf",
+   "board_entries_2025": {
+    "OCR": 5187
+   },
+   "board_total_2025": 5187,
+   "boards": {
+    "AQA": 0.0,
+    "Edexcel": 0.0,
+    "OCR": 1.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 0.0,
+    "OCR": 1.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "OCR": 4708
+   },
+   "board_total_2026": 4708,
+   "delta_pp": {
+    "OCR": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "classical-greek": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (OCR 933)",
+   "source_url": "https://www.ocr.org.uk/Images/739518-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2025.pdf",
+   "board_entries_2025": {
+    "OCR": 933
+   },
+   "board_total_2025": 933,
+   "boards": {
+    "AQA": 0.0,
+    "Edexcel": 0.0,
+    "OCR": 1.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 0.0,
+    "OCR": 1.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "OCR": 839
+   },
+   "board_total_2026": 839,
+   "delta_pp": {
+    "OCR": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "combined-science": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 389,065 / Edexcel 62,174 / OCR 15,620)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 389065,
+    "Edexcel": 62174,
+    "OCR": 15620
+   },
+   "board_total_2025": 466859,
+   "boards": {
+    "AQA": 0.8334,
+    "Edexcel": 0.1332,
+    "OCR": 0.0335,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.8394,
+    "Edexcel": 0.1282,
+    "OCR": 0.0324,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 398085,
+    "Edexcel": 60789,
+    "OCR": 15351
+   },
+   "board_total_2026": 474225,
+   "delta_pp": {
+    "AQA": 0.6,
+    "Edexcel": -0.5,
+    "OCR": -0.1
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "computer-science": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (OCR 66,716 / AQA 13,420 / Edexcel 9,656 / Eduqas 545)",
+   "source_url": "https://www.ocr.org.uk/Images/739518-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2025.pdf",
+   "board_entries_2025": {
+    "AQA": 13420,
+    "Edexcel": 9656,
+    "Eduqas": 545,
+    "OCR": 66716
+   },
+   "board_total_2025": 90337,
+   "boards": {
+    "AQA": 0.1486,
+    "Edexcel": 0.1069,
+    "OCR": 0.7385,
+    "Eduqas": 0.006,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.1418,
+    "Edexcel": 0.1169,
+    "OCR": 0.7343,
+    "Eduqas": 0.007,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 11838,
+    "Edexcel": 9764,
+    "Eduqas": 587,
+    "OCR": 61312
+   },
+   "board_total_2026": 83501,
+   "delta_pp": {
+    "AQA": -0.7,
+    "Edexcel": 1.0,
+    "Eduqas": 0.1,
+    "OCR": -0.4
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "design-and-technology": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 52,935 / Edexcel 10,485 / Eduqas 10,359 / OCR 4,820)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 52935,
+    "Edexcel": 10485,
+    "Eduqas": 10359,
+    "OCR": 4820
+   },
+   "board_total_2025": 78599,
+   "boards": {
+    "AQA": 0.6735,
+    "Edexcel": 0.1334,
+    "OCR": 0.0613,
+    "Eduqas": 0.1318,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.669,
+    "Edexcel": 0.1251,
+    "OCR": 0.0626,
+    "Eduqas": 0.1432,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 51236,
+    "Edexcel": 9584,
+    "Eduqas": 10965,
+    "OCR": 4796
+   },
+   "board_total_2026": 76581,
+   "delta_pp": {
+    "AQA": -0.4,
+    "Edexcel": -0.8,
+    "Eduqas": 1.1,
+    "OCR": 0.1
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "drama": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 19,256 / Eduqas 12,754 / Edexcel 10,911 / OCR 6,002)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 19256,
+    "Edexcel": 10911,
+    "Eduqas": 12754,
+    "OCR": 6002
+   },
+   "board_total_2025": 48923,
+   "boards": {
+    "AQA": 0.3936,
+    "Edexcel": 0.223,
+    "OCR": 0.1227,
+    "Eduqas": 0.2607,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.3856,
+    "Edexcel": 0.2239,
+    "OCR": 0.1247,
+    "Eduqas": 0.2658,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 18629,
+    "Edexcel": 10820,
+    "Eduqas": 12840,
+    "OCR": 6026
+   },
+   "board_total_2026": 48315,
+   "delta_pp": {
+    "AQA": -0.8,
+    "Edexcel": 0.1,
+    "Eduqas": 0.5,
+    "OCR": 0.2
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "economics": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (OCR 4,415 / AQA 3,029)",
+   "source_url": "https://www.ocr.org.uk/Images/739518-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2025.pdf",
+   "board_entries_2025": {
+    "AQA": 3029,
+    "OCR": 4415
+   },
+   "board_total_2025": 7444,
+   "boards": {
+    "AQA": 0.4069,
+    "Edexcel": 0.0,
+    "OCR": 0.5931,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.4291,
+    "Edexcel": 0.0,
+    "OCR": 0.5709,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 3197,
+    "OCR": 4254
+   },
+   "board_total_2026": 7451,
+   "delta_pp": {
+    "AQA": 2.2,
+    "OCR": -2.2
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "electronics": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Eduqas 937)",
+   "source_url": "https://www.eduqas.co.uk/media/a33nq5bz/eduqas-gcse-provisional-results-2025.pdf",
+   "board_entries_2025": {
+    "Eduqas": 937
+   },
+   "board_total_2025": 937,
+   "boards": {
+    "AQA": 0.0,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 1.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 1.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "Eduqas": 827
+   },
+   "board_total_2026": 827,
+   "delta_pp": {
+    "Eduqas": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "engineering": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 2,327)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 2327
+   },
+   "board_total_2025": 2327,
+   "boards": {
+    "AQA": 1.0,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 1.0,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 2137
+   },
+   "board_total_2026": 2137,
+   "delta_pp": {
+    "AQA": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "english-language": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 593,963 / Edexcel 107,990 / Eduqas 97,094 / OCR 5,723)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 593963,
+    "Edexcel": 107990,
+    "Eduqas": 97094,
+    "OCR": 5723
+   },
+   "board_total_2025": 804770,
+   "boards": {
+    "AQA": 0.7381,
+    "Edexcel": 0.1342,
+    "OCR": 0.0071,
+    "Eduqas": 0.1206,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.7589,
+    "Edexcel": 0.1094,
+    "OCR": 0.0056,
+    "Eduqas": 0.1261,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 623435,
+    "Edexcel": 89878,
+    "Eduqas": 103594,
+    "OCR": 4591
+   },
+   "board_total_2026": 821498,
+   "delta_pp": {
+    "AQA": 2.1,
+    "Edexcel": -2.5,
+    "Eduqas": 0.5,
+    "OCR": -0.2
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "english-literature": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 498,874 / Eduqas 59,417 / Edexcel 46,358 / OCR 6,158)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 498874,
+    "Edexcel": 46358,
+    "Eduqas": 59417,
+    "OCR": 6158
+   },
+   "board_total_2025": 610807,
+   "boards": {
+    "AQA": 0.8167,
+    "Edexcel": 0.0759,
+    "OCR": 0.0101,
+    "Eduqas": 0.0973,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.8256,
+    "Edexcel": 0.0695,
+    "OCR": 0.0078,
+    "Eduqas": 0.0971,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 508116,
+    "Edexcel": 42780,
+    "Eduqas": 59758,
+    "OCR": 4770
+   },
+   "board_total_2026": 615424,
+   "delta_pp": {
+    "AQA": 0.9,
+    "Edexcel": -0.6,
+    "Eduqas": -0.0,
+    "OCR": -0.2
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "film-studies": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Eduqas 5,888)",
+   "source_url": "https://www.eduqas.co.uk/media/a33nq5bz/eduqas-gcse-provisional-results-2025.pdf",
+   "board_entries_2025": {
+    "Eduqas": 5888
+   },
+   "board_total_2025": 5888,
+   "boards": {
+    "AQA": 0.0,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 1.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 1.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "Eduqas": 6283
+   },
+   "board_total_2026": 6283,
+   "delta_pp": {
+    "Eduqas": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "food-preparation-and-nutrition": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 32,343 / Eduqas 18,468 / OCR 4,592)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 32343,
+    "Eduqas": 18468,
+    "OCR": 4592
+   },
+   "board_total_2025": 55403,
+   "boards": {
+    "AQA": 0.5838,
+    "Edexcel": 0.0,
+    "OCR": 0.0829,
+    "Eduqas": 0.3333,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.5848,
+    "Edexcel": 0.0,
+    "OCR": 0.0835,
+    "Eduqas": 0.3317,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 31938,
+    "Eduqas": 18117,
+    "OCR": 4562
+   },
+   "board_total_2026": 54617,
+   "delta_pp": {
+    "AQA": 0.1,
+    "Eduqas": -0.2,
+    "OCR": 0.1
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "french": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 97,806 / Edexcel 27,258 / Eduqas 2,995)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 97806,
+    "Edexcel": 27258,
+    "Eduqas": 2995
+   },
+   "board_total_2025": 128059,
+   "boards": {
+    "AQA": 0.7638,
+    "Edexcel": 0.2129,
+    "OCR": 0.0,
+    "Eduqas": 0.0234,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.5685,
+    "Edexcel": 0.4315,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 68706,
+    "Edexcel": 52159,
+    "Eduqas": 0
+   },
+   "board_total_2026": 120865,
+   "delta_pp": {
+    "AQA": -19.5,
+    "Edexcel": 21.9,
+    "Eduqas": -2.3
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "geography": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 202,553 / Edexcel 47,701 / OCR 24,967 / Eduqas 14,693)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 202553,
+    "Edexcel": 47701,
+    "Eduqas": 14693,
+    "OCR": 24967
+   },
+   "board_total_2025": 289914,
+   "boards": {
+    "AQA": 0.6987,
+    "Edexcel": 0.1645,
+    "OCR": 0.0861,
+    "Eduqas": 0.0507,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.7065,
+    "Edexcel": 0.1568,
+    "OCR": 0.0867,
+    "Eduqas": 0.05,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 202653,
+    "Edexcel": 44989,
+    "Eduqas": 14334,
+    "OCR": 24869
+   },
+   "board_total_2026": 286845,
+   "delta_pp": {
+    "AQA": 0.8,
+    "Edexcel": -0.8,
+    "Eduqas": -0.1,
+    "OCR": 0.1
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "geology": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Eduqas 522)",
+   "source_url": "https://www.eduqas.co.uk/media/a33nq5bz/eduqas-gcse-provisional-results-2025.pdf",
+   "board_entries_2025": {
+    "Eduqas": 522
+   },
+   "board_total_2025": 522,
+   "boards": {
+    "AQA": 0.0,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 1.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 1.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "Eduqas": 500
+   },
+   "board_total_2026": 500,
+   "delta_pp": {
+    "Eduqas": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "german": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 25,392 / Edexcel 6,158)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 25392,
+    "Edexcel": 6158
+   },
+   "board_total_2025": 31550,
+   "boards": {
+    "AQA": 0.8048,
+    "Edexcel": 0.1952,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.5329,
+    "Edexcel": 0.4671,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 17301,
+    "Edexcel": 15163
+   },
+   "board_total_2026": 32464,
+   "delta_pp": {
+    "AQA": -27.2,
+    "Edexcel": 27.2
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "greek": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 603)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "Edexcel": 603
+   },
+   "board_total_2025": 603,
+   "boards": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "Edexcel": 559
+   },
+   "board_total_2026": 559,
+   "delta_pp": {
+    "Edexcel": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "gujarati": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 316)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "Edexcel": 316
+   },
+   "board_total_2025": 316,
+   "boards": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "Edexcel": 254
+   },
+   "board_total_2026": 254,
+   "delta_pp": {
+    "Edexcel": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
   },
   "health-and-social-care": {
-   "source_label": "BTEC Technical Award is a Pearson-only qualification brand, so the DfE BTEC bucket is 100% Pearson by construction",
-   "source_url": "https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2026-provisional-gcse-9-1-specifications.pdf",
+   "year": 2025,
+   "source_label": "BTEC Technical Award is a Pearson-only qualification brand, so the DfE BTEC Technical Award bucket is 100% Pearson by construction - not a derived share",
+   "source_url": "https://qualifications.pearson.com/en/qualifications/btec-tech-awards.html",
+   "boards": {
+    "Edexcel": 1.0,
+    "AQA": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "Edexcel": 1.0,
+    "AQA": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "delta_pp": {
+    "Edexcel": 0.0
+   },
+   "source_label_2026": "same, by construction",
+   "no_board_release": true
+  },
+  "hebrew": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 653)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 653
+   },
+   "board_total_2025": 653,
+   "boards": {
+    "AQA": 1.0,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 1.0,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 739
+   },
+   "board_total_2026": 739,
+   "delta_pp": {
+    "AQA": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "history": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 167,004 / AQA 93,746 / OCR 20,112 / Eduqas 9,474)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "AQA": 93746,
+    "Edexcel": 167004,
+    "Eduqas": 9474,
+    "OCR": 20112
+   },
+   "board_total_2025": 290336,
+   "boards": {
+    "AQA": 0.3229,
+    "Edexcel": 0.5752,
+    "OCR": 0.0693,
+    "Eduqas": 0.0326,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.3133,
+    "Edexcel": 0.5825,
+    "OCR": 0.0707,
+    "Eduqas": 0.0335,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 91075,
+    "Edexcel": 169307,
+    "Eduqas": 9725,
+    "OCR": 20544
+   },
+   "board_total_2026": 290651,
+   "delta_pp": {
+    "AQA": -1.0,
+    "Edexcel": 0.7,
+    "Eduqas": 0.1,
+    "OCR": 0.1
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "italian": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 2,576 / Edexcel 1,061)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 2576,
+    "Edexcel": 1061
+   },
+   "board_total_2025": 3637,
+   "boards": {
+    "AQA": 0.7083,
+    "Edexcel": 0.2917,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.7024,
+    "Edexcel": 0.2976,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 2266,
+    "Edexcel": 960
+   },
+   "board_total_2026": 3226,
+   "delta_pp": {
+    "AQA": -0.6,
+    "Edexcel": 0.6
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "japanese": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 926)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "Edexcel": 926
+   },
+   "board_total_2025": 926,
    "boards": {
     "AQA": 0.0,
     "Edexcel": 1.0,
     "OCR": 0.0,
     "Eduqas": 0.0,
     "WJEC": 0.0
-   }
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "Edexcel": 840
+   },
+   "board_total_2026": 840,
+   "delta_pp": {
+    "Edexcel": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "latin": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (OCR 4,945 / Eduqas 3,458)",
+   "source_url": "https://www.ocr.org.uk/Images/739518-gcse-cambridge-nationals-and-entry-level-provisional-results-statistics-june-2025.pdf",
+   "board_entries_2025": {
+    "Eduqas": 3458,
+    "OCR": 4945
+   },
+   "board_total_2025": 8403,
+   "boards": {
+    "AQA": 0.0,
+    "Edexcel": 0.0,
+    "OCR": 0.5885,
+    "Eduqas": 0.4115,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 0.0,
+    "OCR": 0.5871,
+    "Eduqas": 0.4129,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "Eduqas": 3291,
+    "OCR": 4679
+   },
+   "board_total_2026": 7970,
+   "delta_pp": {
+    "Eduqas": 0.1,
+    "OCR": -0.1
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "mathematics": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 521,132 / AQA 189,529 / OCR 74,199 / Eduqas 49,187)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "AQA": 189529,
+    "Edexcel": 521132,
+    "Eduqas": 49187,
+    "OCR": 74199
+   },
+   "board_total_2025": 834047,
+   "boards": {
+    "AQA": 0.2272,
+    "Edexcel": 0.6248,
+    "OCR": 0.089,
+    "Eduqas": 0.059,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.2138,
+    "Edexcel": 0.6208,
+    "OCR": 0.0984,
+    "Eduqas": 0.067,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 182547,
+    "Edexcel": 530142,
+    "Eduqas": 57238,
+    "OCR": 84036
+   },
+   "board_total_2026": 853963,
+   "delta_pp": {
+    "AQA": -1.3,
+    "Edexcel": -0.4,
+    "Eduqas": 0.8,
+    "OCR": 0.9
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "media-studies": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Eduqas 18,544 / AQA 6,377 / OCR 3,249)",
+   "source_url": "https://www.eduqas.co.uk/media/a33nq5bz/eduqas-gcse-provisional-results-2025.pdf",
+   "board_entries_2025": {
+    "AQA": 6377,
+    "Eduqas": 18544,
+    "OCR": 3249
+   },
+   "board_total_2025": 28170,
+   "boards": {
+    "AQA": 0.2264,
+    "Edexcel": 0.0,
+    "OCR": 0.1153,
+    "Eduqas": 0.6583,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.19,
+    "Edexcel": 0.0,
+    "OCR": 0.1243,
+    "Eduqas": 0.6857,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 5484,
+    "Eduqas": 19791,
+    "OCR": 3588
+   },
+   "board_total_2026": 28863,
+   "delta_pp": {
+    "AQA": -3.6,
+    "Eduqas": 2.7,
+    "OCR": 0.9
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "music": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Eduqas 13,870 / Edexcel 9,000 / OCR 7,226 / AQA 4,506)",
+   "source_url": "https://www.eduqas.co.uk/media/a33nq5bz/eduqas-gcse-provisional-results-2025.pdf",
+   "board_entries_2025": {
+    "AQA": 4506,
+    "Edexcel": 9000,
+    "Eduqas": 13870,
+    "OCR": 7226
+   },
+   "board_total_2025": 34602,
+   "boards": {
+    "AQA": 0.1302,
+    "Edexcel": 0.2601,
+    "OCR": 0.2088,
+    "Eduqas": 0.4008,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.1306,
+    "Edexcel": 0.2339,
+    "OCR": 0.2139,
+    "Eduqas": 0.4216,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 4449,
+    "Edexcel": 7972,
+    "Eduqas": 14367,
+    "OCR": 7290
+   },
+   "board_total_2026": 34078,
+   "delta_pp": {
+    "AQA": 0.0,
+    "Edexcel": -2.6,
+    "Eduqas": 2.1,
+    "OCR": 0.5
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "panjabi": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 935)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 935
+   },
+   "board_total_2025": 935,
+   "boards": {
+    "AQA": 1.0,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 1.0,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 1021
+   },
+   "board_total_2026": 1021,
+   "delta_pp": {
+    "AQA": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "persian": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 862)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "Edexcel": 862
+   },
+   "board_total_2025": 862,
+   "boards": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "Edexcel": 1023
+   },
+   "board_total_2026": 1023,
+   "delta_pp": {
+    "Edexcel": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "physical-education": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 36,379 / OCR 23,370 / Edexcel 18,807 / Eduqas 1,917)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 36379,
+    "Edexcel": 18807,
+    "Eduqas": 1917,
+    "OCR": 23370
+   },
+   "board_total_2025": 80473,
+   "boards": {
+    "AQA": 0.4521,
+    "Edexcel": 0.2337,
+    "OCR": 0.2904,
+    "Eduqas": 0.0238,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.4583,
+    "Edexcel": 0.2348,
+    "OCR": 0.2826,
+    "Eduqas": 0.0243,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 38175,
+    "Edexcel": 19555,
+    "Eduqas": 2022,
+    "OCR": 23542
+   },
+   "board_total_2026": 83294,
+   "delta_pp": {
+    "AQA": 0.6,
+    "Edexcel": 0.1,
+    "Eduqas": 0.0,
+    "OCR": -0.8
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "physics": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 134,975 / Edexcel 20,762 / OCR 8,214)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 134975,
+    "Edexcel": 20762,
+    "OCR": 8214
+   },
+   "board_total_2025": 163951,
+   "boards": {
+    "AQA": 0.8233,
+    "Edexcel": 0.1266,
+    "OCR": 0.0501,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.829,
+    "Edexcel": 0.1211,
+    "OCR": 0.0499,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 133453,
+    "Edexcel": 19496,
+    "OCR": 8037
+   },
+   "board_total_2026": 160986,
+   "delta_pp": {
+    "AQA": 0.6,
+    "Edexcel": -0.5,
+    "OCR": -0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "polish": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 9,111)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 9111
+   },
+   "board_total_2025": 9111,
+   "boards": {
+    "AQA": 1.0,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 1.0,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 8597
+   },
+   "board_total_2026": 8597,
+   "delta_pp": {
+    "AQA": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "portuguese": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 2,656)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "Edexcel": 2656
+   },
+   "board_total_2025": 2656,
+   "boards": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "Edexcel": 2486
+   },
+   "board_total_2026": 2486,
+   "delta_pp": {
+    "Edexcel": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "psychology": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 12,422 / OCR 5,432 / Edexcel 3,898)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 12422,
+    "Edexcel": 3898,
+    "OCR": 5432
+   },
+   "board_total_2025": 21752,
+   "boards": {
+    "AQA": 0.5711,
+    "Edexcel": 0.1792,
+    "OCR": 0.2497,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.5592,
+    "Edexcel": 0.1753,
+    "OCR": 0.2656,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 12019,
+    "Edexcel": 3767,
+    "OCR": 5709
+   },
+   "board_total_2026": 21495,
+   "delta_pp": {
+    "AQA": -1.2,
+    "Edexcel": -0.4,
+    "OCR": 1.6
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "religious-studies": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 124,710 / Eduqas 48,447 / Edexcel 40,624 / OCR 4,436)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 124710,
+    "Edexcel": 40624,
+    "Eduqas": 48447,
+    "OCR": 4436
+   },
+   "board_total_2025": 218217,
+   "boards": {
+    "AQA": 0.5715,
+    "Edexcel": 0.1862,
+    "OCR": 0.0203,
+    "Eduqas": 0.222,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.5811,
+    "Edexcel": 0.1802,
+    "OCR": 0.0144,
+    "Eduqas": 0.2243,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 127465,
+    "Edexcel": 39538,
+    "Eduqas": 49204,
+    "OCR": 3148
+   },
+   "board_total_2026": 219355,
+   "delta_pp": {
+    "AQA": 1.0,
+    "Edexcel": -0.6,
+    "Eduqas": 0.2,
+    "OCR": -0.6
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "russian": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 3,797)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "Edexcel": 3797
+   },
+   "board_total_2025": 3797,
+   "boards": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "Edexcel": 3510
+   },
+   "board_total_2026": 3510,
+   "delta_pp": {
+    "Edexcel": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "sociology": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 22,258 / Eduqas 8,951)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 22258,
+    "Eduqas": 8951
+   },
+   "board_total_2025": 31209,
+   "boards": {
+    "AQA": 0.7132,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 0.2868,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.724,
+    "Edexcel": 0.0,
+    "OCR": 0.0,
+    "Eduqas": 0.276,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 23593,
+    "Eduqas": 8996
+   },
+   "board_total_2026": 32589,
+   "delta_pp": {
+    "AQA": 1.1,
+    "Eduqas": -1.1
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "spanish": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 102,687 / Edexcel 26,797 / Eduqas 2,548)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 102687,
+    "Edexcel": 26797,
+    "Eduqas": 2548
+   },
+   "board_total_2025": 132032,
+   "boards": {
+    "AQA": 0.7777,
+    "Edexcel": 0.203,
+    "OCR": 0.0,
+    "Eduqas": 0.0193,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.5668,
+    "Edexcel": 0.4332,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 75073,
+    "Edexcel": 57387,
+    "Eduqas": 0
+   },
+   "board_total_2026": 132460,
+   "delta_pp": {
+    "AQA": -21.1,
+    "Edexcel": 23.0,
+    "Eduqas": -1.9
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "statistics": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 28,776 / AQA 5,689)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "AQA": 5689,
+    "Edexcel": 28776
+   },
+   "board_total_2025": 34465,
+   "boards": {
+    "AQA": 0.1651,
+    "Edexcel": 0.8349,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.1659,
+    "Edexcel": 0.8341,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 6332,
+    "Edexcel": 31836
+   },
+   "board_total_2026": 38168,
+   "delta_pp": {
+    "AQA": 0.1,
+    "Edexcel": -0.1
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "turkish": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (Edexcel 2,529)",
+   "source_url": "https://web.archive.org/web/20260131173541id_/https://qualifications.pearson.com/content/dam/pdf/Support/Grade-statistics/GCSE/grade-statistics-june-2025-provisional-gcse-9-1-specifications.pdf",
+   "board_entries_2025": {
+    "Edexcel": 2529
+   },
+   "board_total_2025": 2529,
+   "boards": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.0,
+    "Edexcel": 1.0,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "Edexcel": 2475
+   },
+   "board_total_2026": 2475,
+   "delta_pp": {
+    "Edexcel": 0.0
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
+  },
+  "urdu": {
+   "year": 2025,
+   "source_label": "derived from the boards' own June 2025 results statistics (AQA 2,657 / Edexcel 1,730)",
+   "source_url": "https://www.aqa.org.uk/files/308c1e70-dc8d-4263-8719-d0f10f869a7f/d1c20b6fb8a0b39dd217019c50a02bd1cae10f99.xlsx",
+   "board_entries_2025": {
+    "AQA": 2657,
+    "Edexcel": 1730
+   },
+   "board_total_2025": 4387,
+   "boards": {
+    "AQA": 0.6057,
+    "Edexcel": 0.3943,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "boards_2026": {
+    "AQA": 0.6081,
+    "Edexcel": 0.3919,
+    "OCR": 0.0,
+    "Eduqas": 0.0,
+    "WJEC": 0.0
+   },
+   "board_entries_2026": {
+    "AQA": 2556,
+    "Edexcel": 1647
+   },
+   "board_total_2026": 4203,
+   "delta_pp": {
+    "AQA": 0.2,
+    "Edexcel": -0.2
+   },
+   "source_label_2026": "boards' own June 2026 results statistics"
   }
- }
+ },
+ "route_weights": {
+  "biology|J247": {
+   "board": "OCR",
+   "subject": "Biology A (Gateway Science)",
+   "weight_2025": 0.7886,
+   "entries_2025": 7317,
+   "board_total_2025": 9278,
+   "source": "OCR June 2025 results statistics: J247 7,317, J257 1,961"
+  },
+  "biology|J257": {
+   "board": "OCR",
+   "subject": "Biology B (Twenty First Century Science)",
+   "weight_2025": 0.2114,
+   "entries_2025": 1961,
+   "board_total_2025": 9278,
+   "source": "OCR June 2025 results statistics: J247 7,317, J257 1,961"
+  },
+  "chemistry|J248": {
+   "board": "OCR",
+   "subject": "Chemistry A (Gateway Science)",
+   "weight_2025": 0.7597,
+   "entries_2025": 6630,
+   "board_total_2025": 8727,
+   "source": "OCR June 2025 results statistics: J248 6,630, J258 2,097"
+  },
+  "chemistry|J258": {
+   "board": "OCR",
+   "subject": "Chemistry B (Twenty First Century Science)",
+   "weight_2025": 0.2403,
+   "entries_2025": 2097,
+   "board_total_2025": 8727,
+   "source": "OCR June 2025 results statistics: J248 6,630, J258 2,097"
+  },
+  "combined-science|8464": {
+   "board": "AQA",
+   "subject": "Combined Science: Trilogy",
+   "weight_2025": 0.9856,
+   "entries_2025": 383446,
+   "board_total_2025": 389065,
+   "source": "AQA June 2025 results statistics: 8464 383,446, 8465 5,619"
+  },
+  "combined-science|8465": {
+   "board": "AQA",
+   "subject": "Combined Science: Synergy",
+   "weight_2025": 0.0144,
+   "entries_2025": 5619,
+   "board_total_2025": 389065,
+   "source": "AQA June 2025 results statistics: 8464 383,446, 8465 5,619"
+  },
+  "combined-science|J250": {
+   "board": "OCR",
+   "subject": "Combined Science A (Gateway Science)",
+   "weight_2025": 0.804,
+   "entries_2025": 12559,
+   "board_total_2025": 15620,
+   "source": "OCR June 2025 results statistics: J250 12,559, J260 3,061"
+  },
+  "combined-science|J260": {
+   "board": "OCR",
+   "subject": "Combined Science B (Twenty First Century Science)",
+   "weight_2025": 0.196,
+   "entries_2025": 3061,
+   "board_total_2025": 15620,
+   "source": "OCR June 2025 results statistics: J250 12,559, J260 3,061"
+  },
+  "english-language|1EN0": {
+   "board": "Edexcel",
+   "subject": "English Language",
+   "weight_2025": 0.3849,
+   "entries_2025": 41565,
+   "board_total_2025": 107990,
+   "source": "Edexcel June 2025 results statistics: 1EN0 41,565, 1EN2 66,425"
+  },
+  "english-language|1EN2": {
+   "board": "Edexcel",
+   "subject": "English Language 2.0",
+   "weight_2025": 0.6151,
+   "entries_2025": 66425,
+   "board_total_2025": 107990,
+   "source": "Edexcel June 2025 results statistics: 1EN0 41,565, 1EN2 66,425"
+  },
+  "geography|1GA0": {
+   "board": "Edexcel",
+   "subject": "Geography A",
+   "weight_2025": 0.383,
+   "entries_2025": 18271,
+   "board_total_2025": 47701,
+   "source": "Edexcel June 2025 results statistics: 1GA0 18,271, 1GB0 29,430"
+  },
+  "geography|1GB0": {
+   "board": "Edexcel",
+   "subject": "Geography B",
+   "weight_2025": 0.617,
+   "entries_2025": 29430,
+   "board_total_2025": 47701,
+   "source": "Edexcel June 2025 results statistics: 1GA0 18,271, 1GB0 29,430"
+  },
+  "geography|C111QS": {
+   "board": "Eduqas",
+   "subject": "Geography A",
+   "weight_2025": 0.3715,
+   "entries_2025": 5458,
+   "board_total_2025": 14693,
+   "source": "Eduqas June 2025 results statistics: C111QS 5,458, C112QS 9,235"
+  },
+  "geography|C112QS": {
+   "board": "Eduqas",
+   "subject": "Geography B",
+   "weight_2025": 0.6285,
+   "entries_2025": 9235,
+   "board_total_2025": 14693,
+   "source": "Eduqas June 2025 results statistics: C111QS 5,458, C112QS 9,235"
+  },
+  "geography|J383": {
+   "board": "OCR",
+   "subject": "Geography A (Geographical Themes)",
+   "weight_2025": 0.2273,
+   "entries_2025": 5674,
+   "board_total_2025": 24967,
+   "source": "OCR June 2025 results statistics: J383 5,674, J384 19,293"
+  },
+  "geography|J384": {
+   "board": "OCR",
+   "subject": "Geography B (Geography for Enquiring Minds)",
+   "weight_2025": 0.7727,
+   "entries_2025": 19293,
+   "board_total_2025": 24967,
+   "source": "OCR June 2025 results statistics: J383 5,674, J384 19,293"
+  },
+  "history|J410": {
+   "board": "OCR",
+   "subject": "History A (Explaining the Modern World)",
+   "weight_2025": 0.131,
+   "entries_2025": 2635,
+   "board_total_2025": 20112,
+   "source": "OCR June 2025 results statistics: J410 2,635, J411 17,477"
+  },
+  "history|J411": {
+   "board": "OCR",
+   "subject": "History B (Schools History Project)",
+   "weight_2025": 0.869,
+   "entries_2025": 17477,
+   "board_total_2025": 20112,
+   "source": "OCR June 2025 results statistics: J410 2,635, J411 17,477"
+  },
+  "physics|J249": {
+   "board": "OCR",
+   "subject": "Physics A (Gateway Science)",
+   "weight_2025": 0.7885,
+   "entries_2025": 6477,
+   "board_total_2025": 8214,
+   "source": "OCR June 2025 results statistics: J249 6,477, J259 1,737"
+  },
+  "physics|J259": {
+   "board": "OCR",
+   "subject": "Physics B (Twenty First Century Science)",
+   "weight_2025": 0.2115,
+   "entries_2025": 1737,
+   "board_total_2025": 8214,
+   "source": "OCR June 2025 results statistics: J249 6,477, J259 1,737"
+  },
+  "religious-studies|1RA0": {
+   "board": "Edexcel",
+   "subject": "Religious Studies A",
+   "weight_2025": 0.422,
+   "entries_2025": 17143,
+   "board_total_2025": 40624,
+   "source": "Edexcel June 2025 results statistics: 1RA0 17,143, 1RB0 23,481"
+  },
+  "religious-studies|1RB0": {
+   "board": "Edexcel",
+   "subject": "Religious Studies B",
+   "weight_2025": 0.578,
+   "entries_2025": 23481,
+   "board_total_2025": 40624,
+   "source": "Edexcel June 2025 results statistics: 1RA0 17,143, 1RB0 23,481"
+  },
+  "religious-studies|8062": {
+   "board": "AQA",
+   "subject": "Religious Studies A",
+   "weight_2025": 0.906,
+   "entries_2025": 112987,
+   "board_total_2025": 124710,
+   "source": "AQA June 2025 results statistics: 8062 112,987, 8063 11,723"
+  },
+  "religious-studies|8063": {
+   "board": "AQA",
+   "subject": "Religious Studies B",
+   "weight_2025": 0.094,
+   "entries_2025": 11723,
+   "board_total_2025": 124710,
+   "source": "AQA June 2025 results statistics: 8062 112,987, 8063 11,723"
+  }
+ },
+ "index_gaps": [
+  {
+   "board": "Edexcel",
+   "spec_code": "1EN2",
+   "family": "english-language",
+   "subject": "English Language 2.0",
+   "note": "Pearson's larger English Language specification - 66,425 entries in June 2025 against 41,565 on 1EN0, which is the one we hold. Absent from specs/index.json.",
+   "entries_2025": 66425,
+   "entries_2026": 52515
+  },
+  {
+   "board": "Edexcel",
+   "spec_code": "1RB0",
+   "family": "religious-studies",
+   "subject": "Religious Studies B",
+   "note": "Pearson's larger Religious Studies specification - 23,481 entries in June 2025 against 17,143 on 1RA0, which is the one we hold. Absent from specs/index.json.",
+   "entries_2025": 23481,
+   "entries_2026": 21947
+  }
+ ]
 }

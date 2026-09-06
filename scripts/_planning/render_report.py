@@ -6,12 +6,21 @@ Self-contained page: no external stylesheet, font or script.
 import html as H
 import json
 import os
+import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 D = json.load(open(os.path.join(HERE, "remaining_builds.json"), encoding="utf-8"))
 T = D["totals"]
 CM = D["cost_model"]
 SRC = D["dfe_source"]
+CC = D["crosscheck"]
+CQ = D["crosscheck_summary"]
+PREV = {}
+_prev = os.path.join(HERE, "_remaining_builds_prev_2026shares.json")
+if os.path.exists(_prev):
+    _p = json.load(open(_prev, encoding="utf-8"))
+    PREV = {r["spec_code"]: (i, r["est_students"])
+            for i, r in enumerate(_p["table1_remaining"], 1)}
 
 TAG_LABEL = {"build": "BUILD", "port": "PORT", "alias": "ALIAS", "skip": "SKIP",
              "general": "note"}
@@ -29,6 +38,22 @@ def n(x):
 
 def pct(x):
     return "—" if x is None else f"{100 * x:.1f}%"
+
+
+def trend(r):
+    """2026 board-level share and the change in percentage points. Direction of
+    travel only - no calculation on this page uses the 2026 series."""
+    a, b = r.get("board_share_2025_boardlevel"), r.get("board_share_2026_boardlevel")
+    if a is None or b is None:
+        return '<span class="note">&mdash;</span>'
+    d = r.get("board_delta_pp")
+    if d is None:
+        d = 100 * (b - a)
+    cls = "up" if d > 0.25 else ("down" if d < -0.25 else "")
+    arrow = "&#9650;" if d > 0.25 else ("&#9660;" if d < -0.25 else "&ndash;")
+    return (f'{100*a:.1f}% &rarr; {100*b:.1f}%<br>'
+            f'<span class="{cls}">{arrow} {d:+.1f} pp</span>'
+            f'<br><span class="note">whole board, both series</span>')
 
 
 def tag(t):
@@ -125,7 +150,8 @@ def table1():
     head = ("<tr><th>#</th><th>Spec</th><th>Board</th><th>Subject</th>"
             "<th class='num'>England entries<br>2024/25</th>"
             "<th class='num'>Schools<br>entering</th>"
-            "<th>Board share (source)</th>"
+            "<th>Share of the subject, 2025<br>(route-adjusted; source)</th>"
+            "<th class='num'>Board share<br>2025 &rarr; 2026</th>"
             "<th class='num'>Est.<br>students</th>"
             "<th class='num'>Likely<br>lessons</th>"
             "<th class='num'>Est.<br>cost</th>"
@@ -133,9 +159,15 @@ def table1():
     body = []
     for i, r in enumerate(D["table1_remaining"], 1):
         if r["board_share_known"]:
+            # Keep Table 1 compact: the full entry breakdown behind each share
+            # is in the "Board shares on file" table further down.
+            src = re.sub(r"\s*\(.*", "", r["board_share_source"] or "")
             share = (f'{pct(r["board_share"])} '
                      f'<span class="ok">PUBLISHED</span><br>'
-                     f'<span class="note">{e(r["board_share_source"])}</span>')
+                     f'<span class="note">{e(src)}'
+                     + (f'<br>Route weight {r["route_weight"]:.1%} of that board '
+                        f'&mdash; {e(r["route_weight_source"])}'
+                        if r.get("route_weight") else '') + '</span>')
         elif r["est_students"] is None:
             share = '<span class="flag">NO DfE MATCH</span>'
         elif r["board"] == "WJEC":
@@ -152,6 +184,7 @@ def table1():
             f'<td class="num">{n(r["entries"])}</td>'
             f'<td class="num">{n(r["schools_entering"])}</td>'
             f'<td>{share}</td>'
+            f'<td class="num">{trend(r)}</td>'
             f'<td class="num strong">{n(r["est_students"])}</td>'
             f'<td class="num">{r["likely_lessons"]}<br>'
             f'<span class="note">{e(r["lesson_reference"][:44])}</span></td>'
@@ -270,16 +303,125 @@ def coverage_table():
 
 def board_share_sources():
     rows = []
-    for fam, s in sorted(D["board_share_db"].get("shares", {}).items()):
-        boards = ", ".join(f"{b} {v:.1%}" for b, v in s["boards"].items() if v)
+    for fam, sh in sorted(D["board_share_db"].get("shares", {}).items()):
+        b25 = sh.get("boards", {})
+        b26 = sh.get("boards_2026", {})
+        d = sh.get("delta_pp", {})
+        cells = []
+        for b in sorted(b25, key=lambda k: -b25.get(k, 0)):
+            if not b25.get(b):
+                continue
+            dd = d.get(b)
+            move = (f' <span class="{"up" if dd > 0.25 else ("down" if dd < -0.25 else "")}">'
+                    f'{dd:+.1f}</span>' if dd is not None else '')
+            cells.append(f'{b} <strong>{100*b25[b]:.1f}%</strong>'
+                         + (f' &rarr; {100*b26[b]:.1f}%{move}' if b in b26 else ''))
+        ent = sh.get("board_entries_2025", {})
+        ent_s = ", ".join(f"{b} {v:,}" for b, v in
+                          sorted(ent.items(), key=lambda kv: -kv[1]) if v)
         rows.append(f'<tr><td class="strong">{e(fam)}</td>'
-                    f'<td class="note">{e(boards)}</td>'
-                    f'<td class="note">{e(s["source_label"])}<br>'
-                    f'<span class="mono">{e(s["source_url"])}</span></td></tr>')
+                    f'<td class="note">{" &nbsp;·&nbsp; ".join(cells)}</td>'
+                    f'<td class="num">{n(sh.get("board_total_2025"))}</td>'
+                    f'<td class="note">{e(ent_s) or "&mdash;"}</td>'
+                    f'<td class="note">{e(sh["source_label"][:150])}<br>'
+                    f'<span class="mono">{e(sh.get("source_url", ""))}</span></td></tr>')
     if not rows:
         return "<p class='hint'>No published board shares are on file.</p>"
-    return ('<div class="tw"><table><thead><tr><th>Family</th><th>Shares</th>'
+    return ('<div class="tw"><table class="t2"><thead><tr><th>Family</th>'
+            '<th>Share 2025 &rarr; 2026 (pp change)</th>'
+            '<th class="num">Board sum<br>2025</th><th>2025 entries by board</th>'
             f'<th>Source</th></tr></thead><tbody>{"".join(rows)}</tbody></table></div>')
+
+
+def crosscheck_table():
+    head = ("<tr><th>Family</th><th class='num'>DfE England<br>2024/25</th>"
+            "<th class='num'>Board sum<br>June 2025</th>"
+            "<th class='num'>Residual</th><th class='num'>Residual %</th>"
+            "<th class='num'>Ratio<br>2025</th><th class='num'>Ratio<br>2026</th>"
+            "<th>Reading</th></tr>")
+    resit = set(CQ.get("resit_heavy", []))
+    body = []
+    for c in CC:
+        dev25 = abs(c["ratio_2025"] - 1)
+        dev26 = abs((c["ratio_2026"] or 1) - 1)
+        if c["family"] in resit:
+            why = ("post-16 resits: the boards count every entry, the DfE counts "
+                   "only pupils at the end of KS4")
+        elif abs(c["residual"]) < 400:
+            why = "small subject; the residual is a few hundred candidates"
+        elif dev25 <= 0.05:
+            why = "matches"
+        else:
+            why = "board totals include non-England and post-16 entries"
+        better = ('<span class="ok">2025 CLOSER</span>' if dev25 < dev26 - 0.002
+                  else ('<span class="flag">2026 CLOSER</span>'
+                        if dev26 < dev25 - 0.002 else ''))
+        cls = "" if dev25 <= 0.05 else ("up" if c["residual"] > 0 else "down")
+        body.append(
+            f'<tr><td class="strong">{e(c["family"])}</td>'
+            f'<td class="num">{c["dfe_entries"]:,}</td>'
+            f'<td class="num">{c["board_sum_2025"]:,}</td>'
+            f'<td class="num">{c["residual"]:+,}</td>'
+            f'<td class="num {cls}">{c["residual_pct"]:+.1f}%</td>'
+            f'<td class="num">{c["ratio_2025"]:.3f}</td>'
+            f'<td class="num">{(c["ratio_2026"] or 0):.3f} {better}</td>'
+            f'<td class="note">{why}</td></tr>')
+    return ('<div class="tw"><table class="t2"><thead>' + head +
+            '</thead><tbody>' + "".join(body) + '</tbody></table></div>')
+
+
+def realignment_table():
+    """What moved when the shares were realigned onto the 2025 cohort and the
+    even route splits were replaced with measured ones."""
+    if not PREV:
+        return ""
+    rows = []
+    for i, r in enumerate(D["table1_remaining"], 1):
+        prev = PREV.get(r["spec_code"])
+        if not prev:
+            continue
+        move = prev[0] - i
+        d = r["est_students"] - prev[1]
+        if abs(move) < 1 and abs(d) < 500:
+            continue
+        cls = "up" if move > 0 else ("down" if move < 0 else "")
+        rw = (f'route weight now {r["route_weight"]:.1%}, measured'
+              if r.get("route_weight") else 'board share moved between series')
+        rows.append(f'<tr><td class="mono">{e(r["spec_code"])}</td>'
+                    f'<td class="strong">{e(r["subject"])}</td>'
+                    f'<td>{e(r["board"])}</td>'
+                    f'<td class="num">{prev[0]}</td><td class="num">{i}</td>'
+                    f'<td class="num {cls}">{move:+d}</td>'
+                    f'<td class="num">{prev[1]:,}</td>'
+                    f'<td class="num strong">{r["est_students"]:,}</td>'
+                    f'<td class="num {cls}">{d:+,}</td>'
+                    f'<td class="note">{rw}</td></tr>')
+    if not rows:
+        return "<p class='hint'>No row changed rank.</p>"
+    return ('<div class="tw"><table><thead><tr><th>Spec</th><th>Subject</th>'
+            '<th>Board</th><th class="num">Rank before</th><th class="num">Rank now</th>'
+            '<th class="num">Move</th><th class="num">Est. before</th>'
+            '<th class="num">Est. now</th><th class="num">Change</th>'
+            f'<th>Why</th></tr></thead><tbody>{"".join(rows)}</tbody></table></div>')
+
+
+def index_gaps_table():
+    gaps = D.get("index_gaps", [])
+    if not gaps:
+        return ""
+    body = []
+    for g in gaps:
+        body.append(f'<tr><td class="mono">{e(g["spec_code"])}</td>'
+                    f'<td>{e(g["board"])}</td>'
+                    f'<td class="strong">{e(g["subject"])}</td>'
+                    f'<td class="num">{n(g.get("entries_2025"))}</td>'
+                    f'<td class="num">{n(g.get("entries_2026"))}</td>'
+                    f'<td class="note">{e(g["note"])}</td></tr>')
+    return ('<div class="tw"><table class="t2"><thead><tr><th>Spec</th><th>Board</th>'
+            '<th>Subject</th><th class="num">Entries<br>June 2025</th>'
+            '<th class="num">Entries<br>June 2026</th>'
+            f'<th>Why it matters</th></tr></thead><tbody>{"".join(body)}</tbody>'
+            '</table></div>')
 
 
 def main():
@@ -299,7 +441,8 @@ def main():
 <p class="sub">Generated {e(D["generated"])} · branch <span class="mono">platform</span> ·
 entry data: DfE Explore Education Statistics, {e(SRC["publication"])},
 dataset &ldquo;{e(SRC["dataset"])}&rdquo; (<span class="mono">{e(SRC["dataset_id"])}</span>),
-England, {e(SRC["time_period"])}</p>
+England, {e(SRC["time_period"])} &middot; board shares: the four boards' own
+<strong>June 2025</strong> results statistics &mdash; the same exam series</p>
 <p class="lede">Every unbuilt specification in <span class="mono">specs/index.json</span>,
 scored against the real number of pupils who sat that subject in England last year.
 The build/skip/alias/port decisions are the ones already recorded in
@@ -345,7 +488,9 @@ catalogue addresses: <strong>{scope:,}</strong>.</p>
 
 <h2>Table 1 — remaining buildable specs, ranked by students reached</h2>
 <p class="hint">Ranked on estimated students: England entries for the subject
-&times; that spec's share of the subject. A green <span class="ok">PUBLISHED</span>
+&times; that spec's share of the subject. Where a board runs two routes, its
+share is divided by the measured route weight, so the route-adjusted figure in
+column seven can be smaller than the whole-board share in column eight. A green <span class="ok">PUBLISHED</span>
 mark means the board share comes from a real source; an amber
 <span class="flag">SHARE UNKNOWN</span> mark means no published board split was
 found and the row uses an equal split, which is a placeholder, not a measurement.
@@ -354,6 +499,13 @@ Cost model: &pound;{CM["api_per_lesson_gbp"]:.3f}/lesson generation +
 &pound;{CM["factcheck_per_subject_gbp"]:.0f} fact-check per spec; PORT rows at
 {CM["port_factor"]:.0%}.</p>
 {table1()}
+
+<h2>What the cohort realignment changed</h2>
+<p class="hint">The first cut of this page joined June 2026 board shares to
+2024/25 (summer 2025) DfE entries &mdash; two different cohorts &mdash; and split a
+board's routes evenly for want of a figure. Both are now fixed: shares come from
+the June 2025 releases, and every route split is measured. These rows moved.</p>
+{realignment_table()}
 
 <h2>Table 2 — skipped, aliased and port-tagged items</h2>
 <p class="hint">SKIP and ALIAS rows are deliberately not ranked as builds. An
@@ -366,6 +518,30 @@ SKIP rows are Wales-regulated WJEC specs that England centres cannot enter.</p>
 schools entering them are individually addressable, and small enough that no big
 revision platform serves them. Each row opens to the ten largest centres by entries.</p>
 {table3()}
+
+<h2>Cross-check: DfE subject total against the June 2025 board sum</h2>
+<p class="hint">Two independent counts of the same exam series. They cannot match
+exactly &mdash; the DfE counts pupils at the end of KS4 in England, the boards count
+every entry they took &mdash; but a large residual would mean a mis-mapped subject.
+Across {CQ["quality"]["all_2025"]["families"]} families the median absolute
+deviation is <strong>{CQ["quality"]["all_2025"]["median_abs_dev"]:.1%}</strong> on
+2025 shares against {CQ["quality"]["all_2026"]["median_abs_dev"]:.1%} on the 2026
+shares this page used before, and
+{CQ["quality"]["all_2025"]["within_5pct"]} families sit within 5% against
+{CQ["quality"]["all_2026"]["within_5pct"]}. Weighting by entries and setting aside
+the three resit-heavy subjects, the deviation is
+<strong>{CQ["quality"]["ex_resit_2025"]["entries_weighted_abs_dev"]:.2%}</strong>
+against {CQ["quality"]["ex_resit_2026"]["entries_weighted_abs_dev"]:.2%}. The
+realignment improves the fit on every measure.</p>
+{crosscheck_table()}
+
+<h2>Specifications missing from specs/index.json</h2>
+<p class="hint">Found by the cross-check. These specifications appear in a board's
+own results release but not in our spec index, so the To-Build page cannot see
+them. They are counted in the share denominators here &mdash; leaving them out
+inflated every other board &mdash; but they are not ranked in Table 1, because
+Table 1 reproduces the page's logic. Both are real, unbuilt content gaps.</p>
+{index_gaps_table()}
 
 <h2>What changed against the tier letters</h2>
 <p class="hint">The ENTRY_TIER map in <span class="mono">admin/build-status.html</span>
@@ -383,19 +559,32 @@ through to a C default, which is why so many vocational families read as C.</p>
 
 <h2>Data caveats</h2>
 <ul class="plain">
+<li><strong>Cohort alignment.</strong> The entry totals are DfE 2024/25, which
+is the summer 2025 exam series. The board shares are taken from the four boards'
+own <strong>June 2025</strong> results statistics, so shares and totals describe
+one cohort. June 2026 appears only as a direction-of-travel column and is never
+used in a calculation. This matters: between the two series AQA French fell from
+76.4% to 56.8% and AQA Spanish from 77.8% to 56.7% as the reformed MFL
+specifications came in, so 2026 shares would have badly mis-stated the 2025
+cohort. Every family on this page now carries a 2025 share except NCFE Music
+Technology, which no GCSE results release covers, and the Pearson BTEC Tech
+Award, whose 100% share is true by construction rather than derived.</li>
 <li><strong>England only.</strong> The DfE dataset covers
 {e(SRC["coverage"])}. Wales, Scotland and Northern Ireland are absent, so every
 WJEC figure on this page is zero by construction rather than by measurement.</li>
 <li><strong>DfE counts subjects, not boards.</strong> The dataset has no awarding
-organisation column. Every per-board number here is the subject total multiplied by
-a share, and only the shares marked <span class="ok">PUBLISHED</span> rest on a
-source. The rest are equal splits and will be wrong in both directions — most
-obviously for AQA, which really holds far more than a quarter of most subjects.</li>
-<li><strong>Route splits are mostly assumed.</strong> Where a board runs two routes
-(Geography A and B, History A and B) the board's share is split evenly between them
-unless a build note records the real split. Only two real splits are on file: AQA
-Combined Science Synergy (&lt;10% of AQA) and AQA Religious Studies Spec B (~5–10%
-of AQA).</li>
+organisation column, so every per-board number here is the subject total multiplied
+by a share. The shares themselves are <em>derived, not published</em>: no board or
+regulator publishes a share, so each board's own published entry count is divided by
+the sum across the England-accessible boards. Ofqual's entries release was checked
+and carries England subject totals only, with no awarding-organisation split.</li>
+<li><strong>Route splits are now measured, not assumed.</strong> Where a board runs
+two routes, the split comes from that board's own June 2025 per-specification
+entries. Twenty-four route weights are on file. The corrections are large: OCR
+History B is 86.9% of OCR History, not half; OCR Geography B is 77.3%; Eduqas
+Geography B is 62.9%; Pearson Geography B is 61.7%. AQA Combined Science Synergy
+turns out to be 1.4% of AQA, not the &ldquo;under 10%&rdquo; the build note
+estimates, and AQA Religious Studies Spec B is 9.4%.</li>
 <li><strong>Discount groups are legacy labels.</strong> DfE files GCSE Citizenship
 Studies under &ldquo;Community Development&rdquo;, GCSE PE under &ldquo;Sports
 Studies&rdquo;, GCSE Drama under &ldquo;Speech &amp; Drama&rdquo; and GCSE Food
@@ -412,16 +601,15 @@ bucket cannot be separated. Treat vocational entry counts as the size of the
 territory, not of a single award.</li>
 <li><strong>The subject mapping was cross-validated.</strong> Every DfE discount
 group used here was checked against the four boards' own June 2026 entry totals.
-Drama reads 48,301 against a board sum of 48,315; Classical Greek 847 against 839;
-Citizenship Studies (&ldquo;Community Development&rdquo;) 19,680 against 21,578;
-Economics 7,176 against 7,451; Latin 8,107 against 7,970. The two counts are
-different years and different populations, so they will not match exactly &mdash;
-but no mapping is out by a factor that would change a ranking.</li>
-<li><strong>OCR Geography B is probably understated here.</strong> The build note
-records that OCR B has higher uptake than OCR A, but neither board nor regulator
-publishes the split, so this page divides OCR's 8.7% evenly. If OCR B really carries
-two thirds of OCR Geography, its true reach is nearer 16,700 than 12,500 and it moves
-up the table.</li>
+On the aligned 2025 figures History reads 289,332 against a board sum of 290,336
+(ratio 1.003), Geography 287,748 against 289,914 (1.008), Drama 48,301 against
+48,923 (1.013), English Literature 605,318 against 610,807 (1.009). The full
+residual table is above.</li>
+<li><strong>The build note on OCR Geography B is confirmed and then some.</strong>
+It says OCR B has higher uptake than OCR A. OCR's own June 2025 figures give B
+19,293 entries against A 5,674 &mdash; B is 77.3% of OCR Geography, and the same
+pattern is far stronger in History, where OCR B (SHP) takes 17,477 against OCR A's
+2,635. We built the smaller route on both.</li>
 <li><strong>Independent schools are included</strong> in the school list, which
 matters most for Latin, Classical Greek, Ancient History and Classical Civilisation
 — the niche subjects whose top-ten school lists are dominated by them.</li>

@@ -183,15 +183,11 @@ DFE_MAP = {
 # Where a board runs two routes, its entries do NOT split evenly. Only two
 # splits are actually documented (in admin/build-status.html BUILD_NOTES);
 # everywhere else the report says so and splits evenly.
-_AQA26 = "AQA June 2026 results statistics, per-spec entry counts"
-ROUTE_WEIGHT = {
-    ("combined-science", "8464"): (0.9869, f"{_AQA26}: Trilogy 392,855 vs Synergy 5,230"),
-    ("combined-science", "8465"): (0.0131, f"{_AQA26}: Synergy 5,230 of AQA's 398,085"),
-    ("religious-studies", "8062"): (0.9107, f"{_AQA26}: Spec A 116,083 vs Spec B 11,382"),
-    ("religious-studies", "8063"): (0.0893, f"{_AQA26}: Spec B 11,382 of AQA's 127,465"),
-    ("religious-education", "8062"): (0.9107, f"{_AQA26}: Spec A 116,083 vs Spec B 11,382"),
-    ("religious-education", "8063"): (0.0893, f"{_AQA26}: Spec B 11,382 of AQA's 127,465"),
-}
+# Route weights (how a board's entries divide between its own routes, e.g.
+# Geography A vs Geography B) are read from board_share.json, where they are
+# derived from the boards' published June 2025 per-specification entry counts.
+# ROUTE_WEIGHT is filled in main(); an empty entry means an even split, flagged.
+ROUTE_WEIGHT = {}
 
 # Board naming in specs/index.json -> board key used in board_share.json
 BOARD_KEY = {"AQA": "AQA", "Edexcel": "Edexcel", "Pearson Edexcel": "Edexcel",
@@ -204,6 +200,14 @@ def main():
     sb = load("_supabase_subjects.json")
     dfe = load("dfe_subject_entries_2025.json")
     share_db = load("board_share.json")
+
+    # Real route weights, derived from the boards' June 2025 per-spec entries.
+    for key, rw in share_db.get("route_weights", {}).items():
+        f, code = key.split("|", 1)
+        ROUTE_WEIGHT[(f, code)] = (rw["weight_2025"], rw["source"])
+        # RS is filed under two family slugs in build-status.
+        if f == "religious-studies":
+            ROUTE_WEIGHT[("religious-education", code)] = (rw["weight_2025"], rw["source"])
 
     # --- DfE lookup ---------------------------------------------------------
     dfe_idx = {}
@@ -375,6 +379,17 @@ def main():
             "board_share_source": share_src if share_known else None,
             "board_share_url": share_url if share_known else None,
             "england_boards": n_boards,
+            # Board-level share in each series, for the direction-of-travel column.
+            # Not route-split: it describes the whole board, not this one route.
+            "board_share_2025_boardlevel": (sh.get("boards", {}).get(board)
+                                            if share_known else None),
+            "board_share_2026_boardlevel": (sh.get("boards_2026", {}).get(board)
+                                            if share_known else None),
+            "board_delta_pp": (sh.get("delta_pp", {}).get(board)
+                               if share_known else None),
+            "route_weight": ROUTE_WEIGHT.get((fam, sp["spec_code"]), (None, None))[0],
+            "route_weight_source": ROUTE_WEIGHT.get((fam, sp["spec_code"]),
+                                                    (None, None))[1],
             "est_students": est, "est_basis": est_basis,
             "likely_lessons": lessons, "lesson_reference": lesson_ref,
             "est_cost_gbp": cost,
@@ -476,8 +491,85 @@ def main():
             })
     tier_conflicts.sort(key=lambda r: -r["entries"])
 
+    # --- cross-check: DfE England subject total vs the 2025 board sum --------
+    # Both now describe the summer 2025 series, so the residual measures only
+    # population difference (DfE = KS4 pupils in England; boards = all their
+    # entries, all ages, and for AQA/OCR/Eduqas all countries).
+    crosscheck = []
+    for f, s in sorted(share_db.get("shares", {}).items()):
+        dg = DFE_MAP.get(f)
+        drow = dfe_idx.get(dg) if dg and dg[0] else None
+        tot25 = s.get("board_total_2025")
+        if not drow or not tot25:
+            continue
+        crosscheck.append({
+            "family": f,
+            "dfe_entries": drow["entries"],
+            "board_sum_2025": tot25,
+            "board_sum_2026": s.get("board_total_2026"),
+            "ratio_2025": round(tot25 / drow["entries"], 3),
+            "ratio_2026": (round(s["board_total_2026"] / drow["entries"], 3)
+                           if s.get("board_total_2026") else None),
+            "residual": tot25 - drow["entries"],
+            "residual_pct": round(100 * (tot25 - drow["entries"]) / drow["entries"], 1),
+            "dfe_subject": drow["subject_discount_group"],
+            "qualification": drow["qualification"],
+        })
+    crosscheck.sort(key=lambda r: -abs(r["residual_pct"]))
+    ratios = [c["ratio_2025"] for c in crosscheck]
+    ratios26 = [c["ratio_2026"] for c in crosscheck if c["ratio_2026"]]
+
+    def median(v):
+        v = sorted(v)
+        return round(v[len(v) // 2], 3) if v else None
+
+    # Entries that a board counts but the DfE KS4 population cannot: post-16
+    # resits. AQA publishes the age split and it dominates three subjects.
+    RESIT_HEAVY = {"mathematics", "english-language", "english-literature"}
+
+    def quality(rows, year):
+        if not rows:
+            return None
+        dev = [abs(r[f"ratio_{year}"] - 1) for r in rows]
+        dev.sort()
+        w = (sum(r["dfe_entries"] * abs(r[f"ratio_{year}"] - 1) for r in rows)
+             / sum(r["dfe_entries"] for r in rows))
+        return {"families": len(rows),
+                "median_abs_dev": round(dev[len(dev) // 2], 4),
+                "mean_abs_dev": round(sum(dev) / len(dev), 4),
+                "entries_weighted_abs_dev": round(w, 4),
+                "within_5pct": sum(1 for x in dev if x <= 0.05)}
+
+    both = [c for c in crosscheck if c["ratio_2026"]]
+    ex_resit = [c for c in both if c["family"] not in RESIT_HEAVY]
+
+    # Which families still rest on a 2026 share (no 2025 board release found)?
+    on_2026 = sorted(f for f, s in share_db.get("shares", {}).items()
+                     if s.get("year") != 2025)
+
     result = {
         "generated": "2026-09-06",
+        "share_year": 2025,
+        "crosscheck": crosscheck,
+        "crosscheck_summary": {
+            "families": len(crosscheck),
+            "median_ratio_2025": median(ratios),
+            "median_ratio_2026": median(ratios26),
+            "within_10pct_2025": sum(1 for r in ratios if 0.90 <= r <= 1.10),
+            "within_10pct_2026": sum(1 for r in ratios26 if 0.90 <= r <= 1.10),
+            "worst": crosscheck[0]["family"] if crosscheck else None,
+            "resit_heavy": sorted(RESIT_HEAVY),
+            "quality": {
+                "all_2025": quality(both, 2025), "all_2026": quality(both, 2026),
+                "ex_resit_2025": quality(ex_resit, 2025),
+                "ex_resit_2026": quality(ex_resit, 2026),
+            },
+        },
+        "index_gaps": share_db.get("index_gaps", []),
+        "route_weights": share_db.get("route_weights", {}),
+        "families_still_on_2026_share": on_2026,
+        "families_without_board_release": sorted(
+            f for f, s in share_db.get("shares", {}).items() if s.get("no_board_release")),
         "totals": {
             "specs_total": len(specs),
             "specs_in_scope": len(in_scope),
