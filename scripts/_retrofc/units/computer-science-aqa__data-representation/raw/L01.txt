@@ -1,0 +1,321 @@
+=== L1 Number Bases and Binary Arithmetic ===
+id: 1d169dac-ad03-47ad-aac0-4665c117bd64
+slug: number-bases-and-binary-arithmetic
+status: live tier:both updated:2026-07-30T22:24:22.916346+00:00
+narration_manifest: array len 38
+
+--- DESCRIPTION ---
+Decimal, binary and hexadecimal, plus binary addition, binary shifts and why hex is so useful.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">Why Computers Use Binary</h2>
+<p data-narration-id="n2">Every piece of data inside a computer &mdash; text, images, sound, instructions &mdash; is ultimately stored and processed as a pattern of 1s and 0s. This is the <dfn class="term" data-def="A number system that uses only two digits, 0 and 1. Every circuit in a computer is either on (1) or off (0), making binary the natural language of digital hardware.">binary</dfn> (base-2) number system. A transistor in a chip is either conducting electricity or not &mdash; that two-state physical reality maps perfectly onto binary&rsquo;s two digits. Every other number system we use in computing is ultimately a convenient way of writing or working with binary data.</p>
+
+<h2 data-narration-id="n3">Place Values in Binary</h2>
+<p data-narration-id="n4">Just as <dfn class="term" data-def="The standard base-10 number system we use every day, using digits 0&ndash;9.">denary</dfn> (decimal, base-10) uses place values of 1, 10, 100, 1000&hellip;, binary uses place values that are powers of 2. For an 8-bit number, the place values from left (most significant) to right (least significant) are:</p>
+<p data-narration-id="n5"><strong>128 &mdash; 64 &mdash; 32 &mdash; 16 &mdash; 8 &mdash; 4 &mdash; 2 &mdash; 1</strong></p>
+<p data-narration-id="n6">The maximum 8-bit value is 11111111, which equals 128+64+32+16+8+4+2+1 = <strong>255</strong>. An 8-bit binary number can therefore represent any whole number from 0 to 255.</p>
+
+<div class="key-fact" data-narration-id="n7" data-revision-tip="Cover this and write out the 8 place values from memory, then use them to convert 10110100 to denary.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>An 8-bit binary number has place values <strong>128, 64, 32, 16, 8, 4, 2, 1</strong> (left to right). To convert binary to denary, add up the place values where the digit is 1. The maximum 8-bit value is 11111111 = 255. Decimal values from 0 to 255 must be representable.</p>
+</div>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example &mdash; Converting Between Binary and Denary</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n8"><strong>Binary &rarr; Denary:</strong> Convert 10110010</p>
+    <p data-narration-id="n9">Write out place values and match each bit:<br>
+    128: 1 &rarr; 128<br>
+    64:  0 &rarr; 0<br>
+    32:  1 &rarr; 32<br>
+    16:  1 &rarr; 16<br>
+    8:   0 &rarr; 0<br>
+    4:   0 &rarr; 0<br>
+    2:   1 &rarr; 2<br>
+    1:   0 &rarr; 0<br>
+    <strong>Total: 128 + 32 + 16 + 2 = 178</strong></p>
+    <p data-narration-id="n10"><strong>Denary &rarr; Binary:</strong> Convert 157<br>
+    128 fits: 157 &minus; 128 = 29, write 1<br>
+    64 does not fit in 29, write 0<br>
+    32 does not fit in 29, write 0<br>
+    16 fits: 29 &minus; 16 = 13, write 1<br>
+    8 fits: 13 &minus; 8 = 5, write 1<br>
+    4 fits: 5 &minus; 4 = 1, write 1<br>
+    2 does not fit in 1, write 0<br>
+    1 fits: 1 &minus; 1 = 0, write 1<br>
+    <strong>Result: 10011101</strong></p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n11">Hexadecimal</h2>
+<p data-narration-id="n12"><dfn class="term" data-def="A base-16 number system using digits 0&ndash;9 and letters A&ndash;F. Each hex digit represents exactly four binary bits (one nibble).">Hexadecimal</dfn> (hex, base-16) uses 16 symbols: digits 0&ndash;9 and letters A&ndash;F, where A = 10, B = 11, C = 12, D = 13, E = 14, F = 15. The maximum 8-bit value in hex is <strong>FF</strong> (both nibbles at maximum). Hex is widely used because it is a compact shorthand for binary: every four bits (one <dfn class="term" data-def="A group of 4 bits. One nibble converts directly to one hexadecimal digit.">nibble</dfn>) maps to exactly one hex digit, making long binary strings much easier for humans to read.</p>
+<p data-narration-id="n13">You will see hex everywhere: web colour codes (#FF5500), MAC addresses on network cards, memory dump listings in diagnostic tools. Computers do not process hex directly &mdash; it is a human convenience for representing binary concisely.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example &mdash; Converting Between Binary, Denary and Hex</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n14"><strong>Binary &rarr; Hex:</strong> Convert 11001010<br>
+    Split into nibbles: 1100 | 1010<br>
+    1100 = 12 = C<br>
+    1010 = 10 = A<br>
+    <strong>Result: CA</strong></p>
+    <p data-narration-id="n15"><strong>Hex &rarr; Denary:</strong> Convert CA<br>
+    C = 12; A = 10<br>
+    (12 &times; 16) + 10 = 192 + 10 = <strong>202</strong></p>
+    <p data-narration-id="n16"><strong>Denary &rarr; Hex:</strong> Convert 200<br>
+    200 &divide; 16 = 12 remainder 8<br>
+    12 = C, 8 = 8<br>
+    <strong>Result: C8</strong><br>
+    Check: (12 &times; 16) + 8 = 192 + 8 = 200 &#10003;</p>
+  </div></div>
+</div>
+
+<div class="key-fact" data-narration-id="n17" data-revision-tip="Test yourself: convert 10110011 to hex without notes. Split into nibbles, convert each, write the two hex digits.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>To convert binary to hex: split into groups of 4 bits (nibbles) from the right, then convert each nibble to its hex digit. The maximum 8-bit value is <strong>FF</strong> in hex, <strong>255</strong> in denary. To convert hex to denary: multiply the first digit by 16 and add the second.</p>
+</div>
+
+<h2 data-narration-id="n18">Units of Information</h2>
+<p data-narration-id="n19">A single binary digit is called a <dfn class="term" data-def="The smallest unit of data in a computer, representing a single binary digit: either 0 or 1.">bit</dfn>. Eight bits together form a <dfn class="term" data-def="A group of 8 bits. The standard unit for measuring data storage.">byte</dfn>. The convention on this course uses the SI decimal prefixes &mdash; not powers of 2:</p>
+<ul>
+  <li data-narration-id="n20"><strong>kilobyte (kB)</strong> = 1,000 bytes</li>
+  <li data-narration-id="n21"><strong>megabyte (MB)</strong> = 1,000 kilobytes</li>
+  <li data-narration-id="n22"><strong>gigabyte (GB)</strong> = 1,000 megabytes</li>
+  <li data-narration-id="n23"><strong>terabyte (TB)</strong> = 1,000 gigabytes</li>
+</ul>
+<p data-narration-id="n24">Note: you may have seen the prefix &ldquo;kibi&rdquo; (KiB = 1,024 bytes) used in some contexts, but this course uses the decimal SI convention only. Do not write 1 kB = 1,024 bytes in your exam answers.</p>
+
+<h2 data-narration-id="n25">Binary Addition</h2>
+<p data-narration-id="n26">Binary addition follows four simple rules: 0+0=0; 1+0=1; 1+1=0 carry 1; 1+1+1=1 carry 1. The exam will ask you to add up to <strong>three</strong> 8-bit numbers in a single column, meaning the maximum number of 1s in any column is three. Answers stay within 8 bits &mdash; exam questions will not require carrying beyond the eighth bit.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example &mdash; Adding Two Binary Numbers</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n27">Add 01110011 (115) and 00101100 (44):</p>
+    <pre data-narration-id="n28">  01110011
++ 00101100
+----------
+  10011111</pre>
+    <p data-narration-id="n29">Working right to left:<br>
+    Col 1: 1+0 = 1<br>
+    Col 2: 1+0 = 1<br>
+    Col 3: 0+1 = 1<br>
+    Col 4: 0+1 = 1<br>
+    Col 5: 1+0 = 1<br>
+    Col 6: 1+1 = 0 carry 1<br>
+    Col 7: 1+0+carry1 = 0 carry 1<br>
+    Col 8: 0+0+carry1 = 1<br>
+    <strong>Result: 10011111 = 159. Check: 115 + 44 = 159 &#10003;</strong></p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n30">Binary Shifts</h2>
+<p data-narration-id="n31">A <dfn class="term" data-def="Moving all bits in a binary number left or right by a set number of positions. A left shift multiplies the number by a power of 2; a right shift divides it.">binary shift</dfn> moves every bit in a number left or right by a stated number of positions. Bits that move beyond the 8-bit boundary are lost. Empty positions are filled with 0.</p>
+<p data-narration-id="n32">A <strong>left shift by 1</strong> multiplies the value by 2. A <strong>left shift by 2</strong> multiplies by 4. A <strong>right shift by 1</strong> divides by 2 (integer division &mdash; any remainder is lost). A <strong>right shift by 2</strong> divides by 4.</p>
+<p data-narration-id="n33">Example: 00001100 (12) left-shifted by 2 &rarr; 00110000 = 48. Check: 12 &times; 4 = 48. Right-shifted by 1 &rarr; 00000110 = 6. Check: 12 &divide; 2 = 6. Binary shifts are used in image processing, audio signal scaling, and efficient arithmetic in embedded systems where multiplying by a power of 2 is extremely common.</p>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n35">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n36">Binary (base-2) uses place values 128, 64, 32, 16, 8, 4, 2, 1 for 8-bit numbers (0&ndash;255). Hex (base-16) is a compact shorthand: each nibble (4 bits) maps to one hex digit, giving a maximum of FF for 8 bits.</li>
+  <li data-narration-id="n37">Binary addition: 1+1=0 carry 1; 1+1+1=1 carry 1. Left shifts multiply by powers of 2; right shifts divide. Exam questions use a maximum of 8 bits with no carry beyond bit 8.</li>
+  <li data-narration-id="n38">Data units use decimal SI prefixes: 1 kB = 1,000 bytes, 1 MB = 1,000 kB, 1 GB = 1,000 MB, 1 TB = 1,000 GB.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n34">For &ldquo;3 marks &mdash; Convert (Number Base)&rdquo; questions, always show your working: write out the place values, label which are 1 and which are 0, and state the final answer in the requested base. Stripping leading zeros from a binary answer (e.g. writing 1101 when the question asks for 8 bits) costs marks &mdash; always pad to the requested bit length. If converting via hex, split into nibbles and convert each separately. Watch out for the units question: on this course 1 kB = 1,000 bytes, not 1,024.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Which one of the following is the correct denary value for the binary number 10110100?\nA) 178\nB) 180\nC) 174\nD) 182",
+  "type": "1 mark — Multiple Choice",
+  "marks": "B) 180 [1 mark]\n128+32+16+4 = 180"
+ },
+ {
+  "text": "State the hexadecimal value that is equivalent to the denary number 255.",
+  "type": "1 mark — Give/Name",
+  "marks": "FF [1 mark]"
+ },
+ {
+  "text": "Convert the binary number 11100101 into hexadecimal. Show your working.",
+  "type": "3 marks — Convert (Number Base)",
+  "marks": "Split into nibbles: 1110 | 0101 [1 mark]\n1110 = 14 = E [1 mark]\n0101 = 5 [1 mark]\nAnswer: E5"
+ },
+ {
+  "text": "A binary shift of 2 places to the left is applied to the 8-bit number 00001011.\n(a) State the result of the shift. [1 mark]\n(b) State the denary equivalent of the result. [1 mark]\n(c) Explain what arithmetic operation a left shift by 2 performs. [1 mark]",
+  "type": "3 marks — Calculate",
+  "marks": "(a) 00101100 [1 mark]\n(b) 44 [1 mark]\n(c) Multiplies the number by 4 (i.e. by 2²) [1 mark]"
+ },
+ {
+  "text": "Add the following two 8-bit binary numbers together. Show your working and state the denary equivalent of the result.\n\n01011010\n00110101",
+  "type": "3 marks — Calculate",
+  "marks": "Binary addition working shown [1 mark]\nCorrect result: 10001111 [1 mark]\nDenary equivalent: 143 [1 mark]\n(Check: 90 + 53 = 143)"
+ },
+ {
+  "text": "Explain why hexadecimal is often used by programmers and computer engineers instead of binary, and describe with an example how to convert a binary number to hexadecimal.",
+  "type": "4 marks — Explain",
+  "marks": "One mark each up to four:\n• Hex is shorter and easier for humans to read than long binary strings [1]\n• Each hex digit represents exactly 4 bits (one nibble), making conversion straightforward [1]\n• Used for colour codes, memory addresses, MAC addresses, etc. [1]\n• Correct conversion method described: split binary into nibbles from the right; convert each nibble to its hex digit [1]\n• Correct worked example with correct nibble split and correct hex digits [credit only if method is also present]"
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "What is the denary value of the 8-bit binary number 00001111?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "8",
+   "12",
+   "15",
+   "16"
+  ]
+ },
+ {
+  "q": "How many bytes are in 1 kilobyte (kB) on this course?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "1,024",
+   "512",
+   "1,000",
+   "8,000"
+  ]
+ },
+ {
+  "q": "The maximum value that can be stored in an 8-bit binary number is _____ in denary.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "127",
+   "256",
+   "255",
+   "128"
+  ]
+ },
+ {
+  "q": "Splitting 11110000 into two nibbles gives 1111 and 0000, which equals _____ in hexadecimal.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "FF",
+   "F0",
+   "0F",
+   "00"
+  ]
+ },
+ {
+  "q": "Match each number base to its number of distinct digit symbols:",
+  "left": [
+   "Binary (base-2)",
+   "Denary (base-10)",
+   "Hexadecimal (base-16)"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   1,
+   2
+  ],
+  "right": [
+   "2 symbols: 0 and 1",
+   "10 symbols: 0 to 9",
+   "16 symbols: 0–9 and A–F"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "128, 64, 32, 16, 8, 4, 2, 1.",
+  "q": "What are the 8 place values of an 8-bit binary number, from left to right?"
+ },
+ {
+  "a": "255",
+  "q": "What is the maximum value an 8-bit binary number can represent in denary?"
+ },
+ {
+  "a": "FF",
+  "q": "What is the maximum 8-bit value in hexadecimal?"
+ },
+ {
+  "a": "4",
+  "q": "How many bits are in one nibble?"
+ },
+ {
+  "a": "Split into nibbles of 4 bits from the right; convert each nibble to one hex digit.",
+  "q": "How do you convert a binary number to hexadecimal?"
+ },
+ {
+  "a": "Multiplies it by 2.",
+  "q": "What does a left binary shift by 1 do to a number's value?"
+ },
+ {
+  "a": "Divides it by 2 (integer division).",
+  "q": "What does a right binary shift by 1 do to a number's value?"
+ },
+ {
+  "a": "0 with a carry of 1.",
+  "q": "In binary addition, what is the result of 1 + 1?"
+ },
+ {
+  "a": "1,000 kilobytes.",
+  "q": "How many kilobytes are in 1 megabyte on this course?"
+ },
+ {
+  "a": "It is shorter and easier to read — each hex digit represents exactly 4 bits.",
+  "q": "Why is hexadecimal used instead of binary by programmers?"
+ },
+ {
+  "a": "10",
+  "q": "What is the denary value of hexadecimal A?"
+ },
+ {
+  "a": "15",
+  "q": "What is the denary value of hexadecimal F?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "binary",
+  "definition": "A number system that uses only two digits, 0 and 1. Every circuit in a computer is either on (1) or off (0), making binary the natural language of digital hardware."
+ },
+ {
+  "term": "denary",
+  "definition": "The standard base-10 number system we use every day, using digits 0–9."
+ },
+ {
+  "term": "hexadecimal",
+  "definition": "A base-16 number system using digits 0–9 and letters A–F. Each hex digit represents exactly four binary bits (one nibble)."
+ },
+ {
+  "term": "nibble",
+  "definition": "A group of 4 bits. One nibble converts directly to one hexadecimal digit."
+ },
+ {
+  "term": "bit",
+  "definition": "The smallest unit of data in a computer, representing a single binary digit: either 0 or 1."
+ },
+ {
+  "term": "byte",
+  "definition": "A group of 8 bits. The standard unit for measuring data storage."
+ },
+ {
+  "term": "binary shift",
+  "definition": "Moving all bits in a binary number left or right by a set number of positions. A left shift multiplies the number by a power of 2; a right shift divides it."
+ }
+]

@@ -1,0 +1,279 @@
+=== L3 Representing Images and Sound ===
+id: d7a0d766-ed24-4238-8dbb-1e371b1f25a6
+slug: representing-images-and-sound
+status: live tier:both updated:2026-07-30T22:52:54.82442+00:00
+narration_manifest: array len 35
+
+--- DESCRIPTION ---
+Bitmap pixels, colour depth, image file size, sound sampling rate and calculating audio file sizes.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">How Computers Store Images</h2>
+<p data-narration-id="n2">Every digital image is built from a grid of tiny coloured squares called <dfn class="term" data-def="The smallest individual element of a digital image. Short for picture element.">pixels</dfn>. Each pixel stores a single colour value represented in binary. The more pixels an image contains, the more detail it can show &mdash; but the larger the file it produces.</p>
+<p data-narration-id="n3">The total number of pixels in an image is given by its <dfn class="term" data-def="The dimensions of a bitmap image measured in pixels: width &times; height.">image size</dfn>. A 640 &times; 480 image contains 307,200 pixels. A 1920 &times; 1080 (Full HD) image contains 2,073,600 pixels. Zooming in on a low-resolution image reveals visible pixel squares &mdash; this is because there are fewer pixels packed into the same display area.</p>
+
+<div class="key-fact" data-narration-id="n4" data-revision-tip="Cover this and write the formula for image file size in bits, then convert your answer to bytes. Then check.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Image file size (bits) = W &times; H &times; D, where W is width in pixels, H is height in pixels, and D is <strong>colour depth</strong> in bits. To convert to bytes, divide by 8.</p>
+</div>
+
+<h2 data-narration-id="n5">Colour Depth</h2>
+<p data-narration-id="n6"><dfn class="term" data-def="The number of bits used to represent the colour of each pixel. More bits means a greater range of possible colours.">Colour depth</dfn> determines how many different colours are available for each pixel. With 1-bit colour depth, only 2 colours are possible (black and white). With 8-bit depth, 256 colours are possible. With 24-bit depth &mdash; often called &ldquo;true colour&rdquo; &mdash; over 16 million distinct colours can be represented, which appears photorealistic to the human eye.</p>
+<p data-narration-id="n7">Increasing the colour depth improves visual quality but increases file size. A 100 &times; 100 image at 8-bit colour depth requires 80,000 bits (10,000 bytes). The same image at 24-bit colour depth requires 240,000 bits (30,000 bytes) &mdash; three times as large.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example: Calculating Image File Size</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n8"><strong>Problem:</strong> A bitmap image is 800 pixels wide and 600 pixels tall. It uses a colour depth of 24 bits per pixel. Calculate the file size in megabytes.</p>
+    <p data-narration-id="n9"><strong>Step 1</strong> &mdash; Apply the formula: Size (bits) = W &times; H &times; D = 800 &times; 600 &times; 24 = 11,520,000 bits.</p>
+    <p data-narration-id="n10"><strong>Step 2</strong> &mdash; Convert to bytes: 11,520,000 &divide; 8 = 1,440,000 bytes.</p>
+    <p data-narration-id="n11"><strong>Step 3</strong> &mdash; Convert to megabytes (using SI prefix: 1 MB = 1,000,000 bytes): 1,440,000 &divide; 1,000,000 = 1.44 MB.</p>
+    <p data-narration-id="n12"><strong>Common mistake:</strong> Forgetting to divide by 8. The formula gives bits &mdash; always convert to bytes for the final answer unless the question specifies bits.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n13">Converting Between Bitmaps and Binary</h2>
+<p data-narration-id="n14">A simple 1-bit bitmap uses just 0s and 1s &mdash; 0 for white and 1 for black (or vice versa). Given a grid of binary values you can reconstruct the image pixel by pixel. For example, a 4 &times; 4 grid with binary row <code>1100</code> produces two black pixels followed by two white pixels on that row. In exam questions you may be asked to draw a small pixel image from a binary pattern, or to write out the binary for a given black-and-white image.</p>
+
+<div class="key-fact" data-narration-id="n15" data-revision-tip="Test yourself: a 4-bit colour depth gives how many possible colours? Write your calculation.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The number of colours available at a given colour depth = 2<sup>depth</sup>. So 4-bit = 2<sup>4</sup> = 16 colours; 8-bit = 2<sup>8</sup> = 256 colours; 24-bit = 2<sup>24</sup> = 16,777,216 colours. Doubling the bit depth squares the number of available colours.</p>
+</div>
+
+<h2 data-narration-id="n16">How Sound Is Stored</h2>
+<p data-narration-id="n17">Sound is an <dfn class="term" data-def="A signal that varies continuously over time, such as the pressure waves that make up sound.">analogue signal</dfn> &mdash; a continuous wave of varying air pressure. Computers cannot store continuous signals directly, so sound must be converted to digital form by taking regular measurements called <dfn class="term" data-def="A measurement of the amplitude of a sound wave taken at a single point in time, recorded as a binary number.">samples</dfn>. Each sample captures the amplitude (volume level) of the sound at that moment.</p>
+<p data-narration-id="n18">This conversion from analogue to digital is performed by an analogue-to-digital converter (ADC). Playback reverses the process through a digital-to-analogue converter (DAC), turning the stored numbers back into a continuous wave through a speaker.</p>
+
+<h2 data-narration-id="n19">Sampling Rate and Sample Resolution</h2>
+<p data-narration-id="n20"><dfn class="term" data-def="The number of samples taken per second when digitising sound, measured in hertz (Hz).">Sampling rate</dfn> is how many samples are captured every second, measured in hertz (Hz). A higher sampling rate captures the original sound wave more faithfully because it takes more measurements. CD-quality audio uses a sampling rate of 44,100 Hz &mdash; meaning 44,100 measurements are made every second.</p>
+<p data-narration-id="n21"><dfn class="term" data-def="The number of bits used to store each individual sound sample, also called bit depth. More bits means more precise volume levels can be recorded.">Sample resolution</dfn> (also called bit depth) is the number of bits used for each sample. A higher sample resolution captures more precise volume levels. CD-quality audio uses a 16-bit sample resolution, giving 65,536 possible amplitude levels per sample. Higher sample resolution produces richer, more detailed sound.</p>
+
+<div class="key-fact" data-narration-id="n22" data-revision-tip="Cover this. Write out the sound file size formula from memory, then use it: rate 44,100 Hz, resolution 16 bits, duration 10 seconds.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Sound file size (bits) = sampling rate &times; sample resolution &times; duration (seconds). To convert to bytes, divide by 8. Always check which unit the question asks for.</p>
+</div>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example: Calculating Sound File Size (CD Audio)</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n23"><strong>Problem:</strong> A 60-second piece of music is recorded at CD quality: sampling rate 44,100 Hz, sample resolution 16 bits. Calculate the file size in megabytes.</p>
+    <p data-narration-id="n24"><strong>Step 1</strong> &mdash; Apply the formula: Size (bits) = 44,100 &times; 16 &times; 60 = 42,336,000 bits.</p>
+    <p data-narration-id="n25"><strong>Step 2</strong> &mdash; Convert to bytes: 42,336,000 &divide; 8 = 5,292,000 bytes.</p>
+    <p data-narration-id="n26"><strong>Step 3</strong> &mdash; Convert to megabytes (1 MB = 1,000,000 bytes): 5,292,000 &divide; 1,000,000 = 5.292 MB &asymp; 5.3 MB.</p>
+    <p data-narration-id="n27"><strong>Note:</strong> This is for a single audio channel (mono). Stereo audio would double the file size to roughly 10.6 MB for 60 seconds. This is why CD-quality audio needs compression (MP3) to be practical for streaming.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n28">Quality Versus File Size</h2>
+<p data-narration-id="n29">Both image and sound files face the same trade-off: higher quality always means larger file size. For images, increasing resolution (more pixels) or colour depth (more bits per pixel) improves quality but uses more storage. For sound, increasing sampling rate or sample resolution captures the audio more accurately but grows the file. In practice, file size is managed through compression &mdash; covered in the next lesson.</p>
+<p data-narration-id="n30"><dfn class="term" data-def="Additional information stored alongside media data, such as the width, height and colour depth of an image or the sampling rate and resolution of an audio file.">Metadata</dfn> is stored alongside the pixel or sample data. For a bitmap image, metadata includes the width, height and colour depth. For a sound file, it includes the sampling rate and sample resolution. Metadata is not counted in the main file size calculation but it is always present in real files.</p>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n32">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n33">Bitmap images are stored as a grid of pixels. File size (bits) = W &times; H &times; D. Divide by 8 for bytes. Higher resolution or colour depth improves quality but increases file size.</li>
+  <li data-narration-id="n34">Sound is sampled from an analogue wave. File size (bits) = sampling rate &times; sample resolution &times; duration. Higher sampling rate and sample resolution give better audio fidelity but larger files.</li>
+  <li data-narration-id="n35">Both image and sound storage involve a quality/file-size trade-off. Metadata (width, height, colour depth, sampling rate) is stored alongside the main data but is not part of the core file size calculation.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n31">File size calculations are a staple exam question. Always show every step: write the formula, substitute the values, calculate the answer in bits, then divide by 8 for bytes and by 1,000 (or 1,000,000) for kilobytes or megabytes. The most common error is forgetting to divide by 8 when the question asks for bytes. Note that this specification uses the SI decimal prefixes: 1 kB = 1,000 bytes and 1 MB = 1,000,000 bytes &mdash; not 1,024. When answering questions about how quality affects file size, say &ldquo;increases file size because each pixel/sample requires more bits&rdquo; rather than just &ldquo;makes the file bigger&rdquo;.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "A bitmap image has a width of 400 pixels, a height of 300 pixels and a colour depth of 8 bits.\nCalculate the file size of this image. Give your answer in kilobytes (kB).\nShow your working.",
+  "type": "3 marks — Calculate",
+  "marks": "Mastering: Size (bits) = 400 × 300 × 8 = 960,000 bits → ÷8 = 120,000 bytes → ÷1000 = 120 kB. All three steps shown and correct answer 120 kB.\nSecure: Two correct steps shown with one arithmetic or conversion error, e.g. correct formula applied but wrong final unit conversion.\nDeveloping: Formula stated correctly (W × H × D) but calculation contains two or more errors.\nEmerging: Some reference to multiplying dimensions together but no complete calculation."
+ },
+ {
+  "text": "An audio file is recorded at a sampling rate of 22,050 Hz and a sample resolution of 8 bits. The recording is 30 seconds long.\nCalculate the file size in megabytes (MB). Show your working.",
+  "type": "3 marks — Calculate",
+  "marks": "Mastering: Size (bits) = 22,050 × 8 × 30 = 5,292,000 bits → ÷8 = 661,500 bytes → ÷1,000,000 = 0.6615 MB. All steps shown, correct answer.\nSecure: Correct formula applied with one conversion or arithmetic error.\nDeveloping: Formula stated (rate × resolution × duration) but significant calculation errors.\nEmerging: Some attempt to combine the three given values but no clear method."
+ },
+ {
+  "text": "Explain how increasing the colour depth of a bitmap image affects both image quality and file size.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: Clearly explains that more bits per pixel means more possible colours (e.g. 8-bit = 256 colours, 24-bit = 16+ million colours), which makes the image more realistic and detailed. Also clearly explains that more bits per pixel means more data stored per pixel, so file size increases proportionally. Both directions explained with specific detail.\nSecure: Both effects explained (quality improves, file size increases) with some supporting reason but not fully developed.\nDeveloping: States that quality improves and file size increases but gives no reason for either.\nEmerging: One correct effect identified but unexplained."
+ },
+ {
+  "text": "A 1-bit black and white bitmap image is 4 pixels wide and 4 pixels tall. The binary data for the image is:\n0110\n1001\n1001\n0110\nDraw the image on a 4 × 4 grid, shading pixels where the bit is 1.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: Correct 4 × 4 grid drawn. Row 1: columns 2 and 3 shaded (0110). Row 2: columns 1 and 4 shaded (1001). Row 3: columns 1 and 4 shaded (1001). Row 4: columns 2 and 3 shaded (0110). Image forms a diamond / ring shape.\nSecure: At least three rows correctly drawn.\nDeveloping: At least two rows correctly drawn.\nEmerging: At least one row correctly drawn."
+ },
+ {
+  "text": "State two differences between sampling rate and sample resolution.",
+  "type": "2 marks — State a Difference",
+  "marks": "One mark each, up to 2, for any two of: sampling rate is the number of samples per second / sample resolution is the number of bits per sample; sampling rate affects how closely spaced the measurements are in time / sample resolution affects how precisely each volume level is recorded; increasing sampling rate captures higher-frequency sounds / increasing sample resolution captures finer volume distinctions."
+ },
+ {
+  "text": "Which one of the following correctly gives the file size formula for a bitmap image?\nA) width + height + colour depth\nB) width × height × colour depth\nC) width × height ÷ colour depth\nD) (width + height) × colour depth",
+  "type": "1 mark — Multiple Choice",
+  "marks": "B) width × height × colour depth [1 mark]"
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "A bitmap image is 200 pixels wide and 100 pixels tall with a colour depth of 4 bits. What is the file size in bits?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "4,000 bits",
+   "80,000 bits",
+   "2,500 bits",
+   "160,000 bits"
+  ]
+ },
+ {
+  "q": "Which term describes the number of bits used to represent the colour of each pixel?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "Resolution",
+   "Sampling rate",
+   "Colour depth",
+   "Metadata"
+  ]
+ },
+ {
+  "q": "Sound file size (bits) = sampling rate × _____ × duration.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "frequency",
+   "amplitude",
+   "sample resolution",
+   "colour depth"
+  ]
+ },
+ {
+  "q": "CD-quality audio uses a sampling rate of _____ Hz.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "22,050",
+   "44,100",
+   "8,000",
+   "48,000"
+  ]
+ },
+ {
+  "q": "Match each term to its correct description:",
+  "left": [
+   "Pixel",
+   "Colour depth",
+   "Sample resolution"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   2,
+   1
+  ],
+  "right": [
+   "The smallest individual element of a digital image",
+   "Number of bits used to store each sound sample",
+   "Number of bits used to represent each pixel's colour"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "File size in bits, where W = width, H = height, D = colour depth.",
+  "q": "What does the image file size formula W × H × D calculate?"
+ },
+ {
+  "a": "10,000 bytes (100 × 100 × 8 = 80,000 bits ÷ 8).",
+  "q": "A bitmap is 100 × 100 pixels with 8-bit colour. What is its size in bytes?"
+ },
+ {
+  "a": "Picture element.",
+  "q": "What does pixel stand for?"
+ },
+ {
+  "a": "2 (black and white).",
+  "q": "A 1-bit colour depth allows how many colours?"
+ },
+ {
+  "a": "The number of bits used to represent the colour of each pixel.",
+  "q": "What is colour depth?"
+ },
+ {
+  "a": "A measurement of sound wave amplitude at a single point in time.",
+  "q": "What is a sample in digital sound recording?"
+ },
+ {
+  "a": "Hertz (Hz) — samples per second.",
+  "q": "What is sampling rate measured in?"
+ },
+ {
+  "a": "44,100 Hz.",
+  "q": "What sampling rate does CD-quality audio use?"
+ },
+ {
+  "a": "16 bits.",
+  "q": "What sample resolution does CD-quality audio use?"
+ },
+ {
+  "a": "Sampling rate × sample resolution × duration (seconds).",
+  "q": "Sound file size (bits) = _____ × _____ × _____."
+ },
+ {
+  "a": "Sound is an analogue (continuous) signal; computers can only store discrete binary values.",
+  "q": "Why must sound be sampled to store it digitally?"
+ },
+ {
+  "a": "Improves quality; increases file size.",
+  "q": "What does increasing sampling rate do to audio quality and file size?"
+ },
+ {
+  "a": "Divide by 8.",
+  "q": "To convert an image file size from bits to bytes, what do you do?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "pixel",
+  "definition": "The smallest individual element of a digital image. Short for picture element."
+ },
+ {
+  "term": "image size",
+  "definition": "The dimensions of a bitmap image measured in pixels: width × height."
+ },
+ {
+  "term": "colour depth",
+  "definition": "The number of bits used to represent the colour of each pixel. More bits means a greater range of possible colours."
+ },
+ {
+  "term": "analogue signal",
+  "definition": "A signal that varies continuously over time, such as the pressure waves that make up sound."
+ },
+ {
+  "term": "sample",
+  "definition": "A measurement of the amplitude of a sound wave taken at a single point in time, recorded as a binary number."
+ },
+ {
+  "term": "sampling rate",
+  "definition": "The number of samples taken per second when digitising sound, measured in hertz (Hz)."
+ },
+ {
+  "term": "sample resolution",
+  "definition": "The number of bits used to store each individual sound sample, also called bit depth. More bits means more precise volume levels can be recorded."
+ },
+ {
+  "term": "metadata",
+  "definition": "Additional information stored alongside media data, such as the width, height and colour depth of an image or the sampling rate and resolution of an audio file."
+ }
+]

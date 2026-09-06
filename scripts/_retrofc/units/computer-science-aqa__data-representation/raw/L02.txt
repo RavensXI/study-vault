@@ -1,0 +1,242 @@
+=== L2 Character Encoding: ASCII and Unicode ===
+id: 4b0c87fa-bc4d-4538-a978-394ec6cb30e3
+slug: character-encoding-ascii-and-unicode
+status: live tier:both updated:2026-07-30T22:31:02.245455+00:00
+narration_manifest: array len 25
+
+--- DESCRIPTION ---
+How characters are stored as binary, the ASCII table, and why Unicode replaced it for global text.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">How Computers Store Text</h2>
+<p data-narration-id="n2">A computer stores everything as binary &mdash; including the letters you type. To do this, every character must be assigned a unique number, which is then stored as its binary equivalent. A <dfn class="term" data-def="A defined list that assigns a unique numerical code to each character a computer can store or display, including letters, digits, punctuation and symbols.">character set</dfn> is the agreed list that maps each character to its code. Without a shared standard, a file created on one computer would display as gibberish on another.</p>
+
+<h2 data-narration-id="n3">ASCII: The 7-Bit Standard</h2>
+<p data-narration-id="n4"><dfn class="term" data-def="American Standard Code for Information Interchange. A 7-bit character encoding standard representing 128 characters, including the English alphabet (upper and lower case), digits 0&ndash;9, and common punctuation.">ASCII</dfn> (American Standard Code for Information Interchange) was developed to give early computers a common language for text. It uses <strong>7 bits</strong> per character, which allows for 2<sup>7</sup> = 128 unique codes (0 to 127). These 128 characters cover the upper-case English alphabet, the lower-case English alphabet, the digits 0&ndash;9, punctuation marks, and a set of control characters (such as &ldquo;new line&rdquo;).</p>
+<p data-narration-id="n5">The key principle behind ASCII is that codes are <strong>grouped and sequential</strong>. The upper-case letters run consecutively: A = 65, B = 66, C = 67, and so on up to Z = 90. The lower-case letters start at a = 97, b = 98, and continue to z = 122. The digit characters begin at 0 = 48, 1 = 49, and continue to 9 = 57. This means that if you know the code for one character in a group, you can calculate the code for any other in that group by counting up or down.</p>
+
+<div class="key-fact" data-narration-id="n6" data-revision-tip="Cover this and recall: what ASCII code is 'A'? What is 'a'? What is '0'? Now calculate the code for 'F' and for 'n'.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>In ASCII: upper-case A = 65, lower-case a = 97, digit 0 = 48. Because codes are sequential within each group, you can calculate any character&rsquo;s code: &lsquo;F&rsquo; = 65 + 5 = <strong>70</strong>. &lsquo;n&rsquo; = 97 + 13 = <strong>110</strong>. ASCII uses 7 bits and covers 128 characters (0&ndash;127).</p>
+</div>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example &mdash; Character Code Calculations</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n7"><strong>Example 1:</strong> Given that A = 65, what is the code for G?<br>
+    G is the 7th letter (A=1, B=2, C=3, D=4, E=5, F=6, G=7).<br>
+    G = 65 + (7 &minus; 1) = 65 + 6 = <strong>71</strong></p>
+    <p data-narration-id="n8"><strong>Example 2:</strong> A character has the ASCII code 100. What character is it?<br>
+    Lower-case a = 97. 100 &minus; 97 = 3. Count 3 letters on from a: b, c, <strong>d</strong>.<br>
+    The character is &lsquo;d&rsquo;.</p>
+    <p data-narration-id="n9"><strong>Example 3:</strong> Given that digit 0 = 48, what code represents the character &lsquo;7&rsquo;?<br>
+    7 is 7 positions after 0: 48 + 7 = <strong>55</strong>.<br>
+    Note: &lsquo;7&rsquo; as a character (code 55) is different from the integer 7 (the value itself). This distinction matters when sorting or comparing strings.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n10">The Limitation of ASCII</h2>
+<p data-narration-id="n11">With only 128 characters, ASCII has no space for accented letters (é, ñ, ü), Chinese or Arabic script, mathematical symbols beyond basic operators, or the emoji that modern communication relies on. As the internet connected the world, it became impossible to exchange text between different languages using ASCII alone. A website serving users in Japan, Saudi Arabia and Nigeria cannot represent all three languages in 7 bits.</p>
+
+<h2 data-narration-id="n12">Unicode: A Universal Standard</h2>
+<p data-narration-id="n13"><dfn class="term" data-def="A character encoding standard designed to represent every character used in every written language, as well as symbols and emoji. Unicode uses more bits per character than ASCII, allowing over a million unique codes.">Unicode</dfn> was developed to solve ASCII&rsquo;s limitations. Rather than 7 bits, Unicode uses more bits per character, allowing for far more than 128 code points. The Unicode standard can represent over one million distinct characters &mdash; enough for every writing system currently in use, historical scripts, mathematical symbols, scientific notation, and emoji.</p>
+<p data-narration-id="n14">An important design decision was that Unicode is <strong>backwards-compatible with ASCII</strong>: it uses exactly the same codes as ASCII for the first 128 characters (0&ndash;127). This means that any file stored using ASCII can be read by a Unicode system without any conversion. The letter A is still code 65 in Unicode, just as it is in ASCII.</p>
+
+<div class="key-fact" data-narration-id="n15" data-revision-tip="Test yourself: name two advantages of Unicode over ASCII, and explain what backwards-compatibility with ASCII means in practice.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Unicode uses the same codes as ASCII for characters 0&ndash;127, but extends far beyond to cover every writing system in use worldwide. This backwards-compatibility means ASCII files are readable by any Unicode system without conversion. Unicode can represent over one million characters; ASCII can only represent 128.</p>
+</div>
+
+<h2 data-narration-id="n16">Comparing ASCII and Unicode</h2>
+<p data-narration-id="n17">ASCII uses 7 bits per character and covers 128 characters. This is sufficient for English-language text and simple punctuation, and it uses less storage per character. Unicode uses more bits per character to support a vastly larger range of code points. The trade-off is that Unicode files require more storage space per character than ASCII files for the same English text. However, this cost is negligible on modern hardware, and the ability to represent all the world&rsquo;s languages in a single standard is worth it. Virtually every modern operating system, browser, and application uses Unicode.</p>
+<p data-narration-id="n18">You do not need to know the details of specific Unicode formats such as UTF-8 or UTF-16 for this course. Understanding that Unicode uses more bits than ASCII, supports far more characters, and remains backwards-compatible with ASCII codes 0&ndash;127 is what the exam requires.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Why Sequential Codes Matter for Sorting</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n19">Because character codes are sequential and grouped, computers can sort text alphabetically by comparing character codes numerically. &lsquo;A&rsquo; (65) comes before &lsquo;B&rsquo; (66) because 65 &lt; 66. All upper-case letters (65&ndash;90) come before all lower-case letters (97&ndash;122), which is why a list sorted by character code puts &lsquo;Z&rsquo; before &lsquo;a&rsquo;. This is called <strong>lexicographic</strong> order and it is how search engines, databases and spreadsheets perform string comparisons.</p>
+    <p data-narration-id="n20">It is also why you must be careful when comparing user input: the string &ldquo;7&rdquo; (character code 55) is not the same as the integer 7 (value 7). A sort on string values would place &ldquo;10&rdquo; before &ldquo;9&rdquo; because &lsquo;1&rsquo; (49) &lt; &lsquo;9&rsquo; (57) &mdash; another common programming mistake that character encoding helps explain.</p>
+  </div></div>
+</div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n22">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n23">ASCII uses 7 bits to represent 128 characters (codes 0&ndash;127). Character codes are grouped and sequential: A = 65, a = 97, &lsquo;0&rsquo; = 48. Calculate any character&rsquo;s code by counting from the group start.</li>
+  <li data-narration-id="n24">Unicode extends ASCII to cover over one million characters, enabling every writing system, symbol and emoji. It uses exactly the same codes as ASCII for 0&ndash;127, making the two standards backwards-compatible.</li>
+  <li data-narration-id="n25">ASCII needs less storage per character; Unicode needs more bits but supports a far greater range. You do not need to know UTF-8 or UTF-16 formats for this course.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n21">For character encoding questions, the most common task is &ldquo;given that A = 65, calculate the code for [letter]&rdquo;. Always count carefully &mdash; A is position 0 (code 65), not position 1. So &lsquo;C&rsquo; = 65 + 2 = 67, not 65 + 3. For &ldquo;advantages of Unicode over ASCII&rdquo; questions, always give at least two points: more characters supported (not just &ldquo;more languages&rdquo; &mdash; say how many more); backwards-compatible with ASCII codes 0&ndash;127. Avoid saying Unicode is &ldquo;better&rdquo; without explaining why. For comparison questions, note both the advantage (range) and the trade-off (more bits required per character).</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Which one of the following is the ASCII code for the character 'D', given that A = 65?\nA) 67\nB) 68\nC) 69\nD) 70",
+  "type": "1 mark — Multiple Choice",
+  "marks": "B) 68 [1 mark]\nA=65, B=66, C=67, D=68."
+ },
+ {
+  "text": "State one advantage of Unicode over ASCII.",
+  "type": "1 mark — Give/Name",
+  "marks": "One mark for any one of:\n• Unicode supports far more characters (over one million) compared to ASCII's 128.\n• Unicode can represent characters from all the world's writing systems, not just English.\n• Unicode allows emoji and mathematical symbols to be stored. [1 mark]"
+ },
+ {
+  "text": "Explain what is meant by the statement that Unicode is backwards-compatible with ASCII.",
+  "type": "2 marks — Define",
+  "marks": "One mark each up to two:\n• Unicode uses the same character codes as ASCII for codes 0–127 [1]\n• So a file encoded using ASCII can be read correctly by a Unicode system without any conversion [1]"
+ },
+ {
+  "text": "A student is told that in ASCII, the code for upper-case 'A' is 65.\n(a) State the code for upper-case 'M'. [1 mark]\n(b) A character has the code 116 in ASCII. Given that lower-case 'a' = 97, state the character. [1 mark]\n(c) Explain why character codes are designed to be sequential within groups. [2 marks]",
+  "type": "4 marks — Explain",
+  "marks": "(a) 77 (A=65, M is the 13th letter, 65+12=77) [1 mark]\n(b) 't' (116 - 97 = 19; 19th letter after a = t) [1 mark]\n(c) One mark each up to two:\n• Sequential codes allow you to calculate the code for any character in the group once you know one code, without needing a lookup table [1]\n• Sequential codes allow computers to sort characters alphabetically by comparing their numerical codes [1]"
+ },
+ {
+  "text": "Compare ASCII and Unicode as character encoding standards. In your answer, refer to the number of bits used, the number of characters each can represent, and the relationship between the two standards.",
+  "type": "6 marks — Compare and Contrast",
+  "marks": "Mastering: Structured comparison of all three areas (bits used, characters supported, relationship). Each comparison makes an explicit link between the two standards rather than listing facts about each separately. Correct figures quoted (128 characters, 7 bits for ASCII; over one million for Unicode; same codes 0–127).\nSecure: At least two of the three areas compared clearly. Correct figures for at least one area. Some explicit comparison rather than just listing.\nDeveloping: One area compared with some accuracy. Limited development.\nEmerging: Simple statement that Unicode supports more characters or more languages, without developed comparison."
+ },
+ {
+  "text": "Explain why character encoding standards such as ASCII and Unicode were needed as computers began to exchange data across networks and between countries.",
+  "type": "4 marks — Explain",
+  "marks": "One mark each up to four:\n• Without a shared standard, the same binary code would represent different characters on different systems [1]\n• ASCII covered English characters only, making it unsuitable for international communication [1]\n• As the internet connected computers worldwide, a standard that could represent all languages became essential [1]\n• Unicode provided a single universal standard covering all writing systems, solving the interoperability problem [1]"
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "How many characters can 7-bit ASCII represent?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "64",
+   "126",
+   "128",
+   "256"
+  ]
+ },
+ {
+  "q": "Given that A = 65 in ASCII, what is the code for 'E'?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "68",
+   "69",
+   "70",
+   "71"
+  ]
+ },
+ {
+  "q": "Unicode uses the same character codes as ASCII for codes _____ to 127.",
+  "type": "fill",
+  "correct": 0,
+  "options": [
+   "0",
+   "32",
+   "64",
+   "100"
+  ]
+ },
+ {
+  "q": "In ASCII, lower-case 'a' has the code _____ .",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "65",
+   "90",
+   "97",
+   "48"
+  ]
+ },
+ {
+  "q": "Match each character encoding feature to the correct standard:",
+  "left": [
+   "Uses 7 bits per character",
+   "Represents over one million characters",
+   "Uses the same codes for characters 0–127 as ASCII"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   1,
+   2
+  ],
+  "right": [
+   "ASCII",
+   "Unicode",
+   "Unicode"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "7 bits.",
+  "q": "How many bits does 7-bit ASCII use per character?"
+ },
+ {
+  "a": "128",
+  "q": "How many characters can ASCII represent?"
+ },
+ {
+  "a": "65",
+  "q": "What is the ASCII code for upper-case 'A'?"
+ },
+ {
+  "a": "97",
+  "q": "What is the ASCII code for lower-case 'a'?"
+ },
+ {
+  "a": "48",
+  "q": "What is the ASCII code for the digit character '0'?"
+ },
+ {
+  "a": "72 (H is the 8th letter: 65 + 7 = 72).",
+  "q": "Calculate the ASCII code for 'H', given that A = 65."
+ },
+ {
+  "a": "A list that assigns a unique numerical code to each character a computer can store or display.",
+  "q": "What is a character set?"
+ },
+ {
+  "a": "It only covers 128 characters — enough for English but not other languages or scripts.",
+  "q": "Why does ASCII fail to support global text exchange?"
+ },
+ {
+  "a": "Unicode uses the same codes as ASCII for characters 0–127, so ASCII files can be read by Unicode systems.",
+  "q": "What does it mean that Unicode is backwards-compatible with ASCII?"
+ },
+ {
+  "a": "ASCII uses fewer bits per character, so takes less storage space.",
+  "q": "Give one advantage of ASCII over Unicode."
+ },
+ {
+  "a": "No — only that Unicode uses more bits than ASCII and supports far more characters.",
+  "q": "Do you need to know UTF-8 or UTF-16 for this course?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "character set",
+  "definition": "A defined list that assigns a unique numerical code to each character a computer can store or display, including letters, digits, punctuation and symbols."
+ },
+ {
+  "term": "ASCII",
+  "definition": "American Standard Code for Information Interchange. A 7-bit character encoding standard representing 128 characters, including the English alphabet (upper and lower case), digits 0–9, and common punctuation."
+ },
+ {
+  "term": "Unicode",
+  "definition": "A character encoding standard designed to represent every character used in every written language, as well as symbols and emoji. Unicode uses more bits per character than ASCII, allowing over a million unique codes."
+ }
+]

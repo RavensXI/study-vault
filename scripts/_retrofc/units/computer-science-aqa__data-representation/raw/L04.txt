@@ -1,0 +1,267 @@
+=== L4 Data Compression: Huffman and Run-Length Encoding ===
+id: 78751653-a881-4aba-b495-c04038ea8560
+slug: data-compression-huffman-and-run-length-encoding
+status: live tier:both updated:2026-07-30T22:38:03.101612+00:00
+narration_manifest: array len 39
+
+--- DESCRIPTION ---
+Why files get compressed, how Huffman trees produce short codes for common characters, and how RLE works.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">Why Compress Data?</h2>
+<p data-narration-id="n2"><dfn class="term" data-def="The process of encoding data so that it takes up less storage space or can be transmitted more quickly.">Data compression</dfn> reduces the size of a file. Smaller files download faster, cost less to transmit over a network and consume less storage space. A high-definition video without compression could occupy hundreds of gigabytes &mdash; compression makes streaming and cloud storage practical at everyday internet speeds.</p>
+<p data-narration-id="n3">This lesson covers two <dfn class="term" data-def="A compression method that reduces file size without removing any data, so the original file can be perfectly reconstructed.">lossless compression</dfn> techniques: Huffman coding and run-length encoding (RLE). Both methods remove redundancy from the data without discarding any information &mdash; the original file can be recovered perfectly from the compressed version.</p>
+
+<div class="key-fact" data-narration-id="n4" data-revision-tip="Cover this and recall: what is lossless compression and how does it differ from a method that permanently removes data?">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Lossless compression reduces file size without losing any data. The original file can be perfectly reconstructed. This is essential whenever data integrity matters &mdash; for example, text files, program code, medical images and database backups.</p>
+</div>
+
+<h2 data-narration-id="n5">Huffman Coding</h2>
+<p data-narration-id="n6"><dfn class="term" data-def="A lossless compression algorithm that assigns shorter binary codes to characters that appear more frequently and longer codes to characters that appear less frequently.">Huffman coding</dfn> exploits the fact that in any real piece of text, some characters appear far more often than others. Standard encoding uses the same number of bits for every character (for example, 7-bit ASCII uses 7 bits for every character, regardless of frequency). Huffman coding assigns shorter codes to common characters and longer codes to rare ones, so on average fewer bits are needed.</p>
+<p data-narration-id="n7">The algorithm produces a <dfn class="term" data-def="A tree structure used in Huffman coding where each leaf represents a character and the path from root to leaf gives the character's binary code.">Huffman tree</dfn>. To read a character&rsquo;s code, you trace a path from the root of the tree to the leaf node labelled with that character. Each left branch adds a 0 to the code and each right branch adds a 1 (or the reverse &mdash; the convention is set when the tree is built). Characters that appear most often are placed nearest the root, so their codes are shortest.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Interpreting a Huffman Tree &mdash; Worked Example</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n8">Suppose a Huffman tree is given for four characters. Reading left as 0 and right as 1:</p>
+    <p data-narration-id="n9">Character E (most frequent) &mdash; at depth 1 &mdash; code: <strong>0</strong> (1 bit).</p>
+    <p data-narration-id="n10">Character T (second most frequent) &mdash; at depth 2 &mdash; code: <strong>10</strong> (2 bits).</p>
+    <p data-narration-id="n11">Character A &mdash; at depth 3 &mdash; code: <strong>110</strong> (3 bits).</p>
+    <p data-narration-id="n12">Character Z (least frequent) &mdash; at depth 3 &mdash; code: <strong>111</strong> (3 bits).</p>
+    <p data-narration-id="n13">To encode the string &ldquo;EETA&rdquo;: E=0, E=0, T=10, A=110 &rarr; <strong>0 0 10 110</strong> = 8 bits total. In standard 7-bit ASCII, &ldquo;EETA&rdquo; would need 4 &times; 7 = 28 bits. Huffman encoding saves 20 bits for this short string.</p>
+    <p data-narration-id="n14"><strong>Important:</strong> In your exam you will always be given the Huffman tree. You are not required to construct a tree from scratch &mdash; only to read codes from a given tree and calculate the total bits saved.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n15">Calculating Bits Saved by Huffman Coding</h2>
+<p data-narration-id="n16">To calculate bits saved, compare the bits needed to store the message in ASCII against the bits needed using the Huffman codes from the tree:</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked Example: Bits Saved Calculation</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n17"><strong>Problem:</strong> A message contains 10 characters. In ASCII (7 bits per character), storage = 10 &times; 7 = 70 bits. Using a Huffman tree, the 10 characters need a total of 28 bits. How many bits are saved?</p>
+    <p data-narration-id="n18"><strong>Step 1</strong> &mdash; ASCII bits = number of characters &times; 7 = 10 &times; 7 = 70 bits.</p>
+    <p data-narration-id="n19"><strong>Step 2</strong> &mdash; Huffman bits = sum of (frequency of each character &times; its code length from the tree). Here given as 28 bits.</p>
+    <p data-narration-id="n20"><strong>Step 3</strong> &mdash; Bits saved = 70 &minus; 28 = <strong>42 bits saved</strong>.</p>
+    <p data-narration-id="n21">Follow this method exactly: calculate ASCII total first, then Huffman total, then subtract. Show each step to gain method marks.</p>
+  </div></div>
+</div>
+
+<div class="key-fact" data-narration-id="n22" data-revision-tip="Close this and write out the three steps for calculating bits saved by Huffman coding. Check you included: ASCII total, Huffman total, subtraction.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Bits saved = (number of characters &times; 7) &minus; (sum of frequency &times; code length for each character). Always show both totals before subtracting. Examiners award method marks for visible working.</p>
+</div>
+
+<h2 data-narration-id="n23">Run-Length Encoding (RLE)</h2>
+<p data-narration-id="n24"><dfn class="term" data-def="A lossless compression technique that represents sequences of repeated values as a count followed by the value, stored as frequency/data pairs.">Run-length encoding (RLE)</dfn> works on data that contains long runs of repeated values. Instead of storing each repeated value separately, RLE stores it as a pair: the count (how many times the value repeats) followed by the value itself. These are called <strong>frequency/data pairs</strong>.</p>
+<p data-narration-id="n25">RLE is especially effective for simple bitmap images with large areas of solid colour, such as diagrams, logos or fax transmissions. It is not effective on photographic images where adjacent pixels rarely share the same value.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>RLE Worked Example &mdash; Bitmap Row</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n26">Consider this 16-bit bitmap row (0 = white, 1 = black):</p>
+    <p data-narration-id="n27"><strong>Original data:</strong> <code>0000011100000011</code></p>
+    <p data-narration-id="n28">Reading left to right: five 0s, then three 1s, then six 0s, then two 1s.</p>
+    <p data-narration-id="n29"><strong>RLE frequency/data pairs:</strong> <code>5 0 3 1 6 0 2 1</code></p>
+    <p data-narration-id="n30">Original: 16 values. Compressed: 8 values (4 pairs). For this row, RLE halves the data.</p>
+    <p data-narration-id="n31"><strong>Remember:</strong> RLE writes the <em>count first</em>, then the <em>value</em>. So &ldquo;5 0&rdquo; means five zeros; &ldquo;3 1&rdquo; means three ones.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n32">When RLE Works Well &mdash; and When It Doesn&rsquo;t</h2>
+<p data-narration-id="n33">RLE performs best when the data has long, uninterrupted runs of the same value. A solid-colour logo might compress dramatically. However, if the data alternates frequently (e.g. <code>010101</code>), RLE actually <em>increases</em> the file size, because each single value requires its own count-value pair. You would produce <code>1 0 1 1 1 0 1 1 1 0 1 1</code> &mdash; 12 values instead of 6. Understanding this limitation is important for exam questions that ask you to evaluate whether RLE is suitable for a given scenario.</p>
+<p data-narration-id="n34">Huffman coding, by contrast, is effective for any text data since natural language always has uneven character frequencies. The two techniques suit different types of data and can even be combined in more advanced compression systems.</p>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n36">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n37">Lossless compression reduces file size without losing data. Huffman coding assigns shorter binary codes to more frequent characters; you read codes from a given tree by tracing root to leaf. Bits saved = ASCII total &minus; Huffman total.</li>
+  <li data-narration-id="n38">Run-length encoding replaces repeated values with frequency/data pairs. The example <code>0000011100000011</code> becomes <code>5 0 3 1 6 0 2 1</code>. RLE is effective on data with long runs but counterproductive on rapidly alternating data.</li>
+  <li data-narration-id="n39">Always show your working in calculation questions. Examiners award marks for each correct step even if the final answer is wrong.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n35">For Huffman questions, you will always be given the tree &mdash; you do not need to construct one. When tracing a code, write each bit as you move down the tree and be careful to read left as 0 and right as 1 (or as stated in the question). For the bits-saved calculation, always show the ASCII total first (characters &times; 7), then calculate the Huffman total by summing frequency &times; code length for each character in the message, then subtract. For RLE, write pairs in the order count then value, and remember that frequent alternation makes RLE worse, not better. Both types of question regularly appear as 4&ndash;6 mark questions with marks for method, not just the final answer.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "A Huffman tree is given for a message containing four characters. The codes are: A = 0 (1 bit), B = 10 (2 bits), C = 110 (3 bits), D = 111 (3 bits). The message is: AABACDA\nCalculate the total number of bits needed to store this message using the Huffman codes.",
+  "type": "3 marks — Calculate",
+  "marks": "Mastering: Counts each character correctly: A appears 4 times × 1 bit = 4; B appears 2 times × 2 bits = 4; C appears 1 time × 3 bits = 3; D appears 1 time × 3 bits = 3. Total = 4 + 4 + 3 + 3 = 14 bits. All steps shown.\nSecure: Correct method applied with one counting or multiplication error.\nDeveloping: Attempts to multiply frequency × code length but significant errors.\nEmerging: Some reference to using the code lengths but no systematic calculation."
+ },
+ {
+  "text": "Using the same Huffman codes from question 1 (A = 0, B = 10, C = 110, D = 111), the message AABACDA contains 7 characters.\nCalculate how many bits are saved compared to storing the message in standard 7-bit ASCII.",
+  "type": "3 marks — Calculate",
+  "marks": "Mastering: ASCII bits = 7 × 7 = 49 bits. Huffman bits = 14 bits (from Q1). Bits saved = 49 − 14 = 35 bits. All three steps shown.\nSecure: Correct ASCII and Huffman totals but arithmetic error in subtraction, or Huffman total from own working in Q1 correctly used.\nDeveloping: ASCII total correct (49) but Huffman total incorrect.\nEmerging: Attempts ASCII total only."
+ },
+ {
+  "text": "A row of pixels in a black-and-white bitmap is represented by the following binary sequence:\n1111110000001111\nRepresent this data using run-length encoding. Write your answer as frequency/data pairs.",
+  "type": "2 marks — Define",
+  "marks": "Full marks (2): 6 1 6 0 4 1\nOne mark: correct identification of the three runs (six 1s, six 0s, four 1s) but pairs written in wrong order (value before count).\nNo marks: incorrect grouping of runs."
+ },
+ {
+  "text": "Explain why run-length encoding would not be an effective method of compression for a high-resolution photograph.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: Explains that in a photograph, adjacent pixels have many different colours/values and do not repeat in long runs. RLE replaces runs of identical values with count-value pairs, so if there are no long runs, every pixel needs its own pair. This means the compressed data could be the same size as or larger than the original. Contrast with simple diagrams where RLE is effective.\nSecure: States that photographs have frequently changing pixel values and RLE needs repeated values, so it would not compress effectively.\nDeveloping: States that photographs are complex but does not explain the link to RLE's mechanism.\nEmerging: States that RLE works on repetition but does not apply this to photographs."
+ },
+ {
+  "text": "Explain the difference between lossless and lossy compression. Give one example of when lossless compression must be used.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: Lossless — file size is reduced but no data is removed; the original file can be perfectly reconstructed. Lossy — data is permanently removed to achieve a smaller file; the original cannot be fully recovered. Good example of lossless necessity: compressing program code, medical scans, text documents, or database backups where data integrity is critical.\nSecure: Both types correctly described and one valid use case given.\nDeveloping: One type described correctly.\nEmerging: Vague reference to data being lost or kept."
+ },
+ {
+  "text": "Which one of the following best describes how Huffman coding achieves compression?\nA) Removing data permanently to make the file smaller\nB) Assigning shorter codes to more frequently occurring characters\nC) Replacing repeated values with a count and the value\nD) Storing only every second character and reconstructing the rest",
+  "type": "1 mark — Multiple Choice",
+  "marks": "B) Assigning shorter codes to more frequently occurring characters [1 mark]"
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "What does lossless compression guarantee about the original file?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "It will be half the original size",
+   "It can be perfectly reconstructed",
+   "Some data will be permanently removed",
+   "It is converted to a different format"
+  ]
+ },
+ {
+  "q": "In run-length encoding, what does the sequence '4 0' represent?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "A single 0 followed by a 4",
+   "Four 1s",
+   "Four 0s",
+   "Zero repeated four times and once"
+  ]
+ },
+ {
+  "q": "In Huffman coding, characters that appear most frequently are assigned _____ binary codes.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "the longest",
+   "the shortest",
+   "7-bit ASCII",
+   "random"
+  ]
+ },
+ {
+  "q": "The binary sequence 0000011100000011 in RLE becomes: 5 0 3 1 _____ 0 2 1.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "4",
+   "5",
+   "6",
+   "7"
+  ]
+ },
+ {
+  "q": "Match each term to its description:",
+  "left": [
+   "Huffman coding",
+   "Run-length encoding",
+   "Lossless compression"
+  ],
+  "type": "match",
+  "order": [
+   1,
+   2,
+   0
+  ],
+  "right": [
+   "Compression where the original file can be perfectly restored",
+   "Assigns shorter codes to more frequent characters",
+   "Stores repeated values as count/value pairs"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "Encoding data so it takes up less storage space or transmits faster.",
+  "q": "What is data compression?"
+ },
+ {
+  "a": "Lossless compression.",
+  "q": "What type of compression can perfectly restore the original file?"
+ },
+ {
+  "a": "The shortest binary code.",
+  "q": "What does Huffman coding assign to the most frequent character?"
+ },
+ {
+  "a": "Trace the path from root to the character's leaf node.",
+  "q": "In a Huffman tree, how do you find a character's binary code?"
+ },
+ {
+  "a": "ASCII total − Huffman total.",
+  "q": "Bits saved by Huffman = _____ − _____."
+ },
+ {
+  "a": "7 bits.",
+  "q": "How many bits does standard ASCII use per character?"
+ },
+ {
+  "a": "A count of how many times a value repeats, followed by the value.",
+  "q": "What are frequency/data pairs in RLE?"
+ },
+ {
+  "a": "5 0 3 1 6 0 2 1.",
+  "q": "Convert 0000011100000011 to RLE frequency/data pairs."
+ },
+ {
+  "a": "When data values alternate frequently with no long repeated runs.",
+  "q": "When is RLE least effective?"
+ },
+ {
+  "a": "Program code (or: text files, medical images, database backups).",
+  "q": "Give one data type where lossless compression is essential."
+ },
+ {
+  "a": "Common characters use fewer bits; rare ones use more, so average bit use falls.",
+  "q": "What makes Huffman coding more efficient than fixed-length encoding?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "data compression",
+  "definition": "The process of encoding data so that it takes up less storage space or can be transmitted more quickly."
+ },
+ {
+  "term": "lossless compression",
+  "definition": "A compression method that reduces file size without removing any data, so the original file can be perfectly reconstructed."
+ },
+ {
+  "term": "Huffman coding",
+  "definition": "A lossless compression algorithm that assigns shorter binary codes to characters that appear more frequently and longer codes to characters that appear less frequently."
+ },
+ {
+  "term": "Huffman tree",
+  "definition": "A tree structure used in Huffman coding where each leaf represents a character and the path from root to leaf gives the character's binary code."
+ },
+ {
+  "term": "run-length encoding (RLE)",
+  "definition": "A lossless compression technique that represents sequences of repeated values as a count followed by the value, stored as frequency/data pairs."
+ }
+]
