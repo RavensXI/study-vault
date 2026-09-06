@@ -130,7 +130,10 @@ R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), video on R2
     awaits Entra admin consent; that consent gates student identity and
     therefore everything teacher-facing per-pupil.
   - **Teachers:** individual Supabase Auth accounts, invited by admin,
-    scoped via `teacher_subjects`. One consolidated screen at
+    scoped via `teacher_subjects`. Two kinds of row: subjects on the
+    invitation carry can_edit/can_publish (review + editor links appear);
+    subjects a teacher ticks on sign-up are a teaching declaration only
+    (both false). One consolidated screen at
     `/teacher/classes`. Boundary rules: teachers SEE attainment +
     misconceptions; behaviour aggregate-only; never study habits; NO
     work-setting/assignments/due dates (vision boundary).
