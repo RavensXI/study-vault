@@ -77,6 +77,11 @@ generated column `lessons.is_listening` (indexed; migration 20260906130000).
 `batch_podcasts.py`, `batch_explainer_videos.py` and `/admin/build-status`
 skip or separately count them. Any new consumer of "article lessons" must
 exclude `is_listening`.
+Deck standard (7 Sep 2026): the 20 Edexcel/Eduqas listening lessons follow the
+approved guided-listening deck — docked player with verified numbered pins, a
+cover card, one ~75-word statement card per pin, an exam checklist, ≤9 cards
+(builders + timing audit in `scripts/_content_music_listening_rebuild/`); the 4
+music-aqa listening rows still use the older long-deck layout.
 
 **Tier gaps (accurate 29 Aug 2026):**
 - **Diagrams**: Unity-only (Gemini diagrams stripped from free tier Apr 2026;
