@@ -15,6 +15,9 @@
 body[data-staff="teacher"] {
   --t-paper:#f6f1e7; --t-card:#fffdf8; --t-ink:#26231e; --t-sec:#57534a;
   --t-mut:#84806f; --t-line:#e4dfd2; --t-linel:#efeadf; --t-anchor:#5b4632;
+  --t-good:#245b40; --t-goodbg:#eef4ef; --t-goodline:#cfe1d5;
+  --t-bad:#8f3728; --t-badbg:#f7ece9; --t-badline:#eddcd7;
+  --t-inset:#faf6ec;
 
   background: var(--t-paper);
   color: var(--t-ink);
@@ -124,3 +127,122 @@ body[data-staff="teacher"] button.primary:hover {
    admin-only); offering a button that always 403s is just a worse way of
    saying no. */
 body[data-staff="teacher"] [data-admin-only] { display: none !important; }
+
+/* ============================================================
+   Sign in and sign up  —  teacher/login.html, teacher/signup.html
+   ------------------------------------------------------------
+   The two doors a school walks through first, and until now the only
+   teacher screens still wearing the old slate-and-purple kit: dark
+   masthead, violet accent, centred copy. Everything below puts them on
+   the same tokens, the same masthead and the same controls as
+   /teacher/classes, so signing in and then arriving at your classes is
+   one product rather than two.
+
+   Scoped to body.auth-page, which ONLY those two files carry.
+   /teacher/classes.html does not link this stylesheet at all, and
+   /teacher/review and /teacher/editor get data-staff WITHOUT
+   .auth-page — so nothing here can reach any of them.
+
+   The pages also carry data-staff="teacher", which is what supplies the
+   tokens, the paper background and the masthead colours above. The card
+   surface is the shell's own .card rule; only its padding and width are
+   set here.
+   ============================================================ */
+
+body.auth-page { margin:0; min-height:100vh; display:flex; flex-direction:column;
+  line-height:1.55; -webkit-font-smoothing:antialiased; }
+body.auth-page *, body.auth-page *::before, body.auth-page *::after {
+  box-sizing:border-box; margin:0; padding:0; }
+
+/* ---- masthead: the classes-screen bar, minus the signed-in nav ---- */
+.auth-page .top { border-bottom:1px solid var(--t-line); background:var(--t-paper); }
+.auth-page .top-in { max-width:1120px; margin:0 auto; padding:0 26px; height:62px;
+  display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.auth-page .brand { font-size:1.24rem; font-weight:500; color:#3d3428;
+  text-decoration:none; letter-spacing:-.01em; }
+.auth-page .brand b { font-weight:800; }
+.auth-page .top nav { display:flex; align-items:center; gap:18px; font-size:.87rem; }
+.auth-page .top nav a { color:var(--t-sec); text-decoration:none; }
+.auth-page .top nav a:hover { color:var(--t-ink); }
+
+/* ---- the card ----
+   Top-biased rather than vertically centred: the sign-up form is tall
+   enough on a phone that true centring would push its heading off the
+   top of the screen. */
+.auth-page .auth-main { flex:1; display:flex; justify-content:center; align-items:flex-start;
+  padding:clamp(26px,6vh,64px) 22px 72px; }
+.auth-page .auth-card { width:100%; max-width:430px; padding:28px 28px 24px; }
+.auth-page .auth-card--wide { max-width:468px; }
+
+.auth-page .card-title { font-family:'Literata',Georgia,serif; font-size:1.5rem;
+  font-weight:600; letter-spacing:-.012em; color:var(--t-ink); }
+.auth-page .card-subtitle { font-size:.92rem; color:var(--t-sec); margin:.4rem 0 1.35rem;
+  max-width:46ch; }
+
+/* ---- fields ----
+   Labels and hints take --t-sec, not --t-mut: at label size --t-mut is 3.9:1
+   on the card, under AA. */
+.auth-page .form-group { margin-bottom:14px; }
+.auth-page .form-label { display:block; font-size:.8rem; font-weight:600;
+  color:var(--t-sec); margin-bottom:5px; }
+.auth-page .form-input { width:100%; font:inherit; font-size:.95rem; color:var(--t-ink);
+  background:#fff; border:1px solid var(--t-line); border-radius:10px; padding:10px 12px; }
+.auth-page .form-input:focus { border-color:var(--t-anchor); }
+/* the address the invitation was sent to: shown, not editable, and it should
+   look settled rather than broken */
+.auth-page .form-input[readonly] { background:var(--t-inset); color:var(--t-sec); }
+.auth-page .form-hint { font-size:.79rem; color:var(--t-sec); margin-top:5px; }
+
+/* ---- messages ----
+   Bordered all round and tinted, never a coloured edge-stripe. Both are
+   live regions, so a failed sign-in is announced and not merely drawn. */
+.auth-page .form-error, .auth-page .form-success {
+  display:none; font-size:.87rem; border-radius:10px; padding:9px 12px; margin-bottom:12px; }
+.auth-page .form-error { color:var(--t-bad); background:var(--t-badbg); border:1px solid var(--t-badline); }
+.auth-page .form-success { color:var(--t-good); background:var(--t-goodbg); border:1px solid var(--t-goodline); }
+.auth-page .form-error.visible, .auth-page .form-success.visible { display:block; }
+
+/* ---- buttons ---- */
+.auth-page .form-btn { display:block; width:100%; font:inherit; font-size:.95rem;
+  font-weight:600; cursor:pointer; background:var(--t-anchor); color:#fdfaf3;
+  border:1px solid var(--t-anchor); border-radius:11px; padding:11px 20px; margin-top:16px; }
+.auth-page .form-btn:hover { background:#4a3829; border-color:#4a3829; }
+.auth-page .form-btn:disabled { opacity:.55; cursor:not-allowed; }
+
+/* Secondary actions are buttons, not bare anchors with no href: the old
+   markup could not be reached by keyboard at all. */
+.auth-page .forgot-link { display:block; margin-top:12px; background:none; border:none;
+  font:inherit; font-size:.87rem; font-weight:600; color:var(--t-anchor);
+  cursor:pointer; text-align:left; }
+.auth-page .forgot-link:hover { text-decoration:underline; }
+
+/* ---- the school an invitation belongs to ---- */
+.auth-page .auth-meta { background:var(--t-inset); border:1px solid var(--t-line);
+  border-radius:12px; padding:10px 13px; margin-bottom:18px; }
+.auth-page .auth-meta-label { display:block; font-size:.72rem; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--t-sec); }
+.auth-page .auth-meta-value { display:block; font-size:.98rem; font-weight:600;
+  color:var(--t-ink); margin-top:2px; }
+
+/* ---- footer of the card ---- */
+.auth-page .auth-foot { margin-top:22px; padding-top:16px; border-top:1px solid var(--t-line);
+  font-size:.87rem; color:var(--t-sec); }
+.auth-page .auth-foot p + p { margin-top:7px; }
+.auth-page .auth-foot a { color:var(--t-anchor); font-weight:600; text-decoration:none; }
+.auth-page .auth-foot a:hover { text-decoration:underline; }
+
+/* ---- sign-up's four states ---- */
+.auth-page .view { display:none; }
+.auth-page .view.active { display:block; }
+.auth-page .loading-text { color:var(--t-sec); font-size:.92rem; padding:8px 0 18px; }
+
+/* ---- focus: always visible, on every control ---- */
+.auth-page a:focus-visible, .auth-page button:focus-visible {
+  outline:2px solid var(--t-anchor); outline-offset:2px; border-radius:4px; }
+
+@media (max-width:480px) {
+  .auth-page .top-in { padding:0 18px; }
+  .auth-page .auth-main { padding:24px 16px 56px; }
+  .auth-page .auth-card { padding:22px 20px 20px; }
+  .auth-page .card-title { font-size:1.34rem; }
+}
