@@ -1,0 +1,79 @@
+{
+ "unit": "health-social-care-edexcel / health-and-wellbeing",
+ "checked_at": "2026-09-06",
+ "spec_used": "specs/edexcel/health-and-social-care-btec-2022.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "practice_questions",
+   "severity": "HIGH",
+   "claim": "Model answer for the 10-mark case study: \"Person-specific: At 45, Amir is in middle adulthood where health risks increase naturally.\"",
+   "truth": "The spec sets early adulthood at 19-45 years and middle adulthood at 46-65 years. A 45-year-old is in early adulthood. The mark scheme rewards the wrong life-stage boundary on the one synoptic point the question asks for.",
+   "evidence": "spec Component 1 A1 life stages (specs/edexcel/health-and-social-care-btec-2022.md, 'early adulthood (19-45 years)', 'middle adulthood (46-65 years)')",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 9,
+   "field": "practice_questions",
+   "severity": "HIGH",
+   "claim": "Mark scheme for the 10-mark Tariq case study lists \"Barriers: geographical (stress management course location), financial (cost of gym), time (long working hours making appointments difficult)\" and then lists \"Obstacles: time constraints (60 hours/week)\".",
+   "truth": "The question tests the barrier/obstacle distinction. In the spec, time constraints and availability of resources (financial, equipment, amenities - a gym membership) are personal obstacles; barriers are the system-level list (physical, sensory, social/cultural, language, geographical, resource for the provider, financial charges/transport/lost income). The scheme credits time as a barrier AND as an obstacle in the same answer, so it marks the exact misconception the lesson warns against.",
+   "evidence": "spec Component 3 C3 (barriers list and obstacles list) and Component 2 B3 ('time constraints - work and family commitments', 'availability of resources - financial, equipment, amenities'); lesson 9 content_html teaches the same split",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 0,
+   "field": "content_html / practice_questions",
+   "severity": "MEDIUM",
+   "claim": "The literal string \"Component 1\" appears seven times across lessons 2, 3, 4, 5, 10 and 11 (synoptic-link bullets in mark schemes, the L4 exam tip, and L10/L11 opening prose). It is on the checker's banned-string list, which rejects a whole unit.",
+   "truth": "Two options. (a) Whitelist \"Component 1/2/3\" for BTEC Tech Award units: these are the qualification's own component names, printed on the exam paper and on the spec cover, not board paper/section codes or mark-scheme wording, and Component 3 is defined as synoptic across the other two - a student cannot be taught the synoptic links without naming them. (b) Reword every occurrence to a description such as \"the human lifespan development component\", which is vaguer than what the learner will see in the exam. Recommendation: (a) whitelist for BTEC; the ban exists to stop reproduction of board paper codes such as \"Paper 1 Section B\", which is not what these are.",
+   "evidence": "scripts/_retrofc/CHECK_PROMPT_GENERIC.md banned-string list; spec structure section (Components 1 and 2 internal 36 GLH each, Component 3 external synoptic 48 GLH)",
+   "verdict": "NOTE",
+   "ruling": "NOTE: 'Component 1/2/3' are BTEC's own component names, printed on the paper - kept. Validator only rejects NEW violations, so the finish is unaffected; whitelist recorded for the validator."
+  },
+  {
+   "id": "F4",
+   "lesson": 8,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "The 10-mark case study gives Priya \"a resting heart rate of 95 bpm\" and the mark scheme rewards \"increase physical activity to lower heart rate and BMI\".",
+   "truth": "95 bpm sits inside the published normal range of 60-100 bpm. The recommendation is not wrong (activity does lower resting heart rate) but no band credits the student who correctly reads the figure as normal, which is the interpretation skill the exam actually tests. Better teaching would pick a figure above 100 bpm, as lesson 5 does with Mark at 105 bpm.",
+   "evidence": "spec Component 3 B1 'resting heart rate (pulse) - normal range 60 to 100 bpm'",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F5",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "\"Screen use before bed is a common cause of light pollution affecting young people.\"",
+   "truth": "Light pollution means excessive or misdirected artificial light in the outdoor environment - street lights, floodlights, illuminated buildings. Screen light before bed does disrupt the circadian rhythm, but it is not light pollution. The environmental effect described (street lights into a bedroom) is already covered correctly in the same paragraph, so the claim costs no marks; it is a definition slip only.",
+   "evidence": "spec Component 3 A1 'exposure to pollution - air, noise and light' (an environmental factor of the home's surroundings)",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F6",
+   "lesson": 0,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "All 12 lessons use \"Lower band\" in their band ladders (30 occurrences). No lesson uses \"Low band\".",
+   "truth": "The house band vocabulary is Top band / Upper-mid band / Mid band / Lower-mid band / Low band. Several lessons also run a four-rung ladder of Top / Upper-mid / Lower-mid / Lower, so \"Lower band\" and \"Lower-mid band\" sit next to each other and read as near-duplicates. Not a fact error - hand to the band-ladder relabel queue rather than editing here.",
+   "evidence": "house band vocabulary; grep of raw/L01-L12",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [
+  2,
+  3,
+  5,
+  6,
+  7,
+  10,
+  11,
+  12
+ ],
+ "summary": "Two mark-scheme answer-key errors: a 45-year-old placed in middle adulthood (the spec puts 19-45 in early adulthood), and a scheme that credits time constraints as a system barrier in the very question that tests the barrier/obstacle split. Every figure in the unit is correct - BMI bands 18.5-24.9/25-29.9/30-39.9/40+, blood pressure 90/60-120/80 ideal and 140/90+ high, resting heart rate 60-100 bpm, 150 minutes and 60 minutes activity, 14 alcohol units over 3+ days, unit arithmetic, 5 A Day, Eatwell 'just over a third' and 6-8 glasses, the six life stages, the 6 Cs, and the spec's barrier and obstacle lists - and all 60 knowledge-check and match keys recompute correctly."
+}
