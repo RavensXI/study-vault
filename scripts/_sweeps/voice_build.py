@@ -35,11 +35,19 @@ edits, problems = [], []
 for n, old, new in spec.get("pairs", []):
     r = recs[n]
     raw = r["raw"]
-    if raw.count(old) != 1:
-        problems.append(f"#{n}: fragment occurs {raw.count(old)}x in the sentence: {old!r}\n     {raw!r}")
+    # a fragment may run past the flagged sentence (rewriting a subject that the
+    # NEXT sentence pronominalises); the find then stretches to cover it
+    window = raw + (r.get("after") or "")
+    if window.count(old) != 1:
+        problems.append(f"#{n}: fragment occurs {window.count(old)}x in the sentence: {old!r}\n     {raw!r}")
         continue
+    i = window.index(old)
+    if i >= len(raw):
+        problems.append(f"#{n}: fragment starts outside the flagged sentence: {old!r}")
+        continue
+    find = window[:max(len(raw), i + len(old))]
     edits.append({"lesson_id": r["lesson_id"], "field": r["field"], "n": n,
-                  "find": raw, "replace": raw.replace(old, new, 1)})
+                  "find": find, "replace": find.replace(old, new, 1)})
 skipped = [{"lesson_id": recs[n]["lesson_id"], "lesson_number": recs[n]["lesson_number"],
             "field": recs[n]["field"], "reason": why, "sentence": recs[n]["plain"]}
            for n, why in spec.get("skipped", [])]
