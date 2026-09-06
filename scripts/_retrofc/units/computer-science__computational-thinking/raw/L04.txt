@@ -1,0 +1,279 @@
+=== L4 Sorting Algorithms ===
+id: 98afc0d9-84c3-461c-a550-e193ce6aeb2f
+slug: sorting-algorithms
+status: live tier:both updated:2026-08-30T01:55:21.009908+00:00
+narration_manifest: array len 26
+
+--- DESCRIPTION ---
+How bubble, insertion and merge sort put a list in order, and which one to pick.
+
+--- CONTENT_HTML ---
+<p data-narration-id="n1">A list is far easier to work with when its items are in order. An ordered list is quicker to scan by eye, quicker to search with a computer, and some fast search methods will only work at all once the data has been arranged from smallest to largest. Putting items into order &mdash; ascending numbers, or names into alphabetical order &mdash; is the job of a sorting method.</p>
+
+<p data-narration-id="n2">A <dfn class="term" data-def="A set of steps that arranges the items in a list into a chosen order, such as smallest to largest or alphabetical.">sorting algorithm</dfn> takes an unordered list and rearranges it into the required order. There is no single &lsquo;best&rsquo; sorting algorithm; each one trades speed, memory use and simplicity against the others. This lesson looks at three of them &mdash; bubble sort, insertion sort and merge sort &mdash; and at how to judge which is the better choice for a job.</p>
+
+<h3 data-narration-id="n3">Bubble sort</h3>
+
+<p data-narration-id="n4"><dfn class="term" data-def="A sorting method that repeatedly compares neighbouring items and swaps any that are in the wrong order.">Bubble sort</dfn> works by comparing pairs of neighbouring items and swapping them when they are in the wrong order. A <dfn class="term" data-def="Exchanging the positions of two items in a list.">swap</dfn> simply exchanges the two values. Starting from the front, the algorithm compares the first and second items, then the second and third, and so on to the end of the list.</p>
+
+<p data-narration-id="n5">Each complete run through the list is called a <dfn class="term" data-def="One complete run through a list, from the first item to the last, during a sort.">pass</dfn>. During the first pass the largest value keeps being swapped rightwards until it reaches the end &mdash; it &lsquo;bubbles&rsquo; to the top. Bubble sort keeps making passes, each one settling the next-largest value into place, until it completes a whole pass without making a single swap. When that happens the list is known to be in order.</p>
+
+<div class="key-fact" data-narration-id="n6" data-revision-tip="Cover this and recall: which items does bubble sort compare, and which value is guaranteed to be in place after pass one?">
+<div class="key-fact-label">Key Fact</div>
+<p>Bubble sort only ever compares <em>adjacent</em> items. After each full pass, the largest remaining value is guaranteed to be in its correct place at the end of the list.</p>
+</div>
+
+<div class="collapsible">
+<button class="collapsible-toggle" aria-expanded="false"><span>Bubble sort: worked example</span><svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+<div class="collapsible-content"><div class="collapsible-inner">
+<p data-narration-id="n7">Sort the list 5, 1, 4, 2 into ascending order. <strong>Pass 1:</strong> compare 5 and 1, they are in the wrong order so swap &rarr; 1, 5, 4, 2. Compare 5 and 4, swap &rarr; 1, 4, 5, 2. Compare 5 and 2, swap &rarr; 1, 4, 2, 5. The largest value, 5, has now bubbled to the end. <strong>Pass 2:</strong> compare 1 and 4, no swap; compare 4 and 2, swap &rarr; 1, 2, 4, 5. A final pass makes no swaps at all, so the algorithm stops &mdash; the list is sorted.</p>
+</div></div>
+</div>
+
+<h3 data-narration-id="n8">Insertion sort</h3>
+
+<p data-narration-id="n9"><dfn class="term" data-def="A sorting method that builds a sorted section at the front of the list, inserting each new item into its correct place.">Insertion sort</dfn> builds a sorted section at the start of the list, one item at a time. The very first item is treated as a sorted list of one. The algorithm then takes the next unsorted item and inserts it into its correct position within the already-sorted section, shifting any larger items one place to the right to make room.</p>
+
+<p data-narration-id="n10">This is much like sorting a hand of playing cards: you pick up each new card and slide it into the right spot among the cards you already hold. Because insertion sort moves items by shifting them along rather than repeatedly swapping across the whole list, it is often very quick when a list is already nearly in order &mdash; each new item usually needs to move only a short distance.</p>
+
+<div class="collapsible">
+<button class="collapsible-toggle" aria-expanded="false"><span>Insertion sort: worked example</span><svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+<div class="collapsible-content"><div class="collapsible-inner">
+<p data-narration-id="n11">Sort the list 3, 7, 4, 1. The sorted section starts as just [3]. Take 7: it is larger than 3, so it stays where it is &rarr; [3, 7]. Take 4: it is smaller than 7, so shift 7 right; it is larger than 3, so insert 4 between them &rarr; [3, 4, 7]. Take 1: it is smaller than every sorted item, so shift 7, 4 and 3 each one place right and place 1 at the front &rarr; [1, 3, 4, 7]. The list is now sorted.</p>
+</div></div>
+</div>
+
+<h3 data-narration-id="n12">Merge sort</h3>
+
+<p data-narration-id="n13"><dfn class="term" data-def="A sorting method that repeatedly splits a list into halves, then merges the pieces back together in order.">Merge sort</dfn> uses a strategy called <dfn class="term" data-def="Breaking a problem into smaller sub-problems, solving each one, then combining the results.">divide and conquer</dfn>. It repeatedly splits the list in half, and splits the halves again, until every sub-list holds just a single item. A list of one item cannot be out of order, so each of these tiny lists is already sorted.</p>
+
+<p data-narration-id="n14">The clever part is the merging. Two sorted sub-lists are combined by repeatedly comparing their front items and taking the smaller one, until all the values have been copied into a single, larger sorted list. This merging is repeated, joining pairs of sub-lists into ever-longer sorted lists, until one fully sorted list remains.</p>
+
+<div class="key-fact" data-narration-id="n15" data-revision-tip="Close this and explain in one sentence why a sub-list of one item is already sorted in merge sort.">
+<div class="key-fact-label">Key Fact</div>
+<p>Merge sort first splits the list down to single items, then merges pairs back together in order. A sub-list of one item is treated as already sorted because a single value cannot be out of order.</p>
+</div>
+
+<div class="collapsible">
+<button class="collapsible-toggle" aria-expanded="false"><span>Merge sort: worked example</span><svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+<div class="collapsible-content"><div class="collapsible-inner">
+<p data-narration-id="n16">Sort the list 6, 2, 7, 1. Split it into [6, 2] and [7, 1], then split again into [6], [2], [7] and [1]. Now merge: [6] and [2] combine to [2, 6]; [7] and [1] combine to [1, 7]. Finally merge [2, 6] with [1, 7]: compare 2 and 1, take 1; compare 2 and 7, take 2; compare 6 and 7, take 6; then take the last value, 7. The result is [1, 2, 6, 7].</p>
+</div></div>
+</div>
+
+<h3 data-narration-id="n17">Comparing the algorithms</h3>
+
+<p data-narration-id="n18">Bubble sort and insertion sort are simple to understand and easy to write. They also work <dfn class="term" data-def="An algorithm that sorts a list using little or no extra memory beyond the original list.">in place</dfn>, meaning they need very little extra memory. Their weakness is speed: as a list grows, the number of comparisons they must make rises steeply, so they become slow on large amounts of data.</p>
+
+<p data-narration-id="n19">Merge sort copes far better with large lists &mdash; the amount of work it does grows much more gently as the list gets longer. The trade-off is that it needs extra memory to hold all the sub-lists while they are being merged, and it is more complicated to write than the other two.</p>
+
+<p data-narration-id="n20">As a rule of thumb, the simple sorts are perfectly good for short lists, while merge sort is usually the better choice for large ones. Of the three, bubble sort generally does the most comparing and swapping, so in practice it tends to be the slowest.</p>
+
+<div class="key-fact" data-narration-id="n21" data-revision-tip="Write from memory: one advantage and one disadvantage of merge sort compared with bubble sort.">
+<div class="key-fact-label">Key Fact</div>
+<p>Merge sort is much faster than bubble sort on large lists, but it uses more memory because it must store the sub-lists while merging them.</p>
+</div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n23">Key Takeaways</h3>
+<ul>
+<li data-narration-id="n24">Bubble sort compares adjacent items and swaps them, making repeated passes until a pass has no swaps; the largest value settles at the end each pass.</li>
+<li data-narration-id="n25">Insertion sort grows a sorted section at the front, shifting larger items right to slot each new item into place &mdash; fast on nearly-sorted lists.</li>
+<li data-narration-id="n26">Merge sort splits the list into single items then merges them back in order; it is faster on large lists but uses more memory than the simple sorts.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n22">When a question says &lsquo;trace&rsquo; or asks you to apply an algorithm to a data set, write out the whole list after every pass or merge &mdash; do not just give the final answer, as the working carries the marks. Watch the command word closely: &lsquo;describe&rsquo; wants the steps of one algorithm, while &lsquo;compare&rsquo; wants clear differences between algorithms, usually covering both how they work and how efficient they are. A common slip is forgetting that bubble sort settles the <em>largest</em> value at the end after the first pass, not the smallest.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Which statement best describes how bubble sort works? A) It splits the list in half and merges the pieces back together. B) It compares adjacent items and swaps any that are in the wrong order. C) It builds a sorted section at the front by inserting each new item. D) It checks the middle item and discards half of the list each time.",
+  "type": "1 mark — Multiple Choice",
+  "marks": "Correct answer: B (bubble sort compares adjacent items and swaps those in the wrong order). 1 mark. A describes merge sort, C describes insertion sort, D describes a search method rather than a sort."
+ },
+ {
+  "text": "State what merge sort does to the list before it begins merging any items back together.",
+  "type": "1 mark — State/Identify",
+  "marks": "1 mark for stating that it repeatedly splits/divides the list in half until each sub-list contains a single item. Accept 'breaks the list down into individual items'."
+ },
+ {
+  "text": "Describe what happens during a single pass of bubble sort.",
+  "type": "2 marks — Describe",
+  "marks": "1 mark per valid point to a maximum of 2. Points: it moves through the list comparing each pair of adjacent items; it swaps a pair whenever they are in the wrong order (larger before smaller for ascending). Secure: both compare and conditional-swap given. Developing: only one point given."
+ },
+ {
+  "text": "Explain why merge sort is usually a better choice than bubble sort for sorting a very large list.",
+  "type": "3 marks — Explain",
+  "marks": "Mastering: clearly links merge sort's divide-and-conquer approach to far fewer comparisons as the list grows, so it stays fast on large lists, while acknowledging bubble sort's comparisons rise steeply. Secure: states merge sort is faster on large lists because the work grows more gently. Developing: states merge sort is faster without explaining why. Emerging: vague or unsupported statement."
+ },
+ {
+  "text": "Trace a bubble sort on the list 8, 3, 5, 1 sorting into ascending order. Write out the full list after each complete pass until it is sorted.",
+  "type": "4 marks — Trace an Algorithm",
+  "marks": "1 mark for each correct pass state, to a maximum of 4. After pass 1: 3, 5, 1, 8. After pass 2: 3, 1, 5, 8. After pass 3: 1, 3, 5, 8. Final pass makes no swaps, confirming the sorted list 1, 3, 5, 8. Mastering: all pass states correct and in order. Developing: some pass states correct with minor slips."
+ },
+ {
+  "text": "Compare bubble sort, insertion sort and merge sort. Refer to how each one works and to how efficient each is, then recommend which you would use to sort a very large list, giving a reason.",
+  "type": "6 marks — Compare",
+  "marks": "Mastering: accurate account of all three methods (bubble: swap adjacent pairs over repeated passes; insertion: build a sorted front section by shifting; merge: split then merge halves), a clear efficiency comparison (merge sort scales best on large lists but uses more memory; the simple sorts are easy and in-place but slow on large lists), and a justified recommendation of merge sort for a large list. Secure: describes all three and makes a supported recommendation. Developing: describes some methods with a partial comparison. Emerging: lists methods with little comparison or justification."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "After the first complete pass of a bubble sort (ascending order), which value is guaranteed to be in its correct place?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "The smallest value, at the front",
+   "The largest value, at the end",
+   "The middle value, in the centre",
+   "None can be guaranteed yet"
+  ]
+ },
+ {
+  "q": "Which sorting algorithm uses a divide-and-conquer strategy?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "Bubble sort",
+   "Insertion sort",
+   "Merge sort",
+   "Linear sort"
+  ]
+ },
+ {
+  "q": "In insertion sort, larger items are _____ one place to the right to make room for the new item.",
+  "type": "fill",
+  "correct": 0,
+  "options": [
+   "shifted",
+   "deleted",
+   "doubled",
+   "reversed"
+  ]
+ },
+ {
+  "q": "Merge sort treats a sub-list that contains a single item as already _____.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "merged",
+   "sorted",
+   "reversed",
+   "empty"
+  ]
+ },
+ {
+  "q": "Match each sorting algorithm to how it works.",
+  "left": [
+   "Bubble sort",
+   "Insertion sort",
+   "Merge sort"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   1,
+   2
+  ],
+  "right": [
+   "Compares and swaps adjacent pairs over repeated passes",
+   "Builds a sorted section at the front, shifting items along",
+   "Splits the list into halves then merges them back in order"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "When the two adjacent items being compared are in the wrong order.",
+  "q": "In bubble sort, when are two items swapped?"
+ },
+ {
+  "a": "One complete run through the list, from the first item to the last.",
+  "q": "What is a 'pass' in a sorting algorithm?"
+ },
+ {
+  "a": "The largest value, now at the end of the list.",
+  "q": "After the first pass of bubble sort, which item is in its final place?"
+ },
+ {
+  "a": "When it completes a full pass without making any swaps.",
+  "q": "How does bubble sort know the list is sorted?"
+ },
+ {
+  "a": "It grows a sorted section at the front and inserts each new item into place.",
+  "q": "How does insertion sort build up the sorted list?"
+ },
+ {
+  "a": "It shifts larger items one place to the right.",
+  "q": "What does insertion sort do to make room for a new item?"
+ },
+ {
+  "a": "A list that is already nearly in order.",
+  "q": "On what kind of list is insertion sort especially fast?"
+ },
+ {
+  "a": "Breaking a problem into smaller parts, solving each, then combining the results.",
+  "q": "What does 'divide and conquer' mean?"
+ },
+ {
+  "a": "Splitting each list in half.",
+  "q": "What does merge sort keep doing until every sub-list has one item?"
+ },
+ {
+  "a": "By repeatedly taking the smaller of the two front items.",
+  "q": "How are two sorted sub-lists merged into one?"
+ },
+ {
+  "a": "It has to store the sub-lists while it merges them.",
+  "q": "Why does merge sort need extra memory?"
+ },
+ {
+  "a": "Merge sort.",
+  "q": "Which sort is usually the best choice for a very large list?"
+ },
+ {
+  "a": "Bubble sort.",
+  "q": "Which of the three sorts generally does the most work?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "sorting algorithm",
+  "definition": "A set of steps that arranges the items in a list into a chosen order, such as smallest to largest or alphabetical."
+ },
+ {
+  "term": "Bubble sort",
+  "definition": "A sorting method that repeatedly compares neighbouring items and swaps any that are in the wrong order."
+ },
+ {
+  "term": "swap",
+  "definition": "Exchanging the positions of two items in a list."
+ },
+ {
+  "term": "pass",
+  "definition": "One complete run through a list, from the first item to the last, during a sort."
+ },
+ {
+  "term": "Insertion sort",
+  "definition": "A sorting method that builds a sorted section at the front of the list, inserting each new item into its correct place."
+ },
+ {
+  "term": "Merge sort",
+  "definition": "A sorting method that repeatedly splits a list into halves, then merges the pieces back together in order."
+ },
+ {
+  "term": "divide and conquer",
+  "definition": "Breaking a problem into smaller sub-problems, solving each one, then combining the results."
+ },
+ {
+  "term": "in place",
+  "definition": "An algorithm that sorts a list using little or no extra memory beyond the original list."
+ }
+]

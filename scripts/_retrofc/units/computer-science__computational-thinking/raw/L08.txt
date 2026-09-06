@@ -1,0 +1,281 @@
+=== L8 Defensive Design & Input Validation ===
+id: 81bb943c-0627-424e-8fc9-35e89c4e882f
+slug: defensive-design
+status: live tier:both updated:2026-07-30T22:39:19.138667+00:00
+narration_manifest: array len 22
+
+--- DESCRIPTION ---
+How robust programs handle invalid input, confirm who users are and stay easy to maintain.
+
+--- CONTENT_HTML ---
+<h2 data-narration-id="n1">Programs Have to Cope With Real People</h2>
+<p data-narration-id="n2">When you test your own code, you type exactly what it expects. Real users are less predictable. They leave boxes blank, type letters where a number is needed, paste in a thousand characters, or tap buttons in the wrong order. <dfn class="term" data-def="Designing a program so that it keeps working sensibly even when the user enters unexpected, invalid or malicious input.">Defensive design</dfn> is the habit of writing a program that stays under control no matter what the user throws at it. A program that behaves like this is described as <em>robust</em>.</p>
+<p data-narration-id="n3">Getting this wrong is expensive. A program that is not robust can crash and lose the user&rsquo;s work, store nonsense in a file, or open a security hole that lets an attacker in. Building defences in from the start is far cheaper than patching a broken program later, so professional programmers plan for bad input before they write a single line that trusts it.</p>
+
+<h2 data-narration-id="n4">Anticipating Misuse</h2>
+<p data-narration-id="n5"><dfn class="term" data-def="Predicting the mistakes and deliberate attacks a user might make, and writing the program so it handles them safely.">Anticipating misuse</dfn> means asking, before you write the code, &ldquo;How might someone break this?&rdquo; You then make sure each of those situations is handled instead of ignored. Some inputs cause a mistake by accident; others are deliberate attempts to make the program fail.</p>
+<ul data-narration-id="n6">
+  <li>Leaving a required field completely empty.</li>
+  <li>Typing letters or symbols where a number is expected.</li>
+  <li>Entering an impossible value, such as an age of &minus;5 or 300.</li>
+  <li>Giving a date that does not exist, like the 31st of February.</li>
+  <li>Pasting in an enormous amount of text to try to overload the program.</li>
+</ul>
+<p data-narration-id="n7">A well-designed program anticipates each case and responds gracefully. Instead of crashing, it shows a clear, polite message that tells the user what went wrong and how to fix it, then lets them try again. Guarding against a value that would break a calculation &mdash; such as dividing by zero &mdash; is another example of anticipating misuse.</p>
+
+<h2 data-narration-id="n8">Input Validation</h2>
+<p data-narration-id="n9"><dfn class="term" data-def="Automatic checks that test whether entered data is sensible and allowable before the program processes it.">Input validation</dfn> is the most important defensive tool. It runs a series of checks on data the moment it is entered, and only lets the data through if it passes. Validation confirms that data is <em>reasonable</em> and <em>allowable</em>; it cannot prove the data is actually true. A validation check will happily accept the wrong-but-sensible age of 21, so validation reduces errors rather than removing them completely.</p>
+<p data-narration-id="n10">There are several standard checks, and a single field often uses more than one of them at once.</p>
+<ul data-narration-id="n11">
+  <li>A <strong>presence check</strong> makes sure a required field has not been left empty.</li>
+  <li>A <strong>range check</strong> confirms a number falls between an acceptable lower and upper limit, such as a month between 1 and 12.</li>
+  <li>A <strong>type check</strong> confirms the data is the correct data type, for example a whole number rather than text.</li>
+  <li>A <strong>length check</strong> confirms the data has an acceptable number of characters, such as a password of at least eight.</li>
+  <li>A <strong>format check</strong> confirms the data follows a required pattern, such as an email address containing an &ldquo;@&rdquo; symbol.</li>
+</ul>
+<div class="key-fact" data-narration-id="n12" data-revision-tip="Cover this and list the five validation checks, giving one example of what each one would reject.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The five common validation checks are presence, range, type, length and format. Presence rejects an empty box, range rejects a number that is too big or too small, type rejects the wrong data type, length rejects data with the wrong number of characters, and format rejects data that breaks the required pattern.</p>
+</div>
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>What validation can and cannot do</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n13">It is easy to assume that validated data must be correct, but that is not what validation promises. If a user is asked for their year of birth and types 1999 when they were really born in 2000, a range check sees a sensible four-digit year and lets it through. Validation only guarantees that data is <em>possible</em> and <em>allowable</em>, so a robust program still needs sensible defaults, clear instructions and helpful error messages to catch the mistakes that validation cannot see.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n14">Authentication</h2>
+<p data-narration-id="n15"><dfn class="term" data-def="Confirming that a user really is who they claim to be before granting access.">Authentication</dfn> protects a program by checking the identity of the person using it. The most common method is a username and password: the username says who you claim to be, and the password proves it because only the real account holder should know it. A program should compare the entered details against stored records and refuse access if they do not match.</p>
+<p data-narration-id="n16">Passwords are only useful if they are hard to guess. A strong password is a good length and mixes uppercase and lowercase letters, numbers and symbols, which makes it far harder for an attacker to work out. Many systems add extra layers, such as two-factor authentication &mdash; where a password is combined with a second check like a code sent to a phone &mdash; along with biometrics such as a fingerprint, or security questions. Each extra layer makes it harder for someone to pretend to be a genuine user.</p>
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Why password length matters so much</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n17">Every extra character you add to a password multiplies the number of possible combinations an attacker would have to try. A short password made only of lowercase letters can be broken quickly by a computer testing millions of guesses, while a longer password that also uses capitals, digits and symbols has so many combinations that guessing becomes impractical. This is why systems often insist on a minimum length and a mixture of character types &mdash; a rule that is enforced using a length check and a format check.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n18">Maintainability</h2>
+<p data-narration-id="n19"><dfn class="term" data-def="How easy a program is to understand, correct and update after it has been written.">Maintainability</dfn> is a part of defensive design that is often forgotten. Programs are read, fixed and improved for years, often by a different programmer from the one who wrote them. Code that is tidy and clearly explained can be changed safely; code that is a tangled mess is where new bugs are introduced. Four simple habits make a program much easier to maintain.</p>
+<p data-narration-id="n20">First, use <dfn class="term" data-def="A named, self-contained block of code, such as a function or procedure, that can be called whenever it is needed.">sub programs</dfn> to break a large task into smaller named pieces. This avoids writing the same block of code twice, so if a mistake is found it only has to be fixed in one place. Second, follow sensible <dfn class="term" data-def="Agreed rules for choosing clear, consistent identifier names for variables, functions and other items in a program.">naming conventions</dfn> so that a variable called <em>totalPrice</em> tells the reader exactly what it holds, unlike a vague name such as <em>x</em>.</p>
+<p data-narration-id="n21">Third, use consistent <strong>indentation</strong> so the shape of the code shows its structure &mdash; which lines sit inside a loop or a condition. Fourth, add <dfn class="term" data-def="Notes written into the source code to explain it to humans; they are ignored by the computer when the program runs.">comments</dfn> to explain anything that is not obvious. A comment is written for the programmer, not the computer, so it never changes what the program does, but it can save hours of confusion later.</p>
+<div class="key-fact" data-narration-id="n22" data-revision-tip="Close this and name the four techniques that make a program easier to maintain, with one sentence on how each one helps.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Four techniques improve maintainability: using sub programs to avoid repeated code, following clear naming conventions, indenting code to show its structure, and adding comments to explain how it works.</p>
+</div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n24">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n25">Defensive design builds a robust program that anticipates misuse and stays under control when users enter unexpected input.</li>
+  <li data-narration-id="n26">Input validation uses presence, range, type, length and format checks to keep out unsuitable data, and authentication confirms a user really is who they claim to be.</li>
+  <li data-narration-id="n27">Sub programs, clear naming conventions, indentation and comments make a program easier and safer to maintain in the future.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n23">Watch the command word. &ldquo;State&rdquo; or &ldquo;Identify&rdquo; wants a short, named answer, while &ldquo;Describe&rdquo; and &ldquo;Explain&rdquo; expect you to say <em>how</em> or <em>why</em> as well. A very common mistake is to confuse validation with authentication: validation checks that <em>data</em> is sensible, while authentication checks that a <em>user</em> is genuine &mdash; keep the two separate. When you name a validation check, always back it up with a concrete example of an input it would reject, because the example is usually where the marks are.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "State what is meant by the term input validation.",
+  "type": "1 mark — Short response",
+  "marks": "One mark for a correct statement, e.g. automatic checks that test whether entered data is sensible or allowable before the program processes it. Accept: reasonable / acceptable / within set limits."
+ },
+ {
+  "text": "Describe what is meant by 'anticipating misuse' as part of defensive design.",
+  "type": "2 marks — Short response",
+  "marks": "One mark for identifying that the programmer predicts how a user might enter wrong data or try to break the program; one mark for saying the program is then written to handle those situations safely rather than crash. Example (blank field, letters instead of a number, impossible value) may earn a mark. Secure: both points made clearly. Developing: one point only."
+ },
+ {
+  "text": "A program asks a user to enter their age in whole years. Describe two validation checks that could be applied to this input, and state what each one would reject.",
+  "type": "3 marks — Short response",
+  "marks": "Up to three marks. One mark for each correctly named and described check (e.g. presence check rejects an empty box; type check rejects letters/decimals; range check rejects an age below 0 or above a sensible upper limit). A third mark for a clear example of a rejected input. Secure: two checks named with what each rejects. Developing: one valid check, or checks named without saying what they reject."
+ },
+ {
+  "text": "Explain how authentication helps to make a login system more secure. Refer to one example in your answer.",
+  "type": "4 marks — Short response",
+  "marks": "Mastering: clear explanation that authentication confirms the user's identity before granting access, with a developed example (e.g. a username identifies the claim and a password proves it, or two-factor authentication adds a code sent to a phone) and why this blocks unauthorised users. Secure: correct purpose plus a relevant example. Developing: partial idea, such as naming a method without explaining how it improves security. Emerging: vague reference to passwords with no explanation."
+ },
+ {
+  "text": "Describe two techniques a programmer can use to make a program easier to maintain, explaining how each technique helps.",
+  "type": "4 marks — Short response",
+  "marks": "Up to four marks: two marks per technique (one for naming it, one for explaining the benefit). Valid techniques: sub programs (avoid repeated code / fix a bug in one place), naming conventions (self-explanatory identifiers), indentation (shows code structure), commenting (explains code to future programmers). Secure: two techniques with a correct benefit each. Developing: techniques named without a clear benefit."
+ },
+ {
+  "text": "Discuss how defensive design and input validation can be used to make a program that stores new user accounts robust and secure.",
+  "type": "6 marks — Extended response",
+  "marks": "Mastering: a balanced discussion linking several ideas — anticipating misuse (blank or oversized entries), a range of validation checks on each field (presence, length and format on a password; format on an email), authentication for returning users, strong-password rules enforced by length and format checks, and maintainable code so the system can be fixed safely. Points are justified with clear reasons. Secure: several relevant techniques described with some justification. Developing: a few valid techniques listed with limited explanation. Emerging: one or two isolated points with little development."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which validation check makes sure a required field has not been left empty?",
+  "type": "mcq",
+  "correct": 0,
+  "options": [
+   "Presence check",
+   "Range check",
+   "Length check",
+   "Format check"
+  ]
+ },
+ {
+  "q": "What is the main purpose of authentication?",
+  "type": "mcq",
+  "correct": 0,
+  "options": [
+   "To confirm the identity of a user",
+   "To make a program run faster",
+   "To reduce the size of stored data",
+   "To sort a list into order"
+  ]
+ },
+ {
+  "q": "A _____ check confirms that a number falls between an acceptable lower and upper limit.",
+  "type": "fill",
+  "correct": 0,
+  "options": [
+   "range",
+   "presence",
+   "format",
+   "length"
+  ]
+ },
+ {
+  "q": "_____ design means predicting how a user might misuse a program and handling those situations safely.",
+  "type": "fill",
+  "correct": 0,
+  "options": [
+   "Defensive",
+   "Iterative",
+   "Modular",
+   "Physical"
+  ]
+ },
+ {
+  "q": "Match each maintainability technique to what it does.",
+  "left": [
+   "Commenting",
+   "Indentation",
+   "Naming conventions",
+   "Sub programs"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "right": [
+   "explains code to humans but is ignored when the program runs",
+   "shows the structure of the code, such as loops and conditions",
+   "gives variables clear, self-explanatory names",
+   "avoid repeating the same block of code"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "Building a program so it keeps working sensibly when users enter unexpected or invalid input.",
+  "q": "What is defensive design?"
+ },
+ {
+  "a": "Checking that entered data is sensible and allowable before the program processes it.",
+  "q": "What is input validation?"
+ },
+ {
+  "a": "Predicting how users might enter wrong data or break a program, then handling it.",
+  "q": "What is 'anticipating misuse'?"
+ },
+ {
+  "a": "Checks the data entered is the correct data type, such as a whole number.",
+  "q": "What does a type check do?"
+ },
+ {
+  "a": "Checks data has an acceptable number of characters.",
+  "q": "What does a length check do?"
+ },
+ {
+  "a": "Checks data follows a required pattern, such as an email containing an @ symbol.",
+  "q": "What does a format check do?"
+ },
+ {
+  "a": "No; it only confirms data is sensible and allowable, not that it is correct.",
+  "q": "Can validation prove that data is true?"
+ },
+ {
+  "a": "A fingerprint or other biometric check.",
+  "q": "Give one authentication method other than a password."
+ },
+ {
+  "a": "Each extra character multiplies possible combinations, making guessing far harder.",
+  "q": "Why does a longer password improve security?"
+ },
+ {
+  "a": "Uppercase and lowercase letters combined with numbers and symbols.",
+  "q": "What character types should a strong password mix together?"
+ },
+ {
+  "a": "Using a password plus a second check, such as a code sent to a phone.",
+  "q": "What is two-factor authentication?"
+ },
+ {
+  "a": "How easy a program is to understand, correct and update in the future.",
+  "q": "What is maintainability?"
+ },
+ {
+  "a": "So the code is easier to read and understand.",
+  "q": "Why give variables meaningful names?"
+ },
+ {
+  "a": "They avoid repeating code and let a bug be fixed in one place.",
+  "q": "Why use sub programs?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "Defensive design",
+  "definition": "Designing a program so that it keeps working sensibly even when the user enters unexpected, invalid or malicious input."
+ },
+ {
+  "term": "Anticipating misuse",
+  "definition": "Predicting the mistakes and deliberate attacks a user might make, and writing the program so it handles them safely."
+ },
+ {
+  "term": "Input validation",
+  "definition": "Automatic checks that test whether entered data is sensible and allowable before the program processes it."
+ },
+ {
+  "term": "Authentication",
+  "definition": "Confirming that a user really is who they claim to be before granting access."
+ },
+ {
+  "term": "Maintainability",
+  "definition": "How easy a program is to understand, correct and update after it has been written."
+ },
+ {
+  "term": "Sub programs",
+  "definition": "Named, self-contained blocks of code, such as functions or procedures, that can be called whenever they are needed."
+ },
+ {
+  "term": "Naming conventions",
+  "definition": "Agreed rules for choosing clear, consistent identifier names for variables, functions and other items in a program."
+ },
+ {
+  "term": "Comments",
+  "definition": "Notes written into the source code to explain it to humans; they are ignored by the computer when the program runs."
+ }
+]

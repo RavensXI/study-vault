@@ -1,0 +1,190 @@
+=== L10 Boolean Logic & Truth Tables ===
+id: c253dbec-9ea0-4668-ae98-967cd48127ee
+slug: boolean-logic
+status: live tier:both updated:2026-08-30T01:58:54.621377+00:00
+narration_manifest: array len 24
+
+--- DESCRIPTION ---
+Meet the AND, OR and NOT gates, build truth tables, and combine gates to solve logic problems.
+
+--- CONTENT_HTML ---
+<p data-narration-id="n1">Deep inside every computer, all data &mdash; numbers, letters, images and sounds &mdash; is stored as <dfn class="term" data-def="A logic system that uses only two possible values, usually written as 1 (true) and 0 (false).">Boolean</dfn> values: long streams of 1s and 0s. Boolean logic is the set of rules a computer follows to make decisions using just these two values, where 1 means true (or &lsquo;on&rsquo;) and 0 means false (or &lsquo;off&rsquo;). Almost every action a machine takes, from unlocking a phone to deciding whether a game character can jump, comes down to combinations of trues and falses.</p><p data-narration-id="n2">Each of those decisions is built from tiny electronic components called <dfn class="term" data-def="An electronic component that takes one or more binary inputs and produces a single binary output based on a fixed rule.">logic gates</dfn>. A logic gate takes one or more binary inputs and produces a single binary output, always following the same fixed rule. Millions of these gates sit inside the arithmetic logic unit, the part of the processor that carries out calculations and logical comparisons. The whole system is named after George Boole, a 19th-century English mathematician who first set out this kind of algebra long before computers existed.</p><div class="key-fact" data-narration-id="n3" data-revision-tip="Cover this and name the three logic gates, saying in one sentence what each one does."><div class="key-fact-label">Key Fact</div><p>There are three fundamental logic gates you must know: AND, OR and NOT. Any circuit, however large or complex, can be built by combining just these three.</p></div><h3 data-narration-id="n4">The AND gate</h3><p data-narration-id="n5">An AND gate has two inputs and one output. Its output is 1 only when both inputs are 1; if either input is 0, the output is 0. A helpful picture is two switches wired one after the other (in series) &mdash; the current can only flow when both switches are closed at the same time. To record how any gate behaves we use a <dfn class="term" data-def="A table that lists every possible combination of inputs to a logic circuit and the output each one produces.">truth table</dfn>, which lists every possible combination of inputs and shows the output for each.</p><table><thead><tr><th>Input A</th><th>Input B</th><th>Output Q</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>0</td></tr><tr><td>1</td><td>1</td><td>1</td></tr></tbody></table><p data-narration-id="n6">Notice there is only a single 1 in the output column &mdash; on the bottom row, the one row where both inputs are 1.</p><h3 data-narration-id="n7">The OR gate</h3><p data-narration-id="n8">An OR gate also has two inputs and one output, but its output is 1 when at least one input is 1. The only way to get an output of 0 is for both inputs to be 0 together. Picture two switches wired side by side (in parallel): the current flows if either one of them is closed.</p><table><thead><tr><th>Input A</th><th>Input B</th><th>Output Q</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>1</td></tr><tr><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>1</td></tr></tbody></table><p data-narration-id="n9">This time there is only a single 0 in the output column, on the top row where both inputs are 0. Everywhere else the output is 1.</p><h3 data-narration-id="n10">The NOT gate</h3><p data-narration-id="n11">A NOT gate works differently: it has just one input and one output. It simply reverses, or inverts, whatever it is given, so an input of 0 becomes 1 and an input of 1 becomes 0. Because it flips the signal, a NOT gate is often called an <dfn class="term" data-def="Another name for a NOT gate, because it reverses its single input.">inverter</dfn>. Its truth table is the shortest of the three.</p><table><thead><tr><th>Input A</th><th>Output Q</th></tr></thead><tbody><tr><td>0</td><td>1</td></tr><tr><td>1</td><td>0</td></tr></tbody></table><div class="collapsible"><button class="collapsible-toggle" aria-expanded="false"><span>Recognising the gate symbols</span><svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button><div class="collapsible-content"><div class="collapsible-inner"><p data-narration-id="n12">Each gate is drawn with its own distinctive shape inside a <dfn class="term" data-def="A drawing that represents a logic circuit using the standard symbols for each gate.">logic diagram</dfn>. The AND gate is drawn with a flat back and a rounded front, so it looks like a capital letter D. The OR gate has a curved back and narrows to a point at the output, giving it a shield or spaceship shape.</p><p data-narration-id="n13">The NOT gate is drawn as a small triangle pointing towards its output, with a tiny circle (called a bubble) on the very tip. That bubble is the giveaway that the signal is being inverted &mdash; if you ever see it, you know the gate flips its input.</p></div></div></div><div class="key-fact" data-narration-id="n14" data-revision-tip="Close this and work out how many rows a truth table needs for a circuit with 4 inputs."><div class="key-fact-label">Key Fact</div><p>The number of rows a truth table needs depends on how many inputs the circuit has. For a circuit with \(n\) inputs, the table needs \(2^n\) rows &mdash; so 1 input needs 2 rows, 2 inputs need 4 rows, and 3 inputs need 8 rows.</p></div><h3 data-narration-id="n15">Combining logic gates</h3><p data-narration-id="n16">Real circuits usually join several gates together, and this is exactly the same idea as using AND, OR and NOT inside the conditions of a program. To read a combined circuit, work out the output of each gate one step at a time, following the signals from the inputs through to the final output. Writing the circuit as a Boolean expression first makes this much easier to track.</p><p data-narration-id="n17">Take a circuit written as Q = (A AND B) OR C. To build its full truth table, first list all \(2^3 = 8\) possible combinations of A, B and C. Next add a helper column that works out A AND B for each row. Finally work out Q by applying OR to that helper column and to C. The brackets tell you to deal with the AND gate before the OR gate.</p><table><thead><tr><th>A</th><th>B</th><th>C</th><th>A AND B</th><th>Q</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>0</td><td>1</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>0</td><td>1</td><td>1</td></tr><tr><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr></tbody></table><div class="collapsible"><button class="collapsible-toggle" aria-expanded="false"><span>Writing Boolean expressions</span><svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button><div class="collapsible-content"><div class="collapsible-inner"><p data-narration-id="n18">A Boolean expression is a shorthand way of describing a circuit without drawing it. You can spell the operators out in words &mdash; A AND B &mdash; or use symbols, where a dot stands for AND, a plus sign stands for OR, and a bar written over a letter stands for NOT. Brackets show which operation to work out first, exactly as they do in ordinary maths.</p><p data-narration-id="n19">The real skill is being able to move freely between four different ways of describing the same logic: a written description in plain English, a Boolean expression, a logic diagram of gates, and a completed truth table. Each one contains exactly the same information, just presented differently.</p></div></div></div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n21">Key Takeaways</h3><ul><li data-narration-id="n22">An AND gate outputs 1 only when both inputs are 1; an OR gate outputs 1 when at least one input is 1; a NOT gate reverses its single input.</li><li data-narration-id="n23">A truth table lists every input combination and its output, and needs \(2^n\) rows for a circuit with \(n\) inputs.</li><li data-narration-id="n24">Combined circuits are solved one gate at a time, and the same logic can be shown as words, a Boolean expression, a logic diagram or a truth table.</li></ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n20">When a question asks you to complete a truth table, always list the input combinations in a steady binary counting order (00, 01, 10, 11) so you never miss a row, and add a helper column for each intermediate gate before working out the final output. Watch the command words carefully: &lsquo;complete&rsquo; means fill in a table, &lsquo;draw&rsquo; means produce a labelled logic diagram using the correct gate symbols, and &lsquo;explain&rsquo; means give the reason behind an output, not just the answer.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "State the output produced by a NOT gate when its input is 0.",
+  "type": "1 mark — Identify",
+  "marks": "Correct answer: 1 (also accept 'true' or 'on'). A NOT gate inverts its input, so an input of 0 produces an output of 1."
+ },
+ {
+  "text": "A logic circuit uses a single OR gate with inputs A and B. Complete a truth table showing the output Q for all four possible combinations of inputs.",
+  "type": "2 marks — Complete the Truth Table",
+  "marks": "Secure: all four output values correct — Q is 0 only when A is 0 and B is 0, and Q is 1 for the other three combinations. Developing: two or three output values correct. Emerging: fewer than two correct, or missing input combinations."
+ },
+ {
+  "text": "Describe the difference between the behaviour of an AND gate and an OR gate.",
+  "type": "2 marks — Describe",
+  "marks": "Secure: clearly states that an AND gate outputs 1 only when both inputs are 1, whereas an OR gate outputs 1 when at least one input is 1. Developing: one gate described correctly, the other vague or missing. Emerging: a partly incorrect or muddled description of both gates."
+ },
+ {
+  "text": "A door alarm sounds (output Q = 1) only when the door sensor (A) is triggered AND the system is armed (B). Draw a logic diagram to represent this system, labelling both inputs and the output.",
+  "type": "3 marks — Draw a Logic Diagram",
+  "marks": "Mastering: a single AND gate drawn with the recognised D-shaped symbol, both inputs (A and B) connected, and the output (Q) clearly labelled. Secure: correct gate and connections with a minor labelling omission. Developing: correct gate chosen but the diagram or labels are incomplete. Emerging: the wrong gate, or no recognisable logic diagram."
+ },
+ {
+  "text": "A heating system turns on (Q = 1) when the temperature is low (A = 1) OR the manual override is pressed (B = 1), but only while the system has power (C = 1). The system can be written as Q = (A OR B) AND C. Explain, step by step, how you would work out the output for the inputs A = 1, B = 0, C = 1.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: works out A OR B = 1 first (because at least one input is 1), then combines that result with C using AND to reach Q = 1, explaining the reason at each step. Secure: reaches Q = 1 with mostly correct working. Developing: correct method but an error in one step, or thin explanation. Emerging: an incorrect final result, or no clear working shown."
+ },
+ {
+  "text": "A security light (output Q) switches on when it is dark (A = 1) AND either motion is detected (B = 1) OR the manual switch is on (C = 1). Explain how logic gates and a truth table could be used to design and test this system. Refer to the gates needed, a suitable Boolean expression, and how the truth table would be built.",
+  "type": "6 marks — Extended Response",
+  "marks": "Mastering: identifies that an OR gate combines B and C, whose result is fed into an AND gate with A, giving the expression Q = A AND (B OR C); explains that the truth table needs 8 rows for the three inputs and describes using a helper column for B OR C before finding Q, so every case can be tested. Secure: correct gates and expression with a clear description of building the table. Developing: mostly correct gates or expression but the truth-table explanation is limited. Emerging: some relevant points but the logic or expression is largely incorrect."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "What is the output of an AND gate when one input is 1 and the other input is 0?",
+  "type": "mcq",
+  "correct": 0,
+  "options": [
+   "0",
+   "1",
+   "It stays the same as input A",
+   "Both 0 and 1"
+  ]
+ },
+ {
+  "q": "How many rows does a truth table need for a logic circuit that has three inputs?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "3",
+   "6",
+   "8",
+   "9"
+  ]
+ },
+ {
+  "q": "An _____ gate outputs 1 when at least one of its inputs is 1.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "AND",
+   "OR",
+   "NOT",
+   "inverter"
+  ]
+ },
+ {
+  "q": "Because it reverses its single input, a NOT gate is also known as an _____.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "adder",
+   "operator",
+   "inverter",
+   "output"
+  ]
+ },
+ {
+  "q": "Match each logic gate to its symbol shape.",
+  "left": [
+   "AND gate",
+   "OR gate",
+   "NOT gate"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   1,
+   2
+  ],
+  "right": [
+   "Flat back with a rounded front, like a letter D",
+   "Curved back narrowing to a pointed output",
+   "Triangle with a small circle on its tip"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "1",
+  "q": "In Boolean logic, what value represents true?"
+ },
+ {
+  "a": "0",
+  "q": "In Boolean logic, what value represents false?"
+ },
+ {
+  "a": "Only when both of its inputs are 1.",
+  "q": "When does an AND gate output 1?"
+ },
+ {
+  "a": "When at least one of its inputs is 1.",
+  "q": "When does an OR gate output 1?"
+ },
+ {
+  "a": "It reverses it, so 0 becomes 1 and 1 becomes 0.",
+  "q": "What does a NOT gate do to its input?"
+ },
+ {
+  "a": "One.",
+  "q": "How many inputs does a NOT gate have?"
+ },
+ {
+  "a": "2 to the power of n rows.",
+  "q": "How many rows does a truth table need for a circuit with n inputs?"
+ },
+ {
+  "a": "Four.",
+  "q": "How many rows does a truth table need for two inputs?"
+ },
+ {
+  "a": "A table showing every input combination and the output it produces.",
+  "q": "What is a truth table?"
+ },
+ {
+  "a": "The arithmetic logic unit (ALU).",
+  "q": "Which part of the processor carries out logic operations?"
+ },
+ {
+  "a": "George Boole.",
+  "q": "Boolean logic is named after which mathematician?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "Boolean",
+  "definition": "A logic system that uses only two possible values, usually written as 1 (true) and 0 (false)."
+ },
+ {
+  "term": "logic gate",
+  "definition": "An electronic component that takes one or more binary inputs and produces a single binary output based on a fixed rule."
+ },
+ {
+  "term": "truth table",
+  "definition": "A table that lists every possible combination of inputs to a logic circuit and the output each one produces."
+ },
+ {
+  "term": "inverter",
+  "definition": "Another name for a NOT gate, because it reverses its single input."
+ },
+ {
+  "term": "logic diagram",
+  "definition": "A drawing that represents a logic circuit using the standard symbols for each gate."
+ }
+]

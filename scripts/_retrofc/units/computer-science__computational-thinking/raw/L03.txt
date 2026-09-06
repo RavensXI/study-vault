@@ -1,0 +1,262 @@
+=== L3 Searching Algorithms ===
+id: acf56f3d-b56c-40b6-8e78-0fd2921100ea
+slug: searching-algorithms
+status: live tier:both updated:2026-07-30T22:45:41.997959+00:00
+narration_manifest: array len 16
+
+--- DESCRIPTION ---
+Linear and binary search: how each one works, how fast they are, and when to use them.
+
+--- CONTENT_HTML ---
+<p data-narration-id="n1">A <dfn class="term" data-def="A precise sequence of steps that solves a problem or completes a task.">searching algorithm</dfn> is a set of clear steps for finding a particular piece of data inside a collection &mdash; like looking up a name in a contacts list or a product in an online shop. Two standard searching methods appear again and again in computing: the linear search and the binary search. Both reach the same goal &mdash; locating an item &mdash; but they go about it in very different ways, and each one suits different situations.</p>
+
+<h3 data-narration-id="n2">Linear search</h3>
+
+<p data-narration-id="n3">A <dfn class="term" data-def="A search that checks each item in a list one at a time, starting from the first, until the target is found or the list ends.">linear search</dfn> is the most straightforward method. It starts at the very first item in the list and compares it with the target &mdash; the value being searched for. If the two match, the search is over and the position is reported. If they do not match, the algorithm simply moves on to the next item and compares again.</p>
+
+<p data-narration-id="n4">This checking continues, one item at a time, until either the target is found or the end of the list is reached. If the end is reached without a match, the algorithm reports that the item is not in the list. Because it never assumes anything about the order of the data, a linear search works on any list at all.</p>
+
+<div class="key-fact" data-narration-id="n5" data-revision-tip="Cover this and recall: does a linear search need the data to be sorted first? Answer in one sentence.">
+<div class="key-fact-label">Key Fact</div>
+<p>A linear search has no prerequisites: it works whether the data is sorted or not. That makes it flexible, but it can be slow because it may have to check every single item.</p>
+</div>
+
+<p data-narration-id="n6">How efficient is it? Each time the algorithm checks one item against the target, that counts as one <dfn class="term" data-def="A single check of one item in a list against the value being searched for.">comparison</dfn>. In the best case the target is the first item, so only one comparison is needed. In the worst case the target is the last item &mdash; or missing entirely &mdash; and the algorithm must make as many comparisons as there are items in the list.</p>
+
+<div class="collapsible">
+<button class="collapsible-toggle" aria-expanded="false">
+<span>Worked example: a linear search</span>
+<svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+</button>
+<div class="collapsible-content"><div class="collapsible-inner">
+<p data-narration-id="n7">Imagine searching the unsorted list 34, 7, 19, 45, 2, 88 for the value 45. The algorithm checks 34 (no match), then 7 (no match), then 19 (no match), then 45 &mdash; a match, found at the fourth position after four comparisons. If instead we searched for 15, the algorithm would check all six items, reach the end without a match, and report that 15 is not in the list. Notice that the list did not need to be in order for this to work.</p>
+</div></div>
+</div>
+
+<h3 data-narration-id="n8">Binary search</h3>
+
+<p data-narration-id="n9">A <dfn class="term" data-def="A search that repeatedly checks the middle item of a sorted list and discards the half that cannot contain the target.">binary search</dfn> is much faster, but it comes with one strict condition: the list must already be <dfn class="term" data-def="Arranged in order, for example numbers from smallest to largest or words in alphabetical order.">sorted</dfn>, meaning the items are arranged in order such as numbers from smallest to largest. When the data is sorted, a binary search can rule out huge chunks of the list at once instead of plodding through it item by item.</p>
+
+<p data-narration-id="n10">It works by finding the middle item of the list and comparing it with the target. If they match, the search is finished. If the target is smaller than the middle item, the algorithm throws away the middle item and the entire upper half, then repeats on the lower half. If the target is larger, it throws away the lower half and repeats on the upper half. Each pass finds a new middle and discards half of what remains, until the item is found or nothing is left to check.</p>
+
+<div class="key-fact" data-narration-id="n11" data-revision-tip="Close this and write down the two things a binary search does on every pass: which item it checks and what it does with the rest.">
+<div class="key-fact-label">Key Fact</div>
+<p>A binary search only works on sorted data, and it halves the number of items still to check with every comparison. That is why it is so fast on large lists.</p>
+</div>
+
+<div class="collapsible">
+<button class="collapsible-toggle" aria-expanded="false">
+<span>Worked example: a binary search</span>
+<svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+</button>
+<div class="collapsible-content"><div class="collapsible-inner">
+<p data-narration-id="n12">Suppose the sorted list is 2, 5, 8, 12, 16, 23, 38, 45, 56, 72, 91 and we are looking for 45. First the algorithm checks the middle value, 23. Because 45 is larger than 23, the whole lower half is discarded and only 38, 45, 56, 72, 91 remain. The new middle value is 56; 45 is smaller, so 56 and everything above it is discarded, leaving 38 and 45. The middle of these two rounds down to 38; 45 is larger, so only 45 is left, and the next check finds it. The target was found in just four comparisons, whereas a linear search would have taken eight.</p>
+</div></div>
+</div>
+
+<h3 data-narration-id="n13">Comparing the two searches</h3>
+
+<p data-narration-id="n14">The big difference is speed on large lists. A linear search may have to look at every item, so searching a list of one thousand items could take up to one thousand comparisons. A binary search halves the remaining items with every check, so the same list of one thousand items needs at most about ten comparisons. It scales remarkably well: doubling the size of the list adds only one extra comparison to a binary search.</p>
+
+<p data-narration-id="n15">So why not always use a binary search? Because it only works on a sorted list. If the data is not in order, it must be sorted first, and sorting takes time and effort. A linear search has no such requirement &mdash; it happily works on data in any order and is very simple to write. For short lists the speed difference is tiny, so the extra work of keeping data sorted may not be worth it.</p>
+
+<div class="collapsible">
+<button class="collapsible-toggle" aria-expanded="false">
+<span>Which search should you use?</span>
+<svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+</button>
+<div class="collapsible-content"><div class="collapsible-inner">
+<p data-narration-id="n16">If the data set is small, or if it changes often and is rarely kept in order, a linear search is usually the sensible choice because it is simple and needs no preparation. If the data is large and already sorted &mdash; or will be searched many times &mdash; a binary search is far more efficient. Remember that sorting a list takes time too, so a binary search pays off most when the same sorted list is searched again and again.</p>
+</div></div>
+</div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n18">Key Takeaways</h3>
+<ul>
+<li data-narration-id="n19">A linear search checks each item in turn and works on data in any order, but it can be slow on long lists because it may check every item.</li>
+<li data-narration-id="n20">A binary search is much faster because it halves the search area each pass, but the list must be sorted first.</li>
+<li data-narration-id="n21">Choose a linear search for small or unsorted data, and a binary search for large sorted lists that are searched often.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n17">Questions often give you a list and ask you to apply a search to it, so practise tracing each step and counting the comparisons. If a question asks you to identify an algorithm from its steps, the giveaway for a binary search is that it checks a middle value and discards half of the data &mdash; and remember it can only be used on a sorted list. Watch the command words: &lsquo;describe&rsquo; wants the ordered steps, while &lsquo;compare&rsquo; wants clear differences between the two methods.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "State the one condition that a data set must meet before a binary search can be carried out.",
+  "type": "1 mark — State",
+  "marks": "Correct response: the data must be sorted (arranged in order, such as ascending or descending). Accept any wording showing the list is ordered, for example 'in alphabetical order' or 'smallest to largest'."
+ },
+ {
+  "text": "Describe how a linear search finds a value in a list.",
+  "type": "2 marks — Describe",
+  "marks": "Secure: the search starts at the first item and compares it with the target; if it does not match it moves on to the next item, repeating until the target is found or the end of the list is reached. Developing: mentions checking items one at a time from the start but leaves out how the search ends. Emerging: a vague reference to looking through the list."
+ },
+ {
+  "text": "Explain why a binary search cannot be used to find a value in the list: 14, 3, 27, 8, 19.",
+  "type": "3 marks — Explain",
+  "marks": "Secure response covers: the list is not sorted (1); a binary search relies on the order of the data to decide which half to keep and which half to discard (1); on unsorted data the discarded half might actually contain the target, so the search could miss it or give the wrong result (1). Developing: identifies that the list is unsorted with a partial reason. Emerging: states only that the list is not in order."
+ },
+ {
+  "text": "Compare a linear search and a binary search. Refer to how each one works and how efficient they are.",
+  "type": "4 marks — Compare",
+  "marks": "Mastering: a clear, balanced comparison covering both how each search works (linear checks items in turn from the start; binary checks the middle and discards half) and their efficiency (binary is far faster on large lists but needs sorted data; linear works on any order). Secure: describes both methods with at least one clear comparison of efficiency or requirements. Developing: describes both methods but with little direct comparison. Emerging: an isolated point about one method."
+ },
+ {
+  "text": "A shopping website stores a list of 5,000 product codes that is always kept in order. Discuss which searching algorithm the developers should use to look up a product code, and justify your choice.",
+  "type": "6 marks — Extended response",
+  "marks": "Mastering: a well-reasoned recommendation of a binary search, justified by its efficiency on a large list (halving the data each pass means only a handful of comparisons for 5,000 items) and by the fact that the list is already sorted, so the prerequisite is met; may weigh this against a linear search to strengthen the argument. Secure: recommends binary search with a clear efficiency reason and notes the list is sorted. Developing: makes a choice with a basic reason. Emerging: names a search with little or no justification."
+ },
+ {
+  "text": "Discuss the advantages and disadvantages of a linear search and a binary search, and explain the situations in which each one is the better choice.",
+  "type": "8 marks — Discuss",
+  "marks": "Mastering: a balanced discussion covering the strengths and weaknesses of both methods (linear: simple, works on unsorted data, but slow on long lists; binary: very fast on large lists, but requires sorted data which itself takes time to produce) and links these to clear situations where each is preferable, such as small or frequently changing data for linear and large, stable, sorted data for binary. Secure: covers advantages and disadvantages of both with at least one appropriate situation for each. Developing: covers both methods but the discussion is one-sided or the situations are unclear. Emerging: a few isolated points with little development."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which type of data does a binary search require in order to work?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "Unsorted data",
+   "Sorted data",
+   "Numeric data only",
+   "Text data only"
+  ]
+ },
+ {
+  "q": "In the worst case, how many items might a linear search have to check in a list of 100 items?",
+  "type": "mcq",
+  "correct": 3,
+  "options": [
+   "1",
+   "10",
+   "50",
+   "100"
+  ]
+ },
+ {
+  "q": "A binary search works by repeatedly checking the _____ item of the list and discarding the half that cannot contain the target.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "first",
+   "middle",
+   "last",
+   "random"
+  ]
+ },
+ {
+  "q": "A search that starts at the first item and checks each one in turn is called a _____ search.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "binary",
+   "middle",
+   "linear",
+   "split"
+  ]
+ },
+ {
+  "q": "Match each term to its correct meaning:",
+  "left": [
+   "Linear search",
+   "Binary search",
+   "Sorted list",
+   "Comparison"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "right": [
+   "Checks each item in turn, starting from the first",
+   "Needs ordered data and halves the search each pass",
+   "A list arranged in order, such as smallest to largest",
+   "Checking one item against the value being searched for"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "It must already be sorted (in order).",
+  "q": "What must be true of a list before a binary search can be used?"
+ },
+ {
+  "a": "At the first item in the list.",
+  "q": "Where does a linear search start?"
+ },
+ {
+  "a": "It checks each item in turn until the target is found or the list ends.",
+  "q": "How does a linear search move through a list?"
+ },
+ {
+  "a": "The middle item of the list.",
+  "q": "Which item does a binary search check first?"
+ },
+ {
+  "a": "It discards the half that cannot contain the target.",
+  "q": "What does a binary search do after comparing with the middle item?"
+ },
+ {
+  "a": "About ten.",
+  "q": "A binary search on about 1,000 sorted items needs at most roughly how many comparisons?"
+ },
+ {
+  "a": "All n items.",
+  "q": "In the worst case, how many items does a linear search check in a list of n items?"
+ },
+ {
+  "a": "A linear search.",
+  "q": "Which search works on data in any order?"
+ },
+ {
+  "a": "A binary search.",
+  "q": "Which search is usually faster on a large sorted list?"
+ },
+ {
+  "a": "It works on unsorted lists.",
+  "q": "Give one advantage a linear search has over a binary search."
+ },
+ {
+  "a": "Because each pass halves the remaining items.",
+  "q": "Why does doubling a sorted list's size add only one comparison to a binary search?"
+ },
+ {
+  "a": "Checking one item against the target value.",
+  "q": "What is a 'comparison' in a searching algorithm?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "searching algorithm",
+  "definition": "A precise sequence of steps that solves a problem or completes a task."
+ },
+ {
+  "term": "linear search",
+  "definition": "A search that checks each item in a list one at a time, starting from the first, until the target is found or the list ends."
+ },
+ {
+  "term": "comparison",
+  "definition": "A single check of one item in a list against the value being searched for."
+ },
+ {
+  "term": "binary search",
+  "definition": "A search that repeatedly checks the middle item of a sorted list and discards the half that cannot contain the target."
+ },
+ {
+  "term": "sorted",
+  "definition": "Arranged in order, for example numbers from smallest to largest or words in alphabetical order."
+ }
+]

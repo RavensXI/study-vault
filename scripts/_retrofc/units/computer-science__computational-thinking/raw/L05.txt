@@ -1,0 +1,325 @@
+=== L5 Programming Fundamentals ===
+id: 2beb43e6-58fc-47c2-950c-eee0c4bdd55d
+slug: programming-fundamentals
+status: live tier:both updated:2026-07-30T22:26:27.908113+00:00
+narration_manifest: array len 29
+
+--- DESCRIPTION ---
+Variables, constants, operators and the three constructs that control every program.
+
+--- CONTENT_HTML ---
+<p data-narration-id="n1">Every app, game and website you use is built from a small number of simple ideas. Master these building blocks and you can read and write code in almost any language. This lesson covers four of them: storing information in <dfn class="term" data-def="A named store in memory whose value can change while a program is running.">variables</dfn> and <dfn class="term" data-def="A named value that is fixed when the program is written and cannot change while it runs.">constants</dfn>, changing that information with <dfn class="term" data-def="A symbol or keyword that performs an operation on data, such as adding numbers or comparing values.">operators</dfn>, and controlling the order in which instructions run.</p>
+
+<h3 data-narration-id="n2">Storing data: variables and constants</h3>
+
+<p data-narration-id="n3">A variable is like a labelled box in the computer&rsquo;s memory. The label is its name, and inside the box is a value your program can read or change at any time. A game might use a variable called <code>score</code> that starts at zero and grows as the player collects points. Because the value can change while the program is running, we say a variable is <em>mutable</em>.</p>
+
+<p data-narration-id="n4">A constant is also a named value, but it is set once and never changes while the program runs. Good examples are a rate of VAT, the value of pi, or the maximum number of lives in a game. Using a constant makes a program easier to read and safer, because an important value cannot be altered by mistake.</p>
+
+<div class="key-fact" data-narration-id="n5" data-revision-tip="Cover this and explain in one sentence each: how does a variable differ from a constant?">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The key difference is change. A variable&rsquo;s value can change while the program is running; a constant&rsquo;s value is fixed and stays the same throughout.</p>
+</div>
+
+<h3 data-narration-id="n6">Assignment, input and output</h3>
+
+<p data-narration-id="n7">To put a value into a variable we use <dfn class="term" data-def="Storing a value in a variable, written with the equals sign; the value on the right is copied into the variable named on the left.">assignment</dfn>, written with a single equals sign. The computer works out the right-hand side first, then stores the result in the variable named on the left. This is why <code>score = score + 10</code> makes sense: it means &lsquo;take the current score, add ten, and store the answer back in score&rsquo;.</p>
+
+<pre data-narration-id="n8"><code>score = 0
+name = input("Enter your name: ")
+score = score + 10
+print(name)
+print(score)</code></pre>
+
+<p data-narration-id="n9">Most programs also need to talk to the user. An <code>input</code> command reads something typed by the user so you can store it in a variable, while an <code>output</code> command (often written as <code>print</code>) displays a value on screen. Together, input, assignment and output let a program take data in, work on it, and show a result.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Why &lsquo;=&rsquo; does not mean &lsquo;equals&rsquo;</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n10">In everyday maths, <code>x = x + 1</code> is impossible &mdash; a number cannot equal itself plus one. In programming the equals sign is not a question about whether two things are the same; it is an instruction to store a value. <code>x = x + 1</code> tells the computer to take the current value of <code>x</code>, add one, and put the answer back. To test whether two values are the same, programmers use the double equals operator <code>==</code> instead.</p>
+  </div></div>
+</div>
+
+<h3 data-narration-id="n11">Operators</h3>
+
+<p data-narration-id="n12">An operator is a symbol or keyword that acts on data. The arithmetic operators do the maths you already know &mdash; addition with <code>+</code>, subtraction with <code>-</code>, multiplication with <code>*</code> and division with <code>/</code> &mdash; plus three that are especially useful in programming.</p>
+
+<ul>
+  <li data-narration-id="n13">Normal division uses <code>/</code> and can give a decimal, so seventeen divided by five is <code>3.4</code>.</li>
+  <li data-narration-id="n14"><code>DIV</code> gives the whole-number quotient, meaning how many whole times one number goes into another, so <code>17 DIV 5</code> is <code>3</code>.</li>
+  <li data-narration-id="n15"><code>MOD</code> gives the remainder, or modulo, that is left over, so <code>17 MOD 5</code> is <code>2</code>.</li>
+  <li data-narration-id="n16"><code>^</code> raises a number to a power, known as exponentiation, so <code>3 ^ 2</code> is <code>9</code>.</li>
+</ul>
+
+<div class="key-fact" data-narration-id="n17" data-revision-tip="Work these out from memory: what are 23 DIV 4 and 23 MOD 4?">
+  <div class="key-fact-label">Key Fact</div>
+  <p><code>DIV</code> and <code>MOD</code> work as a pair. <code>DIV</code> gives the whole number of times a division fits, and <code>MOD</code> gives what is left over. So <code>23 DIV 4</code> is <code>5</code>, and <code>23 MOD 4</code> is <code>3</code>.</p>
+</div>
+
+<p data-narration-id="n18">Comparison operators ask a true-or-false question about two values. They are: equal to <code>==</code>, not equal to <code>!=</code>, less than <code>&lt;</code>, less than or equal to <code>&lt;=</code>, greater than <code>&gt;</code>, and greater than or equal to <code>&gt;=</code>. Notice that testing for equality uses two equals signs, which keeps it clearly separate from assignment.</p>
+
+<p data-narration-id="n19"><dfn class="term" data-def="An operator that combines or reverses true or false values; the three common ones are AND, OR and NOT.">Boolean operators</dfn> let you combine these true-or-false results. <code>AND</code> is true only when both conditions are true, <code>OR</code> is true when at least one condition is true, and <code>NOT</code> reverses a result, turning true into false and false into true.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Combining conditions with AND, OR and NOT</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n20">Imagine a website that lets someone register only if they are aged 13 or over <em>and</em> have ticked the terms box. In code this becomes <code>age &gt;= 13 AND agreed == true</code>. Both parts must be true for the whole condition to be true. If you swapped <code>AND</code> for <code>OR</code>, a person could register by doing just one of the two things &mdash; which is exactly why choosing the right Boolean operator matters.</p>
+  </div></div>
+</div>
+
+<h3 data-narration-id="n21">The three programming constructs</h3>
+
+<p data-narration-id="n22">Every program controls the order its instructions run using just three building blocks, called constructs. Almost all software is these three, combined and nested inside one another.</p>
+
+<p data-narration-id="n23"><dfn class="term" data-def="A construct where instructions are carried out one after another, in the order they are written.">Sequence</dfn> simply means the computer carries out instructions one after another, from top to bottom, in the order they are written. On its own, sequence always does exactly the same thing every time it runs.</p>
+
+<p data-narration-id="n24"><dfn class="term" data-def="A construct that chooses between different blocks of code depending on whether a condition is true or false.">Selection</dfn> lets a program choose between different paths depending on a condition. It is built with <code>if</code>, <code>elseif</code> and <code>else</code>, or with a <code>switch</code>/<code>case</code> statement when you are checking one value against many possible options.</p>
+
+<pre data-narration-id="n25"><code>if score &gt;= 50 then
+    print("Pass")
+elseif score &gt;= 40 then
+    print("Near miss")
+else
+    print("Try again")
+endif</code></pre>
+
+<p data-narration-id="n26"><dfn class="term" data-def="A construct that repeats a block of code; also known as looping.">Iteration</dfn>, also called looping, repeats a block of code so you do not have to write it out many times. There are two kinds. A <dfn class="term" data-def="A loop that repeats a fixed, known number of times, usually using a counter.">count-controlled loop</dfn> repeats a set number of times using a counter, which is ideal when you know exactly how many repeats you need. A <dfn class="term" data-def="A loop that keeps repeating until a condition is met, so the number of repeats is not fixed in advance.">condition-controlled loop</dfn> keeps going until a condition is met, so the number of repeats can vary each time the program runs.</p>
+
+<pre data-narration-id="n27"><code>// count-controlled loop
+for i = 1 to 5
+    print("Hello")
+next i
+
+// condition-controlled loop
+answer = ""
+while answer != "yes"
+    answer = input("Ready? ")
+endwhile</code></pre>
+
+<div class="key-fact" data-narration-id="n28" data-revision-tip="Close this and name the three programming constructs, with one sentence on what each one does.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Sequence, selection and iteration are the three constructs that control the flow of any program. Sequence runs steps in order, selection chooses between paths, and iteration repeats steps. Nearly every program is a mix of these three.</p>
+</div>
+
+<p data-narration-id="n29">These building blocks are deliberately simple, yet they combine to make everything from a calculator to a search engine. When you plan a program, ask yourself three questions: what data do I need to store, what operators will change it, and which constructs will control when each step runs?</p>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n31">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n32">Variables hold values that can change; constants hold values that stay fixed. Assignment with <code>=</code> stores the value on the right into the variable on the left.</li>
+  <li data-narration-id="n33">Operators act on data: arithmetic (including <code>MOD</code>, <code>DIV</code> and <code>^</code>), comparison such as <code>==</code> and <code>!=</code>, and the Boolean operators <code>AND</code>, <code>OR</code> and <code>NOT</code>.</li>
+  <li data-narration-id="n34">Sequence, selection and iteration are the three constructs that control the order in which a program&rsquo;s instructions run.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n30">Watch out for two classic slips. First, keep <code>=</code> (store a value) separate from <code>==</code> (test whether two values are equal) &mdash; mixing them up is one of the most common mistakes. Second, know your operator words: <code>DIV</code> gives the whole-number part of a division and <code>MOD</code> gives the remainder, and examiners often ask you to work a quick <code>MOD</code> or <code>DIV</code> out by hand. When a question says &lsquo;state&rsquo; or &lsquo;give&rsquo;, a short fact is enough; when it says &lsquo;explain&rsquo;, you must say <em>why</em> or <em>how</em>, usually with a brief example.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "State the difference between a variable and a constant.",
+  "type": "2 marks — Describe",
+  "marks": "One mark for stating that a variable's value can change while a program runs; one mark for stating that a constant's value is fixed and cannot change while the program runs."
+ },
+ {
+  "text": "Give the value produced by each of these expressions: 23 DIV 4 and 23 MOD 4.",
+  "type": "2 marks — Calculate",
+  "marks": "One mark for 23 DIV 4 = 5 (the whole-number quotient). One mark for 23 MOD 4 = 3 (the remainder)."
+ },
+ {
+  "text": "A program should welcome a user only when their age is at least 13 and no more than 18. Write a single condition, using comparison and Boolean operators, that is true only for ages in this range.",
+  "type": "3 marks — Complete the Program",
+  "marks": "One mark for a correct lower bound such as age >= 13. One mark for a correct upper bound such as age <= 18. One mark for correctly joining the two with AND, for example age >= 13 AND age <= 18."
+ },
+ {
+  "text": "Explain how the selection construct changes the way a program runs, and give one example of when a program would need it.",
+  "type": "3 marks — Explain",
+  "marks": "Mastering: clear explanation that selection chooses between different blocks of code based on a true or false condition, with a relevant example. Secure: correct explanation of choosing a path from a condition, with a basic example. Developing: partial idea of making a choice; example vague or missing. Emerging: names selection or if statements with little explanation."
+ },
+ {
+  "text": "Explain the difference between a count-controlled loop and a condition-controlled loop. Include an example of a task that suits each one.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: precise explanation that a count-controlled loop repeats a set number of times while a condition-controlled loop repeats until a condition is met, with a fitting example of each. Secure: correct difference explained with at least one suitable example. Developing: some awareness of the difference; examples weak or only one given. Emerging: names the loop types with little or no explanation."
+ },
+ {
+  "text": "A simple quiz program keeps asking the user a question until they type the correct answer, then displays how many attempts they took. Describe how variables, assignment and iteration would work together to build this program.",
+  "type": "6 marks — Extended Response",
+  "marks": "Mastering: sustained answer linking a variable to count attempts, assignment to update it, input to read each guess, and a condition-controlled loop that repeats until the answer is correct, then output of the count. Secure: covers variables, assignment and iteration correctly with a mostly complete description. Developing: mentions some of the parts but with gaps or muddled links between them. Emerging: identifies one or two relevant ideas with little detail."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which operator returns the remainder that is left after a division?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "DIV",
+   "MOD",
+   "/",
+   "^"
+  ]
+ },
+ {
+  "q": "What does the statement score = score + 1 do?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "It checks whether score is equal to score plus one",
+   "It adds one to the current value of score and stores the new value back in score",
+   "It creates a constant called score",
+   "It prints the value of score"
+  ]
+ },
+ {
+  "q": "A _____ is a named store whose value can change while a program runs.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "constant",
+   "variable",
+   "operator",
+   "loop"
+  ]
+ },
+ {
+  "q": "A count-controlled loop repeats a set number of times, whereas a _____ loop keeps going until a condition is met.",
+  "type": "fill",
+  "correct": 3,
+  "options": [
+   "sequence",
+   "selection",
+   "nested",
+   "condition-controlled"
+  ]
+ },
+ {
+  "q": "Match each operator to what it does.",
+  "left": [
+   "MOD",
+   "DIV",
+   "^",
+   "!="
+  ],
+  "type": "match",
+  "order": [
+   2,
+   3,
+   1,
+   0
+  ],
+  "right": [
+   "Not equal to",
+   "Raise to a power",
+   "Remainder after division",
+   "Whole-number quotient"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "A named store whose value can change while a program runs.",
+  "q": "What is a variable?"
+ },
+ {
+  "a": "A named value that is fixed and cannot change while a program runs.",
+  "q": "What is a constant?"
+ },
+ {
+  "a": "Stores the value on its right into the variable named on its left.",
+  "q": "What does the assignment operator = do?"
+ },
+ {
+  "a": "2 (the remainder).",
+  "q": "What is the value of 17 MOD 5?"
+ },
+ {
+  "a": "3 (the whole-number quotient).",
+  "q": "What is the value of 17 DIV 5?"
+ },
+ {
+  "a": "9.",
+  "q": "What is the value of 3 ^ 2?"
+ },
+ {
+  "a": "!=",
+  "q": "Which comparison operator means 'not equal to'?"
+ },
+ {
+  "a": "Sequence.",
+  "q": "Which construct runs statements one after another in order?"
+ },
+ {
+  "a": "Selection.",
+  "q": "Which construct chooses between paths using a condition?"
+ },
+ {
+  "a": "Iteration.",
+  "q": "Which construct repeats a block of code?"
+ },
+ {
+  "a": "A loop that repeats a set, known number of times.",
+  "q": "What is a count-controlled loop?"
+ },
+ {
+  "a": "A loop that repeats until a condition is met.",
+  "q": "What is a condition-controlled loop?"
+ },
+ {
+  "a": "AND.",
+  "q": "Which Boolean operator is true only when both conditions are true?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "variable",
+  "definition": "A named store in memory whose value can change while a program is running."
+ },
+ {
+  "term": "constant",
+  "definition": "A named value that is fixed when the program is written and cannot change while it runs."
+ },
+ {
+  "term": "operator",
+  "definition": "A symbol or keyword that performs an operation on data, such as adding numbers or comparing values."
+ },
+ {
+  "term": "assignment",
+  "definition": "Storing a value in a variable, written with the equals sign; the value on the right is copied into the variable named on the left."
+ },
+ {
+  "term": "Boolean operator",
+  "definition": "An operator that combines or reverses true or false values; the three common ones are AND, OR and NOT."
+ },
+ {
+  "term": "sequence",
+  "definition": "A construct where instructions are carried out one after another, in the order they are written."
+ },
+ {
+  "term": "selection",
+  "definition": "A construct that chooses between different blocks of code depending on whether a condition is true or false."
+ },
+ {
+  "term": "iteration",
+  "definition": "A construct that repeats a block of code; also known as looping."
+ },
+ {
+  "term": "count-controlled loop",
+  "definition": "A loop that repeats a fixed, known number of times, usually using a counter."
+ },
+ {
+  "term": "condition-controlled loop",
+  "definition": "A loop that keeps repeating until a condition is met, so the number of repeats is not fixed in advance."
+ }
+]

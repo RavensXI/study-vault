@@ -1,0 +1,292 @@
+=== L11 Programming Languages & IDEs ===
+id: 09ebadd2-c826-44d7-8a3e-b08582904a7e
+slug: languages-and-ides
+status: live tier:both updated:2026-07-30T22:21:07.468601+00:00
+narration_manifest: array len 20
+
+--- DESCRIPTION ---
+How high-level and low-level languages, compilers, interpreters and IDEs turn code into software.
+
+--- CONTENT_HTML ---
+<p data-narration-id="n1">Computers ultimately understand only one thing: patterns of binary 1s and 0s. Yet almost nobody writes programs directly in binary &mdash; it would be painfully slow and terribly easy to get wrong. Instead, programmers pick a language that suits the job and rely on other software to turn their code into something the processor can actually run. This lesson looks at the different levels of programming language, the translators that convert your code, and the toolkit that makes writing software far quicker.</p>
+
+<h3 data-narration-id="n2">High-level and low-level languages</h3>
+
+<p data-narration-id="n3">Programming languages sit on a scale, depending on how close they are to human language or to the raw instructions of the processor. A <dfn class="term" data-def="A programming language that uses English-like keywords, is easy for people to read and write, and must be translated before a computer can run it.">high-level language</dfn> such as Python, Java or C++ is written using English-like keywords such as &lsquo;if&rsquo;, &lsquo;print&rsquo; and &lsquo;while&rsquo;. A single line of high-level code usually stands in for many processor instructions. This makes high-level code easier to read, write and debug, and it is portable &mdash; the same program can run on different types of computer once it has been translated. Its one catch is that it must always be translated before the processor can understand it.</p>
+
+<p data-narration-id="n4">A <dfn class="term" data-def="A programming language that is close to the hardware, such as machine code, which is fast and machine-specific but hard for people to read and write.">low-level language</dfn> is much closer to the hardware. The lowest level is <dfn class="term" data-def="Binary instructions that a processor can execute directly, without any translation.">machine code</dfn> &mdash; pure binary that the processor runs directly, with no translation needed. Assembly language is also low-level, replacing binary with short memory-joggers called mnemonics. Low-level code is hard for people to read and write, and it is machine-specific, so it only works on one type of processor. In return it runs very fast, uses little memory and gives the programmer precise control over the hardware, which is why it is used for tasks like device drivers and other software that must squeeze the most out of the machine.</p>
+
+<div class="key-fact" data-narration-id="n5" data-revision-tip="Cover this and list two advantages of a high-level language and two advantages of a low-level language.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>High-level languages use English-like keywords, are easy to read and debug, and are portable across different machines. Low-level languages are close to the hardware: harder to write and machine-specific, but faster and more memory-efficient.</p>
+</div>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Why bother with high-level languages?</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n6">Because one high-level statement replaces many machine-code instructions, programmers can build software much faster and with fewer mistakes. A program written once in a high-level language can also be translated to run on many different computers, whereas low-level code usually has to be rewritten for each new type of processor. For most everyday software, that productivity and portability easily outweigh the small loss of speed.</p>
+  </div></div>
+</div>
+
+<h3 data-narration-id="n7">Translators: compilers and interpreters</h3>
+
+<p data-narration-id="n8">Because a processor can only run machine code, any program written in a high-level language has to be converted first. A <dfn class="term" data-def="A program that converts source code into machine code so that the processor can run it.">translator</dfn> is a program that turns <dfn class="term" data-def="The code a programmer writes in a programming language, before it is translated into machine code.">source code</dfn> &mdash; the code a programmer writes &mdash; into machine code. The two translators you need to know are the compiler and the interpreter. They do the same job in very different ways.</p>
+
+<p data-narration-id="n9">A <dfn class="term" data-def="A translator that converts the whole program into machine code in one go, producing an executable file that can be run on its own.">compiler</dfn> translates the entire program in one go, before it is run. It produces a separate <dfn class="term" data-def="A ready-to-run file of machine code produced by a compiler, which runs without needing the source code or the translator.">executable file</dfn> of machine code that can then be run on its own, without the source code or the compiler being present. Compiling a large program can take a while, but the finished executable then runs quickly. A compiler checks the whole program and produces an error report at the end, listing the mistakes together rather than stopping at the first one.</p>
+
+<p data-narration-id="n10">An <dfn class="term" data-def="A translator that converts and runs a program one statement at a time, needing the source code and interpreter present every time.">interpreter</dfn> translates and runs the program one statement at a time. It does not create an executable file, so the interpreter and the source code are both needed every time the program runs. Because it translates as it goes, an interpreted program runs more slowly. However, the interpreter stops at the very first error it meets and reports it straight away, which makes mistakes much easier to find and fix while a program is still being developed.</p>
+
+<div class="key-fact" data-narration-id="n11" data-revision-tip="Close this and write one benefit and one drawback of a compiler, then do the same for an interpreter.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>A compiler translates the whole program at once into a fast, standalone executable, but reports all its errors together at the end. An interpreter translates line by line, runs more slowly and needs the source code each time, but stops at the first error, making debugging easier.</p>
+</div>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Choosing between them: benefits and drawbacks</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n12">A compiler is a good choice for finished software you want to share. The executable runs fast, works without the original source code, and keeps that source code hidden from users. The drawbacks are that you must recompile the whole program after every change, and the executable only runs on the type of processor it was built for.</p>
+    <p data-narration-id="n13">An interpreter suits writing and testing programs. Errors are caught one at a time, and the same source code will run on any device that has the right interpreter, which makes it very portable. The trade-offs are slower running speed and the fact that the source code must be handed over to anyone who wants to run the program.</p>
+  </div></div>
+</div>
+
+<h3 data-narration-id="n14">Integrated Development Environments</h3>
+
+<p data-narration-id="n15">Writing, running and fixing code in separate programs would be slow, so programmers use an <dfn class="term" data-def="A single application that brings together the tools a programmer needs to write, run and debug programs.">Integrated Development Environment</dfn>, or IDE &mdash; a single application that brings all the tools they need into one place. Popular examples include IDLE for Python, PyCharm and Visual Studio. An IDE usually provides four kinds of tool.</p>
+
+<ul>
+  <li data-narration-id="n16"><strong>Editor</strong> &mdash; where you type your code. Helpful features such as colour-coded keywords (syntax highlighting), automatic indentation, auto-complete and line numbering make code faster to write and easier to read.</li>
+  <li data-narration-id="n17"><strong>Error diagnostics</strong> &mdash; tools that help track down mistakes. A <dfn class="term" data-def="A marker that pauses a running program at a chosen line so the programmer can inspect it.">breakpoint</dfn> pauses the program at a chosen line, and the programmer can then step through the code line by line and watch how the values stored in variables change, pinpointing where a fault happens.</li>
+  <li data-narration-id="n18"><strong>Run-time environment</strong> &mdash; a <dfn class="term" data-def="The part of an IDE that lets a programmer run a program and see its output without needing separate software.">run-time environment</dfn> lets the programmer run the program from inside the IDE and see its output straight away.</li>
+  <li data-narration-id="n19"><strong>Translator</strong> &mdash; a built-in compiler or interpreter that converts the code into machine code so it can actually run.</li>
+</ul>
+
+<p data-narration-id="n20">Because all of these tools sit in one window, an IDE speeds up the whole write, run and debug cycle. That is why almost all software today is created using one.</p>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n22">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n23">High-level languages are written in English-like keywords and are portable and easy to debug; low-level languages sit close to the hardware and are fast but machine-specific.</li>
+  <li data-narration-id="n24">A compiler translates the whole program at once into a standalone executable, while an interpreter translates and runs it line by line, stopping at the first error.</li>
+  <li data-narration-id="n25">An IDE combines an editor, error-diagnostic tools, a run-time environment and a translator so that code can be written, run and fixed in one place.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n21">Watch the command word carefully. &lsquo;State&rsquo; or &lsquo;Give&rsquo; wants a quick fact with no explanation, while &lsquo;Describe&rsquo; and especially &lsquo;Explain&rsquo; expect you to say how or why. A very common question asks you to compare a compiler and an interpreter &mdash; make sure each point is a genuine contrast (for example, &lsquo;a compiler translates all the code at once, whereas an interpreter translates one line at a time&rsquo;) rather than two facts that never mention each other. When a question is about an IDE, name a specific tool and then say exactly how it helps the programmer, not just what it is.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "State one characteristic of a high-level programming language.",
+  "type": "1 mark — Short response",
+  "marks": "A correct response identifies a defining feature, such as: it uses English-like keywords; it is easy for people to read and write; one statement stands in for many machine instructions; it is portable across different machines; or it must be translated before it can run. A single clear characteristic gains the mark."
+ },
+ {
+  "text": "Describe one difference between a high-level language and a low-level language.",
+  "type": "2 marks — Short response",
+  "marks": "Secure: a clear contrast made on the same measure — for example, that a high-level language uses English-like keywords and is portable across machines, whereas a low-level language is written closer to the hardware, is machine-specific and is harder for people to read. Developing: two unconnected facts about each language, or a difference only hinted at. Emerging: one vague or inaccurate point."
+ },
+ {
+  "text": "Explain why a program written in a high-level language needs a translator before it can run.",
+  "type": "2 marks — Short response",
+  "marks": "Secure: explains that the processor can only execute machine code (binary), so a translator is needed to convert the high-level source code into machine code that the computer can run. One mark for identifying that the processor only understands machine code, a second for the point that the translator converts the code so it can be executed. Developing: states that code must be translated without saying why."
+ },
+ {
+  "text": "Explain two differences between how a compiler and an interpreter work.",
+  "type": "4 marks — Short response",
+  "marks": "Mastering: two clear, correctly contrasted differences, each developed — for example, a compiler translates the whole program before it runs while an interpreter translates and runs one statement at a time; and a compiler produces a standalone executable while an interpreter needs the source code and interpreter present every time. Secure: two valid differences with some explanation. Developing: one difference explained, or two only stated. Emerging: a relevant point about either translator with limited accuracy."
+ },
+ {
+  "text": "Describe three tools that an Integrated Development Environment provides to help a programmer, and how each one helps.",
+  "type": "3 marks — Short response",
+  "marks": "Secure: three distinct IDE tools, each with a brief note of how it helps — for example an editor (typing code with syntax highlighting and auto-indentation), error-diagnostic or debugging tools (breakpoints to pause and inspect the program), a run-time environment (running the program and viewing its output), or a built-in translator (converting the code so it can run). One mark per correctly described tool. Naming a tool without saying how it helps is developing."
+ },
+ {
+  "text": "A developer is writing and testing a new program and must decide whether to use a compiler or an interpreter. Discuss the benefits and drawbacks of each, and recommend which she should use while she is still developing the program.",
+  "type": "6 marks — Extended response",
+  "marks": "Mastering: a balanced discussion covering benefits and drawbacks of both translators, applied to the scenario, leading to a justified recommendation — for example, an interpreter during development because it stops at the first error and makes debugging quick, despite its slower running speed. Secure: clear benefits and drawbacks of both translators with a supported recommendation. Developing: some relevant points, mostly one-sided, with a limited or unsupported judgement. Emerging: a few basic points about either translator with no real comparison or conclusion."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "A programmer wants their finished game to run as fast as possible and does not want users to see the original code. Which translator best suits this?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "An interpreter",
+   "A compiler",
+   "An editor",
+   "A run-time environment"
+  ]
+ },
+ {
+  "q": "Which of these is an advantage of a high-level language over a low-level language?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "It runs directly on the hardware",
+   "It uses less memory",
+   "It is easier for people to read and debug",
+   "It works on only one type of processor"
+  ]
+ },
+ {
+  "q": "The code a programmer writes, before it is translated into machine code, is called _____ code.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "machine",
+   "source",
+   "binary",
+   "object"
+  ]
+ },
+ {
+  "q": "The IDE editor feature that colour-codes keywords to make code easier to read is called syntax _____.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "checking",
+   "highlighting",
+   "diagnostics",
+   "indentation"
+  ]
+ },
+ {
+  "q": "Match each translator or tool to what it does:",
+  "left": [
+   "Compiler",
+   "Interpreter",
+   "Editor",
+   "Run-time environment"
+  ],
+  "type": "match",
+  "order": [
+   1,
+   0,
+   2,
+   3
+  ],
+  "right": [
+   "Translates and runs code one line at a time",
+   "Translates the whole program into an executable",
+   "Where code is typed, with syntax highlighting",
+   "Lets you run a program and see its output in the IDE"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "English-like keywords that are easy for people to read and write.",
+  "q": "What kind of keywords does a high-level language use?"
+ },
+ {
+  "a": "Machine code.",
+  "q": "The lowest level of language, made of binary the CPU runs directly, is ___."
+ },
+ {
+  "a": "It runs directly on the hardware with little or no translation.",
+  "q": "Why does low-level code run faster than high-level code?"
+ },
+ {
+  "a": "The same program can run on different machines once it is translated.",
+  "q": "Why is a high-level program described as portable?"
+ },
+ {
+  "a": "A program that turns source code into machine code the processor can run.",
+  "q": "What is a translator?"
+ },
+ {
+  "a": "The whole program, before it is run.",
+  "q": "How much of a program does a compiler translate at once?"
+ },
+ {
+  "a": "A standalone executable file of machine code.",
+  "q": "What does a compiler produce?"
+ },
+ {
+  "a": "All together in a report at the end of compilation.",
+  "q": "When does a compiler report errors?"
+ },
+ {
+  "a": "One statement at a time, as the program runs.",
+  "q": "How does an interpreter translate a program?"
+ },
+ {
+  "a": "It stops at the first error and reports it immediately.",
+  "q": "Why is finding bugs easier with an interpreter?"
+ },
+ {
+  "a": "It is translated again every time the program runs.",
+  "q": "Why does an interpreted program run more slowly than a compiled one?"
+ },
+ {
+  "a": "Integrated Development Environment.",
+  "q": "What does IDE stand for?"
+ },
+ {
+  "a": "Pauses a running program at a chosen line so it can be inspected.",
+  "q": "What does a breakpoint do?"
+ },
+ {
+  "a": "Run the program and see its output inside the IDE.",
+  "q": "What does an IDE run-time environment let a programmer do?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "high-level language",
+  "definition": "A programming language that uses English-like keywords, is easy for people to read and write, and must be translated before a computer can run it."
+ },
+ {
+  "term": "low-level language",
+  "definition": "A programming language that is close to the hardware, such as machine code, which is fast and machine-specific but hard for people to read and write."
+ },
+ {
+  "term": "machine code",
+  "definition": "Binary instructions that a processor can execute directly, without any translation."
+ },
+ {
+  "term": "translator",
+  "definition": "A program that converts source code into machine code so that the processor can run it."
+ },
+ {
+  "term": "source code",
+  "definition": "The code a programmer writes in a programming language, before it is translated into machine code."
+ },
+ {
+  "term": "compiler",
+  "definition": "A translator that converts the whole program into machine code in one go, producing an executable file that can be run on its own."
+ },
+ {
+  "term": "executable file",
+  "definition": "A ready-to-run file of machine code produced by a compiler, which runs without needing the source code or the translator."
+ },
+ {
+  "term": "interpreter",
+  "definition": "A translator that converts and runs a program one statement at a time, needing the source code and interpreter present every time."
+ },
+ {
+  "term": "Integrated Development Environment",
+  "definition": "A single application that brings together the tools a programmer needs to write, run and debug programs."
+ },
+ {
+  "term": "breakpoint",
+  "definition": "A marker that pauses a running program at a chosen line so the programmer can inspect it."
+ },
+ {
+  "term": "run-time environment",
+  "definition": "The part of an IDE that lets a programmer run a program and see its output without needing separate software."
+ }
+]

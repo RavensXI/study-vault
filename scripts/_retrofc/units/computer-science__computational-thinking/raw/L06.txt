@@ -1,0 +1,303 @@
+=== L6 Data Types & Structures ===
+id: 0c27a41c-3b16-4ca0-b54b-9011752e2b33
+slug: data-types-and-structures
+status: live tier:both updated:2026-07-30T22:21:22.374896+00:00
+narration_manifest: array len 24
+
+--- DESCRIPTION ---
+Integers, reals, Booleans, characters and strings, plus arrays and records for storing data.
+
+--- CONTENT_HTML ---
+<p data-narration-id="n1">Computers do not really know the difference between a person&rsquo;s age, a price in pounds, and the answer to a yes-or-no question &mdash; unless you tell them. A <dfn class="term" data-def="A category that tells the computer what kind of value is being stored and what can be done with it.">data type</dfn> is the label a program attaches to a piece of data so the computer knows how to store it and what it is allowed to do with it. Choosing types well is one of the marks of a careful programmer.</p>
+
+<h3 data-narration-id="n2">The basic data types</h3>
+
+<p data-narration-id="n3">A handful of types are used again and again. An <dfn class="term" data-def="A whole number with no fractional or decimal part, such as 42 or -7.">integer</dfn> is a whole number with nothing after a decimal point, so it suits counting things like lives, scores or the number of students in a class. A <dfn class="term" data-def="A number that includes a fractional or decimal part, such as 3.14 or 19.99; also called a float.">real</dfn> number, sometimes called a float, has a decimal part, which makes it right for measurements and money, such as a height of 1.72 metres or a price of &pound;19.99.</p>
+
+<p data-narration-id="n4">A <dfn class="term" data-def="A data type that can hold only one of two values: True or False.">Boolean</dfn> can hold only one of two values, True or False. It is the natural choice for anything with a yes-or-no answer, such as whether a user is logged in or whether a game has been paused.</p>
+
+<p data-narration-id="n5">The last two deal with text. A <dfn class="term" data-def="A single symbol such as a letter, digit, space or punctuation mark, for example the letter A.">character</dfn> is a single symbol &mdash; one letter, digit, space or punctuation mark. A <dfn class="term" data-def="A sequence of characters treated as one value, such as a word or a whole sentence.">string</dfn> is a sequence of characters joined together, so a name like &ldquo;Ada Lovelace&rdquo;, or even an empty piece of text, is a string. A string can contain digits, but if you store a phone number as a string you cannot do sums with it &mdash; it is text, not a number.</p>
+
+<div class="key-fact" data-narration-id="n6" data-revision-tip="Cover this and write down the correct data type for each: a shoe size of 7, a price of 4.50, and whether a light is on.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The quickest way to tell an integer from a real is the decimal point. Whole numbers with no decimal part are integers; numbers that need a decimal part, including most prices and measurements, are reals.</p>
+</div>
+
+<h3 data-narration-id="n7">Casting: changing a value&rsquo;s type</h3>
+
+<p data-narration-id="n8"><dfn class="term" data-def="Temporarily converting a value from one data type to another, for example turning the string 5 into the integer 5.">Casting</dfn> means temporarily converting a value from one type to another. Functions such as <code>int()</code> and <code>real()</code> turn text into numbers, while <code>str()</code> turns a number back into text. The original value does not change type for good; casting simply gives you the value in the form you need at that moment.</p>
+
+<p data-narration-id="n9">Casting matters most when a program reads input. Whatever a user types at an <code>input</code> prompt arrives as a string, even when they type digits. To do arithmetic with it you must cast it first. So <code>age = int(input("How old are you? "))</code> reads the text and converts it into an integer the program can add to or compare.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Why numbers typed in often need casting</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n10">Imagine a program that asks for two numbers and adds them. If it reads them as strings and writes <code>answer = first + second</code>, then typing 2 and 3 gives &ldquo;23&rdquo;, because joining two strings sticks them end to end instead of adding them. Casting each input with <code>int()</code> first makes the program store whole numbers, so 2 and 3 correctly give 5. This is one of the most common bugs a new programmer meets.</p>
+  </div></div>
+</div>
+
+<h3 data-narration-id="n11">Why the right data type matters</h3>
+
+<p data-narration-id="n12">The type you choose decides three things. It decides which operations are allowed, because you can multiply two integers but not two Booleans. It affects how much memory is used, since a single character needs far less space than a long string. And it helps catch mistakes, because a program expecting an integer age can reject the text &ldquo;banana&rdquo; before it causes trouble later.</p>
+
+<div class="key-fact" data-narration-id="n13" data-revision-tip="Close this and list the three reasons, given in the lesson, why choosing the correct data type is important.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Choosing a suitable data type is not just tidy &mdash; it controls which operations you can perform, how much memory the data uses, and whether invalid data can be spotted early.</p>
+</div>
+
+<h3 data-narration-id="n14">Data structures: arrays</h3>
+
+<p data-narration-id="n15">Storing hundreds of values in separate variables would be a nightmare. An <dfn class="term" data-def="A data structure that stores many values of the same data type under one name, reached by an index number.">array</dfn> solves this by holding many values of the same data type under a single name. Each value is reached by its index, a position number that starts at 0, so the first item is at index 0, the second at index 1, and so on. Arrays have a fixed length, meaning their size is set when they are created and does not change.</p>
+
+<pre data-narration-id="n16"><code>array colours[5]
+colours[0] = "Blue"
+colours[1] = "Pink"
+print(colours[0])   // displays Blue</code></pre>
+
+<p data-narration-id="n17">A one-dimensional (1D) array is a simple list. A two-dimensional (2D) array adds a second index so it behaves like a grid of rows and columns, which is ideal for a game board, a seating plan, or emulating the rows of a database table. You reach a cell with two numbers, one for the row and one for the column.</p>
+
+<pre data-narration-id="n18"><code>array board[3,3]
+board[0,0] = "X"
+board[1,2] = "O"
+print(board[1,2])   // displays O</code></pre>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Arrays versus separate variables</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n19">Suppose you need to store the marks of 30 students. Without an array you would need 30 separate variables and 30 lines just to add them up. With an array you can use a single loop that visits each index in turn, so the same few lines work whether there are 30 marks or 3000. This is why arrays and loops are so often used together.</p>
+  </div></div>
+</div>
+
+<h3 data-narration-id="n20">Records</h3>
+
+<p data-narration-id="n21">An array is perfect when every item is the same type, but real things often need several different pieces of information. A <dfn class="term" data-def="A data structure that groups together related fields about one thing, where the fields may be different data types.">record</dfn> groups related fields about one subject, and crucially those fields can be different data types. A single student record might hold a name as a string, an age as an integer, an average mark as a real, and whether fees are paid as a Boolean. You reach one field by its name, usually written with a dot.</p>
+
+<pre data-narration-id="n22"><code>student.name = "Ada"      // string
+student.age = 15          // integer
+student.average = 72.4    // real
+student.feesPaid = true   // Boolean
+print(student.name)       // displays Ada</code></pre>
+
+<div class="key-fact" data-narration-id="n23" data-revision-tip="Cover this and explain in one sentence how a record differs from an array.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The key difference is variety of type. An array holds many items of one single data type, whereas a record holds several fields about one thing and those fields can each be a different data type.</p>
+</div>
+
+<p data-narration-id="n24">Put these ideas together and you can model almost any information. You might use a record to describe one student and an array to hold a whole class of those records &mdash; the right data type inside the right data structure. Whenever you plan a program, ask what kind of value each item is, and whether you are storing one of something or many.</p>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n26">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n27">The basic data types are integer (whole numbers), real (decimals), Boolean (True or False), character (a single symbol) and string (text).</li>
+  <li data-narration-id="n28">Casting temporarily converts a value from one type to another, which is essential because input always arrives as a string.</li>
+  <li data-narration-id="n29">An array stores many values of the same type by index, while a record groups differently typed fields about one thing.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n25">Read the command word carefully. &lsquo;State&rsquo; or &lsquo;identify&rsquo; wants a short answer, such as naming a data type, while &lsquo;explain&rsquo; wants a reason or a worked example. A classic question gives a list of values and asks for the most suitable data type for each &mdash; remember that whole numbers are integers, anything with a decimal point is a real, True or False is Boolean, and text is a string. If a question involves reading input and then doing a calculation, mention casting, because that is exactly the skill being tested.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Which of the following values would be stored as a real (float)?  A) 42   B) True   C) 3.14   D) 'k'",
+  "type": "1 mark — Multiple Choice",
+  "marks": "One mark for C) 3.14, because it is a number that includes a decimal (fractional) part."
+ },
+ {
+  "text": "State the most suitable data type for each of the following: the number of lives a player has left, and whether the player has unlocked the bonus round.",
+  "type": "2 marks — Describe",
+  "marks": "One mark for integer (a whole number) for the number of lives left. One mark for Boolean (True or False) for whether the bonus round is unlocked."
+ },
+ {
+  "text": "A program uses the line total = input(\"Enter price: \") and then tries to add VAT to total, but it does not work. Explain why casting is needed and how it fixes the problem.",
+  "type": "3 marks — Explain",
+  "marks": "One mark for identifying that input returns a string. One mark for explaining that arithmetic cannot be carried out on a string. One mark for stating that casting the input to a real (or integer) lets the number be used in the calculation."
+ },
+ {
+  "text": "A program needs to store the seven days of the week. Write a line that declares a suitable one-dimensional array, and a line that stores 'Monday' as the first element.",
+  "type": "3 marks — Complete the Program",
+  "marks": "One mark for declaring an array of the correct size, for example array days[7]. One mark for using the correct first index of 0. One mark for a valid assignment, for example days[0] = \"Monday\"."
+ },
+ {
+  "text": "Explain the difference between an array and a record, using an example of data that each one is well suited to storing.",
+  "type": "4 marks — Explain",
+  "marks": "Mastering: clear explanation that an array stores many items of the same data type while a record groups related fields that may be different data types, with a fitting example of each. Secure: correct difference with at least one suitable example. Developing: partial difference or only one structure explained; example weak. Emerging: names arrays or records with little explanation."
+ },
+ {
+  "text": "A school wants to store data about its students so a program can process it. Each student has a name, an age, an average grade and whether their fees are paid. Discuss how data types and data structures could be used to store this data effectively.",
+  "type": "6 marks — Extended Response",
+  "marks": "Mastering: sustained answer that selects suitable data types (such as string for name, integer for age, real for average grade, Boolean for fees paid) and explains using a record to group one student's fields and an array to hold many students, with justified choices. Secure: identifies appropriate data types and at least one suitable structure with mostly correct reasoning. Developing: some suitable data types or structures named with limited justification. Emerging: identifies one or two relevant ideas with little detail."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which data type would best store a person's exact height in metres, such as 1.72?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "Integer",
+   "Real",
+   "Boolean",
+   "Character"
+  ]
+ },
+ {
+  "q": "Which data type can hold only the values True or False?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "String",
+   "Integer",
+   "Boolean",
+   "Character"
+  ]
+ },
+ {
+  "q": "Temporarily converting a value from one data type to another is called _____.",
+  "type": "fill",
+  "correct": 0,
+  "options": [
+   "casting",
+   "indexing",
+   "concatenation",
+   "iteration"
+  ]
+ },
+ {
+  "q": "An array stores many values of the _____ data type under one name.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "different",
+   "same",
+   "Boolean",
+   "real"
+  ]
+ },
+ {
+  "q": "Match each value to its most suitable data type.",
+  "left": [
+   "19.99",
+   "\"Hello\"",
+   "True",
+   "42"
+  ],
+  "type": "match",
+  "order": [
+   1,
+   3,
+   2,
+   0
+  ],
+  "right": [
+   "Integer",
+   "Real",
+   "Boolean",
+   "String"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "A whole number with no fractional or decimal part.",
+  "q": "What is an integer in programming?"
+ },
+ {
+  "a": "A number that includes a decimal or fractional part.",
+  "q": "What is a real (or float) data type?"
+ },
+ {
+  "a": "True or False.",
+  "q": "A Boolean data type can only hold one of which two values?"
+ },
+ {
+  "a": "A single symbol such as a letter, digit or space.",
+  "q": "What is a character data type?"
+ },
+ {
+  "a": "A sequence of characters, such as a word or sentence.",
+  "q": "What is a string in programming?"
+ },
+ {
+  "a": "Temporarily converting a value from one data type to another.",
+  "q": "What is casting in programming?"
+ },
+ {
+  "a": "String.",
+  "q": "Which data type does the input command always return?"
+ },
+ {
+  "a": "One.",
+  "q": "How many data types can a single array store?"
+ },
+ {
+  "a": "0.",
+  "q": "What index number refers to the first element of an array?"
+ },
+ {
+  "a": "A grid of rows and columns, like a table.",
+  "q": "What is a two-dimensional array well suited to representing?"
+ },
+ {
+  "a": "A structure that groups related fields about one thing.",
+  "q": "What is a record data type?"
+ },
+ {
+  "a": "An array holds one data type; a record can hold several.",
+  "q": "What is the main difference between an array and a record?"
+ },
+ {
+  "a": "data type.",
+  "q": "An array can hold only one ____, whereas a record can hold several."
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "data type",
+  "definition": "A category that tells the computer what kind of value is being stored and what can be done with it."
+ },
+ {
+  "term": "integer",
+  "definition": "A whole number with no fractional or decimal part, such as 42 or -7."
+ },
+ {
+  "term": "real",
+  "definition": "A number that includes a fractional or decimal part, such as 3.14 or 19.99; also called a float."
+ },
+ {
+  "term": "Boolean",
+  "definition": "A data type that can hold only one of two values: True or False."
+ },
+ {
+  "term": "character",
+  "definition": "A single symbol such as a letter, digit, space or punctuation mark, for example the letter A."
+ },
+ {
+  "term": "string",
+  "definition": "A sequence of characters treated as one value, such as a word or a whole sentence."
+ },
+ {
+  "term": "casting",
+  "definition": "Temporarily converting a value from one data type to another, for example turning the string 5 into the integer 5."
+ },
+ {
+  "term": "array",
+  "definition": "A data structure that stores many values of the same data type under one name, reached by an index number."
+ },
+ {
+  "term": "record",
+  "definition": "A data structure that groups together related fields about one thing, where the fields may be different data types."
+ }
+]

@@ -1,0 +1,313 @@
+=== L7 Advanced Programming Techniques ===
+id: 4fb92899-c95b-4e4a-8f03-a254aab82954
+slug: advanced-programming
+status: live tier:both updated:2026-07-30T22:31:44.909274+00:00
+narration_manifest: array len 25
+
+--- DESCRIPTION ---
+Structure programs with functions and procedures, use parameters, manage scope and handle files.
+
+--- CONTENT_HTML ---
+<p data-narration-id="n1">Most real programs are far too large to write as one long list of instructions. If every line sat in a single block, the code would be hard to read, tricky to test and almost impossible to fix. The professional solution is to break a big problem into smaller, self-contained blocks of code that each do one job. Writing a program in this way is known as producing structured code.</p>
+
+<p data-narration-id="n2">A <dfn class="term" data-def="A named block of code that performs a specific task and can be run (called) from other parts of a program.">sub program</dfn> is a named block of code that you can run whenever you need it, simply by writing its name. Because a sub program is written once but can be called many times, it saves you repeating the same instructions and keeps each part of the program short and focused. There are two kinds of sub program: procedures and functions.</p>
+
+<h3 data-narration-id="n3">Procedures and functions</h3>
+
+<p data-narration-id="n4">A <dfn class="term" data-def="A sub program that carries out a task but does not return a value.">procedure</dfn> is a sub program that carries out a task &mdash; such as printing a message or updating a score &mdash; but does not send any value back. You define it between the keywords <code>procedure</code> and <code>endprocedure</code>, then run it by writing its name followed by brackets.</p>
+
+<pre data-narration-id="n5"><code>procedure agePass()
+    print("You are old enough to ride")
+endprocedure
+
+agePass()</code></pre>
+
+<p data-narration-id="n6">A <dfn class="term" data-def="A sub program that carries out a task and returns a single value to the code that called it.">function</dfn> also carries out a task, but it sends a single value back to the part of the program that called it. The value is passed back using the keyword <code>return</code>. Because a function produces a result, you normally store what it returns in a variable so you can use it later.</p>
+
+<pre data-narration-id="n7"><code>function squared(number)
+    squared = number^2
+    return squared
+endfunction
+
+newValue = squared(4)</code></pre>
+
+<div class="key-fact" data-narration-id="n8" data-revision-tip="Cover this and write down: which kind of sub program returns a value, and which one only performs a task?">
+  <div class="key-fact-label">Key Fact</div>
+  <p>A procedure performs a task but returns no value. A function performs a task and returns one value, which should be stored in a variable if you want to use it later.</p>
+</div>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>When should you use a function or a procedure?</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n9">Use a function whenever the sub program needs to work out or look up a value that the rest of the program will use &mdash; for example calculating a total, converting units or checking a password. The answer comes back through <code>return</code>.</p>
+    <p data-narration-id="n10">Use a procedure when the sub program simply needs to do something and does not need to hand a value back &mdash; for example printing a menu, saving a file or clearing the screen. Choosing the right one makes your intentions clear to anyone reading the code.</p>
+  </div></div>
+</div>
+
+<h3 data-narration-id="n11">Parameters and arguments</h3>
+
+<p data-narration-id="n12">Sub programs become far more useful when you can feed data into them. A <dfn class="term" data-def="A variable listed in a sub program definition that receives a value passed into it.">parameter</dfn> is a variable listed in the sub program definition that receives an incoming value. An <dfn class="term" data-def="The actual value supplied to a sub program when it is called.">argument</dfn> is the actual value you supply when you call the sub program. In the code below, <code>width</code> and <code>height</code> are parameters; when the sub program is called, the numbers 5 and 3 are the arguments.</p>
+
+<pre data-narration-id="n13"><code>procedure printArea(width, height)
+    print(width * height)
+endprocedure
+
+printArea(5, 3)</code></pre>
+
+<p data-narration-id="n14">Passing data through parameters means the same sub program can work on different values each time it is called, instead of being tied to one fixed set of numbers. This is exactly what makes sub programs reusable.</p>
+
+<h3 data-narration-id="n15">Variable scope: local and global</h3>
+
+<p data-narration-id="n16">The <dfn class="term" data-def="The parts of a program in which a particular variable can be used.">scope</dfn> of a variable describes which parts of a program are allowed to use it. A <dfn class="term" data-def="A variable created inside a sub program that only exists while that sub program is running.">local variable</dfn> is created inside a sub program and only exists while that sub program is running, so the rest of the program cannot see it. A <dfn class="term" data-def="A variable that can be read or changed anywhere in the program.">global variable</dfn> is declared in the main program and can be read or changed anywhere, including inside sub programs.</p>
+
+<div class="key-fact" data-narration-id="n17" data-revision-tip="Close this and explain in one sentence the difference between a local and a global variable.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>A local variable only exists inside the sub program where it is created and disappears when that sub program ends. A global variable can be accessed from anywhere in the program.</p>
+</div>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Why local variables are usually the safer choice</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n18">Because a local variable is sealed inside its own sub program, it cannot be changed by accident from somewhere else. This keeps sub programs independent, so you can change one without breaking another.</p>
+    <p data-narration-id="n19">Global variables can be handy for data the whole program needs, but if many sub programs can all change the same global value, tracking down a bug becomes much harder. As a rule, keep variables local unless there is a clear reason to make them global.</p>
+  </div></div>
+</div>
+
+<h3 data-narration-id="n20">Reading and writing files</h3>
+
+<p data-narration-id="n21">A running program normally loses everything held in memory when it closes. To keep data permanently, a program can save it to a text file and read it back later &mdash; this is called <dfn class="term" data-def="Saving data to a text file and reading it back so it is not lost when the program closes.">file handling</dfn>. There are four basic operations: open a file, read from it, write to it, and close it. When you open a file it must be stored in a variable so the program can work with it.</p>
+
+<pre data-narration-id="n22"><code>myFile = open("sample.txt")
+print(myFile.readLine())
+myFile.close()</code></pre>
+
+<p data-narration-id="n23">The command <code>readLine()</code> returns the next line of the file each time it is used. To read a whole file you loop until you reach the end, which the <code>endOfFile()</code> command checks for you:</p>
+
+<pre data-narration-id="n24"><code>myFile = open("sample.txt")
+while NOT myFile.endOfFile()
+    print(myFile.readLine())
+endwhile
+myFile.close()</code></pre>
+
+<p data-narration-id="n25">To store new data, <code>writeLine()</code> adds a line of text to the end of the file, and <code>newFile()</code> creates a brand new file ready to be opened. Always close a file with <code>close()</code> when you have finished, so that your changes are saved and the file is freed for other programs to use.</p>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n27">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n28">Sub programs &mdash; functions and procedures &mdash; break a program into reusable, named blocks; only a function returns a value.</li>
+  <li data-narration-id="n29">Parameters let you pass data into a sub program, and a variable&rsquo;s scope decides whether it is local (inside one sub program) or global (usable everywhere).</li>
+  <li data-narration-id="n30">File handling uses open, read, write and close so a program can store data permanently and read it back the next time it runs.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n26">Watch the command word carefully. &ldquo;State&rdquo; or &ldquo;identify&rdquo; wants a quick fact, such as naming the keyword that ends a function, while &ldquo;describe&rdquo; and &ldquo;explain&rdquo; expect you to say how something works and why it is useful. A very common question asks for the difference between a function and a procedure &mdash; always mention the return value. If you are asked to write code, use clear names and neat indentation, because marks are given for readable, well-structured solutions as well as for correct logic.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Describe the difference between a function and a procedure.",
+  "type": "2 marks — Short response",
+  "marks": "Secure: clearly states that a function returns a value to the part of the program that called it, whereas a procedure carries out a task but returns no value. Developing: identifies that only one of them returns a value but explains the point loosely. Emerging: names functions and procedures without making the return-value distinction clear."
+ },
+ {
+  "text": "A program uses a sub program to calculate the area of a rectangle. Explain what parameters are and how this sub program would use them.",
+  "type": "3 marks — Short response",
+  "marks": "Secure: defines a parameter as a variable in the sub program definition that receives an incoming value, and explains that the width and height would be passed in as parameters so the sub program can calculate the area of any rectangle. Developing: gives a partial definition of a parameter and links it loosely to width and height. Emerging: mentions passing numbers in without correctly using the idea of a parameter."
+ },
+ {
+  "text": "Explain the difference between a local variable and a global variable, and give one advantage of using local variables.",
+  "type": "4 marks — Short response",
+  "marks": "Mastering: accurately distinguishes a local variable (exists only inside the sub program where it is created) from a global variable (accessible anywhere in the program) and gives a clear advantage, such as a local variable cannot be changed accidentally by other parts of the program, which reduces errors. Secure: correct distinction with a valid advantage stated more simply. Developing: distinction is only partly correct or the advantage is vague. Emerging: confuses the two terms or gives no valid advantage."
+ },
+ {
+  "text": "Write a few lines of pseudocode that open a text file called scores.txt, write the line \"Pass\" to it, and then close the file.",
+  "type": "3 marks — Short response",
+  "marks": "Secure: pseudocode stores the opened file in a variable, uses a writeLine command to add the text \"Pass\", and closes the file, for example open(\"scores.txt\") then myFile.writeLine(\"Pass\") then myFile.close(). Developing: two of the three operations are correct, or the file is not stored in a variable. Emerging: only one operation is attempted correctly."
+ },
+ {
+  "text": "Explain what is meant by the scope of a variable.",
+  "type": "2 marks — Short response",
+  "marks": "Secure: explains that scope means the parts of a program in which a variable can be used or accessed, and shows understanding that some variables are only usable within a particular sub program. Developing: gives a partial idea of scope, such as where a variable works, without full clarity. Emerging: restates the word scope without explaining it."
+ },
+ {
+  "text": "Discuss the benefits of using sub programs to produce structured code that is easy to maintain.",
+  "type": "6 marks — Extended response",
+  "marks": "Mastering: sustained discussion covering several clear benefits — writing a block of code once and calling it many times avoids repetition, small named blocks are easier to read and test, work can be shared between programmers, and local variables keep each sub program independent — with reasoning that links each benefit to maintainability. Secure: several valid benefits explained with some development. Developing: a couple of relevant benefits stated with limited explanation. Emerging: one simple benefit with little or no development."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which type of sub program sends a value back to the code that called it?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "A procedure",
+   "A function",
+   "A parameter",
+   "A global variable"
+  ]
+ },
+ {
+  "q": "What name is given to a variable that can only be used inside the sub program where it is created?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "Global variable",
+   "Local variable",
+   "Argument",
+   "Constant"
+  ]
+ },
+ {
+  "q": "When a program opens a file, the file must be stored in a _____ so it can be read from or written to.",
+  "type": "fill",
+  "correct": 0,
+  "options": [
+   "variable",
+   "constant",
+   "parameter",
+   "function"
+  ]
+ },
+ {
+  "q": "The _____ command adds a new line of text to the end of a file.",
+  "type": "fill",
+  "correct": 0,
+  "options": [
+   "writeLine",
+   "readLine",
+   "endOfFile",
+   "open"
+  ]
+ },
+ {
+  "q": "Match each programming term to its description.",
+  "left": [
+   "Procedure",
+   "Function",
+   "Parameter",
+   "Global variable"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "right": [
+   "Performs a task but returns no value",
+   "Returns a value to be used later",
+   "A variable that receives a value passed in",
+   "Can be accessed anywhere in the program"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "A named block of code that can be called (run) from other parts of a program.",
+  "q": "What is a sub program?"
+ },
+ {
+  "a": "A function returns a value; a procedure does not.",
+  "q": "What is the key difference between a function and a procedure?"
+ },
+ {
+  "a": "endprocedure",
+  "q": "Which keyword in pseudocode ends a procedure definition?"
+ },
+ {
+  "a": "return",
+  "q": "Which keyword in pseudocode sends a value back from a function?"
+ },
+ {
+  "a": "A variable in a sub program's definition that receives a value passed in.",
+  "q": "What is a parameter?"
+ },
+ {
+  "a": "The actual value passed into a sub program when it is called.",
+  "q": "What is an argument?"
+ },
+ {
+  "a": "A variable that only exists inside the sub program where it is created.",
+  "q": "What is a local variable?"
+ },
+ {
+  "a": "A variable that can be accessed anywhere in the program.",
+  "q": "What is a global variable?"
+ },
+ {
+  "a": "The parts of a program where that variable can be used.",
+  "q": "What does the scope of a variable mean?"
+ },
+ {
+  "a": "open(\"sample.txt\")",
+  "q": "Which pseudocode command opens a text file called sample.txt?"
+ },
+ {
+  "a": ".writeLine()",
+  "q": "Which pseudocode method writes a new line to the end of a file?"
+ },
+ {
+  "a": ".readLine()",
+  "q": "Which pseudocode method returns the next line of a file?"
+ },
+ {
+  "a": "Whether the end of the file has been reached.",
+  "q": "What does the .endOfFile() command check?"
+ },
+ {
+  "a": "So changes are saved and the file is freed for other programs to use.",
+  "q": "Why should a file be closed after use?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "sub program",
+  "definition": "A named block of code that performs a specific task and can be run (called) from other parts of a program."
+ },
+ {
+  "term": "procedure",
+  "definition": "A sub program that carries out a task but does not return a value."
+ },
+ {
+  "term": "function",
+  "definition": "A sub program that carries out a task and returns a single value to the code that called it."
+ },
+ {
+  "term": "parameter",
+  "definition": "A variable listed in a sub program definition that receives a value passed into it."
+ },
+ {
+  "term": "argument",
+  "definition": "The actual value supplied to a sub program when it is called."
+ },
+ {
+  "term": "local variable",
+  "definition": "A variable created inside a sub program that only exists while that sub program is running."
+ },
+ {
+  "term": "global variable",
+  "definition": "A variable that can be read or changed anywhere in the program."
+ },
+ {
+  "term": "scope",
+  "definition": "The parts of a program in which a particular variable can be used."
+ },
+ {
+  "term": "file handling",
+  "definition": "Saving data to a text file and reading it back so it is not lost when the program closes."
+ }
+]

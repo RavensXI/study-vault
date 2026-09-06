@@ -1,0 +1,313 @@
+=== L9 Testing & Debugging ===
+id: 8816ea35-b5b3-405c-8e0c-f86da44c196e
+slug: testing
+status: live tier:both updated:2026-07-30T22:40:12.042269+00:00
+narration_manifest: array len 28
+
+--- DESCRIPTION ---
+How to test programs with the right data and track down bugs before users find them.
+
+--- CONTENT_HTML ---
+<p data-narration-id="n1">However carefully a program is written, mistakes creep in. A <dfn class="term" data-def="An error or fault in a program that makes it behave incorrectly.">bug</dfn> is any error in the code that stops the program working the way it should. Testing is the process of running a program with carefully chosen data to reveal these bugs so they can be fixed before real users ever see them.</p>
+
+<p data-narration-id="n2">The purpose of testing is to check that a program meets its requirements, produces the correct output for every likely input, and keeps working without crashing. Good testing also proves that a program is robust &mdash; it copes sensibly with unexpected or silly data instead of falling over. It is worth remembering that testing can reveal that bugs exist, but it can never prove that a program is completely free of them.</p>
+
+<div class="key-fact" data-narration-id="n3" data-revision-tip="Cover this and list the three things good testing checks a program does.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>Testing checks that a program meets its requirements, gives correct outputs for all likely inputs, and is robust enough to handle unexpected data. It can show that bugs are present but never prove that none remain.</p>
+</div>
+
+<h2 data-narration-id="n4">Testing as you go, and testing at the end</h2>
+
+<p data-narration-id="n5">Programmers test in two different ways at two different stages. <dfn class="term" data-def="Testing small parts of a program repeatedly as they are written, so errors are caught early.">Iterative testing</dfn> happens all the way through development. Each time a small section or module is written, the programmer runs it, checks it works, fixes anything wrong, then moves on. Because problems are caught early and in small pieces of code, they are far easier to locate and put right.</p>
+
+<p data-narration-id="n6"><dfn class="term" data-def="Testing the whole finished program at the end of development to check all parts work together.">Final testing</dfn>, also called terminal testing, is carried out once the whole program is finished. Now that the separate modules are joined together, the aim is to check that the complete system works as one and meets every requirement. Some faults only appear when parts of a program interact, so this final stage catches problems that module-by-module testing can miss.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Why test in small modules?</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n7">If you write two hundred lines of code and only test at the very end, a single wrong result could be hiding anywhere. By testing each module as you build it, you already know the earlier parts work, so any new bug is almost certainly in the code you just added. This is why iterative testing saves so much time compared with leaving everything to the end.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n8">Two kinds of error: syntax and logic</h2>
+
+<p data-narration-id="n9">A <dfn class="term" data-def="An error that breaks the grammatical rules of a programming language, stopping it from being translated or run.">syntax error</dfn> breaks the grammatical rules of the programming language. A missing bracket, a misspelled keyword, or a colon left off the end of a line all count. Because the translator cannot understand the code, a syntax error stops the program from being translated or run at all. The good news is that these errors are usually flagged straight away, often with the line number where the problem was found.</p>
+
+<p data-narration-id="n10">A <dfn class="term" data-def="An error where a program runs but produces unexpected or incorrect output.">logic error</dfn> is sneakier. The code obeys all the grammar rules, so it runs perfectly happily &mdash; but it produces the wrong output. Using a plus sign where you meant a minus, or checking &lsquo;greater than&rsquo; when you meant &lsquo;greater than or equal to&rsquo;, will not stop the program, yet the answers will be wrong. Because nothing crashes, logic errors are the hardest to spot.</p>
+
+<div class="key-fact" data-narration-id="n11" data-revision-tip="Close this and explain the difference between a syntax error and a logic error in one sentence each.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>A syntax error breaks the rules of the language and stops the program running or being translated. A logic error lets the program run but produces unexpected, incorrect output.</p>
+</div>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked example: which error is it?</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n12">Suppose a program should add VAT to a price. If you write <code>prnt(total)</code> instead of <code>print(total)</code>, the translator does not recognise the command and reports a syntax error before the program even runs. But if you accidentally multiply the price by 1.02 when VAT is 20 per cent, the program runs fine and simply gives the wrong total &mdash; that is a logic error. Same program, two very different kinds of mistake.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n13">Choosing good test data</h2>
+
+<p data-narration-id="n14">Testing only with sensible, everyday values is not enough. A thorough test tries the edges and the rubbish too. There are four types of test data you should be able to choose for any scenario. Imagine a program that accepts a school year group, where only whole numbers from 7 to 11 are allowed.</p>
+
+<ul>
+  <li data-narration-id="n15"><dfn class="term" data-def="Sensible, typical data that a program should accept without causing errors.">Normal test data</dfn> is data that should be accepted without causing errors &mdash; sensible, typical values. Example: 9.</li>
+  <li data-narration-id="n16"><dfn class="term" data-def="Data of the correct type that lies on the very edge of what is valid.">Boundary test data</dfn> is data of the correct type that sits right on the very edge of what is allowed. You test both sides of each edge: 7 and 11 should be accepted, while 6 and 12 should be rejected.</li>
+  <li data-narration-id="n17"><dfn class="term" data-def="Data of the correct type that is out of range and should be rejected.">Invalid test data</dfn> is data of the correct type that should still be rejected. Example: 15 &mdash; it is a whole number, but it lies outside the allowed range.</li>
+  <li data-narration-id="n18"><dfn class="term" data-def="Data of the incorrect type that should be rejected by the program.">Erroneous test data</dfn> is data of the wrong type altogether that should be rejected. Example: the word &lsquo;nine&rsquo;, because text cannot be a year-group number.</li>
+</ul>
+
+<div class="key-fact" data-narration-id="n19" data-revision-tip="Write from memory: give one invalid and one erroneous example for an age box that accepts 11 to 16.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The difference between invalid and erroneous data is the data type. Invalid data is the correct type but out of range and should be rejected. Erroneous data is the wrong type entirely and should also be rejected.</p>
+</div>
+
+<h2 data-narration-id="n20">Recording tests: the test plan</h2>
+
+<p data-narration-id="n21">Professionals do not test at random and hope for the best. They write a <dfn class="term" data-def="A table listing each test, the data used, the expected result and the actual result.">test plan</dfn> &mdash; a table listing each test, the data used, the type of test, the result expected, and the result that actually happened. If the actual result matches the expected result, the test passes; if not, a bug has been found and needs fixing. A strong test plan includes normal, boundary, invalid and erroneous data so that nothing is left unchecked.</p>
+
+<table data-narration-id="n22">
+  <thead><tr><th>Test data</th><th>Type</th><th>Expected result</th></tr></thead>
+  <tbody>
+    <tr><td>9</td><td>Normal</td><td>Accepted</td></tr>
+    <tr><td>7</td><td>Boundary</td><td>Accepted</td></tr>
+    <tr><td>12</td><td>Boundary</td><td>Rejected</td></tr>
+    <tr><td>15</td><td>Invalid</td><td>Rejected</td></tr>
+    <tr><td>&lsquo;nine&rsquo;</td><td>Erroneous</td><td>Rejected</td></tr>
+  </tbody>
+</table>
+
+<h2 data-narration-id="n23">Debugging: finding and fixing bugs</h2>
+
+<p data-narration-id="n24">When a test fails, the next job is debugging &mdash; tracking down the exact cause of a bug and correcting it. Syntax errors are usually easy: the translator points to the line and often describes what is wrong. Logic errors take far more detective work, because the program runs without complaint and gives no clue where it went astray.</p>
+
+<p data-narration-id="n25">The most reliable way to hunt a logic error is to follow the code by hand, one line at a time, writing down how each variable changes. This is called a dry run, and the table you fill in is a trace table. Comparing the values the variables actually hold against the values they should hold reveals exactly where the program goes wrong. Adding temporary lines that print a variable&rsquo;s value at key points does a similar job while the program is running.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>A systematic debugging routine</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n26">Faced with a failing program, work methodically. First, read any error message carefully &mdash; it often names the line and the problem. Next, narrow down where the fault lies by checking the output of each module in turn. Then trace the suspect section by hand to see where a variable takes the wrong value. Finally, make one change at a time and re-test, so you always know which fix actually worked. Changing lots of things at once usually just creates new bugs.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n27">Refining the solution</h2>
+
+<p data-narration-id="n28">Testing and debugging feed into refining &mdash; improving the program once faults have been found. Refining might mean correcting an error, but it can also mean tightening up the logic, adding a check for input the programmer had not thought of, or rewriting a clumsy section so it runs faster or reads more clearly. Development is a cycle: write, test, debug, refine, then test again until the program is genuinely reliable.</p>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n30">Key Takeaways</h3>
+<ul>
+  <li data-narration-id="n31">Iterative testing checks modules as they are written; final (terminal) testing checks the whole finished program works together.</li>
+  <li data-narration-id="n32">Syntax errors break the language rules and stop the program running; logic errors let it run but produce the wrong output.</li>
+  <li data-narration-id="n33">Test with normal, boundary, invalid and erroneous data, record it in a test plan, then debug and refine until the program is reliable.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n29">Questions on this topic love the word &lsquo;identify&rsquo; or &lsquo;give&rsquo; &mdash; if you are given a scenario with a valid range, be ready to name matching normal, boundary, invalid and erroneous data. The mark most often lost is confusing invalid with erroneous: remember invalid data is the right type but out of range, while erroneous data is the wrong type completely. When a &lsquo;describe&rsquo; or &lsquo;explain&rsquo; question mentions a program that runs but gives the wrong answer, that is your cue to write about logic errors and how a trace table or dry run helps you find them.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "State what is meant by a logic error.",
+  "type": "1 mark — State/Identify",
+  "marks": "Credit a correct meaning: an error where the program runs but produces unexpected or incorrect output. Do not credit answers that instead describe a syntax error (breaking the rules of the language)."
+ },
+ {
+  "text": "Define the terms 'iterative testing' and 'final testing'.",
+  "type": "2 marks — Define",
+  "marks": "One mark for each correct definition. Iterative testing: testing small parts or modules repeatedly as they are written during development. Final (terminal) testing: testing the whole finished program at the end to check all the parts work together."
+ },
+ {
+  "text": "A program accepts a person's age, which must be a whole number from 11 to 16. Describe suitable normal, boundary and erroneous test data for this program, giving one example of each.",
+  "type": "3 marks — Describe",
+  "marks": "One mark for each type paired with a valid example. Normal: a typical accepted value such as 13. Boundary: a value on the edge of the range such as 11 or 16 (accept 10 or 17 as just-outside boundary values). Erroneous: data of the wrong type such as the word 'twelve' or a symbol."
+ },
+ {
+  "text": "Explain the difference between invalid test data and erroneous test data. Use an example to support each answer.",
+  "type": "4 marks — Explain",
+  "marks": "Invalid data is of the correct data type but should be rejected because it is out of range (e.g. an age of 40 when the range is 11 to 16). Erroneous data is of the incorrect data type and should be rejected (e.g. entering 'ten' as text). Credit a clear distinction based on data type plus a correct example for each."
+ },
+ {
+  "text": "A program runs without crashing but gives the wrong answer. Explain why a programmer would use a trace table to investigate.",
+  "type": "4 marks — Explain",
+  "marks": "Response should recognise this is a logic error, so no error message appears to point at the fault. A trace table lets the programmer follow the code line by line and record how each variable changes, then compare the actual values against the expected values to pinpoint where the program goes wrong. Credit clear reasoning linking the technique to locating logic errors."
+ },
+ {
+  "text": "Compare syntax errors and logic errors. In your answer, refer to how each type of error affects whether a program runs and how a programmer would find each one.",
+  "type": "6 marks — Compare",
+  "marks": "Mastering: Sustained comparison making clear that a syntax error breaks the language rules and stops the program being translated or run (usually flagged with a line number), while a logic error lets the program run but produces wrong output and must be found by tracing or dry running; differences in detection are drawn out throughout. Secure: Clear explanation of both error types and at least one clear difference in how each is found. Developing: Some accurate points about each error type with limited comparison. Emerging: Simple, isolated points; little or no comparison between the two."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which type of error stops a program from being translated or run?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "Logic error",
+   "Syntax error",
+   "Boundary error",
+   "Refining error"
+  ]
+ },
+ {
+  "q": "A program should accept whole numbers from 1 to 10. Which of these is erroneous test data?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "0",
+   "10",
+   "'five' typed as text",
+   "11"
+  ]
+ },
+ {
+  "q": "Testing that happens repeatedly throughout development, as each module is written, is called _____ testing.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "final",
+   "iterative",
+   "boundary",
+   "erroneous"
+  ]
+ },
+ {
+  "q": "Data of the correct type that sits right on the edge of what is allowed is called _____ test data.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "normal",
+   "boundary",
+   "invalid",
+   "erroneous"
+  ]
+ },
+ {
+  "q": "Match each term to its meaning:",
+  "left": [
+   "Syntax error",
+   "Logic error",
+   "Normal test data",
+   "Test plan"
+  ],
+  "type": "match",
+  "order": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "right": [
+   "Breaks the grammar rules and stops the program running",
+   "Runs but produces the wrong output",
+   "A typical value that should be accepted",
+   "A table recording tests, expected and actual results"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "To verify it meets its requirements and uncover bugs before real users encounter them.",
+  "q": "Why do programmers test a program before releasing it to users?"
+ },
+ {
+  "a": "iterative testing",
+  "q": "Testing each module as it is written, throughout development, is called _____ testing."
+ },
+ {
+  "a": "Testing the whole finished program at the end to check it all works together.",
+  "q": "What is final (terminal) testing?"
+ },
+ {
+  "a": "Breaks the language's grammar rules and stops it running or being translated.",
+  "q": "What does a syntax error do to a program?"
+ },
+ {
+  "a": "Lets it run but produces unexpected or incorrect output.",
+  "q": "What does a logic error do to a program?"
+ },
+ {
+  "a": "Typical, sensible data that should be accepted without causing errors.",
+  "q": "What is normal test data?"
+ },
+ {
+  "a": "Data of the correct type on the very edge of being valid.",
+  "q": "What is boundary test data?"
+ },
+ {
+  "a": "Data of the correct type that is out of range and should be rejected.",
+  "q": "What is invalid test data?"
+ },
+ {
+  "a": "Data of the wrong type that should be rejected.",
+  "q": "What is erroneous test data?"
+ },
+ {
+  "a": "A table recording each test's data, expected result and actual result.",
+  "q": "What is a test plan?"
+ },
+ {
+  "a": "It records how each variable changes line by line, revealing exactly where the wrong value appears.",
+  "q": "How does a trace table help a programmer find a logic error?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "bug",
+  "definition": "An error or fault in a program that makes it behave incorrectly."
+ },
+ {
+  "term": "iterative testing",
+  "definition": "Testing small parts of a program repeatedly as they are written, so errors are caught early."
+ },
+ {
+  "term": "final testing",
+  "definition": "Testing the whole finished program at the end of development to check all parts work together."
+ },
+ {
+  "term": "syntax error",
+  "definition": "An error that breaks the grammatical rules of a programming language, stopping it from being translated or run."
+ },
+ {
+  "term": "logic error",
+  "definition": "An error where a program runs but produces unexpected or incorrect output."
+ },
+ {
+  "term": "normal test data",
+  "definition": "Sensible, typical data that a program should accept without causing errors."
+ },
+ {
+  "term": "boundary test data",
+  "definition": "Data of the correct type that lies on the very edge of what is valid."
+ },
+ {
+  "term": "invalid test data",
+  "definition": "Data of the correct type that is out of range and should be rejected."
+ },
+ {
+  "term": "erroneous test data",
+  "definition": "Data of the incorrect type that should be rejected by the program."
+ },
+ {
+  "term": "test plan",
+  "definition": "A table listing each test, the data used, the expected result, and the actual result."
+ }
+]
