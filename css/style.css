@@ -9285,6 +9285,12 @@ body.sv-listening-mode .conclusion, body.sv-listening-mode .sv-legal-footer { di
 .sv-listening .sv-card-body > .sv-embed:only-child { max-width: 620px; margin-left: auto; margin-right: auto; }
 /* light cards render as centred statements, not text lost in the stage */
 .sv-listening .sv-card--statement { display: flex; align-items: center; justify-content: center; }
+/* Bigger text / wider spacing can make a card taller than the stage. Plain
+   centring then overflows BOTH ends and the top is unreachable; 'safe' keeps
+   the centring when it fits and scrolls from the top when it does not.
+   !important because the statement cards carry the centring inline (6 Sep 2026). */
+.sv-listening .sv-card--statement { justify-content: safe center !important; align-items: safe center !important; }
+.sv-listening .sv-card--cover { align-content: safe center; }
 .sv-listening .sv-card--statement .sv-card-body { max-width: 620px; font-size: 1.12em; column-count: 1; }
 .sv-card-img { margin: 0; break-inside: avoid; }
 .sv-card-img img { width: 100%; height: calc(100vh - var(--ll-top, 110px) - var(--ll-bottom, 235px) - 200px);
