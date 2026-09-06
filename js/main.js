@@ -3605,6 +3605,7 @@ function initListeningLesson() {
 
   var idx = 0, autoFollow = false;
   function goTo(i, fromMusic) {
+    stopRead();
     idx = Math.max(0, Math.min(cards.length - 1, i));
     track.style.transform = 'translateX(-' + (idx * 100) + '%)';
     dots.forEach(function (d, j) { d.classList.toggle('sv-ll-dot--on', j === idx); });
@@ -3647,6 +3648,91 @@ function initListeningLesson() {
       chip.addEventListener('click', function () { window.LessonTutor.askAbout(''); });
       fig.querySelector('.sv-ap-bar').appendChild(chip);
     }
+  }
+
+  // ---- Reading options (Tom, 6 Sep 2026) ----
+  // The accessibility toolbar sits in the article column, which the stage
+  // covers. Every one of its settings already applies to the cards, so it only
+  // needs surfacing: host the SAME element in a collapsed strip at the top of
+  // the stage (moving the node keeps its listeners; main.js and reader-skin.js
+  // both find it by class). Collapsed by default because the stage is short
+  // on laptop-height screens.
+  var tb = document.querySelector('.a11y-toolbar');
+  if (tb) {
+    var tools = document.createElement('div'); tools.className = 'sv-ll-tools';
+    var tg = document.createElement('button');
+    tg.type = 'button'; tg.className = 'sv-ll-tools-toggle'; tg.setAttribute('aria-expanded', 'false');
+    tg.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg><span>Reading options</span>';
+    var row = document.createElement('div'); row.className = 'sv-ll-tools-row'; row.hidden = true;
+    row.appendChild(tb);
+    tools.appendChild(tg); tools.appendChild(row);
+    stage.insertBefore(tools, stage.firstChild);
+    tg.addEventListener('click', function () {
+      var open = row.hidden;
+      row.hidden = !open;
+      tg.setAttribute('aria-expanded', String(open));
+      document.body.classList.toggle('sv-ll-tools-open', open);
+    });
+  }
+
+  // ---- Per-card narration (Tom, 6 Sep 2026) ----
+  // The whole-lesson player is hidden here because a narrator over the music
+  // is unusable. Each card instead gets "Read this card": it pauses the
+  // recording, plays that card's clips from the manifest in order, and
+  // highlights the sentence being read. Navigating away or starting the music
+  // stops it.
+  var clipById = {};
+  (window.narrationManifest || []).forEach(function (m) { if (m && m.id && m.src) clipById[m.id] = m; });
+  var reader = new Audio(); reader.preload = 'none';
+  var readQueue = [], readCard = null, readBtn = null;
+  function clearReadHighlight() {
+    Array.prototype.forEach.call(stage.querySelectorAll('.narration-active'), function (e) { e.classList.remove('narration-active'); });
+  }
+  function stopRead() {
+    if (!readQueue || (!readBtn && !readQueue.length)) return;   // goTo(0) runs before the reader vars are assigned
+    try { reader.pause(); } catch (e) {}
+    readQueue = [];
+    clearReadHighlight();
+    if (readBtn) { readBtn.classList.remove('sv-card-read--on'); readBtn.setAttribute('aria-pressed', 'false'); }
+    readBtn = null; readCard = null;
+  }
+  function nextClip() {
+    clearReadHighlight();
+    var id = readQueue.shift();
+    if (!id || !readCard) { stopRead(); return; }
+    var el = readCard.querySelector('[data-narration-id="' + id + '"]');
+    if (el) el.classList.add('narration-active');
+    reader.src = clipById[id].src;
+    reader.play().catch(function () { stopRead(); });
+  }
+  reader.addEventListener('ended', nextClip);
+  reader.addEventListener('error', function () { stopRead(); });
+  cards.forEach(function (c) {
+    var ids = Array.prototype.map.call(c.querySelectorAll('[data-narration-id]'), function (e) { return e.getAttribute('data-narration-id'); })
+      .filter(function (id) { return !!clipById[id]; });
+    if (!ids.length) return;
+    var body = c.querySelector('.sv-card-body') || c;
+    var rowEl = document.createElement('div'); rowEl.className = 'sv-card-readrow';
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'sv-card-read'; b.setAttribute('aria-pressed', 'false');
+    b.title = 'Read this card aloud';
+    b.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg><span>Read this card</span>';
+    b.addEventListener('click', function () {
+      if (readBtn === b) { stopRead(); return; }
+      stopRead();
+      if (fig && fig._ap && !fig._ap.paused()) fig._ap.pause();
+      readCard = c; readBtn = b;
+      b.classList.add('sv-card-read--on'); b.setAttribute('aria-pressed', 'true');
+      readQueue = ids.slice();
+      nextClip();
+    });
+    rowEl.appendChild(b);
+    body.appendChild(rowEl);
+  });
+  if (fig) {
+    fig.addEventListener('click', function (e) {
+      if (e.target.closest('.sv-ap-play, .sv-ap-pin, .sv-ap-canvas, .sv-ap-track, .sv-ap-trackbtn')) stopRead();
+    });
   }
 
   function size() {
