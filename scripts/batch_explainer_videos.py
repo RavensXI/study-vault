@@ -172,6 +172,8 @@ def _fetch_subject_lessons(sb, slug, subject, limit, all_pending):
                 continue
             if not (lesson.get('content_html') or '').strip():
                 continue  # No article body — skip practice/empty shells
+            if 'sv-listening' in (lesson.get('content_html') or ''):
+                continue  # listening format: sidebar video is hidden on these pages (Tom, 6 Sep 2026)
             all_pending.append({
                 "lesson": lesson,
                 "subject_slug": slug,

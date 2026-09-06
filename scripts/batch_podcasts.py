@@ -167,6 +167,13 @@ def save_state(state):
         json.dump(state, f, indent=2, ensure_ascii=False)
 
 
+def is_listening_lesson(lesson):
+    """Third lesson format. Article rows whose body carries the listening
+    stage render as a card carousel over a docked player; every sidebar and
+    audio feature is hidden there, so podcasts/explainers are never shown."""
+    return 'sv-listening' in (lesson.get("content_html") or "")
+
+
 def has_podcast(lesson):
     media = lesson.get("related_media") or []
     for cat in media:
@@ -195,6 +202,11 @@ def _fetch_subject_lessons(sb, slug, subject, limit, all_pending):
                 continue
             # practice-format / stub lessons can't sustain a podcast
             if len(lesson.get("content_html") or "") < 800:
+                continue
+            # listening-format lessons (Music set works): the page docks a
+            # card carousel over the article and hides the sidebar, so a
+            # podcast would never be reachable (Tom, 6 Sep 2026)
+            if is_listening_lesson(lesson):
                 continue
             if LIVE_ONLY and lesson.get("status") != "live":
                 continue

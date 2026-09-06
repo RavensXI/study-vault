@@ -708,17 +708,25 @@
       // has a populated practice_data object. Verified to produce identical
       // counts to the old code across article/mixed/practice subjects.
       var ARTICLE = 'practice_data.is.null,practice_data.eq.{}';
+      // Third format (6 Sep 2026): a LISTENING lesson is an article row whose
+      // body carries the Music set-work stage. The page docks a card carousel
+      // over the article and hides the sidebar, audio player and practice
+      // section, so podcasts, explainer videos and narration are never shown
+      // there. They are counted separately and excluded from asset coverage.
+      var LISTENING = '%sv-listening%';
       var L = function () { return sb.from('lessons').select('unit_id'); };
+      var A = function () { return L().or(ARTICLE).not('content_html', 'ilike', LISTENING); };
       var metricDefs = {
-        article:   function (f, t) { return L().or(ARTICLE).range(f, t); },
+        article:   function (f, t) { return A().range(f, t); },
+        listening: function (f, t) { return L().or(ARTICLE).ilike('content_html', LISTENING).range(f, t); },
         practice:  function (f, t) { return L().not('practice_data', 'is', null).neq('practice_data', '{}').range(f, t); },
-        content:   function (f, t) { return L().or(ARTICLE).not('content_html', 'is', null).range(f, t); },
-        heroes:    function (f, t) { return L().or(ARTICLE).not('hero_image_url', 'is', null).range(f, t); },
-        narration: function (f, t) { return L().or(ARTICLE).not('narration_manifest', 'is', null).range(f, t); },
-        relmedia:  function (f, t) { return L().or(ARTICLE).not('related_media', 'is', null).neq('related_media', '[]').range(f, t); },
+        content:   function (f, t) { return A().not('content_html', 'is', null).range(f, t); },
+        heroes:    function (f, t) { return A().not('hero_image_url', 'is', null).range(f, t); },
+        narration: function (f, t) { return A().not('narration_manifest', 'is', null).range(f, t); },
+        relmedia:  function (f, t) { return A().not('related_media', 'is', null).neq('related_media', '[]').range(f, t); },
         // NB: use .filter('cs', <json string>) — supabase-js .contains() does
         // NOT JSON-serialise objects (it coerces to "[object Object]" → 400).
-        podcasts:  function (f, t) { return L().or(ARTICLE).filter('related_media', 'cs', JSON.stringify([{ category: 'Podcasts', items: [{ title: 'Lesson Podcast' }] }])).range(f, t); }
+        podcasts:  function (f, t) { return A().filter('related_media', 'cs', JSON.stringify([{ category: 'Podcasts', items: [{ title: 'Lesson Podcast' }] }])).range(f, t); }
       };
 
       // Paginate one metric's filtered query, collecting unit_ids only.
@@ -736,12 +744,12 @@
         return ids;
       }
 
-      var keys = ['article', 'practice', 'content', 'heroes', 'narration', 'relmedia', 'podcasts'];
+      var keys = ['article', 'listening', 'practice', 'content', 'heroes', 'narration', 'relmedia', 'podcasts'];
       var results = await Promise.all(keys.map(function (k) { return fetchUnitIds(metricDefs[k]); }));
 
       var statsBy = {};
       function ensure(sid) {
-        if (!statsBy[sid]) statsBy[sid] = { total: 0, articleTotal: 0, practiceTotal: 0, content: 0, heroes: 0, narration: 0, podcasts: 0, relmedia: 0, practice: 0 };
+        if (!statsBy[sid]) statsBy[sid] = { total: 0, articleTotal: 0, listeningTotal: 0, practiceTotal: 0, content: 0, heroes: 0, narration: 0, podcasts: 0, relmedia: 0, practice: 0 };
         return statsBy[sid];
       }
       keys.forEach(function (k, idx) {
@@ -750,12 +758,13 @@
           if (!sid) return;
           var st = ensure(sid);
           if (k === 'article') st.articleTotal++;
+          else if (k === 'listening') st.listeningTotal++;
           else if (k === 'practice') { st.practiceTotal++; st.practice++; }
           else st[k]++;
         });
       });
       Object.keys(statsBy).forEach(function (sid) {
-        statsBy[sid].total = statsBy[sid].articleTotal + statsBy[sid].practiceTotal;
+        statsBy[sid].total = statsBy[sid].articleTotal + statsBy[sid].listeningTotal + statsBy[sid].practiceTotal;
       });
       state.statsBySubject = statsBy;
 
@@ -785,7 +794,7 @@
     // note there). Returns the same shape the renderer expects.
     function statsForSubject(subject) {
       return state.statsBySubject[subject.id] || {
-        total: 0, articleTotal: 0, practiceTotal: 0,
+        total: 0, articleTotal: 0, listeningTotal: 0, practiceTotal: 0,
         content: 0, heroes: 0, narration: 0, podcasts: 0, relmedia: 0, practice: 0
       };
     }
@@ -842,7 +851,7 @@
       // Sum stats across all subjects in a group
       function aggregateStats(subs) {
         var agg = {
-          total: 0, articleTotal: 0, practiceTotal: 0,
+          total: 0, articleTotal: 0, listeningTotal: 0, practiceTotal: 0,
           content: 0, heroes: 0, narration: 0, podcasts: 0, relmedia: 0, practice: 0,
           boardsTotal: subs.length, boardsLive: 0
         };
@@ -851,6 +860,7 @@
           agg.total += st.total;
           agg.articleTotal += st.articleTotal;
           agg.practiceTotal += st.practiceTotal;
+          agg.listeningTotal += st.listeningTotal;
           agg.content += st.content;
           agg.heroes += st.heroes;
           agg.narration += st.narration;
@@ -862,11 +872,12 @@
         return agg;
       }
 
-      function lessonsBreakdown(art, prac) {
-        if (art && prac) return art + ' article + ' + prac + ' practice';
-        if (art) return art + ' article';
-        if (prac) return prac + ' practice';
-        return '0';
+      function lessonsBreakdown(art, prac, listen) {
+        var parts = [];
+        if (art) parts.push(art + ' article');
+        if (listen) parts.push(listen + ' listening');
+        if (prac) parts.push(prac + ' practice');
+        return parts.length ? parts.join(' + ') : '0';
       }
 
       var groupHtml = groupKeys.map(function (fam) {
@@ -897,7 +908,7 @@
           var boardLabel = browseUrl
             ? '<a href="' + browseUrl + '" target="_blank"><span class="board-label">' + escapeHtml(sub.exam_board || '—') + '</span><span class="board-slug">' + escapeHtml(sub.slug) + '</span></a>'
             : '<span class="board-label">' + escapeHtml(sub.exam_board || '—') + '</span><span class="board-slug">' + escapeHtml(sub.slug) + '</span>';
-          var lessonsText = lessonsBreakdown(st.articleTotal, st.practiceTotal);
+          var lessonsText = lessonsBreakdown(st.articleTotal, st.practiceTotal, st.listeningTotal);
           return (
             '<div class="board-row">' +
               '<div>' + boardLabel + '</div>' +
@@ -919,7 +930,7 @@
             '<summary class="subj-summary">' +
               '<svg class="subj-chevron" viewBox="0 0 16 16" fill="currentColor"><path d="M5.7 12.3a1 1 0 010-1.4L8.6 8 5.7 5.1a1 1 0 011.4-1.4l3.6 3.6a1 1 0 010 1.4l-3.6 3.6a1 1 0 01-1.4 0z"/></svg>' +
               '<span class="subj-title">' + escapeHtml(displayName) + '</span>' +
-              '<span class="subj-meta"><strong>' + agg.boardsTotal + '</strong> board' + (agg.boardsTotal !== 1 ? 's' : '') + ' · <strong>' + lessonsBreakdown(agg.articleTotal, agg.practiceTotal) + '</strong></span>' +
+              '<span class="subj-meta"><strong>' + agg.boardsTotal + '</strong> board' + (agg.boardsTotal !== 1 ? 's' : '') + ' · <strong>' + lessonsBreakdown(agg.articleTotal, agg.practiceTotal, agg.listeningTotal) + '</strong></span>' +
               summaryCoverage +
             '</summary>' +
             '<div class="subj-boards">' + boardRowsHtml + '</div>' +

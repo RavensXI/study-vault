@@ -278,6 +278,7 @@
   // points at it). Clicking re-runs the tour from the start.
   function buildTourReplay() {
     if (document.querySelector('.sv-tour-replay')) return;
+    if (isListeningLesson()) return;
     var b = document.createElement('button');
     b.className = 'sv-tour-replay'; b.type = 'button';
     b.setAttribute('aria-label', 'Replay the page tour');
@@ -297,6 +298,15 @@
   // spotlight one feature at a time, small caption card with Back/Next/Skip.
   // Shows once (localStorage); re-run anytime with window.svStartTour().
   var tourStarted = false, tourPolling = false;
+  // Listening lessons (Music set works) dock a fixed carousel over the top of
+  // the article, so every tour target sits underneath it: the first step
+  // spotlights an empty strip and the rest are dropped (Tom, 6 Sep 2026).
+  // Skip the tour there WITHOUT marking it seen - it runs on the student's
+  // next ordinary lesson instead.
+  function isListeningLesson() {
+    return !!document.querySelector('.sv-listening') ||
+           document.body.classList.contains('sv-listening-mode');
+  }
   // A step targets one selector (sel) or a group whose union is spotlit (sels).
   // Steps whose targets are all absent/hidden are dropped (e.g. video).
   var TOUR_STEPS = [
@@ -341,6 +351,7 @@
   }
   function maybeStartTour() {
     if (tourPolling || tourStarted) return;
+    if (isListeningLesson()) return;
     if (new URLSearchParams(location.search).get('notour') === '1')
       try { localStorage.setItem('sv-reader-tour-v1', '1'); } catch (e) {}   // QA staging
     if (localStorage.getItem('sv-reader-tour-v1')) return;
@@ -358,6 +369,7 @@
   }
   function startTour() {
     if (document.querySelector('.sv-tour-card')) return;
+    if (isListeningLesson()) return;
     tourStarted = true;
     // keep a step if its target exists (or, for a triggered step, its required
     // source element exists — the spotlight target appears once triggered)
