@@ -1,0 +1,193 @@
+{
+ "unit": "computer-science-edexcel/computers",
+ "checked_at": "2026-09-06T12:00:00",
+ "spec_used": "specs/edexcel/computer-science-1CP1.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "\"The von Neumann model has five key CPU components: the control unit, the arithmetic logic unit (ALU), registers, the clock, and the three buses (address, data, control).\" The matching revision tip asks for \"the five components the spec expects you to describe inside the CPU\", and the conclusion lists the clock among the parts \"the CPU contains\".",
+   "truth": "The CPU contains the control unit, the ALU and registers. The buses are not inside the CPU; they are the wires that connect the CPU to main memory. Spec 3.1.1 groups them exactly that way: \"CPU (control unit, arithmetic logic unit, registers), clock, address bus, data bus, control bus\". A student who names a bus as a CPU component in a 'name the components of the CPU' item loses the mark.",
+   "evidence": "spec 3.1.1 (Topic 3 Hardware)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 1,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "The 6-mark Discuss mark scheme requires \"the number of cores allows parallel processing of independent tasks, and larger on-chip cache reduces the frequency of slow RAM accesses\", and the Secure band asks for \"one other performance factor (e.g. cores or cache)\".",
+   "truth": "Cache and cores appear nowhere in this specification. Topic 3 names the clock only, in the context of the fetch-decode-execute cycle. The on-spec limits on clock speed are heat and instability, plus the CPU waiting on RAM across the buses. Teaching cache and cores as the credit-earning content of an Edexcel answer points revision at another board's spec.",
+   "evidence": "spec 3.1.1; whole-spec search finds no 'cache' and no 'core(s)' as CPU content",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 1,
+   "field": "exam_tip_html",
+   "severity": "MEDIUM",
+   "claim": "\"examiners look for 'decode' as a separate stage\".",
+   "truth": "No examiner statement supports this. House rule: no invented examiner claims. The point is true without the examiner voice.",
+   "evidence": "checker brief (copyright distancing)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "\"You do not need to know the names of specific registers for your exam.\"",
+   "truth": "Two defensible options. (a) Keep it: spec 3.1.1 names only \"registers\", never the PC, MAR, MDR or accumulator, so the claim follows the spec, which is the scope authority. (b) Soften it: sample assessment materials could still show a named register in a diagram, and telling a student not to learn something carries an asymmetric downside. Recommended: keep as written.",
+   "evidence": "spec 3.1.1; SAMs not checked (no web budget)",
+   "verdict": "NOTE",
+   "ruling": "NOTE: 'no named registers required' follows spec 3.1.1 (only 'registers'); kept."
+  },
+  {
+   "id": "F5",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "\"DVD — typically 4.7 to 8.5 gibibytes (GiB)\" and \"Blu-ray — typically 25 to 50 GiB or more per disc\".",
+   "truth": "Those figures are the manufacturers' decimal capacities: a single-layer DVD holds 4.7 GB, which is 4.38 GiB, and a single-layer Blu-ray holds 25 GB, which is 23.3 GiB. The CD figure (around 700 MiB) is right. The error is about 7% and is not mark-affecting at GCSE, but the unit labels decimal figures as binary multiples.",
+   "evidence": "spec 2.3.1 (binary multiples); DVD and Blu-ray capacity conventions",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F6",
+   "lesson": 2,
+   "field": "exam_tip_html",
+   "severity": "MEDIUM",
+   "claim": "\"examiners want to see that you understand the fixed-purpose nature\".",
+   "truth": "No examiner statement supports this. House rule: no invented examiner claims.",
+   "evidence": "checker brief (copyright distancing)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "The inline definition attached to the term \"code review\" reads \"A log that automatically records actions performed within a system — for example, who accessed a file, when a record was changed, or which user logged in at what time. Used to detect security breaches or trace errors after they have occurred.\"",
+   "truth": "That is the definition of an audit trail, which the next paragraph then defines correctly. The glossary term in the same lesson has the right code review definition. As shipped, a student who taps 'code review' is taught the reversed definition of the pair the lesson exists to separate.",
+   "evidence": "spec 3.2.3; the lesson's own glossary entry and paragraph n22",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 3,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "\"Name two functions of an operating system.\" is labelled \"1 mark — Give/State/Name\" and the mark scheme reads \"1 mark for any two of the four\".",
+   "truth": "Two named functions earn two marks, one each, on a Paper 1 short item. The question, its label and its mark scheme disagree, and as written they teach a student that naming two things is worth one mark.",
+   "evidence": "spec assessment information (short items, 1-6 marks per part); internal inconsistency",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 3,
+   "field": "exam_tip_html",
+   "severity": "MEDIUM",
+   "claim": "\"the key distinction examiners test is design-time vs run-time\".",
+   "truth": "No examiner statement supports this. House rule: no invented examiner claims.",
+   "evidence": "checker brief (copyright distancing)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 4,
+   "field": "knowledge_checks",
+   "severity": "HIGH",
+   "claim": "The match check offers right-hand options [\"Interpreter\", \"Compiler\", \"Compiler\"] with the key [1, 0, 1].",
+   "truth": "Two options carry the identical text \"Compiler\", but only the one at index 1 is accepted, and index 2 is never a correct answer. The check renders as a dropdown per row holding the shuffled option texts, and marking compares the chosen index with the key, so a student who picks the other identical \"Compiler\" is marked wrong. Both Compiler rows are therefore a coin toss. Rebuilt as a one-to-one match on compiler, interpreter and machine code.",
+   "evidence": "renderMatch in js/main.js (parseInt(sel.value) === q.order[i]); recomputation of the key",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11",
+   "lesson": 4,
+   "field": "exam_tip_html",
+   "severity": "MEDIUM",
+   "claim": "\"Examiners look for three dimensions:\".",
+   "truth": "No examiner statement supports this. House rule: no invented examiner claims.",
+   "evidence": "checker brief (copyright distancing)",
+   "verdict": "FIX"
+  }
+ ],
+ "lessons_clean": [],
+ "summary": "Two HIGH defects: lesson 3 attaches the audit-trail definition to the term 'code review', and lesson 4's match check has two identical 'Compiler' options with only one accepted, so it marks correct answers wrong. Otherwise the technical content is sound - register roles are not named, bus roles, volatility, storage properties and the compiler/interpreter contrast are all correct, and every other answer key recomputes clean; the remaining fixes are a CPU/bus component slip, an off-spec cache-and-cores mark scheme, a 'name two' item tariffed at one mark, and four invented examiner claims.",
+ "renarration": {
+  "run_at": "2026-09-06T11:02:27Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n4",
+    "key": "computer-science-edexcel/computers/narration_lesson-01_n4.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-edexcel/computers/narration_lesson-01_n4.mp3",
+    "voice": "Ollie",
+    "duration": 24.12,
+    "bytes": 289440,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 11:01:45 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n27",
+    "key": "computer-science-edexcel/computers/narration_lesson-01_n27.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-edexcel/computers/narration_lesson-01_n27.mp3",
+    "voice": "Ollie",
+    "duration": 34.8,
+    "bytes": 417600,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 11:01:53 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n30",
+    "key": "computer-science-edexcel/computers/narration_lesson-01_n30.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-edexcel/computers/narration_lesson-01_n30.mp3",
+    "voice": "Ollie",
+    "duration": 19.08,
+    "bytes": 228960,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 11:01:58 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n26",
+    "key": "computer-science-edexcel/computers/narration_lesson-02_n26.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-edexcel/computers/narration_lesson-02_n26.mp3",
+    "voice": "Ada",
+    "duration": 31.42,
+    "bytes": 376992,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 11:02:05 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n24",
+    "key": "computer-science-edexcel/computers/narration_lesson-03_n24.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-edexcel/computers/narration_lesson-03_n24.mp3",
+    "voice": "Ollie",
+    "duration": 34.92,
+    "bytes": 419040,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 11:02:13 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n26",
+    "key": "computer-science-edexcel/computers/narration_lesson-04_n26.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science-edexcel/computers/narration_lesson-04_n26.mp3",
+    "voice": "Ada",
+    "duration": 33.84,
+    "bytes": 406080,
+    "verify_status": 206,
+    "last_modified": "Sun, 06 Sep 2026 11:02:20 GMT"
+   }
+  ],
+  "verified_ok": 6,
+  "total": 6
+ }
+}
