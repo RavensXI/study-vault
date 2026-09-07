@@ -46,18 +46,22 @@ for f in sorted(glob.glob(os.path.join(HERE, "probes", "*.json"))):
     key = os.path.splitext(os.path.basename(f))[0]
     d = json.load(io.open(f, encoding="utf-8"))
     votes = list(d["votes"].values())
-    keys = ["video_length"] + [q[0] for q in d["questions"]]
-    vl_vals = [secs(v.get("video_length")) for v in votes]
+    vl_key = "video_length" if any("video_length" in v for v in votes) else "audio_length"
+    keys = [vl_key] + [q[0] for q in d["questions"]]
+    vl_vals = [secs(v.get(vl_key)) for v in votes]
     dur, _ = consensus(vl_vals, 3)
     tol = max(3, int(0.012 * (dur or 300)))
     rows = {}
     for k in keys:
         vals = [secs(v.get(k)) for v in votes]
-        val, note = consensus(vals, 3 if k == "video_length" else tol)
+        val, note = consensus(vals, 3 if k == vl_key else tol)
         rows[k] = {"secs": val, "votes": vals, "verdict": note}
-    out[key] = {"yt": d["yt"], "piece": d["piece"][:90], "tolerance_s": tol,
+    out[key] = {"yt": d.get("yt") or d.get("audio"), "piece": d["piece"][:90], "tolerance_s": tol,
+                "window": d.get("window"),
                 "intro_notes": [v.get("intro_before_music") for v in votes], "events": rows}
-    print("\n== %s (%s) dur=%s tol=%ds" % (key, d["yt"], dur, tol))
+    win = d.get("window")
+    print("\n== %s (%s) dur=%s tol=%ds%s" % (key, (d.get("yt") or "R2 audio"), dur, tol,
+          (" WINDOW %s" % (win,)) if win else ""))
     for k in keys:
         r = rows[k]
         mark = "OK " if r["secs"] is not None else "SPLIT"
