@@ -1449,6 +1449,13 @@ function initNarration() {
     if (vm && vm.classList.contains('active')) return;
     if (e.code === 'Space') {
       e.preventDefault();
+      // Listening lessons: the whole-lesson narration is hidden there, and
+      // Space was starting it underneath the music (Tom, 7 Sep 2026). Hand
+      // the key to the listening stage instead.
+      if (document.body.classList.contains('sv-listening-mode')) {
+        try { document.dispatchEvent(new CustomEvent('sv-ll-space')); } catch (err) {}
+        return;
+      }
       if (audio.paused) { startPlayback(); } else { audio.pause(); }
     }
   });
@@ -3794,6 +3801,11 @@ function initListeningLesson() {
       if (e.target.closest('.sv-ap-play, .sv-ap-pin, .sv-ap-canvas, .sv-ap-track, .sv-ap-trackbtn')) stopRead();
     });
   }
+  // Space: stop a card being read if one is; otherwise play/pause the piece.
+  document.addEventListener('sv-ll-space', function () {
+    if (readBtn) { stopRead(); return; }
+    if (fig && fig._ap) { if (fig._ap.paused()) fig._ap.play(); else fig._ap.pause(); }
+  });
 
   // ---- Full listen (Tom, 6 Sep 2026): 85% of the piece's seconds heard, in
   // any order, ticks "Listen to the whole piece". Seconds heard are kept per
