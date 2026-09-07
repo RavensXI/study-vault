@@ -22,6 +22,17 @@ if os.path.exists(_prev):
     PREV = {r["spec_code"]: (i, r["est_students"])
             for i, r in enumerate(_p["table1_remaining"], 1)}
 
+# Multi-year class flags for the Table 3 schools, written by
+# render_niche_history.py. Absent on a first run; the table degrades quietly.
+NICHE = {}
+_nh = os.path.join(HERE, "niche_school_classes.json")
+if os.path.exists(_nh):
+    NICHE = json.load(open(_nh, encoding="utf-8"))
+
+NICHE_CSS = {"NEW": "tag-build", "ESTABLISHED": "tag-port",
+             "ALTERNATE": "tag-warm", "INTERMITTENT": "tag-alias",
+             "ONE-OFF": "tag-skip", "LAPSED": "tag-skip"}
+
 TAG_LABEL = {"build": "BUILD", "port": "PORT", "alias": "ALIAS", "skip": "SKIP",
              "general": "note"}
 TIER_LABEL = {"S": "Top tier (400k+)", "A": "High uptake (100–400k)",
@@ -112,7 +123,9 @@ td.rank{color:#9a938a;font-variant-numeric:tabular-nums}
 .tag-port{background:#e2e6f2;color:#33406b}
 .tag-alias{background:#f0e6f4;color:#5b3568}
 .tag-skip{background:#eeeae4;color:#6d655b}
+.tag-warm{background:#fbeccd;color:#7a5300}
 .tag-general{background:#f3efe8;color:#6d655b}
+.chips{display:inline-block;margin-top:.4rem;font-weight:400}
 .flag{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.04em;
  padding:2px 6px;border-radius:4px;background:#fbeccd;color:#7a5300}
 .ok{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.04em;
@@ -127,6 +140,7 @@ summary:before{content:"▸ ";color:#9a938a}
 details[open] summary:before{content:"▾ "}
 .schools{margin:.5rem 0 0;padding:0;list-style:none;
  columns:2;column-gap:2rem;font-size:.78rem}
+.schools.schools-1{columns:1}
 .schools li{break-inside:avoid;padding:.16rem 0;color:#5c554d}
 .schools .n{font-variant-numeric:tabular-nums;color:#2d2a26;font-weight:600}
 .schools .urn{color:#9a938a;font-family:ui-monospace,Consolas,monospace;font-size:.7rem}
@@ -234,19 +248,52 @@ def table2():
 
 
 # ---------------------------------------------------------------- table 3
+def niche_key(s):
+    return re.sub(r"\s*/\s*", "/", re.sub(r"\s+", " ", str(s).strip())).lower()
+
+
 def table3():
+    subs = NICHE.get("subjects", {})
+    years = NICHE.get("years", [])
     out = []
     for r in D["table3_niche"]:
-        schools = "".join(
-            f'<li><span class="n">{s["entries"]}</span> &nbsp;{e(s["name"])} '
-            f'<span class="urn">URN {e(s["urn"])}</span></li>'
-            for s in r["top_schools"])
+        sub = subs.get(niche_key(r["subject_discount_group"]), {})
+        flags = sub.get("schools", {})
+        comp = sub.get("comparable_years", years)
+        items = []
+        for s in r["top_schools"]:
+            info = flags.get(str(s["urn"]))
+            if info:
+                cls = info["class"]
+                parts = []
+                for y, v in zip(years, info["entries"]):
+                    if y not in comp:
+                        parts.append("n/c")
+                    else:
+                        parts.append(f"{v:,}" if v else "&ndash;")
+                extra = (f' <span class="tag {NICHE_CSS[cls]}">{e(cls)}</span>'
+                         f' <span class="urn">{" ".join(parts)}</span>'
+                         f' <span class="urn">{e(info["approach"])}</span>')
+            else:
+                extra = ' <span class="tag tag-general">no history match</span>'
+            items.append(
+                f'<li><span class="n">{s["entries"]}</span> &nbsp;{e(s["name"])} '
+                f'<span class="urn">URN {e(s["urn"])}</span>{extra}</li>')
+        counts = {}
+        for info in flags.values():
+            counts[info["class"]] = counts.get(info["class"], 0) + 1
+        chips = " ".join(
+            f'<span class="tag {NICHE_CSS[c]}">{e(c)} {counts[c]}</span>'
+            for c in ["NEW", "ESTABLISHED", "ALTERNATE", "INTERMITTENT",
+                      "ONE-OFF", "LAPSED"] if counts.get(c))
         out.append(
             f'<details><summary>{e(r["subject_discount_group"])} '
             f'&nbsp;·&nbsp; {r["entries"]:,} entries &nbsp;·&nbsp; '
             f'{r["schools_entering"]} schools &nbsp;·&nbsp; '
-            f'<span class="note">{e(r["qualification"])}</span></summary>'
-            f'<ul class="schools">{schools}</ul></details>')
+            f'<span class="note">{e(r["qualification"])}</span>'
+            + (f'<br><span class="chips">{chips}</span>' if chips else '')
+            + f'</summary><ul class="schools schools-1">{"".join(items)}</ul>'
+            f'</details>')
     return "".join(out)
 
 
@@ -516,7 +563,22 @@ SKIP rows are Wales-regulated WJEC specs that England centres cannot enter.</p>
 <h2>Table 3 — niche subjects (≤ {D["niche_threshold"] if "niche_threshold" in D else 3000:,} entries): the schools that enter them</h2>
 <p class="hint">The sales target list. These subjects are small enough that the
 schools entering them are individually addressable, and small enough that no big
-revision platform serves them. Each row opens to the ten largest centres by entries.</p>
+revision platform serves them. Each row opens to the ten largest centres by
+entries, and every centre now carries a class flag read across
+{e(" to ".join([NICHE.get("years", ["?"])[0], NICHE.get("years", ["?"])[-1]]))}:
+<span class="tag tag-build">NEW</span> first entries in the last two years, the
+warmest prospect; <span class="tag tag-port">ESTABLISHED</span> entries every year
+since 2022/23, a real department; <span class="tag tag-warm">ALTERNATE</span> a
+one-year gap, the ordinary shape of an every-other-year cohort, so check the
+timing; <span class="tag tag-alias">INTERMITTENT</span> a longer gap;
+<span class="tag tag-skip">LAPSED</span> or <span class="tag tag-skip">ONE-OFF</span>
+nothing in the latest year. The four figures after the flag are that school's
+entries by year, and the chips on the summary line count every school in the
+subject, not only the ten shown. Vocational rows roll all Level 1/2 awarding
+routes together and some read "n/c" for the years DfE re-coded, so their flags
+come from the last two years only. Full working, and every school rather than the
+top ten, in
+<span class="mono">scripts/_planning/niche_schools_history.html</span>.</p>
 {table3()}
 
 <h2>Cross-check: DfE subject total against the June 2025 board sum</h2>
