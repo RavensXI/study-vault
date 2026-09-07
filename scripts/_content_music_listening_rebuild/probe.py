@@ -42,7 +42,16 @@ def ask(model, prompt, url):
             time.sleep(15)
             continue
         if r.status_code == 200:
-            t = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+            # A candidate can come back with no "parts" at all (thinking budget
+            # exhausted, or a safety stop). That is a lost vote, not a crash:
+            # retry once, then record it so consensus.py counts it as missing.
+            try:
+                t = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+            except (KeyError, IndexError, TypeError):
+                if attempt < 2:
+                    time.sleep(10)
+                    continue
+                return {"error": "no text part", "raw": json.dumps(r.json())[:400]}
             m = re.search(r"\{.*\}", t, re.S)
             try:
                 return json.loads(m.group(0))
