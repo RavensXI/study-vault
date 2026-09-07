@@ -1,0 +1,480 @@
+<meta charset="utf-8">
+<title>StudyVault — What would it cost us?</title>
+<style>
+  :root {
+    --bg: #faf8f5; --panel: #fffdfa; --ink: #2d2a26; --muted: #6e675e; --faint: #938b80;
+    --line: rgba(45, 42, 38, 0.14); --accent: #16a34a;
+    --accent-soft: rgba(22, 163, 74, 0.09); --accent-line: rgba(22, 163, 74, 0.32);
+    --serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+    --sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#211e1b; --panel:#2a2622; --ink:#ede7de; --muted:#a79e92; --faint:#8b8277;
+      --line:rgba(237,231,222,.15); --accent:#6cba86;
+      --accent-soft:rgba(108,186,134,.12); --accent-line:rgba(108,186,134,.34); }
+  }
+  :root[data-theme="dark"] { --bg:#211e1b; --panel:#2a2622; --ink:#ede7de; --muted:#a79e92;
+    --faint:#8b8277; --line:rgba(237,231,222,.15); --accent:#6cba86;
+    --accent-soft:rgba(108,186,134,.12); --accent-line:rgba(108,186,134,.34); }
+  :root[data-theme="light"] { --bg:#faf8f5; --panel:#fffdfa; --ink:#2d2a26; --muted:#6e675e;
+    --faint:#938b80; --line:rgba(45,42,38,.14); --accent:#16a34a;
+    --accent-soft:rgba(22,163,74,.09); --accent-line:rgba(22,163,74,.32); }
+
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+    font-size:15px; line-height:1.55; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 34px 22px 80px; }
+
+  .masthead { display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+    padding-bottom:16px; border-bottom:1px solid var(--line); margin-bottom:28px; }
+  .wordmark { font-family:var(--serif); font-size:27px; font-weight:600; letter-spacing:-.01em; }
+  .wordmark svg { width:.5em; height:.5em; vertical-align:.01em; margin-left:.08em; fill:currentColor; }
+  .mast-right { text-align:right; color:var(--muted); font-size:12px; line-height:1.45; }
+  .mast-right b { color:var(--ink); font-weight:600; }
+
+  h1 { font-family:var(--serif); font-size:clamp(26px,4.4vw,36px); font-weight:600;
+    margin:0 0 8px; letter-spacing:-.01em; text-wrap:balance; }
+  .standfirst { color:var(--muted); max-width:60ch; margin:0 0 28px; }
+  .standfirst b { color:var(--ink); font-weight:600; }
+
+  .layout { display:grid; grid-template-columns: 1fr 340px; gap:26px; align-items:start; }
+  @media (max-width: 880px) { .layout { grid-template-columns:1fr; } }
+
+  .q { margin-bottom:26px; }
+  .q > .qhead { display:flex; align-items:baseline; gap:10px; margin-bottom:11px; }
+  .qnum { font-family:var(--serif); font-size:14px; font-weight:600; color:var(--accent);
+    min-width:1.4em; }
+  .qtext { font-size:16.5px; font-weight:600; }
+  .qhint { font-size:13px; color:var(--muted); margin:-6px 0 11px 26px; }
+  .opts { display:grid; gap:9px; margin-left:26px; }
+  .opts.two { grid-template-columns:1fr 1fr; }
+  .opts.three { grid-template-columns:repeat(3,1fr); }
+  @media (max-width:600px){ .opts.two,.opts.three{ grid-template-columns:1fr; } }
+
+  .opt { text-align:left; font:inherit; color:inherit; cursor:pointer;
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:11px 14px; transition:border-color .12s, background .12s; }
+  .opt:hover { border-color:var(--accent-line); }
+  .opt[aria-pressed="true"] { border-color:var(--accent); background:var(--accent-soft); }
+  .opt b { display:block; font-weight:600; font-size:14.5px; }
+  .opt span { display:block; font-size:12.5px; color:var(--muted); margin-top:1px; }
+  .opt:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+  .trustrow { margin-left:26px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .trustrow input[type="number"] { width:70px; font:inherit; font-size:14px; padding:5px 8px;
+    border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink);
+    text-align:right; }
+  .trustrow label { font-size:13.5px; color:var(--muted); }
+
+  /* result */
+  .result { position:sticky; top:20px; background:var(--panel); border:1px solid var(--line);
+    border-radius:16px; padding:20px 22px; }
+  .result .kicker { font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
+    color:var(--faint); font-weight:700; margin-bottom:8px; }
+  .figure { font-family:var(--serif); font-size:44px; font-weight:600; line-height:1.05;
+    letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .figure small { display:block; font-family:var(--sans); font-size:13px; font-weight:500;
+    color:var(--muted); letter-spacing:0; margin-top:5px; }
+  .was { color:var(--muted); font-size:13.5px; margin-top:9px; }
+  .was s { color:var(--faint); }
+  .badge { display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--accent); background:var(--accent-soft);
+    border:1px solid var(--accent-line); padding:3px 9px; border-radius:999px; margin-bottom:12px; }
+  .rlines { margin:16px 0 0; padding:15px 0 0; border-top:1px solid var(--line); }
+  .rline { display:flex; justify-content:space-between; gap:12px; font-size:13px;
+    color:var(--muted); padding:3px 0; }
+  .rline b { color:var(--ink); font-weight:600; text-align:right; }
+  .rnote { font-size:13px; color:var(--muted); margin-top:14px; padding-top:14px;
+    border-top:1px solid var(--line); }
+  .rnote b { color:var(--ink); font-weight:600; }
+
+  .incl { margin-top:26px; }
+  .incl h2, .next h2 { font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
+    color:var(--faint); font-weight:700; margin:0 0 11px; }
+  .incl ul { list-style:none; margin:0; padding:0; display:grid;
+    grid-template-columns:1fr 1fr; gap:6px 22px; }
+  @media (max-width:600px){ .incl ul{ grid-template-columns:1fr; } }
+  .incl li { font-size:13.5px; color:var(--muted); padding-left:19px; position:relative; }
+  .incl li::before { content:"✓"; position:absolute; left:0; color:var(--accent); font-weight:700; }
+  .incl li b { color:var(--ink); font-weight:600; }
+
+  .next { margin-top:26px; background:var(--panel); border:1px solid var(--line);
+    border-radius:16px; padding:18px 20px; }
+  .fields { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+  @media (max-width:600px){ .fields{ grid-template-columns:1fr; } }
+  .fields label { display:block; font-size:12px; color:var(--muted); margin-bottom:3px; }
+  .fields input { width:100%; font:inherit; font-size:14px; padding:7px 10px;
+    border:1px solid var(--line); border-radius:9px; background:var(--bg); color:var(--ink); }
+  .fields input:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .wide { grid-column:1/-1; }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .btn { font:600 14px var(--sans); padding:9px 18px; border-radius:999px; cursor:pointer;
+    border:1px solid var(--accent); background:var(--accent); color:var(--bg); text-decoration:none;
+    display:inline-block; }
+  .btn.ghost { background:transparent; color:var(--muted); border-color:var(--line); }
+  .btn.ghost:hover { border-color:var(--accent); color:var(--accent); }
+  .btn:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
+  .smallprint { font-size:12px; color:var(--faint); margin-top:12px; }
+
+  /* founding offer */
+  .founding-offer { border:1px solid var(--accent-line); background:var(--accent-soft);
+    border-radius:14px; padding:16px 18px; margin-bottom:26px; }
+  .fbox { display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:start; cursor:pointer; }
+  .fbox input { width:19px; height:19px; margin:2px 0 0; accent-color:var(--accent); cursor:pointer; }
+  .fbox b { display:block; font-size:16px; font-weight:600; margin-bottom:3px; }
+  .fbox em { font-style:normal; font-size:11px; font-weight:700; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--accent); margin-left:8px; }
+  .fbox .fwhy { display:block; font-size:13.5px; color:var(--muted); }
+  .fterms { margin:12px 0 0 31px; padding:0; list-style:none; }
+  .fterms li { font-size:13px; color:var(--muted); padding-left:17px; position:relative; margin:3px 0; }
+  .fterms li::before { content:"·"; position:absolute; left:5px; color:var(--accent); font-weight:700; }
+  .fdrop { margin:11px 0 0 31px; font-size:13.5px; color:var(--ink); font-weight:600; }
+
+  footer { margin-top:34px; padding-top:16px; border-top:1px solid var(--line);
+    color:var(--faint); font-size:11.5px; line-height:1.6; }
+
+  @media print {
+    .q, .next, .masthead .mast-right, .standfirst { display:none; }
+    .layout { grid-template-columns:1fr; }
+    .result { position:static; border:none; padding:0; }
+    body { font-size:12px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+</style>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="wordmark">StudyVault<svg viewBox="0 0 2048 2048" aria-hidden="true"><path fill="currentColor" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/><path d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></div>
+    <div class="mast-right"><b>GCSE revision, complete.</b><br>www.studyvault.co.uk</div>
+  </div>
+
+  <h1>What would StudyVault cost us?</h1>
+  <p class="standfirst">Four questions and you have the number — <b>no email address, no "request a quote", no sales call</b>. Every price we charge is on this page.</p>
+
+  <div class="layout">
+    <div>
+
+      <div class="q">
+        <div class="qhead"><span class="qnum">1</span><span class="qtext">What do you want covered?</span></div>
+        <div class="qhint">A subject means one GCSE course family — English Language and Literature count as one, as do Combined and Triple Science, and the three languages.</div>
+        <div class="opts three" id="qCover" role="group" aria-label="What do you want covered"></div>
+      </div>
+
+      <div class="q">
+        <div class="qhead"><span class="qnum"></span><span class="qtext">Is this for one school or a trust?</span></div>
+        <div class="qhint">A trust means three or more schools buying together, on one agreement and one invoice.</div>
+        <div class="opts two" id="qTrust" role="group" aria-label="One school or a trust" style="margin-bottom:10px"></div>
+        <div id="trustCount" hidden>
+          <div class="qhint" style="margin-left:26px">Schools in a trust are rarely the same size, and each one is charged for its own size rather than a trust average. How many of each?</div>
+          <div class="trustrow">
+            <label for="n0">Under 600</label><input type="number" id="n0" min="0" max="60" value="0">
+            <label for="n1">600–1,200</label><input type="number" id="n1" min="0" max="60" value="3">
+            <label for="n2">Over 1,200</label><input type="number" id="n2" min="0" max="60" value="0">
+          </div>
+        </div>
+      </div>
+
+      <div class="q" id="qSizeBlock">
+        <div class="qhead"><span class="qnum"></span><span class="qtext">How big is your school?</span></div>
+        <div class="qhint">Total pupils on roll, as published — we never count your students, this only sets the band.</div>
+        <div class="opts three" id="qSize" role="group" aria-label="How big is your school"></div>
+      </div>
+
+      <div class="q">
+        <div class="qhead"><span class="qnum"></span><span class="qtext">When would you want to start?</span></div>
+        <div class="qhint">Licences always run to 31 August and renew each September.</div>
+        <div class="opts two" id="qWhen" role="group" aria-label="When would you want to start"></div>
+      </div>
+
+      <div class="founding-offer" id="foundingBlock" hidden>
+        <label class="fbox" for="foundingTick">
+          <input type="checkbox" id="foundingTick">
+          <span>
+            <b>Join as a Founding School<em id="placesLeft"></em></b>
+            <span class="fwhy">Roughly half price, fixed for as long as your subscription continues — it never rises, whatever standard pricing does. In return you agree to help shape the platform:</span>
+          </span>
+        </label>
+        <ul class="fterms">
+          <li>A short feedback call each half-term, around your calendar</li>
+          <li>A named case study and a written testimonial, after a full term — you approve the wording before anything is published</li>
+          <li>Willing to be a reference for two or three interested schools a year</li>
+        </ul>
+        <div class="fdrop" id="fDrop"></div>
+      </div>
+
+      <div class="incl">
+        <h2>Every licence includes</h2>
+        <ul>
+          <li><b>Unlimited students and staff</b> — no per-pupil counting, ever</li>
+          <li><b>Specification-matched content</b> for your exact board and options</li>
+          <li><b>Audio narration and revision podcasts</b> for every lesson</li>
+          <li><b>AI marking</b> with instant feedback on written answers</li>
+          <li><b>Your own resources built in</b> as bespoke content, at no extra cost</li>
+          <li><b>Updated automatically</b> when specifications change</li>
+          <li><b>UK-hosted student data</b> and a signed Data Processing Agreement</li>
+          <li><b>Direct support</b> from the founder — a serving teacher</li>
+        </ul>
+      </div>
+
+      <div class="next">
+        <h2>Want this as a formal quote?</h2>
+        <p style="font-size:13.5px;color:var(--muted);margin:0 0 13px">Enough to raise a purchase order against. It comes back the same day, on letterhead, with a Data Processing Agreement attached.</p>
+        <div class="fields">
+          <div><label for="fName">Your name</label><input id="fName" autocomplete="name"></div>
+          <div><label for="fSchool">School</label><input id="fSchool" autocomplete="organization"></div>
+          <div><label for="fEmail">Work email</label><input id="fEmail" type="email" autocomplete="email"></div>
+          <div><label for="fRef">Who told you about StudyVault?</label><input id="fRef" placeholder="Optional"></div>
+        </div>
+        <div class="actions">
+          <a class="btn" id="sendBtn" href="#">Email me this quote</a>
+          <button class="btn ghost" id="printBtn" type="button">Print it</button>
+        </div>
+        <p class="smallprint">Your details go straight to the founder's inbox and nowhere else. No mailing list, no follow-up sequence.</p>
+      </div>
+
+    </div>
+
+    <!-- ============ RESULT ============ -->
+    <aside class="result" aria-live="polite">
+      <div id="badge"></div>
+      <div class="kicker" id="rKicker">Your price</div>
+      <div class="figure" id="rFigure">—<small id="rUnit">answer the questions</small></div>
+      <div class="was" id="rWas"></div>
+      <div class="rlines" id="rLines"></div>
+      <div class="rnote" id="rNote"></div>
+    </aside>
+  </div>
+
+  <footer>
+    Prices are final — StudyVault is not registered for VAT, so none is added. Licences run to 31 August and renew each September at the same price. A subject means one GCSE course family. Tiers are levels, not stackable bundles.<br>
+    StudyVault is an independent revision platform and is not affiliated with, or endorsed by, AQA, Pearson Edexcel, OCR, WJEC or Eduqas. Exam board names are used only to identify specification coverage.
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ============================================================
+     PRICES — the single place to edit. Must match the pricing
+     sheet exactly. Bands are by total pupils on roll.
+     ============================================================ */
+  var P = {
+    foundingPlacesLeft: 10,                 // ← THE ONE NUMBER TO KEEP CURRENT.
+                                            //   Set to 0 and the whole offer disappears.
+    foundingCapPerTrust: 3,                 // one trust may never take more than this
+    standard: {
+      one:   [195, 265, 345],               // small / medium / large
+      three: [495, 665, 865],
+      whole: [1995, 2995, 3995]
+    },
+    founding: { one: 95, three: 245, whole: 995 },   // flat, any school size
+    trustShare: 2 / 3,                      // of each school's own band
+    trustMin: 3,
+    contact: "t.shaun@studyvault.co.uk"
+  };
+
+  var COVER = [
+    { id:"one",   label:"One subject",      hint:"A single department" },
+    { id:"three", label:"Up to three",      hint:"Split across departments" },
+    { id:"whole", label:"The whole school", hint:"Every subject we cover" }
+  ];
+  var SIZE = [
+    { id:0, label:"Under 600",   hint:"on roll" },
+    { id:1, label:"600–1,200",   hint:"on roll" },
+    { id:2, label:"Over 1,200",  hint:"on roll" }
+  ];
+  var WHEN = [
+    { id:"autumn", label:"This autumn term", hint:"Full year, to 31 August" },
+    { id:"spring", label:"The spring term",  hint:"Two-thirds of the year, two-thirds the price" },
+    { id:"summer", label:"The summer term",  hint:"Start now, pay from September" },
+    { id:"sept",   label:"Next September",   hint:"A full year from the start" }
+  ];
+  var TRUST = [
+    { id:"no",  label:"No — one school", hint:"" },
+    { id:"yes", label:"Yes — a trust",   hint:"Three schools or more" }
+  ];
+
+  var A = { cover:null, size:null, when:null, trust:"no", counts:[0, 3, 0], founding:false };
+
+  function $(id){ return document.getElementById(id); }
+  function money(n){ return "£" + Math.round(n).toLocaleString("en-GB"); }
+
+  function build(host, items, key, cls) {
+    items.forEach(function (it) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "opt"; b.setAttribute("aria-pressed", "false");
+      b.innerHTML = "<b>" + it.label + "</b>" + (it.hint ? "<span>" + it.hint + "</span>" : "");
+      b.onclick = function () {
+        A[key] = it.id;
+        [].forEach.call(host.children, function (o) { o.setAttribute("aria-pressed", "false"); });
+        b.setAttribute("aria-pressed", "true");
+        if (key === "trust") {
+          $("trustCount").hidden = (it.id !== "yes");
+          $("qSizeBlock").hidden = (it.id === "yes");   // the per-band counts replace it
+        }
+        render();
+      };
+      host.appendChild(b);
+    });
+  }
+
+  function compute() {
+    var isTrust = A.trust === "yes";
+    if (A.cover === null || A.when === null || (!isTrust && A.size === null)) return null;
+    var band = A.size === null ? 0 : A.size;
+    var std = P.standard[A.cover][band];
+    var fPrice = P.founding[A.cover];
+    var onFounding = A.founding && P.foundingPlacesLeft > 0;
+    var out = { std: std, lines: [], notes: [], standardTotal: 0 };
+
+    if (isTrust) {
+      // One entry per school, largest first, so founding places land where they save most.
+      var schools = [];
+      SIZE.forEach(function (s, b) { for (var i = 0; i < A.counts[b]; i++) schools.push(b); });
+      schools.sort(function (a, b) { return b - a; });
+      var nFound = onFounding ? Math.min(P.foundingCapPerTrust, P.foundingPlacesLeft, schools.length) : 0;
+      var total = 0, solo = 0, trustByBand = [0, 0, 0];
+      schools.forEach(function (b, i) {
+        solo += P.standard[A.cover][b];
+        if (i < nFound) { total += fPrice; }
+        else { total += Math.round(P.standard[A.cover][b] * P.trustShare); trustByBand[b]++; }
+      });
+      out.standardTotal = solo;
+      out.headline = total;
+      out.unit = "a year for " + schools.length + (schools.length === 1 ? " school" : " schools");
+      out.kicker = onFounding && nFound ? "Trust price, with founding places" : "Trust price";
+      if (nFound) out.lines.push([nFound + " × founding place", money(fPrice) + " each"]);
+      SIZE.forEach(function (s, b) {
+        if (trustByBand[b]) out.lines.push([trustByBand[b] + " × " + s.label.toLowerCase(),
+          money(Math.round(P.standard[A.cover][b] * P.trustShare)) + " each"]);
+      });
+      out.was = solo ? "They would pay " + money(solo) + " between them as separate schools." : "";
+      out.notes.push("One agreement, one invoice. Each school pays for its own size — a small school never picks up part of a bigger one's bill, and you can recharge it school by school.");
+      if (nFound) out.notes.push("Founding places are capped at " + P.foundingCapPerTrust
+        + " per trust, and applied here to your largest schools, where they are worth most. The rest join at the trust rate for their own size.");
+      if (schools.length < P.trustMin) { out.warn = "Trust pricing needs at least " + P.trustMin + " schools — tell me the mix and I will price it anyway."; }
+    } else {
+      out.standardTotal = std;
+      out.headline = onFounding ? fPrice : std;
+      out.unit = onFounding ? "a year, locked permanently" : "a year";
+      out.kicker = onFounding ? "Founding Schools price" : "Your price";
+      if (onFounding) {
+        out.badge = P.foundingPlacesLeft + (P.foundingPlacesLeft === 1 ? " place left" : " founding places left");
+        out.was = "Standard price " + money(std) + " — you pay "
+          + Math.round((1 - fPrice / std) * 100) + "% less, for as long as you stay.";
+      }
+    }
+
+    // mid-year handling
+    if (A.when === "spring") {
+      var annual = out.headline;
+      out.headline = Math.round(annual * 2 / 3);
+      out.unit = "to 31 August";
+      out.lines.push(["Full-year price", money(annual)]);
+      out.lines.push(["Spring start", "two-thirds"]);
+      out.notes.push("Spring joiners pay two-thirds for the rest of this year. It renews each September at "
+        + money(annual) + (P.foundingPlacesLeft > 0 && A.trust !== "yes" ? ", locked permanently." : "."));
+    } else if (A.when === "summer") {
+      out.lines.push(["This summer", "included"]);
+      out.notes.push("Sign for September and start straight away — the rest of this year is included, and you pay from your new budget.");
+    } else if (A.when === "sept") {
+      out.notes.push("Invoiced in September, from the new financial year.");
+    } else {
+      out.notes.push("Invoiced now, running to 31 August.");
+    }
+    out.notes.push("Introduce another school that takes a licence and your next renewal is at two-thirds price.");
+    return out;
+  }
+
+  // number only the questions actually on screen, so hiding one never leaves a gap
+  function renumber() {
+    var n = 0;
+    [].forEach.call(document.querySelectorAll(".q"), function (q) {
+      var tag = q.querySelector(".qnum"); if (!tag) return;
+      tag.textContent = q.hidden ? "" : String(++n);
+    });
+  }
+
+  // the founding offer only exists while places do
+  function foundingUI(r) {
+    var live = P.foundingPlacesLeft > 0;
+    $("foundingBlock").hidden = !live;
+    if (!live) { A.founding = false; $("foundingTick").checked = false; return; }
+    $("placesLeft").textContent = P.foundingPlacesLeft
+      + (P.foundingPlacesLeft === 1 ? " place left" : " of 10 places left");
+    if (!r) { $("fDrop").textContent = ""; return; }
+    if (A.founding) {
+      $("fDrop").textContent = "Applied — down from " + money(r.standardTotal)
+        + " to " + money(r.headline) + ".";
+    } else {
+      // show what ticking it would do, without changing the headline
+      A.founding = true; var f = compute(); A.founding = false;
+      $("fDrop").textContent = f
+        ? "Ticking this takes " + money(r.headline) + " down to " + money(f.headline) + "."
+        : "";
+    }
+  }
+
+  function render() {
+    renumber();
+    var r = compute();
+    foundingUI(r);
+    if (!r) {
+      $("rFigure").innerHTML = "—<small>answer the questions</small>";
+      $("rWas").textContent = ""; $("rLines").innerHTML = ""; $("rNote").innerHTML = "";
+      $("badge").innerHTML = ""; $("rKicker").textContent = "Your price";
+      return;
+    }
+    $("badge").innerHTML = r.badge ? '<span class="badge">' + r.badge + "</span>" : "";
+    $("rKicker").textContent = r.kicker;
+    $("rFigure").innerHTML = money(r.headline) + "<small>" + r.unit + "</small>";
+    $("rWas").innerHTML = r.was ? r.was : "";
+    $("rLines").innerHTML = r.lines.map(function (l) {
+      return '<div class="rline"><span>' + l[0] + "</span><b>" + l[1] + "</b></div>";
+    }).join("");
+    $("rNote").innerHTML = (r.warn ? "<b>" + r.warn + "</b><br>" : "") + r.notes.join("<br><br>");
+    mail(r);
+  }
+
+  function mail(r) {
+    var cover = (COVER.find(function (c) { return c.id === A.cover; }) || {}).label;
+    var size = (SIZE.find(function (s) { return s.id === A.size; }) || {}).label;
+    var when = (WHEN.find(function (w) { return w.id === A.when; }) || {}).label;
+    var isTrust = A.trust === "yes";
+    var mix = SIZE.map(function (s, b) { return A.counts[b] ? A.counts[b] + " " + s.label.toLowerCase() : null; })
+      .filter(Boolean).join(", ");
+    var body = "Hello Tom,\n\nPlease could you send a formal quote for:\n\n"
+      + "  Cover: " + cover + "\n"
+      + (isTrust ? "  Trust, schools by roll: " + mix + "\n" : "  School size: " + size + " on roll\n")
+      + "  Start: " + when + "\n"
+      + (A.founding ? "  Founding School: yes — we accept the founding terms\n" : "")
+      + "  Price shown: " + money(r.headline) + " " + r.unit + "\n\n"
+      + "  Name: " + ($("fName").value || "") + "\n"
+      + "  School: " + ($("fSchool").value || "") + "\n"
+      + "  Email: " + ($("fEmail").value || "") + "\n"
+      + "  Heard about StudyVault from: " + ($("fRef").value || "") + "\n\nThank you.";
+    $("sendBtn").href = "mailto:" + P.contact
+      + "?subject=" + encodeURIComponent("Quote request — " + ($("fSchool").value || "school"))
+      + "&body=" + encodeURIComponent(body);
+  }
+
+  build($("qCover"), COVER, "cover");
+  build($("qSize"),  SIZE,  "size");
+  build($("qWhen"),  WHEN,  "when");
+  build($("qTrust"), TRUST, "trust");
+  document.querySelectorAll("#qTrust .opt")[0].setAttribute("aria-pressed", "true");
+  ["n0", "n1", "n2"].forEach(function (id, b) {
+    $(id).addEventListener("input", function () {
+      A.counts[b] = Math.max(0, parseInt(this.value, 10) || 0); render();
+    });
+  });
+  ["fName","fSchool","fEmail","fRef"].forEach(function (id) {
+    $(id).addEventListener("input", function () { var r = compute(); if (r) mail(r); });
+  });
+  $("foundingTick").addEventListener("change", function () { A.founding = this.checked; render(); });
+  $("printBtn").onclick = function () { window.print(); };
+  render();
+})();
+</script>
