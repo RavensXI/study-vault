@@ -277,6 +277,7 @@
   // persistent "replay the tour" control (bottom-left; the tour's last step
   // points at it). Clicking re-runs the tour from the start.
   function buildTourReplay() {
+    if (window.SV_EMBED) return;
     if (document.querySelector('.sv-tour-replay')) return;
     if (isListeningLesson()) return;
     var b = document.createElement('button');
@@ -350,6 +351,7 @@
     return { left: l, top: t, right: rt, bottom: b, width: rt - l, height: b - t };
   }
   function maybeStartTour() {
+    if (window.SV_EMBED) return;                     // embedded lesson: never tour inside a frame
     if (tourPolling || tourStarted) return;
     if (isListeningLesson()) return;
     if (new URLSearchParams(location.search).get('notour') === '1')

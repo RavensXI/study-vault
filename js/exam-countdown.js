@@ -5,6 +5,7 @@
  * Dismissible via localStorage.
  */
 (function () {
+  if (window.SV_EMBED) return;   // embedded lesson (homepage-v2): no prompts
   'use strict';
 
   var HIDE_KEY = 'studyvault-hide-countdown';

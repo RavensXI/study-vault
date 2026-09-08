@@ -17,6 +17,34 @@
   <script src="/js/account-sync.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script>
+  /* embed mode (homepage-v2, 8 Sep 2026): /lesson/...?embed=1 renders the real lesson
+     inside the landing page. Chrome only, no nudges: header, footer, cookie banner,
+     welcome modal, tour, install/what's-new/bug prompts are suppressed; everything a
+     student uses stays. window.SV_EMBED is the flag other scripts read. */
+  window.SV_EMBED = /[?&]embed=1(&|$)/.test(location.search);
+  if (window.SV_EMBED) {
+    document.documentElement.classList.add('sv-embed');
+    /* an embedded lesson must never scroll the page it sits in: until the visitor
+       interacts with the frame, automatic focus() / scrollIntoView() calls (toolbar
+       set-up, masthead reveal) run without scrolling ancestors */
+    (function(){
+      var live=false; ['pointerdown','keydown','wheel','touchstart'].forEach(function(t){ addEventListener(t,function(){ live=true; },{once:true,capture:true,passive:true}); });
+      var f=HTMLElement.prototype.focus, siv=Element.prototype.scrollIntoView;
+      HTMLElement.prototype.focus=function(o){ return f.call(this, live?o:Object.assign({},o||{},{preventScroll:true})); };
+      Element.prototype.scrollIntoView=function(o){ if(live) return siv.call(this,o); };
+      window.SV_EMBED_LIVE=function(){ return live; };
+    })();
+  }
+  </script>
+  <style>
+  html.sv-embed .page-header, html.sv-embed .scroll-progress, html.sv-embed .mobile-overlay,
+  html.sv-embed .sv-legal-footer, html.sv-embed .cookie-banner, html.sv-embed .sv-install-banner,
+  html.sv-embed .sv-whats-new, html.sv-embed .bugr-fab, html.sv-embed .exam-cd,
+  html.sv-embed .sv-anon-welcome, html.sv-embed .anon-welcome-overlay { display: none !important; }
+  html.sv-embed body { padding-top: 0 !important; }
+  html.sv-embed #lesson-page { padding-top: 0 !important; }
+  </style>
 </head>
 <body>
 
@@ -283,5 +311,44 @@
      phone, close it, open a laptop, and the session had never been pushed. -->
 <script src="/sync.js"></script>
 <script src="/js/reader-skin.js"></script>
+<script>
+/* embed bridge: the landing page asks the frame to show one of the five things
+   ("lesson", "practice", "kc", "flashcards", "narration"); the frame scrolls
+   itself there and opens the quiz / flashcards where that is the real element.
+   Same origin, but postMessage keeps it decoupled from the loader. */
+(function(){
+  if(!window.SV_EMBED) return;
+  function el(sel){ return document.querySelector(sel); }
+  function show(target){
+    var map={
+      lesson:   function(){ return el('#study-notes'); },
+      practice: function(){ return el('#practice'); },
+      narration:function(){ return el('.audio-player-wrapper') || el('.narration-player'); },
+      kc:       function(){ var b=el('#knowledge-check-btn'); if(b){ b.scrollIntoView({block:'center',behavior:'smooth'}); setTimeout(function(){ b.click(); },350); } return null; },
+      flashcards:function(){ var b=el('#sidebar-flashcard-btn'); if(b){ b.scrollIntoView({block:'center',behavior:'smooth'}); setTimeout(function(){ b.click(); },350); } else if(typeof openFlashcardModal==='function') openFlashcardModal(); return null; }
+    };
+    var f=map[target]; if(!f) return;
+    var node=f(); if(node) node.scrollIntoView({block:'start',behavior:'smooth'});
+  }
+  addEventListener('message',function(e){
+    if(e.origin!==location.origin) return;
+    var d=e.data||{}; if(d.type==='sv-embed-show'){ try{ dispatchEvent(new Event('pointerdown')); }catch(x){} show(d.target); }
+    if(d.type==='sv-embed-close'){ document.querySelectorAll('.kc-modal-close,.flashcard-modal-close,.modal-close').forEach(function(b){ b.click(); }); }
+  });
+  /* verification hook: /lesson/...?embed=1&show=practice drives show() and writes a probe */
+  var qq=new URLSearchParams(location.search);
+  if(qq.get('show')){ var w=setInterval(function(){ var pg=document.getElementById('lesson-page'); if(pg && pg.style.display!=='none'){ clearInterval(w);
+    setTimeout(function(){ try{ dispatchEvent(new Event('pointerdown')); }catch(x){} show(qq.get('show')); setTimeout(function(){ var pre=document.createElement('pre'); pre.id='embedprobe';
+      pre.textContent=JSON.stringify({target:qq.get('show'),scrollY:Math.round(scrollY),kcModal:!!document.querySelector('.kc-modal'),fcModal:!!document.querySelector('.fc-modal'),live:window.SV_EMBED_LIVE()});
+      document.body.appendChild(pre); },1800); },600); } },100); }
+  /* tell the parent when the lesson has rendered (title set by the loader) */
+  var tries=0, t=setInterval(function(){
+    var pg=document.getElementById('lesson-page');
+    if(pg && pg.style.display!=='none'){ clearInterval(t);
+      try{ parent.postMessage({type:'sv-embed-ready',title:document.getElementById('lesson-title').textContent,href:location.pathname},location.origin); }catch(err){} }
+    else if(++tries>200) clearInterval(t);
+  },100);
+})();
+</script>
 </body>
 </html>

@@ -25,6 +25,7 @@
  *   sv-pwa-installed    — '1' once the install completes; never show again
  */
 (function () {
+  if (window.SV_EMBED) return;   // embedded lesson (homepage-v2): no prompts
   'use strict';
 
   var KEY_FIRST = 'sv-pwa-first-visit';

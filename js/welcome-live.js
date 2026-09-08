@@ -13,57 +13,97 @@
     return fetch(SB_URL+'/rest/v1/'+path,{headers:H}).then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); });
   }
 
-  /* ================= 1. a real lesson, live ================= */
-  var LESSON={subject:'geology-eduqas',unit:'rocks-and-minerals',n:1,kicker:'GCSE Geology · Rocks and Minerals · Lesson 1'};
-  function firstBlocks(html,n){
-    var parts=html.split(/(?=<h2\b)/).filter(function(p){return /^\s*<h2/.test(p);}).slice(0,n);
-    return parts.map(function(p){
-      p=p.replace(/\s*data-narration-id="[^"]*"/g,'').replace(/<dfn[^>]*>([\s\S]*?)<\/dfn>/g,'<b class="term">$1</b>');
-      var segs=p.match(/<h2>[\s\S]*?<\/h2>|<p>[\s\S]*?<\/p>/g)||[];
-      return segs.slice(0,2).join('');
-    }).join('');
+  /* ================= 1. a real lesson, live, in a frame ================= */
+  /* One curated lesson per painted subject family: chosen for a striking hero
+     photograph and a strong opening (8 Sep 2026). Practice-format families
+     (maths, English Language, the languages) have no entry and fall back. */
+  var LESSONS={
+    geog:      {s:'geography-aqa',u:'paper-1',n:1,name:'GCSE Geography'},
+    history:   {s:'history-aqa',u:'germany-democracy-dictatorship',n:1,name:'GCSE History'},
+    science:   {s:'science-aqa',u:'biology-paper-1',n:1,name:'GCSE Combined Science'},
+    triple:    {s:'separate-sciences',u:'biology-paper-1',n:1,name:'GCSE Biology'},
+    lit:       {s:'english-literature-aqa',u:'macbeth',n:1,name:'GCSE English Literature'},
+    business:  {s:'business-aqa',u:'business-real-world',n:1,name:'GCSE Business'},
+    cs:        {s:'computer-science-aqa',u:'algorithms',n:1,name:'GCSE Computer Science'},
+    pe:        {s:'physical-education-aqa',u:'human-body-and-movement',n:1,name:'GCSE Physical Education'},
+    psych:     {s:'psychology-aqa',u:'memory',n:1,name:'GCSE Psychology'},
+    rs:        {s:'religious-studies-aqa',u:'christianity-beliefs',n:1,name:'GCSE Religious Studies'},
+    socio:     {s:'sociology-aqa',u:'studying-society-research-methods',n:1,name:'GCSE Sociology'},
+    econ:      {s:'economics-aqa',u:'economic-foundations-and-resource-allocation',n:1,name:'GCSE Economics'},
+    stats:     {s:'statistics-aqa',u:'planning-designing-enquiry',n:1,name:'GCSE Statistics'},
+    media:     {s:'media-studies-aqa',u:'media-language',n:1,name:'GCSE Media Studies'},
+    film:      {s:'film-studies-eduqas',u:'film-form-and-language',n:1,name:'GCSE Film Studies'},
+    drama:     {s:'drama-aqa',u:'theatre-roles-stagecraft',n:1,name:'GCSE Drama'},
+    music:     {s:'music-aqa',u:'aos1-western-classical',n:1,name:'GCSE Music'},
+    mtech:     {s:'music-technology',u:'music-business',n:1,name:'Music Technology'},
+    dt:        {s:'design-technology',u:'core-technical',n:1,name:'GCSE Design & Technology'},
+    eng:       {s:'engineering-aqa',u:'engineering-materials',n:1,name:'GCSE Engineering'},
+    electronics:{s:'electronics-eduqas',u:'discovering-electronics',n:1,name:'GCSE Electronics'},
+    it:        {s:'it-ocr',u:'it-in-the-digital-world',n:1,name:'IT'},
+    astro:     {s:'astronomy-edexcel',u:'naked-eye-astronomy',n:1,name:'GCSE Astronomy'},
+    geology:   {s:'geology-eduqas',u:'rocks-and-minerals',n:1,name:'GCSE Geology'},
+    classics:  {s:'classical-civilisation-ocr',u:'greek-and-roman-mythology',n:1,name:'GCSE Classical Civilisation'},
+    citizenship:{s:'citizenship-aqa',u:'politics-participation-active-citizenship',n:1,name:'GCSE Citizenship'},
+    food:      {s:'food-preparation-and-nutrition-aqa',u:'food-nutrition-and-health',n:1,name:'GCSE Food Preparation & Nutrition'},
+    hosp:      {s:'hospitality-catering',u:'the-hospitality-and-catering-industry',n:1,name:'Hospitality & Catering'},
+    hsc:       {s:'health-social-care-ocr',u:'principles-of-care',n:1,name:'Health & Social Care'}
+  };
+  var DEFAULT='geog';
+  var frame=document.getElementById('lessoniframe'), kicker=document.getElementById('lf-kicker'),
+      openLink=document.getElementById('lf-open'), which=document.getElementById('lf-which');
+  var currentKey=null, armed=false;
+  /* `picked` is a top-level const in the page script: global lexical scope, not a window property */
+  function pickedKeys(){ try{ return (typeof picked!=='undefined' ? picked : []).slice(); }catch(e){ return []; } }
+  /* the visitor's LATEST option drives the frame; the four pre-ticked cores
+     (maths, English x2, science) never do, so the default stays until they choose */
+  var CORE={maths:1,lang:1,lit:1,science:1};
+  function lessonKey(){
+    var ks=pickedKeys();
+    for(var i=ks.length-1;i>=0;i--){ if(!CORE[ks[i]] && LESSONS[ks[i]]) return ks[i]; }
+    return DEFAULT;
   }
-  function renderLesson(d){
-    var host=document.getElementById('livelesson'); if(!host) return;
-    var pq=d.pq||{}; var lines=String(pq.text||'').split('\n');
-    var stem=lines[0], opts=lines.slice(1).filter(Boolean);
-    host.innerHTML=
-      '<div class="lp-hero"><img src="'+esc(d.hero)+'" alt="'+esc(d.hero_alt)+'"><span class="plate" aria-hidden="true">1</span></div>'
-      +'<div class="lp-body">'
-      +'<div class="lp-kicker">'+esc(d.kicker)+'</div>'
-      +'<h3 class="lp-title">'+esc(d.title)+'</h3>'
-      +'<div class="lp-content">'+d.content+'</div>'
-      +'<div class="lp-q"><span class="plate" aria-hidden="true">2</span>'
-      +'<div class="lp-qhead">Practice question <span class="lp-qtype">'+esc(pq.type||'')+'</span></div>'
-      +'<p class="lp-stem">'+esc(stem)+'</p>'
-      +(opts.length?'<ul class="lp-opts">'+opts.map(function(o){return '<li>'+esc(o)+'</li>';}).join('')+'</ul>':'')
-      +'<button type="button" class="lp-reveal" aria-expanded="false">Reveal the mark scheme</button>'
-      +'<p class="lp-answer" hidden>'+esc(pq.marks||'')+'</p></div>'
-      +'<div class="lp-tools">'
-      +'<div class="lp-tool"><span class="plate" aria-hidden="true">3</span><b>Knowledge check</b><span>'+esc(d.kc)+' questions</span></div>'
-      +'<div class="lp-tool"><span class="plate" aria-hidden="true">4</span><b>Flashcards</b><span>'+esc(d.fc)+' cards</span></div>'
-      +'<div class="lp-tool"><span class="plate" aria-hidden="true">5</span><b>Read aloud</b><span>narration + podcast</span></div>'
-      +'</div>'
-      +'<a class="lp-open" href="'+esc(d.url)+'">Open this lesson &rarr;</a>'
-      +'</div>';
-    var btn=host.querySelector('.lp-reveal'), ans=host.querySelector('.lp-answer');
-    btn.addEventListener('click',function(){ var on=ans.hidden; ans.hidden=!on; btn.setAttribute('aria-expanded',String(on)); btn.textContent=on?'Hide the mark scheme':'Reveal the mark scheme'; });
-    host.classList.add('is-ready');
+  function ordinal(n){ return ['one','two','three','four','five','six'][n-1]||String(n); }
+  function setFrame(key){
+    if(!frame||key===currentKey) return;
+    var L=LESSONS[key]; currentKey=key;
+    var path='/lesson/'+L.s+'/'+L.u+'/'+L.n;
+    if(kicker) kicker.textContent=L.name+' · Lesson '+L.n+' · loading…';
+    if(openLink) openLink.href=path;
+    if(which) which.textContent=L.name+', lesson '+ordinal(L.n);
+    frame.src=path+'?embed=1';
   }
-  function loadLesson(){
-    if(FB.lesson) renderLesson(FB.lesson);              /* paint the baked copy first: never an empty frame */
-    get('subjects?slug=eq.'+LESSON.subject+'&school_id=is.null&select=id').then(function(s){
-      if(!s.length) throw new Error('no subject');
-      return get('units?subject_id=eq.'+s[0].id+'&slug=eq.'+LESSON.unit+'&select=id');
-    }).then(function(u){
-      if(!u.length) throw new Error('no unit');
-      return get('lessons?unit_id=eq.'+u[0].id+'&lesson_number=eq.'+LESSON.n+'&status=eq.live&select=title,hero_image_url,hero_image_alt,content_html,practice_questions,knowledge_checks,flashcard_questions');
-    }).then(function(rows){
-      var l=rows&&rows[0]; if(!l||!l.content_html) throw new Error('no lesson');
-      renderLesson({title:l.title,hero:l.hero_image_url,hero_alt:l.hero_image_alt||'',content:firstBlocks(l.content_html,2),
-        pq:(l.practice_questions||[])[0]||{},kc:(l.knowledge_checks||[]).length,fc:(l.flashcard_questions||[]).length,
-        url:'/lesson/'+LESSON.subject+'/'+LESSON.unit+'/'+LESSON.n,kicker:LESSON.kicker});
-    }).catch(function(){ /* the baked copy stays up */ });
+  /* the frame reports when the real lesson has rendered */
+  addEventListener('message',function(e){
+    if(e.origin!==location.origin) return;
+    var d=e.data||{};
+    if(d.type==='sv-embed-ready' && currentKey){ var L=LESSONS[currentKey]; if(kicker) kicker.textContent=L.name+' · Lesson '+L.n+' · '+(d.title||''); }
+  });
+  /* five captions = five controls that move the real page inside the frame */
+  document.querySelectorAll('.showme[data-target]').forEach(function(b){
+    b.addEventListener('click',function(){
+      if(!currentKey) setFrame(lessonKey());
+      var send=function(){ try{ frame.contentWindow.postMessage({type:'sv-embed-show',target:b.dataset.target},location.origin); }catch(e){} };
+      send();
+      frame.scrollIntoView({block:'nearest'});
+    });
+  });
+  /* lazy: create the frame when the section approaches; then follow the picker */
+  function arm(){
+    if(armed) return; armed=true; setFrame(lessonKey());
+  }
+  var sec=document.getElementById('sec-inside');
+  if(sec && 'IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){ if(es.some(function(x){return x.isIntersecting;})){ arm(); io.disconnect(); } },{rootMargin:'800px 0px'});
+    io.observe(sec);
+    /* belt and braces: the zoomed canvas can confuse the observer's rects */
+    addEventListener('scroll',function onS(){ if(window.scrollY>120){ arm(); removeEventListener('scroll',onS); } },{passive:true});
+    setTimeout(function(){ if(!armed && sec.getBoundingClientRect().top<innerHeight*2) arm(); },1500);
+  } else arm();
+  var swapTimer=null;
+  function onPickChange(){ if(!armed){ arm(); return; } clearTimeout(swapTimer); swapTimer=setTimeout(function(){ setFrame(lessonKey()); },350); }
+  if(typeof window.togglePick==='function'){
+    var _tp=window.togglePick;
+    window.togglePick=function(slug){ var r=_tp.apply(this,arguments); onPickChange(); return r; };
   }
 
   /* ================= 2. the catalogue, tappable ================= */
@@ -134,6 +174,6 @@
     }).catch(function(){});
   }
 
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ loadLesson(); loadCatalogue(); });
-  else { loadLesson(); loadCatalogue(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',loadCatalogue);
+  else loadCatalogue();
 })();

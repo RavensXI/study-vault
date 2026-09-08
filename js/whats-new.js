@@ -10,6 +10,7 @@
  * with `status = 'live'`, sorted by created_at DESC.
  */
 (function () {
+  if (window.SV_EMBED) return;   // embedded lesson (homepage-v2): no prompts
   'use strict';
 
   var SESSION_KEY = 'sv-whats-new-shown';

@@ -4,6 +4,7 @@
  */
 (function () {
   var KEY = 'studyvault-cookie-consent';
+  if (window.SV_EMBED) return;                       // embedded lesson: the landing page owns consent
 
   // Don't show for school students (they don't see ads)
   if (typeof SchoolSession !== 'undefined' && SchoolSession.isActive()) return;
