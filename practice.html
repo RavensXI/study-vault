@@ -17,6 +17,29 @@
   <meta name="theme-color" content="#2d2a26">
   <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
   <link rel="apple-touch-icon" href="/images/icon-192.png">
+  <script>
+  /* embed mode (homepage-v2, 8 Sep 2026): /practice/...?embed=1 renders the real
+     workbook inside the landing page's tablet. Chrome off, everything a student
+     uses stays. window.SV_EMBED is the flag other scripts read. */
+  window.SV_EMBED = /[?&]embed=1(&|$)/.test(location.search);
+  if (window.SV_EMBED) {
+    document.documentElement.classList.add('sv-embed');
+    (function(){
+      var live=false; ['pointerdown','keydown','wheel','touchstart'].forEach(function(t){ addEventListener(t,function(){ live=true; },{once:true,capture:true,passive:true}); });
+      var f=HTMLElement.prototype.focus, siv=Element.prototype.scrollIntoView;
+      HTMLElement.prototype.focus=function(o){ return f.call(this, live?o:Object.assign({},o||{},{preventScroll:true})); };
+      Element.prototype.scrollIntoView=function(o){ if(live) return siv.call(this,o); };
+      window.SV_EMBED_LIVE=function(){ return live; };
+    })();
+  }
+  </script>
+  <style>
+  html.sv-embed .page-header, html.sv-embed .sv-legal-footer, html.sv-embed .cookie-banner,
+  html.sv-embed .sv-install-banner, html.sv-embed .sv-whats-new, html.sv-embed .bugr-fab,
+  html.sv-embed .exam-cd, html.sv-embed .sv-anon-welcome, html.sv-embed .anon-welcome-overlay { display:none !important; }
+  html.sv-embed body { padding-top:0 !important; }
+  html.sv-embed .practice-layout { padding-top:0 !important; }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     /* ============================================
@@ -6918,8 +6941,8 @@
             renderLearnExample();
           }
         }
-      } else if (mc && mc.title && !localStorage.getItem(modalKey)) {
-        // First visit to this lesson — show method modal
+      } else if (mc && mc.title && !localStorage.getItem(modalKey) && !window.SV_EMBED) {
+        // First visit to this lesson — show method modal (not inside the landing page's tablet)
         _isFirstVisit = !localStorage.getItem(tooltipKey); // tooltips only on very first lesson
         showMethodModal();
         localStorage.setItem(modalKey, '1');
@@ -9388,6 +9411,23 @@
 
 <div class="sv-legal-footer"><p>&copy; 2026 StudyVault &middot; <a href="/about">About</a> &middot; <a href="/faq">FAQ</a> &middot; <a href="/copyright.html">Copyright &amp; IP</a> &middot; <a href="/privacy.html">Privacy</a> &middot; <a href="#" class="sv-disclaimers-link">Disclaimers</a></p></div>
 <script defer src="/js/bug-reporter.js"></script>
+<script>
+/* embed bridge (workbook edition): report when rendered; the five lesson
+   controls do not apply here, so answer any request with open:false */
+(function(){
+  if(!window.SV_EMBED) return;
+  var tries=0, t=setInterval(function(){
+    var pg=document.getElementById('practice-page');
+    if(pg && pg.style.display!=='none'){ clearInterval(t);
+      try{ parent.postMessage({type:'sv-embed-ready',title:(document.title||'').replace(/ - StudyVault$/,''),href:location.pathname,workbook:true},location.origin); }catch(e){} }
+    else if(++tries>200) clearInterval(t);
+  },100);
+  addEventListener('message',function(e){
+    if(e.origin!==location.origin) return; var d=e.data||{};
+    if(d.type==='sv-embed-show'){ try{ parent.postMessage({type:'sv-embed-state',target:d.target,open:false,workbook:true},location.origin); }catch(x){} }
+  });
+})();
+</script>
   <script defer src="/js/legal.js"></script>
 <!-- progress sync: lesson and practice pages are where progress is MADE, and
      they were the only pages not loading it. Everything still reached the

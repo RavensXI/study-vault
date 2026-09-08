@@ -450,15 +450,15 @@
      tall enough window; phones and short windows scroll freely. ---- */
   :root{--z:1}
   @media (min-height:700px){
-    html.snappy{scroll-snap-type:y mandatory}
-    html.snappy .caserow:first-child,html.snappy .caserow.page{scroll-snap-align:start;scroll-snap-stop:always}
+    html.snappy{scroll-snap-type:y proximity}
+    html.snappy .caserow:first-child,html.snappy .caserow.page{scroll-snap-align:start}
     html.snappy .casefloor{scroll-snap-align:end}
     html.snappy .caserow.page{min-height:calc(100vh / var(--z));display:flex;flex-direction:column;justify-content:center;box-sizing:border-box;padding-bottom:6px}
     html.snappy .caserow.page .seclead{padding-top:28px;padding-bottom:16px}
     html.snappy .caserow.page .secsub{margin-top:.6rem}
     html.snappy .caserow.page .slot{margin-bottom:18px}
     html.snappy .sec-inside .lessonslot{margin-bottom:10px}
-    html.snappy .sec-library .catslot{margin-bottom:10px;padding-bottom:96px}
+    html.snappy .sec-library .catslot{margin-bottom:8px}
     html.snappy .caserow.page+.caserow.page,html.snappy .caserow.page+.casefloor{margin-top:0}
   }
   @media (prefers-reduced-motion:no-preference){ html.snappy{scroll-behavior:smooth} }
@@ -634,6 +634,65 @@
   @media (max-width:640px){ .brow{flex-wrap:wrap} .chips{margin-left:50px} }
   .shelf-empty-note{position:absolute;left:50%;bottom:70px;transform:translateX(-50%);z-index:2;
     font-family:var(--hand);font-size:1.25rem;color:var(--mut);pointer-events:none;transition:opacity .3s}
+
+  /* ============ ROUND 3 (Tom's feedback, 8 Sep 2026) ============ */
+  /* props at the ends of every lower shelf, so the case reads as one piece */
+  .caserow.page .wing.wl{justify-content:flex-start}
+  .caserow.page .wing.wr{justify-content:flex-end}
+  /* the tablet on the shelf: walnut body, brass inner line, the lesson as its screen */
+  .tablet{position:relative;flex:0 0 790px;text-align:center}
+  .tablet-body{position:relative;background:linear-gradient(160deg,#5b4231 0%,#3d2b1d 55%,#33241a 100%);border-radius:24px;padding:16px 16px 18px;
+    box-shadow:0 34px 54px -24px rgba(30,20,8,.7),0 4px 10px -4px rgba(30,20,8,.5),inset 0 1px 0 rgba(255,236,200,.22),inset 0 -2px 0 rgba(0,0,0,.4)}
+  .tablet-body::before{content:'';position:absolute;inset:7px;border-radius:19px;border:1.5px solid rgba(218,178,102,.55);pointer-events:none}
+  .tablet-cam{position:absolute;left:50%;top:6px;width:6px;height:6px;margin-left:-3px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#9a8a66,#1a130c 70%);box-shadow:0 0 0 1px rgba(218,178,102,.35)}
+  .tablet-screen{position:relative;background:#fffdf9;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;text-align:left;
+    box-shadow:inset 0 0 0 1px rgba(40,28,12,.3)}
+  .tablet-screen iframe{display:block;width:100%;border:0;background:#faf8f5;height:clamp(400px, calc(100vh / var(--z) - 420px), 800px)}
+  .tablet-stand{position:relative;height:36px;width:230px;margin:-2px auto 0;
+    background:linear-gradient(180deg,#4a3826,#2c1f14);clip-path:polygon(30% 0,70% 0,100% 100%,0 100%);
+    filter:drop-shadow(0 6px 6px rgba(30,20,8,.4))}
+  .tablet::after{content:'';position:absolute;left:6%;right:6%;bottom:36px;height:16px;z-index:-1;
+    background:radial-gradient(52% 120% at 50% 10%,rgba(34,22,8,.5),rgba(34,22,8,.16) 55%,transparent 78%);filter:blur(3px)}
+  .lf-live{display:inline-flex;align-items:center;gap:.45rem;font:600 .72rem var(--head);letter-spacing:.12em;text-transform:uppercase;color:#8a6a35}
+  .lf-live i{width:8px;height:8px;border-radius:50%;background:#3f8a4a;box-shadow:0 0 0 3px rgba(63,138,74,.18)}
+  .lf-note{font-family:var(--hand);font-size:1.32rem;color:#5a4a34;line-height:1.3;margin:12px auto 0;max-width:640px;min-height:1.7em}
+  .lf-note.workbook{color:#3f3222}
+  .lessonslot{align-items:flex-end;margin-bottom:38px}
+  .lessonside{padding-bottom:70px}
+  .workbooknote{font-size:1.35rem;margin:1.1rem 0 0 40px;color:#5a4a34}
+  .lessonside.workbook .showme{opacity:.5;cursor:default}
+  .lessonside.workbook .showme .go{visibility:hidden}
+  .lessonlist.plated .showme[aria-pressed="true"]{background:rgba(91,70,50,.1)}
+  /* the library: two full shelves of painted books; a tapped book lifts and its boards open below */
+  .catslot{width:1500px;margin:0 auto 8px;padding:0;text-align:center}
+  .catshelves{display:flex;flex-direction:column;gap:22px;--bkh:190px}
+  .catrow .shelf{justify-content:center;padding:0 40px;gap:3px;min-height:calc(var(--bkh) + 8px)}
+  .catrow .ledgewrap{margin-top:-12px}
+  .catrow .bookend{height:calc(var(--bkh)*1.03);margin:0 -4px 0 0}
+  .catrow .bookend.mirror{margin:0 0 0 -4px}
+  button.bk{cursor:pointer;pointer-events:auto;font:inherit}
+  button.bk:hover img,button.bk:focus-visible img{filter:saturate(1.75) brightness(1.24)}
+  button.bk:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:4px}
+  button.bk[aria-expanded="true"]{transform:translateX(var(--shift,0px)) rotate(var(--lean,0deg)) translateY(-16px)}
+  .catband{height:104px;position:relative;margin-top:4px}
+  .catboards{position:absolute;left:50%;top:0;transform:translateX(-50%);width:auto;min-width:520px;max-width:1100px;
+    margin:0;bottom:auto;right:auto}
+  .catboards .cb-head img{height:44px}
+  /* the drawers + two pinned papers, one shelf */
+  .sec-schools .shelf{gap:26px}
+  .catwrap{width:600px}
+  .faqslot{width:380px;margin-left:0}
+  .noticeslot{width:440px;margin-bottom:52px}
+  .paper.notice{transform:rotate(-1.1deg);min-height:198px}
+  .paper.notice h3{font-family:var(--hand);font-size:1.7rem;font-weight:600;margin:0 0 .45rem;color:#3f3222}
+  .paper.notice ul{list-style:none;margin:0 0 .5rem;padding:0}
+  .paper.notice li{font-family:var(--read);font-size:.94rem;color:var(--ink);line-height:1.42;padding:.32rem 0 .32rem 26px;position:relative;border-bottom:1px solid var(--linel)}
+  .paper.notice li:last-child{border-bottom:0}
+  .paper.notice li::before{content:'';position:absolute;left:0;top:.95rem;width:16px;height:3px;background:#4a3d2c;opacity:.5;border-radius:2px;transform:rotate(-4deg)}
+  .paper.notice .teacherline{margin:.5rem 0 .8rem;font-size:1.3rem}
+  .paper.notice .cta{display:inline-block;width:auto;padding:.7rem 1.7rem;text-decoration:none}
+  .paper.notice .signinline{margin:.75rem 0 0}
 </style>
 </head>
 <body data-view="landing" class="tagul">
@@ -726,6 +785,7 @@
           <p class="secsub">Start here. Maths, English and Science are already on your shelf &mdash; everyone sits those.
             Add your options; most students pick four. You can change these any time.</p></div>
         <div class="shelf">
+          <span class="wing wl"><span class="bks" data-books="@pot_ivy,@bookstack"></span></span>
           <div class="slot pickslot">
             <div class="subject-grid embed" id="sgrid-home" aria-label="Pick your subjects"></div>
             <div class="picker-foot embed">
@@ -735,88 +795,79 @@
             <p class="planline embed">Next: your boards and your exam year. Put those in once and the planner fills your
               run-in for you, in 25-minute sittings &mdash; free, no account needed.</p>
           </div>
+          <span class="wing wr"><span class="bks" data-books="@pencilpot,@clock"></span></span>
         </div>
         <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
       </div>
 
-      <!-- S3 · inside every lesson: the real thing, framed. The frame follows the picker. -->
+      <!-- S3 · inside every lesson: the real thing, on a tablet standing on the shelf. The frame follows the picker. -->
       <div class="caserow rv page sec-inside" id="sec-inside">
         <div class="seclead"><h2 class="sechead">Inside every lesson</h2>
           <p class="secsub">A real lesson, live from the library &mdash; <span id="lf-which">GCSE Geography, lesson one</span>. Tick a subject above and it becomes one of yours.</p></div>
         <div class="shelf">
+          <span class="wing wl"><span class="bks" data-books="@globe"></span></span>
           <div class="slot lessonslot">
-            <div class="lessonframe" id="lessonframe">
-              <div class="lf-bar"><span class="lf-kicker" id="lf-kicker">Loading a lesson&hellip;</span>
-                <a class="lf-open" id="lf-open" href="/lesson/geography-aqa/paper-1/1" target="_blank" rel="noopener">Open this lesson &rarr;</a></div>
-              <iframe id="lessoniframe" title="A StudyVault lesson, live"></iframe>
+            <div class="tablet" id="lessonframe">
+              <div class="tablet-body"><span class="tablet-cam" aria-hidden="true"></span>
+                <div class="tablet-screen">
+                  <div class="lf-bar"><span class="lf-live"><i></i>Live from the library</span>
+                    <a class="lf-open" id="lf-open" href="/lesson/geography-aqa/paper-1/1" target="_blank" rel="noopener">Open this lesson &rarr;</a></div>
+                  <iframe id="lessoniframe" title="A StudyVault lesson, live" allow="autoplay"></iframe>
+                </div>
+              </div>
+              <div class="tablet-stand" aria-hidden="true"></div>
+              <p class="lf-note" id="lf-note">Loading a lesson&hellip;</p>
             </div>
-            <div class="lessonside">
+            <div class="lessonside" id="lessonside">
               <ul class="lessonlist plated">
                 <li><button type="button" class="showme" data-target="lesson"><span class="plate" aria-hidden="true">1</span><b>The lesson itself</b> &mdash; written to your exact specification, with a real photograph, not clip art<span class="go">Show me</span></button></li>
                 <li><button type="button" class="showme" data-target="practice"><span class="plate" aria-hidden="true">2</span><b>Six practice questions</b>, mark-scheme style &mdash; and a tutor that marks your answer<span class="go">Show me</span></button></li>
                 <li><button type="button" class="showme" data-target="kc"><span class="plate" aria-hidden="true">3</span><b>A five-question knowledge check</b> to prove it stuck<span class="go">Open the quiz</span></button></li>
                 <li><button type="button" class="showme" data-target="flashcards"><span class="plate" aria-hidden="true">4</span><b>Flashcards</b> for the bus home<span class="go">Open the cards</span></button></li>
-                <li><button type="button" class="showme" data-target="narration"><span class="plate" aria-hidden="true">5</span><b>Read aloud</b> &mdash; narration and a podcast for every lesson<span class="go">Show me</span></button></li>
+                <li><button type="button" class="showme" data-target="narration"><span class="plate" aria-hidden="true">5</span><b>Read aloud</b> &mdash; narration and a podcast for every lesson<span class="go">Play it</span></button></li>
               </ul>
-              <div class="workcopy small">
-                <h3>Some subjects aren&rsquo;t reading subjects</h3>
-                <p>Maths, French, Spanish, German and English Language are built as workbooks instead:
-                  type your answer and StudyVault doesn&rsquo;t just mark it wrong &mdash; it spots
-                  <em>which mistake</em> you made, and drills the fix.</p>
-              </div>
+              <p class="workbooknote handnote" id="workbooknote" hidden>This one&rsquo;s a workbook &mdash; type an answer and it marks you.</p>
             </div>
           </div>
+          <span class="wing wr"><span class="bks" data-books="@hourglass,@inkwell"></span></span>
         </div>
         <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
       </div>
 
-      <!-- S4 · the whole library, tappable -->
+      <!-- S4 · the whole library: every subject a painted book, every book a door -->
       <div class="caserow rv page sec-library" id="sec-library">
         <div class="seclead">
           <h2 class="sechead">Every subject, every board</h2>
-          <p class="secsub" id="catsub">Seventy-plus GCSE subjects across AQA, Pearson Edexcel, OCR, WJEC and Eduqas. Tap one to see its boards and go straight in.</p>
+          <p class="secsub" id="catsub">Seventy-plus GCSE subjects across AQA, Pearson Edexcel, OCR, WJEC and Eduqas. Tap a book to see its boards and go straight in.</p>
         </div>
-        <div class="shelf">
-          <div class="slot catslot">
-            <div class="catgrid" id="catgrid"></div>
-            <div class="catboards" id="catboards" hidden></div>
-          </div>
+        <div class="slot catslot">
+          <div class="catshelves" id="catshelves"></div>
+          <div class="catband"><div class="catboards" id="catboards" hidden></div></div>
         </div>
-        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
       </div>
 
-      <!-- S6 · with your school: one strip, no empty cupboard -->
+      <!-- S6 · questions answered + with your school: one shelf, the drawers and two pinned papers -->
       <div class="caserow rv page sec-schools" id="sec-schools">
-        <div class="seclead"><h2 class="sechead">With your school</h2></div>
-        <div class="shelf">
-          <div class="slot schoolslot strip">
-            <ul class="slist two">
-              <li>Bespoke lessons for your classes, built from your own schemes of work</li>
-              <li>Just your department? Create a class, share the code &mdash; your students are in before the bell</li>
-              <li>Whole school? Students sign straight in with Google or Microsoft &mdash; no passwords to manage</li>
-              <li>Progress teachers can actually see, class by class</li>
-            </ul>
-            <div class="schoolrow">
-              <p class="teacherline">Built and run by a serving classroom teacher.</p>
-              <div class="schoolctas">
-                <a class="cta" href="mailto:studyvault.info@gmail.com">Talk to us</a>
-                <a class="ghostcta" href="/teach" target="_blank" rel="noopener">Try the teacher dashboard &rarr;</a>
-              </div>
-            </div>
-            <p class="demoline">A live demo class &mdash; click around, no sign-up, nothing to set up.
-              <span class="signinline">Already teaching with StudyVault? <a href="/teacher/login">Teacher sign in</a></span></p>
-          </div>
-        </div>
-        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
-      </div>
-
-      <!-- S7 · the bottom drawer -->
-      <div class="caserow rv page sec-faq" id="sec-faq">
         <div class="seclead"><h2 class="sechead">Questions, answered</h2>
-          <p class="secsub">The ones people actually ask.</p></div>
+          <p class="secsub">The ones people actually ask &mdash; and a note for teachers.</p></div>
         <div class="shelf">
+          <span class="wing wl"><span class="bks" data-books="@pot_fern"></span></span>
           <div class="slot catwrap"><div class="catalogue" id="faqcat"></div></div>
           <div class="slot faqslot"><div class="paper index" id="faqcard"></div></div>
+          <div class="slot noticeslot">
+            <div class="paper notice">
+              <h3>With your school</h3>
+              <ul>
+                <li>Lessons built from your own schemes of work</li>
+                <li>A class code for your department, or Google and Microsoft sign-in for the whole school</li>
+                <li>Progress teachers can actually see, class by class</li>
+              </ul>
+              <p class="teacherline">Built and run by a serving classroom teacher.</p>
+              <a class="cta" href="mailto:studyvault.info@gmail.com">Talk to us</a>
+              <p class="signinline">Already teaching with StudyVault? <a href="/teacher/login">Teacher sign in</a></p>
+            </div>
+          </div>
+          <span class="wing wr"><span class="bks" data-books="@trophy,@handbell"></span></span>
         </div>
         <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
       </div>
@@ -1808,6 +1859,27 @@ if(q.has('bench')){
   stageL.classList.add('lit');
   apply();
 }
+
+/* settle: after the wheel stops, ease to the nearest shelf top over ~650ms with the
+   site's soft-close curve. Only when a shelf top is near (never a lurch across the
+   page); off for reduced motion; only in the snappy state (mouse + tall window). */
+(function(){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  let timer=null, raf=0;
+  const ease=x=>1-Math.pow(1-x,3.2);
+  function tops(){ return [...document.querySelectorAll('body[data-view="landing"] .caserow:first-child, body[data-view="landing"] .caserow.page')].map(p=>p.getBoundingClientRect().top+scrollY); }
+  function cancel(){ if(raf){ cancelAnimationFrame(raf); raf=0; } }
+  function settle(){
+    if(!document.documentElement.classList.contains('snappy')) return;
+    const y=scrollY; let best=null, bd=1e9;
+    tops().forEach(v=>{ const d=Math.abs(v-y); if(d<bd){ bd=d; best=v; } });
+    if(best===null || bd<2 || bd>innerHeight*0.45) return;
+    const from=y, to=best, t0=performance.now(), D=650;
+    (function step(now){ const k=Math.min(1,(now-t0)/D); scrollTo({top:from+(to-from)*ease(k),behavior:'instant'}); raf=k<1?requestAnimationFrame(step):0; })(t0);
+  }
+  addEventListener('scroll',()=>{ if(raf) return; clearTimeout(timer); timer=setTimeout(settle,150); },{passive:true});
+  ['wheel','touchstart','keydown','pointerdown'].forEach(ev=>addEventListener(ev,cancel,{passive:true}));
+})();
 window.SV_LIB={SUBJECTS:SUBJECTS};
 </script>
 <script src="/js/welcome-fallback.js"></script>

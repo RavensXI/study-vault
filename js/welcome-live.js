@@ -1,7 +1,8 @@
 /* welcome-live.js — the two homepage sections that show the real product
-   instead of a picture of it: a live lesson from the library, and the
-   catalogue as a tappable grid. Both fetch with the public anon key and paint
-   the baked copy in js/welcome-fallback.js first, so neither is ever empty. */
+   instead of a picture of it: a live lesson (or workbook) from the library on
+   the tablet, and the catalogue as a painted bookshelf. Both fetch with the
+   public anon key and paint the baked copy in js/welcome-fallback.js first,
+   so neither is ever empty. */
 (function(){
   var SB_URL='https://baipckgywpnwapobwtsy.supabase.co';
   var SB_KEY='sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
@@ -13,10 +14,9 @@
     return fetch(SB_URL+'/rest/v1/'+path,{headers:H}).then(function(r){ if(!r.ok) throw new Error(String(r.status)); return r.json(); });
   }
 
-  /* ================= 1. a real lesson, live, in a frame ================= */
+  /* ================= 1. a real lesson, live, on the tablet ================= */
   /* One curated lesson per painted subject family: chosen for a striking hero
-     photograph and a strong opening (8 Sep 2026). Practice-format families
-     (maths, English Language, the languages) have no entry and fall back. */
+     photograph and a strong opening (8 Sep 2026). */
   var LESSONS={
     geog:      {s:'geography-aqa',u:'paper-1',n:1,name:'GCSE Geography'},
     history:   {s:'history-aqa',u:'germany-democracy-dictatorship',n:1,name:'GCSE History'},
@@ -46,44 +46,81 @@
     citizenship:{s:'citizenship-aqa',u:'politics-participation-active-citizenship',n:1,name:'GCSE Citizenship'},
     food:      {s:'food-preparation-and-nutrition-aqa',u:'food-nutrition-and-health',n:1,name:'GCSE Food Preparation & Nutrition'},
     hosp:      {s:'hospitality-catering',u:'the-hospitality-and-catering-industry',n:1,name:'Hospitality & Catering'},
-    hsc:       {s:'health-social-care-ocr',u:'principles-of-care',n:1,name:'Health & Social Care'}
+    hsc:       {s:'health-social-care-ocr',u:'principles-of-care',n:1,name:'Health & Social Care'},
+    /* workbook (practice-first) subjects: the tablet shows the real workbook page */
+    maths:     {s:'maths-aqa',u:'number',n:1,name:'GCSE Maths',practice:true},
+    lang:      {s:'english-language-aqa',u:'paper-1-reading',n:1,name:'GCSE English Language',practice:true},
+    french:    {s:'french-aqa',u:'people-and-lifestyle',n:1,name:'GCSE French',practice:true},
+    spanish:   {s:'spanish-aqa',u:'people-and-lifestyle',n:1,name:'GCSE Spanish',practice:true},
+    german:    {s:'german-aqa',u:'people-and-lifestyle',n:1,name:'GCSE German',practice:true}
   };
   var DEFAULT='geog';
-  var frame=document.getElementById('lessoniframe'), kicker=document.getElementById('lf-kicker'),
-      openLink=document.getElementById('lf-open'), which=document.getElementById('lf-which');
-  var currentKey=null, armed=false;
+  var frame=document.getElementById('lessoniframe'), note=document.getElementById('lf-note'),
+      openLink=document.getElementById('lf-open'), which=document.getElementById('lf-which'),
+      side=document.getElementById('lessonside'), wbnote=document.getElementById('workbooknote');
+  var currentKey=null, armed=false, lastToggled=null, ready=false;
   /* `picked` is a top-level const in the page script: global lexical scope, not a window property */
   function pickedKeys(){ try{ return (typeof picked!=='undefined' ? picked : []).slice(); }catch(e){ return []; } }
-  /* the visitor's LATEST option drives the frame; the four pre-ticked cores
-     (maths, English x2, science) never do, so the default stays until they choose */
+  /* the subject the visitor touched LAST drives the tablet (ticked on = show it);
+     otherwise their latest non-core pick; the four pre-ticked cores never do
+     on their own, so the default stays until they choose. */
   var CORE={maths:1,lang:1,lit:1,science:1};
   function lessonKey(){
     var ks=pickedKeys();
+    if(lastToggled && ks.indexOf(lastToggled)>=0 && LESSONS[lastToggled]) return lastToggled;
     for(var i=ks.length-1;i>=0;i--){ if(!CORE[ks[i]] && LESSONS[ks[i]]) return ks[i]; }
     return DEFAULT;
   }
   function ordinal(n){ return ['one','two','three','four','five','six'][n-1]||String(n); }
+  function unitName(u){ return u.replace(/-/g,' ').replace(/\b(paper|aos)\s*(\d)/i,function(m,a,b){ return a[0].toUpperCase()+a.slice(1)+' '+b; }); }
   function setFrame(key){
     if(!frame||key===currentKey) return;
-    var L=LESSONS[key]; currentKey=key;
-    var path='/lesson/'+L.s+'/'+L.u+'/'+L.n;
-    if(kicker) kicker.textContent=L.name+' · Lesson '+L.n+' · loading…';
-    if(openLink) openLink.href=path;
-    if(which) which.textContent=L.name+', lesson '+ordinal(L.n);
+    var L=LESSONS[key]; currentKey=key; ready=false; openTarget=null; syncPressed();
+    var path='/'+(L.practice?'practice':'lesson')+'/'+L.s+'/'+L.u+'/'+L.n;
+    if(openLink){ openLink.href=path; openLink.textContent=(L.practice?'Open this workbook':'Open this lesson')+' →'; }
+    if(which) which.textContent=L.name+', '+(L.practice?'workbook':'lesson')+' '+ordinal(L.n);
+    if(side){ side.classList.toggle('workbook',!!L.practice); }
+    if(wbnote) wbnote.hidden=!L.practice;
+    document.querySelectorAll('.showme[data-target]').forEach(function(b){ b.setAttribute('aria-disabled',L.practice?'true':'false'); });
+    if(note){ note.classList.toggle('workbook',!!L.practice); note.textContent='Loading '+L.name+'…'; }
     frame.src=path+'?embed=1';
   }
-  /* the frame reports when the real lesson has rendered */
+  function caption(L,title){
+    if(L.practice) return L.name+' is a workbook subject — '+(title?'“'+title+'”: ':'')+'type an answer and it marks you. No narration or flashcards here; those belong to reading subjects.';
+    return (title?'“'+title+'” — ':'')+L.name+', '+unitName(L.u)+', lesson '+ordinal(L.n)+'. The real page, live from the library: scroll it, or press one of the five.';
+  }
+  /* the frame reports when the real page has rendered, and what state it is in */
+  var openTarget=null;
+  function syncPressed(){
+    document.querySelectorAll('.showme[data-target]').forEach(function(b){ b.setAttribute('aria-pressed',b.dataset.target===openTarget?'true':'false'); });
+  }
+  var STATE_NOTE={
+    kc:{on:'The five-question knowledge check is open on the tablet. Press again to close it.',off:'No knowledge check on this one.'},
+    flashcards:{on:'Flashcards are open on the tablet. Press again to close them.',off:'No flashcards on this one.'},
+    narration:{on:'Playing — the narration reads the lesson aloud and follows along on the page. Press again to pause.',off:'The narration could not start on this one.',paused:'Paused. Press again to carry on.'},
+    practice:{on:'Six practice questions in the exam’s own style, open on the tablet. Answer one and the tutor marks it. Press again to close.',off:'No practice questions on this one.'},
+    lesson:{on:'The lesson itself — written to the specification, with a real photograph.',off:''}
+  };
   addEventListener('message',function(e){
     if(e.origin!==location.origin) return;
-    var d=e.data||{};
-    if(d.type==='sv-embed-ready' && currentKey){ var L=LESSONS[currentKey]; if(kicker) kicker.textContent=L.name+' · Lesson '+L.n+' · '+(d.title||''); }
+    var d=e.data||{}; if(!currentKey) return; var L=LESSONS[currentKey];
+    if(d.type==='sv-embed-ready'){ ready=true; if(note) note.textContent=caption(L,d.title||''); }
+    if(d.type==='sv-embed-state'){
+      var t=d.target, s=STATE_NOTE[t]||{};
+      openTarget=(d.open && t!=='lesson')? t : null;
+      syncPressed();
+      if(note) note.textContent=(d.open? s.on : (d.closed? caption(L,'') : (d.paused? s.paused : s.off)))||caption(L,'');
+    }
   });
-  /* five captions = five controls that move the real page inside the frame */
+  /* five captions = five controls that move the real page inside the frame.
+     Pressing the same one again closes what it opened (quiz, cards, narration). */
   document.querySelectorAll('.showme[data-target]').forEach(function(b){
+    b.setAttribute('aria-pressed','false');
     b.addEventListener('click',function(){
       if(!currentKey) setFrame(lessonKey());
+      var L=LESSONS[currentKey]; if(L.practice){ if(note) note.textContent=caption(L,''); return; }
       var send=function(){ try{ frame.contentWindow.postMessage({type:'sv-embed-show',target:b.dataset.target},location.origin); }catch(e){} };
-      send();
+      if(ready) send(); else { var n=0, w=setInterval(function(){ if(ready||++n>60){ clearInterval(w); if(ready) send(); } },100); }
       frame.scrollIntoView({block:'nearest'});
     });
   });
@@ -100,13 +137,13 @@
     setTimeout(function(){ if(!armed && sec.getBoundingClientRect().top<innerHeight*2) arm(); },1500);
   } else arm();
   var swapTimer=null;
-  function onPickChange(){ if(!armed){ arm(); return; } clearTimeout(swapTimer); swapTimer=setTimeout(function(){ setFrame(lessonKey()); },350); }
+  function onPickChange(slug){ lastToggled=slug; if(!armed){ arm(); return; } clearTimeout(swapTimer); swapTimer=setTimeout(function(){ setFrame(lessonKey()); },350); }
   if(typeof window.togglePick==='function'){
     var _tp=window.togglePick;
-    window.togglePick=function(slug){ var r=_tp.apply(this,arguments); onPickChange(); return r; };
+    window.togglePick=function(slug){ var r=_tp.apply(this,arguments); onPickChange(slug); return r; };
   }
 
-  /* ================= 2. the catalogue, tappable ================= */
+  /* ================= 2. the catalogue: a painted bookshelf ================= */
   /* welcome's family slug -> the browse base slug. A live row belongs to the
      family when its slug is the base or starts with base + '-'. */
   var FAMILY={maths:'maths',lang:'english-language',lit:'english-literature',science:'science',triple:'separate-sciences',
@@ -115,8 +152,13 @@
     media:'media-studies',film:'film-studies',drama:'drama',music:'music',mtech:'music-technology',dt:'design-technology',
     eng:'engineering',electronics:'electronics',it:'it',astro:'astronomy',geology:'geology',classics:'classical-civilisation',
     citizenship:'citizenship',food:'food-preparation-and-nutrition',hosp:'hospitality-catering',hsc:'health-social-care'};
+  /* the vocational awards have their own painted spines (Sunburst, 8 Sep 2026) */
+  var VOC={'cambridge-nationals-child-development':'child-development','cambridge-nationals-creative-imedia':'creative-imedia',
+    'cambridge-nationals-engineering-design':'engineering-design','cambridge-nationals-engineering-manufacture':'engineering-manufacture',
+    'cambridge-nationals-engineering-programmable-systems':'programmable-systems','cambridge-nationals-enterprise-and-marketing':'enterprise-marketing',
+    'cambridge-nationals-sport-science':'sport-science','cambridge-nationals-sport-studies':'sport-studies',
+    'l12-construction-built-environment':'construction','l12-ict':'ict','l12-retail-business':'retail-business','l12-sport-and-coaching-principles':'sport-coaching'};
   var VOC_LABEL={'cambridge-nationals-':'Cambridge National','l12-':'Level 1/2 Award'};
-  var VOC_SHORT={'Cambridge National':'CN','Level 1/2 Award':'L1/2'};
   function boardLabel(b){ return ({'Eduqas / WJEC':'Eduqas','Pearson Edexcel':'Edexcel'})[b]||b||''; }
   function inFamily(slug,base){ return slug===base||slug.indexOf(base+'-')===0; }
   function group(rows){
@@ -128,38 +170,64 @@
       if(mine.length) fams.push({key:s.slug,name:s.name,c:s.c,art:'assets/lw/shelf/book_'+s.slug+'.webp',
         boards:mine.map(function(r){return {label:boardLabel(r.board),slug:r.slug};})});
     });
-    /* vocational awards live outside the painted library: list them plainly */
-    rows.filter(function(r){ return !used[r.slug] && (r.slug.indexOf('cambridge-nationals-')===0||r.slug.indexOf('l12-')===0); })
-      .forEach(function(r){
-        var pre=Object.keys(VOC_LABEL).filter(function(p){return r.slug.indexOf(p)===0;})[0];
-        fams.push({key:r.slug,name:r.name,voc:VOC_LABEL[pre],boards:[{label:boardLabel(r.board),slug:r.slug}]});
-      });
+    rows.filter(function(r){ return !used[r.slug] && VOC[r.slug]; }).forEach(function(r){
+      var pre=Object.keys(VOC_LABEL).filter(function(p){return r.slug.indexOf(p)===0;})[0];
+      fams.push({key:VOC[r.slug],name:r.name,voc:VOC_LABEL[pre],art:'assets/lw/shelf/book_'+VOC[r.slug]+'.webp',boards:[{label:boardLabel(r.board),slug:r.slug}]});
+    });
     return fams;
   }
-  var current=null;
+  function hashv(s){ var h=0; for(var i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return (0.93+(h%13)/100).toFixed(2); }
+  function propEl(name){ var p=document.createElement('span'); p.className='prop prop-'+name; p.innerHTML='<img draggable="false" src="assets/lw/shelf/prop_'+name+'.webp" alt="">'; return p; }
+  function bookendEl(mirror){ var be=document.createElement('img'); be.className='bookend'+(mirror?' mirror':''); be.src='assets/lw/shelf/'+(mirror?'bookend2_marble.png':'bookend2.webp'); be.alt=''; return be; }
+  var current=null, tip=document.getElementById('booktip');
   function renderCatalogue(rows){
-    var grid=document.getElementById('catgrid'), panel=document.getElementById('catboards'), sub=document.getElementById('catsub');
-    if(!grid||!panel) return;
+    var host=document.getElementById('catshelves'), panel=document.getElementById('catboards'), sub=document.getElementById('catsub');
+    if(!host||!panel) return;
     var fams=group(rows);
-    if(sub) sub.textContent=fams.length+' subjects across '+rows.length+' board specifications. Tap one to see its boards and go straight in.';
-    grid.innerHTML=''; current=null; panel.hidden=true;
-    fams.forEach(function(f,i){
-      var b=document.createElement('button'); b.type='button'; b.className='ctile'+(f.voc?' voc':''); b.setAttribute('aria-expanded','false');
-      if(f.c) b.style.setProperty('--tc',f.c);
-      var n=f.boards.length;
-      b.innerHTML=(f.art?'<img src="'+f.art+'" alt="">':'<span class="cvoc" title="'+esc(f.voc)+'">'+esc(VOC_SHORT[f.voc]||f.voc)+'</span>')
-        +'<span class="cname">'+esc(f.name)+'</span><span class="cn">'+n+(n===1?' board':' boards')+'</span>';
-      b.addEventListener('click',function(){ open(i,fams,grid,panel,b); });
-      grid.appendChild(b);
+    if(sub) sub.textContent=fams.length+' subjects across '+rows.length+' board specifications. Tap a book to see its boards and go straight in.';
+    host.innerHTML=''; current=null; panel.hidden=true;
+    var half=Math.ceil(fams.length/2), rowsOf=[fams.slice(0,half),fams.slice(half)];
+    var PROPS=[['@bookstack',null],[null,'@owl']]; /* [leading, trailing] per row */
+    rowsOf.forEach(function(list,ri){
+      var row=document.createElement('div'); row.className='catrow';
+      var shelf=document.createElement('div'); shelf.className='shelf';
+      var bks=document.createElement('span'); bks.className='bks';
+      if(ri===0) bks.appendChild(bookendEl(false));
+      if(PROPS[ri][0]) bks.appendChild(propEl(PROPS[ri][0].slice(1)));
+      list.forEach(function(f,i){
+        var b=document.createElement('button'); b.type='button'; b.className='bk'; b.dataset.key=f.key;
+        b.setAttribute('aria-expanded','false'); b.setAttribute('aria-label',f.name+(f.voc?' ('+f.voc+')':''));
+        b.style.setProperty('--vf',hashv(f.key));
+        var n=list.length, lean=0, shift=0;
+        if(typeof leanFor==='function'){ lean=leanFor(i,n,false); shift=shiftFor(i,n,false); }
+        b.style.setProperty('--lean',lean+'deg'); b.style.setProperty('--shift',shift+'px');
+        b.innerHTML='<img draggable="false" src="'+f.art+'" alt="">';
+        b.addEventListener('click',function(){ open(f,b,panel); });
+        b.addEventListener('mouseenter',function(){ showTip(f,b); });
+        b.addEventListener('mouseleave',function(){ if(tip) tip.classList.remove('on'); });
+        bks.appendChild(b);
+      });
+      if(PROPS[ri][1]) bks.appendChild(propEl(PROPS[ri][1].slice(1)));
+      if(ri===rowsOf.length-1) bks.appendChild(bookendEl(true));
+      shelf.appendChild(bks); row.appendChild(shelf);
+      var lw=document.createElement('div'); lw.className='ledgewrap'; lw.innerHTML='<img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt="">';
+      row.appendChild(lw); host.appendChild(row);
     });
   }
-  function open(i,fams,grid,panel,tile){
-    var f=fams[i];
-    grid.querySelectorAll('.ctile').forEach(function(t){ t.setAttribute('aria-expanded','false'); t.classList.remove('on'); });
-    if(current===i){ current=null; panel.hidden=true; return; }
-    current=i; tile.setAttribute('aria-expanded','true'); tile.classList.add('on');
+  function showTip(f,b){
+    var stage=document.getElementById('stage-landing'); if(!tip||!stage) return;
+    var r=b.getBoundingClientRect(), sr=stage.getBoundingClientRect(), z=window.__svz||1;
+    tip.innerHTML='<span class="tn">'+esc(f.name)+'</span><span class="tb">'+esc((f.voc?f.voc+' · ':'')+f.boards.map(function(x){return x.label;}).join(' · '))+'</span>';
+    tip.style.left=((r.left+r.width/2-sr.left)/z)+'px'; tip.style.top=((r.top-sr.top+4)/z)+'px';
+    tip.classList.add('on');
+  }
+  function open(f,btn,panel){
+    var host=document.getElementById('catshelves');
+    host.querySelectorAll('.bk[aria-expanded="true"]').forEach(function(t){ t.setAttribute('aria-expanded','false'); });
+    if(current===f.key){ current=null; panel.hidden=true; return; }
+    current=f.key; btn.setAttribute('aria-expanded','true');
     panel.hidden=false;
-    panel.innerHTML='<div class="cb-head">'+(f.art?'<img src="'+f.art+'" alt="">':'')+'<b>'+esc(f.name)+'</b>'
+    panel.innerHTML='<div class="cb-head"><img src="'+f.art+'" alt=""><b>'+esc(f.name)+'</b>'
       +(f.voc?'<span class="cb-voc">'+esc(f.voc)+'</span>':'')+'</div>'
       +'<div class="cb-boards">'+f.boards.map(function(b){
         return '<a class="cb-board" href="/browse/'+esc(b.slug)+'"><span class="cb-lbl">'+esc(b.label)+'</span><span class="cb-go">Open &rarr;</span></a>';
