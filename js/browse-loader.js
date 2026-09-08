@@ -219,6 +219,10 @@
       { board: 'Eduqas', slug: 'geology-eduqas' },
       { board: 'WJEC', slug: 'geology-eduqas' }
     ],
+    'latin': [
+      { board: 'Eduqas', slug: 'latin-eduqas' },
+      { board: 'WJEC', slug: 'latin-eduqas' }
+    ],
     'film-studies': [
       { board: 'Eduqas', slug: 'film-studies-eduqas' },
       { board: 'WJEC', slug: 'film-studies-eduqas' }
