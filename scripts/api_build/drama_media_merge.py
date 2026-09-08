@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 """Audit and top up related_media for ONE rebuilt AQA Drama set-play unit.
 
-The rebuild keeps the lesson rows, so each row already carries related media —
-including the real Lesson Podcast entry, which must survive untouched. This
-script therefore MERGES rather than replaces:
+The rebuild keeps the lesson rows, so each row already carries related media.
+This script therefore MERGES rather than replaces:
 
   1. every existing item is verified (YouTube through oEmbed, everything else
      through an HTTP fetch with a browser user agent);
@@ -17,9 +16,14 @@ script therefore MERGES rather than replaces:
 Nothing is written without --apply. Without it the script prints the audit and
 writes the report, so the drops can be read before anything changes.
 
+The Lesson Podcast entry is preserved by default. Pass --drop-stale-podcast
+after a full content rebuild: that podcast narrates the content the rebuild
+replaced, and batch_podcasts.py will not regenerate it while the entry is
+still there.
+
 Usage:
   python scripts/api_build/drama_media_merge.py the-empress
-  python scripts/api_build/drama_media_merge.py the-empress --apply
+  python scripts/api_build/drama_media_merge.py the-empress --apply --drop-stale-podcast
 """
 import argparse
 import io
@@ -115,7 +119,7 @@ def load_candidates(play):
     return json.load(io.open(p, encoding="utf-8")) if os.path.exists(p) else {}
 
 
-def main(play, apply_changes):
+def main(play, apply_changes, drop_stale_podcast=False):
     unit_id = UNITS[play]
     drop_urls, drop_reasons, fixes = load_drops(play)
     candidates = load_candidates(play)
@@ -154,7 +158,17 @@ def main(play, apply_changes):
             for it in cat.get("items", []):
                 url = it.get("url")
                 if it.get("title") == "Lesson Podcast":
-                    podcast_item = it
+                    # A podcast generated from the PREVIOUS content narrates the
+                    # invented plot this rebuild exists to remove, so on a full
+                    # content rebuild it has to go. batch_podcasts.py skips any
+                    # lesson that already carries a real Lesson Podcast URL, so
+                    # removing the entry is also what lets the nightly build
+                    # regenerate it once the unit is flipped live.
+                    if drop_stale_podcast:
+                        dropped.append({"url": url, "title": "Lesson Podcast",
+                                        "why": "podcast built from the pre-rebuild content"})
+                    else:
+                        podcast_item = it
                     continue
                 if not url:
                     continue
@@ -239,5 +253,8 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("play", choices=sorted(UNITS))
     ap.add_argument("--apply", action="store_true")
+    ap.add_argument("--drop-stale-podcast", action="store_true",
+                    help="remove the Lesson Podcast entry, which was generated from the "
+                         "pre-rebuild content and would otherwise block regeneration")
     a = ap.parse_args()
-    main(a.play, a.apply)
+    main(a.play, a.apply, a.drop_stale_podcast)
