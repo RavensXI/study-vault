@@ -806,16 +806,16 @@ function fitShelf(){
   shelf.style.setProperty('--fit',f.toFixed(4));   // scales the foot-shift with the books
   placeLampBits();
 }
-/* on phones the lamp is smaller, so the pull-cord and the bulb (percentages of the desktop
-   stage) are re-anchored to the lamp's own box: cord at 33.7%/29.2% of the lamp, 27% of its
-   height long; bulb at 41%/33%. Desktop keeps the stylesheet positions. */
+/* the pull-cord and the bulb hang from the LAMP, whatever the stage is: their stylesheet
+   positions are percentages of the 722px desktop stage, and the stage narrows below 1280px
+   while the lamp stays anchored right, so the cord drifted (27px right at 1024px). Cord at
+   33.7%/29.2% of the lamp's box, 27% of its height long; bulb at 41%/33%. */
 function placeLampBits(){
   const stage=document.querySelector('.shelfstage'), lamp=document.querySelector('.lamp'),
         cord=document.querySelector('.pullcord'), bulb=document.querySelector('.bulb');
   if(!stage||!lamp||!cord) return;
-  const mob=matchMedia('(max-width:700px)').matches;
-  if(!mob){ [cord,bulb].forEach(e=>{ if(e){ e.style.left=''; e.style.top=''; e.style.height=''; } }); return; }
   const sr=stage.getBoundingClientRect(), lr=lamp.getBoundingClientRect();
+  if(!lr.width) return;
   cord.style.left=(lr.left-sr.left+lr.width*0.337)+'px'; cord.style.top=(lr.top-sr.top+lr.height*0.292)+'px'; cord.style.height=(lr.height*0.27)+'px';
   if(bulb){ bulb.style.left=(lr.left-sr.left+lr.width*0.41)+'px'; bulb.style.top=(lr.top-sr.top+lr.height*0.33)+'px'; }
 }
