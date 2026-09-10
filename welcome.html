@@ -643,6 +643,12 @@
      "not sure" answered in the row, never on a later page; a progress strip so the student
      always knows how much is left. */
   body[data-view="year"] .view-year{display:block}
+  body[data-view="tier"] .view-tier{display:block}
+  /* the tier screen: three wide answers per row, the board shown under the name so it reads as a
+     different question from the boards screen, not more of the same chips */
+  .tierlist .brow{grid-template-columns:38px minmax(10.5rem,1fr) repeat(3,9.2rem)}
+  .tierlist .bn small{display:block;font-family:var(--head);font-size:.72rem;font-weight:600;color:var(--mut);letter-spacing:.07em;text-transform:uppercase;margin-top:2px}
+  .tierlist .chip{padding:.62rem .6rem;font-size:.84rem}
   .wizprog{display:flex;gap:6px;max-width:300px;margin:0 auto 1.05rem}
   .wizprog span{flex:1;height:5px;border-radius:2px;background:var(--linel)}
   .wizprog span.done{background:var(--ink)}
@@ -669,15 +675,10 @@
   .view.enter{animation:viewIn .36s cubic-bezier(.16,1,.3,1) both}
   @keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   @keyframes rowIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-  .brow.tierrow[hidden]{display:none}
-  .brow.tierrow.show{animation:rowIn .28s cubic-bezier(.16,1,.3,1) both}
   .wizprog span{transition:background .35s,opacity .35s}
-  @media (prefers-reduced-motion:reduce){ .view.enter,.stepcard.enter,.brow.tierrow.show{animation:none} .chip::before{transition:none} }
+  @media (prefers-reduced-motion:reduce){ .view.enter,.stepcard.enter{animation:none} .chip::before{transition:none} }
   .allrow small,.brow .hint{display:block;font-size:.76rem;color:var(--mut);font-family:var(--head);font-weight:400;margin-top:3px}
-  .brow.tierrow{border-top:none;padding-top:0}
-  .brow.tierrow .bn{font-family:var(--head);font-size:.72rem;font-weight:600;color:var(--mut);letter-spacing:.07em;
-    text-transform:uppercase;padding-left:0}
-  @media (max-width:640px){ .brow.tierrow .bn{padding-left:0} }
+  @media (max-width:640px){ .tierlist .brow{grid-template-columns:30px minmax(5.5rem,1fr) repeat(3,minmax(0,1fr))} }
   @media (max-width:640px){ .brow{grid-template-columns:30px minmax(5.5rem,1fr) repeat(5,minmax(0,1fr))} .chip{padding:.5rem .3rem;font-size:.7rem} }
   .shelf-empty-note{position:absolute;left:50%;bottom:70px;transform:translateX(-50%);z-index:2;
     font-family:var(--hand);font-size:1.25rem;color:var(--mut);pointer-events:none;transition:opacity .3s}
@@ -1006,6 +1007,34 @@
     <div class="picker-foot">
       <button class="backlink" onclick="go('year')">&larr; Year</button>
       <button class="cta" id="bnext" disabled style="opacity:.45" onclick="enterDash()">See my StudyVault &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ================= TIER: Higher or Foundation, one row per tiered subject ================= -->
+  <div class="view view-tier">
+    <div class="picker-head">
+      <div class="wizprog" aria-hidden="true"></div>
+      <h1>Higher or Foundation?</h1>
+      <p>Maths, the sciences and languages are sat at two tiers. Most students sit Higher &mdash;
+        ask your teacher if you&rsquo;re not sure. You can change it any time.</p>
+    </div>
+
+    <div class="shelfstage lit">
+      <div class="shelf" id="shelf-tier"></div>
+      <img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt="">
+      <div class="lightwash"></div>
+      <div class="lampglow"></div>
+      <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
+      <div class="bulb"></div>
+      <div class="pullcord"></div>
+    </div>
+
+    <div class="boardlist tierlist" id="tlist"></div>
+    <p class="verdict" id="tverdict"></p>
+
+    <div class="picker-foot">
+      <button class="backlink" onclick="go('boards')">&larr; Exam boards</button>
+      <button class="cta" id="tiernext" disabled style="opacity:.45">Continue &rarr;</button>
     </div>
   </div>
 
@@ -1505,7 +1534,7 @@ function renderYearView(){
 }
 /* the strip at the top of every wizard screen: how many taps are left */
 function renderProg(view){
-  const steps=['picker','year','boards'].concat(topicsNeeded().length?['topics']:[]);
+  const steps=['picker','year','boards'].concat(tierNeeded().length?['tier']:[]).concat(topicsNeeded().length?['topics']:[]);
   const at=steps.indexOf(view);
   document.querySelectorAll('.wizprog').forEach(el=>{
     el.innerHTML=steps.map((s,i)=>'<span class="'+(i<at?'done':(i===at?'cur':''))+'"></span>').join('');
@@ -1577,18 +1606,6 @@ function renderBoards(){
       const ch=chipEl('Not sure',()=>pickBoard(slug,defaultBoard(slug),true)); ch.dataset.k='?'; ch.style.gridColumn='7'; chips.appendChild(ch);
     }
     bl.appendChild(row);
-    /* Foundation or Higher for the subjects that have tiers: the row is built now and
-       slides in the moment a board is chosen, so nothing below it jumps */
-    if(TIERED.indexOf(slug)>=0){
-      const tr=document.createElement('div'); tr.className='brow tierrow'; tr.dataset.slug=slug; tr.hidden=true; tr.style.setProperty('--tc',su.c);
-      tr.innerHTML='<span class="bn">Tier</span><span class="chips"></span>';
-      const tc=tr.querySelector('.chips');
-      [['higher','Higher'],['foundation','Foundation'],['unsure','Not sure']].forEach(([v,l],i)=>{
-        const ch=chipEl(l,()=>{ if(tiers[slug]===v) delete tiers[slug]; else tiers[slug]=v; persist(); syncBoards(); });
-        ch.dataset.t=v; ch.style.gridColumn=String(3+i); tc.appendChild(ch);
-      });
-      bl.appendChild(tr);
-    }
   });
   syncBoards();
 }
@@ -1602,13 +1619,6 @@ function syncBoards(){
     const row=bl.querySelector('.brow[data-slug="'+slug+'"]'); if(!row) return;
     row.querySelectorAll('.chip').forEach(ch=>{
       ch.setAttribute('aria-pressed',String(ch.dataset.k==='?'?false:boards[slug]===ch.dataset.k)); });
-    const tr=bl.querySelector('.tierrow[data-slug="'+slug+'"]');
-    if(tr){
-      const on=!!boards[slug]&&!!(su.cover&&su.cover[boards[slug]]);
-      if(on&&tr.hidden){ tr.hidden=false; tr.classList.remove('show'); void tr.offsetWidth; tr.classList.add('show'); }
-      else if(!on&&!tr.hidden){ tr.hidden=true; tr.classList.remove('show'); }
-      tr.querySelectorAll('.chip').forEach(ch=>ch.setAttribute('aria-pressed',String(tiers[slug]===ch.dataset.t)));
-    }
   });
   /* verdict: found vs requested, plus what "Not sure" did on the student's behalf */
   const chosen=picked.filter(sl=>boards[sl]);
@@ -1631,8 +1641,6 @@ function syncBoards(){
   }
   const gs=picked.filter(sl=>guess[sl]&&boards[sl]);
   if(gs.length) t+='<br><span class="note">'+join(gs.map(nm))+(gs.length>1?' are':' is')+' on the board most schools use — change it any time.</span>';
-  const un=picked.filter(sl=>tiers[sl]==='unsure'&&boards[sl]);
-  if(un.length) t+='<br><span class="note">Higher for now in '+join(un.map(nm))+' — most students sit it. Ask your teacher and change it any time.</span>';
   v.innerHTML=t;
   /* The year is required, not optional. Left unanswered it silently breaks the
      revision planner, the countdown and the cohort filtering — a failure the
@@ -1642,10 +1650,47 @@ function syncBoards(){
   nx.disabled=!ready; nx.style.opacity=ready?'1':'.45';
   /* some subjects have another level (history options, set texts) — route there.
      Either way the wizard ends INSIDE the product, never at a sign-up gate. */
-  const needT=topicsNeeded().length>0;
+  const needT=topicsNeeded().length>0, needTier=tierNeeded().length>0;
+  nx.innerHTML=needTier?'Continue &rarr;':(needT?'Choose your topics &rarr;':'See my StudyVault &rarr;');
+  nx.onclick=()=>{ if(needTier) go('tier'); else if(needT) go('topics'); else enterDash(); };
+  renderProg('boards');
+}
+/* ---- the tier screen: one row per tiered subject whose board we have built ---- */
+function tierNeeded(){ return picked.filter(sl=>{ const su=SUBJECTS.find(x=>x.slug===sl);
+  return TIERED.indexOf(sl)>=0&&boards[sl]&&su.cover&&su.cover[boards[sl]]; }); }
+function renderTier(){
+  const need=tierNeeded();
+  if(!need.length){ go(topicsNeeded().length?'topics':'boards'); return; }
+  renderShelfInto(document.getElementById('shelf-tier'),need);
+  const tl=document.getElementById('tlist'); tl.innerHTML='';
+  need.forEach(slug=>{
+    const su=SUBJECTS.find(x=>x.slug===slug);
+    const row=document.createElement('div'); row.className='brow'; row.dataset.slug=slug; row.style.setProperty('--tc',su.c);
+    row.innerHTML='<img src="assets/lw/shelf/book_'+slug+'.webp" alt=""><span class="bn">'+su.name+'<small>'+(BOARDLBL[boards[slug]]||'')+'</small></span><span class="chips"></span>';
+    const tc=row.querySelector('.chips');
+    [['higher','Higher'],['foundation','Foundation'],['unsure','Not sure']].forEach(([v,l],i)=>{
+      const ch=chipEl(l,()=>{ if(tiers[slug]===v) delete tiers[slug]; else tiers[slug]=v; persist(); syncTier(); });
+      ch.dataset.t=v; ch.style.gridColumn=String(3+i); tc.appendChild(ch);
+    });
+    tl.appendChild(row);
+  });
+  syncTier();
+}
+function syncTier(){
+  const need=tierNeeded(), tl=document.getElementById('tlist');
+  need.forEach(slug=>{ const row=tl.querySelector('.brow[data-slug="'+slug+'"]'); if(!row) return;
+    row.querySelectorAll('.chip').forEach(ch=>ch.setAttribute('aria-pressed',String(tiers[slug]===ch.dataset.t))); });
+  const nm=sl=>SUBJECTS.find(x=>x.slug===sl).name;
+  const join=a=>a.length>1?a.slice(0,-1).join(', ')+' and '+a[a.length-1]:a[0];
+  const left=need.filter(sl=>!tiers[sl]), un=need.filter(sl=>tiers[sl]==='unsure');
+  const v=document.getElementById('tverdict');
+  let t=left.length?(left.length===need.length?'One answer per subject.':left.length+' still to answer.'):'<b>All set.</b>';
+  if(un.length) t+=' <span class="note">Higher for now in '+join(un.map(nm))+' — most students sit it. Ask your teacher and change it any time.</span>';
+  v.innerHTML=t;
+  const nx=document.getElementById('tiernext'), ready=!left.length, needT=topicsNeeded().length>0;
+  nx.disabled=!ready; nx.style.opacity=ready?'1':'.45';
   nx.innerHTML=needT?'Choose your topics &rarr;':'See my StudyVault &rarr;';
   nx.onclick=()=>{ if(needT) go('topics'); else enterDash(); };
-  renderProg('boards');
 }
 /* one focused decision per screen: flatten every needed group into steps */
 let tstep=0, TSTEP_OVR=null;
@@ -1706,8 +1751,8 @@ function renderTopics(){
   });
   /* footer: back walks the questions, forward only when answered */
   const bk=document.getElementById('tback');
-  bk.innerHTML=tstep>0?'&larr; Back':'&larr; Exam boards';
-  bk.onclick=()=>{ if(tstep>0){ tstep--; renderTopics(); } else go('boards'); };
+  bk.innerHTML=tstep>0?'&larr; Back':(tierNeeded().length?'&larr; Tier':'&larr; Exam boards');
+  bk.onclick=()=>{ if(tstep>0){ tstep--; renderTopics(); } else go(tierNeeded().length?'tier':'boards'); };
   nx.innerHTML=last?'See my StudyVault &rarr;':'Next &rarr;';
   nx.onclick=last?()=>enterDash():()=>{ tstep++; renderTopics(); };
   syncTopic();
@@ -1734,6 +1779,7 @@ function go(v){
   renderProg(v);
   if(v==='year') renderYearView();
   if(v==='boards') renderBoards();
+  if(v==='tier') renderTier();
   if(v==='topics'){
     const ss=topicSteps(), fu=ss.findIndex(s=>!stepDone(s));
     tstep=(TSTEP_OVR!==null)?TSTEP_OVR:(fu<0?Math.max(ss.length-1,0):fu);
