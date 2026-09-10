@@ -232,9 +232,6 @@
     background:radial-gradient(circle, rgba(255,198,124,.92), rgba(255,168,84,.48) 42%, transparent 72%);
     mix-blend-mode:screen}
   .shelfstage.lit .lightwash,.shelfstage.lit .lampglow,.shelfstage.lit .bulb{opacity:1}
-  /* on the wizard shelves the orange bulb halo at the shade reads as a sunburst (Tom, 10 Sep 2026):
-     the beam stays, the halo goes */
-  .view .shelfstage .bulb{display:none}
   .bk{position:relative;height:calc(var(--bkh,204px)*var(--vf,1));border:none;background:none;padding:0;pointer-events:none;
     transform:translateX(var(--shift,0px)) rotate(var(--lean,0deg));filter:var(--bkshadow);
     transition:filter .55s ease;transform-origin:bottom center}
@@ -565,6 +562,30 @@
 
   /* ---- the picker: build your shelf ---- */
   .view{display:none}
+  /* the wizard's one shelf: shown on every wizard screen, hidden on the landing and sign-in */
+  .wizstage{display:none;max-width:900px;margin:1.2rem auto 0}
+  body[data-view="picker"] .wizstage,body[data-view="year"] .wizstage,body[data-view="boards"] .wizstage,
+  body[data-view="tier"] .wizstage,body[data-view="topics"] .wizstage,body[data-view="save"] .wizstage{display:block}
+  .wizstage .wizprog{margin-bottom:.9rem}
+  .wizstage .shelfstage{margin-top:0}
+  /* the bench behaves like the dashboard's: spines lift on hover, click, and the lamp clicks */
+  .wizstage .bk{pointer-events:auto;cursor:pointer;outline:none;
+    transition:transform .32s cubic-bezier(.34,1.4,.5,1),filter .55s ease,opacity .3s ease}
+  .wizstage .bk:hover,.wizstage .bk.focus,.wizstage .bk:focus-visible{transform:translateX(var(--shift,0px)) rotate(var(--lean,0deg)) translateY(-7px)}
+  .wizstage .bk:focus-visible img{outline:3px solid var(--anchor);outline-offset:3px;border-radius:4px}
+  .wizstage .bk.dim{opacity:.5}
+  .wizstage .bk.out{animation:book-out .34s ease-in both;pointer-events:none}
+  @keyframes book-out{to{transform:translateX(var(--shift,0px)) translateY(36px) rotate(var(--lean,0deg));opacity:0}}
+  .wizstage .lamp.hot{filter:drop-shadow(-10px 8px 8px rgba(40,28,12,.22)) brightness(1.06)}
+  .wizstage .lampbtn:hover ~ .pullcord{filter:brightness(1.08)}
+  .wizstage .bulb{display:none}
+  /* a spine click on the boards / tier screens points at its row */
+  @keyframes rowPulse{0%{background:color-mix(in srgb,var(--tc) 16%,transparent)}100%{background:transparent}}
+  .brow.pulse{animation:rowPulse 1.1s ease-out}
+  /* screens hand over: the old one lifts away, the new one rises in */
+  .view.leave{animation:viewOut .17s ease-in both}
+  @keyframes viewOut{to{opacity:0;transform:translateY(-8px)}}
+  @media (prefers-reduced-motion:reduce){ .view.leave,.wizstage .bk.out{animation:none} }
   body[data-view="landing"] .view-landing{display:block}
   body[data-view="picker"] .view-picker{display:block}
   body[data-view="boards"] .view-boards{display:block}
@@ -943,24 +964,29 @@
 
   </div>
 
-  <!-- ================= PICKER: BUILD YOUR SHELF ================= -->
-  <div class="view view-picker">
-    <div class="picker-head">
-      <div class="wizprog" aria-hidden="true"></div>
-      <h1>Pick your subjects.</h1>
-      <p>Maths, English and Science are already ticked &mdash; everyone sits those.
-        Add your options; most students pick four. You can change these any time.</p>
-    </div>
-
-    <div class="shelfstage lit" id="stage-picker">
-      <div class="shelf" id="shelf-picker"></div>
+  <!-- ================= THE WIZARD'S SHELF: one bench, kept between screens (same bench as the dashboard) ================= -->
+  <div class="wizstage" id="wizstage">
+    <div class="wizprog" aria-hidden="true"></div>
+    <div class="shelfstage lit" id="stage-wiz">
+      <div class="shelf" id="shelf-wiz"></div>
       <img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt="">
       <div class="lightwash"></div>
       <div class="lampglow"></div>
       <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
       <div class="bulb"></div>
       <div class="pullcord"></div>
+      <button class="lampbtn" type="button" aria-label="Reading lamp"></button>
       <div class="shelf-empty-note" id="emptynote">nothing picked yet</div>
+      <div class="booktip" id="wiztip"></div>
+    </div>
+  </div>
+
+  <!-- ================= PICKER: BUILD YOUR SHELF ================= -->
+  <div class="view view-picker">
+    <div class="picker-head">
+      <h1>Pick your subjects.</h1>
+      <p>Maths, English and Science are already ticked &mdash; everyone sits those.
+        Add your options; most students pick four. You can change these any time.</p>
     </div>
 
     <input class="sfilter" id="sfilter" type="search" placeholder="Search subjects&hellip;" aria-label="Search subjects" autocomplete="off">
@@ -976,7 +1002,6 @@
   <!-- ================= YEAR: one tap, sets the exam summer ================= -->
   <div class="view view-year">
     <div class="picker-head">
-      <div class="wizprog" aria-hidden="true"></div>
       <h1>Which year are you in?</h1>
       <p>This sets your exam summer &mdash; the countdown and the planner are built from it.</p>
     </div>
@@ -989,19 +1014,8 @@
   <!-- ================= EDITIONS: one board per book ================= -->
   <div class="view view-boards">
     <div class="picker-head">
-      <div class="wizprog" aria-hidden="true"></div>
       <h1>Which exam board?</h1>
       <p>Tell us the board for each subject &mdash; that decides the exact spec you&rsquo;ll see.</p>
-    </div>
-
-    <div class="shelfstage lit">
-      <div class="shelf" id="shelf-boards"></div>
-      <img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt="">
-      <div class="lightwash"></div>
-      <div class="lampglow"></div>
-      <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
-      <div class="bulb"></div>
-      <div class="pullcord"></div>
     </div>
 
     <div class="boardlist" id="blist"></div>
@@ -1016,20 +1030,9 @@
   <!-- ================= TIER: Higher or Foundation, one row per tiered subject ================= -->
   <div class="view view-tier">
     <div class="picker-head">
-      <div class="wizprog" aria-hidden="true"></div>
       <h1>Higher or Foundation?</h1>
       <p>Maths, the sciences and languages are sat at two tiers. Most students sit Higher &mdash;
         ask your teacher if you&rsquo;re not sure. You can change it any time.</p>
-    </div>
-
-    <div class="shelfstage lit">
-      <div class="shelf" id="shelf-tier"></div>
-      <img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt="">
-      <div class="lightwash"></div>
-      <div class="lampglow"></div>
-      <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
-      <div class="bulb"></div>
-      <div class="pullcord"></div>
     </div>
 
     <div class="boardlist tierlist" id="tlist"></div>
@@ -1044,20 +1047,9 @@
   <!-- ================= TOPICS: the options your school chose ================= -->
   <div class="view view-topics">
     <div class="picker-head">
-      <div class="wizprog" aria-hidden="true"></div>
       <h1>Choose your topics.</h1>
       <p>Some subjects have options your school chose &mdash; History topics, set texts, religions.
         One quick question at a time.</p>
-    </div>
-
-    <div class="shelfstage lit">
-      <div class="shelf" id="shelf-topics"></div>
-      <img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt="">
-      <div class="lightwash"></div>
-      <div class="lampglow"></div>
-      <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
-      <div class="bulb"></div>
-      <div class="pullcord"></div>
     </div>
 
     <div class="stepcard" id="tcard"></div>
@@ -1073,16 +1065,6 @@
     <div class="picker-head">
       <h1>Save your choices.</h1>
       <p id="savesub"></p>
-    </div>
-
-    <div class="shelfstage lit">
-      <div class="shelf" id="shelf-save"></div>
-      <img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt="">
-      <div class="lightwash"></div>
-      <div class="lampglow"></div>
-      <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
-      <div class="bulb"></div>
-      <div class="pullcord"></div>
     </div>
 
     <div class="door savecard">
@@ -1280,7 +1262,7 @@ if(matchMedia('(prefers-reduced-motion:reduce)').matches || !('IntersectionObser
 
 /* ---- picker: build your shelf ---- */
 const picked=[];                                               /* slugs, in pick order */
-const shelfP=document.getElementById('shelf-picker');
+const shelfW=document.getElementById('shelf-wiz'), stageW=document.getElementById('stage-wiz'), tipW=document.getElementById('wiztip');
 /* the same grid twice: on the picker view, and embedded on the landing shelf
    (8 Sep 2026) — one SUBJECTS list, one togglePick, one `picked` array */
 function buildGrid(host){
@@ -1336,14 +1318,7 @@ function togglePick(slug){
     else if(none) none.remove();
   });
 })();
-function renderPickerShelf(newSlug){
-  shelfP.innerHTML=''; shelfP.appendChild(bookendEl());
-  const n=picked.length;
-  picked.forEach((slug,i)=>{
-    const s=SUBJECTS.find(x=>x.slug===slug);
-    shelfP.appendChild(bookEl(s,i,n,slug===newSlug));
-  });
-}
+function renderPickerShelf(){ renderWizShelf(picked); }
 /* real free-tier coverage per family (from Supabase, 10 Jul 2026). 1 = built & live.
    Honest gaps today: Combined Science has no Eduqas/WJEC row; Spanish has no OCR. */
 const BOARDKEYS=['aqa','edexcel','ocr','eduqas'];
@@ -1504,11 +1479,71 @@ function defaultBoard(slug){
 }
 function offers(slug,k){ const o=BOARD_OFFERS[slug]; return o?o.indexOf(k)>=0:true; }
 
-function renderShelfInto(el,slugs){
-  el.innerHTML=''; el.appendChild(bookendEl());
-  slugs.forEach((slug,i)=>{ const s=SUBJECTS.find(x=>x.slug===slug);
-    el.appendChild(bookEl(s,i,slugs.length,false)); });
+/* ONE shelf for the whole wizard, the same bench as the dashboard: books stay put between
+   screens, a new pick drops in, an un-pick falls out, spines lift on hover and answer a
+   click, the lamp clicks on and off. Diffed by slug, never rebuilt. */
+let wizFocus=null;
+function renderWizShelf(slugs,o){
+  o=o||{}; wizFocus=o.focus||null;
+  const el=shelfW; if(!el) return;
+  if(!el.querySelector('.bookend')) el.appendChild(bookendEl());
+  const have={}; el.querySelectorAll('.bk[data-slug]').forEach(b=>{ if(!b.classList.contains('out')) have[b.dataset.slug]=b; });
+  Object.keys(have).forEach(sl=>{ if(slugs.indexOf(sl)<0){ const b=have[sl]; b.classList.add('out');
+    b.addEventListener('animationend',()=>b.remove(),{once:true}); setTimeout(()=>{ if(b.parentNode) b.remove(); },450); delete have[sl]; } });
+  const n=slugs.length;
+  slugs.forEach((slug,i)=>{
+    const s=SUBJECTS.find(x=>x.slug===slug); if(!s) return;
+    let b=have[slug];
+    if(!b){ b=bookEl(s,i,n,true); b.dataset.slug=slug; wireWizBook(b,s); }
+    else{ const lean=(n===9?LEANS[i]:leanFor(i,n)), shift=(n===9?SHIFTS[i]:shiftFor(i,n));
+      b.style.setProperty('--lean',lean+'deg'); b.style.setProperty('--shift',shift+'px'); }
+    b.classList.toggle('focus',wizFocus===slug); b.classList.toggle('dim',!!wizFocus&&wizFocus!==slug);
+    /* keep DOM order = pick order, moving a node only when it is out of place (a move restarts its animation) */
+    const live=[...el.children].filter(c=>c.classList.contains('bookend')||(c.classList.contains('bk')&&!c.classList.contains('out')));
+    const ref=live[i+1]; if(ref!==b) el.insertBefore(b,ref||null);
+  });
+  const en=document.getElementById('emptynote'); if(en) en.style.opacity=(n===0&&document.body.dataset.view==='picker')?'1':'0';
+  fitWizShelf();
 }
+function wireWizBook(b,s){
+  b.tabIndex=0; b.setAttribute('role','button'); b.setAttribute('aria-label',s.name);
+  b.addEventListener('mouseenter',()=>{
+    const r=b.getBoundingClientRect(), sr=stageW.getBoundingClientRect(), z=window.__svz||1, v=document.body.dataset.view;
+    const line=v==='picker'?'tap to take it off the shelf':(BOARDLBL[boards[s.slug]]||'no board yet');
+    tipW.innerHTML='<span class="tn">'+s.name+'</span><span class="tb">'+line+'</span>';
+    tipW.style.left=((r.left+r.width/2-sr.left)/z)+'px'; tipW.style.top=((r.top-sr.top+4)/z)+'px'; tipW.classList.add('on'); });
+  b.addEventListener('mouseleave',()=>tipW.classList.remove('on'));
+  const act=()=>{ tipW.classList.remove('on'); const v=document.body.dataset.view;
+    if(v==='picker'){ togglePick(s.slug); return; }
+    if(v==='topics'){ const ss=topicSteps(), k=ss.findIndex(x=>x.sl===s.slug); if(k>=0){ tstep=k; renderTopics(); } return; }
+    const row=document.querySelector('.view-'+v+' .brow[data-slug="'+s.slug+'"]');
+    if(row){ row.scrollIntoView({behavior:'smooth',block:'center'}); row.classList.remove('pulse'); void row.offsetWidth; row.classList.add('pulse'); } };
+  b.addEventListener('click',act);
+  b.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } });
+}
+/* shrink the books to fit left of the lamp when the shelf is long (same rule as the dashboard) */
+function fitWizShelf(){
+  const shelf=shelfW, lamp=stageW.querySelector('.lamp'); if(!shelf||!lamp||!stageW.offsetWidth) return;
+  shelf.style.removeProperty('--bkh');
+  const bks=shelf.querySelectorAll('.bk:not(.out)'); if(!bks.length) return;
+  const z=parseFloat(getComputedStyle(document.body).zoom)||1;   /* rects are zoomed, offsets are not */
+  const last=bks[bks.length-1], footShift=Math.max(0,parseFloat(last.style.getPropertyValue('--shift'))||0);
+  const natural=last.offsetLeft+last.offsetWidth+footShift; if(!natural) return;
+  const avail=(lamp.getBoundingClientRect().left-shelf.getBoundingClientRect().left)/z-6;   /* the flopped last book must clear the shade */
+  const f=Math.min(1,avail/natural); if(f<1) shelf.style.setProperty('--bkh',(204*f).toFixed(1)+'px');
+}
+/* the reading lamp on the wizard shelf: click it, like the dashboard's; the same remembered preference */
+(function(){
+  const btn=stageW.querySelector('.lampbtn'), cord=stageW.querySelector('.pullcord'), lamp=stageW.querySelector('.lamp');
+  let on=true; try{ if(localStorage.getItem('sv-lamp-on')==='0') on=false; }catch(e){}
+  const apply=()=>{ stageW.classList.toggle('lit',on); btn.setAttribute('aria-pressed',String(on));
+    btn.setAttribute('aria-label',on?'Reading lamp \u2014 on. Click to turn off':'Reading lamp \u2014 off. Click to turn on'); };
+  apply();
+  btn.addEventListener('click',()=>{ on=!on; try{ localStorage.setItem('sv-lamp-on',on?'1':'0'); }catch(e){}
+    cord.classList.remove('tug'); void cord.offsetWidth; cord.classList.add('tug'); setTimeout(apply,140); });
+  btn.addEventListener('mouseenter',()=>lamp.classList.add('hot')); btn.addEventListener('mouseleave',()=>lamp.classList.remove('hot'));
+  addEventListener('resize',fitWizShelf);
+})();
 /* Which year the student is in, which fixes their exam year.
    This question existed on the OLD front door (index.html) and was stranded
    there when welcome.html became the homepage on 11 Aug: nothing has written
@@ -1566,7 +1601,7 @@ function yearWord(){ const y=examYear(); if(!y) return null; const d=y-examYearB
 
 /* build once when the screen opens; every tap after that only flips states in place */
 function renderBoards(){
-  renderShelfInto(document.getElementById('shelf-boards'),picked);
+  renderWizShelf(picked);
   const bl=document.getElementById('blist'); bl.innerHTML='';
   const yl=document.createElement('p'); yl.className='yline';
   yl.innerHTML=examYear()
@@ -1664,7 +1699,7 @@ function tierNeeded(){ return picked.filter(sl=>{ const su=SUBJECTS.find(x=>x.sl
 function renderTier(){
   const need=tierNeeded();
   if(!need.length){ go(topicsNeeded().length?'topics':'boards'); return; }
-  renderShelfInto(document.getElementById('shelf-tier'),need);
+  renderWizShelf(picked);
   const tl=document.getElementById('tlist'); tl.innerHTML='';
   need.forEach(slug=>{
     const su=SUBJECTS.find(x=>x.slug===slug);
@@ -1713,12 +1748,8 @@ function renderTopics(){
   if(tstep>=steps.length) tstep=steps.length-1;
   if(tstep<0) tstep=0;
   const st=steps[tstep], su=SUBJECTS.find(x=>x.slug===st.sl);
-  /* the shelf BUILDS as you answer: every subject you have reached stays up
-     there, newest on the right. Showing only the current subject made the
-     shelf metaphor read as one book at a time, when the whole point is
-     watching your own shelf fill. */
-  const sofar=[]; steps.slice(0,tstep+1).forEach(s=>{ if(sofar.indexOf(s.sl)<0) sofar.push(s.sl); });
-  renderShelfInto(document.getElementById('shelf-topics'),sofar);
+  /* the whole shelf stays up; the book being asked about lifts, the rest sit back */
+  renderWizShelf(picked,{focus:st.sl});
   const tc=document.getElementById('tcard'); tc.style.setProperty('--tc',su.c);
   tc.innerHTML='<div class="tprog">Question '+(tstep+1)+' of '+steps.length+'</div>'
     +'<div class="tsubj"><img src="assets/lw/shelf/book_'+st.sl+'.webp" alt="">'
@@ -1769,7 +1800,7 @@ function pickerBack(){ if(new URLSearchParams(location.search).get('view')==='pi
 function enterDash(){ persist(); document.body.classList.remove('ready');
   setTimeout(()=>{ location.href=dashUrl(); },180); }
 function renderSave(){
-  renderShelfInto(document.getElementById('shelf-save'),picked);
+  renderWizShelf(picked);
   const found=picked.filter(sl=>{ const su=SUBJECTS.find(x=>x.slug===sl); return su.alt?!!su.alt[boards[sl]]:(su.cover&&su.cover[boards[sl]]); });
   const reqs=picked.length-found.length;
   document.getElementById('savesub').textContent=
@@ -1777,20 +1808,29 @@ function renderSave(){
             :(found.length+' ready now \u00b7 '+reqs+' on the way \u2014 we\u2019ll email you.');
 }
 function go(v){
-  document.body.dataset.view=v;
-  const ve=document.querySelector('.view-'+v); if(ve){ ve.classList.remove('enter'); void ve.offsetWidth; ve.classList.add('enter'); }
-  renderProg(v);
-  if(v==='year') renderYearView();
-  if(v==='boards') renderBoards();
-  if(v==='tier') renderTier();
-  if(v==='topics'){
-    const ss=topicSteps(), fu=ss.findIndex(s=>!stepDone(s));
-    tstep=(TSTEP_OVR!==null)?TSTEP_OVR:(fu<0?Math.max(ss.length-1,0):fu);
-    TSTEP_OVR=null;
-    renderTopics();
-  }
-  if(v==='save') renderSave();
-  scrollTo(0,0);
+  const cur=document.body.dataset.view;
+  const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const outEl=(cur&&cur!==v)?document.querySelector('.view-'+cur):null;
+  const doSwitch=()=>{
+    document.body.dataset.view=v;
+    const ve=document.querySelector('.view-'+v); if(ve){ ve.classList.remove('enter'); void ve.offsetWidth; ve.classList.add('enter'); }
+    renderProg(v);
+    if(v==='picker'||v==='year'||v==='save') renderWizShelf(picked);
+    if(v==='year') renderYearView();
+    if(v==='boards') renderBoards();
+    if(v==='tier') renderTier();
+    if(v==='topics'){
+      const ss=topicSteps(), fu=ss.findIndex(s=>!stepDone(s));
+      tstep=(TSTEP_OVR!==null)?TSTEP_OVR:(fu<0?Math.max(ss.length-1,0):fu);
+      TSTEP_OVR=null;
+      renderTopics();
+    }
+    if(v==='save') renderSave();
+    if(cur==='landing'||v==='landing'||reduced) scrollTo(0,0); else scrollTo({top:0,behavior:'smooth'});
+  };
+  /* between wizard screens the old one lifts away before the new one rises; the shelf above stays put */
+  if(outEl&&cur!=='landing'&&v!=='landing'&&!reduced){ outEl.classList.add('leave'); setTimeout(()=>{ outEl.classList.remove('leave'); doSwitch(); },170); }
+  else doSwitch();
 }
 /* the shelf you built survives a wander-off (nothing server-side until Save) */
 function persist(){ if(RESTORING) return; try{
