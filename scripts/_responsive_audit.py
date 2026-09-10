@@ -93,9 +93,13 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
         for vpn, vp in vps.items():
+          for name, path in pages.items():
+            # a fresh context per page: a context reused across pages served stale stylesheets
             ctx = browser.new_context(**vp)
+            # a student who has set up: the planner, dashboards and lesson chrome need picks to render
+            ctx.add_init_script("""try{ if(!localStorage.getItem('sv-welcome')){ localStorage.setItem('sv-welcome', JSON.stringify({picked:['maths','lang','lit','science','history','music'],boards:{maths:'edexcel',lang:'aqa',lit:'aqa',science:'aqa',history:'aqa',music:'aqa'},topics:{},meta:{}})); localStorage.setItem('studyvault-exam-year','2027'); localStorage.setItem('sv-welcome-decision','1'); } }catch(e){}""")
             pg = ctx.new_page()
-            for name, path in pages.items():
+            if True:
                 url = a.base + path + ('&' if '?' in path else '?') + 'v=' + str(int(time.time()))
                 try:
                     pg.goto(url, wait_until='load', timeout=45000)
