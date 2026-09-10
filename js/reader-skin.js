@@ -476,6 +476,7 @@
       card.querySelector('.sv-tour-next').textContent = n === steps.length - 1 ? 'Done' : 'Next';
       [].forEach.call(card.querySelectorAll('.sv-tour-dots i'), function (d, k) { d.classList.toggle('on', k === n); });
       hideDemoMenu();
+      syncDrawer(s);
       if (s.trigger === 'bubbles') {
         var p = document.querySelector('#lesson-page .study-notes p.sv-chunk') ||
                 document.querySelector('#lesson-page .study-notes p');
@@ -491,6 +492,17 @@
       syncSpot();
       transitioning = false;
       fadeIn();
+    }
+    /* on phones the lesson tools live in a drawer behind the burger (main.js
+       initSidebarPanel): open it for the steps that point inside it, close it
+       for the rest, and close it when the tour ends */
+    function syncDrawer(s) {
+      if (!document.body.classList.contains('sidebar-panel-mode')) return;
+      var t = s ? tourFirstEl(s) : null;
+      var inside = !!(t && t.closest && t.closest('.lesson-sidebar'));
+      document.body.classList.toggle('sidebar-open', inside);
+      var ov = document.querySelector('.mobile-overlay'); if (ov) ov.classList.toggle('open', inside);
+      var b = document.querySelector('.mobile-menu-btn'); if (b) b.setAttribute('aria-expanded', inside ? 'true' : 'false');
     }
     var firstShow = true, transitioning = false;
     function show(n) {
@@ -514,6 +526,7 @@
     function finish() {
       localStorage.setItem('sv-reader-tour-v1', '1');
       clearInterval(tracker);
+      syncDrawer(null);
       window.removeEventListener('wheel', preventScroll, { passive: false });
       window.removeEventListener('touchmove', preventScroll, { passive: false });
       window.removeEventListener('keydown', preventScrollKeys, true);

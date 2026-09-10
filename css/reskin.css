@@ -1191,11 +1191,42 @@ body[data-skin="reader"] .sv-video-dur:empty{ display:none; }  /* until the real
 @media (max-width:980px){
   body[data-skin="reader"] .lesson-body{ grid-template-columns:1fr; gap:0; }
   body[data-skin="reader"] .lesson-sidebar{ display:flex; flex-direction:column; position:static; max-height:none; height:auto; overflow:visible; margin-top:2.5rem; }
-  /* the legacy slide-out panel (main.js initSidebarPanel, <=768px) is not the
-     reader skin's model: its translateX(100%) on a static sidebar left the
-     tools dock half off the page and clipped (Tom, 8 Sep 2026). Stack it. */
-  body[data-skin="reader"].sidebar-panel-mode .lesson-sidebar{ position:static !important; transform:none !important; width:auto !important; max-width:none !important; right:auto !important; top:auto !important; bottom:auto !important; box-shadow:none !important; }
-  body[data-skin="reader"] .sidebar-panel-close, body[data-skin="reader"] .sidebar-panel-nav{ display:none !important; }
+}
+/* phones (<=768px): the lesson tools are a drawer behind the burger (main.js
+   initSidebarPanel), not a stack at the foot of the page nobody scrolls to
+   (Tom, 11 Sep 2026). The drawer scrolls inside itself; the tools sit first
+   and the page links last. Tablets 769-980px keep the stacked layout above. */
+@media (max-width:768px){
+  body[data-skin="reader"].sidebar-panel-mode .lesson-sidebar{
+    position:fixed !important; top:0; right:0; bottom:0; left:auto;
+    width:min(88vw,380px); max-width:none; height:100dvh; max-height:none;
+    margin:0; padding:0 1rem 1.5rem; gap:1rem;
+    overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+    background:var(--bg-page,#faf8f5); z-index:1500;
+    box-shadow:-4px 0 24px rgba(0,0,0,.12);
+    transform:translateX(102%); transition:transform .35s cubic-bezier(.16,1,.3,1);
+    opacity:1 !important;
+  }
+  body[data-skin="reader"].sidebar-panel-mode.sidebar-open .lesson-sidebar{ transform:none; }
+  body[data-skin="reader"].sidebar-panel-mode .sidebar-panel-close{ display:flex; background:var(--bg-page,#faf8f5); }
+  body[data-skin="reader"].sidebar-panel-mode .sv-panel{ flex:0 0 auto; }
+  body[data-skin="reader"].sidebar-panel-mode .lesson-sidebar > #sidebar-video-section{ flex:0 0 auto; }
+  /* the page links: a compact row at the foot of the drawer */
+  body[data-skin="reader"].sidebar-panel-mode .sidebar-panel-nav{
+    display:flex; order:99; flex-direction:row; flex-wrap:wrap; gap:.4rem;
+    border-bottom:0; border-top:1px solid var(--border-light); padding:.9rem 0 0; margin:.25rem 0 0;
+  }
+  body[data-skin="reader"].sidebar-panel-mode .sidebar-panel-nav a{
+    flex:1 1 calc(50% - .4rem); justify-content:center; font-size:.84rem; padding:.55rem .5rem;
+    border:1px solid var(--border-light); border-radius:8px; background:var(--bg-card,#fff);
+  }
+  body[data-skin="reader"].sidebar-panel-mode .sidebar-panel-nav a svg{ display:none; }
+  /* the burger: a dot while the quiz in the drawer is still to do */
+  body[data-skin="reader"] .mobile-menu-btn{ position:relative; }
+  body[data-skin="reader"] .mobile-menu-btn.has-unseen::after{
+    content:""; position:absolute; top:.35rem; right:.3rem; width:9px; height:9px; border-radius:50%;
+    background:var(--accent,#5b7c5f); box-shadow:0 0 0 2px var(--bg-page,#faf8f5);
+  }
 }
 
 /* ================= LEGACY CHROME SWEEP =================

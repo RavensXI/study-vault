@@ -794,10 +794,9 @@ function initMobileNav() {
 function initSidebarPanel() {
   var sidebar = document.querySelector('.lesson-sidebar');
   if (!sidebar) return; // Not a lesson page
-  /* the reader skin stacks the sidebar under the article on narrow screens
-     (css/reskin.css); the slide-out panel would only translate it half off
-     the page (Tom, 8 Sep 2026) */
-  if (document.body.dataset.skin === 'reader') return;
+  /* the homepage's phone/tablet demo embeds the lesson without a header, so
+     there is no burger to open a drawer: keep the tools in the page flow there */
+  if (document.documentElement.classList.contains('sv-embed')) return;
 
   var btn = document.querySelector('.mobile-menu-btn');
   var overlay = document.querySelector('.mobile-overlay');
@@ -848,19 +847,43 @@ function initSidebarPanel() {
       'Exam Technique': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
       'Revision Techniques': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>'
     };
-    headerLinks.forEach(function (a) {
-      // Skip hidden prev/next lesson links and lesson pill
-      if (a.style.display === 'none' || a.classList.contains('nav-lesson-pill')) return;
-      var clone = document.createElement('a');
-      clone.href = a.href;
-      clone.textContent = a.textContent.trim();
-      var icon = navIcons[clone.textContent] || '';
-      if (icon) clone.innerHTML = icon + '<span>' + clone.textContent + '</span>';
-      clone.addEventListener('click', function () { closeSidebar(); });
-      panelNav.appendChild(clone);
-    });
+    function refreshPanelNav() {
+      /* the reader skin's harness wraps the sidebar's children into its tool grid after
+         this runs, so put the close row back at the top and the links at the foot */
+      if (closeRow.parentNode !== sidebar || sidebar.firstChild !== closeRow) sidebar.insertBefore(closeRow, sidebar.firstChild);
+      if (panelNav.parentNode !== sidebar || sidebar.lastChild !== panelNav) sidebar.appendChild(panelNav);
+      panelNav.innerHTML = '';
+      (nav ? nav.querySelectorAll('a') : []).forEach(function (a) {
+        // Skip links that are hidden (prev/next before the data loads) or empty
+        if (a.style.display === 'none' || !a.textContent.trim()) return;
+        var clone = document.createElement('a');
+        clone.href = a.href;
+        clone.textContent = a.textContent.trim();
+        var icon = navIcons[clone.textContent] || '';
+        if (icon) clone.innerHTML = icon + '<span>' + clone.textContent + '</span>';
+        // the real links carry their handlers (unit overview, prev/next): forward the click
+        clone.addEventListener('click', function (e) {
+          if (a.getAttribute('href') === '#' || a.id) { e.preventDefault(); a.click(); }
+          closeSidebar();
+        });
+        panelNav.appendChild(clone);
+      });
+    }
+    refreshPanelNav();
+    sidebar._refreshPanelNav = refreshPanelNav;
+    /* the reader harness re-parents the sidebar's children after this runs (and the
+       tour opens the drawer without the burger): keep the close row first and the
+       links last whenever the sidebar's children change */
+    try {
+      new MutationObserver(function () {
+        var misplaced = closeRow.parentNode !== sidebar || sidebar.firstChild !== closeRow ||
+                        panelNav.parentNode !== sidebar || sidebar.lastChild !== panelNav;
+        if (misplaced && panelReady) refreshPanelNav();
+      }).observe(sidebar, { childList: true });
+    } catch (e) {}
     // Insert nav after close button
     sidebar.insertBefore(panelNav, closeRow.nextSibling);
+    markUnseenTools();
 
     // Close button handler
     closeRow.querySelector('.sidebar-panel-close-btn').addEventListener('click', closeSidebar);
@@ -902,9 +925,20 @@ function initSidebarPanel() {
     if (panelNav) panelNav.remove();
   }
 
+  /* a dot on the burger while this lesson's quiz has not been done: the drawer is out of
+     sight, so the burger has to say there is something in it */
+  function markUnseenTools() {
+    try {
+      var m = location.pathname.match(/\/(lesson|practice)\/([^/]+)\/([^/]+)\/(\d+)/);
+      var kc = m && (JSON.parse(localStorage.getItem('sv-kc-log') || '{}')[m[2] + '/' + m[3] + '/' + m[4]]);
+      btn.classList.toggle('has-unseen', !kc);
+    } catch (e) {}
+  }
   function openSidebar() {
+    if (sidebar._refreshPanelNav) sidebar._refreshPanelNav();
     document.body.classList.add('sidebar-open');
     btn.setAttribute('aria-expanded', 'true');
+    btn.classList.remove('has-unseen');
     if (overlay) overlay.classList.add('open');
   }
 
