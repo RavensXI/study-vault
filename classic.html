@@ -45,7 +45,7 @@
   h1{font-size:clamp(1.5rem,2.6vw,1.9rem);font-weight:800;letter-spacing:-.02em;margin:0}
   .momentum{font-family:var(--read);font-size:.92rem;color:var(--sec);margin:0}
   /* LAW 1: the home surface fits the viewport on desktop */
-  @media (min-width:981px) and (min-height:640px){
+  @media (min-width:981px) and (min-height:760px){   /* shorter windows scroll like a normal page */
     html,body{height:100%;overflow:hidden}
     .wrap{height:calc(100% - 64px);overflow:hidden;align-content:start}
     .rail{overflow:hidden}
@@ -387,6 +387,18 @@
     padding:.55rem 1.2rem;border-radius:4px;text-decoration:none}
   .savecta:hover{filter:brightness(1.08)}
   .weekempty{font-family:var(--read);font-size:.92rem;color:var(--sec);line-height:1.55;margin:.4rem 0 0}
+  /* short laptop screens (760-820px tall): the stack must still fit once a subject's panel
+     opens under the shelf. The sign-up strip goes (the top bar carries the same button), the
+     shelf scene shrinks as one piece, the plan tightens; the column scrolls as a last resort. */
+  @media (min-width:981px) and (min-height:760px) and (max-height:820px){
+    .savebar{display:none}
+    .shelfstage{zoom:.86;margin-top:16px}
+    .plan{padding-top:.5rem;padding-bottom:.6rem}
+    .plan li{padding:.22rem .4rem}
+    .h1row{margin-bottom:.35rem}
+    .wrap{padding-bottom:12px}
+    .wrap>:first-child{min-height:0;overflow-y:auto;overflow-x:hidden;padding-bottom:6px}
+  }
   @media (max-width:700px){ .cosy{display:none} }
   /* phones: the books are what you tap, so they get the width. The lamp is small and
      tucked right, the bookend half size; fitShelf() re-anchors the cord and the bulb
@@ -799,7 +811,8 @@ function fitShelf(){
   const last=bks[bks.length-1], footShift=Math.max(0,parseFloat(last.style.getPropertyValue('--shift'))||0);
   const natural=last.offsetLeft+last.offsetWidth+footShift;   // rightmost extent: layout + kicked-out foot
   const under=matchMedia('(max-width:700px)').matches?22:72;   // how far the books may run under the lamp's transparent left / the shade
-  const avail=(lamp?lamp.getBoundingClientRect().left-shelfLeft:shelf.clientWidth)+under;
+  const zf=lamp&&lamp.offsetWidth? lamp.getBoundingClientRect().width/lamp.offsetWidth : 1;   // the stage may be zoomed on short screens
+  const avail=(lamp?(lamp.getBoundingClientRect().left-shelfLeft)/zf:shelf.clientWidth)+under;
   const f=Math.min(1, avail/natural);
   shelf.style.setProperty('--bkh',(204*f).toFixed(1)+'px');
   shelf.style.setProperty('--beh',(210*f).toFixed(1)+'px');
@@ -816,8 +829,10 @@ function placeLampBits(){
   if(!stage||!lamp||!cord) return;
   const sr=stage.getBoundingClientRect(), lr=lamp.getBoundingClientRect();
   if(!lr.width) return;
-  cord.style.left=(lr.left-sr.left+lr.width*0.337)+'px'; cord.style.top=(lr.top-sr.top+lr.height*0.292)+'px'; cord.style.height=(lr.height*0.27)+'px';
-  if(bulb){ bulb.style.left=(lr.left-sr.left+lr.width*0.41)+'px'; bulb.style.top=(lr.top-sr.top+lr.height*0.33)+'px'; }
+  const zf=lr.width/(lamp.offsetWidth||lr.width);   // real px per local px (the stage may be zoomed)
+  const L=(lr.left-sr.left)/zf, T=(lr.top-sr.top)/zf, W=lr.width/zf, H=lr.height/zf;
+  cord.style.left=(L+W*0.337)+'px'; cord.style.top=(T+H*0.292)+'px'; cord.style.height=(H*0.27)+'px';
+  if(bulb){ bulb.style.left=(L+W*0.41)+'px'; bulb.style.top=(T+H*0.33)+'px'; }
 }
 addEventListener('resize',()=>{ clearTimeout(window.__fitT); window.__fitT=setTimeout(fitShelf,120); });
 function deselectSubject(){                 // click a selected spine again -> it slots back into the shelf
