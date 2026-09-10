@@ -572,10 +572,10 @@
   body[data-view="picker"] .wizstage,body[data-view="year"] .wizstage,body[data-view="boards"] .wizstage,
   body[data-view="tier"] .wizstage,body[data-view="topics"] .wizstage,body[data-view="save"] .wizstage{display:block}
   .wizstage .wizprog{margin-bottom:.9rem;transition:margin .42s cubic-bezier(.16,1,.3,1)}
-  .wizstage .shelfstage{margin:0 auto;height:250px;transition:height .42s cubic-bezier(.16,1,.3,1)}
-  .wizstage .stagewrap{position:relative;height:250px;transform-origin:top center;transition:transform .42s cubic-bezier(.16,1,.3,1)}
-  .wizstage.compact .shelfstage{height:150px}
-  .wizstage.compact .stagewrap{transform:scale(.6)}
+  .wizstage .shelfstage{margin:0 auto;height:calc(250px*var(--ms,1));transition:height .42s cubic-bezier(.16,1,.3,1)}
+  .wizstage .stagewrap{position:relative;height:250px;transform-origin:top center;transform:scale(var(--ms,1));transition:transform .42s cubic-bezier(.16,1,.3,1)}
+  .wizstage.compact .shelfstage{height:calc(150px*var(--ms,1))}
+  .wizstage.compact .stagewrap{transform:scale(calc(var(--ms,1)*.6))}
   .wizstage.compact .wizprog{margin-bottom:.5rem}
   @media (prefers-reduced-motion:reduce){ .wizstage .shelfstage,.wizstage .stagewrap,.wizstage .wizprog{transition:none} }
   /* the bench behaves like the dashboard's: spines lift on hover, click, and the lamp clicks */
@@ -673,6 +673,52 @@
   .stepcard .chip::before{left:.55rem}
   .stepcard.enter{animation:viewIn .3s cubic-bezier(.16,1,.3,1) both}
   .savecard{max-width:400px;margin:1.5rem auto 0}
+  /* ============ PHONES AND SMALL TABLETS (<1000px): a real layout, not a scaled canvas ============
+     The painted bookcase is a 1835px composition and cannot reflow, so below 1000px the landing
+     becomes a plain mobile front door and the wizard screens lay out at zoom 1: the shared shelf
+     scales to the width, the subject grid runs two across, board chips wrap under the name. */
+  html.mob body{zoom:1}
+  html.mob .wrap{max-width:none;padding:0 14px 40px}
+  html.mob .view-landing .bookcase,html.mob .view-landing>.schoolslink{display:none}
+  .mland{display:none}
+  html.mob .mland{display:block;padding:2.4rem 0 1rem;text-align:center}
+  .mland .mmark{font-family:'Young Serif',var(--read);font-size:2.2rem;color:var(--ink);letter-spacing:-.01em}
+  .mland .mmark i{display:inline-block;width:.3em;height:.3em;border-radius:50%;background:#c15a3a;margin-left:.06em;vertical-align:.06em}
+  .mland h1{font-size:1.8rem;margin:1.1rem 0 .55rem;line-height:1.15}
+  .mland p{font-size:1rem;color:var(--sec);margin:0 auto 1.3rem;max-width:30rem;line-height:1.5}
+  .mland .cta{max-width:24rem;margin:0 auto}
+  .mland .tiny{margin-top:.9rem}
+  .mland ul{list-style:none;margin:1.9rem auto 0;padding:0;max-width:26rem;text-align:left}
+  .mland li{font-family:var(--read);font-size:.95rem;color:var(--ink);padding:.55rem 0 .55rem 1.6rem;position:relative;border-top:1px solid var(--linel)}
+  .mland li::before{content:"\2713";position:absolute;left:.2rem;top:.55rem;font-weight:700;color:#8a6430}
+  .mland .schools{margin-top:1.6rem;font-size:.86rem}
+  html.mob .wizstage{margin:0 -14px;padding:.6rem 14px .2rem}
+  html.mob .wizstage .shelfstage{max-width:none}
+  html.mob .wizstage .stagewrap{width:900px;transform-origin:top left}
+  html.mob .wizstage.compact .stagewrap{transform:translateX(calc(20% * var(--ms,1))) scale(calc(var(--ms,1)*.6))}
+  html.mob .picker-head{margin:1.1rem 0 .2rem}
+  html.mob .picker-head h1{font-size:1.7rem}
+  html.mob .picker-head p{font-size:.9rem}
+  html.mob .subject-grid{grid-template-columns:1fr 1fr;gap:8px;margin-top:1.1rem}
+  html.mob .scard{padding:.5rem .55rem;gap:7px}
+  html.mob .scard img{height:36px}
+  html.mob .scard .nm{font-size:.8rem}
+  html.mob .sfilter{margin-top:1rem}
+  html.mob .picker-foot{flex-wrap:wrap;gap:10px 14px}
+  html.mob .boardlist{max-width:none}
+  html.mob .brow,html.mob .tierlist .brow{grid-template-columns:30px 1fr;gap:.3rem .5rem;padding:.55rem 0}
+  html.mob .brow>img{height:32px}
+  html.mob .brow .bn{min-width:0;font-size:.9rem}
+  html.mob .brow .chips{display:flex;flex-wrap:wrap;gap:6px;grid-column:1/-1}
+  html.mob .brow .chip{width:auto;display:inline-block;padding:.5rem 1rem;grid-column:auto !important}
+  html.mob .allrow{padding-bottom:.6rem}
+  html.mob .yline{font-size:.86rem}
+  html.mob .stepcard{margin-top:1.1rem}
+  html.mob .tq{font-size:1.2rem}
+  html.mob .stepcard .chip{font-size:.84rem;padding:.55rem 1rem}
+  html.mob .ylist{margin-top:1.1rem}
+  html.mob .ychoice b{font-size:1rem}
+  html.mob .legal{font-size:.68rem;margin:1.6rem auto}
   /* ============ WIZARD ROUND 4 (10 Sep 2026, after the Cognito walk-through) ============
      One tap per screen where a tap is enough; the year on its own screen; boards, tier and
      "not sure" answered in the row, never on a later page; a progress strip so the student
@@ -785,6 +831,20 @@
   <!-- ================= LANDING: the bookcase IS the page ================= -->
   <div class="view view-landing">
     <a class="schoolslink" href="#" onclick="document.querySelector('.sec-schools').scrollIntoView({behavior:'smooth'});return false">For schools</a>
+    <!-- phones: the painted case cannot reflow, so this is the front door instead -->
+    <div class="mland">
+      <div class="mmark">StudyVault<i></i></div>
+      <h1>Everything you&rsquo;re studying, nothing you&rsquo;re not.</h1>
+      <p>Free GCSE lessons, practice questions and podcasts for every subject and every exam board. Three minutes to set up, no account needed.</p>
+      <button class="cta" onclick="go('picker')">Tell us what you&rsquo;re taking</button>
+      <p class="tiny"><a href="#" onclick="go('signin');return false">Already have an account? Sign in</a></p>
+      <ul>
+        <li>Every subject, every board &mdash; only what your school actually teaches</li>
+        <li>Lessons you can read or listen to, with practice and marking built in</li>
+        <li>A revision planner built around your real exam dates</li>
+      </ul>
+      <p class="schools"><a href="/teach">For schools and teachers</a></p>
+    </div>
     <div class="bookcase shelfstage" id="stage-landing">
 
       <div class="caserow">
@@ -1953,11 +2013,15 @@ addEventListener('pageshow',()=>document.body.classList.add('ready'));
    it looks the same everywhere (Tom's proportions, 12 Jul 2026) */
 const SV_BASE=1835;
 function fitScale(){
-  /* floor at .5: below ~918px windows we hold scale and allow panning rather
-     than shrinking to unreadable (proper mobile layout is a later decision) */
-  const z=Math.max(document.documentElement.clientWidth/SV_BASE, .5);
+  /* below 1000px the page stops being a scaled canvas: html.mob switches on the mobile
+     layout (zoom 1) and --ms scales the wizard's shelf to the width. Above it the canvas
+     scales with the window, floored at .5. */
+  const cw=document.documentElement.clientWidth, mob=cw<1000;
+  document.documentElement.classList.toggle('mob',mob);
+  const z=mob?1:Math.max(cw/SV_BASE, .5);
   document.body.style.zoom=z; window.__svz=z;
   document.documentElement.style.setProperty('--z',z);   /* page-by-page sections are 100vh / zoom tall */
+  document.documentElement.style.setProperty('--ms',mob?((cw-28)/900).toFixed(4):'1');
 }
 fitScale(); addEventListener('resize',fitScale);
 /* page-by-page snapping only on the landing view (the wizard views scroll freely) */
