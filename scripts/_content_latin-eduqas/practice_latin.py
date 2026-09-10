@@ -550,9 +550,14 @@ def stage_assemble(cfg, plan):
             for i, p in enumerate(pd["problem_bank"][tier]):
                 probs += ["%s[%d] %s" % (tier, i, x) for x in check_problem(p)]
         for i, w in enumerate(pd["worked_examples"]):
+            # the renderer lowercases this, but keep the stored value canonical
+            w["difficulty"] = (w.get("difficulty") or "").lower()
             steps = w.get("steps") or []
             if not steps or not steps[-1].get("isAnswer"):
                 probs.append("worked_example[%d] final step missing isAnswer" % i)
+        tiers = [w.get("difficulty") for w in pd["worked_examples"]]
+        if sorted(tiers) != ["bronze", "gold", "silver"]:
+            probs.append("worked example tiers %s (want one each)" % tiers)
         blob = json.dumps(pd, ensure_ascii=False)
         probs += D.drift_grep(blob)
         for banned in ("Eduqas", "WJEC", "C580QS", "higher tier", "Higher tier",
