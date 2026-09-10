@@ -589,36 +589,41 @@
   .backlink{background:none;border:none;font:inherit;font-size:.88rem;color:var(--sec);cursor:pointer;
     text-decoration:underline;text-underline-offset:3px}
   /* editions: one row per picked book, a chip per board */
-  .boardlist{max-width:740px;margin:1.4rem auto 0;display:flex;flex-direction:column}
-  .brow{display:flex;align-items:center;gap:12px;padding:.5rem .2rem;border-top:1px solid var(--linel)}
+  .boardlist{max-width:820px;margin:1.4rem auto 0;display:flex;flex-direction:column}
+  .brow{display:grid;grid-template-columns:38px minmax(10.5rem,1fr) repeat(5,6.6rem);gap:.4rem .45rem;align-items:center;
+    padding:.45rem .2rem;border-top:1px solid var(--linel)}
+  .brow>img{grid-column:1}
+  .brow .bn{grid-column:2}
   .brow:first-child{border-top:none}
   .brow img{height:38px;width:auto;flex:none;filter:saturate(1.4) brightness(1.1)}
   .brow .bn{font-family:var(--read);font-size:.94rem;font-weight:600;min-width:9.5rem}
-  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-left:auto}
-  .chip{font:600 .78rem/1 var(--head);color:var(--sec);background:var(--card);border:1px solid var(--line);
-    border-radius:3px;padding:.42rem .65rem;cursor:pointer;transition:border-color .15s,background .15s;letter-spacing:.02em}
+  .chips{display:contents}
+  .chip{position:relative;display:block;width:100%;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    font:600 .78rem/1 var(--head);color:var(--sec);background:var(--card);border:1px solid var(--line);
+    border-radius:3px;padding:.5rem .6rem;cursor:pointer;letter-spacing:.02em;
+    transition:border-color .18s,background .18s,color .18s,box-shadow .18s,transform .12s}
+  .chip:active{transform:scale(.96)}
   .chip:hover{border-color:var(--tc)}
   .chip[aria-pressed="true"]{background:var(--tc);border-color:var(--tc);color:#fff}
-  .chip[aria-pressed="true"] .reqtag{background:rgba(255,255,255,.24);color:#fff}
   /* selected chips also get a tick and a soft ring (6 Sep 2026, Tom: fill alone was
      not obvious enough) — the same tick the subject cards use, so one selection
      language runs through the whole wizard */
-  .chip[aria-pressed="true"]{font-weight:700;box-shadow:0 0 0 3px color-mix(in srgb,var(--tc) 28%,transparent)}
-  .chip[aria-pressed="true"]::before{content:"\2713";display:inline-block;margin-right:.4rem;font-weight:700}
+  .chip[aria-pressed="true"]{box-shadow:0 0 0 3px color-mix(in srgb,var(--tc) 28%,transparent)}
+  /* the tick lives in the reserved left padding: a selected chip is exactly as wide as an unselected one */
+  .chip::before{content:"\2713";position:absolute;left:.32rem;top:50%;transform:translateY(-50%) scale(.6);opacity:0;font-weight:700;font-size:.66rem;transition:opacity .18s,transform .22s cubic-bezier(.16,1,.3,1)}
+  .chip[aria-pressed="true"]::before{opacity:1;transform:translateY(-50%) scale(1)}
   /* the year row has no subject colour, so its chips select in ink — without this the
      selected year rendered white-on-paper (invalid var(--tc)) and looked unselected */
   .yrow{--tc:var(--ink)}
   .yrow .chip{padding:.5rem .8rem;font-size:.84rem}
   /* a board we don't have yet: honest, and one tap turns the miss into a request */
-  .chip.off{border-style:dashed;color:var(--mut)}
-  .chip .reqtag{display:inline-block;margin-left:.42rem;padding:.08rem .3rem;border-radius:3px;
-    background:rgba(161,121,61,.16);color:#8a6a35;font-size:.62rem;letter-spacing:.04em;
-    text-transform:uppercase;vertical-align:1px}
-  .chip.off[aria-pressed="true"] .reqtag{background:rgba(255,255,255,.24);color:#fff}
-  .chip.off[aria-pressed="true"]{background:#a1793d;border-color:#a1793d;border-style:solid;color:#fff}
+  /* a board we have not built yet: quieter, same size, no badge; the line under the list explains */
+  .chip.off{color:var(--mut);background:transparent}
+  .chip.off[aria-pressed="true"]{background:#a1793d;border-color:#a1793d;color:#fff}
   .verdict{text-align:center;font-size:.92rem;color:var(--sec);margin:1rem 0 0}
   .verdict b{color:var(--ink)}
   .verdict .req{color:#8a6430}
+  .verdict .note{display:inline-block;margin-top:.35rem;font-size:.86rem;color:var(--mut)}
   /* topics step: one decision at a time — a single focused question card */
   .stepcard{max-width:780px;margin:1.7rem auto 0;text-align:center}
   .tprog{font-size:.76rem;font-weight:600;color:var(--mut);letter-spacing:.14em;text-transform:uppercase}
@@ -628,8 +633,10 @@
   .tsubj .bd{font-size:.74rem;color:var(--mut);letter-spacing:.09em;text-transform:uppercase}
   .tq{font-family:var(--read);font-size:1.5rem;font-weight:600;margin:.45rem 0 1.1rem;letter-spacing:-.01em}
   .tq .tpick{font-size:.9rem;font-weight:600;color:#8a6430;white-space:nowrap}
-  .stepcard .chips{margin-left:0;justify-content:center;gap:9px}
-  .stepcard .chip{font-size:.88rem;padding:.58rem .85rem}
+  .stepcard .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:9px}
+  .stepcard .chip{display:inline-block;width:auto;font-size:.88rem;padding:.62rem 1.35rem}
+  .stepcard .chip::before{left:.55rem}
+  .stepcard.enter{animation:viewIn .3s cubic-bezier(.16,1,.3,1) both}
   .savecard{max-width:400px;margin:1.5rem auto 0}
   /* ============ WIZARD ROUND 4 (10 Sep 2026, after the Cognito walk-through) ============
      One tap per screen where a tap is enough; the year on its own screen; boards, tier and
@@ -659,13 +666,19 @@
   .yline .backlink{font-size:.84rem;margin-left:.45rem}
   .allrow{--tc:var(--ink);padding-bottom:.75rem;margin-bottom:.35rem;border-bottom:1px dashed var(--line)}
   .allrow .bn{min-width:0}
+  .view.enter{animation:viewIn .36s cubic-bezier(.16,1,.3,1) both}
+  @keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes rowIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .brow.tierrow[hidden]{display:none}
+  .brow.tierrow.show{animation:rowIn .28s cubic-bezier(.16,1,.3,1) both}
+  .wizprog span{transition:background .35s,opacity .35s}
+  @media (prefers-reduced-motion:reduce){ .view.enter,.stepcard.enter,.brow.tierrow.show{animation:none} .chip::before{transition:none} }
   .allrow small,.brow .hint{display:block;font-size:.76rem;color:var(--mut);font-family:var(--head);font-weight:400;margin-top:3px}
-  .brow .hint{flex-basis:100%;text-align:right;margin-top:-2px}
-  .brow.tierrow{border-top:none;padding-top:.05rem}
+  .brow.tierrow{border-top:none;padding-top:0}
   .brow.tierrow .bn{font-family:var(--head);font-size:.72rem;font-weight:600;color:var(--mut);letter-spacing:.07em;
-    text-transform:uppercase;padding-left:50px}
-  @media (max-width:640px){ .brow.tierrow .bn{padding-left:0} .brow .hint{text-align:left} }
-  @media (max-width:640px){ .brow{flex-wrap:wrap} .chips{margin-left:50px} }
+    text-transform:uppercase;padding-left:0}
+  @media (max-width:640px){ .brow.tierrow .bn{padding-left:0} }
+  @media (max-width:640px){ .brow{grid-template-columns:30px minmax(5.5rem,1fr) repeat(5,minmax(0,1fr))} .chip{padding:.5rem .3rem;font-size:.7rem} }
   .shelf-empty-note{position:absolute;left:50%;bottom:70px;transform:translateX(-50%);z-index:2;
     font-family:var(--hand);font-size:1.25rem;color:var(--mut);pointer-events:none;transition:opacity .3s}
 
@@ -1307,7 +1320,7 @@ const BOARDLBL={aqa:'AQA',edexcel:'Edexcel',ocr:'OCR',eduqas:'Eduqas / WJEC'};
    unioned with what we have live, NOT the same question as `cover` (what we
    have built). Showing a board that does not award the qualification is
    misinformation, so those chips are never rendered. */
-const BOARD_OFFERS={astro:['edexcel'],business:['aqa','edexcel','ocr','eduqas'],citizenship:['aqa','edexcel','ocr'],classics:['ocr'],cs:['aqa','edexcel','ocr','eduqas'],drama:['aqa','edexcel','ocr','eduqas'],dt:['aqa','edexcel','ocr','eduqas'],econ:['aqa','ocr'],electronics:['eduqas'],eng:['aqa','ocr','eduqas'],film:['eduqas'],food:['aqa','ocr','eduqas'],french:['aqa','edexcel','eduqas'],geog:['aqa','edexcel','ocr','eduqas'],geology:['eduqas'],german:['aqa','edexcel','eduqas'],history:['aqa','edexcel','ocr','eduqas'],hosp:['eduqas'],hsc:['edexcel','ocr','eduqas'],it:['ocr'],lang:['aqa','edexcel','ocr','eduqas'],lit:['aqa','edexcel','ocr','eduqas'],maths:['aqa','edexcel','ocr','eduqas'],media:['aqa','ocr','eduqas'],music:['aqa','edexcel','ocr','eduqas'],pe:['aqa','edexcel','ocr','eduqas'],psych:['aqa','edexcel','ocr'],rs:['aqa','edexcel','ocr','eduqas'],science:['aqa','edexcel','ocr'],socio:['aqa','eduqas'],spanish:['aqa','edexcel','eduqas'],stats:['aqa','edexcel'],triple:['aqa','edexcel','ocr','eduqas']};
+const BOARD_OFFERS={astro:['edexcel'],business:['aqa','edexcel','ocr','eduqas'],citizenship:['aqa','edexcel','ocr'],classics:['ocr'],cs:['aqa','edexcel','ocr','eduqas'],drama:['aqa','edexcel','ocr','eduqas'],dt:['aqa','edexcel','ocr','eduqas'],econ:['aqa','ocr'],electronics:['eduqas'],eng:['aqa','ocr','eduqas'],film:['eduqas'],food:['aqa','ocr','eduqas'],french:['aqa','edexcel'],geog:['aqa','edexcel','ocr','eduqas'],geology:['eduqas'],german:['aqa','edexcel'],history:['aqa','edexcel','ocr','eduqas'],hosp:['eduqas'],hsc:['edexcel','ocr','eduqas'],it:['ocr'],lang:['aqa','edexcel','ocr','eduqas'],lit:['aqa','edexcel','ocr','eduqas'],maths:['aqa','edexcel','ocr','eduqas'],media:['aqa','ocr','eduqas'],music:['aqa','edexcel','ocr','eduqas'],pe:['aqa','edexcel','ocr','eduqas'],psych:['aqa','edexcel','ocr'],rs:['aqa','edexcel','ocr','eduqas'],science:['aqa','edexcel','ocr'],socio:['aqa','eduqas'],spanish:['aqa','edexcel'],stats:['aqa','edexcel'],triple:['aqa','edexcel','ocr','eduqas']};
 
 /* Topic-level pickers — mined from the production wizard (index.html:
    litTexts, historyOptions, filmStudiesOptions, religiousEducationOptions,
@@ -1498,6 +1511,13 @@ function renderProg(view){
     el.innerHTML=steps.map((s,i)=>'<span class="'+(i<at?'done':(i===at?'cur':''))+'"></span>').join('');
   });
 }
+/* chips live in fixed grid columns (AQA | Edexcel | OCR | Eduqas | Not sure), so every
+   AQA lines up under every other AQA and a tap never moves anything but its own chip */
+const CHIPLBL={aqa:'AQA',edexcel:'Edexcel',ocr:'OCR',eduqas:'Eduqas'};
+function chipEl(label,onclick,cls){
+  const ch=document.createElement('button'); ch.type='button'; ch.className='chip'+(cls?' '+cls:'');
+  ch.setAttribute('aria-pressed','false'); ch.innerHTML=label; ch.onclick=onclick; return ch;
+}
 function pickBoard(slug,k,isGuess){
   if(!isGuess&&boards[slug]===k){ delete boards[slug]; delete guess[slug]; }
   else{ boards[slug]=k; if(isGuess) guess[slug]=true; else delete guess[slug]; }
@@ -1508,20 +1528,17 @@ function pickBoard(slug,k,isGuess){
     if(boards[slug]){ boards[twin]=k; if(isGuess) guess[twin]=true; else delete guess[twin]; }
     else{ delete boards[twin]; delete guess[twin]; }
   }
-  persist(); renderBoards();
+  persist(); syncBoards();
 }
-function chipEl(label,pressed,onclick,cls){
-  const ch=document.createElement('button'); ch.type='button'; ch.className='chip'+(cls?' '+cls:'');
-  ch.setAttribute('aria-pressed',String(!!pressed)); ch.innerHTML=label; ch.onclick=onclick; return ch;
-}
+function yearWord(){ const y=examYear(); if(!y) return null; const d=y-examYearBase(); return d===0?'11':(d===1?'10':(d===2?'9':null)); }
 
+/* build once when the screen opens; every tap after that only flips states in place */
 function renderBoards(){
   renderShelfInto(document.getElementById('shelf-boards'),picked);
   const bl=document.getElementById('blist'); bl.innerHTML='';
-  /* the year, already answered, stays visible and one tap from being changed */
   const yl=document.createElement('p'); yl.className='yline';
   yl.innerHTML=examYear()
-    ?'<b>Year '+(examYear()===examYearBase()?'11':(examYear()===examYearBase()+1?'10':'9'))+'</b> &middot; exams summer '+examYear()
+    ?'<b>Year '+(yearWord()||'?')+'</b> &middot; exams summer '+examYear()
       +'<button class="backlink" type="button" onclick="go(\'year\')">change</button>'
     :'<b>Which year are you in?</b><button class="backlink" type="button" onclick="go(\'year\')">choose</button>';
   bl.appendChild(yl);
@@ -1529,72 +1546,94 @@ function renderBoards(){
      the odd ones out. Only worth showing once there are enough rows to save taps. */
   if(picked.length>=3){
     const row=document.createElement('div'); row.className='brow allrow';
-    row.innerHTML='<span class="bn">Same board for everything?<small>Set them all, then change the odd ones out below.</small></span><span class="chips"></span>';
+    row.innerHTML='<span class="bn">Same board for all?<small>then fix the odd ones out</small></span><span class="chips"></span>';
     const chips=row.querySelector('.chips');
-    BOARDKEYS.forEach(k=>{
-      const all=picked.every(sl=>!offers(sl,k)||boards[sl]===k)&&picked.some(sl=>offers(sl,k));
-      chips.appendChild(chipEl(BOARDLBL[k],all,()=>{
+    BOARDKEYS.forEach((k,i)=>{
+      const ch=chipEl(CHIPLBL[k],()=>{
         picked.forEach(sl=>{ const su=SUBJECTS.find(x=>x.slug===sl); if(!su.alt&&offers(sl,k)){ boards[sl]=k; delete guess[sl]; } });
-        persist(); renderBoards(); }));
+        persist(); syncBoards(); });
+      ch.dataset.k=k; ch.style.gridColumn=String(3+i); chips.appendChild(ch);
     });
     bl.appendChild(row);
   }
   picked.forEach(slug=>{
     const su=SUBJECTS.find(x=>x.slug===slug);
-    const row=document.createElement('div'); row.className='brow'; row.style.setProperty('--tc',su.c);
+    const row=document.createElement('div'); row.className='brow'; row.dataset.slug=slug; row.style.setProperty('--tc',su.c);
     row.innerHTML='<img src="assets/lw/shelf/book_'+slug+'.webp" alt=""><span class="bn">'+su.name+'</span><span class="chips"></span>';
     const chips=row.querySelector('.chips');
     const keys=su.alt?Object.keys(su.alt):BOARDKEYS.filter(k=>offers(slug,k));
     keys.forEach(k=>{
       const have=su.alt?1:(su.cover&&su.cover[k]);
-      var lbl=su.alt?su.alt[k]:BOARDLBL[k];
-      /* a chip we cannot serve is a REQUEST, not a dead option — say so on the
-         chip itself, so nobody taps it expecting content */
-      const ch=chipEl(have?lbl:lbl+'<span class="reqtag">request</span>',boards[slug]===k,()=>pickBoard(slug,k,false),have?'':'off');
-      ch.title=have?'':'We have not built this board yet — tap to request it and we will email you';
+      /* a board we have not built yet is quieter, never a dead end: choosing it
+         records a request and the line under the list says what happens next */
+      const ch=chipEl(su.alt?su.alt[k]:CHIPLBL[k],()=>pickBoard(slug,k,false),have?'':'off');
+      ch.dataset.k=k; ch.style.gridColumn=String(su.alt?3:3+BOARDKEYS.indexOf(k));
+      ch.title=have?'':'Not built yet — choose it and we will email you when it is ready';
       chips.appendChild(ch);
     });
     /* a student who does not know their board should not be stuck: "Not sure" fills
-       in the board most schools use and says so, and the answer stays one tap away */
-    if(keys.length>1&&defaultBoard(slug)) chips.appendChild(chipEl('Not sure',false,()=>pickBoard(slug,defaultBoard(slug),true)));
-    if(guess[slug]&&boards[slug]){
-      const h=document.createElement('span'); h.className='hint';
-      h.textContent='We’ve put you on '+(BOARDLBL[boards[slug]]||boards[slug])+', the board most schools use — change it any time.';
-      row.appendChild(h);
+       in the board most schools use, and the line under the list says so */
+    if(keys.length>1&&defaultBoard(slug)){
+      const ch=chipEl('Not sure',()=>pickBoard(slug,defaultBoard(slug),true)); ch.dataset.k='?'; ch.style.gridColumn='7'; chips.appendChild(ch);
     }
     bl.appendChild(row);
-    /* Foundation or Higher, asked right here for the subjects that have tiers */
-    if(TIERED.indexOf(slug)>=0&&boards[slug]&&su.cover&&su.cover[boards[slug]]){
-      const tr=document.createElement('div'); tr.className='brow tierrow'; tr.style.setProperty('--tc',su.c);
+    /* Foundation or Higher for the subjects that have tiers: the row is built now and
+       slides in the moment a board is chosen, so nothing below it jumps */
+    if(TIERED.indexOf(slug)>=0){
+      const tr=document.createElement('div'); tr.className='brow tierrow'; tr.dataset.slug=slug; tr.hidden=true; tr.style.setProperty('--tc',su.c);
       tr.innerHTML='<span class="bn">Tier</span><span class="chips"></span>';
       const tc=tr.querySelector('.chips');
-      [['higher','Higher'],['foundation','Foundation'],['unsure','Not sure']].forEach(([v,l])=>{
-        tc.appendChild(chipEl(l,tiers[slug]===v,()=>{ if(tiers[slug]===v) delete tiers[slug]; else tiers[slug]=v; persist(); renderBoards(); }));
+      [['higher','Higher'],['foundation','Foundation'],['unsure','Not sure']].forEach(([v,l],i)=>{
+        const ch=chipEl(l,()=>{ if(tiers[slug]===v) delete tiers[slug]; else tiers[slug]=v; persist(); syncBoards(); });
+        ch.dataset.t=v; ch.style.gridColumn=String(3+i); tc.appendChild(ch);
       });
-      if(tiers[slug]==='unsure'){ const h=document.createElement('span'); h.className='hint';
-        h.textContent='Most students sit Higher, so that’s what you’ll see for now. Ask your teacher and change it any time.'; tr.appendChild(h); }
       bl.appendChild(tr);
     }
   });
-  /* verdict: found vs requested */
+  syncBoards();
+}
+function syncBoards(){
+  const bl=document.getElementById('blist');
+  bl.querySelectorAll('.allrow .chip').forEach(ch=>{ const k=ch.dataset.k;
+    const all=picked.every(sl=>!offers(sl,k)||boards[sl]===k)&&picked.some(sl=>offers(sl,k));
+    ch.setAttribute('aria-pressed',String(all)); });
+  picked.forEach(slug=>{
+    const su=SUBJECTS.find(x=>x.slug===slug);
+    const row=bl.querySelector('.brow[data-slug="'+slug+'"]'); if(!row) return;
+    row.querySelectorAll('.chip').forEach(ch=>{
+      ch.setAttribute('aria-pressed',String(ch.dataset.k==='?'?false:boards[slug]===ch.dataset.k)); });
+    const tr=bl.querySelector('.tierrow[data-slug="'+slug+'"]');
+    if(tr){
+      const on=!!boards[slug]&&!!(su.cover&&su.cover[boards[slug]]);
+      if(on&&tr.hidden){ tr.hidden=false; tr.classList.remove('show'); void tr.offsetWidth; tr.classList.add('show'); }
+      else if(!on&&!tr.hidden){ tr.hidden=true; tr.classList.remove('show'); }
+      tr.querySelectorAll('.chip').forEach(ch=>ch.setAttribute('aria-pressed',String(tiers[slug]===ch.dataset.t)));
+    }
+  });
+  /* verdict: found vs requested, plus what "Not sure" did on the student's behalf */
   const chosen=picked.filter(sl=>boards[sl]);
   const hasB=sl=>{ const su=SUBJECTS.find(x=>x.slug===sl); return su.alt?!!su.alt[boards[sl]]:(su.cover&&su.cover[boards[sl]]); };
   const found=chosen.filter(hasB);
   const reqs=chosen.filter(sl=>!hasB(sl));
+  const nm=sl=>SUBJECTS.find(x=>x.slug===sl).name;
+  const join=a=>a.length>1?a.slice(0,-1).join(', ')+' and '+a[a.length-1]:a[0];
   const v=document.getElementById('verdict');
-  if(!examYear()) v.innerHTML='Choose your year above, then a board for each subject.';
-  else if(!chosen.length) v.innerHTML='Pick a board for each subject — or tap Not sure and we’ll pick the most common.';
+  let t;
+  if(!examYear()) t='Choose your year above, then a board for each subject.';
+  else if(!chosen.length) t='Pick a board for each subject — or tap Not sure and we’ll pick the most common.';
   else if(reqs.length===0 && chosen.length===picked.length)
-    v.innerHTML='<b>'+found.length+' of '+picked.length+' covered.</b> Everything you&rsquo;re studying is here.';
+    t='<b>'+found.length+' of '+picked.length+' covered.</b> Everything you&rsquo;re studying is here.';
   else{
-    let t='<b>'+found.length+' of '+picked.length+'</b> covered so far.';
-    if(reqs.length) t+=' <span class="req">'+reqs.map(sl=>{ const su=SUBJECTS.find(x=>x.slug===sl);
-      const lbl=su.alt&&su.alt[boards[sl]]?su.alt[boards[sl]]:BOARDLBL[boards[sl]];
-      return su.name+' ('+lbl+')'; }).join(', ')
-      +(reqs.length>1?' aren&rsquo;t':' isn&rsquo;t')+' available yet &mdash; we&rsquo;ll email you the moment that changes.</span>';
+    t='<b>'+found.length+' of '+picked.length+'</b> covered so far.';
+    if(reqs.length) t+=' <span class="req">'+reqs.map(sl=>nm(sl)+' ('+(BOARDLBL[boards[sl]]||boards[sl])+')').join(', ')
+      +(reqs.length>1?' aren&rsquo;t':' isn&rsquo;t')+' built yet &mdash; we&rsquo;ll email you the moment that changes.</span>';
     if(chosen.length<picked.length) t+=' '+(picked.length-chosen.length)+' still to choose.';
-    v.innerHTML=t;
   }
+  const gs=picked.filter(sl=>guess[sl]&&boards[sl]);
+  if(gs.length) t+='<br><span class="note">'+join(gs.map(nm))+(gs.length>1?' are':' is')+' on the board most schools use — change it any time.</span>';
+  const un=picked.filter(sl=>tiers[sl]==='unsure'&&boards[sl]);
+  if(un.length) t+='<br><span class="note">Higher for now in '+join(un.map(nm))+' — most students sit it. Ask your teacher and change it any time.</span>';
+  v.innerHTML=t;
   /* The year is required, not optional. Left unanswered it silently breaks the
      revision planner, the countdown and the cohort filtering — a failure the
      student cannot see and would not connect to a question they skipped. */
@@ -1606,6 +1645,7 @@ function renderBoards(){
   const needT=topicsNeeded().length>0;
   nx.innerHTML=needT?'Choose your topics &rarr;':'See my StudyVault &rarr;';
   nx.onclick=()=>{ if(needT) go('topics'); else enterDash(); };
+  renderProg('boards');
 }
 /* one focused decision per screen: flatten every needed group into steps */
 let tstep=0, TSTEP_OVR=null;
@@ -1637,14 +1677,19 @@ function renderTopics(){
     +'<span class="bn">'+su.name+'</span><span class="bd">'+(BOARDLBL[boards[st.sl]]||'')+'</span></div>'
     +'<h2 class="tq">'+st.label+(st.pick>1?' <span class="tpick">&middot; pick '+st.pick+'</span>':'')+'</h2>'
     +'<div class="chips"></div>';
+  tc.classList.remove('enter'); void tc.offsetWidth; tc.classList.add('enter');
   const chips=tc.querySelector('.chips');
-  const cur=(topics[st.sl]||{})[st.gi];
-  const sel=st.pick>1?(Array.isArray(cur)?cur:[]):cur;
+  const nx=document.getElementById('tnext'), last=tstep===steps.length-1;
+  /* a tap flips its own chip and the Next button, nothing else re-renders */
+  function syncTopic(){
+    const cur=(topics[st.sl]||{})[st.gi];
+    const sel=st.pick>1?(Array.isArray(cur)?cur:[]):cur;
+    chips.querySelectorAll('.chip').forEach(ch=>ch.setAttribute('aria-pressed',String(st.pick>1?sel.includes(ch.dataset.s):sel===ch.dataset.s)));
+    const ok=last?steps.every(stepDone):stepDone(st);
+    nx.disabled=!ok; nx.style.opacity=ok?'1':'.45';
+  }
   st.opts.forEach(o=>{
-    const ch=document.createElement('button'); ch.type='button'; ch.className='chip';
-    ch.setAttribute('aria-pressed',String(st.pick>1?sel.includes(o.s):sel===o.s));
-    ch.textContent=o.n;
-    ch.onclick=()=>{
+    const ch=chipEl(o.n,()=>{
       topics[st.sl]=topics[st.sl]||{};
       if(st.pick>1){
         let arr=Array.isArray(topics[st.sl][st.gi])?topics[st.sl][st.gi].slice():[];
@@ -1655,26 +1700,17 @@ function renderTopics(){
         if(topics[st.sl][st.gi]===o.s) delete topics[st.sl][st.gi];
         else topics[st.sl][st.gi]=o.s;
       }
-      persist();
-      renderTopics();   /* selection just selects — Next is always the user's move */
-    };
-    chips.appendChild(ch);
+      persist(); syncTopic();   /* selection just selects — Next is always the user's move */
+    });
+    ch.dataset.s=o.s; chips.appendChild(ch);
   });
   /* footer: back walks the questions, forward only when answered */
   const bk=document.getElementById('tback');
   bk.innerHTML=tstep>0?'&larr; Back':'&larr; Exam boards';
   bk.onclick=()=>{ if(tstep>0){ tstep--; renderTopics(); } else go('boards'); };
-  const nx=document.getElementById('tnext');
-  const allDone=steps.every(stepDone), last=tstep===steps.length-1;
-  if(!last){
-    nx.innerHTML='Next &rarr;';
-    nx.disabled=!stepDone(st); nx.style.opacity=stepDone(st)?'1':'.45';
-    nx.onclick=()=>{ tstep++; renderTopics(); };
-  }else{
-    nx.innerHTML='See my StudyVault &rarr;';
-    nx.disabled=!allDone; nx.style.opacity=allDone?'1':'.45';
-    nx.onclick=()=>enterDash();
-  }
+  nx.innerHTML=last?'See my StudyVault &rarr;':'Next &rarr;';
+  nx.onclick=last?()=>enterDash():()=>{ tstep++; renderTopics(); };
+  syncTopic();
 }
 /* the wizard ends INSIDE the product: the real dashboard, no sign-up gate */
 function dashUrl(){ try{ return localStorage.getItem('sv-dash-view')==='desk'?'/desk':'/classic'; }catch(e){ return '/classic'; } }
@@ -1694,6 +1730,7 @@ function renderSave(){
 }
 function go(v){
   document.body.dataset.view=v;
+  const ve=document.querySelector('.view-'+v); if(ve){ ve.classList.remove('enter'); void ve.offsetWidth; ve.classList.add('enter'); }
   renderProg(v);
   if(v==='year') renderYearView();
   if(v==='boards') renderBoards();
