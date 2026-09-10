@@ -726,12 +726,9 @@
   html.mob .devices{flex-direction:column;align-items:center;gap:26px}
   html.mob .tablet{flex:none;width:min(100%,360px);margin:0 auto}
   html.mob .tablet.pad{width:100%}
-  html.mob .tablet.pad{--vw:100%;--k:1;--vh:min(62vw,420px)}
-  html.mob .tablet.pad .tablet-body{padding:12px 14px}
+  html.mob .tablet.pad{--vw:100%;--k:1}
   html.mob .lessonlist.plated{grid-template-columns:1fr;gap:6px}
-  html.mob .tablet-body{padding:12px 10px 14px;border-radius:40px}
-  html.mob .tablet-screen{border-radius:30px}
-  html.mob .tablet{--vw:100%;--k:1;--vh:min(74vh,640px)}
+  html.mob .tablet{--vw:100%;--k:1}
   html.mob .lessonside{padding-bottom:0}
   html.mob .workbooknote{margin-left:0}
   html.mob .sec-work .shelf{padding:0 6px}
@@ -822,41 +819,30 @@
   .caserow.page .wing.wl{justify-content:flex-start}
   .caserow.page .wing.wr{justify-content:flex-end}
   /* the tablet on the shelf: walnut body, brass inner line, the lesson as its screen */
-  .tablet{position:relative;flex:0 0 268px;text-align:center}
+  /* ---- the two devices: painted frames (assets/lw/shelf/device_*.webp, line-and-wash like the lamp)
+     with the screen keyed out; the real page renders at a real device width behind the hole and
+     is scaled to fit it. Rectangles come from scripts/_device_frames.json. ---- */
+  .tablet{position:relative;flex:0 0 268px;text-align:center;--vw:360px;--k:0.6655;
+    --sl:5.376%;--st:1.866%;--sw:89.401%;--sh:96.418%}
+  .tablet.pad{flex:0 0 760px;--vw:1024px;--k:0.6907;
+    --sl:3.430%;--st:5.896%;--sw:93.064%;--sh:88.443%}
   .devices{display:flex;align-items:flex-end;justify-content:center;gap:44px;width:100%}
-  /* the tablet: landscape, camera on the long bezel, no side keys, a squarer screen */
-  .tablet.pad{flex:0 0 760px}
-  .tablet.pad .tablet-body{border-radius:30px;padding:16px 18px}
-  .tablet.pad .tablet-body::before{inset:7px;border-radius:24px}
-  .tablet.pad .tablet-body::after{display:none}
-  .tablet.pad .tablet-cam{left:auto;right:auto;top:50%;left:6px;width:7px;height:7px;margin:-3px 0 0;border-radius:50%;box-shadow:none;
-    background:radial-gradient(circle at 35% 30%,#9a8a66,#1a130c 70%)}
-  .tablet.pad .tablet-cam::after{display:none}
-  .tablet.pad .tablet-screen{border-radius:12px}
-  .tablet.pad{--vw:1024px;--vh:500px;--k:.7070}
-  .tablet.pad .tablet-screen .lf-bar{padding-top:.55rem}
-  /* the phone's screen is too narrow for the full kicker: dot + Live, and the link */
-  .tablet:not(.pad) .lf-live{font-size:0;gap:0}
-  .tablet:not(.pad) .lf-live i{margin-right:.4rem}
-  .tablet:not(.pad) .lf-live::after{content:'Live';font:600 .66rem var(--head);letter-spacing:.12em}
-  .tablet-body{position:relative;background:linear-gradient(160deg,#5b4231 0%,#3d2b1d 55%,#33241a 100%);border-radius:46px;padding:14px 12px 16px;
-    box-shadow:0 34px 54px -24px rgba(30,20,8,.7),0 4px 10px -4px rgba(30,20,8,.5),inset 0 1px 0 rgba(255,236,200,.22),inset 0 -2px 0 rgba(0,0,0,.4)}
-  .tablet-body::before{content:'';position:absolute;inset:6px;border-radius:41px;border:1.5px solid rgba(218,178,102,.55);pointer-events:none}
-  /* the phone's side keys, drawn in the same brass line */
-  .tablet-body::after{content:'';position:absolute;right:-3px;top:150px;width:3px;height:64px;border-radius:0 3px 3px 0;background:#6a5038;box-shadow:0 -90px 0 0 #6a5038,0 -46px 0 0 #6a5038}
-  /* the camera island at the top of the screen */
-  .tablet-cam{position:absolute;left:50%;top:22px;width:84px;height:22px;margin-left:-42px;border-radius:11px;z-index:2;
-    background:#1a130c;box-shadow:0 0 0 1px rgba(218,178,102,.28)}
-  .tablet-cam::after{content:'';position:absolute;right:8px;top:7px;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7f7a8f,#14101a 70%)}
-  .tablet-screen{position:relative;background:#fffdf9;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;text-align:left;
-    box-shadow:inset 0 0 0 1px rgba(40,28,12,.3)}
-  /* each screen renders the real page at a real device width (360px phone, 1024px tablet) and
-     scales it to the frame, so the page lays out as it would on the device, not as a 230px sliver */
-  .tablet{--vw:360px;--vh:480px;--k:.6778}
-  .lf-view{position:relative;overflow:hidden;width:100%;height:var(--vh);background:#faf8f5}
+  .tablet-body{position:relative;background:none;padding:0;border-radius:0;box-shadow:none}
+  .tablet-body::before,.tablet-body::after{display:none}
+  .tablet-art{position:relative;z-index:2;display:block;width:100%;height:auto;pointer-events:none;
+    filter:drop-shadow(-8px 10px 10px rgba(40,28,12,.28))}
+  .tablet-screen{position:absolute;left:var(--sl);top:var(--st);width:var(--sw);height:var(--sh);z-index:1;
+    border-radius:0;box-shadow:none;background:#fffdf9;display:flex;flex-direction:column;text-align:left;overflow:hidden}
+  /* the phone's camera island, drawn over the page where the painting keyed it out */
+  .tablet-cam{position:absolute;left:50%;top:2.1%;width:30%;height:3.3%;margin-left:-15%;border-radius:999px;z-index:3;
+    background:#1a130c;box-shadow:0 0 0 1px rgba(218,178,102,.28);pointer-events:none}
+  .tablet-cam::after{content:'';position:absolute;right:9%;top:22%;width:22%;height:56%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7f7a8f,#14101a 70%)}
+  .tablet.pad .tablet-cam{display:none}
+  .tablet-screen .lf-bar{padding:32px .8rem .45rem}
+  .tablet.pad .tablet-screen .lf-bar{padding:.55rem .9rem}
+  .lf-view{position:relative;overflow:hidden;width:100%;flex:1 1 auto;min-height:0;background:#faf8f5}
   .lf-view iframe{position:absolute;left:0;top:0;display:block;border:0;background:#faf8f5;
-    width:var(--vw);height:calc(var(--vh) / var(--k));transform:scale(var(--k));transform-origin:0 0}
-  .tablet-screen .lf-bar{padding-top:34px}   /* clear of the camera island */
+    width:var(--vw);height:calc(100% / var(--k));transform:scale(var(--k));transform-origin:0 0}
   .tablet-stand{display:none}
   .tablet::after{content:'';position:absolute;left:8%;right:8%;bottom:-6px;height:18px;z-index:-1;
     background:radial-gradient(52% 120% at 50% 10%,rgba(34,22,8,.5),rgba(34,22,8,.16) 55%,transparent 78%);filter:blur(3px)}
@@ -1050,6 +1036,7 @@
                     <a class="lf-open" id="lf-open" href="/lesson/geography-aqa/paper-1/1" target="_blank" rel="noopener">Open this lesson &rarr;</a></div>
                   <div class="lf-view"><iframe id="lessoniframe" title="A StudyVault lesson, live" allow="autoplay"></iframe></div>
                 </div>
+                <img class="tablet-art" src="assets/lw/shelf/device_phone.webp" alt="" draggable="false">
               </div>
               <div class="tablet-stand" aria-hidden="true"></div>
               <p class="lf-note" id="lf-note">Loading a lesson&hellip;</p>
@@ -1062,6 +1049,7 @@
                     <a class="lf-open" href="/lesson/music-aqa/aos1-western-classical/3" target="_blank" rel="noopener">Open this lesson &rarr;</a></div>
                   <div class="lf-view"><iframe title="A StudyVault guided-listening lesson, live" src="/lesson/music-aqa/aos1-western-classical/3?embed=1" allow="autoplay" loading="lazy"></iframe></div>
                 </div>
+                <img class="tablet-art" src="assets/lw/shelf/device_tablet.webp" alt="" draggable="false">
               </div>
             </div>
             </div>

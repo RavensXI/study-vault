@@ -121,7 +121,10 @@
       var L=LESSONS[currentKey]; if(L.practice){ if(note) note.textContent=caption(L,''); return; }
       var send=function(){ try{ frame.contentWindow.postMessage({type:'sv-embed-show',target:b.dataset.target},location.origin); }catch(e){} };
       if(ready) send(); else { var n=0, w=setInterval(function(){ if(ready||++n>60){ clearInterval(w); if(ready) send(); } },100); }
-      frame.scrollIntoView({block:'nearest'});
+      /* only scroll if the VISIBLE screen is off-screen: the iframe's own box is taller than the
+         frame it is scaled into, so scrolling the iframe itself dragged the page down */
+      var v=frame.closest('.lf-view')||frame, r=v.getBoundingClientRect();
+      if(r.top<0||r.bottom>innerHeight) v.scrollIntoView({block:'nearest',behavior:'smooth'});
     });
   });
   /* lazy: create the frame when the section approaches; then follow the picker */

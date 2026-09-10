@@ -54,6 +54,11 @@
   html.sv-embed .sv-card-hero { height: 22%; min-height: 100px; }
   html.sv-embed .sv-listening .sv-card { padding-top: .9rem; padding-bottom: .7rem; }
   html.sv-embed .sv-listening .sv-card--statement .sv-card-body { font-size: .92em; line-height: 1.5; }
+  /* the cover keeps its two columns in the tablet embed (1024px wide falls under the site's
+     stack-below-1100px rule), so the title and opening sit beside the photo, not under it */
+  html.sv-embed .sv-listening .sv-card--cover { display: grid; grid-template-columns: .9fr 1.1fr; gap: 0 1.6rem; align-content: start; }
+  html.sv-embed .sv-listening .sv-card--cover .sv-card-hero { height: 100%; min-height: 120px; max-height: 250px; }
+  html.sv-embed .sv-listening .sv-card--cover h2 { font-size: 1.3rem; margin-bottom: .5rem; }
   html.sv-embed .sv-annotated-player { padding-top: .5rem; padding-bottom: .35rem; }
   html.sv-embed .sv-ap-wrap { height: 92px; }
   html.sv-embed .sv-ap-canvas { height: 68px; margin-top: 22px; }
@@ -343,7 +348,10 @@
     var fc=el('.fc-modal-overlay'); if(fc){ var b2=fc.querySelector('.fc-modal-close'); if(b2) b2.click(); else fc.remove(); }
     var pq=el('.pq-modal'); if(pq && !pq.hidden){ var b3=pq.querySelector('.pq-close'); if(b3) b3.click(); else pq.hidden=true; }
   }
-  function go(node,block){ if(node) node.scrollIntoView({block:block||'start',behavior:'smooth'}); return !!node; }
+  /* scroll THIS document only: scrollIntoView inside an iframe also scrolls the parent page to the
+     node, and the welcome page's frame is scaled and taller than its window, so the page jumped */
+  function go(node,block){ if(!node) return false; var r=node.getBoundingClientRect(), h=innerHeight;
+    var y=scrollY+r.top-(block==='center'? Math.max(0,(h-r.height)/2) : 0); scrollTo({top:Math.max(0,y),behavior:'smooth'}); return true; }
   function waitFor(sel,ms,fn){ var t0=Date.now(); (function poll(){ var n=el(sel); if(n && n.offsetHeight>0) return fn(n); if(Date.now()-t0<ms) setTimeout(poll,120); else fn(null); })(); }
   var open=null;
   function show(target){
