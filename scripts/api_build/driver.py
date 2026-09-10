@@ -874,8 +874,14 @@ def stage_factcheck(cfg):
                       "max_uses": fc_search}] if fc_search else [])
         fc_system = FACTCHECK_SYSTEM + (
             "\n\n" + cfg["factcheck_system_extra"] if cfg.get("factcheck_system_extra") else "")
+        # Opus runs adaptive thinking, and the thinking bills against max_tokens
+        # before a single character of the findings JSON is emitted. At 8000 the
+        # Drama run lost 6 of 8 checks to stop_reason=max_tokens with an empty
+        # text block. Raise it for any unit whose lessons are long or whose
+        # source document invites close comparison.
         reqs.append({"custom_id": cid, "params": {
-            "model": MODEL_FACTCHECK, "max_tokens": 8000,
+            "model": MODEL_FACTCHECK,
+            "max_tokens": cfg.get("factcheck_max_tokens", 8000),
             "tools": fc_tools,
             "system": ([{"type": "text", "text": fc_system},
                         {"type": "text",
@@ -1022,8 +1028,11 @@ def stage_unitcheck(cfg):
                "\n\n".join(parts)))
     print("unitcheck: %d lessons, %dk chars" % (len(cids), len(user) // 1000))
     cl = client()
+    # As with stage_factcheck: Opus thinking bills against max_tokens before the
+    # findings JSON starts, and 12000 truncated the Drama unitcheck mid-object.
     with cl.messages.stream(
-        model=MODEL_FACTCHECK, max_tokens=12000,
+        model=MODEL_FACTCHECK,
+        max_tokens=cfg.get("unitcheck_max_tokens", 12000),
         system=[{"type": "text", "text": UNITCHECK_SYSTEM}],
         messages=[{"role": "user", "content": user}],
     ) as stream:

@@ -521,6 +521,10 @@ def main(play):
         "spec_md": ctx,
         "factcheck_context_doc": src,
         "factcheck_search_max": 2,
+        # Opus thinking bills against max_tokens before the findings JSON starts;
+        # 8000 truncated 6 of 8 checks on the first run.
+        "factcheck_max_tokens": 24000,
+        "unitcheck_max_tokens": 32000,
         "factcheck_system_extra": FACTCHECK_EXTRA,
         "quote_gate_corpus": gate,
         "assessment_rules_doc": rules,

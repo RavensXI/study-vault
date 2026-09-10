@@ -16,14 +16,15 @@ This script therefore MERGES rather than replaces:
 Nothing is written without --apply. Without it the script prints the audit and
 writes the report, so the drops can be read before anything changes.
 
-The Lesson Podcast entry is preserved by default. Pass --drop-stale-podcast
-after a full content rebuild: that podcast narrates the content the rebuild
-replaced, and batch_podcasts.py will not regenerate it while the entry is
-still there.
+The Lesson Podcast item is always preserved — lesson-loader.js keys the tabbed
+narration player off it. Pass --reset-stale-podcast after a full content
+rebuild to blank its URL to the documented "#" placeholder: the old audio
+narrates the content the rebuild replaced, and batch_podcasts.py will not
+regenerate it while a live URL is still there.
 
 Usage:
   python scripts/api_build/drama_media_merge.py the-empress
-  python scripts/api_build/drama_media_merge.py the-empress --apply --drop-stale-podcast
+  python scripts/api_build/drama_media_merge.py the-empress --apply --reset-stale-podcast
 """
 import argparse
 import io
@@ -43,7 +44,17 @@ from lib.supabase_client import get_client  # noqa: E402
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")
 TIMEOUT = 12
-FLOOR = 8
+FLOOR = 8      # the pipeline's minimum useful shelf
+CEILING = 10   # "quality over quantity" — stop adding once the shelf is full
+
+# A generated candidate that points at another board's specification sends an
+# AQA student to the wrong document. The model produced three of these.
+WRONG_BOARD = re.compile(
+    r"edexcel|eduqas|wjec|\bocr\b|qualifications\.pearson\.com", re.IGNORECASE)
+
+# Titles that differ only in punctuation or dash style are the same resource;
+# URL-only dedupe lets the same thing in twice under two links.
+_NORM = re.compile(r"[^a-z0-9]+")
 
 CATEGORY_ORDER = ["Podcasts", "Videos & Channels", "Movies", "TV Shows",
                   "Documentaries", "Study Tools"]
@@ -119,7 +130,7 @@ def load_candidates(play):
     return json.load(io.open(p, encoding="utf-8")) if os.path.exists(p) else {}
 
 
-def main(play, apply_changes, drop_stale_podcast=False):
+def main(play, apply_changes, reset_stale_podcast=False):
     unit_id = UNITS[play]
     drop_urls, drop_reasons, fixes = load_drops(play)
     candidates = load_candidates(play)
@@ -159,16 +170,22 @@ def main(play, apply_changes, drop_stale_podcast=False):
                 url = it.get("url")
                 if it.get("title") == "Lesson Podcast":
                     # A podcast generated from the PREVIOUS content narrates the
-                    # invented plot this rebuild exists to remove, so on a full
-                    # content rebuild it has to go. batch_podcasts.py skips any
-                    # lesson that already carries a real Lesson Podcast URL, so
-                    # removing the entry is also what lets the nightly build
-                    # regenerate it once the unit is flipped live.
-                    if drop_stale_podcast:
-                        dropped.append({"url": url, "title": "Lesson Podcast",
-                                        "why": "podcast built from the pre-rebuild content"})
-                    else:
-                        podcast_item = it
+                    # invented plot this rebuild exists to remove, so its audio
+                    # must not survive a full content rebuild. But the item
+                    # itself is a hard contract: lesson-loader.js looks for
+                    # exactly this entry to route the tabbed narration player.
+                    #
+                    # So the ITEM stays and only its URL is reset to "#", which
+                    # RELATED_MEDIA_PIPELINE.md defines as the placeholder for
+                    # "narration planned but not yet recorded". That also
+                    # unblocks regeneration: batch_podcasts.py skips a lesson
+                    # whose Lesson Podcast URL is set and is not "#".
+                    if reset_stale_podcast and url and url != "#":
+                        it = dict(it, url="#")
+                        fixed.append({"url": url, "to": "Podcasts",
+                                      "title": "Lesson Podcast (URL reset to placeholder — "
+                                               "old audio was built from the pre-rebuild content)"})
+                    podcast_item = it
                     continue
                 if not url:
                     continue
@@ -193,7 +210,10 @@ def main(play, apply_changes, drop_stale_podcast=False):
                 kept.setdefault(target, []).append(it)
 
         have = {it["url"] for items in kept.values() for it in items}
+        have_titles = {_NORM.sub("", (it.get("title") or "").lower())
+                       for items in kept.values() for it in items}
         added = []
+        rejected = []
         for cat in candidates.get(cid, []):
             name = cat.get("category")
             if name not in CATEGORY_ORDER:
@@ -202,16 +222,22 @@ def main(play, apply_changes, drop_stale_podcast=False):
                 url = it.get("url")
                 if not url or url in have or url in drop_urls:
                     continue
-                status, note = results.get(url, ("unknown", "not checked"))
-                if status != "ok":
+                title_key = _NORM.sub("", (it.get("title") or "").lower())
+                if title_key in have_titles:
+                    continue                       # same resource, different link
+                if WRONG_BOARD.search((it.get("title") or "") + " " + url):
+                    rejected.append({"url": url, "title": it.get("title"),
+                                     "why": "names a different exam board"})
                     continue
-                total = sum(len(v) for v in kept.values())
-                if total >= FLOOR and len(kept.get(name, [])) >= 3:
+                if results.get(url, ("unknown", ""))[0] != "ok":
+                    continue
+                if sum(len(v) for v in kept.values()) >= CEILING:
                     continue
                 if len(kept.get(name, [])) >= 3:
                     continue
                 kept.setdefault(name, []).append(it)
                 have.add(url)
+                have_titles.add(title_key)
                 added.append({"category": name, "url": url, "title": it.get("title")})
 
         out = []
@@ -227,8 +253,8 @@ def main(play, apply_changes, drop_stale_podcast=False):
                 out.append({"category": name, "emoji": CATEGORY_EMOJI[name],
                             "items": items})
         total = sum(len(c["items"]) for c in out)
-        report["lessons"][cid] = {"total": total, "dropped": dropped,
-                                  "fixed": fixed, "added": added}
+        report["lessons"][cid] = {"total": total, "dropped": dropped, "fixed": fixed,
+                                  "added": added, "rejected": rejected}
         flag = "" if total >= FLOOR else "   << BELOW FLOOR"
         print("  L%02d %-46s %2d items (-%d ~%d +%d)%s"
               % (n, r["title"][:46], total, len(dropped), len(fixed), len(added), flag))
@@ -238,6 +264,8 @@ def main(play, apply_changes, drop_stale_podcast=False):
             print("        FIX  [%s] %s" % (f["to"], (f["title"] or "")[:52]))
         for a in added:
             print("        ADD  [%s] %s" % (a["category"], (a["title"] or "")[:52]))
+        for x in rejected:
+            print("        SKIP %s — %s" % ((x["title"] or "")[:48], x["why"]))
         if apply_changes:
             sb.table("lessons").update({"related_media": out}).eq("id", r["id"]).execute()
 
@@ -253,8 +281,9 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("play", choices=sorted(UNITS))
     ap.add_argument("--apply", action="store_true")
-    ap.add_argument("--drop-stale-podcast", action="store_true",
-                    help="remove the Lesson Podcast entry, which was generated from the "
-                         "pre-rebuild content and would otherwise block regeneration")
+    ap.add_argument("--reset-stale-podcast", action="store_true",
+                    help="keep the Lesson Podcast item but reset its URL to the \"#\" "
+                         "placeholder, because the old audio was generated from the "
+                         "pre-rebuild content and a live URL blocks regeneration")
     a = ap.parse_args()
-    main(a.play, a.apply, a.drop_stale_podcast)
+    main(a.play, a.apply, a.reset_stale_podcast)
