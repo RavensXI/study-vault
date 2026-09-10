@@ -723,7 +723,12 @@
   html.mob .pickslot{width:100%}
   html.mob .subject-grid.embed{grid-template-columns:1fr 1fr;gap:8px}
   html.mob .lessonslot{width:100%;flex-direction:column;gap:18px}
+  html.mob .devices{flex-direction:column;align-items:center;gap:26px}
   html.mob .tablet{flex:none;width:min(100%,360px);margin:0 auto}
+  html.mob .tablet.pad{width:100%}
+  html.mob .tablet.pad .tablet-screen iframe{height:min(62vw,420px)}
+  html.mob .tablet.pad .tablet-body{padding:12px 14px}
+  html.mob .lessonlist.plated{grid-template-columns:1fr;gap:6px}
   html.mob .tablet-body{padding:12px 10px 14px;border-radius:40px}
   html.mob .tablet-screen{border-radius:30px}
   html.mob .tablet-screen iframe{height:min(74vh,640px)}
@@ -817,7 +822,23 @@
   .caserow.page .wing.wl{justify-content:flex-start}
   .caserow.page .wing.wr{justify-content:flex-end}
   /* the tablet on the shelf: walnut body, brass inner line, the lesson as its screen */
-  .tablet{position:relative;flex:0 0 392px;text-align:center}
+  .tablet{position:relative;flex:0 0 268px;text-align:center}
+  .devices{display:flex;align-items:flex-end;justify-content:center;gap:44px;width:100%}
+  /* the tablet: landscape, camera on the long bezel, no side keys, a squarer screen */
+  .tablet.pad{flex:0 0 760px}
+  .tablet.pad .tablet-body{border-radius:30px;padding:16px 18px}
+  .tablet.pad .tablet-body::before{inset:7px;border-radius:24px}
+  .tablet.pad .tablet-body::after{display:none}
+  .tablet.pad .tablet-cam{left:auto;right:auto;top:50%;left:6px;width:7px;height:7px;margin:-3px 0 0;border-radius:50%;box-shadow:none;
+    background:radial-gradient(circle at 35% 30%,#9a8a66,#1a130c 70%)}
+  .tablet.pad .tablet-cam::after{display:none}
+  .tablet.pad .tablet-screen{border-radius:12px}
+  .tablet.pad .tablet-screen iframe{height:500px}
+  .tablet.pad .tablet-screen .lf-bar{padding-top:.55rem}
+  /* the phone's screen is too narrow for the full kicker: dot + Live, and the link */
+  .tablet:not(.pad) .lf-live{font-size:0;gap:0}
+  .tablet:not(.pad) .lf-live i{margin-right:.4rem}
+  .tablet:not(.pad) .lf-live::after{content:'Live';font:600 .66rem var(--head);letter-spacing:.12em}
   .tablet-body{position:relative;background:linear-gradient(160deg,#5b4231 0%,#3d2b1d 55%,#33241a 100%);border-radius:46px;padding:14px 12px 16px;
     box-shadow:0 34px 54px -24px rgba(30,20,8,.7),0 4px 10px -4px rgba(30,20,8,.5),inset 0 1px 0 rgba(255,236,200,.22),inset 0 -2px 0 rgba(0,0,0,.4)}
   .tablet-body::before{content:'';position:absolute;inset:6px;border-radius:41px;border:1.5px solid rgba(218,178,102,.55);pointer-events:none}
@@ -829,7 +850,7 @@
   .tablet-cam::after{content:'';position:absolute;right:8px;top:7px;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7f7a8f,#14101a 70%)}
   .tablet-screen{position:relative;background:#fffdf9;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;text-align:left;
     box-shadow:inset 0 0 0 1px rgba(40,28,12,.3)}
-  .tablet-screen iframe{display:block;width:100%;border:0;background:#faf8f5;height:clamp(560px, calc(100vh / var(--z) - 330px), 760px)}
+  .tablet-screen iframe{display:block;width:100%;border:0;background:#faf8f5;height:480px}
   .tablet-screen .lf-bar{padding-top:34px}   /* clear of the camera island */
   .tablet-stand{display:none}
   .tablet::after{content:'';position:absolute;left:8%;right:8%;bottom:-6px;height:18px;z-index:-1;
@@ -837,8 +858,11 @@
   .lf-live{display:inline-flex;align-items:center;gap:.45rem;font:600 .72rem var(--head);letter-spacing:.12em;text-transform:uppercase;color:#8a6a35}
   .lf-live i{width:8px;height:8px;border-radius:50%;background:#3f8a4a;box-shadow:0 0 0 3px rgba(63,138,74,.18)}
   .lf-note{display:none}
-  .lessonslot{align-items:center;margin-bottom:26px}
-  .lessonside{padding-bottom:0}
+  .lessonslot{flex-direction:column;align-items:center;gap:22px;margin-bottom:26px}
+  .lessonside{width:100%;padding:0}
+  /* the five points run in a row under the two devices */
+  .lessonlist.plated{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding-top:0;max-width:1180px;margin:0 auto}
+  .lessonlist.plated li{font-size:.94rem}
   .workbooknote{font-size:1.35rem;margin:1.1rem 0 0 40px;color:#5a4a34}
   .lessonside.workbook .showme{opacity:.5;cursor:default}
   .lessonside.workbook .showme .go{visibility:hidden}
@@ -1013,6 +1037,7 @@
         <div class="shelf">
           <span class="wing wl"><span class="bks" data-books="@globe"></span></span>
           <div class="slot lessonslot">
+            <div class="devices">
             <div class="tablet" id="lessonframe">
               <div class="tablet-body"><span class="tablet-cam" aria-hidden="true"></span>
                 <div class="tablet-screen">
@@ -1023,6 +1048,17 @@
               </div>
               <div class="tablet-stand" aria-hidden="true"></div>
               <p class="lf-note" id="lf-note">Loading a lesson&hellip;</p>
+            </div>
+            <!-- the tablet, landscape: a guided-listening lesson with the study piece docked underneath -->
+            <div class="tablet pad">
+              <div class="tablet-body"><span class="tablet-cam" aria-hidden="true"></span>
+                <div class="tablet-screen">
+                  <div class="lf-bar"><span class="lf-live"><i></i>Guided listening &middot; GCSE Music</span>
+                    <a class="lf-open" href="/lesson/music-aqa/aos1-western-classical/3" target="_blank" rel="noopener">Open this lesson &rarr;</a></div>
+                  <iframe title="A StudyVault guided-listening lesson, live" src="/lesson/music-aqa/aos1-western-classical/3?embed=1" allow="autoplay" loading="lazy"></iframe>
+                </div>
+              </div>
+            </div>
             </div>
             <div class="lessonside" id="lessonside">
               <ul class="lessonlist plated">
