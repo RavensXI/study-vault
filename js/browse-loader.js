@@ -130,6 +130,12 @@
       { board: 'Edexcel', slug: 'psychology-edexcel' },
       { board: 'OCR', slug: 'psychology-ocr' }
     ],
+    'music': [
+      { board: 'AQA', slug: 'music-aqa' },
+      { board: 'Edexcel', slug: 'music-edexcel' },
+      { board: 'OCR', slug: 'music-ocr' },
+      { board: 'Eduqas', slug: 'music-eduqas' }
+    ],
     'french': [
       { board: 'AQA', slug: 'french-aqa' },
       { board: 'Edexcel', slug: 'french-edexcel' }
