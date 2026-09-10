@@ -563,11 +563,21 @@
   /* ---- the picker: build your shelf ---- */
   .view{display:none}
   /* the wizard's one shelf: shown on every wizard screen, hidden on the landing and sign-in */
-  .wizstage{display:none;max-width:900px;margin:1.2rem auto 0}
+  /* pinned: the bench stays at the top while the screen scrolls under it, and condenses to
+     a 60% strip once the heading has gone by, so the list keeps most of the screen */
+  .wizstage{display:none;position:sticky;top:0;z-index:30;background:var(--paper);margin:0 -32px;padding:.8rem 32px .4rem}
+  .wizsentinel{position:absolute;top:0;left:0;width:1px;height:150px;pointer-events:none;visibility:hidden}
+  .wizstage::after{content:"";position:absolute;left:0;right:0;bottom:-16px;height:16px;pointer-events:none;
+    background:linear-gradient(var(--paper),transparent)}
   body[data-view="picker"] .wizstage,body[data-view="year"] .wizstage,body[data-view="boards"] .wizstage,
   body[data-view="tier"] .wizstage,body[data-view="topics"] .wizstage,body[data-view="save"] .wizstage{display:block}
-  .wizstage .wizprog{margin-bottom:.9rem}
-  .wizstage .shelfstage{margin-top:0}
+  .wizstage .wizprog{margin-bottom:.9rem;transition:margin .42s cubic-bezier(.16,1,.3,1)}
+  .wizstage .shelfstage{margin:0 auto;height:250px;transition:height .42s cubic-bezier(.16,1,.3,1)}
+  .wizstage .stagewrap{position:relative;height:250px;transform-origin:top center;transition:transform .42s cubic-bezier(.16,1,.3,1)}
+  .wizstage.compact .shelfstage{height:150px}
+  .wizstage.compact .stagewrap{transform:scale(.6)}
+  .wizstage.compact .wizprog{margin-bottom:.5rem}
+  @media (prefers-reduced-motion:reduce){ .wizstage .shelfstage,.wizstage .stagewrap,.wizstage .wizprog{transition:none} }
   /* the bench behaves like the dashboard's: spines lift on hover, click, and the lamp clicks */
   .wizstage .bk{pointer-events:auto;cursor:pointer;outline:none;
     transition:transform .32s cubic-bezier(.34,1.4,.5,1),filter .55s ease,opacity .3s ease}
@@ -965,9 +975,10 @@
   </div>
 
   <!-- ================= THE WIZARD'S SHELF: one bench, kept between screens (same bench as the dashboard) ================= -->
+  <div class="wizsentinel" id="wizsentinel" aria-hidden="true"></div>
   <div class="wizstage" id="wizstage">
     <div class="wizprog" aria-hidden="true"></div>
-    <div class="shelfstage lit" id="stage-wiz">
+    <div class="shelfstage lit" id="stage-wiz"><div class="stagewrap">
       <div class="shelf" id="shelf-wiz"></div>
       <img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt="">
       <div class="lightwash"></div>
@@ -978,7 +989,7 @@
       <button class="lampbtn" type="button" aria-label="Reading lamp"></button>
       <div class="shelf-empty-note" id="emptynote">nothing picked yet</div>
       <div class="booktip" id="wiztip"></div>
-    </div>
+    </div></div>
   </div>
 
   <!-- ================= PICKER: BUILD YOUR SHELF ================= -->
@@ -1508,10 +1519,10 @@ function renderWizShelf(slugs,o){
 function wireWizBook(b,s){
   b.tabIndex=0; b.setAttribute('role','button'); b.setAttribute('aria-label',s.name);
   b.addEventListener('mouseenter',()=>{
-    const r=b.getBoundingClientRect(), sr=stageW.getBoundingClientRect(), z=window.__svz||1, v=document.body.dataset.view;
+    const v=document.body.dataset.view;
     const line=v==='picker'?'tap to take it off the shelf':(BOARDLBL[boards[s.slug]]||'no board yet');
     tipW.innerHTML='<span class="tn">'+s.name+'</span><span class="tb">'+line+'</span>';
-    tipW.style.left=((r.left+r.width/2-sr.left)/z)+'px'; tipW.style.top=((r.top-sr.top+4)/z)+'px'; tipW.classList.add('on'); });
+    tipW.style.left=(shelfW.offsetLeft+b.offsetLeft+b.offsetWidth/2)+'px'; tipW.style.top=(shelfW.offsetTop+b.offsetTop+4)+'px'; tipW.classList.add('on'); });
   b.addEventListener('mouseleave',()=>tipW.classList.remove('on'));
   const act=()=>{ tipW.classList.remove('on'); const v=document.body.dataset.view;
     if(v==='picker'){ togglePick(s.slug); return; }
@@ -1526,10 +1537,10 @@ function fitWizShelf(){
   const shelf=shelfW, lamp=stageW.querySelector('.lamp'); if(!shelf||!lamp||!stageW.offsetWidth) return;
   shelf.style.removeProperty('--bkh');
   const bks=shelf.querySelectorAll('.bk:not(.out)'); if(!bks.length) return;
-  const z=parseFloat(getComputedStyle(document.body).zoom)||1;   /* rects are zoomed, offsets are not */
   const last=bks[bks.length-1], footShift=Math.max(0,parseFloat(last.style.getPropertyValue('--shift'))||0);
   const natural=last.offsetLeft+last.offsetWidth+footShift; if(!natural) return;
-  const avail=(lamp.getBoundingClientRect().left-shelf.getBoundingClientRect().left)/z-6;   /* the flopped last book must clear the shade */
+  /* offsets, not client rects: unaffected by the page zoom and by the compact scale */
+  const avail=lamp.offsetLeft-shelf.offsetLeft-6;   /* the flopped last book must clear the shade */
   const f=Math.min(1,avail/natural); if(f<1) shelf.style.setProperty('--bkh',(204*f).toFixed(1)+'px');
 }
 /* the reading lamp on the wizard shelf: click it, like the dashboard's; the same remembered preference */
@@ -1543,6 +1554,28 @@ function fitWizShelf(){
     cord.classList.remove('tug'); void cord.offsetWidth; cord.classList.add('tug'); setTimeout(apply,140); });
   btn.addEventListener('mouseenter',()=>lamp.classList.add('hot')); btn.addEventListener('mouseleave',()=>lamp.classList.remove('hot'));
   addEventListener('resize',fitWizShelf);
+})();
+(function(){
+  /* condense on scroll. Driven by how much of a 150px sentinel at the very top of the page is
+     still in view (an observer hears that whatever is doing the scrolling), with hysteresis:
+     compact once the sentinel has fully gone, expand once most of it is back. Never compacts on
+     a page too short to scroll past it, since shrinking the bench would shorten the page and
+     bounce the scroll position. */
+  const stage=document.getElementById('wizstage'), sent=document.getElementById('wizsentinel'); let compact=false;
+  function set(on){ if(compact===on) return; compact=on; stage.classList.toggle('compact',on); }
+  function check(){
+    const v=document.body.dataset.view;
+    if(!stage||v==='landing'||v==='signin'||!sent){ set(false); return; }
+    const r=sent.getBoundingClientRect();            /* where the top 150px of the page is right now */
+    const de=document.documentElement, room=de.scrollHeight-de.clientHeight, z=parseFloat(getComputedStyle(document.body).zoom)||1;
+    /* compacting takes 100 canvas px off the page: only do it when the scroll cannot be clamped back into the expand zone */
+    if(!compact&&r.bottom<=0&&room>170*z) set(true);
+    else if(compact&&r.bottom>=r.height*.6) set(false);
+  }
+  window.__wizExpand=()=>set(false);
+  /* both routes call the same check, so it does not matter which one hears the scroll */
+  addEventListener('scroll',check,{passive:true});
+  if(sent&&'IntersectionObserver' in window) new IntersectionObserver(check,{threshold:[0,.2,.4,.6,.8,1]}).observe(sent);
 })();
 /* Which year the student is in, which fixes their exam year.
    This question existed on the OLD front door (index.html) and was stranded
@@ -1827,6 +1860,7 @@ function go(v){
     }
     if(v==='save') renderSave();
     if(cur==='landing'||v==='landing'||reduced) scrollTo(0,0); else scrollTo({top:0,behavior:'smooth'});
+    if(window.__wizExpand) window.__wizExpand();
   };
   /* between wizard screens the old one lifts away before the new one rises; the shelf above stays put */
   if(outEl&&cur!=='landing'&&v!=='landing'&&!reduced){ outEl.classList.add('leave'); setTimeout(()=>{ outEl.classList.remove('leave'); doSwitch(); },170); }
