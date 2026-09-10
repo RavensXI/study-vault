@@ -130,6 +130,12 @@
       { board: 'Edexcel', slug: 'psychology-edexcel' },
       { board: 'OCR', slug: 'psychology-ocr' }
     ],
+    'music': [
+      { board: 'AQA', slug: 'music-aqa' },
+      { board: 'Edexcel', slug: 'music-edexcel' },
+      { board: 'OCR', slug: 'music-ocr' },
+      { board: 'Eduqas', slug: 'music-eduqas' }
+    ],
     'french': [
       { board: 'AQA', slug: 'french-aqa' },
       { board: 'Edexcel', slug: 'french-edexcel' }
@@ -218,6 +224,10 @@
     'geology': [
       { board: 'Eduqas', slug: 'geology-eduqas' },
       { board: 'WJEC', slug: 'geology-eduqas' }
+    ],
+    'latin': [
+      { board: 'Eduqas', slug: 'latin-eduqas' },
+      { board: 'WJEC', slug: 'latin-eduqas' }
     ],
     'film-studies': [
       { board: 'Eduqas', slug: 'film-studies-eduqas' },

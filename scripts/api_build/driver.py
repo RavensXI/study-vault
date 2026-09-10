@@ -865,10 +865,25 @@ def stage_factcheck(cfg):
                    ("SCOPE FOR THIS UNIT: " + scope) if scope else "",
                    rules,
                    json.dumps(payload, ensure_ascii=False)))
+        # A build whose authority is a supplied source document (a set text, a
+        # reconciled research bank) sets factcheck_search_max low or to 0: the
+        # web is then not a competing authority, only a last resort for facts
+        # the source document does not cover.
+        fc_search = cfg.get("factcheck_search_max", 8)
+        fc_tools = ([{"type": "web_search_20260209", "name": "web_search",
+                      "max_uses": fc_search}] if fc_search else [])
+        fc_system = FACTCHECK_SYSTEM + (
+            "\n\n" + cfg["factcheck_system_extra"] if cfg.get("factcheck_system_extra") else "")
+        # Opus runs adaptive thinking, and the thinking bills against max_tokens
+        # before a single character of the findings JSON is emitted. At 8000 the
+        # Drama run lost 6 of 8 checks to stop_reason=max_tokens with an empty
+        # text block. Raise it for any unit whose lessons are long or whose
+        # source document invites close comparison.
         reqs.append({"custom_id": cid, "params": {
-            "model": MODEL_FACTCHECK, "max_tokens": 8000,
-            "tools": [{"type": "web_search_20260209", "name": "web_search", "max_uses": 8}],
-            "system": ([{"type": "text", "text": FACTCHECK_SYSTEM},
+            "model": MODEL_FACTCHECK,
+            "max_tokens": cfg.get("factcheck_max_tokens", 8000),
+            "tools": fc_tools,
+            "system": ([{"type": "text", "text": fc_system},
                         {"type": "text",
                          "text": "SOURCE TEXT (primary authority for quotations):\n\n"
                                  + read(cfg["factcheck_context_doc"]),
@@ -1013,8 +1028,11 @@ def stage_unitcheck(cfg):
                "\n\n".join(parts)))
     print("unitcheck: %d lessons, %dk chars" % (len(cids), len(user) // 1000))
     cl = client()
+    # As with stage_factcheck: Opus thinking bills against max_tokens before the
+    # findings JSON starts, and 12000 truncated the Drama unitcheck mid-object.
     with cl.messages.stream(
-        model=MODEL_FACTCHECK, max_tokens=12000,
+        model=MODEL_FACTCHECK,
+        max_tokens=cfg.get("unitcheck_max_tokens", 12000),
         system=[{"type": "text", "text": UNITCHECK_SYSTEM}],
         messages=[{"role": "user", "content": user}],
     ) as stream:
@@ -1364,6 +1382,14 @@ def stage_insert(cfg):
                      ("description", "content_html", "exam_tip_html", "conclusion_html",
                       "practice_questions", "knowledge_checks", "flashcard_questions",
                       "glossary_terms", "hero_image_caption")}
+            # Rebuild-in-place mode: the lesson rows already exist and keep their
+            # ids, slugs and hero images. Titles may change when a rebuild
+            # re-shapes the unit; the hero caption describes the photograph that
+            # is being kept, so it must NOT be overwritten.
+            if cfg.get("keep_hero_caption"):
+                patch.pop("hero_image_caption", None)
+            if cfg.get("patch_titles"):
+                patch["title"] = l["title"]
             patch["status"] = "pending_review"
             supa(cfg, "PATCH",
                  "/rest/v1/lessons?unit_id=eq.%s&lesson_number=eq.%s" % (uid[u["slug"]], l["number"]),
