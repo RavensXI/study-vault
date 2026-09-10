@@ -342,10 +342,17 @@ def cmd_generate(args):
 
         focus = build_explainer_focus(lesson, entry["subject_name"], entry["unit_name"],
                                        entry["exam_board"], entry["unit_lessons"])
+        rate_limited = False
         try:
             nlm_run(["video", "create", notebook_id, "--format", "explainer", "--focus", focus, "--confirm"], timeout=90)
         except Exception as e:
             print(f"  WARN: video create raised: {str(e)[:120]}")
+            # 9-10 Sep 2026: NLM now answers an exhausted video pool with an explicit
+            # "Rate limited ... RESOURCE_EXHAUSTED" error (36 launches on 9 Sep all got it,
+            # each one still counting against the rolling window). Once we see it, every
+            # further create in this run is wasted quota: save this job for a re-fire and stop.
+            if "RESOURCE_EXHAUSTED" in str(e) or "Rate limited" in str(e):
+                rate_limited = True
         time.sleep(2)
 
         # The notebooklm_tools CLI occasionally crashes inside its own studio_status
@@ -377,6 +384,10 @@ def cmd_generate(args):
         save_state(state)
         created += 1
         print(f"  LAUNCHED (artifact: {artifact_id})")
+        if rate_limited:
+            print("  NLM video pool exhausted (RESOURCE_EXHAUSTED) - stopping the launch loop; "
+                  "the saved job will be re-fired by --refire-missing when the window rolls.")
+            break
         time.sleep(3)
     finally:
         print(f"\n{'=' * 60}")
