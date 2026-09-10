@@ -733,7 +733,10 @@
      (fitScale sets --k from the frame's measured width) */
   html.mob .tablet.pad{--vw:1024px}
   html.mob .lessonlist.plated{grid-template-columns:1fr;gap:6px}
-  html.mob .tablet{--vw:100%;--k:1}
+  /* on phones both devices are 'photos': the phone's page renders at a large phone's width
+     (430px) and scales into the small frame (about .75), so it is not life-size next to a
+     tablet scaled to a third (fitScale sets --k from the frame's measured screen width) */
+  html.mob .tablet{--vw:430px}
   html.mob .lessonside{padding-bottom:0}
   html.mob .workbooknote{margin-left:0}
   html.mob .sec-work .shelf{padding:0 6px}
@@ -2142,8 +2145,10 @@ function fitScale(){
   const st=document.getElementById('stage-landing'), fl=document.querySelector('.casefloor');
   if(st) document.documentElement.style.setProperty('--casew',st.clientWidth+'px');
   if(fl && fl.offsetHeight) document.documentElement.style.setProperty('--floorh',fl.offsetHeight+'px');
-  const pad=document.querySelector('.tablet.pad'), padScreen=pad&&pad.querySelector('.tablet-screen');
-  if(pad) pad.style.setProperty('--k', mob && padScreen && padScreen.clientWidth ? (padScreen.clientWidth/1024).toFixed(4) : '');
+  document.querySelectorAll('.tablet').forEach(t=>{
+    const scr=t.querySelector('.tablet-screen'), base=t.classList.contains('pad')?1024:430;
+    t.style.setProperty('--k', mob && scr && scr.clientWidth ? (scr.clientWidth/base).toFixed(4) : '');
+  });
 }
 fitScale(); addEventListener('resize',fitScale);
 /* page-by-page snapping only on the landing view (the wizard views scroll freely) */
