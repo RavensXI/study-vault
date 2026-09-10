@@ -729,7 +729,9 @@
   html.mob .devices{flex-direction:column;align-items:center;gap:26px}
   html.mob .tablet{flex:none;width:min(100%,360px);margin:0 auto}
   html.mob .tablet.pad{width:100%}
-  html.mob .tablet.pad{--vw:100%;--k:1}
+  /* the tablet keeps its tablet-width page on phones too, scaled to the small frame
+     (fitScale sets --k from the frame's measured width) */
+  html.mob .tablet.pad{--vw:1024px}
   html.mob .lessonlist.plated{grid-template-columns:1fr;gap:6px}
   html.mob .tablet{--vw:100%;--k:1}
   html.mob .lessonside{padding-bottom:0}
@@ -2140,6 +2142,8 @@ function fitScale(){
   const st=document.getElementById('stage-landing'), fl=document.querySelector('.casefloor');
   if(st) document.documentElement.style.setProperty('--casew',st.clientWidth+'px');
   if(fl && fl.offsetHeight) document.documentElement.style.setProperty('--floorh',fl.offsetHeight+'px');
+  const pad=document.querySelector('.tablet.pad'), padScreen=pad&&pad.querySelector('.tablet-screen');
+  if(pad) pad.style.setProperty('--k', mob && padScreen && padScreen.clientWidth ? (padScreen.clientWidth/1024).toFixed(4) : '');
 }
 fitScale(); addEventListener('resize',fitScale);
 /* page-by-page snapping only on the landing view (the wizard views scroll freely) */
