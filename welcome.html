@@ -387,31 +387,40 @@
     color:#54401c;text-shadow:0 1px 0 rgba(255,249,226,.65);white-space:nowrap;
     background:url("assets/lw/shelf/plaque_wide.webp");background-size:100% 100%}
 
-  /* S7 — the bottom drawer: FAQ as a card catalogue */
-  .catwrap{width:640px;margin-bottom:52px}
-  .catalogue{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:14px;
-    background:linear-gradient(180deg,#4a3826,#38291a);border-radius:5px;
-    box-shadow:0 20px 40px -18px rgba(30,20,8,.55), inset 0 1px 0 rgba(255,236,200,.12)}
-  .fdrawer{position:relative;height:88px;border:0;cursor:pointer;border-radius:3px;
-    background:url("assets/lw/shelf/ledge_strip.webp") center/cover;
-    box-shadow:inset 0 0 0 2px rgba(46,32,16,.55), inset 0 2px 6px rgba(255,236,200,.14),
-      0 3px 6px rgba(25,16,6,.45);
-    transition:transform .18s var(--ease), box-shadow .18s ease}
-  .fdrawer:hover{transform:translateY(-2px)}
+  /* S7 — questions answered: a painted card catalogue (assets/lw/shelf/catalogue.webp, same
+     hand as the lamp and the devices). Each drawer is a button carrying its own slice of the
+     painting, so the open one can pull out towards you; the six labels are real text sat on
+     the painted plates (rectangles from scripts/_device_frames.json). */
+  .catwrap{width:600px;margin-bottom:40px;position:relative;z-index:2}
+  .catalogue{position:relative;display:block;padding:0;background:none;border-radius:0;box-shadow:none;
+    container-type:inline-size;filter:drop-shadow(-10px 14px 12px rgba(40,28,12,.3))}
+  .catalogue .catart{display:block;width:100%;height:auto;pointer-events:none;user-select:none}
+  .fdrawer{position:absolute;border:0;padding:0;margin:0;cursor:pointer;border-radius:4px;box-shadow:none;
+    background-repeat:no-repeat;background-image:url("assets/lw/shelf/catalogue.webp");
+    transform-origin:50% 50%;transition:transform .22s var(--ease), filter .18s ease, box-shadow .22s var(--ease)}
+  .fdrawer:hover{filter:brightness(1.06)}
   .fdrawer:focus-visible{outline:3px solid #e8c47a;outline-offset:2px}
-  .fdrawer.open{transform:translateY(3px);box-shadow:inset 0 0 0 2px rgba(46,32,16,.75),
-      inset 0 3px 10px rgba(25,16,6,.5), 0 1px 2px rgba(25,16,6,.4)}
-  .fdrawer .pull{position:absolute;left:50%;bottom:11px;width:26px;height:13px;margin-left:-13px;
-    border:3px solid #b28e46;border-top:0;border-radius:0 0 15px 15px;
-    filter:drop-shadow(0 1px 1px rgba(25,16,6,.5))}
-  .fdrawer .flabel{position:absolute;left:50%;top:13px;transform:translateX(-50%);
-    background:#f6efdc;border:2px solid #a8853f;border-radius:2px;padding:3px 11px;
-    font-family:var(--head);font-weight:600;font-size:.7rem;letter-spacing:.1em;
-    color:#46351d;white-space:nowrap}
-  .faqslot{width:400px;margin-bottom:56px;margin-left:36px}
-  .paper.index{transform:rotate(1.1deg);min-height:198px}
+  .fdrawer.open{transform:scale(1.08);filter:brightness(1.05);z-index:2;
+    box-shadow:-9px 13px 16px rgba(30,20,8,.5), 0 0 0 1px rgba(60,40,18,.55)}
+  /* the label is a real plate over the painted one: it grows with the word, the painted plate
+     is fully covered */
+  .fdrawer .flabel{position:absolute;display:flex;align-items:center;justify-content:center;transform:translateX(-50%);
+    box-sizing:border-box;padding:0 .5em;background:#f3ecd8;border-radius:2px;
+    box-shadow:0 0 0 1px rgba(92,66,30,.5), inset 0 0 0 1px rgba(255,252,240,.7);
+    font-family:var(--head);font-weight:600;font-size:clamp(.58rem,1.7cqw,.7rem);letter-spacing:.06em;
+    color:#4a3820;white-space:nowrap;line-height:1}
+  .fdrawer.open .flabel{color:#2a1c0c}
+  .faqslot{width:372px;margin-left:-38px;margin-bottom:26px;position:relative;z-index:3}
+  .paper.index{transform:rotate(2.2deg);transform-origin:0 100%;min-height:210px;padding-bottom:1.3rem;
+    box-shadow:-8px 10px 18px -6px rgba(30,20,8,.4)}
+  .paper.index::before{display:none}   /* it leans on the cabinet, it is not pinned */
   .paper.index h3{font-family:var(--hand);font-size:1.55rem;margin:0 0 .45rem;color:#3f3222}
   .paper.index p{font-family:var(--read);font-size:.96rem;color:var(--sec);line-height:1.6;margin:0}
+  .paper.index.swap{animation:cardswap .38s var(--ease)}
+  @keyframes cardswap{0%{transform:rotate(2.2deg) translateY(0);opacity:1}35%{transform:rotate(3.5deg) translateY(-14px);opacity:.2}100%{transform:rotate(2.2deg) translateY(0);opacity:1}}
+  /* the last shelf is not a full screen: the floor (last call, skirting, small print) fills
+     the rest of the viewport under it, so nothing is left to scroll past */
+  html.snappy .caserow.page.sec-schools{min-height:calc(100vh / var(--z) - 288px);justify-content:flex-end}
 
   /* the floor: last call, skirting, boards, small print */
   .floorcta{text-align:center;padding:44px 20px 36px;position:relative;z-index:2}
@@ -739,6 +748,7 @@
   html.mob .catband{height:auto;min-height:0;margin-top:10px}
   html.mob .catboards{position:static;transform:none;min-width:0;max-width:none;width:100%}
   html.mob .catwrap,html.mob .faqslot,html.mob .noticeslot,html.mob .schoolslot{width:100%;margin:0 0 22px}
+  html.mob .faqslot{margin-top:-8px}
   html.mob .paper.index,html.mob .paper.notice{transform:none}
   html.mob .floorcta{padding:28px 12px 30px}
   html.mob .planline.embed{font-size:.86rem}
@@ -874,11 +884,11 @@
     margin:0;bottom:auto;right:auto}
   .catboards .cb-head img{height:44px}
   /* the drawers + two pinned papers, one shelf */
-  .sec-schools .shelf{gap:26px}
+  .sec-schools .shelf{gap:0}
   .catwrap{width:600px}
   .faqslot{width:380px;margin-left:0}
-  .noticeslot{width:440px;margin-bottom:52px}
-  .paper.notice{transform:rotate(-1.1deg);min-height:198px}
+  .noticeslot{width:400px;margin-left:34px;margin-bottom:120px}   /* pinned to the wall above the shelf */
+  .paper.notice{transform:rotate(-1.4deg);min-height:198px}
   .paper.notice h3{font-family:var(--hand);font-size:1.7rem;font-weight:600;margin:0 0 .45rem;color:#3f3222}
   .paper.notice ul{list-style:none;margin:0 0 .5rem;padding:0}
   .paper.notice li{font-family:var(--read);font-size:.94rem;color:var(--ink);line-height:1.42;padding:.32rem 0 .32rem 26px;position:relative;border-bottom:1px solid var(--linel)}
@@ -1087,14 +1097,14 @@
           <p class="secsub">The ones people actually ask &mdash; and a note for teachers.</p></div>
         <div class="shelf">
           <span class="wing wl"><span class="bks" data-books="@pot_fern"></span></span>
-          <div class="slot catwrap"><div class="catalogue" id="faqcat"></div></div>
+          <div class="slot catwrap"><div class="catalogue" id="faqcat"><img class="catart" src="assets/lw/shelf/catalogue.webp" alt="" draggable="false"></div></div>
           <div class="slot faqslot"><div class="paper index" id="faqcard"></div></div>
           <div class="slot noticeslot">
             <div class="paper notice">
               <h3>With your school</h3>
               <ul>
                 <li>Lessons built from your own schemes of work</li>
-                <li>A class code for your department, or Google and Microsoft sign-in for the whole school</li>
+                <li>Google and Microsoft sign-in for your department, or the whole school</li>
                 <li>Progress teachers can actually see, class by class</li>
               </ul>
               <p class="teacherline">Built and run by a serving classroom teacher.</p>
@@ -1408,14 +1418,26 @@ const FAQS=[
   a:'Ask your teacher for the school sign-in. You’ll get your school’s own StudyVault, set up for your classes, and sign in with your school Google or Microsoft account.'}
 ];
 const faqcat=document.getElementById('faqcat'), faqcard=document.getElementById('faqcard');
+/* the six drawers of the painting: cell and label plate as fractions of the picture
+   (scripts/gen_catalogue.py measures the plates; the cells are thirds and halves round them) */
+const DRAWERS=[{"l":0.04,"t":0.1,"w":0.3,"h":0.39,"pl":0.3373,"pt":0.2221,"pw":0.3284,"ph":0.2009},{"l":0.35,"t":0.1,"w":0.3,"h":0.39,"pl":0.3358,"pt":0.2221,"pw":0.3284,"ph":0.2009},{"l":0.661,"t":0.1,"w":0.3,"h":0.39,"pl":0.3361,"pt":0.2221,"pw":0.3284,"ph":0.2009},{"l":0.04,"t":0.49,"w":0.3,"h":0.39,"pl":0.3373,"pt":0.2375,"pw":0.3284,"ph":0.2009},{"l":0.35,"t":0.49,"w":0.3,"h":0.39,"pl":0.3384,"pt":0.2375,"pw":0.3258,"ph":0.2009},{"l":0.661,"t":0.49,"w":0.3,"h":0.39,"pl":0.3361,"pt":0.2375,"pw":0.3284,"ph":0.2009}];
+let faqOpen=-1;
 function openDrawer(i){
-  faqcat.querySelectorAll('.fdrawer').forEach((d,j)=>d.classList.toggle('open',i===j));
-  faqcard.innerHTML='<h3>'+FAQS[i].q+'</h3><p>'+FAQS[i].a+'</p>';
+  if(i===faqOpen) return; faqOpen=i;
+  faqcat.querySelectorAll('.fdrawer').forEach((d,j)=>{ d.classList.toggle('open',i===j); d.setAttribute('aria-expanded',i===j?'true':'false'); });
+  const fill=()=>{ faqcard.innerHTML='<h3>'+FAQS[i].q+'</h3><p>'+FAQS[i].a+'</p>'; };
+  if(!faqcard.innerHTML){ fill(); return; }
+  faqcard.classList.remove('swap'); void faqcard.offsetWidth; faqcard.classList.add('swap');
+  setTimeout(fill,130); setTimeout(()=>faqcard.classList.remove('swap'),420);
 }
 FAQS.forEach((f,i)=>{
+  const c=DRAWERS[i], pc=v=>(v*100).toFixed(2)+'%';
   const d=document.createElement('button'); d.type='button'; d.className='fdrawer';
-  d.setAttribute('aria-label',f.q);
-  d.innerHTML='<span class="flabel">'+f.k+'</span><span class="pull"></span>';
+  d.setAttribute('aria-label',f.q); d.setAttribute('aria-controls','faqcard');
+  /* the button shows the same slice of the painting it covers, so it can pull out */
+  d.style.cssText='left:'+pc(c.l)+';top:'+pc(c.t)+';width:'+pc(c.w)+';height:'+pc(c.h)+
+    ';background-size:'+pc(1/c.w)+' '+pc(1/c.h)+';background-position:'+pc(c.l/(1-c.w))+' '+pc(c.t/(1-c.h));
+  d.innerHTML='<span class="flabel" style="left:'+pc(c.pl+c.pw/2)+';top:'+pc(c.pt)+';min-width:'+pc(c.pw)+';height:'+pc(c.ph)+'">'+f.k+'</span>';
   d.addEventListener('click',()=>openDrawer(i));
   faqcat.appendChild(d);
 });
