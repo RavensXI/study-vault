@@ -631,6 +631,40 @@
   .stepcard .chips{margin-left:0;justify-content:center;gap:9px}
   .stepcard .chip{font-size:.88rem;padding:.58rem .85rem}
   .savecard{max-width:400px;margin:1.5rem auto 0}
+  /* ============ WIZARD ROUND 4 (10 Sep 2026, after the Cognito walk-through) ============
+     One tap per screen where a tap is enough; the year on its own screen; boards, tier and
+     "not sure" answered in the row, never on a later page; a progress strip so the student
+     always knows how much is left. */
+  body[data-view="year"] .view-year{display:block}
+  .wizprog{display:flex;gap:6px;max-width:300px;margin:0 auto 1.05rem}
+  .wizprog span{flex:1;height:5px;border-radius:2px;background:var(--linel)}
+  .wizprog span.done{background:var(--ink)}
+  .wizprog span.cur{background:var(--ink);opacity:.5}
+  .ylist{max-width:520px;margin:1.6rem auto 0;display:flex;flex-direction:column;gap:10px}
+  .ychoice{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;background:var(--card);
+    border:1px solid var(--line);border-radius:4px;padding:.95rem 1.1rem;cursor:pointer;font-family:var(--head);
+    text-align:left;color:inherit;transition:border-color .15s,box-shadow .15s}
+  .ychoice:hover{border-color:#b9a98c}
+  .ychoice[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 3px rgba(40,28,12,.12)}
+  .ychoice b{font-family:var(--read);font-size:1.05rem;font-weight:600}
+  .ychoice small{display:block;color:var(--sec);font-size:.84rem;margin-top:2px}
+  .ychoice .arr{color:var(--mut);font-size:1.15rem;flex:none}
+  .sfilter{display:block;max-width:420px;width:100%;margin:1.3rem auto -.5rem;font:inherit;font-size:.92rem;
+    padding:.6rem .85rem;border:1px solid var(--line);border-radius:4px;background:var(--card);color:inherit}
+  .sfilter:focus{outline:none;border-color:#b9a98c}
+  .scard[hidden]{display:none}
+  .sgrid-none{grid-column:1/-1;text-align:center;color:var(--mut);font-size:.9rem;padding:1.2rem 0}
+  .yline{text-align:center;font-size:.9rem;color:var(--sec);margin:1.1rem 0 .7rem}
+  .yline b{color:var(--ink)}
+  .yline .backlink{font-size:.84rem;margin-left:.45rem}
+  .allrow{--tc:var(--ink);padding-bottom:.75rem;margin-bottom:.35rem;border-bottom:1px dashed var(--line)}
+  .allrow .bn{min-width:0}
+  .allrow small,.brow .hint{display:block;font-size:.76rem;color:var(--mut);font-family:var(--head);font-weight:400;margin-top:3px}
+  .brow .hint{flex-basis:100%;text-align:right;margin-top:-2px}
+  .brow.tierrow{border-top:none;padding-top:.05rem}
+  .brow.tierrow .bn{font-family:var(--head);font-size:.72rem;font-weight:600;color:var(--mut);letter-spacing:.07em;
+    text-transform:uppercase;padding-left:50px}
+  @media (max-width:640px){ .brow.tierrow .bn{padding-left:0} .brow .hint{text-align:left} }
   @media (max-width:640px){ .brow{flex-wrap:wrap} .chips{margin-left:50px} }
   .shelf-empty-note{position:absolute;left:50%;bottom:70px;transform:translateX(-50%);z-index:2;
     font-family:var(--hand);font-size:1.25rem;color:var(--mut);pointer-events:none;transition:opacity .3s}
@@ -790,7 +824,7 @@
             <div class="subject-grid embed" id="sgrid-home" aria-label="Pick your subjects"></div>
             <div class="picker-foot embed">
               <span class="picker-count" id="pcount-home">No subjects yet</span>
-              <button class="cta" id="pnext-home" disabled style="opacity:.45" onclick="go('boards')">Choose exam boards &rarr;</button>
+              <button class="cta" id="pnext-home" disabled style="opacity:.45" onclick="go('year')">Continue &rarr;</button>
             </div>
             <p class="planline embed">Next: your boards and your exam year. Put those in once and the planner fills your
               run-in for you, in 25-minute sittings &mdash; free, no account needed.</p>
@@ -895,6 +929,7 @@
   <!-- ================= PICKER: BUILD YOUR SHELF ================= -->
   <div class="view view-picker">
     <div class="picker-head">
+      <div class="wizprog" aria-hidden="true"></div>
       <h1>Pick your subjects.</h1>
       <p>Maths, English and Science are already ticked &mdash; everyone sits those.
         Add your options; most students pick four. You can change these any time.</p>
@@ -911,18 +946,33 @@
       <div class="shelf-empty-note" id="emptynote">nothing picked yet</div>
     </div>
 
+    <input class="sfilter" id="sfilter" type="search" placeholder="Search subjects&hellip;" aria-label="Search subjects" autocomplete="off">
     <div class="subject-grid" id="sgrid"></div>
 
     <div class="picker-foot">
       <button class="backlink" onclick="pickerBack()">&larr; Back</button>
       <span class="picker-count" id="pcount">No subjects yet</span>
-      <button class="cta" id="pnext" disabled style="opacity:.45" onclick="go('boards')">Choose exam boards &rarr;</button>
+      <button class="cta" id="pnext" disabled style="opacity:.45" onclick="go('year')">Continue &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ================= YEAR: one tap, sets the exam summer ================= -->
+  <div class="view view-year">
+    <div class="picker-head">
+      <div class="wizprog" aria-hidden="true"></div>
+      <h1>Which year are you in?</h1>
+      <p>This sets your exam summer &mdash; the countdown and the planner are built from it.</p>
+    </div>
+    <div class="ylist" id="ylist"></div>
+    <div class="picker-foot">
+      <button class="backlink" onclick="go('picker')">&larr; Subjects</button>
     </div>
   </div>
 
   <!-- ================= EDITIONS: one board per book ================= -->
   <div class="view view-boards">
     <div class="picker-head">
+      <div class="wizprog" aria-hidden="true"></div>
       <h1>Which exam board?</h1>
       <p>Tell us the board for each subject &mdash; that decides the exact spec you&rsquo;ll see.</p>
     </div>
@@ -941,7 +991,7 @@
     <p class="verdict" id="verdict"></p>
 
     <div class="picker-foot">
-      <button class="backlink" onclick="go('picker')">&larr; Subjects</button>
+      <button class="backlink" onclick="go('year')">&larr; Year</button>
       <button class="cta" id="bnext" disabled style="opacity:.45" onclick="enterDash()">See my StudyVault &rarr;</button>
     </div>
   </div>
@@ -949,6 +999,7 @@
   <!-- ================= TOPICS: the options your school chose ================= -->
   <div class="view view-topics">
     <div class="picker-head">
+      <div class="wizprog" aria-hidden="true"></div>
       <h1>Choose your topics.</h1>
       <p>Some subjects have options your school chose &mdash; History topics, set texts, religions.
         One quick question at a time.</p>
@@ -1049,7 +1100,7 @@ const SUBJECTS=[
  {slug:'media',  name:'Media Studies',      c:'#6b4f63', cover:{aqa:1}},
  {slug:'film',   name:'Film Studies',       c:'#4a4a52', cover:{eduqas:1}},
  {slug:'drama',  name:'Drama',              c:'#8d3f4c', cover:{aqa:1}},
- {slug:'music',  name:'Music',              c:'#446272', cover:{aqa:1}},
+ {slug:'music',  name:'Music',              c:'#446272', cover:{aqa:1,edexcel:1,ocr:1,eduqas:1}},
  {slug:'mtech',  name:'Music Technology',   c:'#4c5480', cover:{}, alt:{ncfe:'NCFE'}},
  {slug:'dt',     name:'Design & Technology',c:'#8a713b', cover:{aqa:1,edexcel:1,eduqas:1}},
  {slug:'eng',    name:'Engineering',        c:'#5a6068', cover:{aqa:1,eduqas:1}},
@@ -1202,15 +1253,44 @@ buildGrid(document.getElementById('sgrid-home'));
 function togglePick(slug){
   const i=picked.indexOf(slug);
   if(i>=0) picked.splice(i,1); else picked.push(slug);
+  /* Combined and Triple are the same course at two sizes: a student sits one or the
+     other, never both. Picking one quietly lets go of the other (10 Sep 2026). */
+  if(i<0&&(slug==='science'||slug==='triple')){
+    const other=slug==='science'?'triple':'science', j=picked.indexOf(other);
+    if(j>=0){ picked.splice(j,1); delete boards[other]; delete topics[other]; delete tiers[other]; delete guess[other]; }
+  }
   renderPickerShelf(i<0?slug:null);
   document.querySelectorAll('.scard').forEach(c=>c.setAttribute('aria-pressed',String(picked.includes(c.dataset.slug))));
   const n=picked.length;
   ['pcount','pcount-home'].forEach(id=>{ const pc=document.getElementById(id); if(pc) pc.textContent=n===0?'No subjects yet':n+' subject'+(n>1?'s':'')+' selected'; });
   ['pnext','pnext-home'].forEach(id=>{ const nx=document.getElementById(id); if(nx){ nx.disabled=n===0; nx.style.opacity=n===0?'.45':'1'; } });
   const en=document.getElementById('emptynote'); if(en) en.style.opacity=n===0?'1':'0';
-  if(!picked.includes(slug)){ delete boards[slug]; delete topics[slug]; }   /* un-picking a book drops its edition + topics */
+  if(!picked.includes(slug)){ delete boards[slug]; delete topics[slug]; delete tiers[slug]; delete guess[slug]; }   /* un-picking a book drops its edition + topics */
   persist();
 }
+/* the picker's search box: 40 books is a lot to scan on a phone */
+(function(){
+  const inp=document.getElementById('sfilter'), grid=document.getElementById('sgrid');
+  if(!inp||!grid) return;
+  const ALIAS={maths:'mathematics',lang:'english',lit:'english',science:'combined biology chemistry physics',
+    triple:'separate biology chemistry physics',geog:'geography',cs:'computing coding programming',pe:'sport',
+    psych:'psychology',rs:'re religious education philosophy ethics',socio:'sociology',econ:'economics',
+    stats:'statistics',dt:'design technology',eng:'engineering',it:'ict computing',astro:'space',
+    classics:'classical civilisation ancient greece rome',food:'food nutrition cooking',hosp:'hospitality catering',
+    hsc:'health social care',mtech:'music technology',film:'film studies',media:'media studies'};
+  inp.addEventListener('input',()=>{
+    const q=inp.value.trim().toLowerCase(); let n=0;
+    grid.querySelectorAll('.scard').forEach(c=>{
+      const s=SUBJECTS.find(x=>x.slug===c.dataset.slug);
+      const hay=(s.name+' '+(ALIAS[s.slug]||'')).toLowerCase();
+      const hit=!q||hay.indexOf(q)>=0; c.hidden=!hit; if(hit) n++;
+    });
+    let none=grid.querySelector('.sgrid-none');
+    if(!n){ if(!none){ none=document.createElement('div'); none.className='sgrid-none'; grid.appendChild(none); }
+      none.textContent='No subject matches “'+inp.value.trim()+'” — tell us and we’ll build it.'; }
+    else if(none) none.remove();
+  });
+})();
 function renderPickerShelf(newSlug){
   shelfP.innerHTML=''; shelfP.appendChild(bookendEl());
   const n=picked.length;
@@ -1357,6 +1437,27 @@ function topicsFor(sl){ return TOPICS[sl]&&boards[sl]?TOPICS[sl][boards[sl]]||nu
 function topicsNeeded(){ return picked.filter(sl=>topicsFor(sl)); }
 let boards={};   /* slug -> board key; a key the board doesn't offer = a request */
 let topics={};   /* slug -> {groupIndex: choice slug} for subjects with another level */
+let tiers={};    /* slug -> 'higher' | 'foundation' | 'unsure' for the tiered subjects */
+let guess={};    /* slug -> true when the board was our "most common" default, not the student's answer */
+/* subjects sat at two tiers: the answer changes which practice questions and which
+   lesson tier the student sees, so it is asked here and written to studyvault-tiers
+   (the key every lesson and practice page already reads) */
+const TIERED=['maths','science','triple','french','spanish','german'];
+const TIERSLUG={maths:{aqa:'maths-aqa',edexcel:'maths-edexcel',ocr:'maths-ocr',eduqas:'maths-eduqas'},
+  science:{aqa:'science-aqa',edexcel:'science-edexcel',ocr:'science-ocr'},
+  triple:{aqa:'separate-sciences',edexcel:'separate-sciences-edexcel',ocr:'separate-sciences-ocr'},
+  french:{aqa:'french-aqa',edexcel:'french-edexcel'},spanish:{aqa:'spanish-aqa',edexcel:'spanish-edexcel'},
+  german:{aqa:'german-aqa',edexcel:'german-edexcel'}};
+/* "Not sure" picks the board most schools use for that subject (JCQ entries), so
+   nobody is stuck at a question they cannot answer; the row says so and the dashboard
+   can nudge later. Maths is the one subject where Edexcel leads. */
+function defaultBoard(slug){
+  const su=SUBJECTS.find(x=>x.slug===slug); if(!su) return null;
+  if(su.alt) return Object.keys(su.alt)[0];
+  const order=slug==='maths'?['edexcel','aqa','ocr','eduqas']:['aqa','edexcel','ocr','eduqas'];
+  return order.find(k=>su.cover&&su.cover[k])||null;
+}
+function offers(slug,k){ const o=BOARD_OFFERS[slug]; return o?o.indexOf(k)>=0:true; }
 
 function renderShelfInto(el,slugs){
   el.innerHTML=''; el.appendChild(bookendEl());
@@ -1375,53 +1476,105 @@ function renderShelfInto(el,slugs){
    svExamYearBase() in index.html so both front doors agree. */
 function examYearBase(){ const n=new Date(); return n.getMonth()>=6?n.getFullYear()+1:n.getFullYear(); }
 function examYear(){ const y=parseInt(localStorage.getItem('studyvault-exam-year')||'',10); return y||null; }
-function renderYearRow(host){
+/* the year is one tap on its own screen: it is required (the planner, the countdown
+   and the cohort gate all hang off it) and it used to hide as a row above the boards */
+function renderYearView(){
   const base=examYearBase(), cur=examYear();
-  const row=document.createElement('div'); row.className='brow yrow';
-  row.innerHTML='<span class="bn">Which year are you in?</span><span class="chips"></span>';
-  const chips=row.querySelector('.chips');
-  [{l:'Year 11',y:base},{l:'Year 10',y:base+1}].forEach(o=>{
-    const ch=document.createElement('button'); ch.type='button';
-    ch.className='chip'; ch.setAttribute('aria-pressed',String(cur===o.y));
-    ch.innerHTML=o.l+' <span class="reqtag">exams '+o.y+'</span>';
-    ch.onclick=()=>{ localStorage.setItem('studyvault-exam-year',String(o.y)); persist(); renderBoards(); };
-    chips.appendChild(ch);
+  const host=document.getElementById('ylist'); host.innerHTML='';
+  [{l:'Year 11',y:base,n:'Exams this coming summer'},{l:'Year 10',y:base+1,n:'Exams the summer after next'},
+   {l:'Year 9',y:base+2,n:'Just starting your GCSE courses'}].forEach(o=>{
+    const b=document.createElement('button'); b.type='button'; b.className='ychoice';
+    b.setAttribute('aria-pressed',String(cur===o.y));
+    b.innerHTML='<span><b>'+o.l+'</b><small>'+o.n+' &middot; exams summer '+o.y+'</small></span><span class="arr">&rarr;</span>';
+    b.onclick=()=>{ localStorage.setItem('studyvault-exam-year',String(o.y)); persist(); go('boards'); };
+    host.appendChild(b);
   });
-  host.appendChild(row);
+}
+/* the strip at the top of every wizard screen: how many taps are left */
+function renderProg(view){
+  const steps=['picker','year','boards'].concat(topicsNeeded().length?['topics']:[]);
+  const at=steps.indexOf(view);
+  document.querySelectorAll('.wizprog').forEach(el=>{
+    el.innerHTML=steps.map((s,i)=>'<span class="'+(i<at?'done':(i===at?'cur':''))+'"></span>').join('');
+  });
+}
+function pickBoard(slug,k,isGuess){
+  if(!isGuess&&boards[slug]===k){ delete boards[slug]; delete guess[slug]; }
+  else{ boards[slug]=k; if(isGuess) guess[slug]=true; else delete guess[slug]; }
+  /* English Language and English Literature are sat with the same board
+     in almost every school, so choosing one answers the other */
+  const twin=slug==='lang'?'lit':(slug==='lit'?'lang':null);
+  if(twin&&picked.indexOf(twin)>=0&&offers(twin,k)){
+    if(boards[slug]){ boards[twin]=k; if(isGuess) guess[twin]=true; else delete guess[twin]; }
+    else{ delete boards[twin]; delete guess[twin]; }
+  }
+  persist(); renderBoards();
+}
+function chipEl(label,pressed,onclick,cls){
+  const ch=document.createElement('button'); ch.type='button'; ch.className='chip'+(cls?' '+cls:'');
+  ch.setAttribute('aria-pressed',String(!!pressed)); ch.innerHTML=label; ch.onclick=onclick; return ch;
 }
 
 function renderBoards(){
   renderShelfInto(document.getElementById('shelf-boards'),picked);
   const bl=document.getElementById('blist'); bl.innerHTML='';
-  renderYearRow(bl);
+  /* the year, already answered, stays visible and one tap from being changed */
+  const yl=document.createElement('p'); yl.className='yline';
+  yl.innerHTML=examYear()
+    ?'<b>Year '+(examYear()===examYearBase()?'11':(examYear()===examYearBase()+1?'10':'9'))+'</b> &middot; exams summer '+examYear()
+      +'<button class="backlink" type="button" onclick="go(\'year\')">change</button>'
+    :'<b>Which year are you in?</b><button class="backlink" type="button" onclick="go(\'year\')">choose</button>';
+  bl.appendChild(yl);
+  /* most schools sit one board for most subjects: set them all in one tap, then fix
+     the odd ones out. Only worth showing once there are enough rows to save taps. */
+  if(picked.length>=3){
+    const row=document.createElement('div'); row.className='brow allrow';
+    row.innerHTML='<span class="bn">Same board for everything?<small>Set them all, then change the odd ones out below.</small></span><span class="chips"></span>';
+    const chips=row.querySelector('.chips');
+    BOARDKEYS.forEach(k=>{
+      const all=picked.every(sl=>!offers(sl,k)||boards[sl]===k)&&picked.some(sl=>offers(sl,k));
+      chips.appendChild(chipEl(BOARDLBL[k],all,()=>{
+        picked.forEach(sl=>{ const su=SUBJECTS.find(x=>x.slug===sl); if(!su.alt&&offers(sl,k)){ boards[sl]=k; delete guess[sl]; } });
+        persist(); renderBoards(); }));
+    });
+    bl.appendChild(row);
+  }
   picked.forEach(slug=>{
     const su=SUBJECTS.find(x=>x.slug===slug);
     const row=document.createElement('div'); row.className='brow'; row.style.setProperty('--tc',su.c);
     row.innerHTML='<img src="assets/lw/shelf/book_'+slug+'.webp" alt=""><span class="bn">'+su.name+'</span><span class="chips"></span>';
     const chips=row.querySelector('.chips');
-    const keys=su.alt?Object.keys(su.alt)
-      :BOARDKEYS.filter(function(k){ var o=BOARD_OFFERS[slug]; return o?o.indexOf(k)>=0:true; });
+    const keys=su.alt?Object.keys(su.alt):BOARDKEYS.filter(k=>offers(slug,k));
     keys.forEach(k=>{
       const have=su.alt?1:(su.cover&&su.cover[k]);
-      const ch=document.createElement('button'); ch.type='button';
-      ch.className='chip'+(have?'':' off');
-      ch.setAttribute('aria-pressed',String(boards[slug]===k));
       var lbl=su.alt?su.alt[k]:BOARDLBL[k];
       /* a chip we cannot serve is a REQUEST, not a dead option — say so on the
          chip itself, so nobody taps it expecting content */
-      ch.innerHTML=have?lbl:lbl+'<span class="reqtag">request</span>';
-      ch.title=have?'':'We have not built this board yet \u2014 tap to request it and we will email you';
-      ch.onclick=()=>{ if(boards[slug]===k) delete boards[slug]; else boards[slug]=k;
-        /* English Language and English Literature are sat with the same board
-           in almost every school, so choosing one answers the other */
-        const twin=slug==='lang'?'lit':(slug==='lit'?'lang':null);
-        if(twin&&picked.indexOf(twin)>=0&&(BOARD_OFFERS[twin]||[]).indexOf(k)>=0){
-          if(boards[slug]) boards[twin]=k; else delete boards[twin];
-        }
-        persist(); renderBoards(); };
+      const ch=chipEl(have?lbl:lbl+'<span class="reqtag">request</span>',boards[slug]===k,()=>pickBoard(slug,k,false),have?'':'off');
+      ch.title=have?'':'We have not built this board yet — tap to request it and we will email you';
       chips.appendChild(ch);
     });
+    /* a student who does not know their board should not be stuck: "Not sure" fills
+       in the board most schools use and says so, and the answer stays one tap away */
+    if(keys.length>1&&defaultBoard(slug)) chips.appendChild(chipEl('Not sure',false,()=>pickBoard(slug,defaultBoard(slug),true)));
+    if(guess[slug]&&boards[slug]){
+      const h=document.createElement('span'); h.className='hint';
+      h.textContent='We’ve put you on '+(BOARDLBL[boards[slug]]||boards[slug])+', the board most schools use — change it any time.';
+      row.appendChild(h);
+    }
     bl.appendChild(row);
+    /* Foundation or Higher, asked right here for the subjects that have tiers */
+    if(TIERED.indexOf(slug)>=0&&boards[slug]&&su.cover&&su.cover[boards[slug]]){
+      const tr=document.createElement('div'); tr.className='brow tierrow'; tr.style.setProperty('--tc',su.c);
+      tr.innerHTML='<span class="bn">Tier</span><span class="chips"></span>';
+      const tc=tr.querySelector('.chips');
+      [['higher','Higher'],['foundation','Foundation'],['unsure','Not sure']].forEach(([v,l])=>{
+        tc.appendChild(chipEl(l,tiers[slug]===v,()=>{ if(tiers[slug]===v) delete tiers[slug]; else tiers[slug]=v; persist(); renderBoards(); }));
+      });
+      if(tiers[slug]==='unsure'){ const h=document.createElement('span'); h.className='hint';
+        h.textContent='Most students sit Higher, so that’s what you’ll see for now. Ask your teacher and change it any time.'; tr.appendChild(h); }
+      bl.appendChild(tr);
+    }
   });
   /* verdict: found vs requested */
   const chosen=picked.filter(sl=>boards[sl]);
@@ -1429,8 +1582,8 @@ function renderBoards(){
   const found=chosen.filter(hasB);
   const reqs=chosen.filter(sl=>!hasB(sl));
   const v=document.getElementById('verdict');
-  if(!examYear()) v.innerHTML='Tell us which year you are in, and the board for each subject.';
-  else if(!chosen.length) v.innerHTML='Pick a board for each subject.';
+  if(!examYear()) v.innerHTML='Choose your year above, then a board for each subject.';
+  else if(!chosen.length) v.innerHTML='Pick a board for each subject — or tap Not sure and we’ll pick the most common.';
   else if(reqs.length===0 && chosen.length===picked.length)
     v.innerHTML='<b>'+found.length+' of '+picked.length+' covered.</b> Everything you&rsquo;re studying is here.';
   else{
@@ -1541,6 +1694,8 @@ function renderSave(){
 }
 function go(v){
   document.body.dataset.view=v;
+  renderProg(v);
+  if(v==='year') renderYearView();
   if(v==='boards') renderBoards();
   if(v==='topics'){
     const ss=topicSteps(), fu=ss.findIndex(s=>!stepDone(s));
@@ -1560,9 +1715,18 @@ function persist(){ if(RESTORING) return; try{
     const su=SUBJECTS.find(x=>x.slug===sl), g=topicsFor(sl), names=[];
     if(g) g.forEach((gr,gi)=>{ const v=(topics[sl]||{})[gi]; if(!v) return;
       (Array.isArray(v)?v:[v]).forEach(sv=>{ const o=gr[2].find(x=>x.s===sv); if(o) names.push(o.n); }); });
-    meta[sl]={board:su.alt&&su.alt[boards[sl]]?su.alt[boards[sl]]:(BOARDLBL[boards[sl]]||''),topics:names};
+    meta[sl]={board:su.alt&&su.alt[boards[sl]]?su.alt[boards[sl]]:(BOARDLBL[boards[sl]]||''),topics:names,
+      tier:tiers[sl]||null,guessed:!!guess[sl]};
   });
-  localStorage.setItem('sv-welcome',JSON.stringify({picked:picked,boards:boards,topics:topics,meta:meta}));
+  localStorage.setItem('sv-welcome',JSON.stringify({picked:picked,boards:boards,topics:topics,meta:meta,tiers:tiers,guess:guess}));
+  /* the tier answer goes where every lesson and practice page already looks for it,
+     keyed by the real subject slug; "not sure" and unanswered both mean Higher */
+  try{
+    const st=JSON.parse(localStorage.getItem('studyvault-tiers')||'{}');
+    picked.forEach(sl=>{ const m=TIERSLUG[sl], real=m&&m[boards[sl]]; if(!real) return;
+      st[real]=tiers[sl]==='foundation'?'foundation':'higher'; });
+    localStorage.setItem('studyvault-tiers',JSON.stringify(st));
+  }catch(e){}
   /* signed in? the account mirrors every change (debounced) — the setup on
      the account is always the setup on the screen */
   clearTimeout(persist._t);
@@ -1583,7 +1747,7 @@ let firstVisit=true, RESTORING=false;
   /* boards/topics load BEFORE the pick loop, and persist() is suppressed
      while restoring — re-persisting mid-restore used to clobber them */
   RESTORING=true;
-  boards=st.boards||{}; topics=st.topics||{};
+  boards=st.boards||{}; topics=st.topics||{}; tiers=st.tiers||{}; guess=st.guess||{};
   (st.picked||[]).forEach(sl=>{ if(SUBJECTS.some(x=>x.slug===sl)) togglePick(sl); });
   RESTORING=false;
 }catch(e){ RESTORING=false; } })();
