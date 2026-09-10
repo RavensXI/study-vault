@@ -63,6 +63,7 @@
     background-repeat:no-repeat, no-repeat, repeat;
     background-position:top center, center, center top}
   .bookcase.shelfstage>*{position:relative;z-index:1}
+  .bookcase.shelfstage>.booktip{position:absolute;z-index:40}   /* the tooltip floats over the shelves; never in flow */
   .caserow{position:relative;padding:0;--bkh:158px}
   .caserow .shelf{justify-content:center;height:auto;min-height:calc(var(--bkh) + 8px);
     align-items:flex-end;padding:0 44px;gap:3px}
@@ -354,12 +355,6 @@
   .planline{font-family:var(--read);font-size:.95rem;color:var(--sec);line-height:1.55;
     margin:1.2rem auto 0;max-width:430px}
 
-  /* the quiet teacher door: a masthead-corner link, never a third door card —
-     the fold belongs to students. Scrolls to the schools shelf. */
-  .schoolslink{position:fixed;top:22px;right:30px;z-index:40;font-family:var(--head);font-weight:600;
-    font-size:.92rem;letter-spacing:.04em;color:#4a3d2c;text-decoration:none;opacity:.72;
-    transition:opacity .15s}
-  .schoolslink:hover,.schoolslink:focus-visible{opacity:1;text-decoration:underline}
 
   /* S6 — with your school: the cupboard + the pitch */
   .schoolslot{width:520px;text-align:left;margin-bottom:54px;margin-left:40px}
@@ -420,7 +415,7 @@
   @keyframes cardswap{0%{transform:rotate(2.2deg) translateY(0);opacity:1}35%{transform:rotate(3.5deg) translateY(-14px);opacity:.2}100%{transform:rotate(2.2deg) translateY(0);opacity:1}}
   /* the last shelf is not a full screen: the floor (last call, skirting, small print) fills
      the rest of the viewport under it, so nothing is left to scroll past */
-  html.snappy .caserow.page.sec-schools{min-height:calc(100vh / var(--z) - 288px);justify-content:flex-end}
+  html.snappy .caserow.page.sec-schools{min-height:calc(100vh / var(--z) - var(--floorh,288px));justify-content:flex-end}
 
   /* the floor: last call, skirting, boards, small print */
   .floorcta{text-align:center;padding:44px 20px 36px;position:relative;z-index:2}
@@ -687,7 +682,6 @@
      scales to the width, the subject grid runs two across, board chips wrap under the name. */
   html.mob body{zoom:1}
   html.mob .wrap{max-width:none;padding:0 14px 40px}
-  html.mob .view-landing>.schoolslink{display:none}
   /* the landing on phones: same wall, same books, same lamp, stacked */
   .mland{display:none}
   html.mob .view-landing .bookcase>.caserow:nth-child(-n+3){display:none}
@@ -873,6 +867,8 @@
   .catshelves{display:flex;flex-direction:column;gap:22px;--bkh:190px}
   .catrow .shelf{justify-content:center;padding:0 40px;gap:3px;min-height:calc(var(--bkh) + 8px)}
   .catrow .ledgewrap{margin-top:-12px}
+  /* the two library ledges span the whole case like every other shelf (--casew from fitScale) */
+  html:not(.mob) .catrow .ledgewrap{position:relative;width:var(--casew,100%);left:50%;transform:translateX(-50%)}
   .catrow .bookend{height:calc(var(--bkh)*1.03);margin:0 -4px 0 0}
   .catrow .bookend.mirror{margin:0 0 0 -4px}
   button.bk{cursor:pointer;pointer-events:auto;font:inherit}
@@ -905,7 +901,6 @@
 
   <!-- ================= LANDING: the bookcase IS the page ================= -->
   <div class="view view-landing">
-    <a class="schoolslink" href="#" onclick="document.querySelector('.sec-schools').scrollIntoView({behavior:'smooth'});return false">For schools</a>
     <div class="bookcase shelfstage" id="stage-landing">
 
       <div class="caserow">
@@ -1051,13 +1046,13 @@
               <div class="tablet-stand" aria-hidden="true"></div>
               <p class="lf-note" id="lf-note">Loading a lesson&hellip;</p>
             </div>
-            <!-- the tablet, landscape: a guided-listening lesson with the study piece docked underneath -->
+            <!-- the tablet, landscape: the same lesson as the phone, at tablet width (js/welcome-live.js drives both) -->
             <div class="tablet pad">
               <div class="tablet-body"><span class="tablet-cam" aria-hidden="true"></span>
                 <div class="tablet-screen">
-                  <div class="lf-bar"><span class="lf-live"><i></i>Guided listening &middot; GCSE Music</span>
-                    <a class="lf-open" href="/lesson/music-aqa/aos1-western-classical/3" target="_blank" rel="noopener">Open this lesson &rarr;</a></div>
-                  <div class="lf-view"><iframe title="A StudyVault guided-listening lesson, live" src="/lesson/music-aqa/aos1-western-classical/3?embed=1" allow="autoplay" loading="lazy"></iframe></div>
+                  <div class="lf-bar"><span class="lf-live"><i></i>The same lesson, on a tablet</span>
+                    <a class="lf-open" id="lf-open-pad" href="/lesson/geography-aqa/paper-1/1" target="_blank" rel="noopener">Open this lesson &rarr;</a></div>
+                  <div class="lf-view"><iframe id="padiframe" title="The same StudyVault lesson on a tablet, live" allow="autoplay"></iframe></div>
                 </div>
                 <img class="tablet-art" src="assets/lw/shelf/device_tablet.webp" alt="" draggable="false">
               </div>
@@ -2143,6 +2138,11 @@ function fitScale(){
   document.body.style.zoom=z; window.__svz=z;
   document.documentElement.style.setProperty('--z',z);   /* page-by-page sections are 100vh / zoom tall */
   document.documentElement.style.setProperty('--ms',mob?((cw-28)/900).toFixed(4):'1');
+  /* measured after the zoom is applied: the case's inner width (library ledges span it) and
+     the floor's height (the last shelf takes the viewport minus it) */
+  const st=document.getElementById('stage-landing'), fl=document.querySelector('.casefloor');
+  if(st) document.documentElement.style.setProperty('--casew',st.clientWidth+'px');
+  if(fl && fl.offsetHeight) document.documentElement.style.setProperty('--floorh',fl.offsetHeight+'px');
 }
 fitScale(); addEventListener('resize',fitScale);
 /* page-by-page snapping only on the landing view (the wizard views scroll freely) */
@@ -2386,6 +2386,7 @@ if(q.has('bench')){
     if(!document.documentElement.classList.contains('snappy')) return;
     const y=scrollY, T=tops().sort((a,b)=>a-b), vh=innerHeight;
     const maxY=document.documentElement.scrollHeight-vh;
+    if(T.some(v=>Math.abs(v-y)<3)) return;   /* already on a shelf top (a programmatic jump): leave it */
     let best=null;
     if(dir>0){ const ahead=T.filter(v=>v>y+2 && v<=maxY+2); if(ahead.length) best=ahead[0]; }
     else if(dir<0){ const behind=T.filter(v=>v<y-2); if(behind.length) best=behind[behind.length-1]; }

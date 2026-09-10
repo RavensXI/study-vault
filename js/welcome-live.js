@@ -56,6 +56,7 @@
   };
   var DEFAULT='geog';
   var frame=document.getElementById('lessoniframe'), note=document.getElementById('lf-note'),
+      pad=document.getElementById('padiframe'), openPad=document.getElementById('lf-open-pad'),   /* the tablet: same lesson, tablet width */
       openLink=document.getElementById('lf-open'), which=document.getElementById('lf-which'),
       side=document.getElementById('lessonside'), wbnote=document.getElementById('workbooknote');
   var currentKey=null, armed=false, lastToggled=null, ready=false;
@@ -84,6 +85,8 @@
     document.querySelectorAll('.showme[data-target]').forEach(function(b){ b.setAttribute('aria-disabled',L.practice?'true':'false'); });
     if(note){ note.classList.toggle('workbook',!!L.practice); note.textContent='Loading '+L.name+'…'; }
     frame.src=path+'?embed=1';
+    if(pad) pad.src=path+'?embed=1';
+    if(openPad) openPad.href=path;
   }
   function caption(L,title){
     if(L.practice) return L.name+' is a workbook subject — '+(title?'“'+title+'”: ':'')+'type an answer and it marks you. No narration or flashcards here; those belong to reading subjects.';
@@ -104,6 +107,7 @@
   addEventListener('message',function(e){
     if(e.origin!==location.origin) return;
     var d=e.data||{}; if(!currentKey) return; var L=LESSONS[currentKey];
+    if(pad && e.source===pad.contentWindow) return;   /* the tablet mirrors; the phone reports */
     if(d.type==='sv-embed-ready'){ ready=true; if(note) note.textContent=caption(L,d.title||''); }
     if(d.type==='sv-embed-state'){
       var t=d.target, s=STATE_NOTE[t]||{};
@@ -119,7 +123,9 @@
     b.addEventListener('click',function(){
       if(!currentKey) setFrame(lessonKey());
       var L=LESSONS[currentKey]; if(L.practice){ if(note) note.textContent=caption(L,''); return; }
-      var send=function(){ try{ frame.contentWindow.postMessage({type:'sv-embed-show',target:b.dataset.target},location.origin); }catch(e){} };
+      var send=function(){ try{ frame.contentWindow.postMessage({type:'sv-embed-show',target:b.dataset.target},location.origin); }catch(e){}
+        /* the tablet follows, except the narration: one voice, not two */
+        if(pad && b.dataset.target!=='narration'){ try{ pad.contentWindow.postMessage({type:'sv-embed-show',target:b.dataset.target},location.origin); }catch(e){} } };
       if(ready) send(); else { var n=0, w=setInterval(function(){ if(ready||++n>60){ clearInterval(w); if(ready) send(); } },100); }
       /* only scroll if the VISIBLE screen is off-screen: the iframe's own box is taller than the
          frame it is scaled into, so scrolling the iframe itself dragged the page down */
