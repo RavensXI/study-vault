@@ -13,6 +13,7 @@
  */
 (function () {
   var SEEN_KEY = 'sv-anon-welcome-seen';
+  if (window.SV_EMBED) return;                       // embedded on the landing page: no nudge
 
   // Bail if a logged-in / personalised user.
   if (typeof SchoolSession !== 'undefined' && SchoolSession.isActive()) return;

@@ -1191,6 +1191,11 @@ body[data-skin="reader"] .sv-video-dur:empty{ display:none; }  /* until the real
 @media (max-width:980px){
   body[data-skin="reader"] .lesson-body{ grid-template-columns:1fr; gap:0; }
   body[data-skin="reader"] .lesson-sidebar{ display:flex; flex-direction:column; position:static; max-height:none; height:auto; overflow:visible; margin-top:2.5rem; }
+  /* the legacy slide-out panel (main.js initSidebarPanel, <=768px) is not the
+     reader skin's model: its translateX(100%) on a static sidebar left the
+     tools dock half off the page and clipped (Tom, 8 Sep 2026). Stack it. */
+  body[data-skin="reader"].sidebar-panel-mode .lesson-sidebar{ position:static !important; transform:none !important; width:auto !important; max-width:none !important; right:auto !important; top:auto !important; bottom:auto !important; box-shadow:none !important; }
+  body[data-skin="reader"] .sidebar-panel-close, body[data-skin="reader"] .sidebar-panel-nav{ display:none !important; }
 }
 
 /* ================= LEGACY CHROME SWEEP =================
@@ -1332,7 +1337,12 @@ body[data-skin="reader"] .a11y-toolbar{
   border:1px solid var(--border-light); border-radius:4px;
   padding:.5rem .9rem; gap:.4rem; margin:.2rem 0 2.1rem;
   font-family:var(--font-ui); justify-content:space-between;
+  /* one row, always: when the column is narrower than the controls the band
+     scrolls sideways rather than wrapping onto two lines (Tom, 8 Sep 2026) */
+  flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; scrollbar-width:none;
 }
+body[data-skin="reader"] .a11y-toolbar::-webkit-scrollbar{ display:none; }
+body[data-skin="reader"] .a11y-toolbar > *{ flex:none; }
 /* "Reading" = a leading section label; the divider after it is one of the
    evenly-spaced .a11y-divider items (normalised by the harness) */
 body[data-skin="reader"] .a11y-toolbar::before{
@@ -1380,8 +1390,14 @@ body[data-skin="reader"] .a11y-bar-end{ flex:0 0 1px; align-self:center; height:
 body[data-skin="reader"] .a11y-overlay-label{
   font-family:var(--font-ui); font-weight:600; font-size:.8rem; color:var(--text-muted);
 }
-@media (max-width:640px){
+/* below ~720px the band wrapped onto two lines; one row that scrolls sideways
+   reads as one object, which is the point of the band (Tom, 8 Sep 2026) */
+@media (max-width:720px){
+  body[data-skin="reader"] .a11y-toolbar{ flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; -webkit-overflow-scrolling:touch; gap:.3rem; padding:.45rem .7rem; }
+  body[data-skin="reader"] .a11y-toolbar::-webkit-scrollbar{ display:none; }
+  body[data-skin="reader"] .a11y-toolbar > *{ flex:none; }
   body[data-skin="reader"] .a11y-toolbar::before{ display:none; }
+  body[data-skin="reader"] .a11y-bar-end{ margin-left:auto; }
 }
 
 /* FONT SIZE A-/A+ : the buttons toggle body.font-size-* classes that only

@@ -2,6 +2,7 @@
 // Captures the current page via html2canvas (lazy-loaded on first open) and sends to /api/bug-report.
 
 (function () {
+  if (window.SV_EMBED) return;   // embedded lesson (homepage-v2): no prompts
   // Skip on admin/teacher pages — the studyvault-auth session indicates they're a known role,
   // and a bug widget there clutters the UI. Students/free users have no such session.
   function isStaffPage() {

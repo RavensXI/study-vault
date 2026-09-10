@@ -794,6 +794,10 @@ function initMobileNav() {
 function initSidebarPanel() {
   var sidebar = document.querySelector('.lesson-sidebar');
   if (!sidebar) return; // Not a lesson page
+  /* the reader skin stacks the sidebar under the article on narrow screens
+     (css/reskin.css); the slide-out panel would only translate it half off
+     the page (Tom, 8 Sep 2026) */
+  if (document.body.dataset.skin === 'reader') return;
 
   var btn = document.querySelector('.mobile-menu-btn');
   var overlay = document.querySelector('.mobile-overlay');
@@ -1193,6 +1197,14 @@ function initNarration() {
     if (currentIndex < 0) loadClip(0);
     audio.play();
   }
+  /* the landing page's "Read aloud" control (embed bridge in lesson.html):
+     toggles play/pause and resolves true when now playing */
+  window.svNarrationPlay = function() {
+    if (!audio.paused) { audio.pause(); return Promise.resolve(false); }
+    if (currentIndex < 0) loadClip(0);
+    var p = audio.play();
+    return (p && p.then) ? p.then(function() { return true; }) : Promise.resolve(true);
+  };
 
   function isInViewport(el) {
     var rect = el.getBoundingClientRect();
