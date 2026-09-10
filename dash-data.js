@@ -542,12 +542,25 @@ function svDashInit(SUBJECTS, opts) {
   var subs = SUBJECTS.filter(function (su) { return su.sub; })
     .map(function (su) { return su.sub; });
   if (!subs.length) return;
-  fetch(SUPA + '/rest/v1/subjects?select=slug,settings,units(slug,name,lesson_count,sort_order)'
+  var liveCounts = {};
+  fetch(SUPA + '/rest/v1/subjects?select=slug,settings,units(id,slug,name,lesson_count,sort_order)'
       + '&school_id=is.null&slug=in.(' + subs.map(function (x) { return '"' + x + '"'; }).join(',') + ')',
       { headers: { apikey: ANON } })
     .then(function (r) { return r.json(); })
     .then(function (rows) {
-      rows.forEach(function (row) {
+      /* units.lesson_count is written at plan approval and not on review flips, so it goes
+         stale (the three new Music boards sat at 0 for weeks). Count LIVE lessons instead,
+         as browse does; the column is only the fallback. */
+      var ids = [];
+      (rows || []).forEach(function (row) { (row.units || []).forEach(function (u) { if (u.id) ids.push(u.id); }); });
+      if (!ids.length) return rows;
+      return fetch(SUPA + '/rest/v1/lessons?select=unit_id&status=eq.live&unit_id=in.(' + ids.join(',') + ')', { headers: { apikey: ANON } })
+        .then(function (r) { return r.json(); })
+        .then(function (ls) { (Array.isArray(ls) ? ls : []).forEach(function (l) { liveCounts[l.unit_id] = (liveCounts[l.unit_id] || 0) + 1; }); return rows; })
+        .catch(function () { return rows; });
+    })
+    .then(function (rows) {
+      (rows || []).forEach(function (row) {
         var su = SUBJECTS.find(function (x) { return x.sub === row.slug; });
         if (!su) return;
         // mixed-format subjects: which of these units are practice-first
@@ -556,8 +569,9 @@ function svDashInit(SUBJECTS, opts) {
           .filter(function (u) { return keepUnit(su, u.slug); });
         if (!us.length) return;
         su.units = us.map(function (u) {
-          var dn = doneIn(su.sub, u.slug).filter(function (k) { return k >= 1 && k <= (u.lesson_count || 0); });
-          return [u.name, u.lesson_count || 0, dn.length, u.slug, dn];
+          var n = (liveCounts[u.id] != null) ? liveCounts[u.id] : (u.lesson_count || 0);
+          var dn = doneIn(su.sub, u.slug).filter(function (k) { return k >= 1 && k <= n; });
+          return [u.name, n, dn.length, u.slug, dn];
         });
       });
       if (opts.onUnits) opts.onUnits();
