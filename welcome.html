@@ -726,12 +726,12 @@
   html.mob .devices{flex-direction:column;align-items:center;gap:26px}
   html.mob .tablet{flex:none;width:min(100%,360px);margin:0 auto}
   html.mob .tablet.pad{width:100%}
-  html.mob .tablet.pad .tablet-screen iframe{height:min(62vw,420px)}
+  html.mob .tablet.pad{--vw:100%;--k:1;--vh:min(62vw,420px)}
   html.mob .tablet.pad .tablet-body{padding:12px 14px}
   html.mob .lessonlist.plated{grid-template-columns:1fr;gap:6px}
   html.mob .tablet-body{padding:12px 10px 14px;border-radius:40px}
   html.mob .tablet-screen{border-radius:30px}
-  html.mob .tablet-screen iframe{height:min(74vh,640px)}
+  html.mob .tablet{--vw:100%;--k:1;--vh:min(74vh,640px)}
   html.mob .lessonside{padding-bottom:0}
   html.mob .workbooknote{margin-left:0}
   html.mob .sec-work .shelf{padding:0 6px}
@@ -833,7 +833,7 @@
     background:radial-gradient(circle at 35% 30%,#9a8a66,#1a130c 70%)}
   .tablet.pad .tablet-cam::after{display:none}
   .tablet.pad .tablet-screen{border-radius:12px}
-  .tablet.pad .tablet-screen iframe{height:500px}
+  .tablet.pad{--vw:1024px;--vh:500px;--k:.7070}
   .tablet.pad .tablet-screen .lf-bar{padding-top:.55rem}
   /* the phone's screen is too narrow for the full kicker: dot + Live, and the link */
   .tablet:not(.pad) .lf-live{font-size:0;gap:0}
@@ -850,7 +850,12 @@
   .tablet-cam::after{content:'';position:absolute;right:8px;top:7px;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7f7a8f,#14101a 70%)}
   .tablet-screen{position:relative;background:#fffdf9;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;text-align:left;
     box-shadow:inset 0 0 0 1px rgba(40,28,12,.3)}
-  .tablet-screen iframe{display:block;width:100%;border:0;background:#faf8f5;height:480px}
+  /* each screen renders the real page at a real device width (360px phone, 1024px tablet) and
+     scales it to the frame, so the page lays out as it would on the device, not as a 230px sliver */
+  .tablet{--vw:360px;--vh:480px;--k:.6778}
+  .lf-view{position:relative;overflow:hidden;width:100%;height:var(--vh);background:#faf8f5}
+  .lf-view iframe{position:absolute;left:0;top:0;display:block;border:0;background:#faf8f5;
+    width:var(--vw);height:calc(var(--vh) / var(--k));transform:scale(var(--k));transform-origin:0 0}
   .tablet-screen .lf-bar{padding-top:34px}   /* clear of the camera island */
   .tablet-stand{display:none}
   .tablet::after{content:'';position:absolute;left:8%;right:8%;bottom:-6px;height:18px;z-index:-1;
@@ -1043,7 +1048,7 @@
                 <div class="tablet-screen">
                   <div class="lf-bar"><span class="lf-live"><i></i>Live from the library</span>
                     <a class="lf-open" id="lf-open" href="/lesson/geography-aqa/paper-1/1" target="_blank" rel="noopener">Open this lesson &rarr;</a></div>
-                  <iframe id="lessoniframe" title="A StudyVault lesson, live" allow="autoplay"></iframe>
+                  <div class="lf-view"><iframe id="lessoniframe" title="A StudyVault lesson, live" allow="autoplay"></iframe></div>
                 </div>
               </div>
               <div class="tablet-stand" aria-hidden="true"></div>
@@ -1055,7 +1060,7 @@
                 <div class="tablet-screen">
                   <div class="lf-bar"><span class="lf-live"><i></i>Guided listening &middot; GCSE Music</span>
                     <a class="lf-open" href="/lesson/music-aqa/aos1-western-classical/3" target="_blank" rel="noopener">Open this lesson &rarr;</a></div>
-                  <iframe title="A StudyVault guided-listening lesson, live" src="/lesson/music-aqa/aos1-western-classical/3?embed=1" allow="autoplay" loading="lazy"></iframe>
+                  <div class="lf-view"><iframe title="A StudyVault guided-listening lesson, live" src="/lesson/music-aqa/aos1-western-classical/3?embed=1" allow="autoplay" loading="lazy"></iframe></div>
                 </div>
               </div>
             </div>
