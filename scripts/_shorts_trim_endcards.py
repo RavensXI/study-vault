@@ -94,6 +94,7 @@ def main():
     ap.add_argument("--sample", type=int, default=0, help="dry-run N spread across the bank, no upload")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--since", default="", help="only entries created on/after this date (YYYY-MM-DD)")
     args = ap.parse_args()
 
     os.makedirs(WORK, exist_ok=True)
@@ -133,7 +134,8 @@ def main():
 
     from lib.r2 import get_r2_client, VIDEO_BUCKET  # noqa: E402  (creds needed only here)
     r2 = get_r2_client()
-    todo = [e for e in manifest if r2_key(e["url"]) not in st["done"]]
+    todo = [e for e in manifest if r2_key(e["url"]) not in st["done"]
+            and (not args.since or str(e.get("created_at", ""))[:10] >= args.since)]
     if args.limit:
         todo = todo[:args.limit]
     print(f"{len(todo)} shorts to trim ({len(st['done'])} already done)", flush=True)

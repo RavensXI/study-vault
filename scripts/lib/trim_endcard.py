@@ -62,10 +62,78 @@ def _frames(path, start, span, fps, width=64):
     return [(start + i / fps, a[i]) for i in range(n)]
 
 
+GEMINI_CARD = 3.1      # the Gemini Notebook card (Sep 2026), measured across the bank
+TAIL_MIN_CARD = 1.0    # less card-like tail than this = no card (already trimmed) -> leave alone
+
+
+def _frames_full(path, fps=10, width=64):
+    """Decode the WHOLE file at a low rate: exact timestamps (index / fps), no seek
+    offset. A 70s short is ~700 tiny frames - cheap."""
+    r = _run([FFMPEG, "-v", "error", "-i", str(path), "-vf", f"fps={fps},scale={width}:-2",
+              "-f", "rawvideo", "-pix_fmt", "rgb24", "-"])
+    raw = r.stdout
+    if not raw:
+        return []
+    # the thumb height from the real aspect ratio (scale=64:-2 rounds to even);
+    # guessing it from divisibility can halve it and double the frame count
+    pr = _run([FFPROBE, "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height",
+               "-of", "csv=p=0", str(path)]).stdout.decode("utf-8", "replace").strip().split(",")
+    try:
+        w0, h0 = int(pr[0]), int(pr[1])
+        h = int(round(h0 * width / w0 / 2)) * 2
+    except (ValueError, IndexError):
+        return []
+    if len(raw) % (width * h * 3) != 0:
+        return []
+    n = len(raw) // (width * h * 3)
+    a = np.frombuffer(raw, dtype=np.uint8).reshape(n, h, width, 3).astype(np.int16)
+    return [(i / fps, a[i]) for i in range(n)]
+
+
+def _card_like(f):
+    """A card frame: flat and near-white (the Gemini Notebook card is a small logo
+    on white or pale grey-blue; content frames carry drawings, text and paper tone)."""
+    return float(f.std(axis=(0, 1)).mean()) <= FLAT_STD_MAX and float(f.mean()) >= 240
+
+
+def measure_card(path, fps=10):
+    """Seconds of card-like frames at the very end of the file (exact decode)."""
+    fr = _frames_full(path, fps)
+    n = 0
+    for _, f in reversed(fr):
+        if _card_like(f):
+            n += 1
+        else:
+            break
+    return n / fps, len(fr) / fps
+
+
+def _detect_static_tail(path, dur):
+    """The Gemini Notebook card (Sep 2026). Tom's rule: the card is a known fixed
+    length, so chop exactly that off the end of every video - no thresholds
+    deciding whether to trim. The only guard is that a card is there at all, so
+    an already-trimmed file (which ends on content) is left alone."""
+    tail, _ = measure_card(path)
+    if tail < TAIL_MIN_CARD:
+        return None, f"no card at the end ({tail:.1f}s card-like)"
+    return dur - GEMINI_CARD, None
+
+
 def detect_cut(path, dur=None):
     """Return (cut_time, endcard_len) or (None, reason)."""
     if dur is None:
         dur = duration(path)
+    cut, err = _detect_hard_cut(path, dur)
+    if cut is not None:
+        return cut, None
+    cut2, err2 = _detect_static_tail(path, dur)
+    if cut2 is not None:
+        return cut2, None
+    return None, f"{err}; static tail: {err2}"
+
+
+def _detect_hard_cut(path, dur):
+    """The original detector: a hard cut ~2.07s from the end (the NotebookLM card)."""
     prior = dur - ENDCARD
     start = max(0.0, prior - WINDOW)
     fr = _frames(path, start, (dur - start) - 0.02, 30)
@@ -149,8 +217,10 @@ def trim(path, out):
         return rep
     # verify: sane length + the new last frame IS the pre-cut content frame
     newdur = duration(out)
-    if not (1.4 <= orig - newdur <= 2.8):
-        rep["why"] = f"trimmed duration delta {orig - newdur:.2f}s out of range"
+    # the delta must match the card we detected (2.07s NLM card or ~3.0s Gemini
+    # Notebook card), allowing for the keyframe snap before the cut
+    if not (rep["endcard"] - 0.35 <= orig - newdur <= rep["endcard"] + 0.45):
+        rep["why"] = f"trimmed duration delta {orig - newdur:.2f}s out of range for a {rep['endcard']}s card"
         return rep
     got = _last_frame(out, newdur)
     if want is None or got is None:
