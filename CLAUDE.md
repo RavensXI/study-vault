@@ -14,7 +14,7 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 ## Branches
 - **`main`** — History at root level. Single-subject, no login.
 - **`platform`** (current) — multi-subject. History under `history/`. Public content, school login, password-gated admin/teacher areas.
-- **`lesson-widgets`** — the interactive widget fleet (see below). Local only, merge-ready (clean test-merge vs platform, QA evidence 29 Aug), awaiting Tom's merge decision.
+- **`lesson-widgets`** — the interactive widget fleet (see below). MERGED into platform 30 Aug 2026 (e2931afe) and live; the branch is history now.
 - **`sandbox` / `landing-wizard`** — summer redesign work. Never merge to platform/main until launch.
 
 ## Counts snapshot — 29 Aug 2026
@@ -95,13 +95,14 @@ for the rest).
 - **Podcasts**: Unity complete; free-tier backlog cleared Aug 2026; new units
   generate automatically the morning after their last lesson flips live.
 
-## Interactive widgets (branch `lesson-widgets`, unmerged)
+## Interactive widgets (LIVE since 30 Aug 2026)
 
 91 bespoke misconception-driven interactives wired into 279 lessons
 (280 strips; one lesson carries two), built Aug 2026, all field-reviewed by
 Tom. Commit-before-feedback, phone-first, mastery exit (3-in-a-row), embed
-strip → modal. Verified 29 Aug: clean test-merge vs platform, 91/91 harness
-passes, 279/279 lessons render.
+strip → modal. Merged 30 Aug (e2931afe), builds deployed under `/widgets/`
+(c6a5fa39); verified live 11 Sep: `.sv-embed-strip` renders and the modal
+mounts the widget.
 
 - Wiring: `js/widget-embed.js` (MAP of lesson-key → widget file, anchor,
   optional per-lesson `variant`). Builds in `scripts/widget_pipeline/builds/`.
@@ -110,7 +111,7 @@ passes, 279/279 lessons render.
   `scripts/widget_pipeline/harness/check.mjs`.
 - Completion credit: widget mastery earns a 10-weight "interactive" activity
   (commit 23635106; in-denominator vs bonus-credit decision open with Tom).
-- Remaining queues: 3-lesson band (48 clusters), merge decision.
+- Remaining queue: 3-lesson band (48 clusters).
 
 ## Specification Database
 
@@ -336,7 +337,7 @@ completion.
 **Dynamic loaders:** `lesson-loader.js`, `browse-loader.js`,
 `guide-loader.js` — auth check → Supabase fetch → populate → init.
 Lesson content injects into `#study-notes`. `js/widget-embed.js` places
-widget strips post-render (on `lesson-widgets` branch).
+widget strips post-render.
 
 ## Sidebar Structure
 
