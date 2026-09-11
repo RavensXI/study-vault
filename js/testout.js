@@ -36,6 +36,12 @@
   };
 
   function lessonTitle() { var h = document.getElementById('lesson-title'); return h ? h.textContent.trim() : ''; }
+  function unitName() { var u = document.getElementById('header-unit-label'); return (u && u.textContent.trim()) || window._unitName || 'this topic'; }
+  function ratingWord() {
+    var p = pathKey(); if (!p) return null;
+    var r = ((g('sv-welcome', {}).rag) || {})[p.sub + '/' + p.unit];
+    return r === 'g' ? 'confident' : r === 'a' ? 'getting there' : null;
+  }
   function nextLessonHref() {
     var a = document.getElementById('nav-next-lesson');
     if (a && a.getAttribute('href') && a.getAttribute('href') !== '#' && a.style.display !== 'none') return a.getAttribute('href');
@@ -46,21 +52,25 @@
   function build() {
     var el = document.createElement('div');
     el.className = 'sv-testout'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Quick check');
+    var word = ratingWord(), unit = unitName();
+    var why = word
+      ? 'You rated <b>' + unit + '</b> as <b>' + word + '</b>, so you can skip the full lesson if you can prove it.'
+      : 'Your plan thinks you may already know this. Prove it and skip the full lesson.';
     el.innerHTML =
       '<div class="sv-to-inner">' +
         '<div class="sv-to-head">' +
           '<div class="sv-to-kicker">Quick check</div>' +
           '<h2 class="sv-to-title"></h2>' +
-          '<p class="sv-to-deal">Four out of five on the quiz, then half marks on one exam question, and this lesson counts as covered.</p>' +
-          '<button type="button" class="sv-to-skip">Complete the full lesson instead</button>' +
+          '<p class="sv-to-deal">' + why + '</p>' +
         '</div>' +
         '<ol class="sv-to-stages">' +
-          '<li class="cur"><span class="n">1</span>Quiz</li>' +
-          '<li class="locked"><span class="n">2</span>Exam question</li>' +
+          '<li class="cur"><span class="n">1</span><span class="t">Quiz<small>4 out of 5</small></span></li>' +
+          '<li class="locked"><span class="n">2</span><span class="t">Exam question<small>at least half marks</small></span></li>' +
         '</ol>' +
         '<div class="sv-to-stage sv-to-s1"></div>' +
         '<div class="sv-to-stage sv-to-s2" hidden></div>' +
         '<div class="sv-to-verdict" hidden></div>' +
+        '<div class="sv-to-foot"><button type="button" class="sv-to-skip">Complete the full lesson instead</button></div>' +
       '</div>';
     el.querySelector('.sv-to-title').textContent = lessonTitle();
     el.querySelector('.sv-to-skip').addEventListener('click', function () { close(true); });
@@ -80,7 +90,7 @@
     /* a quiz still inside the shell is closed with it */
     var ov = shell.querySelector('.kc-overlay'); if (ov) ov.remove();
     shell.remove(); shell = null;
-    document.documentElement.classList.remove('sv-testout-open');
+    document.documentElement.classList.remove('sv-testout-open'); document.body.classList.remove('sv-testout-open');
     window.__svQuizFirst = false; window.__svTestoutStage = null;
   }
 
@@ -89,7 +99,7 @@
     var p = pathKey(); if (!p) return;
     var btn = document.getElementById('knowledge-check-btn'); if (!btn) return;
     shell = build(); document.body.appendChild(shell);
-    document.documentElement.classList.add('sv-testout-open');
+    document.documentElement.classList.add('sv-testout-open'); document.body.classList.add('sv-testout-open');
     document.addEventListener('keydown', onKey, true);
     window.__svQuizFirst = true; closedByUs = false;
     /* open the quiz, then adopt its overlay into stage 1 */
@@ -118,7 +128,7 @@
     s2.appendChild(sec); s2.hidden = false;
     window.__svTestoutStage = 'practice';
     var ta = document.getElementById('practice-answer'); if (ta) setTimeout(function () { ta.focus(); }, 300);
-    shell.querySelector('.sv-to-inner').scrollIntoView({ block: 'start' });
+    shell.scrollTop = 0;
     return true;
   };
 
