@@ -708,18 +708,32 @@ function markTabs(){ [...document.querySelectorAll('.tab4')].forEach((t,i)=>t.se
 /* tabs along the painted fore-edge (positions from _desk4_homography.py) */
 const TABPTS=[[1948,194],[1963,312],[1978,430],[1993,547],[2008,665],[2022,783],[2037,900],[2052,1018],[2067,1136]];
 const tabs=document.getElementById('tabs');
+/* the nine painted positions suit up to nine subjects; more than that (a
+   student can tick as many as they like) are spread evenly along the same
+   fore-edge line, and the tabs slim down so they never overlap. A tenth
+   subject used to read past the end of TABPTS and kill the page (11 Sep). */
+const NSUB=SUBJECTS.length, MANY=NSUB>TABPTS.length;
+const SIL=[76,77,80,81,83,86,88,92,96];
+function tabAt(i){
+  if(!MANY) return {x:TABPTS[i][0], y:TABPTS[i][1], S:SIL[i]};
+  const t=i/Math.max(1,NSUB-1), a=TABPTS[0], z=TABPTS[TABPTS.length-1];
+  return {x:Math.round(a[0]+(z[0]-a[0])*t), y:Math.round(a[1]+(z[1]-a[1])*t), S:Math.round(SIL[0]+(SIL[SIL.length-1]-SIL[0])*t)};
+}
+const TABH=MANY? Math.max(34, Math.min(60, Math.floor((TABPTS[TABPTS.length-1][1]-TABPTS[0][1])/Math.max(1,NSUB-1))-6)) : 60;
 SUBJECTS.forEach((s,i)=>{ const b=document.createElement('button'); b.className='tab4'; b.title=s.name;
-  b.style.setProperty('--tc',s.c); b.style.left=TABPTS[i][0]+'px'; b.style.top=(TABPTS[i][1]+50)+'px';
+  const P=tabAt(i);
+  b.style.setProperty('--tc',s.c); b.style.left=P.x+'px'; b.style.top=(P.y+50)+'px';
+  if(MANY){ b.style.height=TABH+'px'; b.style.fontSize=Math.max(22,Math.round(TABH*0.5))+'px'; }
   b.style.setProperty('--jit',(((i*37)%5)-2)*0.7+'deg');
   /* stagger the tabs THROUGH the painted page stack: each tab belongs to
      a page deeper in the pile, so its base emerges from a line further
      across the fore-edge band — Maths from the topmost pages by the open
      spread, RS from down by the cover. S = measured outer silhouette at
      each tab height (plate alpha); label always starts past the edge. */
-  const S=[76,77,80,81,83,86,88,92,96][i];
+  const S=P.S;
   /* min depth 26px: even the first tab sits behind a few pages, never on
      the open page itself */
-  const base=26+Math.round((i/(SUBJECTS.length-1))*(S-48));
+  const base=26+Math.round((i/Math.max(1,NSUB-1))*(S-48));
   b.style.setProperty('--outx',base+'px');
   b.style.paddingLeft=(S-base+12)+'px';
   b.textContent=s.tab; b.onclick=()=>goSubject(i); tabs.appendChild(b); });
