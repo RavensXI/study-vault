@@ -38,6 +38,7 @@
     'sv-kc-log', 'sv-practice-log', 'sv-flash-log', 'sv-flash-day',
     'sv-warmup-log', 'sv-misconception-log', 'sv-flashcard-progress',
     'sv-ko-data', 'sv-widget-done', 'sv-exit-log',
+    'sv-lesson-keys',   // lessonId -> subject/unit/n (js/strength.js joins flashcards to lessons with it)
     // shorts
     'sv_shorts_watched', 'sv_shorts_saved', 'sv_shorts_day',
     'sv_shorts_streak', 'sv-shorts-checks',

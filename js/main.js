@@ -1836,6 +1836,17 @@ function initKnowledgeCheck() {
   const unit = document.body.dataset.unit || 'unknown';
   const lesson = document.body.dataset.lesson || 'unknown';
   const storageKey = 'studyvault-kc-' + unit + '/' + lesson;
+  /* strength model (js/strength.js): flashcard progress is keyed by lesson id,
+     everything else by subject/unit/n — keep the map so the two can meet */
+  try {
+    var _km = location.pathname.match(/\/(lesson|practice)\/([^/]+)\/([^/]+)\/(\d+)/);
+    if (_km && window._lessonId) { var _keys = JSON.parse(localStorage.getItem('sv-lesson-keys') || '{}'); _keys[window._lessonId] = _km[2] + '/' + _km[3] + '/' + _km[4]; localStorage.setItem('sv-lesson-keys', JSON.stringify(_keys)); }
+  } catch (e) {}
+  /* ?quiz=1 — the plan sent them to TEST OUT of this lesson: the quiz opens
+     first; 4/5 or better marks the lesson covered, less and they read it */
+  const QUIZ_FIRST = new URLSearchParams(location.search).get('quiz') === '1';
+  window.__svQuizFirst = QUIZ_FIRST;
+  if (QUIZ_FIRST && !window.__svQuizFirstOpened) { window.__svQuizFirstOpened = true; setTimeout(function () { scrollTo(0, 0); btn.click(); }, 500); }
 
   // Show saved score on button
   const scoreEl = document.getElementById('knowledge-check-score');
@@ -2101,12 +2112,18 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
     else if (pct >= 60) msg = 'Solid effort. Review what you missed and try again.';
     else msg = 'Read through the lesson and give it another go.';
 
+    var testout = '';
+    if (window.__svQuizFirst) {
+      if (pct >= 80) { svMarkCovered(); testout = '<p class="kc-result-msg kc-testout">You already know this one — it’s marked as covered. Back to your plan when you’re ready.</p>'; }
+      else testout = '<p class="kc-result-msg kc-testout">Not quite there yet — the lesson is below. Read it, then the quiz will come round again.</p>';
+    }
     body.innerHTML =
       '<div class="kc-result">' +
         '<div class="kc-result-score">' + score + '/' + total + '</div>' +
         '<div class="kc-result-label">' + pct + '% correct</div>' +
-        '<p class="kc-result-msg">' + msg + '</p>' +
+        '<p class="kc-result-msg">' + msg + '</p>' + testout +
       '</div>';
+    try { localStorage.setItem('sv-cards-nudge', '1'); } catch (e) {}
     footer.innerHTML =
       '<button class="kc-btn kc-btn-secondary" id="kc-retry">Try again</button>' +
       '<button class="kc-btn kc-btn-primary" id="kc-close">Close</button>';
@@ -2465,10 +2482,25 @@ function initLessonProgress() {
     return { pct: avail ? Math.round(got / avail * 100) : 0,
              complete: avail > 0 && got / avail >= 0.5 };
   }
+  /* test-out (js/strength.js plan): a passed quick quiz marks the lesson covered
+     without the weighted checklist — same records a finished lesson writes */
+  window.svMarkCovered = function () {
+    try {
+      /* the weighted checklist would un-mark it on the next save: record the test-out on the lesson's own state */
+      var st0 = getState(); st0.testout = true; localStorage.setItem(storageKey, JSON.stringify(st0));
+      try { if (typeof state === 'object' && state) state.testout = true; } catch (e1) {}   // the live record the quiz is about to save
+      var key = pathMatch[1] + '/' + pathMatch[2], num = parseInt(pathMatch[3], 10);
+      var roll = JSON.parse(localStorage.getItem('sv-lessons-done') || '{}'); var arr = roll[key] || [];
+      if (arr.indexOf(num) < 0) arr.push(num); roll[key] = arr; localStorage.setItem('sv-lessons-done', JSON.stringify(roll));
+      var when = JSON.parse(localStorage.getItem('sv-lessons-when') || '{}'); var wkey = key + '/' + num;
+      if (!when[wkey]) when[wkey] = new Date().toISOString().slice(0, 10); localStorage.setItem('sv-lessons-when', JSON.stringify(when));
+      if (window.svProgressPushSoon) svProgressPushSoon();
+    } catch (e) {}
+  };
   function updateRollup(s) {
     try {
       var wres = weighted(s);
-      var complete = wres.complete;
+      var complete = wres.complete || !!s.testout;   // a passed quiz-first counts as covered
       var key = pathMatch[1] + '/' + pathMatch[2];
       var num = parseInt(pathMatch[3], 10);
       var roll = {};
@@ -2476,6 +2508,7 @@ function initLessonProgress() {
       var arr = roll[key] || [];
       var ix = arr.indexOf(num);
       var newlyDone = complete && ix < 0;
+      if (newlyDone) { try { localStorage.setItem('sv-cards-nudge', '1'); } catch (e0) {} }
       if (complete && ix < 0) arr.push(num);
       if (!complete && ix >= 0) arr.splice(ix, 1);
       roll[key] = arr;

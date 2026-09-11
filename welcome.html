@@ -573,7 +573,7 @@
   .wizstage::after{content:"";position:absolute;left:0;right:0;bottom:-16px;height:16px;pointer-events:none;
     background:linear-gradient(var(--paper),transparent)}
   body[data-view="picker"] .wizstage,body[data-view="year"] .wizstage,body[data-view="boards"] .wizstage,
-  body[data-view="tier"] .wizstage,body[data-view="topics"] .wizstage,body[data-view="save"] .wizstage{display:block}
+  body[data-view="tier"] .wizstage,body[data-view="topics"] .wizstage,body[data-view="save"] .wizstage,body[data-view="feel"] .wizstage{display:block}
   .wizstage .wizprog{margin-bottom:.9rem;transition:margin .42s cubic-bezier(.16,1,.3,1)}
   .wizstage .shelfstage{margin:0 auto;height:calc(250px*var(--ms,1));transition:height .42s cubic-bezier(.16,1,.3,1)}
   .wizstage .stagewrap{position:relative;height:250px;transform-origin:top center;transform:scale(var(--ms,1));transition:transform .42s cubic-bezier(.16,1,.3,1)}
@@ -602,6 +602,7 @@
   @media (prefers-reduced-motion:reduce){ .view.leave,.wizstage .bk.out{animation:none} }
   body[data-view="landing"] .view-landing{display:block}
   body[data-view="picker"] .view-picker{display:block}
+  body[data-view="feel"] .view-feel{display:block}
   body[data-view="boards"] .view-boards{display:block}
   body[data-view="topics"] .view-topics{display:block}
   body[data-view="save"] .view-save{display:block}
@@ -664,6 +665,31 @@
   .verdict .note{display:inline-block;margin-top:.35rem;font-size:.86rem;color:var(--mut)}
   /* topics step: one decision at a time — a single focused question card */
   .stepcard{max-width:780px;margin:1.7rem auto 0;text-align:center}
+  /* the feel screen: one row per subject, three ink dots; a budget row */
+  .feelcard{text-align:left}
+  .feelrow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.6rem 1rem;padding:.55rem 0;border-top:1px solid var(--linel)}
+  .feelrow:first-child{border-top:0}
+  .feelrow .fn{font-family:var(--read);font-weight:600;font-size:1.02rem;color:var(--ink)}
+  .feelrow .fn small{display:block;font-family:var(--head);font-weight:400;font-size:.78rem;color:var(--mut)}
+  .dots{display:flex;gap:.45rem}
+  .dot{width:38px;height:38px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;position:relative;padding:0}
+  .dot::after{content:'';position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;opacity:.35}
+  .dot.r::after{background:#b5442f}.dot.a::after{background:#d19a2f}.dot.g::after{background:#4e7a4a}
+  .dot[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+  .dot[aria-pressed="true"]::after{opacity:1;width:18px;height:18px;margin:-9px 0 0 -9px}
+  .dotkey{display:flex;justify-content:flex-end;gap:1.2rem;font-size:.74rem;color:var(--mut);margin:0 0 .3rem}
+  .dotkey span::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:.35rem;vertical-align:middle}
+  .dotkey .kr::before{background:#b5442f}.dotkey .ka::before{background:#d19a2f}.dotkey .kg::before{background:#4e7a4a}
+  .budget{margin-top:1.3rem;padding-top:1rem;border-top:1px solid var(--line)}
+  .budget h3{font-family:var(--read);font-size:1.02rem;margin:0 0 .5rem}
+  .budget .bopts{display:flex;gap:.5rem;flex-wrap:wrap}
+  .budget .bopts button{border:1.5px solid var(--line);background:var(--card);border-radius:8px;padding:.55rem .95rem;font:600 .9rem var(--head);color:var(--ink);cursor:pointer}
+  .budget .bopts button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .budget p{margin:.5rem 0 0;font-size:.82rem;color:var(--mut)}
+  .feelskip{flex:1;text-align:center}
+  .feelskip .backlink{font-size:.86rem}
+  html.mob .feelrow{grid-template-columns:1fr;gap:.35rem}
+  html.mob .dots{justify-content:flex-start}
   .tprog{font-size:.76rem;font-weight:600;color:var(--mut);letter-spacing:.14em;text-transform:uppercase}
   .tsubj{display:flex;align-items:center;justify-content:center;gap:10px;margin:.7rem 0 .1rem}
   .tsubj img{height:34px;width:auto;filter:saturate(1.4) brightness(1.1)}
@@ -1194,7 +1220,7 @@
 
     <div class="picker-foot">
       <button class="backlink" onclick="go('year')">&larr; Year</button>
-      <button class="cta" id="bnext" disabled style="opacity:.45" onclick="enterDash()">See my StudyVault &rarr;</button>
+      <button class="cta" id="bnext" disabled style="opacity:.45" onclick="go('feel')">See my StudyVault &rarr;</button>
     </div>
   </div>
 
@@ -1228,6 +1254,21 @@
     <div class="picker-foot">
       <button class="backlink" id="tback">&larr; Exam boards</button>
       <button class="cta" id="tnext" disabled style="opacity:.45">Next &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ================= FEEL: how confident, and how long most days (optional) ================= -->
+  <div class="view view-feel">
+    <div class="picker-head">
+      <h1>How are you feeling about each?</h1>
+      <p>Honest answers make a better plan. The ones you know get a quick quiz first &mdash; pass it and the lesson is covered.
+        You can skip this and start from the beginning.</p>
+    </div>
+    <div class="stepcard feelcard" id="feelcard"></div>
+    <div class="picker-foot">
+      <button class="backlink" id="feelback">&larr; Back</button>
+      <span class="feelskip"><button class="backlink" id="feelskip">Skip &mdash; start from scratch</button></span>
+      <button class="cta" id="feelnext">See my StudyVault &rarr;</button>
     </div>
   </div>
 
@@ -1784,7 +1825,7 @@ function renderYearView(){
 }
 /* the strip at the top of every wizard screen: how many taps are left */
 function renderProg(view){
-  const steps=['picker','year','boards'].concat(tierNeeded().length?['tier']:[]).concat(topicsNeeded().length?['topics']:[]);
+  const steps=['picker','year','boards'].concat(tierNeeded().length?['tier']:[]).concat(topicsNeeded().length?['topics']:[]).concat(['feel']);
   const at=steps.indexOf(view);
   document.querySelectorAll('.wizprog').forEach(el=>{
     el.innerHTML=steps.map((s,i)=>'<span class="'+(i<at?'done':(i===at?'cur':''))+'"></span>').join('');
@@ -1902,7 +1943,7 @@ function syncBoards(){
      Either way the wizard ends INSIDE the product, never at a sign-up gate. */
   const needT=topicsNeeded().length>0, needTier=tierNeeded().length>0;
   nx.innerHTML=needTier?'Continue &rarr;':(needT?'Choose your topics &rarr;':'See my StudyVault &rarr;');
-  nx.onclick=()=>{ if(needTier) go('tier'); else if(needT) go('topics'); else enterDash(); };
+  nx.onclick=()=>{ if(needTier) go('tier'); else if(needT) go('topics'); else go('feel'); };
   renderProg('boards');
 }
 /* ---- the tier screen: one row per tiered subject whose board we have built ---- */
@@ -1940,7 +1981,7 @@ function syncTier(){
   const nx=document.getElementById('tiernext'), ready=!left.length, needT=topicsNeeded().length>0;
   nx.disabled=!ready; nx.style.opacity=ready?'1':'.45';
   nx.innerHTML=needT?'Choose your topics &rarr;':'See my StudyVault &rarr;';
-  nx.onclick=()=>{ if(needT) go('topics'); else enterDash(); };
+  nx.onclick=()=>{ if(needT) go('topics'); else go('feel'); };
 }
 /* one focused decision per screen: flatten every needed group into steps */
 let tstep=0, TSTEP_OVR=null;
@@ -2000,7 +2041,7 @@ function renderTopics(){
   bk.innerHTML=tstep>0?'&larr; Back':(tierNeeded().length?'&larr; Tier':'&larr; Exam boards');
   bk.onclick=()=>{ if(tstep>0){ tstep--; renderTopics(); } else go(tierNeeded().length?'tier':'boards'); };
   nx.innerHTML=last?'See my StudyVault &rarr;':'Next &rarr;';
-  nx.onclick=last?()=>enterDash():()=>{ tstep++; renderTopics(); };
+  nx.onclick=last?()=>go('feel'):()=>{ tstep++; renderTopics(); };
   syncTopic();
 }
 /* the wizard ends INSIDE the product: the real dashboard, no sign-up gate */
@@ -2009,6 +2050,28 @@ function dashUrl(){ try{ return localStorage.getItem('sv-dash-view')==='desk'?'/
    ?view=picker), return to the dashboard the student was using. On the fresh
    onboarding path, go back to the landing view. */
 function pickerBack(){ if(new URLSearchParams(location.search).get('view')==='picker') location.href=dashUrl(); else go('landing'); }
+/* the feel screen: RAG per subject + minutes most days. Optional; skip = start from scratch. */
+let RAG={}, BUDGET=45;
+try{ const w=JSON.parse(localStorage.getItem('sv-welcome')||'{}'); RAG=w.rag||{}; BUDGET=+w.budget||45; }catch(e){}
+function renderFeel(){
+  renderWizShelf(picked);
+  const fc=document.getElementById('feelcard');
+  let html='<div class="dotkey"><span class="kr">struggling</span><span class="ka">getting there</span><span class="kg">confident</span></div>';
+  picked.forEach(sl=>{ const su=SUBJECTS.find(x=>x.slug===sl); if(!su) return;
+    html+='<div class="feelrow"><span class="fn">'+su.name+'<small>'+(BOARDLBL[boards[sl]]||'')+'</small></span><span class="dots" data-sl="'+sl+'">'+
+      ['r','a','g'].map(v=>'<button type="button" class="dot '+v+'" data-v="'+v+'" aria-pressed="'+(RAG[sl]===v)+'" aria-label="'+({r:'struggling',a:'getting there',g:'confident'})[v]+'"></button>').join('')+'</span></div>'; });
+  html+='<div class="budget"><h3>How long most days?</h3><div class="bopts">'+
+    [[20,'20 min'],[45,'45 min'],[60,'An hour']].map(o=>'<button type="button" data-b="'+o[0]+'" aria-pressed="'+(BUDGET===o[0])+'">'+o[1]+'</button>').join('')+
+    '</div><p>You can change this any time from the plan.</p></div>';
+  fc.innerHTML=html;
+  fc.querySelectorAll('.dot').forEach(b=>b.onclick=()=>{ const sl=b.parentElement.dataset.sl, v=b.dataset.v;
+    if(RAG[sl]===v) delete RAG[sl]; else RAG[sl]=v;
+    b.parentElement.querySelectorAll('.dot').forEach(x=>x.setAttribute('aria-pressed',String(RAG[sl]===x.dataset.v))); persist(); });
+  fc.querySelectorAll('.bopts button').forEach(b=>b.onclick=()=>{ BUDGET=+b.dataset.b; fc.querySelectorAll('.bopts button').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.b===BUDGET))); persist(); });
+  document.getElementById('feelback').onclick=()=>{ const ss=topicSteps(); go(ss.length?'topics':(tierNeeded().length?'tier':'boards')); };
+  document.getElementById('feelskip').onclick=()=>{ RAG={}; persist(); enterDash(); };
+  document.getElementById('feelnext').onclick=()=>enterDash();
+}
 function enterDash(){ persist(); document.body.classList.remove('ready');
   setTimeout(()=>{ location.href=dashUrl(); },180); }
 function renderSave(){
@@ -2027,7 +2090,7 @@ function go(v){
     document.body.dataset.view=v;
     const ve=document.querySelector('.view-'+v); if(ve){ ve.classList.remove('enter'); void ve.offsetWidth; ve.classList.add('enter'); }
     renderProg(v);
-    if(v==='picker'||v==='year'||v==='save') renderWizShelf(picked);
+    if(v==='picker'||v==='year'||v==='save'||v==='feel') renderWizShelf(picked);
     if(v==='year') renderYearView();
     if(v==='boards') renderBoards();
     if(v==='tier') renderTier();
@@ -2038,6 +2101,7 @@ function go(v){
       renderTopics();
     }
     if(v==='save') renderSave();
+    if(v==='feel') renderFeel();
     if(cur==='landing'||v==='landing'||reduced) scrollTo(0,0); else scrollTo({top:0,behavior:'smooth'});
     if(window.__wizExpand) window.__wizExpand();
   };
@@ -2057,7 +2121,7 @@ function persist(){ if(RESTORING) return; try{
     meta[sl]={board:su.alt&&su.alt[boards[sl]]?su.alt[boards[sl]]:(BOARDLBL[boards[sl]]||''),topics:names,
       tier:tiers[sl]||null,guessed:!!guess[sl]};
   });
-  localStorage.setItem('sv-welcome',JSON.stringify({picked:picked,boards:boards,topics:topics,meta:meta,tiers:tiers,guess:guess}));
+  localStorage.setItem('sv-welcome',JSON.stringify({picked:picked,boards:boards,topics:topics,meta:meta,tiers:tiers,guess:guess,rag:RAG,budget:BUDGET}));
   /* the tier answer goes where every lesson and practice page already looks for it,
      keyed by the real subject slug; "not sure" and unanswered both mean Higher */
   try{
@@ -2266,7 +2330,9 @@ if(sibtn) sibtn.onclick=async()=>{
           picked:[...new Set([...(acct.picked||[]),...(loc.picked||[])])],
           boards:Object.assign({},loc.boards||{},acct.boards||{}),
           topics:twoDeep(loc.topics,acct.topics),
-          meta:richerMeta(loc.meta,acct.meta)
+          meta:richerMeta(loc.meta,acct.meta),
+          rag:Object.assign({},acct.rag||{},loc.rag||{}),
+          budget:loc.budget||acct.budget||45
         };
         if(merged.picked.length){
           localStorage.setItem('sv-welcome',JSON.stringify(merged));

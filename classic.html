@@ -250,7 +250,23 @@
   .ublock .un{font-family:var(--read);font-size:.84rem;font-weight:600;line-height:1.2;color:var(--ink);
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.1em}
   .ublock .utrack{display:block;height:3px;background:var(--linel);margin:.5rem 0 .3rem;overflow:hidden}
+  .ublock .utrack{position:relative}
   .ublock .utrack i{display:block;height:100%;background:var(--tc)}
+  /* recall strength (js/strength.js) drawn under the progress bar: red/amber/green */
+  .ublock .utrack em{position:absolute;left:0;bottom:-3px;height:2px;background:#4e7a4a;opacity:.9}
+  .ublock.sb-a .utrack em{background:#c48a2c}.ublock.sb-r .utrack em{background:#a3542f}
+  .raterow{display:flex;align-items:center;gap:.7rem;margin-top:.6rem}
+  .ratebtn{border:1px solid var(--line);background:var(--card);border-radius:3px;padding:.3rem .65rem;font:600 .78rem var(--head);color:var(--sec);cursor:pointer}
+  .ratebtn:hover{border-color:var(--tc);color:var(--ink)}
+  .ratehint{font-size:.76rem;color:var(--mut)}
+  .ratelist{margin-top:.4rem;border-top:1px solid var(--line)}
+  .raterowu{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.35rem 0;border-bottom:1px solid var(--linel);font-size:.86rem}
+  .raterowu .rn{font-family:var(--read);font-weight:600}
+  .dots{display:flex;gap:.35rem}
+  .dot{width:28px;height:28px;border-radius:6px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;position:relative;padding:0}
+  .dot::after{content:'';position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;opacity:.35}
+  .dot.r::after{background:#b5442f}.dot.a::after{background:#d19a2f}.dot.g::after{background:#4e7a4a}
+  .dot[aria-pressed="true"]{border-color:var(--ink)}.dot[aria-pressed="true"]::after{opacity:1;width:14px;height:14px;margin:-7px 0 0 -7px}
   .ublock .ud{display:block;font-size:.7rem;color:var(--mut);font-variant-numeric:tabular-nums}
   /* drill into a topic -> pick any lesson (select, then confirm) */
   .sdetail .back{flex:none;width:24px;height:24px;border:1px solid var(--line);background:var(--card);border-radius:3px;
@@ -337,6 +353,12 @@
   .bigcard .face.back .qq::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:0;
     background:var(--anchor);opacity:.35;border-radius:1px}
   .bigcard.showa .face.back .qq::after{width:100%;transition:width var(--read-duration,2s) linear}
+  .fcstrip{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:720px;margin:0 auto}
+  .fcstrip .fsb{position:relative;flex:1 1 90px;max-width:130px;height:26px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden;font:600 .7rem var(--head);color:#fff;display:flex;align-items:center;justify-content:center;letter-spacing:.03em}
+  .fcstrip .fsb i{position:absolute;left:0;top:0;bottom:0;background:#4e7a4a;opacity:.85}
+  .fcstrip .fsb.a i{background:#c48a2c}.fcstrip .fsb.r i{background:#a3542f}
+  .fcstrip .fsb b{position:relative;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+  .fcmodal .fcstrip{position:fixed;left:0;right:0;bottom:64px;z-index:1}
   .fcmeta{position:fixed;left:0;right:0;bottom:26px;color:#f1e8d8;font-size:.85rem;
     display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 16px}
   .fcmeta .hint{opacity:.82;font-style:italic}
@@ -531,7 +553,7 @@
       </span>
     </span>
   </button>
-  <div class="fcmeta"><span class="cnt" id="fcCnt"></span><span class="hint">tap to flip · read the answer, then mark it — the line shows when</span></div>
+  <div class="fcmeta"><div class="fcstrip" id="fcstrip"></div><span class="cnt" id="fcCnt"></span><span class="hint" id="fchint">tap to flip · read the answer, then mark it — the line shows when</span></div>
 </div>
 
 <div class="phonemodal" id="phonemodal" aria-modal="true" role="dialog" aria-label="Shorts">
@@ -546,6 +568,7 @@
 <script src="dash-data.js"></script>
 <script src="sync.js"></script>
 <script src="warmup.js"></script>
+<script src="js/strength.js"></script>
 <script src="planner.js"></script>
 <script>
 /* Sam's subjects — same real free-tier wiring as the desk */
@@ -581,6 +604,10 @@ svDashInit(SUBJECTS,{view:'classic',onUnits:function(){
   /* today's spaced-repetition sitting: due cards first, then new, capped ~20 */
   if(window.svFlashDeck) svFlashDeck(SUBJECTS,deck=>{
     if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0;
+      /* on the way back from a lesson: due cards come up uninvited, three of them */
+      try{ if(localStorage.getItem('sv-cards-nudge')&&window.svStrength&&svStrength.flashDue()>0&&!document.querySelector('.fcmodal.open')){
+        localStorage.removeItem('sv-cards-nudge'); FC.length=Math.min(FC.length,3); fcDeal(); fcmodal.classList.add('open');
+        const h=document.getElementById('fchint'); if(h) h.textContent='three quick cards before your plan · keeps what you learned from fading'; } }catch(e){}
       if(_dq.get('fc')){ fcDeal();   /* staging: re-deal so the real card shows */
         if(_dq.get('fc')==='2'){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } } }
   });
@@ -925,11 +952,22 @@ function renderSubjectPanel(s){
     '<span class="sp"></span>'+
     '<button class="cont">Where you left off →</button></div>'+
     '<div class="units">'+
-      s.units.map((u,ui)=>'<button class="ublock" data-u="'+ui+'" title="'+u[0]+' — pick a lesson">'+
+      s.units.map((u,ui)=>{ const st=window.svStrength?svStrength.unit(s,u):null, b=st==null?'':svStrength.band(st);
+        return '<button class="ublock sb-'+b+'" data-u="'+ui+'" title="'+u[0]+' — pick a lesson'+(st!=null?' · recall '+st+'%':'')+'">'+
         '<span class="un">'+u[0]+'</span>'+
-        '<span class="utrack"><i style="width:'+Math.round(u[2]/u[1]*100)+'%"></i></span>'+
-        '<span class="ud">'+u[2]+' / '+u[1]+' lessons</span></button>').join('')+
+        '<span class="utrack"><i style="width:'+Math.round(u[2]/u[1]*100)+'%"></i><em style="width:'+(st||0)+'%"></em></span>'+
+        '<span class="ud">'+u[2]+' / '+u[1]+' lessons</span></button>'; }).join('')+
+    '</div>'+
+    '<div class="raterow"><button type="button" class="ratebtn" id="ratebtn">Rate the topics</button><span class="ratehint">the ones you know get a quick quiz first</span></div>'+
+    '<div class="ratelist" id="ratelist" hidden>'+
+      s.units.map(u=>{ const k=s.sub+'/'+u[3], cur=window.svStrength?svStrength.rag()[k]:null;
+        return '<div class="raterowu"><span class="rn">'+u[0]+'</span><span class="dots">'+['r','a','g'].map(v=>'<button type="button" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'"></button>').join('')+'</span></div>'; }).join('')+
     '</div>';
+  el.querySelector('#ratebtn').onclick=()=>{ const l=el.querySelector('#ratelist'); l.hidden=!l.hidden; };
+  el.querySelectorAll('.ratelist .dot').forEach(b=>b.onclick=()=>{ const k=b.dataset.k, v=b.dataset.v, cur=svStrength.rag()[k];
+    svStrength.setRag(k, cur===v?null:v);
+    b.parentElement.querySelectorAll('.dot').forEach(x=>x.setAttribute('aria-pressed',String(svStrength.rag()[k]===x.dataset.v)));
+    if(window.svPlannerRefresh) svPlannerRefresh(); });
   el.querySelector('.cont').onclick=()=>nav(urlFor(s,nxt));
   el.querySelectorAll('.ublock').forEach(x=>x.onclick=()=>showLessons(s,s.units[+x.dataset.u]));
 }
@@ -1225,6 +1263,7 @@ const FC=[
 const fcmodal=document.getElementById('fcmodal'), bigcard=document.getElementById('bigcard');
 let fci=0, fcShowA=false;
 function fcDeal(){
+  fcStrip();
   const f=FC[fci], sub=SUBJECTS.find(x=>x.slug===f.slug);
   document.getElementById('bqTag').textContent=f.name||(sub?sub.name:'');
   document.getElementById('bqUnit').textContent=f.uname||'';
@@ -1243,6 +1282,14 @@ document.getElementById('fcdoor').onclick=()=>{ fci=0; fcDeal(); fcmodal.classLi
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE) refreshDayOnePlan(); };
 bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } };
+
+/* the strength strip (js/strength.js): one block per subject, coloured by how
+   much of it the student can currently recall; fills in as they answer */
+function fcStrip(){
+  const el=document.getElementById('fcstrip'); if(!el||!window.svStrength) return;
+  el.innerHTML=SUBJECTS.map(su=>{ const v=svStrength.subject(su), b=svStrength.band(v);
+    return '<span class="fsb '+b+'" title="'+su.name+' · '+v+'%"><i style="width:'+v+'%"></i><b>'+(su.tab||su.name)+'</b></span>'; }).join('');
+}
 /* no tap-to-skip: the only way to the next card is an honest Not yet / Got it */
 /* same read-gate as the in-lesson deck: marks unlock only after there's been
    time to actually read the answer (words/4s, clamped 1.5–6s) */
