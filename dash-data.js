@@ -174,6 +174,21 @@ window.svIsPracticeUnit = svIsPracticeUnit;
 
 /* where does day one actually start? A real lesson if we know the unit,
    the subject's browse page if we don't, nowhere if it isn't built yet. */
+/* day one: which subject to open first. The one whose first exam comes
+   soonest, else the first picked. ONE rule, used by both dashboards: classic
+   named the exam-soonest subject but linked to the first picked, and the desk
+   named the first picked - two authors, two answers (Tom, 11 Sep 2026). */
+function svDayOneSubject(subjects) {
+  var best = null, bestD = null;
+  (subjects || []).forEach(function (su) {
+    var ex = [];
+    try { ex = svExamsFor(su) || []; } catch (e) {}
+    if (!ex.length) return;
+    var d = ex.map(function (e) { return e.d; }).sort(function (a, b) { return a - b; })[0];
+    if (bestD === null || d < bestD) { bestD = d; best = su; }
+  });
+  return best || (subjects && subjects[0]) || null;
+}
 function dayOneUrl(su) {
   if (!su || !su.sub) return null;
   if (su.first) return (svIsPracticeUnit(su, su.first) ? '/practice/' : '/lesson/') + su.sub + '/' + su.first + '/1';

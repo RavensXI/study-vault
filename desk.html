@@ -551,7 +551,7 @@ svDashInit(SUBJECTS,{view:'desk',onUnits:function(){
       if(m&&m.classList.contains('open')&&typeof fcDeal==='function') fcDeal(); }
   });
   if(_dq.get('warmup')&&!window._wuOpened){
-    const t=svContinueTarget(SUBJECTS), u=t?t.url:dayOneUrl(SUBJECTS[0]);
+    const t=svContinueTarget(SUBJECTS), u=t?t.url:dayOneUrl(svDayOneSubject(SUBJECTS));
     if(u){ window._wuOpened=1; svWarmup.open({subjects:SUBJECTS,target:u,nav}); }
   }
 }});
@@ -590,12 +590,12 @@ let TODAY_R=`
    matches the classic view's (same svContinueTarget, same svDoneStats). */
 function buildDayOneToday(){
   const t=svContinueTarget(SUBJECTS);
-  const url=t?t.url:dayOneUrl(SUBJECTS[0]);
+  const url=t?t.url:dayOneUrl(svDayOneSubject(SUBJECTS));
   const w=window.svWarmup?svWarmup.doneToday():null;
   const ps=svPlanState();
   const row2=t
     ?`<li tabindex="0" class="${ps.lesson?'done':''}" onclick="nav('${t.url}')"><span class="n">${ps.lesson?'✓':'2'}</span><div><b>Continue: ${t.unitName}</b><small>${t.su.name} · lesson ${t.num} of ${t.total}</small></div><span class="mins">15 min</span></li>`
-    :`<li tabindex="0" class="${ps.lesson?'done':''}" ${url?`onclick="nav('${url}')"`:''}><span class="n">${ps.lesson?'✓':'2'}</span><div><b>First lesson</b><small>${SUBJECTS[0]?SUBJECTS[0].name:'your first subject'} · start at the beginning</small></div><span class="mins">15 min</span></li>`;
+    :`<li tabindex="0" class="${ps.lesson?'done':''}" ${url?`onclick="nav('${url}')"`:''}><span class="n">${ps.lesson?'✓':'2'}</span><div><b>First lesson</b><small>${svDayOneSubject(SUBJECTS)?svDayOneSubject(SUBJECTS).name:'your first subject'} · start at the beginning</small></div><span class="mins">15 min</span></li>`;
   const startLbl=ps.any?(ps.mins?`Keep going · ${ps.mins} min`:'One more? · 15 min'):'Start · 19 min';
   TODAY_L=`
   <div class="datestamp" id="today"></div>

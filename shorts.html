@@ -18,6 +18,8 @@
   html,body{margin:0;height:100%;background:var(--bg);font-family:var(--font-head);color:var(--ink);overscroll-behavior:none}
 
   /* soft brand rail top-left, doesn't fight the feed */
+  .backlink{position:fixed;top:12px;right:16px;z-index:30;font:600 .86rem Inter,system-ui,sans-serif;color:#fff;text-decoration:none;
+    background:rgba(0,0,0,.42);padding:.42rem .8rem;border-radius:8px;backdrop-filter:blur(4px)}
   .brand{position:fixed;top:14px;left:20px;z-index:30;font-family:'Young Serif',serif;font-weight:400;font-size:1.05rem;color:#1d1c1a;opacity:.9;pointer-events:none}
   .brand .brandlock{height:.30em;width:auto;margin-left:1px;vertical-align:baseline}
   /* narrow view: the card spans the brand's column, so drop the wordmark a
@@ -129,6 +131,7 @@
 </head>
 <body>
   <div class="brand">StudyVault<img class="brandlock" src="assets/studyvault-lock-rust.svg" alt=""></div>
+  <a class="backlink" id="backlink" href="/classic" hidden>&larr; Back</a>
   <div class="feed" id="feed"></div>
   <button class="fsbtn" id="fsbtn" title="Fullscreen" style="display:none"></button>
 
@@ -259,6 +262,8 @@ let QUESTIONS={};                           // lesson_id -> { topic_index: {q,op
 // until the user has interacted (scroll/tap). After that first gesture, every
 // short plays with sound and stays that way.
 let wantSound=true, gestured=false, currentVideo=null;
+/* opened from the phone dashboard (?back=1): give them a way back */
+try{ if(new URLSearchParams(location.search).has('back')){ const b=document.getElementById('backlink'); if(b){ b.hidden=false; b.onclick=e=>{ if(history.length>1){ e.preventDefault(); history.back(); } }; } } }catch(e){}
 
 function refreshSoundUI(){
   if(!currentVideo) return;
@@ -529,8 +534,14 @@ function activate(){
     if(s===best && v){
       const changed=currentVideo!==v;
       currentVideo=v;
-      v.muted=!(wantSound&&gestured);
-      if(v.paused) v.play().catch(()=>{ v.muted=true; v.play().catch(()=>{}); });
+      /* try WITH sound first (the dashboard's tap or the modal's allow=autoplay
+         usually carries the permission); only fall back to muted if the browser
+         refuses, and then the tap-for-sound hint shows */
+      if(v.paused){
+        v.muted=!wantSound;
+        v.play().then(()=>{ if(!v.muted) gestured=true; refreshSoundUI(); })
+                .catch(()=>{ v.muted=true; v.play().catch(()=>{}); refreshSoundUI(); });
+      } else { v.muted=!(wantSound&&gestured); }
       refreshSoundUI();
       if(changed) revealChrome();          // new short -> chrome visible for CHROME_MS
     } else {
