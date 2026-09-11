@@ -565,6 +565,7 @@ const SUBJECTS=[
 const OPEN_STAGE=_dq.get('open');
 if(window.svProgressSync) svProgressSync();   /* signed in: pull-merge account progress */
 svDashInit(SUBJECTS,{view:'classic',onUnits:function(){
+  if(window.svPlannerRefresh) svPlannerRefresh();   /* the plan knows where each subject is now */
   if(OPEN_STAGE&&!selSlug) selSlug=OPEN_STAGE;
   renderSubjects();
   if(selSlug){ const cur=SUBJECTS.find(x=>x.slug===selSlug);
@@ -599,15 +600,15 @@ function dayOneSubjectName(){ var su=svDayOneSubject(SUBJECTS); return (su&&su.n
 
 function refreshDayOnePlan(){
   if(!DAYONE) return;
-  const t=svContinueTarget(SUBJECTS);
+  const t=svPlanLead(SUBJECTS);
   const target=t?t.url:dayOneUrl(svDayOneSubject(SUBJECTS));
   wireWarmupRow(target);
   refreshWeekCard();
   if(t){
     const lis=document.querySelectorAll('.card.plan ol li');
     if(lis[1]){
-      lis[1].innerHTML='<span class="n">2</span><div><b>Continue: '+t.unitName+'</b>'
-        +'<small>'+t.su.name+' · lesson '+t.num+' of '+t.total+'</small></div><span class="mins">15 min</span>';
+      lis[1].innerHTML='<span class="n">2</span><div><b>'+(t.title||('Continue: '+t.unitName))+'</b>'
+        +'<small>'+t.su.name+' · '+t.unitName+' · '+(t.act==='practice'?'set':'lesson')+' '+t.num+' of '+t.total+'</small></div><span class="mins">'+(t.min||15)+' min</span>';
       lis[1].classList.remove('inert'); lis[1].style.cursor='pointer';
       lis[1].onclick=()=>nav(t.url);
     }
@@ -729,7 +730,7 @@ function buildMini(){
     if(d>=now.getDate()){ el.classList.add('hasplan');
       el.onclick=ev=>{ ev.stopPropagation(); showDayTip(el,dt); } }
     g.appendChild(el); } }
-svPlannerBoot(SUBJECTS,{onChange:buildMini});   /* rest/holiday edits redraw the mini month */
+svPlannerBoot(SUBJECTS,{onChange:()=>{ buildMini(); if(typeof refreshDayOnePlan==='function') refreshDayOnePlan(); }});   /* edits, titles and units redraw the month AND the plan card */
 buildMini();
 
 /* subjects: cloth-tab nub + progress + the subject's ladder sketch as a

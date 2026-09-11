@@ -266,6 +266,16 @@ function svContinueTarget(SUBJECTS) {
   return null;
 }
 
+/* the plan's lead lesson for today (planner.js) in svContinueTarget's shape;
+   falls back to the continue target until the planner has booted. Both
+   dashboards' "Here's your plan" row 2 read THIS, so the card and the calendar
+   never disagree (Tom, 11 Sep 2026). */
+function svPlanLead(SUBJECTS) {
+  var p = null;
+  try { p = window.svPlanPrimary ? svPlanPrimary() : null; } catch (e) {}
+  return p || svContinueTarget(SUBJECTS);
+}
+
 /* lifetime + this-week completion counts. Lesson pages stamp completion dates
    into sv-lessons-when (js/main.js) — lessons finished before stamping existed
    count in the total but not the weekly figure. */
