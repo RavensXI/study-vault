@@ -128,6 +128,10 @@ Write-Log ("Lock acquired. Launch timestamp written: {0}" -f (Get-Date -Format "
 
 try {
 
+# 11 Sep 2026: NLM compute-based limits landed. Re-fires paused until one run has shown
+# how a deferred (background-queued) generation reports; remove this line to resume.
+$env:SV_NLM_NO_REFIRE = "1"
+
 # Phase 1: launch up to 180 new generations
 Write-Log "Phase 1: launching..."
 Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--daily-cap", "100") | Out-Null

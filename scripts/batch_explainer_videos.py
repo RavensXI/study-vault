@@ -472,6 +472,14 @@ def cmd_refire_missing(args):
     wrapper's poll loop: the window slides continuously, so a retry 20+ min
     later lands. Per-job: max 3 attempts, >=20 min apart, focus required
     (stored at launch; legacy jobs get it on their next generate re-fire)."""
+    # 11 Sep 2026: Gemini Notebook's compute-based limits landed (5-hour refresh, one
+    # notebook-wide allowance, a background queue for anything over it). Until a run
+    # has shown how a DEFERRED generation reports in `studio status`, re-firing an
+    # artifact-less job could push duplicates into that queue and burn the allowance.
+    # SV_NLM_NO_REFIRE=1 (set by the wrapper) makes this a no-op; lift it once seen.
+    if os.environ.get("SV_NLM_NO_REFIRE") == "1":
+        print("Re-fires paused (SV_NLM_NO_REFIRE=1) while the new NLM queue is observed.")
+        return
     state = load_state()
     now = time.time()
     candidates = [j for j in state["jobs"]
