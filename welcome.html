@@ -683,17 +683,17 @@
   .dot{width:38px;height:38px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;position:relative;padding:0}
   .dot::after{content:'';position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;opacity:.35}
   .dot.r::after{background:#b5442f}.dot.a::after{background:#d19a2f}.dot.g::after{background:#4e7a4a}
+  .dot.n::after{background:none;box-shadow:inset 0 0 0 2px #8f877a}
   .dot[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
   .dot[aria-pressed="true"]::after{opacity:1;width:18px;height:18px;margin:-9px 0 0 -9px}
   .dotkey{display:flex;justify-content:flex-end;gap:1.2rem;font-size:.74rem;color:var(--mut);margin:0 0 .3rem}
   .dotkey span::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:.35rem;vertical-align:middle}
   .dotkey .kr::before{background:#b5442f}.dotkey .ka::before{background:#d19a2f}.dotkey .kg::before{background:#4e7a4a}
+  .dotkey .kn::before{box-shadow:inset 0 0 0 1.5px #8f877a}
   .budget .bopts{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:center}
   .budget .bopts button{border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:1rem 1.6rem;font:600 1.05rem var(--head);color:var(--ink);cursor:pointer;min-width:120px}
   .budget .bopts button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
   .budget p{display:none}
-  .feelskip{flex:1;text-align:center}
-  .feelskip .backlink{font-size:.86rem}
   html.mob .fu-name{font-size:.95rem}
   html.mob .fu-inc ol{columns:1}
   html.mob .feelunit .dots .dot{width:34px;height:34px}
@@ -1273,7 +1273,6 @@
     <div class="stepcard feelcard" id="feelcard"></div>
     <div class="picker-foot">
       <button class="backlink" id="feelback">&larr; Back</button>
-      <span class="feelskip"><button class="backlink" id="feelnone">Haven&rsquo;t started this subject yet</button></span>
       <button class="cta" id="feelnext">Next &rarr;</button>
     </div>
   </div>
@@ -2070,7 +2069,7 @@ function dashUrl(){ try{ return localStorage.getItem('sv-dash-view')==='desk'?'/
    onboarding path, go back to the landing view. */
 function pickerBack(){ if(new URLSearchParams(location.search).get('view')==='picker') location.href=dashUrl(); else go('landing'); }
 /* the feel screen: one subject per step. Every topic (unit) gets a rating —
-   struggling / getting there / confident — and the subject's colour is the
+   not started yet / struggling / getting there / confident — and the subject's colour is the
    average of its topics. A topic opens to show what's in it (its lessons).
    Then one more step: minutes most days. Topics come from Supabase per subject. */
 const WSUB={maths:{aqa:'maths-aqa',edexcel:'maths-edexcel',ocr:'maths-ocr',eduqas:'maths-eduqas'},lang:{aqa:'english-language-aqa',edexcel:'english-language-edexcel',ocr:'english-language-ocr',eduqas:'english-language-eduqas'},lit:{aqa:'english-literature-aqa',edexcel:'english-literature-edexcel',ocr:'english-literature-ocr',eduqas:'english-literature-eduqas'},science:{aqa:'science-aqa',edexcel:'science-edexcel',ocr:'science-ocr'},triple:{aqa:'separate-sciences',edexcel:'separate-sciences-edexcel',ocr:'separate-sciences-ocr'},history:{aqa:'history-aqa',edexcel:'history-edexcel',ocr:'history-ocr',eduqas:'history-eduqas'},geog:{aqa:'geography-aqa',edexcel:'geography-edexcel-a',ocr:'geography-ocr',eduqas:'geography-eduqas'},french:{aqa:'french-aqa',edexcel:'french-edexcel'},spanish:{aqa:'spanish-aqa',edexcel:'spanish-edexcel'},german:{aqa:'german-aqa',edexcel:'german-edexcel'},cs:{aqa:'computer-science-aqa',edexcel:'computer-science-edexcel',ocr:'computer-science',eduqas:'computer-science-eduqas'},business:{aqa:'business-aqa',edexcel:'business-edexcel',ocr:'business-ocr'},pe:{aqa:'physical-education-aqa',edexcel:'physical-education-edexcel',ocr:'physical-education-ocr'},psych:{aqa:'psychology-aqa'},rs:{aqa:'religious-studies-aqa',edexcel:'religious-studies-edexcel',ocr:'religious-studies-ocr',eduqas:'religious-studies-eduqas'},socio:{aqa:'sociology-aqa',eduqas:'sociology-eduqas'},econ:{aqa:'economics-aqa'},stats:{aqa:'statistics-aqa'},media:{aqa:'media-studies-aqa'},film:{eduqas:'film-studies-eduqas'},drama:{aqa:'drama-aqa'},music:{aqa:'music-aqa',edexcel:'music-edexcel',ocr:'music-ocr',eduqas:'music-eduqas'},mtech:{ncfe:'music-technology'},dt:{aqa:'design-technology',eduqas:'design-technology-eduqas'},eng:{aqa:'engineering-aqa',eduqas:'engineering-eduqas'},electronics:{eduqas:'electronics-eduqas'},it:{ocr:'it-ocr'},astro:{edexcel:'astronomy-edexcel'},geology:{eduqas:'geology-eduqas'},classics:{ocr:'classical-civilisation-ocr'},citizenship:{aqa:'citizenship-aqa'},food:{aqa:'food-preparation-and-nutrition-aqa',eduqas:'food-preparation-and-nutrition-eduqas'},hosp:{eduqas:'hospitality-catering'},hsc:{edexcel:'health-social-care-edexcel',ocr:'health-social-care-ocr',eduqas:'health-social-care-eduqas'}};
@@ -2101,7 +2100,7 @@ function feelKeep(sl,uslug){
   return true;
 }
 function feelUnits(sl){ return (WUNITS[wSub(sl)]||[]).filter(u=>feelKeep(sl,u.slug)); }
-function ragRoll(sl){ const sub=wSub(sl), us=feelUnits(sl); const v={r:0,a:1,g:2}; let n=0,t=0;
+function ragRoll(sl){ const sub=wSub(sl), us=feelUnits(sl); const v={n:0,r:0,a:1,g:2}; let n=0,t=0;
   us.forEach(u=>{ const x=RAG[sub+'/'+u.slug]; if(x in v){ n++; t+=v[x]; } });
   if(!n) return null; const m=t/n; return m<0.67?'r':m<1.34?'a':'g'; }
 function renderFeel(){
@@ -2111,9 +2110,9 @@ function renderFeel(){
   const sl=subs[fstep], su=SUBJECTS.find(x=>x.slug===sl), sub=wSub(sl);
   document.getElementById('feelh').innerHTML=su.name+'<span class="feelsub">'+(BOARDLBL[boards[sl]]||'')+' &middot; '+(fstep+1)+' of '+subs.length+'</span>';
   const fc=document.getElementById('feelcard'), nx=document.getElementById('feelnext');
-  const key='<div class="dotkey"><span class="kr">struggling</span><span class="ka">getting there</span><span class="kg">confident</span></div>';
+  const key='<div class="dotkey"><span class="kn">not started yet</span><span class="kr">struggling</span><span class="ka">getting there</span><span class="kg">confident</span></div>';
   fc.innerHTML=key+'<div class="wait">loading the topics&hellip;</div>';
-  const dots=(k,cur)=>['r','a','g'].map(v=>'<button type="button" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'" aria-label="'+({r:'struggling',a:'getting there',g:'confident'})[v]+'"></button>').join('');
+  const dots=(k,cur)=>['n','r','a','g'].map(v=>'<button type="button" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'" aria-label="'+({n:'not started yet',r:'struggling',a:'getting there',g:'confident'})[v]+'"></button>').join('');
   const chev='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2l4 4-4 4"/></svg>';
   const sync=()=>{ const units=feelUnits(sl); const done=units.every(u=>RAG[sub+'/'+u.slug]);
     nx.disabled=!done; nx.style.opacity=done?'':'.45'; };
@@ -2135,7 +2134,6 @@ function renderFeel(){
   nx.disabled=true; nx.style.opacity='.45';
   const advance=()=>{ if(fstep<subs.length-1){ fstep++; renderFeel(); renderProg('feel'); scrollTo({top:0,behavior:'smooth'}); } else go('budget'); };
   document.getElementById('feelback').onclick=()=>{ if(fstep>0){ fstep--; renderFeel(); renderProg('feel'); } else { const ss=topicSteps(); go(ss.length?'topics':(tierNeeded().length?'tier':'boards')); } };
-  document.getElementById('feelnone').onclick=()=>{ feelUnits(sl).forEach(u=>{ RAG[sub+'/'+u.slug]='r'; }); RAG[sl]='r'; persist(); advance(); };
   nx.onclick=()=>{ if(nx.disabled) return; const roll=ragRoll(sl); if(roll) RAG[sl]=roll; persist(); advance(); };
 }
 function renderBudget(){

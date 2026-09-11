@@ -108,7 +108,7 @@ function plRagOf(su, unit) {
   var r = svStrength.rag(); return r[su.sub + '/' + unit] || r[su.slug] || 'a';
 }
 function plQueue(su) {
-  var q = [], order = { r: 0, a: 1, g: 1 };   // red units first; the rest keep the unit order (green ones become quiz-first, not last)
+  var q = [], order = { n: 0, r: 0, a: 1, g: 1 };   // red units first; the rest keep the unit order (green ones become quiz-first, not last)
   var units = (su.units || []).map(function (u, i) { return { u: u, i: i, r: order[plRagOf(su, u[3])] }; });
   units.sort(function (a, b) { return (a.r - b.r) || (a.i - b.i); });
   units.forEach(function (w) {
@@ -163,7 +163,7 @@ function buildSchedule() {
       var nxt = plExams(su).find(function (e) { return e.d >= d; });
       var urg = 1 + 8 / ((nxt ? Math.round((nxt.d - d) / 864e5) : 400) + 3);
       /* the student's own rating of the SUBJECT: red comes round more often, green less */
-      var rw = { r: 1.4, a: 1, g: 0.7 }[(window.svStrength && svStrength.rag()[su.slug]) || 'a'] || 1;
+      var rw = { n: 1.4, r: 1.4, a: 1, g: 0.7 }[(window.svStrength && svStrength.rag()[su.slug]) || 'a'] || 1;
       return { su: su, score: (di - lastSeen[su.slug]) * urg * rw };
     }).sort(function (a, b) { return b.score - a.score || a.su.slug.localeCompare(b.su.slug); });
     var picks = [], k = iso(d);

@@ -24,7 +24,7 @@
   function rag() { var w = g('sv-welcome', {}); return (w && w.rag) || {}; }
   function priorFor(slug, sub, unit) {
     var r = rag(), v = r[sub + '/' + unit] || r[slug];
-    return v === 'r' ? 10 : v === 'g' ? 60 : v === 'a' ? 35 : null;
+    return v === 'r' || v === 'n' ? 10 : v === 'g' ? 60 : v === 'a' ? 35 : null;
   }
   function idFor(key) { var ids = g('sv-lesson-keys', {}); for (var k in ids) if (ids[k] === key) return k; return null; }
   function evidence(sub, unit, num) {

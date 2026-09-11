@@ -253,11 +253,12 @@
   .ublock .utrack i{display:block;height:100%;background:var(--tc)}
   .ublock .ud em{font-style:normal;font-weight:600;color:#4e7a4a}
   .ublock.rc-holding .ud em{color:#b07a1f}.ublock.rc-fading .ud em{color:#a3542f}
-  /* the three dots are the rating control itself: struggling / getting there / know it */
+  /* the four dots are the rating control itself: not started / struggling / getting there / know it */
   .udots{display:flex;gap:4px;margin-top:.35rem}
   .dot{display:inline-block;width:16px;height:16px;border-radius:4px;border:1px solid var(--line);background:var(--card);cursor:pointer;position:relative;padding:0}
   .dot::after{content:'';position:absolute;left:50%;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;opacity:.4}
   .dot.r::after{background:#b5442f}.dot.a::after{background:#d19a2f}.dot.g::after{background:#4e7a4a}
+  .dot.n::after{background:none;box-shadow:inset 0 0 0 1.5px #8f877a}
   .dot[aria-pressed="true"]{border-color:var(--ink)}.dot[aria-pressed="true"]::after{opacity:1;width:10px;height:10px;margin:-5px 0 0 -5px}
   .ublock .ud{display:block;font-size:.7rem;color:var(--mut);font-variant-numeric:tabular-nums}
   /* drill into a topic -> pick any lesson (select, then confirm) */
@@ -952,7 +953,7 @@ function renderSubjectPanel(s){
         '<span class="un">'+u[0]+'</span>'+
         '<span class="utrack"><i style="width:'+Math.round(u[2]/u[1]*100)+'%"></i></span>'+
         '<span class="ud">'+u[2]+' / '+u[1]+' lessons'+(word?' · <em>'+word+'</em>':'')+'</span>'+
-        '<span class="udots">'+['r','a','g'].map(v=>'<span role="button" tabindex="0" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'" aria-label="'+({r:'struggling',a:'getting there',g:'know it'})[v]+'"></span>').join('')+'</span></button>'; }).join('')+
+        '<span class="udots">'+['n','r','a','g'].map(v=>'<span role="button" tabindex="0" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'" aria-label="'+({n:'not started yet',r:'struggling',a:'getting there',g:'know it'})[v]+'"></span>').join('')+'</span></button>'; }).join('')+
     '</div>';
   el.querySelectorAll('.udots .dot').forEach(b=>{ const hit=ev=>{ ev.stopPropagation(); ev.preventDefault(); const k=b.dataset.k, v=b.dataset.v, cur=svStrength.rag()[k];
       svStrength.setRag(k, cur===v?null:v);
