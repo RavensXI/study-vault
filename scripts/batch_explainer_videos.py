@@ -366,7 +366,9 @@ def cmd_generate(args):
             status = nlm_json(["studio", "status", notebook_id])
             if status:
                 for s in status:
-                    if s.get("type") == "video" and s.get("status") in ("in_progress", "completed"):
+                    # 11 Sep 2026: under the new queue the CLI (0.8.1) reports a fresh
+                    # artifact's state as "unknown"; it is still ours - record it
+                    if s.get("type") == "video" and s.get("status") in ("in_progress", "completed", "unknown"):
                         artifact_id = s["id"]
                         break
         except Exception as e:
