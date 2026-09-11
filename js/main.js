@@ -1859,11 +1859,11 @@ function initKnowledgeCheck() {
   window.__svQuizFirst = QUIZ_FIRST;
   if (QUIZ_FIRST && !window.__svQuizFirstOpened) {
     window.__svQuizFirstOpened = true;
-    var hdr = document.querySelector('.lesson-header');
-    if (hdr && !document.querySelector('.sv-testout-banner')) {
+    var col = document.querySelector('#lesson-page .lesson-content');
+    if (col && !document.querySelector('.sv-testout-banner')) {
       var bn = document.createElement('div'); bn.className = 'sv-testout-banner';
       bn.innerHTML = '<b>Quick check first.</b> Four out of five on the quiz, then one exam question — pass both and this lesson counts as covered.';
-      hdr.insertAdjacentElement('afterend', bn);
+      col.insertAdjacentElement('afterbegin', bn);
     }
     setTimeout(function () { scrollTo(0, 0); btn.click(); }, 500);
   }

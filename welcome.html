@@ -573,7 +573,7 @@
   .wizstage::after{content:"";position:absolute;left:0;right:0;bottom:-16px;height:16px;pointer-events:none;
     background:linear-gradient(var(--paper),transparent)}
   body[data-view="picker"] .wizstage,body[data-view="year"] .wizstage,body[data-view="boards"] .wizstage,
-  body[data-view="tier"] .wizstage,body[data-view="topics"] .wizstage,body[data-view="save"] .wizstage,body[data-view="feel"] .wizstage{display:block}
+  body[data-view="tier"] .wizstage,body[data-view="topics"] .wizstage,body[data-view="save"] .wizstage,body[data-view="feel"] .wizstage,body[data-view="budget"] .wizstage{display:block}
   .wizstage .wizprog{margin-bottom:.9rem;transition:margin .42s cubic-bezier(.16,1,.3,1)}
   .wizstage .shelfstage{margin:0 auto;height:calc(250px*var(--ms,1));transition:height .42s cubic-bezier(.16,1,.3,1)}
   .wizstage .stagewrap{position:relative;height:250px;transform-origin:top center;transform:scale(var(--ms,1));transition:transform .42s cubic-bezier(.16,1,.3,1)}
@@ -603,6 +603,7 @@
   body[data-view="landing"] .view-landing{display:block}
   body[data-view="picker"] .view-picker{display:block}
   body[data-view="feel"] .view-feel{display:block}
+  body[data-view="budget"] .view-budget{display:block}
   body[data-view="boards"] .view-boards{display:block}
   body[data-view="topics"] .view-topics{display:block}
   body[data-view="save"] .view-save{display:block}
@@ -667,17 +668,17 @@
   .stepcard{max-width:780px;margin:1.7rem auto 0;text-align:center}
   /* the feel screen: one row per subject, three ink dots; a budget row */
   .feelcard{text-align:left}
-  .feelrow{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:.6rem 1rem;padding:.55rem 0;border-top:1px solid var(--linel)}
-  .feelrow .topics{border:0;background:none;font:600 .8rem var(--head);color:var(--sec);cursor:pointer;padding:.3rem .2rem;text-decoration:underline;text-underline-offset:3px}
-  .feelrow .topics:hover{color:var(--ink)}
-  .feelunits{grid-column:1/-1;display:none;padding:.2rem 0 .4rem 1rem;border-left:2px solid var(--linel)}
-  .feelunits.on{display:block}
-  .feelunit{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.35rem 0;font-family:var(--head);font-size:.9rem;color:var(--ink)}
-  .feelunit .dots .dot{width:30px;height:30px}
-  .feelunits .wait{font-size:.82rem;color:var(--mut);padding:.3rem 0}
-  .feelrow:first-child{border-top:0}
-  .feelrow .fn{font-family:var(--read);font-weight:600;font-size:1.02rem;color:var(--ink)}
-  .feelrow .fn small{display:block;font-family:var(--head);font-weight:400;font-size:.78rem;color:var(--mut)}
+  .feelunit{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.2rem 1rem;padding:.6rem 0;border-top:1px solid var(--linel)}
+  .feelunit:first-of-type{border-top:0}
+  .fu-name{border:0;background:none;padding:0;text-align:left;font:600 1rem var(--read);color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:.4rem}
+  .fu-name svg{width:12px;height:12px;flex:none;opacity:.55;transition:transform .2s}
+  .fu-name[aria-expanded="true"] svg{transform:rotate(90deg)}
+  .fu-inc{grid-column:1/-1;font-family:var(--head);font-size:.86rem;color:var(--sec);padding:.15rem 0 .35rem 1.15rem}
+  .fu-inc p{margin:0 0 .35rem;color:var(--ink)}
+  .fu-inc ol{margin:0;padding-left:1.2rem;columns:2;column-gap:2rem}
+  .fu-inc li{break-inside:avoid;padding:.08rem 0}
+  .feelcard .wait{font-size:.86rem;color:var(--mut);padding:.6rem 0;text-align:center}
+  .feelsub{display:block;font-family:var(--head);font-weight:400;font-size:.9rem;color:var(--mut);margin-top:.2rem}
   .dots{display:flex;gap:.45rem}
   .dot{width:38px;height:38px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;position:relative;padding:0}
   .dot::after{content:'';position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;opacity:.35}
@@ -687,20 +688,15 @@
   .dotkey{display:flex;justify-content:flex-end;gap:1.2rem;font-size:.74rem;color:var(--mut);margin:0 0 .3rem}
   .dotkey span::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:.35rem;vertical-align:middle}
   .dotkey .kr::before{background:#b5442f}.dotkey .ka::before{background:#d19a2f}.dotkey .kg::before{background:#4e7a4a}
-  .budget{margin-top:1.3rem;padding-top:1rem;border-top:1px solid var(--line)}
-  .budget h3{font-family:var(--read);font-size:1.02rem;margin:0 0 .5rem}
-  .budget .bopts{display:flex;gap:.5rem;flex-wrap:wrap}
-  .budget .bopts button{border:1.5px solid var(--line);background:var(--card);border-radius:8px;padding:.55rem .95rem;font:600 .9rem var(--head);color:var(--ink);cursor:pointer}
+  .budget .bopts{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:center}
+  .budget .bopts button{border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:1rem 1.6rem;font:600 1.05rem var(--head);color:var(--ink);cursor:pointer;min-width:120px}
   .budget .bopts button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
   .budget p{display:none}
   .feelskip{flex:1;text-align:center}
   .feelskip .backlink{font-size:.86rem}
-  html.mob .feelrow{grid-template-columns:1fr auto;gap:.1rem .8rem}
-  html.mob .feelrow .fn{grid-row:1}
-  html.mob .feelrow .topics{grid-row:2;grid-column:1;justify-self:start;padding:.1rem 0 .3rem}
-  html.mob .feelrow .dots{grid-row:1/3;grid-column:2;align-self:center}
-  html.mob .feelrow .feelunits{grid-row:3}
-  html.mob .feelunit{font-size:.86rem}
+  html.mob .fu-name{font-size:.95rem}
+  html.mob .fu-inc ol{columns:1}
+  html.mob .feelunit .dots .dot{width:34px;height:34px}
   .tprog{font-size:.76rem;font-weight:600;color:var(--mut);letter-spacing:.14em;text-transform:uppercase}
   .tsubj{display:flex;align-items:center;justify-content:center;gap:10px;margin:.7rem 0 .1rem}
   .tsubj img{height:34px;width:auto;filter:saturate(1.4) brightness(1.1)}
@@ -1271,15 +1267,25 @@
   <!-- ================= FEEL: how confident, and how long most days (optional) ================= -->
   <div class="view view-feel">
     <div class="picker-head">
-      <h1>What do you already know?</h1>
-      <p>Mark each subject, or open it and mark the topics. Anything you rate as known gets a quick check instead of a full lesson;
-        the rest comes first. Do as much or as little as you like.</p>
+      <h1 id="feelh"></h1>
+      <p>How are you doing with each topic? Tap a topic to see what&rsquo;s in it.</p>
     </div>
     <div class="stepcard feelcard" id="feelcard"></div>
     <div class="picker-foot">
       <button class="backlink" id="feelback">&larr; Back</button>
-      <span class="feelskip"><button class="backlink" id="feelskip">Start from the beginning instead</button></span>
-      <button class="cta" id="feelnext">See my StudyVault &rarr;</button>
+      <span class="feelskip"><button class="backlink" id="feelnone">Haven&rsquo;t started this subject yet</button></span>
+      <button class="cta" id="feelnext">Next &rarr;</button>
+    </div>
+  </div>
+
+  <div class="view view-budget">
+    <div class="picker-head">
+      <h1>How long most days?</h1>
+    </div>
+    <div class="stepcard feelcard"><div class="budget"><div class="bopts" id="bopts"></div></div></div>
+    <div class="picker-foot">
+      <button class="backlink" id="budgetback">&larr; Back</button>
+      <button class="cta" id="budgetnext">See my StudyVault &rarr;</button>
     </div>
   </div>
 
@@ -1836,8 +1842,10 @@ function renderYearView(){
 }
 /* the strip at the top of every wizard screen: how many taps are left */
 function renderProg(view){
-  const steps=['picker','year','boards'].concat(tierNeeded().length?['tier']:[]).concat(topicsNeeded().length?['topics']:[]).concat(['feel']);
-  const at=steps.indexOf(view);
+  const base=['picker','year','boards'].concat(tierNeeded().length?['tier']:[]).concat(topicsNeeded().length?['topics']:[]);
+  const feels=feelSubs().map((sl,i)=>'feel'+i);
+  const steps=base.concat(feels).concat(['budget']);
+  const at=view==='feel'?base.length+fstep:steps.indexOf(view);
   document.querySelectorAll('.wizprog').forEach(el=>{
     el.innerHTML=steps.map((s,i)=>'<span class="'+(i<at?'done':(i===at?'cur':''))+'"></span>').join('');
   });
@@ -1954,7 +1962,7 @@ function syncBoards(){
      Either way the wizard ends INSIDE the product, never at a sign-up gate. */
   const needT=topicsNeeded().length>0, needTier=tierNeeded().length>0;
   nx.innerHTML=needTier?'Continue &rarr;':(needT?'Choose your topics &rarr;':'See my StudyVault &rarr;');
-  nx.onclick=()=>{ if(needTier) go('tier'); else if(needT) go('topics'); else go('feel'); };
+  nx.onclick=()=>{ if(needTier) go('tier'); else if(needT) go('topics'); else { fstep=0; go('feel'); } };
   renderProg('boards');
 }
 /* ---- the tier screen: one row per tiered subject whose board we have built ---- */
@@ -1992,7 +2000,7 @@ function syncTier(){
   const nx=document.getElementById('tiernext'), ready=!left.length, needT=topicsNeeded().length>0;
   nx.disabled=!ready; nx.style.opacity=ready?'1':'.45';
   nx.innerHTML=needT?'Choose your topics &rarr;':'See my StudyVault &rarr;';
-  nx.onclick=()=>{ if(needT) go('topics'); else go('feel'); };
+  nx.onclick=()=>{ if(needT) go('topics'); else { fstep=0; go('feel'); } };
 }
 /* one focused decision per screen: flatten every needed group into steps */
 let tstep=0, TSTEP_OVR=null;
@@ -2052,7 +2060,7 @@ function renderTopics(){
   bk.innerHTML=tstep>0?'&larr; Back':(tierNeeded().length?'&larr; Tier':'&larr; Exam boards');
   bk.onclick=()=>{ if(tstep>0){ tstep--; renderTopics(); } else go(tierNeeded().length?'tier':'boards'); };
   nx.innerHTML=last?'See my StudyVault &rarr;':'Next &rarr;';
-  nx.onclick=last?()=>go('feel'):()=>{ tstep++; renderTopics(); };
+  nx.onclick=last?()=>{ fstep=0; go('feel'); }:()=>{ tstep++; renderTopics(); };
   syncTopic();
 }
 /* the wizard ends INSIDE the product: the real dashboard, no sign-up gate */
@@ -2061,47 +2069,68 @@ function dashUrl(){ try{ return localStorage.getItem('sv-dash-view')==='desk'?'/
    ?view=picker), return to the dashboard the student was using. On the fresh
    onboarding path, go back to the landing view. */
 function pickerBack(){ if(new URLSearchParams(location.search).get('view')==='picker') location.href=dashUrl(); else go('landing'); }
-/* the feel screen: RAG per subject (and per topic, on demand) + minutes most days.
-   Optional; skip = start from the beginning. Topic rows come from Supabase per subject. */
+/* the feel screen: one subject per step. Every topic (unit) gets a rating —
+   struggling / getting there / confident — and the subject's colour is the
+   average of its topics. A topic opens to show what's in it (its lessons).
+   Then one more step: minutes most days. Topics come from Supabase per subject. */
 const WSUB={maths:{aqa:'maths-aqa',edexcel:'maths-edexcel',ocr:'maths-ocr',eduqas:'maths-eduqas'},lang:{aqa:'english-language-aqa',edexcel:'english-language-edexcel',ocr:'english-language-ocr',eduqas:'english-language-eduqas'},lit:{aqa:'english-literature-aqa',edexcel:'english-literature-edexcel',ocr:'english-literature-ocr',eduqas:'english-literature-eduqas'},science:{aqa:'science-aqa',edexcel:'science-edexcel',ocr:'science-ocr'},triple:{aqa:'separate-sciences',edexcel:'separate-sciences-edexcel',ocr:'separate-sciences-ocr'},history:{aqa:'history-aqa',edexcel:'history-edexcel',ocr:'history-ocr',eduqas:'history-eduqas'},geog:{aqa:'geography-aqa',edexcel:'geography-edexcel-a',ocr:'geography-ocr',eduqas:'geography-eduqas'},french:{aqa:'french-aqa',edexcel:'french-edexcel'},spanish:{aqa:'spanish-aqa',edexcel:'spanish-edexcel'},german:{aqa:'german-aqa',edexcel:'german-edexcel'},cs:{aqa:'computer-science-aqa',edexcel:'computer-science-edexcel',ocr:'computer-science',eduqas:'computer-science-eduqas'},business:{aqa:'business-aqa',edexcel:'business-edexcel',ocr:'business-ocr'},pe:{aqa:'physical-education-aqa',edexcel:'physical-education-edexcel',ocr:'physical-education-ocr'},psych:{aqa:'psychology-aqa'},rs:{aqa:'religious-studies-aqa',edexcel:'religious-studies-edexcel',ocr:'religious-studies-ocr',eduqas:'religious-studies-eduqas'},socio:{aqa:'sociology-aqa',eduqas:'sociology-eduqas'},econ:{aqa:'economics-aqa'},stats:{aqa:'statistics-aqa'},media:{aqa:'media-studies-aqa'},film:{eduqas:'film-studies-eduqas'},drama:{aqa:'drama-aqa'},music:{aqa:'music-aqa',edexcel:'music-edexcel',ocr:'music-ocr',eduqas:'music-eduqas'},mtech:{ncfe:'music-technology'},dt:{aqa:'design-technology',eduqas:'design-technology-eduqas'},eng:{aqa:'engineering-aqa',eduqas:'engineering-eduqas'},electronics:{eduqas:'electronics-eduqas'},it:{ocr:'it-ocr'},astro:{edexcel:'astronomy-edexcel'},geology:{eduqas:'geology-eduqas'},classics:{ocr:'classical-civilisation-ocr'},citizenship:{aqa:'citizenship-aqa'},food:{aqa:'food-preparation-and-nutrition-aqa',eduqas:'food-preparation-and-nutrition-eduqas'},hosp:{eduqas:'hospitality-catering'},hsc:{edexcel:'health-social-care-edexcel',ocr:'health-social-care-ocr',eduqas:'health-social-care-eduqas'}};
-const WUNITS={};   // sub slug -> [{name,slug}]
+const WUNITS={};   // sub slug -> [{name,slug,subtitle,lessons:[title]}]
 function wSub(sl){ const m=WSUB[sl]||{}; return m[boards[sl]]||Object.values(m)[0]||null; }
+function feelSubs(){ return picked.filter(sl=>!!wSub(sl)); }
 function loadUnits(sub,cb){
   if(WUNITS[sub]) return cb(WUNITS[sub]);
-  fetch('https://baipckgywpnwapobwtsy.supabase.co/rest/v1/subjects?select=slug,settings,units(name,slug,sort_order)&school_id=is.null&slug=eq.'+encodeURIComponent(sub),{headers:{apikey:'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'}})
-    .then(r=>r.json()).then(rows=>{ const row=rows&&rows[0]; const pr=new Set(((row&&row.settings)||{}).practice_units||[]);
-      WUNITS[sub]=((row&&row.units)||[]).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(u=>({name:u.name,slug:u.slug})); cb(WUNITS[sub]); })
+  fetch('https://baipckgywpnwapobwtsy.supabase.co/rest/v1/subjects?select=slug,units(name,slug,subtitle,sort_order,lessons(lesson_number,title,status))&school_id=is.null&slug=eq.'+encodeURIComponent(sub)+'&units.lessons.status=eq.live&units.lessons.order=lesson_number',{headers:{apikey:'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'}})
+    .then(r=>r.json()).then(rows=>{ const row=rows&&rows[0];
+      WUNITS[sub]=((row&&row.units)||[]).filter(u=>(u.lessons||[]).length).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0))
+        .map(u=>({name:u.name,slug:u.slug,subtitle:u.subtitle||'',lessons:(u.lessons||[]).map(l=>l.title)})); cb(WUNITS[sub]); })
     .catch(()=>cb([]));
 }
-let RAG={}, BUDGET=45;
+let RAG={}, BUDGET=45, fstep=0;
 try{ const w=JSON.parse(localStorage.getItem('sv-welcome')||'{}'); RAG=w.rag||{}; BUDGET=+w.budget||45; }catch(e){}
+/* the subject's colour is the average of its topics' */
+function ragRoll(sl){ const sub=wSub(sl), us=WUNITS[sub]||[]; const v={r:0,a:1,g:2}; let n=0,t=0;
+  us.forEach(u=>{ const x=RAG[sub+'/'+u.slug]; if(x in v){ n++; t+=v[x]; } });
+  if(!n) return null; const m=t/n; return m<0.67?'r':m<1.34?'a':'g'; }
 function renderFeel(){
   renderWizShelf(picked);
-  const fc=document.getElementById('feelcard');
-  let html='<div class="dotkey"><span class="kr">struggling</span><span class="ka">getting there</span><span class="kg">confident</span></div>';
+  const subs=feelSubs(); if(!subs.length){ go('budget'); return; }
+  fstep=Math.max(0,Math.min(fstep,subs.length-1));
+  const sl=subs[fstep], su=SUBJECTS.find(x=>x.slug===sl), sub=wSub(sl);
+  document.getElementById('feelh').innerHTML=su.name+'<span class="feelsub">'+(BOARDLBL[boards[sl]]||'')+' &middot; '+(fstep+1)+' of '+subs.length+'</span>';
+  const fc=document.getElementById('feelcard'), nx=document.getElementById('feelnext');
+  const key='<div class="dotkey"><span class="kr">struggling</span><span class="ka">getting there</span><span class="kg">confident</span></div>';
+  fc.innerHTML=key+'<div class="wait">loading the topics&hellip;</div>';
   const dots=(k,cur)=>['r','a','g'].map(v=>'<button type="button" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'" aria-label="'+({r:'struggling',a:'getting there',g:'confident'})[v]+'"></button>').join('');
-  picked.forEach(sl=>{ const su=SUBJECTS.find(x=>x.slug===sl); if(!su) return; const sub=wSub(sl);
-    html+='<div class="feelrow" data-sl="'+sl+'" data-sub="'+(sub||'')+'"><span class="fn">'+su.name+'<small>'+(BOARDLBL[boards[sl]]||'')+'</small></span>'+
-      (sub?'<button type="button" class="topics" aria-expanded="false">topics</button>':'<span></span>')+
-      '<span class="dots">'+dots(sl,RAG[sl])+'</span><div class="feelunits"></div></div>'; });
-  html+='<div class="budget"><h3>How long most days?</h3><div class="bopts">'+
-    [[20,'20 min'],[45,'45 min'],[60,'An hour']].map(o=>'<button type="button" data-b="'+o[0]+'" aria-pressed="'+(BUDGET===o[0])+'">'+o[1]+'</button>').join('')+
-    '</div><p>You can change this any time from the plan.</p></div>';
-  fc.innerHTML=html;
-  const wireDots=root=>root.querySelectorAll('.dot').forEach(b=>b.onclick=()=>{ const k=b.dataset.k, v=b.dataset.v;
-    if(RAG[k]===v) delete RAG[k]; else RAG[k]=v;
-    b.parentElement.querySelectorAll('.dot').forEach(x=>x.setAttribute('aria-pressed',String(RAG[k]===x.dataset.v))); persist(); });
-  wireDots(fc);
-  fc.querySelectorAll('.topics').forEach(t=>t.onclick=()=>{ const row=t.closest('.feelrow'), box=row.querySelector('.feelunits'), sub=row.dataset.sub;
-    const open=!box.classList.contains('on'); box.classList.toggle('on',open); t.setAttribute('aria-expanded',String(open)); t.textContent=open?'hide topics':'topics';
-    if(open&&!box.dataset.loaded){ box.innerHTML='<div class="wait">loading the topics&hellip;</div>';
-      loadUnits(sub,units=>{ box.dataset.loaded='1';
-        box.innerHTML=units.length?units.map(u=>{ const k=sub+'/'+u.slug; return '<div class="feelunit"><span>'+u.name+'</span><span class="dots">'+dots(k,RAG[k])+'</span></div>'; }).join(''):'<div class="wait">no topics listed yet</div>';
-        wireDots(box); }); } });
-  fc.querySelectorAll('.bopts button').forEach(b=>b.onclick=()=>{ BUDGET=+b.dataset.b; fc.querySelectorAll('.bopts button').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.b===BUDGET))); persist(); });
-  document.getElementById('feelback').onclick=()=>{ const ss=topicSteps(); go(ss.length?'topics':(tierNeeded().length?'tier':'boards')); };
-  document.getElementById('feelskip').onclick=()=>{ RAG={}; persist(); enterDash(); };
-  document.getElementById('feelnext').onclick=()=>enterDash();
+  const chev='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2l4 4-4 4"/></svg>';
+  const sync=()=>{ const units=WUNITS[sub]||[]; const done=units.every(u=>RAG[sub+'/'+u.slug]);
+    nx.disabled=!done; nx.style.opacity=done?'':'.45'; };
+  loadUnits(sub,units=>{
+    if(feelSubs()[fstep]!==sl) return;
+    fc.innerHTML=key+(units.length?units.map(u=>{ const k=sub+'/'+u.slug;
+        return '<div class="feelunit" data-k="'+k+'"><button type="button" class="fu-name" aria-expanded="false">'+u.name+chev+'</button>'+
+          '<span class="dots">'+dots(k,RAG[k])+'</span>'+
+          '<div class="fu-inc" hidden>'+(u.subtitle?'<p>'+u.subtitle+'</p>':'')+'<ol>'+u.lessons.map(t=>'<li>'+t+'</li>').join('')+'</ol></div></div>'; }).join('')
+      :'<div class="wait">no topics listed yet</div>');
+    fc.querySelectorAll('.dot').forEach(b=>b.onclick=()=>{ const k=b.dataset.k, v=b.dataset.v;
+      if(RAG[k]===v) delete RAG[k]; else RAG[k]=v;
+      b.parentElement.querySelectorAll('.dot').forEach(x=>x.setAttribute('aria-pressed',String(RAG[k]===x.dataset.v)));
+      const roll=ragRoll(sl); if(roll) RAG[sl]=roll; else delete RAG[sl]; persist(); sync(); });
+    fc.querySelectorAll('.fu-name').forEach(b=>b.onclick=()=>{ const inc=b.parentElement.querySelector('.fu-inc'); const open=inc.hidden; inc.hidden=!open; b.setAttribute('aria-expanded',String(open)); });
+    sync();
+  });
+  nx.disabled=true; nx.style.opacity='.45';
+  const advance=()=>{ if(fstep<subs.length-1){ fstep++; renderFeel(); renderProg('feel'); scrollTo({top:0,behavior:'smooth'}); } else go('budget'); };
+  document.getElementById('feelback').onclick=()=>{ if(fstep>0){ fstep--; renderFeel(); renderProg('feel'); } else { const ss=topicSteps(); go(ss.length?'topics':(tierNeeded().length?'tier':'boards')); } };
+  document.getElementById('feelnone').onclick=()=>{ (WUNITS[sub]||[]).forEach(u=>{ RAG[sub+'/'+u.slug]='r'; }); RAG[sl]='r'; persist(); advance(); };
+  nx.onclick=()=>{ if(nx.disabled) return; const roll=ragRoll(sl); if(roll) RAG[sl]=roll; persist(); advance(); };
+}
+function renderBudget(){
+  renderWizShelf(picked);
+  const box=document.getElementById('bopts');
+  box.innerHTML=[[20,'20 min'],[45,'45 min'],[60,'An hour']].map(o=>'<button type="button" data-b="'+o[0]+'" aria-pressed="'+(BUDGET===o[0])+'">'+o[1]+'</button>').join('');
+  box.querySelectorAll('button').forEach(b=>b.onclick=()=>{ BUDGET=+b.dataset.b; box.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.b===BUDGET))); persist(); });
+  document.getElementById('budgetback').onclick=()=>{ const subs=feelSubs(); if(subs.length){ fstep=subs.length-1; go('feel'); } else { const ss=topicSteps(); go(ss.length?'topics':(tierNeeded().length?'tier':'boards')); } };
+  document.getElementById('budgetnext').onclick=()=>enterDash();
 }
 function enterDash(){ persist(); document.body.classList.remove('ready');
   setTimeout(()=>{ location.href=dashUrl(); },180); }
@@ -2121,7 +2150,7 @@ function go(v){
     document.body.dataset.view=v;
     const ve=document.querySelector('.view-'+v); if(ve){ ve.classList.remove('enter'); void ve.offsetWidth; ve.classList.add('enter'); }
     renderProg(v);
-    if(v==='picker'||v==='year'||v==='save'||v==='feel') renderWizShelf(picked);
+    if(v==='picker'||v==='year'||v==='save'||v==='feel'||v==='budget') renderWizShelf(picked);
     if(v==='year') renderYearView();
     if(v==='boards') renderBoards();
     if(v==='tier') renderTier();
@@ -2133,6 +2162,7 @@ function go(v){
     }
     if(v==='save') renderSave();
     if(v==='feel') renderFeel();
+    if(v==='budget') renderBudget();
     if(cur==='landing'||v==='landing'||reduced) scrollTo(0,0); else scrollTo({top:0,behavior:'smooth'});
     if(window.__wizExpand) window.__wizExpand();
   };
@@ -2174,6 +2204,11 @@ function persist(){ if(RESTORING) return; try{
     }).catch(()=>{});
   },1200);
 }catch(e){} }
+/* ?fresh — walk the flow as a brand-new student: this browser's shelf, ratings and progress are cleared first */
+if(new URLSearchParams(location.search).has('fresh')){ try{
+  ['sv-welcome','sv-welcome-decision','sv-lessons-done','sv-lessons-when','sv-kc-log','sv-lesson-keys','sv-flashcard-progress','sv-cards-nudge','sv-plan-skip','sv-plan-holidays']
+    .forEach(k=>localStorage.removeItem(k));
+  Object.keys(localStorage).filter(k=>k.indexOf('sv_progress_')===0).forEach(k=>localStorage.removeItem(k)); }catch(e){} }
 let firstVisit=true, RESTORING=false;
 (function restore(){ try{
   firstVisit=localStorage.getItem('sv-welcome')===null;
