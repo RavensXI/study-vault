@@ -250,23 +250,15 @@
   .ublock .un{font-family:var(--read);font-size:.84rem;font-weight:600;line-height:1.2;color:var(--ink);
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.1em}
   .ublock .utrack{display:block;height:3px;background:var(--linel);margin:.5rem 0 .3rem;overflow:hidden}
-  .ublock .utrack{position:relative}
   .ublock .utrack i{display:block;height:100%;background:var(--tc)}
-  /* recall strength (js/strength.js) drawn under the progress bar: red/amber/green */
-  .ublock .utrack em{position:absolute;left:0;bottom:-3px;height:2px;background:#4e7a4a;opacity:.9}
-  .ublock.sb-a .utrack em{background:#c48a2c}.ublock.sb-r .utrack em{background:#a3542f}
-  .raterow{display:flex;align-items:center;gap:.7rem;margin-top:.6rem}
-  .ratebtn{border:1px solid var(--line);background:var(--card);border-radius:3px;padding:.3rem .65rem;font:600 .78rem var(--head);color:var(--sec);cursor:pointer}
-  .ratebtn:hover{border-color:var(--tc);color:var(--ink)}
-  .ratehint{font-size:.76rem;color:var(--mut)}
-  .ratelist{margin-top:.4rem;border-top:1px solid var(--line)}
-  .raterowu{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.35rem 0;border-bottom:1px solid var(--linel);font-size:.86rem}
-  .raterowu .rn{font-family:var(--read);font-weight:600}
-  .dots{display:flex;gap:.35rem}
-  .dot{width:28px;height:28px;border-radius:6px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;position:relative;padding:0}
-  .dot::after{content:'';position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;opacity:.35}
+  .ublock .ud em{font-style:normal;font-weight:600;color:#4e7a4a}
+  .ublock.rc-holding .ud em{color:#b07a1f}.ublock.rc-fading .ud em{color:#a3542f}
+  /* the three dots are the rating control itself: struggling / getting there / know it */
+  .udots{display:flex;gap:4px;margin-top:.35rem}
+  .dot{display:inline-block;width:16px;height:16px;border-radius:4px;border:1px solid var(--line);background:var(--card);cursor:pointer;position:relative;padding:0}
+  .dot::after{content:'';position:absolute;left:50%;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;opacity:.4}
   .dot.r::after{background:#b5442f}.dot.a::after{background:#d19a2f}.dot.g::after{background:#4e7a4a}
-  .dot[aria-pressed="true"]{border-color:var(--ink)}.dot[aria-pressed="true"]::after{opacity:1;width:14px;height:14px;margin:-7px 0 0 -7px}
+  .dot[aria-pressed="true"]{border-color:var(--ink)}.dot[aria-pressed="true"]::after{opacity:1;width:10px;height:10px;margin:-5px 0 0 -5px}
   .ublock .ud{display:block;font-size:.7rem;color:var(--mut);font-variant-numeric:tabular-nums}
   /* drill into a topic -> pick any lesson (select, then confirm) */
   .sdetail .back{flex:none;width:24px;height:24px;border:1px solid var(--line);background:var(--card);border-radius:3px;
@@ -353,12 +345,6 @@
   .bigcard .face.back .qq::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:0;
     background:var(--anchor);opacity:.35;border-radius:1px}
   .bigcard.showa .face.back .qq::after{width:100%;transition:width var(--read-duration,2s) linear}
-  .fcstrip{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:720px;margin:0 auto}
-  .fcstrip .fsb{position:relative;flex:1 1 90px;max-width:130px;height:26px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden;font:600 .7rem var(--head);color:#fff;display:flex;align-items:center;justify-content:center;letter-spacing:.03em}
-  .fcstrip .fsb i{position:absolute;left:0;top:0;bottom:0;background:#4e7a4a;opacity:.85}
-  .fcstrip .fsb.a i{background:#c48a2c}.fcstrip .fsb.r i{background:#a3542f}
-  .fcstrip .fsb b{position:relative;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.45)}
-  .fcmodal .fcstrip{position:fixed;left:0;right:0;bottom:64px;z-index:1}
   .fcmeta{position:fixed;left:0;right:0;bottom:26px;color:#f1e8d8;font-size:.85rem;
     display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 16px}
   .fcmeta .hint{opacity:.82;font-style:italic}
@@ -448,6 +434,10 @@
     .ublock .un{min-height:0;-webkit-line-clamp:2}
     .ublock .ud{grid-row:1;grid-column:2;font-size:.78rem;white-space:nowrap}
     .ublock .utrack{grid-row:2;grid-column:1/-1;margin:.25rem 0 0}
+    .ublock .udots{grid-row:3;grid-column:1/-1;margin-top:.45rem}
+    .ublock .udots .dot{width:26px;height:26px;border-radius:6px}
+    .ublock .udots .dot::after{width:10px;height:10px;margin:-5px 0 0 -5px}
+    .ublock .udots .dot[aria-pressed="true"]::after{width:14px;height:14px;margin:-7px 0 0 -7px}
   }
 </style>
 </head>
@@ -553,7 +543,7 @@
       </span>
     </span>
   </button>
-  <div class="fcmeta"><div class="fcstrip" id="fcstrip"></div><span class="cnt" id="fcCnt"></span><span class="hint" id="fchint">tap to flip · read the answer, then mark it — the line shows when</span></div>
+  <div class="fcmeta"><span class="cnt" id="fcCnt"></span><span class="hint" id="fchint">tap to flip · read the answer, then mark it — the line shows when</span></div>
 </div>
 
 <div class="phonemodal" id="phonemodal" aria-modal="true" role="dialog" aria-label="Shorts">
@@ -948,26 +938,27 @@ function renderSubjectPanel(s){
   el.style.setProperty('--tc',s.c);
   el.innerHTML='<div class="top"><h3>'+s.name+'</h3>'+
     '<span class="sub">'+d+' of '+t+' lessons · '+Math.round(d/t*100)+'%'+
+    (window.svStrength?(()=>{ let sec=0,fad=0; s.units.forEach(u=>{ for(let n=1;n<=(u[1]||0);n++){ const r=svStrength.lesson(s,u[3],n); if(r.prior||!r.reps) continue; if(r.s>=70) sec++; else if(r.s<40) fad++; } });
+      return (sec||fad)?' · '+sec+' secure'+(fad?' · <span style="color:#a3542f">'+fad+' fading</span>':''):''; })():'')+
     (DAYONE?'':(rec>=14?' · <span style="color:#a3542f;font-weight:600">'+Math.round(rec/7)+'w untouched</span>':rec>0?' · '+rec+'d ago':' · studied today'))+'</span>'+
     '<span class="sp"></span>'+
     '<button class="cont">Where you left off →</button></div>'+
     '<div class="units">'+
-      s.units.map((u,ui)=>{ const st=window.svStrength?svStrength.unit(s,u):null, b=st==null?'':svStrength.band(st);
-        return '<button class="ublock sb-'+b+'" data-u="'+ui+'" title="'+u[0]+' — pick a lesson'+(st!=null?' · recall '+st+'%':'')+'">'+
+      s.units.map((u,ui)=>{ const k=s.sub+'/'+u[3], cur=window.svStrength?svStrength.rag()[k]:null;
+        /* recall, in words, only once there is something to say */
+        let word=''; if(window.svStrength){ const hasEv=(()=>{ for(let n=1;n<=(u[1]||0);n++){ if(!svStrength.lesson(s,u[3],n).prior&&svStrength.lesson(s,u[3],n).reps) return true; } return false; })();
+          if(hasEv){ const v=svStrength.unit(s,u); word=v>=70?'secure':v>=40?'holding':'fading'; } }
+        return '<button class="ublock'+(word?' rc-'+word:'')+'" data-u="'+ui+'" title="'+u[0]+' — pick a lesson">'+
         '<span class="un">'+u[0]+'</span>'+
-        '<span class="utrack"><i style="width:'+Math.round(u[2]/u[1]*100)+'%"></i><em style="width:'+(st||0)+'%"></em></span>'+
-        '<span class="ud">'+u[2]+' / '+u[1]+' lessons</span></button>'; }).join('')+
-    '</div>'+
-    '<div class="raterow"><button type="button" class="ratebtn" id="ratebtn">Rate the topics</button><span class="ratehint">the ones you know get a quick quiz first</span></div>'+
-    '<div class="ratelist" id="ratelist" hidden>'+
-      s.units.map(u=>{ const k=s.sub+'/'+u[3], cur=window.svStrength?svStrength.rag()[k]:null;
-        return '<div class="raterowu"><span class="rn">'+u[0]+'</span><span class="dots">'+['r','a','g'].map(v=>'<button type="button" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'"></button>').join('')+'</span></div>'; }).join('')+
+        '<span class="utrack"><i style="width:'+Math.round(u[2]/u[1]*100)+'%"></i></span>'+
+        '<span class="ud">'+u[2]+' / '+u[1]+' lessons'+(word?' · <em>'+word+'</em>':'')+'</span>'+
+        '<span class="udots">'+['r','a','g'].map(v=>'<span role="button" tabindex="0" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'" aria-label="'+({r:'struggling',a:'getting there',g:'know it'})[v]+'"></span>').join('')+'</span></button>'; }).join('')+
     '</div>';
-  el.querySelector('#ratebtn').onclick=()=>{ const l=el.querySelector('#ratelist'); l.hidden=!l.hidden; };
-  el.querySelectorAll('.ratelist .dot').forEach(b=>b.onclick=()=>{ const k=b.dataset.k, v=b.dataset.v, cur=svStrength.rag()[k];
-    svStrength.setRag(k, cur===v?null:v);
-    b.parentElement.querySelectorAll('.dot').forEach(x=>x.setAttribute('aria-pressed',String(svStrength.rag()[k]===x.dataset.v)));
-    if(window.svPlannerRefresh) svPlannerRefresh(); });
+  el.querySelectorAll('.udots .dot').forEach(b=>{ const hit=ev=>{ ev.stopPropagation(); ev.preventDefault(); const k=b.dataset.k, v=b.dataset.v, cur=svStrength.rag()[k];
+      svStrength.setRag(k, cur===v?null:v);
+      b.parentElement.querySelectorAll('.dot').forEach(x=>x.setAttribute('aria-pressed',String(svStrength.rag()[k]===x.dataset.v)));
+      if(window.svPlannerRefresh) svPlannerRefresh(); };
+    b.onclick=hit; b.onkeydown=ev=>{ if(ev.key==='Enter'||ev.key===' ') hit(ev); }; });
   el.querySelector('.cont').onclick=()=>nav(urlFor(s,nxt));
   el.querySelectorAll('.ublock').forEach(x=>x.onclick=()=>showLessons(s,s.units[+x.dataset.u]));
 }
@@ -1263,7 +1254,6 @@ const FC=[
 const fcmodal=document.getElementById('fcmodal'), bigcard=document.getElementById('bigcard');
 let fci=0, fcShowA=false;
 function fcDeal(){
-  fcStrip();
   const f=FC[fci], sub=SUBJECTS.find(x=>x.slug===f.slug);
   document.getElementById('bqTag').textContent=f.name||(sub?sub.name:'');
   document.getElementById('bqUnit').textContent=f.uname||'';
@@ -1283,13 +1273,6 @@ document.getElementById('fcdoor').onclick=()=>{ fci=0; fcDeal(); fcmodal.classLi
   if(DAYONE) refreshDayOnePlan(); };
 bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } };
 
-/* the strength strip (js/strength.js): one block per subject, coloured by how
-   much of it the student can currently recall; fills in as they answer */
-function fcStrip(){
-  const el=document.getElementById('fcstrip'); if(!el||!window.svStrength) return;
-  el.innerHTML=SUBJECTS.map(su=>{ const v=svStrength.subject(su), b=svStrength.band(v);
-    return '<span class="fsb '+b+'" title="'+su.name+' · '+v+'%"><i style="width:'+v+'%"></i><b>'+(su.tab||su.name)+'</b></span>'; }).join('');
-}
 /* no tap-to-skip: the only way to the next card is an honest Not yet / Got it */
 /* same read-gate as the in-lesson deck: marks unlock only after there's been
    time to actually read the answer (words/4s, clamped 1.5–6s) */

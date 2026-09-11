@@ -116,7 +116,9 @@ function plQueue(su) {
     for (var n = 1; n <= (u[1] || 0); n++) {
       if (done.indexOf(n) >= 0) continue;
       var st = window.svStrength ? svStrength.lesson(su, u[3], n) : null;
-      q.push({ unit: u[3], unitName: u[0], num: n, total: u[1], quizFirst: !!(st && st.s >= 35) });
+      /* no test-out for practice sets (they are the test) or Music (set works are listened to, not quizzed out of) */
+      var canQF = su.slug !== 'music' && !(window.svIsPracticeUnit && svIsPracticeUnit(su, u[3]));
+      q.push({ unit: u[3], unitName: u[0], num: n, total: u[1], quizFirst: canQF && !!(st && st.s >= 35) });
     }
   });
   return q;
@@ -223,7 +225,7 @@ function svPlanPrimary() {
   return { su: x.s, unitName: x.unitName, unitSlug: x.unit, total: x.total, num: x.num, url: x.url, title: x.title, act: x.act, min: x.min };
 }
 function sessLabel(x) { return x.title || (x.s ? (x.unitName + ' · ' + (x.act === 'practice' ? 'set' : 'lesson') + ' ' + x.num) : x.act); }
-function actWord(x) { return x.quiz ? 'quick quiz' : x.act === 'quiz-first' ? 'quiz first - pass and it is covered' : x.act === 'review' ? 'review' : x.mixed ? '' : x.act; }
+function actWord(x) { return x.quiz ? 'quick quiz' : x.act === 'quiz-first' ? 'quick check' : x.act === 'review' ? 'review' : x.mixed ? '' : x.act; }
 
 /* ---- day tooltip (shared by both views' mini calendars) ---- */
 var DOWNAME = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];
@@ -381,10 +383,10 @@ function buildFit() {
   var short = [];
   PL_SUBJECTS.forEach(function (su) {
     var f = PL_FIT[su.slug]; if (!f || !f.first || !f.left) return;
-    if (f.fit < f.left) short.push(su.name + ': ' + f.fit + ' of ' + f.left + ' lessons fit before ' + f.first.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+    if (f.fit < f.left) short.push(su.name + ' (' + f.fit + ' of ' + f.left + ')');
   });
-  el.textContent = short.length ? 'At ' + plBudget() + ' minutes a day: ' + short.join(' · ') + '. Rate the topics you already know and the quiz-first sessions clear them in minutes.'
-                                : 'At ' + plBudget() + ' minutes a day everything fits before its paper.';
+  el.textContent = short.length ? 'Won’t all fit before the paper at ' + plBudget() + ' min a day: ' + short.join(' · ')
+                                : 'Everything fits before its paper at ' + plBudget() + ' min a day.';
 }
 function buildWk() {
   var w = document.getElementById('wkday'); w.innerHTML = '';
@@ -474,7 +476,7 @@ function buildDaySheet(d) {
     var total = (p.sessions || []).reduce(function (a, x) { return a + x.min; }, 0);
     html += '<div class="acts">';
     if (d >= T0 && p.off !== 'rest') html += '<button type="button" class="plbtn" id="plhol">' + (p.off === 'holiday' ? 'Put this day back' : 'Make this a holiday') + '</button>';
-    if (d >= T0 && p.sessions) html += '<button type="button" class="plbtn" id="plpush">Push today’s work along</button>';
+    if (d >= T0 && p.sessions) html += '<button type="button" class="plbtn" id="plpush">Skip today</button>';
     if (p.sessions && total) html += '<span class="plsub" style="margin:0;align-self:center">' + total + ' min in all</span>';
     html += '</div>';
   }

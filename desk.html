@@ -313,13 +313,7 @@
   .fcmodal .face.back .qq::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:0;
     background:#8a5a44;opacity:.35;border-radius:2px}
   .fcmodal .showa .face.back .qq::after,.bigcard.showa .face.back .qq::after{width:100%;transition:width var(--read-duration,2s) linear}
-  .fcstrip{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:720px;margin:0 auto}
-  .fcstrip .fsb{position:relative;flex:1 1 90px;max-width:130px;height:26px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden;font:600 .7rem var(--head);color:#fff;display:flex;align-items:center;justify-content:center;letter-spacing:.03em}
-  .fcstrip .fsb i{position:absolute;left:0;top:0;bottom:0;background:#4e7a4a;opacity:.85}
-  .fcstrip .fsb.a i{background:#c48a2c}.fcstrip .fsb.r i{background:#a3542f}
-  .fcstrip .fsb b{position:relative;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.45)}
-  .fcmodal .fcstrip{margin-top:1rem}
-  .fcmodal .meta{display:flex;justify-content:space-between;align-items:center;margin-top:.6rem;color:#efe9da}
+  .fcmodal .meta{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;color:#efe9da}
   .fcmodal .meta small{font-family:var(--read);font-style:italic;font-size:.95rem;opacity:.85}
   .fcmodal .meta .metaR{display:flex;align-items:center;gap:12px}
   .fcmodal .meta .cnt{font-variant-numeric:tabular-nums;font-weight:700;font-size:.9rem}
@@ -507,7 +501,6 @@
         </span>
       </span>
     </button>
-    <div class="fcstrip" id="fcstrip"></div>
     <div class="meta"><small id="fchint">tap to flip &middot; read the answer, then mark it &mdash; the line shows when</small><span class="metaR"><span class="cnt" id="fcCnt"></span></span></div>
   </div>
 </div>
@@ -1041,7 +1034,6 @@ fcPreview();
 /* step the card font down for longer Q/A so it never spills past the edge */
 function fcFit(el,s){ s=String(s||''); el.classList.toggle('long', s.length>70); el.classList.toggle('xlong', s.length>150); }
 function fcDeal(){
-  fcStrip();
   const f=FC[fci], sub=SUBJECTS.find(x=>x.slug===f.slug);
   fcmodal.style.setProperty('--fcc', sub?sub.c:'#8a5a44');
   document.getElementById('bqTag').textContent=f.name||(sub?sub.name:f.slug);
@@ -1056,13 +1048,6 @@ function fcDeal(){
   fcShowA=false; bigcard.classList.remove('showa');
 }
 
-/* the strength strip (js/strength.js): one block per subject, coloured by how
-   much of it the student can currently recall; fills in as they answer */
-function fcStrip(){
-  const el=document.getElementById('fcstrip'); if(!el||!window.svStrength) return;
-  el.innerHTML=SUBJECTS.map(su=>{ const v=svStrength.subject(su), b=svStrength.band(v);
-    return '<span class="fsb '+b+'" title="'+su.name+' · '+v+'%"><i style="width:'+v+'%"></i><b>'+(su.tab||su.name)+'</b></span>'; }).join('');
-}
 cardsEl.onclick=()=>{ if(dragBlockClick) return; if(fci>=FC.length) fci=0; fcDeal(); fcmodal.classList.add('open');
   try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
   if(window.svProgressPushSoon) svProgressPushSoon();

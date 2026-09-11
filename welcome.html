@@ -667,7 +667,14 @@
   .stepcard{max-width:780px;margin:1.7rem auto 0;text-align:center}
   /* the feel screen: one row per subject, three ink dots; a budget row */
   .feelcard{text-align:left}
-  .feelrow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.6rem 1rem;padding:.55rem 0;border-top:1px solid var(--linel)}
+  .feelrow{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:.6rem 1rem;padding:.55rem 0;border-top:1px solid var(--linel)}
+  .feelrow .topics{border:0;background:none;font:600 .8rem var(--head);color:var(--sec);cursor:pointer;padding:.3rem .2rem;text-decoration:underline;text-underline-offset:3px}
+  .feelrow .topics:hover{color:var(--ink)}
+  .feelunits{grid-column:1/-1;display:none;padding:.2rem 0 .4rem 1rem;border-left:2px solid var(--linel)}
+  .feelunits.on{display:block}
+  .feelunit{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.35rem 0;font-family:var(--head);font-size:.9rem;color:var(--ink)}
+  .feelunit .dots .dot{width:30px;height:30px}
+  .feelunits .wait{font-size:.82rem;color:var(--mut);padding:.3rem 0}
   .feelrow:first-child{border-top:0}
   .feelrow .fn{font-family:var(--read);font-weight:600;font-size:1.02rem;color:var(--ink)}
   .feelrow .fn small{display:block;font-family:var(--head);font-weight:400;font-size:.78rem;color:var(--mut)}
@@ -685,11 +692,15 @@
   .budget .bopts{display:flex;gap:.5rem;flex-wrap:wrap}
   .budget .bopts button{border:1.5px solid var(--line);background:var(--card);border-radius:8px;padding:.55rem .95rem;font:600 .9rem var(--head);color:var(--ink);cursor:pointer}
   .budget .bopts button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
-  .budget p{margin:.5rem 0 0;font-size:.82rem;color:var(--mut)}
+  .budget p{display:none}
   .feelskip{flex:1;text-align:center}
   .feelskip .backlink{font-size:.86rem}
-  html.mob .feelrow{grid-template-columns:1fr;gap:.35rem}
-  html.mob .dots{justify-content:flex-start}
+  html.mob .feelrow{grid-template-columns:1fr auto;gap:.1rem .8rem}
+  html.mob .feelrow .fn{grid-row:1}
+  html.mob .feelrow .topics{grid-row:2;grid-column:1;justify-self:start;padding:.1rem 0 .3rem}
+  html.mob .feelrow .dots{grid-row:1/3;grid-column:2;align-self:center}
+  html.mob .feelrow .feelunits{grid-row:3}
+  html.mob .feelunit{font-size:.86rem}
   .tprog{font-size:.76rem;font-weight:600;color:var(--mut);letter-spacing:.14em;text-transform:uppercase}
   .tsubj{display:flex;align-items:center;justify-content:center;gap:10px;margin:.7rem 0 .1rem}
   .tsubj img{height:34px;width:auto;filter:saturate(1.4) brightness(1.1)}
@@ -1260,14 +1271,14 @@
   <!-- ================= FEEL: how confident, and how long most days (optional) ================= -->
   <div class="view view-feel">
     <div class="picker-head">
-      <h1>How are you feeling about each?</h1>
-      <p>Honest answers make a better plan. The ones you know get a quick quiz first &mdash; pass it and the lesson is covered.
-        You can skip this and start from the beginning.</p>
+      <h1>What do you already know?</h1>
+      <p>Mark each subject, or open it and mark the topics. Anything you rate as known gets a quick check instead of a full lesson;
+        the rest comes first. Do as much or as little as you like.</p>
     </div>
     <div class="stepcard feelcard" id="feelcard"></div>
     <div class="picker-foot">
       <button class="backlink" id="feelback">&larr; Back</button>
-      <span class="feelskip"><button class="backlink" id="feelskip">Skip &mdash; start from scratch</button></span>
+      <span class="feelskip"><button class="backlink" id="feelskip">Start from the beginning instead</button></span>
       <button class="cta" id="feelnext">See my StudyVault &rarr;</button>
     </div>
   </div>
@@ -2050,23 +2061,43 @@ function dashUrl(){ try{ return localStorage.getItem('sv-dash-view')==='desk'?'/
    ?view=picker), return to the dashboard the student was using. On the fresh
    onboarding path, go back to the landing view. */
 function pickerBack(){ if(new URLSearchParams(location.search).get('view')==='picker') location.href=dashUrl(); else go('landing'); }
-/* the feel screen: RAG per subject + minutes most days. Optional; skip = start from scratch. */
+/* the feel screen: RAG per subject (and per topic, on demand) + minutes most days.
+   Optional; skip = start from the beginning. Topic rows come from Supabase per subject. */
+const WSUB={maths:{aqa:'maths-aqa',edexcel:'maths-edexcel',ocr:'maths-ocr',eduqas:'maths-eduqas'},lang:{aqa:'english-language-aqa',edexcel:'english-language-edexcel',ocr:'english-language-ocr',eduqas:'english-language-eduqas'},lit:{aqa:'english-literature-aqa',edexcel:'english-literature-edexcel',ocr:'english-literature-ocr',eduqas:'english-literature-eduqas'},science:{aqa:'science-aqa',edexcel:'science-edexcel',ocr:'science-ocr'},triple:{aqa:'separate-sciences',edexcel:'separate-sciences-edexcel',ocr:'separate-sciences-ocr'},history:{aqa:'history-aqa',edexcel:'history-edexcel',ocr:'history-ocr',eduqas:'history-eduqas'},geog:{aqa:'geography-aqa',edexcel:'geography-edexcel-a',ocr:'geography-ocr',eduqas:'geography-eduqas'},french:{aqa:'french-aqa',edexcel:'french-edexcel'},spanish:{aqa:'spanish-aqa',edexcel:'spanish-edexcel'},german:{aqa:'german-aqa',edexcel:'german-edexcel'},cs:{aqa:'computer-science-aqa',edexcel:'computer-science-edexcel',ocr:'computer-science',eduqas:'computer-science-eduqas'},business:{aqa:'business-aqa',edexcel:'business-edexcel',ocr:'business-ocr'},pe:{aqa:'physical-education-aqa',edexcel:'physical-education-edexcel',ocr:'physical-education-ocr'},psych:{aqa:'psychology-aqa'},rs:{aqa:'religious-studies-aqa',edexcel:'religious-studies-edexcel',ocr:'religious-studies-ocr',eduqas:'religious-studies-eduqas'},socio:{aqa:'sociology-aqa',eduqas:'sociology-eduqas'},econ:{aqa:'economics-aqa'},stats:{aqa:'statistics-aqa'},media:{aqa:'media-studies-aqa'},film:{eduqas:'film-studies-eduqas'},drama:{aqa:'drama-aqa'},music:{aqa:'music-aqa',edexcel:'music-edexcel',ocr:'music-ocr',eduqas:'music-eduqas'},mtech:{ncfe:'music-technology'},dt:{aqa:'design-technology',eduqas:'design-technology-eduqas'},eng:{aqa:'engineering-aqa',eduqas:'engineering-eduqas'},electronics:{eduqas:'electronics-eduqas'},it:{ocr:'it-ocr'},astro:{edexcel:'astronomy-edexcel'},geology:{eduqas:'geology-eduqas'},classics:{ocr:'classical-civilisation-ocr'},citizenship:{aqa:'citizenship-aqa'},food:{aqa:'food-preparation-and-nutrition-aqa',eduqas:'food-preparation-and-nutrition-eduqas'},hosp:{eduqas:'hospitality-catering'},hsc:{edexcel:'health-social-care-edexcel',ocr:'health-social-care-ocr',eduqas:'health-social-care-eduqas'}};
+const WUNITS={};   // sub slug -> [{name,slug}]
+function wSub(sl){ const m=WSUB[sl]||{}; return m[boards[sl]]||Object.values(m)[0]||null; }
+function loadUnits(sub,cb){
+  if(WUNITS[sub]) return cb(WUNITS[sub]);
+  fetch('https://baipckgywpnwapobwtsy.supabase.co/rest/v1/subjects?select=slug,settings,units(name,slug,sort_order)&school_id=is.null&slug=eq.'+encodeURIComponent(sub),{headers:{apikey:'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'}})
+    .then(r=>r.json()).then(rows=>{ const row=rows&&rows[0]; const pr=new Set(((row&&row.settings)||{}).practice_units||[]);
+      WUNITS[sub]=((row&&row.units)||[]).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(u=>({name:u.name,slug:u.slug})); cb(WUNITS[sub]); })
+    .catch(()=>cb([]));
+}
 let RAG={}, BUDGET=45;
 try{ const w=JSON.parse(localStorage.getItem('sv-welcome')||'{}'); RAG=w.rag||{}; BUDGET=+w.budget||45; }catch(e){}
 function renderFeel(){
   renderWizShelf(picked);
   const fc=document.getElementById('feelcard');
   let html='<div class="dotkey"><span class="kr">struggling</span><span class="ka">getting there</span><span class="kg">confident</span></div>';
-  picked.forEach(sl=>{ const su=SUBJECTS.find(x=>x.slug===sl); if(!su) return;
-    html+='<div class="feelrow"><span class="fn">'+su.name+'<small>'+(BOARDLBL[boards[sl]]||'')+'</small></span><span class="dots" data-sl="'+sl+'">'+
-      ['r','a','g'].map(v=>'<button type="button" class="dot '+v+'" data-v="'+v+'" aria-pressed="'+(RAG[sl]===v)+'" aria-label="'+({r:'struggling',a:'getting there',g:'confident'})[v]+'"></button>').join('')+'</span></div>'; });
+  const dots=(k,cur)=>['r','a','g'].map(v=>'<button type="button" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'" aria-label="'+({r:'struggling',a:'getting there',g:'confident'})[v]+'"></button>').join('');
+  picked.forEach(sl=>{ const su=SUBJECTS.find(x=>x.slug===sl); if(!su) return; const sub=wSub(sl);
+    html+='<div class="feelrow" data-sl="'+sl+'" data-sub="'+(sub||'')+'"><span class="fn">'+su.name+'<small>'+(BOARDLBL[boards[sl]]||'')+'</small></span>'+
+      (sub?'<button type="button" class="topics" aria-expanded="false">topics</button>':'<span></span>')+
+      '<span class="dots">'+dots(sl,RAG[sl])+'</span><div class="feelunits"></div></div>'; });
   html+='<div class="budget"><h3>How long most days?</h3><div class="bopts">'+
     [[20,'20 min'],[45,'45 min'],[60,'An hour']].map(o=>'<button type="button" data-b="'+o[0]+'" aria-pressed="'+(BUDGET===o[0])+'">'+o[1]+'</button>').join('')+
     '</div><p>You can change this any time from the plan.</p></div>';
   fc.innerHTML=html;
-  fc.querySelectorAll('.dot').forEach(b=>b.onclick=()=>{ const sl=b.parentElement.dataset.sl, v=b.dataset.v;
-    if(RAG[sl]===v) delete RAG[sl]; else RAG[sl]=v;
-    b.parentElement.querySelectorAll('.dot').forEach(x=>x.setAttribute('aria-pressed',String(RAG[sl]===x.dataset.v))); persist(); });
+  const wireDots=root=>root.querySelectorAll('.dot').forEach(b=>b.onclick=()=>{ const k=b.dataset.k, v=b.dataset.v;
+    if(RAG[k]===v) delete RAG[k]; else RAG[k]=v;
+    b.parentElement.querySelectorAll('.dot').forEach(x=>x.setAttribute('aria-pressed',String(RAG[k]===x.dataset.v))); persist(); });
+  wireDots(fc);
+  fc.querySelectorAll('.topics').forEach(t=>t.onclick=()=>{ const row=t.closest('.feelrow'), box=row.querySelector('.feelunits'), sub=row.dataset.sub;
+    const open=!box.classList.contains('on'); box.classList.toggle('on',open); t.setAttribute('aria-expanded',String(open)); t.textContent=open?'hide topics':'topics';
+    if(open&&!box.dataset.loaded){ box.innerHTML='<div class="wait">loading the topics&hellip;</div>';
+      loadUnits(sub,units=>{ box.dataset.loaded='1';
+        box.innerHTML=units.length?units.map(u=>{ const k=sub+'/'+u.slug; return '<div class="feelunit"><span>'+u.name+'</span><span class="dots">'+dots(k,RAG[k])+'</span></div>'; }).join(''):'<div class="wait">no topics listed yet</div>';
+        wireDots(box); }); } });
   fc.querySelectorAll('.bopts button').forEach(b=>b.onclick=()=>{ BUDGET=+b.dataset.b; fc.querySelectorAll('.bopts button').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.b===BUDGET))); persist(); });
   document.getElementById('feelback').onclick=()=>{ const ss=topicSteps(); go(ss.length?'topics':(tierNeeded().length?'tier':'boards')); };
   document.getElementById('feelskip').onclick=()=>{ RAG={}; persist(); enterDash(); };

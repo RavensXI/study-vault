@@ -483,6 +483,17 @@ function initPracticeQuestions() {
 
       const data = await resp.json();
       aiFeedbackBody.innerHTML = formatAiResponse(data.result || '(no response)');
+      /* test-out, second hurdle: the AI's mark out of the question's marks */
+      if (window.__svTestoutStage === 'practice') {
+        var mm = String(data.result || '').match(/(\d+)\s*(?:\/|out of)\s*(\d+)/i);
+        var got = mm ? +mm[1] : 0, outOf = mm ? +mm[2] : +marksMatch;
+        var ok = outOf > 0 && got / outOf >= 0.5;
+        window.__svTestoutStage = null;
+        var v = document.createElement('div'); v.className = 'sv-testout-verdict' + (ok ? ' ok' : '');
+        if (ok) { if (window.svMarkCovered) svMarkCovered(); v.innerHTML = '<b>Covered.</b> ' + got + '/' + outOf + ' — that’s this lesson done. <a href="/classic">Back to my plan</a>'; }
+        else v.innerHTML = '<b>Not this time.</b> ' + got + '/' + outOf + ' — read the lesson and it will come round again.';
+        aiFeedbackBody.insertAdjacentElement('afterbegin', v);
+      }
       aiUsageIncrement();
       aiUpdateLimitPill();
       // keep the answer + AI feedback for teacher review (account-synced, capped)
@@ -1846,7 +1857,16 @@ function initKnowledgeCheck() {
      first; 4/5 or better marks the lesson covered, less and they read it */
   const QUIZ_FIRST = new URLSearchParams(location.search).get('quiz') === '1';
   window.__svQuizFirst = QUIZ_FIRST;
-  if (QUIZ_FIRST && !window.__svQuizFirstOpened) { window.__svQuizFirstOpened = true; setTimeout(function () { scrollTo(0, 0); btn.click(); }, 500); }
+  if (QUIZ_FIRST && !window.__svQuizFirstOpened) {
+    window.__svQuizFirstOpened = true;
+    var hdr = document.querySelector('.lesson-header');
+    if (hdr && !document.querySelector('.sv-testout-banner')) {
+      var bn = document.createElement('div'); bn.className = 'sv-testout-banner';
+      bn.innerHTML = '<b>Quick check first.</b> Four out of five on the quiz, then one exam question — pass both and this lesson counts as covered.';
+      hdr.insertAdjacentElement('afterend', bn);
+    }
+    setTimeout(function () { scrollTo(0, 0); btn.click(); }, 500);
+  }
 
   // Show saved score on button
   const scoreEl = document.getElementById('knowledge-check-score');
@@ -2112,10 +2132,11 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
     else if (pct >= 60) msg = 'Solid effort. Review what you missed and try again.';
     else msg = 'Read through the lesson and give it another go.';
 
-    var testout = '';
+    var testout = '', passed = window.__svQuizFirst && pct >= 80;
     if (window.__svQuizFirst) {
-      if (pct >= 80) { svMarkCovered(); testout = '<p class="kc-result-msg kc-testout">You already know this one — it’s marked as covered. Back to your plan when you’re ready.</p>'; }
-      else testout = '<p class="kc-result-msg kc-testout">Not quite there yet — the lesson is below. Read it, then the quiz will come round again.</p>';
+      testout = passed
+        ? '<p class="kc-result-msg kc-testout">Halfway there. One exam question next — half marks and this lesson is covered.</p>'
+        : '<p class="kc-result-msg kc-testout">Not this time. The lesson is below; the quiz comes round again in a few days.</p>';
     }
     body.innerHTML =
       '<div class="kc-result">' +
@@ -2124,6 +2145,23 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
         '<p class="kc-result-msg">' + msg + '</p>' + testout +
       '</div>';
     try { localStorage.setItem('sv-cards-nudge', '1'); } catch (e) {}
+    if (window.__svQuizFirst) {
+      footer.innerHTML = passed
+        ? '<button class="kc-btn kc-btn-primary" id="kc-testout-next">Try the question</button>'
+        : '<button class="kc-btn kc-btn-secondary" id="kc-testout-plan">Back to my plan</button><button class="kc-btn kc-btn-primary" id="kc-close">Read the lesson</button>';
+      var tq = overlay.querySelector('#kc-testout-next');
+      if (tq) tq.addEventListener('click', function () {
+        window.__svTestoutStage = 'practice'; closeKC();
+        var pb = document.querySelector('.sv-practice-btn'); if (pb) pb.click();
+        else { var ps = document.getElementById('practice'); if (ps) ps.scrollIntoView({ behavior: 'smooth' }); }
+        setTimeout(function () { var ta = document.querySelector('#practice-answer, .practice-answer, textarea'); if (ta) ta.focus(); }, 500);
+      });
+      var tp = overlay.querySelector('#kc-testout-plan');
+      if (tp) tp.addEventListener('click', function () { location.href = '/classic'; });
+      var tc = overlay.querySelector('#kc-close'); if (tc) tc.addEventListener('click', closeKC);
+      overlay.querySelector('#kc-retry') && overlay.querySelector('#kc-retry').remove();
+      return;
+    }
     footer.innerHTML =
       '<button class="kc-btn kc-btn-secondary" id="kc-retry">Try again</button>' +
       '<button class="kc-btn kc-btn-primary" id="kc-close">Close</button>';
