@@ -483,11 +483,13 @@ function initPracticeQuestions() {
 
       const data = await resp.json();
       aiFeedbackBody.innerHTML = formatAiResponse(data.result || '(no response)');
-      /* test-out, second hurdle: the AI's mark out of the question's marks */
+      /* the AI's mark out of the question's marks: half or better is what
+         counts, for the completion tick and for the test-out (Tom, 12 Sep 2026) */
+      var mm = String(data.result || '').match(/(\d+)\s*(?:\/|out of)\s*(\d+)/i);
+      var got = mm ? +mm[1] : 0, outOf = mm ? +mm[2] : +marksMatch;
+      var ok = outOf > 0 && got / outOf >= 0.5;
+      if (ok && window.svTickPractice) svTickPractice();
       if (window.__svTestoutStage === 'practice') {
-        var mm = String(data.result || '').match(/(\d+)\s*(?:\/|out of)\s*(\d+)/i);
-        var got = mm ? +mm[1] : 0, outOf = mm ? +mm[2] : +marksMatch;
-        var ok = outOf > 0 && got / outOf >= 0.5;
         window.__svTestoutStage = null;
         var v = document.createElement('div'); v.className = 'sv-testout-verdict' + (ok ? ' ok' : '');
         if (ok) { if (window.svMarkCovered) svMarkCovered(); v.innerHTML = '<b>Covered.</b> ' + got + '/' + outOf + ' — that’s this lesson done. <a href="/classic">Back to my plan</a>'; }
@@ -2659,7 +2661,7 @@ function initLessonProgress() {
   if (practiceBtn && window.practiceQuestions && window.practiceQuestions.length > 0) {
     tasks.push({
       id: 'practice-question',
-      label: 'Answer an exam question',
+      label: 'Answer an exam question (half marks or better)',
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>',
       iconClass: 'lesson-progress-icon--practice',
       auto: true
@@ -2841,17 +2843,17 @@ function initLessonProgress() {
   bindClicks(gutter, '.gutter-progress-item');
 
   // ---- Practice-question auto-tick ----
-  // Tick when the student clicks "AI mark my answer" (asks for feedback).
-  // Capture phase so we fire before the button's own handler does anything
-  // that might prevent default propagation.
+  // Ticks when the AI marks an answer at half marks or better (Tom, 12 Sep
+  // 2026: asking for a mark is not the same as answering the question). The
+  // marking handler calls this once it has parsed the mark.
   if (practiceBtn && tasks.some(function (t) { return t.id === 'practice-question'; })) {
-    practiceBtn.addEventListener('click', function () {
+    window.svTickPractice = function () {
       if (!state['practice-question']) {
         state['practice-question'] = true;
         saveState(state);
         syncAll();
       }
-    }, true);
+    };
   }
 
   // ---- Highlight mode auto-tick ----
