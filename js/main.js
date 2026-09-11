@@ -491,8 +491,8 @@ function initPracticeQuestions() {
         window.__svTestoutStage = null;
         var v = document.createElement('div'); v.className = 'sv-testout-verdict' + (ok ? ' ok' : '');
         if (ok) { if (window.svMarkCovered) svMarkCovered(); v.innerHTML = '<b>Covered.</b> ' + got + '/' + outOf + ' — that’s this lesson done. <a href="/classic">Back to my plan</a>'; }
-        else v.innerHTML = '<b>Not this time.</b> ' + got + '/' + outOf + ' — read the lesson and it will come round again.';
-        aiFeedbackBody.insertAdjacentElement('afterbegin', v);
+        else v.innerHTML = '<b>Not this time.</b> ' + got + '/' + outOf + ' — complete the full lesson and it will come round again.';
+        if (!(window.svTestoutVerdict && svTestoutVerdict(ok, got, outOf))) aiFeedbackBody.insertAdjacentElement('afterbegin', v);
       }
       aiUsageIncrement();
       aiUpdateLimitPill();
@@ -1855,17 +1855,12 @@ function initKnowledgeCheck() {
   } catch (e) {}
   /* ?quiz=1 — the plan sent them to TEST OUT of this lesson: the quiz opens
      first; 4/5 or better marks the lesson covered, less and they read it */
-  const QUIZ_FIRST = new URLSearchParams(location.search).get('quiz') === '1';
-  window.__svQuizFirst = QUIZ_FIRST;
-  if (QUIZ_FIRST && !window.__svQuizFirstOpened) {
+  const QUIZ_FIRST = new URLSearchParams(location.search).get('quiz') === '1'
+    || !!(window.svTestoutShould && svTestoutShould());
+  window.__svQuizFirst = false;
+  if (QUIZ_FIRST && !window.__svQuizFirstOpened && window.svTestoutOpen) {
     window.__svQuizFirstOpened = true;
-    var col = document.querySelector('#lesson-page .lesson-content');
-    if (col && !document.querySelector('.sv-testout-banner')) {
-      var bn = document.createElement('div'); bn.className = 'sv-testout-banner';
-      bn.innerHTML = '<b>Quick check first.</b> Four out of five on the quiz, then one exam question — pass both and this lesson counts as covered.';
-      col.insertAdjacentElement('afterbegin', bn);
-    }
-    setTimeout(function () { scrollTo(0, 0); btn.click(); }, 500);
+    setTimeout(function () { svTestoutOpen(); }, 400);
   }
 
   // Show saved score on button
@@ -2136,7 +2131,7 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
     if (window.__svQuizFirst) {
       testout = passed
         ? '<p class="kc-result-msg kc-testout">Halfway there. One exam question next — half marks and this lesson is covered.</p>'
-        : '<p class="kc-result-msg kc-testout">Not this time. The lesson is below; the quiz comes round again in a few days.</p>';
+        : '<p class="kc-result-msg kc-testout">Not this time. Complete the full lesson; the quiz comes round again in a few days.</p>';
     }
     body.innerHTML =
       '<div class="kc-result">' +
@@ -2148,13 +2143,14 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
     if (window.__svQuizFirst) {
       footer.innerHTML = passed
         ? '<button class="kc-btn kc-btn-primary" id="kc-testout-next">Try the question</button>'
-        : '<button class="kc-btn kc-btn-secondary" id="kc-testout-plan">Back to my plan</button><button class="kc-btn kc-btn-primary" id="kc-close">Read the lesson</button>';
+        : '<button class="kc-btn kc-btn-secondary" id="kc-testout-plan">Back to my plan</button><button class="kc-btn kc-btn-primary" id="kc-close">Complete the full lesson</button>';
       var tq = overlay.querySelector('#kc-testout-next');
       if (tq) tq.addEventListener('click', function () {
+        if (window.svTestoutStage2 && svTestoutStage2()) return;   /* the shell hosts the question */
         window.__svTestoutStage = 'practice'; closeKC();
         var pb = document.querySelector('.sv-practice-btn'); if (pb) pb.click();
         else { var ps = document.getElementById('practice'); if (ps) ps.scrollIntoView({ behavior: 'smooth' }); }
-        setTimeout(function () { var ta = document.querySelector('#practice-answer, .practice-answer, textarea'); if (ta) ta.focus(); }, 500);
+        setTimeout(function () { var ta = document.getElementById('practice-answer'); if (ta) ta.focus(); }, 500);
       });
       var tp = overlay.querySelector('#kc-testout-plan');
       if (tp) tp.addEventListener('click', function () { location.href = '/classic'; });
