@@ -2088,7 +2088,20 @@ function loadUnits(sub,cb){
 let RAG={}, BUDGET=45, fstep=0;
 try{ const w=JSON.parse(localStorage.getItem('sv-welcome')||'{}'); RAG=w.rag||{}; BUDGET=+w.budget||45; }catch(e){}
 /* the subject's colour is the average of its topics' */
-function ragRoll(sl){ const sub=wSub(sl), us=WUNITS[sub]||[]; const v={r:0,a:1,g:2}; let n=0,t=0;
+/* which topics belong to THIS student — the same scoping the dashboard applies
+   (dash-data.js keepUnit): the options chosen in the wizard sculpt the course */
+const DRAMA_PLAYS=['the-crucible','blood-brothers','noughts-and-crosses','around-the-world-80-days','things-i-know-to-be-true','romeo-and-juliet','a-taste-of-honey','the-great-wave','the-empress'];
+const MUSIC_OPTIONAL_AOS=['aos2-popular-music','aos3-traditional-music','aos4-since-1910'];
+function feelKeep(sl,uslug){
+  const raw=Object.keys(topics[sl]||{}).sort((a,b)=>a-b).reduce((o,k)=>{ const v=topics[sl][k]; return o.concat(Array.isArray(v)?v:[v]); },[]).filter(Boolean);
+  if(sl==='history'||sl==='lit') return !raw.length||raw.indexOf(uslug)>=0;
+  if(sl==='drama') return DRAMA_PLAYS.indexOf(uslug)<0||!raw.length||raw.indexOf(uslug)>=0;
+  if(sl==='music') return MUSIC_OPTIONAL_AOS.indexOf(uslug)<0||!raw.length||raw.indexOf(uslug)>=0;
+  if(sl==='rs'&&raw.length) return raw.some(r=>uslug===r||uslug.indexOf(r+'-')===0);
+  return true;
+}
+function feelUnits(sl){ return (WUNITS[wSub(sl)]||[]).filter(u=>feelKeep(sl,u.slug)); }
+function ragRoll(sl){ const sub=wSub(sl), us=feelUnits(sl); const v={r:0,a:1,g:2}; let n=0,t=0;
   us.forEach(u=>{ const x=RAG[sub+'/'+u.slug]; if(x in v){ n++; t+=v[x]; } });
   if(!n) return null; const m=t/n; return m<0.67?'r':m<1.34?'a':'g'; }
 function renderFeel(){
@@ -2102,10 +2115,11 @@ function renderFeel(){
   fc.innerHTML=key+'<div class="wait">loading the topics&hellip;</div>';
   const dots=(k,cur)=>['r','a','g'].map(v=>'<button type="button" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'" aria-label="'+({r:'struggling',a:'getting there',g:'confident'})[v]+'"></button>').join('');
   const chev='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2l4 4-4 4"/></svg>';
-  const sync=()=>{ const units=WUNITS[sub]||[]; const done=units.every(u=>RAG[sub+'/'+u.slug]);
+  const sync=()=>{ const units=feelUnits(sl); const done=units.every(u=>RAG[sub+'/'+u.slug]);
     nx.disabled=!done; nx.style.opacity=done?'':'.45'; };
-  loadUnits(sub,units=>{
+  loadUnits(sub,()=>{
     if(feelSubs()[fstep]!==sl) return;
+    const units=feelUnits(sl);
     fc.innerHTML=key+(units.length?units.map(u=>{ const k=sub+'/'+u.slug;
         return '<div class="feelunit" data-k="'+k+'"><button type="button" class="fu-name" aria-expanded="false">'+u.name+chev+'</button>'+
           '<span class="dots">'+dots(k,RAG[k])+'</span>'+
@@ -2121,7 +2135,7 @@ function renderFeel(){
   nx.disabled=true; nx.style.opacity='.45';
   const advance=()=>{ if(fstep<subs.length-1){ fstep++; renderFeel(); renderProg('feel'); scrollTo({top:0,behavior:'smooth'}); } else go('budget'); };
   document.getElementById('feelback').onclick=()=>{ if(fstep>0){ fstep--; renderFeel(); renderProg('feel'); } else { const ss=topicSteps(); go(ss.length?'topics':(tierNeeded().length?'tier':'boards')); } };
-  document.getElementById('feelnone').onclick=()=>{ (WUNITS[sub]||[]).forEach(u=>{ RAG[sub+'/'+u.slug]='r'; }); RAG[sl]='r'; persist(); advance(); };
+  document.getElementById('feelnone').onclick=()=>{ feelUnits(sl).forEach(u=>{ RAG[sub+'/'+u.slug]='r'; }); RAG[sl]='r'; persist(); advance(); };
   nx.onclick=()=>{ if(nx.disabled) return; const roll=ragRoll(sl); if(roll) RAG[sl]=roll; persist(); advance(); };
 }
 function renderBudget(){
