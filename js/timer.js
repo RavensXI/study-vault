@@ -26,10 +26,10 @@
   function mmss(ms) { var s = Math.max(0, Math.round(ms / 1000)), m = Math.floor(s / 60); s = s % 60; return m + ':' + (s < 10 ? '0' : '') + s; }
 
   var CSS = '.svtimer{position:relative;display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:2px 4px;cursor:pointer;font:600 .82rem Inter,system-ui,sans-serif;color:#4a4239;flex:none}'
-    /* the painted mantel clock from the shelf props; the rust arc runs round its dial while the timer counts */
-    + '.svtimer .dial{position:relative;width:27px;height:32px;display:block}'
+    /* a painted kitchen timer (assets/lw/shelf/prop_timer.webp); the rust arc runs round its dial while it counts */
+    + '.svtimer .dial{position:relative;width:29px;height:32px;display:block}'
     + '.svtimer .dial img{width:100%;height:100%;object-fit:contain;display:block}'
-    + '.svtimer .dial .arcsvg{position:absolute;left:50%;top:40.5%;width:21px;height:21px;transform:translate(-50%,-50%);overflow:visible}'
+    + '.svtimer .dial .arcsvg{position:absolute;left:50%;top:56%;width:23px;height:23px;transform:translate(-50%,-50%);overflow:visible}'
     + '.svtimer .dial .arc{fill:none;stroke:#c06325;stroke-width:2.4;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .9s linear}'
     + '.svtimer .left{font-variant-numeric:tabular-nums;min-width:0}.svtimer .left:empty{display:none}'
     + '.svtimer.flash .dial{animation:svtflash .35s ease-in-out 5}@keyframes svtflash{50%{transform:scale(1.25)}}'
@@ -45,7 +45,7 @@
     var wrap = document.createElement('span'); wrap.style.position = 'relative'; wrap.style.display = 'inline-flex'; wrap.className = 'svtimer-wrap';
     var b = document.createElement('button'); b.type = 'button'; b.className = 'svtimer'; b.setAttribute('aria-label', 'Revision timer');
     var R = 9.6, C = 2 * Math.PI * R;
-    b.innerHTML = '<span class="dial" aria-hidden="true"><img src="/assets/lw/shelf/prop_clock.webp" alt="">'
+    b.innerHTML = '<span class="dial" aria-hidden="true"><img src="/assets/lw/shelf/prop_timer.webp" alt="">'
       + '<svg class="arcsvg" viewBox="0 0 21 21"><circle class="arc" cx="10.5" cy="10.5" r="' + R + '" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + C.toFixed(2) + '"/></svg></span><span class="left"></span>';
     var pop = document.createElement('span'); pop.className = 'svtimer-pop';
     pop.innerHTML = '<button data-min="15">15 min</button><button data-min="25">25 min</button><button data-min="45">45 min</button><button class="stop" data-min="0">Stop</button>';
