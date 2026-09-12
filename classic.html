@@ -599,7 +599,7 @@ svDashInit(SUBJECTS,{view:'classic',onUnits:function(){
   });
   /* today's spaced-repetition sitting: due cards first, then new, capped ~20 */
   if(window.svFlashDeck) svFlashDeck(SUBJECTS,deck=>{
-    if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0; if(typeof wireCardsRow==='function') wireCardsRow();
+    if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0; if(typeof noteDealt==='function') noteDealt(); if(typeof wireCardsRow==='function') wireCardsRow();
       /* on the way back from a lesson: due cards come up uninvited, three of them */
       try{ if(localStorage.getItem('sv-cards-nudge')&&window.svStrength&&svStrength.flashDue()>0&&!document.querySelector('.fcmodal.open')){
         localStorage.removeItem('sv-cards-nudge'); FC.length=Math.min(FC.length,3); fcDeal(); fcmodal.classList.add('open');
@@ -1309,7 +1309,19 @@ function fcDeal(){
   const _cn=document.getElementById('fcCnt'); if(_cn) _cn.textContent=(fci+1)+' / '+FC.length;
   fcShowA=false; bigcard.classList.remove('showa');
 }
-function openCards(){ fci=0; fcDeal(); fcmodal.classList.add('open');
+/* every card dealt this visit, so a second sitting never repeats the first */
+window.__svDealt=window.__svDealt||{};
+function noteDealt(){ FC.forEach(c=>{ if(c.key) __svDealt[c.key]=1; }); }
+var fcSittingDone=false;
+function doorMore(){ const dp=document.querySelector('#fcdoor p'); if(dp) dp.textContent=fcSittingDone?'Want more?':'mixed deck · tap to flip'; }
+function openCards(){
+  if(fcSittingDone){   /* the backlog next, then the weakest lessons — never the same card twice today */
+    if(!window.svFlashDeck) return;
+    svFlashDeck(SUBJECTS,deck=>{ if(!deck.length) return; FC.length=0; deck.forEach(c=>FC.push(c)); noteDealt(); fci=0; fcSittingDone=false; doorMore();
+      fcDeal(); fcmodal.classList.add('open'); },{more:true,exclude:__svDealt});
+    return;
+  }
+  fci=0; fcDeal(); fcmodal.classList.add('open');
   try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE) refreshDayOnePlan(); }
@@ -1346,7 +1358,7 @@ function fcMark(ok){
   if(window.svFlashMark && f.key) f.level=svFlashMark(f.key,ok);
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(fci+1<FC.length){ fci++; fcDeal(); }
-  else { fcmodal.classList.remove('open'); if(DAYONE) refreshDayOnePlan(); }   /* sitting done for today */
+  else { fcmodal.classList.remove('open'); fcSittingDone=true; doorMore(); if(DAYONE) refreshDayOnePlan(); }   /* sitting done; the door offers more */
 }
 ['ok','no'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
   e.stopPropagation(); if(fcShowA) fcMark(k==='ok'); }); });

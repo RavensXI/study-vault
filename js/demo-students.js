@@ -95,7 +95,7 @@
           for (var c = 0; c < 5; c++) {
             var box = BOXES[quality][(i + c) % 5], last = Math.max(0, ago - Math.floor(rnd() * 3));
             var nr = new Date(); nr.setDate(nr.getDate() - last + IV[box]);
-            cards[l.id + ':' + c] = { box: box, nextReview: nr.toISOString().slice(0, 10), attempts: box + 1, correct: box };
+            cards[l.id + ':q' + c] = { box: box, nextReview: nr.toISOString().slice(0, 10), attempts: box + 1, correct: box };
           }
           if (ago <= 6) {
             for (var f = 0; f < 4; f++) flog.push({ t: Date.now() - ago * 864e5, d: d, sub: sub, unit: uslug, n: l.lesson_number, ok: quality === 'weak' ? f % 2 === 0 : f !== 3, q: '' });
