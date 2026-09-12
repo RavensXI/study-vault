@@ -26,12 +26,11 @@
   function mmss(ms) { var s = Math.max(0, Math.round(ms / 1000)), m = Math.floor(s / 60); s = s % 60; return m + ':' + (s < 10 ? '0' : '') + s; }
 
   var CSS = '.svtimer{position:relative;display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:2px 4px;cursor:pointer;font:600 .82rem Inter,system-ui,sans-serif;color:#4a4239;flex:none}'
-    + '.svtimer .dial{width:28px;height:28px;display:block}'
-    + '.svtimer .dial .ring{fill:#fffdf8;stroke:#3a2615;stroke-width:1.5}'
-    + '.svtimer .dial .arc{fill:none;stroke:#c06325;stroke-width:2.2;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .9s linear}'
-    + '.svtimer .dial .tick{stroke:#3a2615;stroke-width:1.1;stroke-linecap:round}'
-    + '.svtimer .dial .hand{stroke:#3a2615;stroke-width:1.7;stroke-linecap:round}'
-    + '.svtimer .dial .pin{fill:#3a2615}'
+    /* the painted mantel clock from the shelf props; the rust arc runs round its dial while the timer counts */
+    + '.svtimer .dial{position:relative;width:27px;height:32px;display:block}'
+    + '.svtimer .dial img{width:100%;height:100%;object-fit:contain;display:block}'
+    + '.svtimer .dial .arcsvg{position:absolute;left:50%;top:40.5%;width:21px;height:21px;transform:translate(-50%,-50%);overflow:visible}'
+    + '.svtimer .dial .arc{fill:none;stroke:#c06325;stroke-width:2.4;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .9s linear}'
     + '.svtimer .left{font-variant-numeric:tabular-nums;min-width:0}.svtimer .left:empty{display:none}'
     + '.svtimer.flash .dial{animation:svtflash .35s ease-in-out 5}@keyframes svtflash{50%{transform:scale(1.25)}}'
     + '.svtimer-pop{position:absolute;top:calc(100% + 8px);right:0;z-index:1000;background:#fff;border:1px solid #d5c9b3;border-radius:6px;padding:.4rem;display:none;gap:.3rem;box-shadow:0 10px 26px rgba(40,28,12,.16)}'
@@ -45,12 +44,9 @@
     if (!document.getElementById('svtimer-css')) { var st = document.createElement('style'); st.id = 'svtimer-css'; st.textContent = CSS; document.head.appendChild(st); }
     var wrap = document.createElement('span'); wrap.style.position = 'relative'; wrap.style.display = 'inline-flex'; wrap.className = 'svtimer-wrap';
     var b = document.createElement('button'); b.type = 'button'; b.className = 'svtimer'; b.setAttribute('aria-label', 'Revision timer');
-    /* a small clock: face, four ticks, hands at ten past ten, a pin; the rust arc runs round the outside */
-    var R = 12.6, C = 2 * Math.PI * R;
-    b.innerHTML = '<svg class="dial" viewBox="0 0 28 28" aria-hidden="true"><circle class="ring" cx="14" cy="14" r="10.3"/>'
-      + [0, 90, 180, 270].map(function (a) { return '<line class="tick" x1="14" y1="5" x2="14" y2="6.8" transform="rotate(' + a + ' 14 14)"/>'; }).join('')
-      + '<line class="hand" x1="14" y1="14" x2="10.6" y2="11"/><line class="hand" x1="14" y1="14" x2="18.6" y2="9.4"/><circle class="pin" cx="14" cy="14" r="1.2"/>'
-      + '<circle class="arc" cx="14" cy="14" r="' + R + '" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + C.toFixed(2) + '"/></svg><span class="left"></span>';
+    var R = 9.6, C = 2 * Math.PI * R;
+    b.innerHTML = '<span class="dial" aria-hidden="true"><img src="/assets/lw/shelf/prop_clock.webp" alt="">'
+      + '<svg class="arcsvg" viewBox="0 0 21 21"><circle class="arc" cx="10.5" cy="10.5" r="' + R + '" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + C.toFixed(2) + '"/></svg></span><span class="left"></span>';
     var pop = document.createElement('span'); pop.className = 'svtimer-pop';
     pop.innerHTML = '<button data-min="15">15 min</button><button data-min="25">25 min</button><button data-min="45">45 min</button><button class="stop" data-min="0">Stop</button>';
     wrap.appendChild(b); wrap.appendChild(pop);
