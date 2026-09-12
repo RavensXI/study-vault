@@ -36,8 +36,7 @@
     display:grid;place-items:center;font-weight:700;font-size:.8rem}
 
   .wrap{max-width:1180px;margin:0 auto;padding:10px clamp(16px,4vw,32px) 56px;
-    display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:34px}
-  @media (max-width:980px){ .wrap{grid-template-columns:minmax(0,1fr)} }
+    display:grid;grid-template-columns:minmax(0,1fr);gap:34px}
   .cosy{white-space:nowrap}
   @media (max-width:560px){ .datestamp{display:none} .scard h3,.scard .meta{padding-right:86px} }
 
@@ -48,7 +47,6 @@
   @media (min-width:981px) and (min-height:760px){   /* shorter windows scroll like a normal page */
     html,body{height:100%;overflow:hidden}
     .wrap{height:calc(100% - 64px);overflow:hidden;align-content:start}
-    .rail{overflow:hidden}
   }
   .hl{background:linear-gradient(101deg,transparent 1.5%,rgba(255,222,84,.5) 7%,rgba(255,226,96,.4) 93%,transparent 98.5%);
     border-radius:6px;padding:1px 7px;margin:0 -3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
@@ -278,12 +276,14 @@
   .lpn{flex:none;font-size:.7rem;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
   .lpt{flex:1;min-width:0;font-family:var(--read);font-size:.92rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .lpick .go{align-self:center}
-  /* ---- rail ---- */
-  .rail{display:flex;flex-direction:column;gap:14px}
-  .exam{padding:.65rem 1rem .7rem;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center}
-  .exam .big{font-size:2rem;font-weight:800;letter-spacing:-.02em;line-height:1}
-  .exam .lbl{font-size:.82rem;color:var(--mut)}
-  .cal{grid-column:1 / -1;margin-top:.45rem;border-top:1px solid var(--linel);padding-top:.7rem}
+  /* ---- the strip under the plan: countdown · this week · cards · shorts · podcast ----
+     one line; "This week" opens to a full-width row beneath it; everything else is one tap */
+  .rail{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 4px}
+  .rail>.card{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:.6rem;padding:.5rem .85rem;min-height:54px;box-sizing:border-box}
+  .exam{align-items:baseline;gap:.5rem}
+  .exam .big{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;line-height:1}
+  .exam .lbl{font-size:.78rem;color:var(--mut);line-height:1.15;white-space:nowrap}
+  .cal{display:none;grid-column:1 / -1;margin-top:.45rem;border-top:1px solid var(--linel);padding-top:.7rem}
   .cal .mon{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:.4rem}
   .cal .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:.72rem;color:var(--sec)}
   .cal .d{position:relative;text-align:center;padding:.18rem 0;font-variant-numeric:tabular-nums}
@@ -293,23 +293,28 @@
   .cal .d.today{color:#fff;isolation:isolate}
   .cal .d.today::before{content:"";position:absolute;inset:-1px 18%;background:var(--anchor);border-radius:3px;z-index:-1}
 
-  .week{padding:.6rem 1rem .65rem}
-  .week h3{font-size:.78rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--mut);margin:0 0 .5rem}
+  .rail>.card.week{flex-direction:column;align-items:stretch;justify-content:center;cursor:pointer}
+  .week h3{font-size:.78rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--mut);margin:0;display:flex;align-items:baseline;gap:.6rem}
+  .week h3 .sum{margin-left:auto;font-family:var(--read);font-size:.92rem;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink)}
+  .week:not(.open)>:not(h3){display:none}
+  .week.open{flex-basis:100%;order:9;cursor:default}
+  .week.open h3{margin-bottom:.5rem;cursor:pointer}
   .week .ln{display:flex;justify-content:space-between;gap:12px;font-family:var(--read);font-size:.85rem;
     color:var(--sec);padding:.26rem 0;border-top:1px solid var(--linel)}
   .week .ln:first-of-type{border-top:none}
   .week .ln b{color:var(--ink);font-weight:600;text-align:right}
 
-  .door{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:11px;align-items:center;
-    padding:.45rem .85rem .45rem .55rem;cursor:pointer;text-align:left;width:100%;font-family:var(--head);color:inherit;
-    transition:border-color .2s,background .2s}
+  .door{cursor:pointer;text-align:left;font-family:var(--head);color:inherit;transition:border-color .2s,background .2s}
   .door:hover{border-color:#c9ba9e;background:color-mix(in srgb,var(--anchor) 4%,transparent)}
-  .door img{width:48px;height:38px;object-fit:contain;display:block}
-  .door h3{font-size:.98rem;font-weight:700;margin:0 0 .1rem}
-  .door p{font-size:.8rem;color:var(--mut);margin:0}
-  .door .go{color:var(--mut);font-size:1.1rem}
-  /* podcast door grows a mini player when playing */
-  .podrow{display:flex;align-items:center;gap:10px;margin-top:.45rem}
+  .door img{width:36px;height:28px;object-fit:contain;display:block;flex:none}
+  .door>span{min-width:0;display:flex;align-items:center;gap:.5rem;flex:1}
+  .door h3{font-size:.92rem;font-weight:700;margin:0;white-space:nowrap}
+  .door p{font-size:.8rem;color:var(--mut);margin:0;display:none}
+  .door.more p{display:block}
+  .door .go{display:none}
+  #poddoor img{display:none}
+  /* the podcast is a player, not a door */
+  .podrow{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
   .podrow button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--card);
     cursor:pointer;display:grid;place-items:center;color:var(--anchor)}
   .podrow button:hover{border-color:var(--anchor)}
@@ -376,6 +381,7 @@
   }
   /* ---- the planner: click the exam card, the plan opens on a real calendar ---- */
   .card.exam{cursor:pointer;transition:border-color .15s}
+  @media (max-width:640px){ .rail>.card{flex:1 1 calc(50% - 5px)} .week.open{flex-basis:100%} }
   .card.exam:hover{border-color:#c9bda4}
   .cal .d.hasplan{cursor:pointer}
   .cal .d.hasplan::after{content:"";position:absolute;left:50%;bottom:-1px;width:4px;height:4px;
@@ -466,26 +472,11 @@
       </div>
     </div>
 
-    <div class="sechead"><h2>Your subjects</h2><span id="subcount"></span></div>
-    <div class="shelfstage">
-      <div class="shelf" id="shelf" role="tablist" aria-label="Your subjects"></div>
-      <img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt="">
-      <div class="lightwash"></div>
-      <div class="lampglow"></div>
-      <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
-      <div class="bulb"></div>
-      <button class="lampbtn" type="button"></button>
-      <div class="pullcord"></div>
-    </div>
-    <div class="card sdetail" id="sdetail"></div>
-    <div class="selprompt" id="selprompt" hidden><span class="uparrow">↑</span>Select a subject</div>
-  </main>
-
-  <aside class="rail">
+  <div class="rail">
     <div class="card exam">
       <div>
         <div class="big" id="examdays">—</div>
-        <div class="lbl">days to your first exam · May 2027</div>
+        <div class="lbl">days to your first exam</div>
       </div>
       <div class="cal">
         <div class="mon" id="calmon"></div>
@@ -505,30 +496,46 @@
 
     <button class="card door" id="fcdoor">
       <img src="assets/lw/desk4-cards-a-cut.webp" alt="">
-      <span><h3>Flashcards</h3><p>mixed deck · tap to flip</p></span>
+      <span><h3>Flashcards</h3><p></p></span>
       <span class="go">→</span>
     </button>
 
     <button class="card door" id="shortsdoor">
       <img src="assets/lw/desk4-phone-c-cut.webp" alt="">
-      <span><h3>Shorts</h3><p>today’s 20 · one-minute videos</p></span>
+      <span><h3>Shorts</h3><p></p></span>
       <span class="go">→</span>
     </button>
 
     <div class="card door" id="poddoor" role="group" aria-label="Podcasts">
       <img src="assets/lw/desk4-radio-a-cut.webp" alt="">
       <span style="min-width:0">
-        <h3>Podcasts</h3><p>episodes for the bus</p>
+        <h3>Podcast</h3>
         <span class="podrow">
           <button id="podplay" aria-label="Play"><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></button>
           <button id="podnext" aria-label="Next episode"><svg viewBox="0 0 16 16"><path d="M3 2l8 6-8 6zM12 2h2v12h-2z"/></svg></button>
-          <span class="podtitle" id="podtitle">tap play for an episode</span>
+          <span class="podtitle" id="podtitle"></span>
         </span>
       </span>
       <span class="go"></span>
     </div>
 
-  </aside>
+  </div>
+
+    <div class="sechead"><h2>Your subjects</h2><span id="subcount"></span></div>
+    <div class="shelfstage">
+      <div class="shelf" id="shelf" role="tablist" aria-label="Your subjects"></div>
+      <img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt="">
+      <div class="lightwash"></div>
+      <div class="lampglow"></div>
+      <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
+      <div class="bulb"></div>
+      <button class="lampbtn" type="button"></button>
+      <div class="pullcord"></div>
+    </div>
+    <div class="card sdetail" id="sdetail"></div>
+    <div class="selprompt" id="selprompt" hidden><span class="uparrow">↑</span>Select a subject</div>
+  </main>
+
 </div>
 
 <div class="fcmodal" id="fcmodal" aria-modal="true" role="dialog" aria-label="Flashcards">
@@ -706,9 +713,8 @@ function refreshWeekCard(){
   /* the first visit of a new week shows last week's picture once; otherwise this week so far */
   const rv=window.__svWeekReview===undefined?(window.__svWeekReview=svProgress.review()):window.__svWeekReview;
   const wk=rv||svProgress.week(), lines=svProgress.lines(wk), said=svProgress.saidNow(SUBJECTS);
-  wc.innerHTML='<h3>'+(rv?'Last week':'This week')+'</h3>'
-    +(wk.any?lines.map(l=>'<div class="ln"><span>'+l[0]+'</span><b>'+l[1]+'</b></div>').join('')
-            :'<p class="weekempty">Nothing yet this week. It fills in as you revise.</p>')
+  wc.innerHTML='<h3>'+(rv?'Last week':'This week')+'<span class="sum">'+(wk.any?wk.active+(wk.active===1?' day':' days'):'')+'</span></h3>'
+    +(wk.any?lines.map(l=>'<div class="ln"><span>'+l[0]+'</span><b>'+l[1]+'</b></div>').join(''):'')
     +(w?'<div class="ln"><span>Warm-up today</span><b>'+w.correct+' / '+w.total+'</b></div>':'')
     +'<div class="ln"><span>Finished so far</span><b>'+st.total+' '+(st.total===1?'lesson':'lessons')+'</b></div>'
     +(said?'<p class="weeksaid">'+said+'</p>':'');
@@ -734,8 +740,7 @@ if(DAYONE){
     if(_u2){ _lis[1].classList.remove('inert'); _lis[1].style.cursor='pointer';
       _lis[1].onclick=()=>nav(_u2); } }
   wireWarmupRow(dayOneUrl(svDayOneSubject(SUBJECTS)));
-  document.querySelector('.card.week').innerHTML='<h3>This week</h3>'+
-    '<p class="weekempty">Nothing here yet — it fills in as you revise. Warm-up accuracy, your best subject, cards due: all of it lands on this card.</p>';
+  document.querySelector('.card.week').innerHTML='<h3>This week<span class="sum"></span></h3>';
   refreshDayOnePlan();   /* ticks + Keep-going label apply before units land too */
   if(SVUSER&&SVUSER.email){
     /* signed in: the avatar is you — click it for edit-subjects / sign out */
@@ -762,8 +767,8 @@ function examsFor(s){ return svExamsFor(s); }
 const _fl=svFirstLast(SUBJECTS);
 const FIRST_EXAM=_fl.first, LASTX=_fl.last;
 document.getElementById('examdays').textContent=Math.max(0,Math.round((FIRST_EXAM-now)/864e5));
-document.querySelector('.card.exam .lbl').textContent='days to your first exam · '
-  +FIRST_EXAM.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+document.querySelector('.card.exam .lbl').textContent='days to your first exam';
+document.querySelector('.card.exam').title='First exam '+FIRST_EXAM.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 /* plan engine + modal + day tooltip live in planner.js (shared with the desk) */
 function buildMini(){
   const m=new Date(now.getFullYear(),now.getMonth(),1);
@@ -1296,7 +1301,7 @@ function fcDeal(){
 window.__svDealt=window.__svDealt||{};
 function noteDealt(){ FC.forEach(c=>{ if(c.key) __svDealt[c.key]=1; }); }
 var fcSittingDone=false;
-function doorMore(){ const dp=document.querySelector('#fcdoor p'); if(dp) dp.textContent=fcSittingDone?'Want more?':'mixed deck · tap to flip'; }
+function doorMore(){ const d=document.getElementById('fcdoor'), dp=d&&d.querySelector('p'); if(dp) dp.textContent=fcSittingDone?'Want more?':''; if(d) d.classList.toggle('more',!!fcSittingDone); }
 function openCards(){
   if(fcSittingDone){   /* the backlog next, then the weakest lessons — never the same card twice today */
     if(!window.svFlashDeck) return;
@@ -1309,6 +1314,9 @@ function openCards(){
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE) refreshDayOnePlan(); }
 document.getElementById('fcdoor').onclick=openCards;
+/* the week chip: one figure closed, the lines open, on tap */
+(function(){ const wc=document.querySelector('.card.week'); if(!wc) return;
+  wc.addEventListener('click',e=>{ if(e.target.closest('#duerow')) return; if(!wc.classList.contains('open')||e.target.closest('h3')) wc.classList.toggle('open'); }); })();
 /* row 3 of the plan is the same deck as the door: today's sitting, not the backlog */
 function wireCardsRow(){ const li=document.getElementById('planCards'); if(!li) return;
   const sm=li.querySelector('small'); if(sm&&FC.length) sm.textContent=FC.length+' cards';
