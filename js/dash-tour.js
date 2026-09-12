@@ -10,31 +10,32 @@
   'use strict';
   var KEY = 'sv-dash-tour-v1';
   var STEPS = [
-    { id: 'plan', title: 'Here’s your plan',
-      text: 'Three things for today, in order, and a Start button that runs them one after another. The lesson in the middle is the one the plan wants next.' },
-    { id: 'revisit', title: 'The revisit',
-      text: 'A few quick questions on lessons you learned a while ago, before they fade. Get them right and the topic stays secure; slip, and the lesson comes back into your plan to redo.' },
-    { id: 'quickcheck', title: 'The quick check',
-      text: 'Rated a topic confident? A lesson opens with a quick check first: get at least 4 out of 5, then at least half marks on an exam question, and you skip the full lesson.' },
-    { id: 'books', title: 'Your subjects',
-      text: 'Pick a book off the shelf to see its topics, then a topic to see its lessons. Books colour in from the bottom as you learn.' },
-    { id: 'rings', title: 'What the rings mean',
-      text: 'Each topic wears a ring: green is secure, amber is developing, red is emerging. They move as your quizzes, cards and marked answers come in, not just when you say so.' },
-    { id: 'week', title: 'This week',
-      text: 'Tap the week chip for the real numbers: days revised, lessons covered, quizzes passed, cards right. On Mondays it shows last week once, so you can see how it went.' },
+    { id: 'plan', title: 'Your plan for today',
+      text: 'Every day, StudyVault picks three short things for you to do: a quick recap, one lesson, and a few flashcards. Press Start and it takes you through them one at a time. Most days it takes about 20 minutes.' },
+    { id: 'revisit', title: 'Revisit: a quick recap',
+      text: 'The first thing each day is a handful of questions on lessons you did a while ago. This is what stops you forgetting them. Get them right and you move on. Get them wrong and that lesson goes back on your list so you can do it again.' },
+    { id: 'quickcheck', title: 'Already know a topic? Prove it and skip ahead',
+      text: 'If you told us you feel confident about a topic, a lesson on it starts with a quick check instead of the full lesson. Get at least 4 out of 5 on the quiz, then at least half marks on an exam question, and that lesson is ticked off without reading it. If not, you do the lesson as normal.' },
+    { id: 'books', title: 'Your subjects are the books',
+      text: 'Each book on the shelf is one of your subjects. Tap a book to see its topics, then tap a topic to see its lessons. You can start any lesson from here. A book fills with colour from the bottom as you work through it.' },
+    { id: 'rings', title: 'The coloured outlines',
+      text: 'Each topic has an outline that tells you how well you know it right now. Green means it is secure. Amber means you are getting there. Red means it needs work. The colours change by themselves as you do quizzes, flashcards and exam questions.' },
+    { id: 'week', title: 'How your week is going',
+      text: 'Tap "This week" to see what you have done: the days you revised, the lessons you finished, the quizzes you passed and the flashcards you got right. On a Monday it shows you last week first, so you can see how it went.' },
     { id: 'flashcards', title: 'Flashcards',
-      text: 'The cards due today, shuffled across your subjects. Tap to flip, then say whether you had it. Done for the day? “Want more?” keeps going.' },
-    { id: 'podcast', title: 'Podcasts',
-      text: 'Press play in the top bar for a podcast on one of your topics, and skip to the next. Finishing one counts towards that lesson.' },
+      text: 'Flashcards are quick question-and-answer cards from the lessons you have done. Tap a card to see the answer, then say whether you got it right. Cards you get wrong come back sooner. Cards you know come back less often.' },
+    { id: 'podcast', title: 'Listen while you do something else',
+      text: 'The play button at the top plays a short podcast about one of your topics, a bit like a radio show. Use the skip button to change to another one. It keeps playing if you lock your phone, and finishing one counts as work on that lesson.' },
     { id: 'timer', title: 'The revision timer',
-      text: 'Tap the timer for 15, 25 or 45 minutes. It follows you from page to page and chimes when the time is up.' },
-    { id: 'restday', title: 'Rest days',
-      text: 'On a day you don’t revise, the plan shows what is up next instead, so if you do sit down you know where to start. Anything you do counts as a bonus.' },
+      text: 'Tap the timer at the top and choose 15, 25 or 45 minutes. It keeps counting as you move between pages, and it chimes when your time is up. Useful for deciding to do "just 25 minutes" and then stopping.' },
+    { id: 'restday', title: 'Days off',
+      text: 'When you set up your plan, you choose which days you revise. On your days off there is nothing you have to do. But if you fancy it, your plan shows what is coming up next, so you can get ahead. Anything you do on a day off is a bonus.' },
     { id: 'planner', title: 'Your exam countdown',
-      text: 'Tap the countdown for the whole plan: every day to your last paper, with rest days, holidays and the real exam dates once the boards publish them.' },
-    { id: 'reading', title: 'Dark mode and reading settings',
-      text: 'The moon opens dark mode, text size, a reading font and colour overlays. Set them here or in a lesson: they follow you everywhere.' }
+      text: 'The number at the top is how many days until your first exam. Tap it to see your whole plan on a calendar, right up to your last exam, including your days off and holidays. You can change your revising days and how long you revise here too.' },
+    { id: 'reading', title: 'Make it easier on your eyes',
+      text: 'Tap the moon at the top to switch to dark mode, make the text bigger, change to an easier-to-read font, or put a colour tint over the page. Whatever you pick stays on across every page, including the lessons.' }
   ];
+
   var manifest = null, dq = new URLSearchParams(location.search);
   function phone() { return matchMedia('(max-width:700px)').matches; }
   function g(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
