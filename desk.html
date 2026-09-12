@@ -521,6 +521,7 @@ if(Math.min(screen.width,innerWidth)<700&&!/[?&]force=1/.test(location.search)) 
 <script src="warmup.js"></script>
 <script src="js/strength.js"></script>
 <script src="js/progress.js"></script>
+<script src="js/timer.js"></script>
 <script src="planner.js"></script>
 <script>
 /* ---------- data: Sam's subjects, wired to REAL free-tier content ----------
@@ -1147,7 +1148,8 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('o
   const tarc=document.getElementById('tarc'), tcirc=document.getElementById('tcirc');
   const wpop=document.getElementById('wpop'), wstop=document.getElementById('wstop');
   const C=1495;
-  let tEnd=0, tTotal=0;
+  const _t0=window.svTimer?svTimer.read():null;   /* a timer set on any other page carries on here */
+  let tEnd=_t0?_t0.end:0, tTotal=_t0?_t0.total:0;
   /* a soft two-note chime when the timer runs out — the flash alone was silent.
      The AudioContext is unlocked on the start tap (a user gesture) so the
      autoplay policy lets it sound minutes later. */
@@ -1171,6 +1173,7 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('o
      time reads true against the PAINTED dial, not the screen. */
   const TILT=45;
   function tickWatch(){
+    if(window.svTimer){ const t=svTimer.read(); if(t&&t.end!==tEnd){ tEnd=t.end; tTotal=t.total; wstop.style.display=''; } else if(!t&&tEnd&&tEnd-Date.now()>0){ tEnd=0; tcirc.style.strokeDashoffset=C; wstop.style.display='none'; } }
     const n=new Date();
     const s=n.getSeconds(), m=n.getMinutes()+s/60, h=(n.getHours()%12)+m/60;
     sh.style.transform='rotate('+(s*6+TILT)+'deg)';
@@ -1178,19 +1181,20 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('o
     hh.style.transform='rotate('+(h*30+TILT)+'deg)';
     if(tEnd){
       const left=tEnd-Date.now();
-      if(left<=0){ tEnd=0; wstop.style.display='none';
+      if(left<=0){ tEnd=0; wstop.style.display='none'; if(window.svTimer) svTimer.stop();
         tarc.classList.add('wflash'); chime();
         setTimeout(()=>{ tarc.classList.remove('wflash'); tcirc.style.strokeDashoffset=C; },1900);
       } else tcirc.style.strokeDashoffset=C*(1-left/tTotal);
     }
   }
+  if(tEnd){ wstop.style.display=''; }
   setInterval(tickWatch,1000); tickWatch();
   document.getElementById('watch').onclick=()=>{ wpop.classList.toggle('open'); };
   wpop.querySelectorAll('button').forEach(b=>b.onclick=e=>{
     e.stopPropagation();
     const min=+b.dataset.min;
-    if(min){ unlockChime(); tTotal=min*60000; tEnd=Date.now()+tTotal; tcirc.style.strokeDashoffset=0; wstop.style.display=''; }
-    else { tEnd=0; tcirc.style.strokeDashoffset=C; wstop.style.display='none'; }
+    if(min){ unlockChime(); tTotal=min*60000; tEnd=Date.now()+tTotal; tcirc.style.strokeDashoffset=0; wstop.style.display=''; if(window.svTimer) svTimer.set(min); }
+    else { tEnd=0; tcirc.style.strokeDashoffset=C; wstop.style.display='none'; if(window.svTimer) svTimer.stop(); }
     wpop.classList.remove('open'); tickWatch();
   });
   addEventListener('keydown',e=>{ if(e.key==='Escape') wpop.classList.remove('open'); });
