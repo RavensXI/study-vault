@@ -324,10 +324,10 @@
   /* ---- the strip under the plan: countdown · this week · cards · shorts · podcast ----
      one line; "This week" opens to a full-width row beneath it; everything else is one tap */
   .rail{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 22px}
-  .rail>.card{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:.6rem;padding:.5rem .85rem;min-height:54px;box-sizing:border-box}
+  .rail>.card{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.5rem 1.6rem .5rem .85rem;min-height:54px;box-sizing:border-box;position:relative;text-align:center}
   .exam{align-items:baseline;gap:.5rem}
-  .exam::after,.week h3::after{content:'›';margin-left:auto;font-size:1.25rem;line-height:1;color:var(--mut);align-self:center}
-  .week h3::after{margin-left:.6rem}
+  .exam::after,.week h3::after{content:'›';position:absolute;right:.8rem;top:50%;transform:translateY(-50%);font-size:1.25rem;line-height:1;color:var(--mut)}
+  .week.open h3::after{top:1rem;transform:none}
   .week.open h3::after{content:'×';font-size:1rem}
   .exam:hover::after,.week:hover h3::after{color:var(--rust)}
   .exam .big{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;line-height:1}
@@ -343,8 +343,9 @@
   .cal .d.today::before{content:"";position:absolute;inset:-1px 18%;background:var(--rust);border-radius:3px;z-index:-1}
 
   .rail>.card.week{flex-direction:column;align-items:stretch;justify-content:center;cursor:pointer}
-  .week h3{font-size:.78rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--mut);margin:0;display:flex;align-items:baseline;gap:.6rem}
-  .week h3 .sum{margin-left:auto;font-family:var(--read);font-size:.92rem;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink)}
+  .week h3{font-size:.78rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--mut);margin:0;display:flex;align-items:baseline;justify-content:center;gap:.7rem}
+  .week h3 .sum{font-family:var(--read);font-size:.92rem;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink)}
+  .week.open h3{justify-content:flex-start}
   .week:not(.open)>:not(h3){display:none}
   .week.open{flex-basis:100%;order:9;cursor:default}
   .week.open h3{margin-bottom:.5rem;cursor:pointer}
