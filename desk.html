@@ -515,10 +515,12 @@
 <script>/* the desk is a 2752px painting: on a phone it is a postage stamp, so phones get the classic view */
 if(Math.min(screen.width,innerWidth)<700&&!/[?&]force=1/.test(location.search)) location.replace('/classic'+location.search);</script>
 <script src="/js/account-sync.js"></script>
+<script src="js/demo-students.js"></script>
   <script src="dash-data.js"></script>
 <script src="sync.js"></script>
 <script src="warmup.js"></script>
 <script src="js/strength.js"></script>
+<script src="js/progress.js"></script>
 <script src="planner.js"></script>
 <script>
 /* ---------- data: Sam's subjects, wired to REAL free-tier content ----------
@@ -612,6 +614,7 @@ function buildDayOneToday(){
     <li tabindex="0" class="${ps.cards?'done':''}"><span class="n">${ps.cards?'✓':'3'}</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>
   </ol>
   <p class="momentum"><span class="hl">${(function(){ const st=svDoneStats();
+    const said=(st.total&&window.svProgress)?svProgress.saidNow(SUBJECTS):null; if(said) return said;
     return !st.total ? 'day one — your first session is ready.'
       : ps.lesson ? 'today’s lesson is done — anything more is a bonus.'
       : st.total+' lesson'+(st.total===1?'':'s')+' in — picking up where you left off.'; })()}</span></p>
@@ -619,7 +622,7 @@ function buildDayOneToday(){
   const st=svDoneStats();
   TODAY_R=`
   <h3>This week</h3>
-  ${st.total?`<div class="noteline">Lessons this week: <b>${st.week}</b></div>
+  ${st.total?`${window.svProgress?(function(){ const wk=svProgress.week(); return svProgress.lines(wk).map(l=>'<div class="noteline">'+l[0]+': <b>'+l[1]+'</b></div>').join(''); })():`<div class="noteline">Lessons this week: <b>${st.week}</b></div>`}
   <div class="noteline">Finished so far: <b>${st.total} ${st.total===1?'lesson':'lessons'}</b></div>
   ${w?`<div class="noteline">Warm-up today: <b>${w.correct}/${w.total}</b></div>`:''}`
  :`<div class="noteline">Nothing here yet — it fills in as you revise.</div>
@@ -683,7 +686,7 @@ function subjSpread(s){
     <div class="subjpg">
       ${s.units.map(u=>`<div class="unit" tabindex="0" onclick="nav('${urlFor(s,u)}')"><b>${u[0]}</b><small>${u[2]} / ${u[1]}</small></div>`).join('')}
     </div>
-    <p class="momentum" style="margin-top:auto">${done} of ${total} topics · ${pct}% complete</p>`;
+    <p class="momentum" style="margin-top:auto">${window.svProgress?svProgress.headline(s).replace(/<[^>]+>/g,''):(done+' of '+total+' topics · '+pct+'% complete')}${window.svProgress&&svProgress.track(s)?' · '+svProgress.track(s):''}</p>`;
   const R=(lad?`
     <div class="splate" style="background-image:url('${lad[stage-1].replace('.png','-page.png')}')"></div>
     <p class="scap">${stageWord[0].toUpperCase()+stageWord.slice(1)} — ${pct}% drawn.<br>The picture finishes as you do.</p>`:`

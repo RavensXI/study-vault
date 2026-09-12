@@ -141,6 +141,7 @@ function plLessonDone(su, unit, num) {
 }
 
 var PL_SUBJECTS = [], PL_LAST = null, PL_ONCHANGE = null, PL_FIT = {};
+window.svPlanFit = function (slug) { return PL_FIT[slug] || null; };   /* js/progress.js: the on-track word */
 var SCHED = {};
 function buildSchedule() {
   SCHED = {};
@@ -151,7 +152,10 @@ function buildSchedule() {
   PL_SUBJECTS.forEach(function (su) { lastSeen[su.slug] = -999; queues[su.slug] = plQueue(su); PL_FIT[su.slug] = { left: queues[su.slug].length, fit: 0, first: (plExams(su)[0] || {}).d || null }; });
   /* today only: lessons whose real strength has faded come back as a quick quiz first */
   var dueNow = [];
-  if (window.svStrength) PL_SUBJECTS.forEach(function (su) { svStrength.due(su, 2).forEach(function (r) { dueNow.push({ on: T0, s: su, unit: r.unit, unitName: r.unitName, num: r.num, total: r.total }); }); });
+  /* practice sets and listening lessons have no quick quiz to come back to */
+  if (window.svStrength) PL_SUBJECTS.forEach(function (su) { if (su.slug === 'music') return;
+    svStrength.due(su, 4).filter(function (r) { return !(window.svIsPracticeUnit && svIsPracticeUnit(su, r.unit)); }).slice(0, 2)
+      .forEach(function (r) { dueNow.push({ on: T0, s: su, unit: r.unit, unitName: r.unitName, num: r.num, total: r.total }); }); });
   retrieval = retrieval.concat(dueNow.slice(0, 2));
   for (var d = new Date(T0), di = 0; d <= PL_LAST; d = new Date(d.getTime() + 864e5), di++) {
     if (offKind(d)) continue;

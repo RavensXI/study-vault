@@ -230,6 +230,8 @@
   .sdetail .top{display:flex;align-items:baseline;gap:10px;flex:none;flex-wrap:nowrap}
   .sdetail h3{font-family:var(--read);font-size:1.1rem;font-weight:600;margin:0;white-space:nowrap;color:var(--ink)}
   .sdetail .sub{font-size:.76rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card.week .weeksaid{margin:.6rem 0 0;font-family:var(--read);font-size:.9rem;color:var(--ink)}
+  .sdetail .sub .pg-fade{color:#a3542f}.sdetail .sub .pg-track{color:var(--ink);font-weight:600}.sdetail .sub .pg-pct{opacity:.7}
   .sdetail .sp{flex:1}
   /* crafted button — a pressable slab, not a pill */
   .sdetail .cont,.sdetail .go{font-family:var(--head);font-weight:600;font-size:.82rem;color:#fff;background:var(--tc);
@@ -556,10 +558,12 @@
 
 <!-- planner modal + day tooltip are injected by planner.js (shared with the desk) -->
 
+<script src="js/demo-students.js"></script>
 <script src="dash-data.js"></script>
 <script src="sync.js"></script>
 <script src="warmup.js"></script>
 <script src="js/strength.js"></script>
+<script src="js/progress.js"></script>
 <script src="planner.js"></script>
 <script>
 /* Sam's subjects — same real free-tier wiring as the desk */
@@ -635,7 +639,9 @@ function refreshDayOnePlan(){
   if(sb&&target) sb.onclick=()=>startWithWarmup(target);
   /* the highlight line tells the truth about where you are, not "day one" forever */
   const hl=document.querySelector('.momentum .hl'), st0=svDoneStats();
-  if(hl) hl.textContent = !st0.total ? 'day one — your first session is ready.'
+  /* their own rating as the yardstick beats any count: "Cells: you said struggling. It's holding now." */
+  const said=(st0.total&&window.svProgress)?svProgress.saidNow(SUBJECTS):null;
+  if(hl) hl.textContent = said ? said : !st0.total ? 'day one — your first session is ready.'
     : (svPlanState().lesson ? 'today’s lesson is done — anything more is a bonus.'
     : st0.total+' lesson'+(st0.total===1?'':'s')+' in — picking up where you left off.');
   /* tick off what's already done today; Start becomes Keep going */
@@ -672,11 +678,23 @@ function refreshWeekCard(){
   const st=svDoneStats(); if(!st.total) return;
   const wc=document.querySelector('.card.week'); if(!wc) return;
   const w=svWarmup.doneToday();
-  wc.innerHTML='<h3>This week</h3>'
-    +'<div class="ln"><span>Lessons this week</span><b>'+st.week+'</b></div>'
-    +'<div class="ln"><span>Finished so far</span><b>'+st.total+' '+(st.total===1?'lesson':'lessons')+'</b></div>'
+  if(!window.svProgress){
+    wc.innerHTML='<h3>This week</h3>'
+      +'<div class="ln"><span>Lessons this week</span><b>'+st.week+'</b></div>'
+      +'<div class="ln"><span>Finished so far</span><b>'+st.total+' '+(st.total===1?'lesson':'lessons')+'</b></div>'
+      +(w?'<div class="ln"><span>Warm-up today</span><b>'+w.correct+' / '+w.total+'</b></div>':'')
+      +'<p class="weekempty">Best subject and cards due join in as the week builds.</p>';
+    return;
+  }
+  /* the first visit of a new week shows last week's picture once; otherwise this week so far */
+  const rv=window.__svWeekReview===undefined?(window.__svWeekReview=svProgress.review()):window.__svWeekReview;
+  const wk=rv||svProgress.week(), lines=svProgress.lines(wk), said=svProgress.saidNow(SUBJECTS);
+  wc.innerHTML='<h3>'+(rv?'Last week':'This week')+'</h3>'
+    +(wk.any?lines.map(l=>'<div class="ln"><span>'+l[0]+'</span><b>'+l[1]+'</b></div>').join('')
+            :'<p class="weekempty">Nothing yet this week. It fills in as you revise.</p>')
     +(w?'<div class="ln"><span>Warm-up today</span><b>'+w.correct+' / '+w.total+'</b></div>':'')
-    +'<p class="weekempty">Best subject and cards due join in as the week builds.</p>';
+    +'<div class="ln"><span>Finished so far</span><b>'+st.total+' '+(st.total===1?'lesson':'lessons')+'</b></div>'
+    +(said?'<p class="weeksaid">'+said+'</p>':'');
 }
 function urlFor(s,u){ return '/'+(window.svIsPracticeUnit&&window.svIsPracticeUnit(s,u[3])?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/'+Math.min(u[2]+1,u[1]); }
 function nav(u){ document.body.classList.remove('ready'); setTimeout(()=>{ location.href=u; },180); }
@@ -938,9 +956,9 @@ function renderSubjectPanel(s){
   el.hidden=false;
   el.style.setProperty('--tc',s.c);
   el.innerHTML='<div class="top"><h3>'+s.name+'</h3>'+
-    '<span class="sub">'+d+' of '+t+' lessons · '+Math.round(d/t*100)+'%'+
-    (window.svStrength?(()=>{ let sec=0,fad=0; s.units.forEach(u=>{ for(let n=1;n<=(u[1]||0);n++){ const r=svStrength.lesson(s,u[3],n); if(r.prior||!r.reps) continue; if(r.s>=70) sec++; else if(r.s<40) fad++; } });
-      return (sec||fad)?' · '+sec+' secure'+(fad?' · <span style="color:#a3542f">'+fad+' fading</span>':''):''; })():'')+
+    '<span class="sub">'+(window.svProgress?svProgress.headline(s):(d+' of '+t+' lessons · '+Math.round(d/t*100)+'%'))+
+    (window.svProgress&&svProgress.track(s)?' · <span class="pg-track">'+svProgress.track(s)+'</span>':'')+
+    ' · <span class="pg-pct">'+d+' of '+t+'</span>'+
     (DAYONE?'':(rec>=14?' · <span style="color:#a3542f;font-weight:600">'+Math.round(rec/7)+'w untouched</span>':rec>0?' · '+rec+'d ago':' · studied today'))+'</span>'+
     '<span class="sp"></span>'+
     '<button class="cont">Where you left off →</button></div>'+

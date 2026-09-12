@@ -33,6 +33,13 @@
     if (kc && kc.t) out.push({ v: 25 + 75 * (kc.s / kc.t), d: daysSince(kc.d), kind: 'quiz' });
     var done = (g('sv-lessons-done', {})[sub + '/' + unit] || []).indexOf(num) >= 0;
     if (done) { var when = g('sv-lessons-when', {})[key]; out.push({ v: 45, d: when ? daysSince(when) : 30, kind: 'read' }); }
+    /* marked exam answers (sv-practice-log): the AI's mark out of the question's marks.
+       For practice-format lessons this is the only real evidence there is. */
+    (g('sv-practice-log', []) || []).forEach(function (e) {
+      if (!e || e.k !== key) return;
+      var mm = String(e.r || '').match(/(\d+)\s*(?:\/|out of)\s*(\d+)/i); if (!mm || !+mm[2]) return;
+      out.push({ v: 25 + 75 * Math.min(1, +mm[1] / +mm[2]), d: daysSince(e.d), kind: 'answer' });
+    });
     var id = idFor(key);
     if (id) {
       var cards = (g('sv-flashcard-progress', { cards: {} }) || {}).cards || {}, boxes = [], last = null;
