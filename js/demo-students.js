@@ -6,7 +6,8 @@
    live catalogue. Personas:
      priya  — day one: rated everything, done nothing
      josh   — three weeks in, 20 min a day, confident on paper, thin evidence
-     amira  — six weeks in, 45 min a day, honest ratings, some units outgrown */
+     amira  — six weeks in, 45 min a day, honest ratings, some units outgrown
+   All three carry eight subjects, the usual GCSE load. */
 (function () {
   'use strict';
   var q = new URLSearchParams(location.search), who = q.get('demo'); if (!who) return;
@@ -15,37 +16,44 @@
   /* unit rule: rag + how many lessons done + how well (strong 4-5/5, mixed 3-5, weak 2-3) + when the run started (days ago) */
   var P = {
     priya: { weeks: 0, budget: 45,
-      picked: ['maths', 'lang', 'lit', 'science', 'history', 'geog'],
-      boards: { maths: 'edexcel', lang: 'aqa', lit: 'aqa', science: 'aqa', history: 'aqa', geog: 'aqa' },
+      picked: ['maths', 'lang', 'lit', 'science', 'history', 'geog', 'french', 'rs'],
+      boards: { maths: 'edexcel', lang: 'aqa', lit: 'aqa', science: 'aqa', history: 'aqa', geog: 'aqa', french: 'aqa', rs: 'aqa' },
       topics: { history: { 0: 'america-opportunity-inequality', 1: 'conflict-tension-inter-war', 2: 'britain-health-people', 3: 'elizabethan-england' },
-                lit: { 0: 'macbeth', 1: 'a-christmas-carol', 2: 'an-inspector-calls', 3: 'power-and-conflict' } },
+                lit: { 0: 'macbeth', 1: 'a-christmas-carol', 2: 'an-inspector-calls', 3: 'power-and-conflict' }, rs: { 0: ['christianity', 'islam'], 1: ['theme-a-relationships', 'theme-b-religion-life', 'theme-d-peace-conflict', 'theme-e-crime-punishment'] } },
       units: { 'maths-edexcel': { number: 'a', algebra: 'a', graphs: 'r', 'ratio-proportion': 'n', geometry: 'r', 'probability-statistics': 'n' },
                'english-language-aqa': { 'paper-1-reading': 'a', 'paper-1-writing': 'a', 'paper-2-reading': 'n', 'paper-2-writing': 'n' },
                'english-literature-aqa': { macbeth: 'r', 'a-christmas-carol': 'a', 'an-inspector-calls': 'n', 'power-and-conflict': 'r' },
                'science-aqa': { 'biology-paper-1': 'a', 'biology-paper-2': 'n', 'chemistry-paper-1': 'r', 'chemistry-paper-2': 'n', 'physics-paper-1': 'r', 'physics-paper-2': 'n', 'physics-calculations': 'r', 'chemistry-calculations': 'n', 'biology-data-skills': 'a' },
                'history-aqa': { 'america-opportunity-inequality': 'a', 'conflict-tension-inter-war': 'n', 'britain-health-people': 'n', 'elizabethan-england': 'n' },
-               'geography-aqa': { 'paper-1': 'a', 'paper-2': 'n', 'geographical-skills': 'a' } } },
+               'geography-aqa': { 'paper-1': 'a', 'paper-2': 'n', 'geographical-skills': 'a' },
+               'french-aqa': { 'people-and-lifestyle': 'a', 'popular-culture': 'r', 'communication-and-world': 'n' },
+               'religious-studies-aqa': { 'christianity-beliefs': 'a', 'christianity-practices': 'r', 'islam-beliefs': 'n', 'islam-practices': 'n', 'theme-a-relationships': 'n', 'theme-b-religion-life': 'n', 'theme-d-peace-conflict': 'n', 'theme-e-crime-punishment': 'n' } } },
     josh: { weeks: 3, budget: 20,
-      picked: ['maths', 'lang', 'lit', 'science', 'history'],
-      boards: { maths: 'edexcel', lang: 'aqa', lit: 'aqa', science: 'aqa', history: 'aqa' },
+      picked: ['maths', 'lang', 'lit', 'science', 'history', 'geog', 'rs', 'cs'],
+      boards: { maths: 'edexcel', lang: 'aqa', lit: 'aqa', science: 'aqa', history: 'aqa', geog: 'aqa', rs: 'aqa', cs: 'aqa' },
       topics: { history: { 0: 'germany-democracy-dictatorship', 1: 'conflict-tension-east-west', 2: 'britain-power-people', 3: 'norman-england' },
-                lit: { 0: 'romeo-and-juliet', 1: 'jekyll-and-hyde', 2: 'animal-farm', 3: 'power-and-conflict' } },
+                lit: { 0: 'romeo-and-juliet', 1: 'jekyll-and-hyde', 2: 'animal-farm', 3: 'power-and-conflict' }, rs: { 0: ['christianity', 'islam'], 1: ['theme-a-relationships', 'theme-b-religion-life', 'theme-d-peace-conflict', 'theme-e-crime-punishment'] } },
       units: { 'maths-edexcel': { number: ['g', 3, 'weak', 20], algebra: 'g', graphs: 'a', 'ratio-proportion': 'a', geometry: 'r', 'probability-statistics': 'n' },
                'english-language-aqa': { 'paper-1-reading': ['a', 2, 'mixed', 12], 'paper-1-writing': 'a', 'paper-2-reading': 'n', 'paper-2-writing': 'n' },
                'english-literature-aqa': { 'romeo-and-juliet': ['a', 2, 'mixed', 18], 'jekyll-and-hyde': 'n', 'animal-farm': 'a', 'power-and-conflict': 'n' },
                'science-aqa': { 'biology-paper-1': ['g', 2, 'weak', 19], 'biology-paper-2': 'n', 'chemistry-paper-1': 'a', 'chemistry-paper-2': 'n', 'physics-paper-1': 'r', 'physics-paper-2': 'n', 'physics-calculations': 'r', 'chemistry-calculations': 'n', 'biology-data-skills': 'n' },
-               'history-aqa': { 'germany-democracy-dictatorship': ['a', 1, 'mixed', 15], 'conflict-tension-east-west': 'n', 'britain-power-people': 'n', 'norman-england': 'n' } } },
+               'history-aqa': { 'germany-democracy-dictatorship': ['a', 1, 'mixed', 15], 'conflict-tension-east-west': 'n', 'britain-power-people': 'n', 'norman-england': 'n' },
+               'geography-aqa': { 'paper-1': ['a', 2, 'mixed', 10], 'paper-2': 'n', 'geographical-skills': 'r' },
+               'religious-studies-aqa': { 'christianity-beliefs': 'g', 'christianity-practices': 'a', 'islam-beliefs': 'n', 'islam-practices': 'n', 'theme-a-relationships': 'n', 'theme-b-religion-life': 'n', 'theme-d-peace-conflict': 'n', 'theme-e-crime-punishment': 'n' },
+               'computer-science-aqa': { algorithms: ['g', 1, 'strong', 8], programming: 'g', 'data-representation': 'a', 'computer-systems': 'n', 'networks-cyber-security': 'n', 'databases-sql': 'n', 'ethical-legal-environmental': 'n' } } },
     amira: { weeks: 6, budget: 45,
-      picked: ['maths', 'lang', 'lit', 'science', 'history', 'geog'],
-      boards: { maths: 'edexcel', lang: 'aqa', lit: 'aqa', science: 'aqa', history: 'aqa', geog: 'aqa' },
+      picked: ['maths', 'lang', 'lit', 'science', 'history', 'geog', 'french', 'rs'],
+      boards: { maths: 'edexcel', lang: 'aqa', lit: 'aqa', science: 'aqa', history: 'aqa', geog: 'aqa', french: 'aqa', rs: 'aqa' },
       topics: { history: { 0: 'america-opportunity-inequality', 1: 'conflict-tension-inter-war', 2: 'britain-health-people', 3: 'elizabethan-england' },
-                lit: { 0: 'macbeth', 1: 'a-christmas-carol', 2: 'an-inspector-calls', 3: 'power-and-conflict' } },
+                lit: { 0: 'macbeth', 1: 'a-christmas-carol', 2: 'an-inspector-calls', 3: 'power-and-conflict' }, rs: { 0: ['christianity', 'islam'], 1: ['theme-a-relationships', 'theme-b-religion-life', 'theme-d-peace-conflict', 'theme-e-crime-punishment'] } },
       units: { 'maths-edexcel': { number: ['g', 7, 'strong', 42], algebra: ['a', 6, 'mixed', 30], graphs: 'r', 'ratio-proportion': ['n', 2, 'strong', 6], geometry: 'r', 'probability-statistics': 'n' },
                'english-language-aqa': { 'paper-1-reading': ['a', 5, 'mixed', 38], 'paper-1-writing': ['a', 2, 'mixed', 9], 'paper-2-reading': 'n', 'paper-2-writing': 'n' },
                'english-literature-aqa': { macbeth: ['r', 7, 'strong', 40], 'a-christmas-carol': ['a', 3, 'mixed', 16], 'an-inspector-calls': 'a', 'power-and-conflict': ['r', 2, 'mixed', 5] },
                'science-aqa': { 'biology-paper-1': ['a', 8, 'strong', 41], 'biology-paper-2': 'n', 'chemistry-paper-1': ['r', 4, 'mixed', 24], 'chemistry-paper-2': 'n', 'physics-paper-1': ['r', 3, 'weak', 39], 'physics-paper-2': 'n', 'physics-calculations': ['r', 2, 'mixed', 20], 'chemistry-calculations': 'n', 'biology-data-skills': 'a' },
                'history-aqa': { 'america-opportunity-inequality': ['n', 6, 'strong', 36], 'conflict-tension-inter-war': ['a', 3, 'mixed', 14], 'britain-health-people': 'n', 'elizabethan-england': 'n' },
-               'geography-aqa': { 'paper-1': ['a', 5, 'mixed', 33], 'paper-2': 'n', 'geographical-skills': ['a', 2, 'strong', 8] } } }
+               'geography-aqa': { 'paper-1': ['a', 5, 'mixed', 33], 'paper-2': 'n', 'geographical-skills': ['a', 2, 'strong', 8] },
+               'french-aqa': { 'people-and-lifestyle': ['a', 4, 'mixed', 35], 'popular-culture': ['r', 2, 'strong', 12], 'communication-and-world': 'n' },
+               'religious-studies-aqa': { 'christianity-beliefs': ['a', 4, 'strong', 37], 'christianity-practices': ['r', 3, 'mixed', 21], 'islam-beliefs': ['n', 2, 'strong', 7], 'islam-practices': 'n', 'theme-a-relationships': ['a', 1, 'mixed', 3], 'theme-b-religion-life': 'n', 'theme-d-peace-conflict': 'n', 'theme-e-crime-punishment': 'n' } } }
   };
   var spec = P[who]; if (!spec) { console.warn('demo: no persona ' + who); return; }
 
@@ -57,7 +65,7 @@
   var BOXES = { strong: [4, 5, 5, 4, 5], mixed: [2, 3, 4, 3, 2], weak: [1, 2, 1, 2, 1] };
   var IV = [0, 1, 2, 4, 7, 14];
   /* practice-format units carry no quiz and no flashcards: only the done stamp and marked answers */
-  var PRACTICE = { 'maths-edexcel': true, 'english-language-aqa': true, 'science-aqa/physics-calculations': true, 'science-aqa/chemistry-calculations': true, 'science-aqa/biology-data-skills': true, 'geography-aqa/geographical-skills': true };
+  var PRACTICE = { 'maths-edexcel': true, 'english-language-aqa': true, 'french-aqa': true, 'science-aqa/physics-calculations': true, 'science-aqa/chemistry-calculations': true, 'science-aqa/biology-data-skills': true, 'geography-aqa/geographical-skills': true };
   function isPractice(sub, u) { return !!(PRACTICE[sub] || PRACTICE[sub + '/' + u]); }
 
   function fetchSub(sub) {
@@ -99,7 +107,7 @@
     /* the subject's own colour is the average of its topics, as the picker does it */
     var v = { n: 0, r: 0, a: 1, g: 2 };
     spec.picked.forEach(function (sl) {
-      var sub = ({ maths: 'maths-edexcel', lang: 'english-language-aqa', lit: 'english-literature-aqa', science: 'science-aqa', history: 'history-aqa', geog: 'geography-aqa' })[sl];
+      var sub = ({ maths: 'maths-edexcel', lang: 'english-language-aqa', lit: 'english-literature-aqa', science: 'science-aqa', history: 'history-aqa', geog: 'geography-aqa', french: 'french-aqa', rs: 'religious-studies-aqa', cs: 'computer-science-aqa' })[sl];
       var t = 0, c = 0; for (var k in rag) if (k.indexOf(sub + '/') === 0) { t += v[rag[k]]; c++; }
       if (c) { var m = t / c; rag[sl] = m < 0.67 ? 'r' : m < 1.34 ? 'a' : 'g'; }
     });
