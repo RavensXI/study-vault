@@ -729,8 +729,10 @@ function refreshDayOnePlan(){
   if(t){
     const lis=document.querySelectorAll('.card.plan ol li');
     if(lis[1]){
+      /* a rest day: the row is the next revising day's lesson and says so */
+      const ahead=t.on&&window.svPlanDayWord?'Next up · '+svPlanDayWord(t.on)+' · ':'';
       lis[1].innerHTML='<span class="n">2</span><div><b>'+(t.redo?'Redo: ':'')+(t.title||('Continue: '+t.unitName))+'</b>'
-        +'<small>'+t.su.name+' · '+t.unitName+'</small></div><span class="mins">'+(t.min||15)+' min</span>';
+        +'<small>'+ahead+t.su.name+' · '+t.unitName+'</small></div><span class="mins">'+(t.min||15)+' min</span>';
       lis[1].classList.remove('inert'); lis[1].style.cursor='pointer';
       lis[1].onclick=()=>nav(t.url);
     }

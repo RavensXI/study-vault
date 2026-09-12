@@ -221,12 +221,31 @@ function planFor(d) {
   return { exams: examsOn(d), off: off, sessions: s, done: done, total: s ? s.length : 0 };
 }
 function svPlanToday() { var p = planFor(T0); return p ? p.sessions : null; }
-/* the dashboards' row 2: today's first real lesson, in svContinueTarget's shape */
+/* a rest day or holiday: the next day that has sessions, within a fortnight, so
+   the dashboards can show what is up next rather than a bare "continue" (Tom,
+   12 Sep 2026 — revising on a Saturday, the card pointed at the wrong lesson) */
+function svPlanNextDay() {
+  var today = planFor(T0); if (!today || !today.off) return null;
+  for (var i = 1; i <= 14; i++) {
+    var d = new Date(T0.getTime() + i * 864e5), p = planFor(d);
+    if (p && !p.off && p.sessions && p.sessions.length) return { on: d, off: today.off, sessions: p.sessions };
+  }
+  return null;
+}
+/* the dashboards' row 2: today's first real lesson, in svContinueTarget's shape;
+   on a rest day, the next revising day's (carrying `on`, the date it is for) */
 function svPlanPrimary() {
-  var s = svPlanToday(); if (!s) return null;
+  var s = svPlanToday(), on = null;
+  if (!s) { var nx = svPlanNextDay(); if (!nx) return null; s = nx.sessions; on = nx.on; }
   var x = s.find(function (y) { return y.s && (y.act === 'lesson' || y.act === 'practice' || y.act === 'quiz-first'); });
   if (!x) return null;
-  return { su: x.s, unitName: x.unitName, unitSlug: x.unit, total: x.total, num: x.num, url: x.url, title: x.title, act: x.act, min: x.min, redo: !!x.redo };
+  return { su: x.s, unitName: x.unitName, unitSlug: x.unit, total: x.total, num: x.num, url: x.url, title: x.title, act: x.act, min: x.min, redo: !!x.redo, on: on };
+}
+/* "Monday" / "tomorrow" for a plan item that is for another day */
+function svPlanDayWord(on) {
+  if (!on) return '';
+  var diff = Math.round((on - T0) / 864e5);
+  return diff === 1 ? 'tomorrow' : on.toLocaleDateString('en-GB', { weekday: 'long' });
 }
 function sessLabel(x) { return x.title || (x.s ? (x.unitName + ' · ' + (x.act === 'practice' ? 'set' : 'lesson') + ' ' + x.num) : x.act); }
 function actWord(x) { return x.quiz ? 'revisit' : x.redo ? 'redo' : x.act === 'quiz-first' ? 'quick check' : x.act === 'review' ? 'review' : x.mixed ? '' : x.act; }

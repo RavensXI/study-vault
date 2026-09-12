@@ -1423,12 +1423,21 @@ body[data-skin="reader"] .a11y-overlay-label{
 }
 /* below ~720px the band wrapped onto two lines; one row that scrolls sideways
    reads as one object, which is the point of the band (Tom, 8 Sep 2026) */
+/* ...and on phones the row scrolled sideways with nothing to say so — the last
+   control sat cut in half and the band looked broken (Tom, 12 Sep 2026). Now the
+   five controls drop their labels (icons keep their titles; the label stays for
+   screen readers) and sit evenly across one row, nothing hidden off the edge. */
 @media (max-width:720px){
-  body[data-skin="reader"] .a11y-toolbar{ flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; -webkit-overflow-scrolling:touch; gap:.3rem; padding:.45rem .7rem; }
-  body[data-skin="reader"] .a11y-toolbar::-webkit-scrollbar{ display:none; }
+  body[data-skin="reader"] .a11y-toolbar{ flex-wrap:nowrap; justify-content:space-evenly; overflow:visible; gap:0; padding:.35rem .3rem; }
   body[data-skin="reader"] .a11y-toolbar > *{ flex:none; }
   body[data-skin="reader"] .a11y-toolbar::before{ display:none; }
-  body[data-skin="reader"] .a11y-bar-end{ margin-left:auto; }
+  body[data-skin="reader"] .a11y-toolbar .a11y-divider:first-child,
+  body[data-skin="reader"] .a11y-bar-end{ display:none; }
+  body[data-skin="reader"] .a11y-toolbar .a11y-btn{ padding:.5rem .55rem; gap:0; }
+  body[data-skin="reader"] .a11y-toolbar .a11y-btn > span:not(.a11y-overlay-dot){
+    position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  body[data-skin="reader"] .a11y-toolbar .a11y-btn svg{ width:20px; height:20px; }
+  body[data-skin="reader"] .a11y-toolbar .a11y-btn{ position:relative; }
 }
 
 /* FONT SIZE A-/A+ : the buttons toggle body.font-size-* classes that only

@@ -607,7 +607,7 @@ function buildDayOneToday(){
   const w=window.svWarmup?svWarmup.doneToday():null;
   const ps=svPlanState();
   const row2=t
-    ?`<li tabindex="0" class="${ps.lesson?'done':''}" onclick="nav('${t.url}')"><span class="n">${ps.lesson?'✓':'2'}</span><div><b>${t.redo?'Redo: ':''}${t.title||('Continue: '+t.unitName)}</b><small>${t.su.name} · ${t.unitName}</small></div><span class="mins">${t.min||15} min</span></li>`
+    ?`<li tabindex="0" class="${ps.lesson?'done':''}" onclick="nav('${t.url}')"><span class="n">${ps.lesson?'✓':'2'}</span><div><b>${t.redo?'Redo: ':''}${t.title||('Continue: '+t.unitName)}</b><small>${t.on&&window.svPlanDayWord?'Next up · '+svPlanDayWord(t.on)+' · ':''}${t.su.name} · ${t.unitName}</small></div><span class="mins">${t.min||15} min</span></li>`
     :`<li tabindex="0" class="${ps.lesson?'done':''}" ${url?`onclick="nav('${url}')"`:''}><span class="n">${ps.lesson?'✓':'2'}</span><div><b>First lesson</b><small>${svDayOneSubject(SUBJECTS)?svDayOneSubject(SUBJECTS).name:'your first subject'} · start at the beginning</small></div><span class="mins">15 min</span></li>`;
   const startLbl=ps.any?(ps.mins?`Keep going · ${ps.mins} min`:'One more? · 15 min'):'Start · 19 min';
   TODAY_L=`

@@ -64,7 +64,7 @@
           '<p class="sv-to-deal">' + why + '</p>' +
         '</div>' +
         '<ol class="sv-to-stages">' +
-          '<li class="cur"><span class="n">1</span><span class="t">Quiz<small>4 out of 5</small></span></li>' +
+          '<li class="cur"><span class="n">1</span><span class="t">Quiz<small>get at least 4 out of 5</small></span></li>' +
           '<li class="locked"><span class="n">2</span><span class="t">Exam question<small>at least half marks</small></span></li>' +
         '</ol>' +
         '<div class="sv-to-stage sv-to-s1"></div>' +
