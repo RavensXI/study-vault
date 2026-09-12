@@ -39,8 +39,8 @@
     '.wu-go:hover{background:#3a342c}',
     '.wu-load{text-align:center;color:#7f7c75;font-size:.9rem;padding:1.4rem 0}',
     '.wu-line{display:flex;justify-content:space-between;gap:1rem;font-size:.92rem;padding:.4rem 0;border-top:1px solid #efece6}',
-    '.wu-line b{color:#9a3a25;font-weight:600;white-space:nowrap;text-align:right}.wu-line.ok b{color:#1e5b3e}',
-    '.wu-sum p{margin:.3rem 0 .8rem;color:#5c574f;font-size:.95rem}'
+    '.wu-line span{text-align:left}.wu-line b{color:#9a3a25;font-weight:600;white-space:nowrap;text-align:right}.wu-line.ok b{color:#1e5b3e}',
+    '.wu-sum p{margin:.3rem auto .8rem;color:#5c574f;font-size:.95rem}'
   ].join('\n');
 
   function todayStr() { return new Date().toISOString().slice(0, 10); }
