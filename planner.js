@@ -108,7 +108,9 @@ function plRagOf(su, unit) {
   var r = svStrength.rag(); return r[su.sub + '/' + unit] || r[su.slug] || 'a';
 }
 function plQueue(su) {
-  var q = [], order = { n: 0, r: 0, a: 1, g: 1 };   // red units first; the rest keep the unit order (green ones become quiz-first, not last)
+  var q = [], order = { n: 0, r: 0, a: 1, g: 1 };
+  /* a lesson whose revisit was failed this fortnight is redone before anything new */
+  if (window.svStrength && svStrength.redo) svStrength.redo(su).forEach(function (r) { q.push({ unit: r.unit, unitName: r.unitName, num: r.num, total: r.total, quizFirst: false, redo: true }); });   // red units first; the rest keep the unit order (green ones become quiz-first, not last)
   var units = (su.units || []).map(function (u, i) { return { u: u, i: i, r: order[plRagOf(su, u[3])] }; });
   units.sort(function (a, b) { return (a.r - b.r) || (a.i - b.i); });
   units.forEach(function (w) {
@@ -176,7 +178,7 @@ function buildSchedule() {
       if (item) {
         var qf = item.quizFirst && !practice;
         if (PL_FIT[su.slug].first && d <= PL_FIT[su.slug].first) PL_FIT[su.slug].fit++;
-        picks.push({ s: su, act: practice ? 'practice' : (qf ? 'quiz-first' : 'lesson'), unit: item.unit, unitName: item.unitName, num: item.num, total: item.total,
+        picks.push({ s: su, act: practice ? 'practice' : (qf ? 'quiz-first' : 'lesson'), unit: item.unit, unitName: item.unitName, num: item.num, total: item.total, redo: !!item.redo,
                      title: plTitle(su, item.unit, item.num), url: plUrl(su, item.unit, item.num) + (qf ? '?quiz=1' : ''), min: qf ? 10 : shape.mins[pi] });
         /* the quick quiz on it three days on: retrieval, not re-reading */
         if (!practice) retrieval.push({ on: new Date(d.getTime() + 3 * 864e5), s: su, unit: item.unit, unitName: item.unitName, num: item.num, total: item.total });
@@ -224,10 +226,10 @@ function svPlanPrimary() {
   var s = svPlanToday(); if (!s) return null;
   var x = s.find(function (y) { return y.s && (y.act === 'lesson' || y.act === 'practice' || y.act === 'quiz-first'); });
   if (!x) return null;
-  return { su: x.s, unitName: x.unitName, unitSlug: x.unit, total: x.total, num: x.num, url: x.url, title: x.title, act: x.act, min: x.min };
+  return { su: x.s, unitName: x.unitName, unitSlug: x.unit, total: x.total, num: x.num, url: x.url, title: x.title, act: x.act, min: x.min, redo: !!x.redo };
 }
 function sessLabel(x) { return x.title || (x.s ? (x.unitName + ' · ' + (x.act === 'practice' ? 'set' : 'lesson') + ' ' + x.num) : x.act); }
-function actWord(x) { return x.quiz ? 'revisit' : x.act === 'quiz-first' ? 'quick check' : x.act === 'review' ? 'review' : x.mixed ? '' : x.act; }
+function actWord(x) { return x.quiz ? 'revisit' : x.redo ? 'redo' : x.act === 'quiz-first' ? 'quick check' : x.act === 'review' ? 'review' : x.mixed ? '' : x.act; }
 
 /* ---- day tooltip (shared by both views' mini calendars) ---- */
 var DOWNAME = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];

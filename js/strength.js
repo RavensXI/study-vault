@@ -80,12 +80,32 @@
      not become a wall of quizzes (20 min -> 2, 45 -> 3, 60 -> 4). Article
      lessons only: practice sets and set works have no quick quiz to come back to. */
   function revisitCap() { return Math.max(2, Math.round(budget() / 15)); }
+  /* a quiz is passed with at most one wrong (4/5, 3/4), or 80% on longer sets */
+  function passed(sc, t) { return t > 0 && (t <= 5 ? sc >= t - 1 : sc / t >= 0.8); }
+  /* a lesson whose latest quiz was failed in the last fortnight is not re-quizzed:
+     it goes back into the plan as a lesson to redo (planner.js plQueue) */
+  function failedRecently(sub, unit, num) {
+    var e = g('sv-kc-log', {})[sub + '/' + unit + '/' + num];
+    return !!(e && e.t && daysSince(e.d) <= 14 && !passed(e.s, e.t));
+  }
+  function redo(su) {
+    var out = [];
+    (su.units || []).forEach(function (u) { (u[4] || []).forEach(function (n) { if (failedRecently(su.sub, u[3], n)) out.push({ unit: u[3], unitName: u[0], num: n, total: u[1] }); }); });
+    return out;
+  }
+  /* days until a lesson's projected strength crosses the revisit line (null if it is already under) */
+  function nextCheck(su, unit, num) {
+    if (lesson(su, unit, num).s < REVISIT_LINE) return null;
+    for (var d = 1; d <= 120; d++) if (lesson(su, unit, num, d).s < REVISIT_LINE) return d;
+    return 120;
+  }
   function revisit(subjects) {
     var all = [];
     (subjects || []).forEach(function (su) {
       if (!su.sub || su.slug === 'music') return;
       due(su, 0, 3).forEach(function (r) {
         if (window.svIsPracticeUnit && svIsPracticeUnit(su, r.unit)) return;
+        if (failedRecently(su.sub, r.unit, r.num)) return;
         all.push({ su: su, sub: su.sub, unit: r.unit, unitName: r.unitName, n: r.num, num: r.num, total: r.total, s: r.s });
       });
     });
@@ -107,6 +127,6 @@
   }
   function budget() { var w = g('sv-welcome', {}); return (w && +w.budget) || 45; }
   function setBudget(m) { var w = g('sv-welcome', {}); w.budget = m; try { localStorage.setItem('sv-welcome', JSON.stringify(w)); } catch (e) {} if (window.svProgressPushSoon) svProgressPushSoon(); }
-  window.svStrength = { lesson: lesson, unit: unit, subject: subject, band: band, due: due, flashDue: flashDue, revisit: revisit, revisitDone: revisitDone, revisitCap: revisitCap,
+  window.svStrength = { lesson: lesson, unit: unit, subject: subject, band: band, due: due, flashDue: flashDue, revisit: revisit, revisitDone: revisitDone, revisitCap: revisitCap, passed: passed, failedRecently: failedRecently, redo: redo, nextCheck: nextCheck,
                         rag: rag, setRag: setRag, prior: priorFor, budget: budget, setBudget: setBudget };
 })();

@@ -39,7 +39,8 @@
     '.wu-go:hover{background:#3a342c}',
     '.wu-load{text-align:center;color:#7f7c75;font-size:.9rem;padding:1.4rem 0}',
     '.wu-line{display:flex;justify-content:space-between;gap:1rem;font-size:.92rem;padding:.4rem 0;border-top:1px solid #efece6}',
-    '.wu-line b{color:#9a3a25;font-weight:600;white-space:nowrap}.wu-line.ok b{color:#1e5b3e}'
+    '.wu-line b{color:#9a3a25;font-weight:600;white-space:nowrap;text-align:right}.wu-line.ok b{color:#1e5b3e}',
+    '.wu-sum p{margin:.3rem 0 .8rem;color:#5c574f;font-size:.95rem}'
   ].join('\n');
 
   function todayStr() { return new Date().toISOString().slice(0, 10); }
@@ -274,15 +275,19 @@
           var kclg = JSON.parse(localStorage.getItem('sv-kc-log')) || {};
           order.forEach(function (key) { kclg[key] = { s: per[key].s, t: per[key].t, d: todayStr(), miss: per[key].miss.slice(0, 5) }; });
           localStorage.setItem('sv-kc-log', JSON.stringify(kclg));
-          localStorage.setItem('sv-revisit', JSON.stringify({ date: todayStr(), correct: order.filter(function (key) { return per[key].t && per[key].s / per[key].t >= 0.8; }).length, total: order.length, questions: correct, ofQuestions: pool.length,
+          localStorage.setItem('sv-revisit', JSON.stringify({ date: todayStr(), correct: order.filter(function (key) { var r = per[key]; return window.svStrength && svStrength.passed ? svStrength.passed(r.s, r.t) : (r.t && r.s / r.t >= 0.8); }).length, total: order.length, questions: correct, ofQuestions: pool.length,
             lessons: order.map(function (key) { return { key: key, s: per[key].s, t: per[key].t, title: per[key].title }; }) }));
         } catch (e) {}
         if (window.svProgressPushSoon) svProgressPushSoon();
-        var rows = order.map(function (key) { var r = per[key], ok = r.t && r.s / r.t >= 0.8;
-          return '<div class="wu-line' + (ok ? ' ok' : '') + '"><span>' + esc(r.title) + '</span><b>' + (ok ? 'still secure' : 'back in your plan') + '</b></div>'; }).join('');
-        var kept = order.filter(function (key) { return per[key].t && per[key].s / per[key].t >= 0.8; }).length;
+        var pass = function (r) { return window.svStrength && svStrength.passed ? svStrength.passed(r.s, r.t) : (r.t && r.s / r.t >= 0.8); };
+        var suOf = {}; (opts.lessons || []).forEach(function (l) { suOf[l.sub + '/' + l.unit + '/' + (l.n || l.num)] = l.su; });
+        var rows = order.map(function (key) { var r = per[key], ok = pass(r), parts = key.split('/');
+          var nx = (ok && window.svStrength && svStrength.nextCheck && suOf[key]) ? svStrength.nextCheck(suOf[key], parts[1], +parts[2]) : null;
+          var what = ok ? 'secure' + (nx ? ' · next check in ' + nx + (nx === 1 ? ' day' : ' days') : '') : 'back in your plan to redo';
+          return '<div class="wu-line' + (ok ? ' ok' : '') + '"><span>' + esc(r.title) + '</span><b>' + r.s + ' of ' + r.t + ' · ' + what + '</b></div>'; }).join('');
+        var kept = order.filter(function (key) { return pass(per[key]); }).length;
         card.innerHTML = '<div class="wu-kick"><span>◆ Revisit done</span></div>'
-          + '<div class="wu-sum"><div class="wu-big">' + kept + ' / ' + order.length + '</div>' + rows
+          + '<div class="wu-sum"><div class="wu-big">' + kept + ' of ' + order.length + '</div><p>' + (kept === order.length ? 'All still secure.' : kept ? 'still secure. The rest go back into your plan as lessons.' : 'None held. They go back into your plan as lessons.') + '</p>' + rows
           + (target ? '<button class="wu-go">Start today’s lesson →</button>' : '<button class="wu-go">Back to my plan →</button>') + '</div>';
         var go = card.querySelector('.wu-go');
         if (go) go.addEventListener('click', target ? goLesson : close);
