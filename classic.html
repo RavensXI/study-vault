@@ -26,6 +26,10 @@
   .top{max-width:1000px;margin:0 auto;padding:18px clamp(16px,4vw,32px) 6px;display:flex;align-items:center;gap:14px}
   .brand{font-family:'Young Serif',serif;font-size:1.22rem;font-weight:400;color:#1d1c1a;white-space:nowrap;flex:none}
   .brandlock{height:.30em;width:auto;margin-left:.5px;vertical-align:baseline}   /* the padlock is the full stop */
+  /* a subscribing school's logo sits beside the wordmark; hidden until there is one */
+  .schoollogo{height:32px;width:auto;max-width:140px;object-fit:contain;flex:none;margin-left:2px}
+  .schoollogo[hidden]{display:none}
+  @media (max-width:700px){ .schoollogo{height:26px;max-width:96px} }
   .brandlogo{height:30px;display:block}
   .datestamp{font-family:var(--hand);font-size:1.35rem;color:var(--mut);margin-left:6px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
   .top .sp{flex:1}
@@ -514,9 +518,12 @@
     .lampbtn{width:90px;height:150px;right:-4px;bottom:14px}
     .bulb{width:40px;height:40px}
     /* the subject panel: the button drops to its own line instead of running off the edge */
-    .sdetail .top{flex-wrap:wrap;row-gap:.45rem}
+    .sdetail .top,.sdetail .top.withbook{flex-direction:column;align-items:center;text-align:center;gap:.35rem}
+    .sdetail .top .bookslot,.sdetail .top .sp{display:none}
+    .sdetail .top.withbook>h3{position:static;width:auto;height:auto;overflow:visible;clip:auto}
     .sdetail h3{white-space:normal}
-    .sdetail .top .cont,.sdetail .top .go{margin-left:auto}
+    .sdetail .top .sub{white-space:normal;overflow:visible}
+    .sdetail .top .cont,.sdetail .top .go{margin:.2rem 0 0;width:100%;text-align:center}
     /* nine units in one row are two letters each on a phone: a list instead,
        full name, count on the right, the progress bar underneath */
     .units{flex-direction:column}
@@ -535,6 +542,7 @@
 
 <div class="top">
   <span class="brand">StudyVault<img class="brandlock" src="assets/studyvault-lock-rust.svg" alt=""></span>
+  <img class="schoollogo" id="schoollogo" alt="" hidden>
   <span class="datestamp" id="today"></span>
   <span class="sp"></span>
   <span class="podbar" id="poddoor" role="group" aria-label="Podcast">
@@ -648,6 +656,7 @@
 
 <!-- planner modal + day tooltip are injected by planner.js (shared with the desk) -->
 
+<script src="js/school-session.js"></script>
 <script src="js/demo-students.js"></script>
 <script src="dash-data.js"></script>
 <script src="sync.js"></script>
@@ -860,6 +869,13 @@ fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
 (function(){ const fb=document.getElementById('fishbowl'); if(!fb) return;
   fb.addEventListener('click',()=>{ fb.classList.remove('swim'); void fb.offsetWidth; fb.classList.add('swim'); });
   fb.querySelector('.fish').addEventListener('animationend',()=>fb.classList.remove('swim')); })();
+/* the school's logo, when the student belongs to a subscribing school (school session today; SSO identity later) */
+(function(){ const img=document.getElementById('schoollogo'); if(!img) return;
+  const logos={'unity-college':'/images/unity-college-logo.png','severn-vale':'/images/severn-vale-logo.png'};
+  let slug=(window.SVUSER&&SVUSER.school_slug)||null, name=(window.SVUSER&&SVUSER.school_name)||'';
+  try{ if(!slug&&window.SchoolSession&&SchoolSession.isActive()){ const ss=SchoolSession.get(); slug=ss.school_slug; name=ss.school_name||''; } }catch(e){}
+  const url=slug&&(logos[slug]||(window.SVUSER&&SVUSER.school_logo)); if(!url) return;
+  img.src=url; img.alt=name; img.title=name; img.hidden=false; })();
 /* the Start tile mirrors the Start button (which keeps all the logic) */
 (function(){ const plan=document.querySelector('.card.plan'), sb=document.getElementById('startbtn'); if(!plan||!sb) return;
   const col=document.createElement('div'); col.className='plancol'; plan.parentNode.insertBefore(col,plan); col.appendChild(plan);

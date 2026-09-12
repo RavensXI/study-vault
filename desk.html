@@ -52,6 +52,8 @@
   .top>*{pointer-events:auto}
   .brand{font-family:'Young Serif',serif;font-size:1.05rem;font-weight:400;color:#1d1c1a}
   .brandlock{height:.30em;width:auto;margin-left:1px;vertical-align:baseline}
+  .schoollogo{height:34px;width:auto;max-width:150px;object-fit:contain;flex:none;margin-left:10px}
+  .schoollogo[hidden]{display:none}
   .brandlogo{height:34px;display:block}
   .avatar{width:30px;height:30px;border-radius:50%;background:#221E19;color:#faf8f5;
     display:grid;place-items:center;font-weight:700;font-size:.78rem}
@@ -397,6 +399,7 @@
 <div class="top">
   <span style="display:flex;align-items:center;gap:1rem">
     <span class="brand">StudyVault<img class="brandlock" src="assets/studyvault-lock-rust.svg" alt=""></span>
+    <img class="schoollogo" id="schoollogo" alt="" hidden>
     <a class="tidy" href="/classic" style="text-decoration:none">classic view</a>
     <button class="tidy" id="tidy" title="Wipe it all down — stains, shavings, the lot">clean desk</button>
   </span>
@@ -515,6 +518,7 @@
 <script>/* the desk is a 2752px painting: on a phone it is a postage stamp, so phones get the classic view */
 if(Math.min(screen.width,innerWidth)<700&&!/[?&]force=1/.test(location.search)) location.replace('/classic'+location.search);</script>
 <script src="/js/account-sync.js"></script>
+<script src="js/school-session.js"></script>
 <script src="js/demo-students.js"></script>
   <script src="dash-data.js"></script>
 <script src="sync.js"></script>
@@ -1143,6 +1147,13 @@ document.getElementById('closephone').onclick=()=>{ modal.classList.remove('open
 modal.addEventListener('click',e=>{ if(e.target===modal){ modal.classList.remove('open'); frame.src=''; } });
 addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('open')){ modal.classList.remove('open'); frame.src=''; } });
 
+/* the school's logo beside the wordmark, when there is one */
+(function(){ const img=document.getElementById('schoollogo'); if(!img) return;
+  const logos={'unity-college':'/images/unity-college-logo.png','severn-vale':'/images/severn-vale-logo.png'};
+  let slug=(window.SVUSER&&SVUSER.school_slug)||null, name=(window.SVUSER&&SVUSER.school_name)||'';
+  try{ if(!slug&&window.SchoolSession&&SchoolSession.isActive()){ const ss=SchoolSession.get(); slug=ss.school_slug; name=ss.school_name||''; } }catch(e){}
+  const url=slug&&(logos[slug]||(window.SVUSER&&SVUSER.school_logo)); if(!url) return;
+  img.src=url; img.alt=name; img.title=name; img.hidden=false; })();
 /* ---------- the wristwatch: real time on the dial + revision timer ---------- */
 { const hh=document.getElementById('hh'), mh=document.getElementById('mh'), sh=document.getElementById('sh');
   const tarc=document.getElementById('tarc'), tcirc=document.getElementById('tcirc');
