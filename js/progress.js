@@ -6,7 +6,7 @@
                      bands are the school words (emerging / developing / secure); decay is not a band
                      but a prompt — a lesson with evidence below the revisit line counts as "due a revisit"
      track(su)    -> 'on track for 11 May' | 'about 6 lessons behind' | null
-     saidNow(...) -> "Cells is developing — better than you rated it."   their own rating as the yardstick
+     saidNow(...) -> "Good progress on Cells — developing now."   said only when the evidence beats their own rating
      week()       -> the last seven days, and lastWeek() for the first visit of a new week
    Tone: say what happened, name the topic, use their words. Never speak when
    nothing changed, never negative, no streaks, no badges. */
@@ -87,9 +87,9 @@
         if (RANK_NOW[now] <= RANK_SAID[said]) return;
         var prev = told[key];
         if (prev && RANK_NOW[prev.band] >= RANK_NOW[now]) return;
-        var text = said === 'n'
-          ? u[0] + ' is ' + NOW[now] + ' already.'
-          : u[0] + ' is ' + NOW[now] + ' — better than you rated it.';
+        var text = now === 'g'
+          ? u[0] + ' is secure now — good work.'
+          : 'Good progress on ' + u[0] + ' — developing now.';
         told[key] = { band: now, d: today(), t: Date.now(), text: text, sub: su.slug };
         changed = true;
       });

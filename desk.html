@@ -548,7 +548,7 @@ svDashInit(SUBJECTS,{view:'desk',onUnits:function(){
   if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); }
   /* today's spaced-repetition sitting: due cards first, then new, capped ~20 */
   if(window.svFlashDeck) svFlashDeck(SUBJECTS,deck=>{
-    if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0; fcPreview();
+    if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0; fcPreview(); window.svDeckSize=FC.length; if(DAYONE&&typeof buildDayOneToday==='function'){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); }
       /* on the way back from a lesson: due cards come up uninvited, three of them */
       try{ if(localStorage.getItem('sv-cards-nudge')&&window.svStrength&&svStrength.flashDue()>0&&!document.getElementById('fcmodal').classList.contains('open')){
         localStorage.removeItem('sv-cards-nudge'); FC.length=Math.min(FC.length,3); fcDeal(); document.getElementById('fcmodal').classList.add('open');
@@ -611,7 +611,7 @@ function buildDayOneToday(){
   <ol class="plan">
     ${revisitRow(url,w,ps)}
     ${row2}
-    <li tabindex="0" class="${ps.cards?'done':''}"><span class="n">${ps.cards?'✓':'3'}</span><div><b>Flashcards</b><small>${window.svStrength&&svStrength.flashDue()?svStrength.flashDue()+' due':'mixed deck'}</small></div><span class="mins">2 min</span></li>
+    <li tabindex="0" class="${ps.cards?'done':''}" onclick="openCards()"><span class="n">${ps.cards?'✓':'3'}</span><div><b>Flashcards</b><small>${window.svDeckSize?window.svDeckSize+' cards':'mixed deck'}</small></div><span class="mins">2 min</span></li>
   </ol>
   <p class="momentum"><span class="hl">${(function(){ const st=svDoneStats();
     const said=(st.total&&window.svProgress)?svProgress.saidNow(SUBJECTS):null; if(said) return said;
@@ -1068,6 +1068,10 @@ function fcDeal(){
   fcShowA=false; bigcard.classList.remove('showa');
 }
 
+function openCards(){ if(fci>=FC.length) fci=0; fcDeal(); fcmodal.classList.add('open');
+  try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
+  if(window.svProgressPushSoon) svProgressPushSoon();
+  if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } }
 cardsEl.onclick=()=>{ if(dragBlockClick) return; if(fci>=FC.length) fci=0; fcDeal(); fcmodal.classList.add('open');
   try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
   if(window.svProgressPushSoon) svProgressPushSoon();

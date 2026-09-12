@@ -599,7 +599,7 @@ svDashInit(SUBJECTS,{view:'classic',onUnits:function(){
   });
   /* today's spaced-repetition sitting: due cards first, then new, capped ~20 */
   if(window.svFlashDeck) svFlashDeck(SUBJECTS,deck=>{
-    if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0;
+    if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0; if(typeof wireCardsRow==='function') wireCardsRow();
       /* on the way back from a lesson: due cards come up uninvited, three of them */
       try{ if(localStorage.getItem('sv-cards-nudge')&&window.svStrength&&svStrength.flashDue()>0&&!document.querySelector('.fcmodal.open')){
         localStorage.removeItem('sv-cards-nudge'); FC.length=Math.min(FC.length,3); fcDeal(); fcmodal.classList.add('open');
@@ -730,7 +730,7 @@ if(DAYONE){
   document.querySelector('.card.plan ol').innerHTML=
     '<li class="inert"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions</small></div><span class="mins">2 min</span></li>'+
     '<li class="inert"><span class="n">2</span><div><b>First lesson</b><small>'+dayOneSubjectName()+' · start at the beginning</small></div><span class="mins">15 min</span></li>'+
-    '<li class="inert"><span class="n">3</span><div><b>Flashcards</b><small>'+(window.svStrength&&svStrength.flashDue()?svStrength.flashDue()+' due':'mixed deck')+'</small></div><span class="mins">2 min</span></li>';
+    '<li class="inert" id="planCards"><span class="n">3</span><div><b>Flashcards</b><small>mixed deck</small></div><span class="mins">2 min</span></li>';
   const _sb=document.getElementById('startbtn');
   if(_sb){ const _u=dayOneUrl(svDayOneSubject(SUBJECTS));
     _sb.onclick=_u?()=>startWithWarmup(_u):()=>false;
@@ -1309,10 +1309,16 @@ function fcDeal(){
   const _cn=document.getElementById('fcCnt'); if(_cn) _cn.textContent=(fci+1)+' / '+FC.length;
   fcShowA=false; bigcard.classList.remove('showa');
 }
-document.getElementById('fcdoor').onclick=()=>{ fci=0; fcDeal(); fcmodal.classList.add('open');
+function openCards(){ fci=0; fcDeal(); fcmodal.classList.add('open');
   try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
   if(window.svProgressPushSoon) svProgressPushSoon();
-  if(DAYONE) refreshDayOnePlan(); };
+  if(DAYONE) refreshDayOnePlan(); }
+document.getElementById('fcdoor').onclick=openCards;
+/* row 3 of the plan is the same deck as the door: today's sitting, not the backlog */
+function wireCardsRow(){ const li=document.getElementById('planCards'); if(!li) return;
+  const sm=li.querySelector('small'); if(sm&&FC.length) sm.textContent=FC.length+' cards';
+  li.classList.remove('inert'); li.style.cursor='pointer'; li.onclick=openCards; }
+wireCardsRow();
 bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } };
 
 /* no tap-to-skip: the only way to the next card is an honest Not yet / Got it */
