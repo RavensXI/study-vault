@@ -73,6 +73,30 @@
   .start:hover{filter:brightness(1.06)}
   .start:active{box-shadow:inset 0 1px 2px rgba(0,0,0,.3)}
   .start svg{width:14px;height:14px;fill:#fff}
+  /* ---- ?startvar=N : five treatments of the Start control, for the design review ---- */
+  /* 1 · compact, right-aligned under the minutes column */
+  body[data-startvar="1"] .startrow{margin:.6rem 0 0;justify-content:flex-end}
+  body[data-startvar="1"] .start{width:auto;border-radius:4px;padding:.6rem 1.2rem}
+  /* 2 · a fourth row in the list, rust text, no bar */
+  body[data-startvar="2"] .startrow{margin:0 -1.2rem -.8rem}
+  body[data-startvar="2"] .start{background:none;color:var(--rust);border-top:1px solid var(--linel);border-radius:0;justify-content:flex-start;padding:.7rem 1.2rem .8rem 1.2rem;font-size:1rem}
+  body[data-startvar="2"] .start svg{fill:var(--rust);margin-left:2px;margin-right:6px}
+  /* 3 · a round play disc beside the heading; the card has no bar */
+  body[data-startvar="3"] .startrow{display:none}
+  body[data-startvar="3"] .h1row{align-items:center}
+  body[data-startvar="3"] .startdisc{margin-left:auto;display:inline-flex;align-items:center;gap:12px;font:700 .95rem var(--head);color:var(--ink);background:none;border:0;cursor:pointer}
+  body[data-startvar="3"] .startdisc i{width:54px;height:54px;border-radius:50%;background:var(--rust);display:grid;place-items:center;box-shadow:0 6px 14px rgba(192,99,37,.35)}
+  body[data-startvar="3"] .startdisc svg{width:20px;height:20px;fill:#fff;margin-left:3px}
+  body[data-startvar="3"] .startdisc:hover i{filter:brightness(1.06)}
+  /* 4 · hand-lettered, with the sketch underline, right of the card */
+  body[data-startvar="4"] .startrow{margin:.5rem 0 0;justify-content:flex-end}
+  body[data-startvar="4"] .start{width:auto;background:none;color:var(--rust);font:600 1.45rem var(--hand);padding:.2rem .4rem .55rem;border-radius:0;position:relative}
+  body[data-startvar="4"] .start svg{fill:var(--rust);width:16px;height:16px}
+  body[data-startvar="4"] .start::after{content:'';position:absolute;left:4px;right:4px;bottom:-2px;height:12px;background:url('assets/lw/shelf/underline_sketch.webp') center/100% 100% no-repeat;opacity:.9}
+  /* 5 · outlined rust bar, the glyph filled */
+  body[data-startvar="5"] .start{background:none;color:var(--rust);box-shadow:inset 0 0 0 2px var(--rust);border-radius:0 0 4px 4px}
+  body[data-startvar="5"] .start svg{fill:var(--rust)}
+  body[data-startvar="5"] .start:hover{background:color-mix(in srgb,var(--rust) 8%,transparent);filter:none}
   .startnote{font-family:var(--hand);font-size:1.15rem;color:var(--mut)}
 
   /* ---- subjects ---- */
@@ -99,10 +123,10 @@
   /* the picture on the wall: this week's, in a chunky painted frame, hung a little askew from a nail */
   /* the painted frame (assets/lw/shelf/frame_wall.webp, nail and twine included) hangs a little askew from its nail;
      the week's picture sits in the opening measured from the frame's own alpha (frame_wall.json) */
-  .wallhang{position:absolute;left:55%;bottom:50px;width:21%;aspect-ratio:775/793;z-index:1;transform:rotate(-2.4deg);transform-origin:52% 2%}
+  .wallhang{position:absolute;left:55%;bottom:50px;width:21%;aspect-ratio:755/781;z-index:1;transform:rotate(-2.4deg);transform-origin:52% 2%}
   .wallhang[hidden]{display:none}
   .wallhang .frame{position:absolute;inset:0;width:100%;height:100%;display:block;filter:drop-shadow(0 4px 5px rgba(40,25,10,.3))}
-  .wallhang .pic{position:absolute;left:20.1%;top:36.3%;width:64.3%;height:45.4%;object-fit:cover;display:block}
+  .wallhang .pic{position:absolute;left:14.2%;top:34.1%;width:71.5%;height:51.7%;object-fit:cover;display:block}
   .wallhang .walltip{position:absolute;left:50%;bottom:-14px;transform:translate(-50%,100%);white-space:nowrap;
     background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.4rem .62rem;font:700 .82rem var(--head);color:var(--ink);
     box-shadow:0 10px 26px rgba(40,28,12,.16);opacity:0;pointer-events:none;transition:opacity .16s;z-index:30}
@@ -796,6 +820,13 @@ fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
   img.onload=()=>{ box.hidden=false; }; img.onerror=()=>{ box.hidden=true; };
   document.getElementById('walltip').textContent=w.cap; img.src='assets/lw/'+w.art;
 }).catch(()=>{});
+/* ?startvar=N — the five Start treatments (design review); 3 moves the control up beside the heading */
+(function(){ const v=_dq.get('startvar'); if(!v) return; document.body.dataset.startvar=v;
+  if(v==='3'){ const h=document.querySelector('.h1row'), sb=document.getElementById('startbtn'); if(h&&sb){
+    const d=document.createElement('button'); d.className='startdisc'; d.type='button';
+    const sync=()=>{ d.innerHTML='<span>'+sb.textContent.trim()+'</span><i><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></i>'; };
+    sync(); new MutationObserver(sync).observe(sb,{childList:true,subtree:true,characterData:true});
+    d.onclick=()=>sb.click(); h.appendChild(d); } } })();
 /* date + exam countdown + mini month */
 const now=new Date();
 document.getElementById('today').textContent=(window.svGreeting&&svGreeting()?svGreeting()+' · ':'')+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
