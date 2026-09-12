@@ -8,6 +8,7 @@
 <title>Your dashboard — StudyVault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Young+Serif&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/scrollbar.css">
 <style>
   /* ============ CLASSIC: the desk's contents, filed neatly ============
      Same data, same painted objects, same subject cloth-tabs as the cosy
@@ -1632,6 +1633,11 @@ function playPod(next){
   const p=PODCASTS[podQ[podPos]];
   player.src=p.u; player.play().catch(()=>{}); podOn=true;
   podplay.innerHTML=ICOPAUSE;
+  try{ if('mediaSession' in navigator){ navigator.mediaSession.metadata=new MediaMetadata({title:p.t,artist:'StudyVault · '+p.s+' podcast',
+    artwork:[{src:'/images/icon-192.png',sizes:'192x192',type:'image/png'},{src:'/images/icon-512.png',sizes:'512x512',type:'image/png'}]});
+    navigator.mediaSession.setActionHandler('play',()=>{ player.play(); podplay.innerHTML=ICOPAUSE; });
+    navigator.mediaSession.setActionHandler('pause',()=>{ player.pause(); podplay.innerHTML=ICOPLAY; });
+    navigator.mediaSession.setActionHandler('nexttrack',()=>playPod(true)); } }catch(e){}
   podTitle(p.t+' · '+p.s);
   const td=document.getElementById('today'); if(td) td.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
 }

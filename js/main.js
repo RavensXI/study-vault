@@ -26,6 +26,26 @@ document.addEventListener('DOMContentLoaded', () => {
  * Phase 2 init — call this after dynamic content has been injected into the DOM.
  * Safe to call on static pages too (all functions guard with early returns).
  */
+/* the phone's lock-screen / notification player shows the lesson title and
+   StudyVault, not a bare address, for anything that plays on the page (Tom,
+   13 Sep 2026). Set on every play so the last thing started is what shows. */
+function svMediaMeta(title, sub) {
+  try {
+    if (!('mediaSession' in navigator)) return;
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: title || document.title.replace(/ - StudyVault$/, ''),
+      artist: 'StudyVault' + (sub ? ' · ' + sub : ''),
+      artwork: [{ src: '/images/icon-192.png', sizes: '192x192', type: 'image/png' }, { src: '/images/icon-512.png', sizes: '512x512', type: 'image/png' }]
+    });
+  } catch (e) {}
+}
+window.svMediaMeta = svMediaMeta;
+document.addEventListener('play', function (e) {
+  var el = e.target; if (!el || !/^(AUDIO|VIDEO)$/.test(el.tagName)) return;
+  var t = (document.getElementById('lesson-title') || {}).textContent || '';
+  svMediaMeta(t.trim(), el.tagName === 'VIDEO' ? 'Video' : '');
+}, true);
+
 function initLessonFeatures() {
   initCollapsibles();
   initVisitedTracking();
