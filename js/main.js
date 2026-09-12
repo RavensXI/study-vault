@@ -1955,6 +1955,19 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
     renderKaTeX(getBody());
   }
 
+  /* a shuffled order of indices that is never the stored order (for 2+ items); options that only
+     make sense in place ("all of the above", "both A and B") keep the stored order */
+  const KC_POSITIONAL = /(all|none|both|neither).*(above|these|apply|correct)|(a and b|b and c|a and c)/i;
+  function kcShuffleOrder(items) {
+    const n = items.length, order = items.map((_, i) => i);
+    if (n < 2 || items.some(o => KC_POSITIONAL.test(String(o)))) return order;
+    for (let tries = 0; tries < 8; tries++) {
+      for (let i = n - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = order[i]; order[i] = order[j]; order[j] = t; }
+      if (order.some((v, i) => v !== i)) return order;
+    }
+    order.push(order.shift()); return order;   // rotate as a last resort
+  }
+
   // --- Multiple Choice ---
   function renderMCQ(q) {
     const body = getBody();
@@ -1965,7 +1978,11 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
     footer.innerHTML = '<button class="kc-btn kc-btn-primary" id="kc-check" disabled>Check</button>';
 
     const grid = body.querySelector('#kc-options');
-    q.options.forEach((opt, i) => {
+    /* the options are shown in a fresh order every time (authors leave the answer in the same
+       slot far too often) — unless one only makes sense in place ("all of the above") */
+    const order = kcShuffleOrder(q.options);
+    order.forEach((i) => {
+      const opt = q.options[i];
       const btn = document.createElement('button');
       btn.className = 'kc-option';
       btn.innerHTML = opt;
@@ -1983,9 +2000,9 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
       if (selected < 0) return;
       grid.querySelectorAll('.kc-option').forEach(b => b.classList.add('locked'));
       const correct = selected === q.correct;
-      grid.children[selected].classList.add(correct ? 'correct' : 'incorrect');
+      grid.children[order.indexOf(selected)].classList.add(correct ? 'correct' : 'incorrect');
       if (!correct) {
-        grid.children[q.correct].classList.add('correct');
+        grid.children[order.indexOf(q.correct)].classList.add('correct');
         kcMisses.push({ q: kcStrip(q.q).slice(0, 160), chose: kcStrip(q.options[selected]), right: kcStrip(q.options[q.correct]) });
       }
       if (correct) score++;
@@ -2071,12 +2088,8 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
 
     const container = body.querySelector('#kc-match');
 
-    // Shuffle right-side options
-    const shuffled = q.right.map((r, i) => ({ text: r, idx: i }));
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      const t = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = t;
-    }
+    // Shuffle right-side options — never leaving them in the stored (answer) order
+    const shuffled = kcShuffleOrder(q.right).map(i => ({ text: q.right[i], idx: i }));
 
     q.left.forEach((left, i) => {
       const row = document.createElement('div');
