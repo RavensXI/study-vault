@@ -14,7 +14,7 @@
    push work along rather than deleting it. A subject's urgency rises as its
    next paper approaches, and it drops out once its final paper is sat.
 
-   Exam dates: data/exam-dates-2027.json (the boards' own timetables) where
+   Exam dates: data/exam-dates-<year>.json (the boards' own timetables) where
    the board+subject is in it; dash-data's provisional table otherwise. Only
    real dates are offered for export.
 
@@ -583,7 +583,8 @@ function svPlannerBoot(SUBJECTS, opts) {
   }
   buildSchedule();
   /* the real timetable and the lesson titles arrive async; each re-plans quietly */
-  if (!PL_REAL) fetch('/data/exam-dates-2027.json').then(function (r) { return r.json(); }).then(function (j) {
+  /* the boards' own timetable for the student's exam year, when we have it; otherwise the provisional dates stand */
+  if (!PL_REAL) fetch('/data/exam-dates-' + (window.svExamYear ? svExamYear() : 2027) + '.json').then(function (r) { if (!r.ok) throw new Error('no timetable for that year'); return r.json(); }).then(function (j) {
     PL_REAL = j || null; PL_LAST = plLast(PL_SUBJECTS); replan(true);
     var b = document.getElementById('plicsex'); if (b) b.hidden = !anyRealExams();
   }).catch(function () {});

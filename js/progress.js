@@ -55,7 +55,10 @@
     if (!window.svPlanFit) return null;
     var f = svPlanFit(su.slug); if (!f || !f.first) return null;
     if (!f.left) return 'nothing left before ' + shortDate(f.first);
-    if (f.fit >= f.left) return 'on track for ' + shortDate(f.first);
+    /* a paper more than a year away (a Year 10) carries its year */
+    var d0 = f.first instanceof Date ? f.first : new Date(f.first + (String(f.first).length === 10 ? 'T12:00:00' : ''));
+    var far = (d0 - Date.now()) > 366 * 864e5;
+    if (f.fit >= f.left) return 'on track for ' + shortDate(f.first) + (far ? ' ' + d0.getFullYear() : '');
     var behind = f.left - f.fit;
     return '≈ ' + behind + ' lesson' + (behind === 1 ? '' : 's') + ' behind schedule';
   }

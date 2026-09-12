@@ -242,8 +242,17 @@ var EXAMS = {
  hosp:[[6,9,'Exam']],
  hsc:[[5,13,'Exam 1'],[6,6,'Exam 2']]
 };
+/* the student's exam summer: the year picked in the wizard (studyvault-exam-year); a Year 10 sits
+   the following summer, so the whole plan, countdown and provisional dates move with it */
+function svExamYear() {
+  var y = 0; try { y = parseInt(localStorage.getItem('studyvault-exam-year') || '', 10); } catch (e) {}
+  if (y) return y;
+  var n = new Date(); return n.getMonth() >= 6 ? n.getFullYear() + 1 : n.getFullYear();
+}
+window.svExamYear = svExamYear;
 function svExamsFor(su) {
-  return (EXAMS[su.slug] || []).map(function (e) { return { d: new Date(2027, e[0] - 1, e[1]), label: e[2] }; });
+  var Y = svExamYear();
+  return (EXAMS[su.slug] || []).map(function (e) { return { d: new Date(Y, e[0] - 1, e[1]), label: e[2] }; });
 }
 /* first + last exam date across the student's subjects — BOTH dashboards'
    countdowns read this, so they can never disagree */
@@ -251,8 +260,9 @@ function svFirstLast(SUBJECTS) {
   var all = [];
   SUBJECTS.forEach(function (su) { all = all.concat(svExamsFor(su)); });
   all.sort(function (a, b) { return a.d - b.d; });
-  return { first: all.length ? all[0].d : new Date(2027, 4, 17),
-           last: all.length ? all[all.length - 1].d : new Date(2027, 5, 18),
+  var Y = svExamYear();
+  return { first: all.length ? all[0].d : new Date(Y, 4, 17),
+           last: all.length ? all[all.length - 1].d : new Date(Y, 5, 18),
            all: all };
 }
 
