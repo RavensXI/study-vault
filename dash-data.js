@@ -566,11 +566,13 @@ function svAvatarMenu(av) {
     menu = document.createElement('div'); menu.className = 'sv-avmenu';
     menu.innerHTML = '<div class="who">' + (SVUSER.name ? esc(SVUSER.name) + ' · ' : 'Signed in as ') + esc(SVUSER.email) + '</div>'
       + '<a href="/welcome?view=picker">Edit subjects &amp; boards</a>'
+      + (window.svDashTour ? '<button type="button" class="tour">Show me around</button>' : '')
       + '<button type="button" class="out">Sign out</button>';
     document.body.appendChild(menu);
     var r = av.getBoundingClientRect();
     menu.style.top = (r.bottom + 8) + 'px';
     menu.style.left = Math.max(8, Math.min(window.innerWidth - menu.offsetWidth - 8, r.right - menu.offsetWidth)) + 'px';
+    var tb = menu.querySelector('.tour'); if (tb) tb.addEventListener('click', function () { close(); svDashTour.open(0); });
     menu.querySelector('.out').addEventListener('click', function () {
       if (window.svSignOut) { svSignOut(); return; }   /* push progress, then clean the device */
       try { localStorage.removeItem('sv-user'); } catch (e2) {}

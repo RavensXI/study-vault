@@ -45,7 +45,7 @@
     // preferences
     'studyvault-a11y', 'sv-focus-mode', 'sv-hl-enabled', 'sv-dash-view',
     // one-time hints (so a new device doesn't replay every tutorial)
-    'sv-reader-tour-v1', 'sv-lesson-tutorial-done',
+    'sv-reader-tour-v1', 'sv-lesson-tutorial-done', 'sv-dash-tour-v1',
     'sv-flashcard-tutorial-done', 'sv-highlight-tutorial-done',
     'sv_collapsible_hint'
   ];
