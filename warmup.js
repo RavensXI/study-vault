@@ -189,16 +189,31 @@
       var card = veil.querySelector('.wu-card');
       var i = 0, correct = 0, locked = false, marks = [], misses = [], unitAtt = {};
 
+      /* the revisit counts in LESSONS, like the plan row does: "Revisit · lesson 1 of 3",
+         the lesson named underneath with its own question count, dots for that lesson only */
+      var lkey = function (c) { return c.sub + '/' + c.unit + '/' + c.n; };
+      var lessonKeys = []; pool.forEach(function (c) { var k = lkey(c); if (lessonKeys.indexOf(k) < 0) lessonKeys.push(k); });
       function renderQ() {
         var c = pool[i]; locked = false;
+        var kick, from, dots;
+        if (REV) {
+          var k0 = lkey(c), li = lessonKeys.indexOf(k0);
+          var idx = pool.map(function (x, k) { return lkey(x) === k0 ? k : -1; }).filter(function (k) { return k >= 0; });
+          kick = '◆ ' + LABEL + ' · lesson ' + (li + 1) + ' of ' + lessonKeys.length;
+          from = esc(c.from) + ' · ' + (idx.indexOf(i) + 1) + ' of ' + idx.length;
+          dots = idx.map(function (k) { return '<i class="' + (k < i ? (marks[k] ? 'ok' : 'no') : (k === i ? 'on' : '')) + '"></i>'; }).join('');
+        } else {
+          kick = '◆ ' + LABEL + ' · ' + (i + 1) + ' of ' + pool.length;
+          from = esc(c.from);
+          dots = pool.map(function (_, k) { return '<i class="' + (k < i ? (marks[k] ? 'ok' : 'no') : (k === i ? 'on' : '')) + '"></i>'; }).join('');
+        }
         card.innerHTML =
-          '<div class="wu-kick"><span>◆ ' + LABEL + ' · ' + (i + 1) + ' of ' + pool.length + '</span>'
+          '<div class="wu-kick"><span>' + kick + '</span>'
           + '<button class="wu-skip">Skip →</button></div>'
-          + '<div class="wu-from">' + esc(c.from) + '</div>'
+          + '<div class="wu-from">' + from + '</div>'
           + '<div class="wu-q">' + esc(c.q) + '</div>'
           + c.opts.map(function (o, k) { return '<button class="wu-opt" data-i="' + k + '">' + esc(o) + '</button>'; }).join('')
-          + '<div class="wu-dots">' + pool.map(function (_, k) {
-              return '<i class="' + (k < i ? (marks[k] ? 'ok' : 'no') : (k === i ? 'on' : '')) + '"></i>'; }).join('') + '</div>';
+          + '<div class="wu-dots">' + dots + '</div>';
         card.querySelector('.wu-skip').addEventListener('click', goLesson);
         [].forEach.call(card.querySelectorAll('.wu-opt'), function (b) {
           b.addEventListener('click', function () {
@@ -259,14 +274,15 @@
           var kclg = JSON.parse(localStorage.getItem('sv-kc-log')) || {};
           order.forEach(function (key) { kclg[key] = { s: per[key].s, t: per[key].t, d: todayStr(), miss: per[key].miss.slice(0, 5) }; });
           localStorage.setItem('sv-kc-log', JSON.stringify(kclg));
-          localStorage.setItem('sv-revisit', JSON.stringify({ date: todayStr(), correct: correct, total: pool.length,
+          localStorage.setItem('sv-revisit', JSON.stringify({ date: todayStr(), correct: order.filter(function (key) { return per[key].t && per[key].s / per[key].t >= 0.8; }).length, total: order.length, questions: correct, ofQuestions: pool.length,
             lessons: order.map(function (key) { return { key: key, s: per[key].s, t: per[key].t, title: per[key].title }; }) }));
         } catch (e) {}
         if (window.svProgressPushSoon) svProgressPushSoon();
         var rows = order.map(function (key) { var r = per[key], ok = r.t && r.s / r.t >= 0.8;
           return '<div class="wu-line' + (ok ? ' ok' : '') + '"><span>' + esc(r.title) + '</span><b>' + (ok ? 'still secure' : 'back in your plan') + '</b></div>'; }).join('');
+        var kept = order.filter(function (key) { return per[key].t && per[key].s / per[key].t >= 0.8; }).length;
         card.innerHTML = '<div class="wu-kick"><span>◆ Revisit done</span></div>'
-          + '<div class="wu-sum"><div class="wu-big">' + correct + ' / ' + pool.length + '</div>' + rows
+          + '<div class="wu-sum"><div class="wu-big">' + kept + ' / ' + order.length + '</div>' + rows
           + (target ? '<button class="wu-go">Start today’s lesson →</button>' : '<button class="wu-go">Back to my plan →</button>') + '</div>';
         var go = card.querySelector('.wu-go');
         if (go) go.addEventListener('click', target ? goLesson : close);

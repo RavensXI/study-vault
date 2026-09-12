@@ -462,7 +462,7 @@
 
     <div class="card plan">
       <ol>
-        <li class="inert"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled</small></div><span class="mins">2 min</span></li>
+        <li class="inert"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions</small></div><span class="mins">2 min</span></li>
         <li onclick="nav('/lesson/english-literature-aqa/a-christmas-carol/4')"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — nearest exam</small></div><span class="mins">15 min</span></li>
         <li onclick="nav('/lesson/computer-science/computer-systems/3')"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — 3 weeks stale</small></div><span class="mins">8 min</span></li>
       </ol>
@@ -674,8 +674,7 @@ function wireRevisitRow(url){
   const li=document.querySelector('.card.plan ol li'); if(!li) return false;
   if(!svDoneStats().total||!window.svStrength||!svStrength.revisit) return false;
   const rv=svStrength.revisit(SUBJECTS), done=svStrength.revisitDone();
-  const small=done?'done today · '+done.correct+' of '+done.total+' right'
-    :rv.today.length?rv.today.length+' of '+rv.total+' due · worst first':'nothing due today';
+  const small=done?done.correct+' of '+done.total+' still secure':rv.today.length?rv.today.length+' of '+rv.total+' due':'none due';
   li.innerHTML='<span class="n">'+(done?'✓':'1')+'</span><div><b>Revisit</b><small>'+small+'</small></div><span class="mins">'+(rv.today.length?rv.mins:2)+' min</span>';
   li.classList.toggle('done',!!done);
   if(done||!rv.today.length){ li.classList.add('inert'); li.style.cursor='default'; li.onclick=null; return true; }
@@ -690,7 +689,7 @@ function wireWarmupRow(url){
   const w=svWarmup.doneToday(), small=li.querySelector('small');
   if(w){ /* once it's done, it's done — the score is the record */
     li.classList.add('inert'); li.style.cursor='default'; li.onclick=null;
-    if(small) small.textContent='done today · '+w.correct+' of '+w.total;
+    if(small) small.textContent=w.correct+' of '+w.total+' right';
     return;
   }
   li.classList.remove('inert'); li.style.cursor='pointer';
@@ -729,9 +728,9 @@ addEventListener('pageshow',e=>{ document.body.classList.add('ready');
 if(DAYONE){
   document.querySelector('.momentum .hl').textContent='day one — your first session is ready.';
   document.querySelector('.card.plan ol').innerHTML=
-    '<li class="inert"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · finds your level</small></div><span class="mins">2 min</span></li>'+
+    '<li class="inert"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions</small></div><span class="mins">2 min</span></li>'+
     '<li class="inert"><span class="n">2</span><div><b>First lesson</b><small>'+dayOneSubjectName()+' · start at the beginning</small></div><span class="mins">15 min</span></li>'+
-    '<li class="inert"><span class="n">3</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>';
+    '<li class="inert"><span class="n">3</span><div><b>Flashcards</b><small>'+(window.svStrength&&svStrength.flashDue()?svStrength.flashDue()+' due':'mixed deck')+'</small></div><span class="mins">2 min</span></li>';
   const _sb=document.getElementById('startbtn');
   if(_sb){ const _u=dayOneUrl(svDayOneSubject(SUBJECTS));
     _sb.onclick=_u?()=>startWithWarmup(_u):()=>false;

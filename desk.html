@@ -578,7 +578,7 @@ let TODAY_L=`
   <div class="datestamp" id="today"></div>
   <h2>Here’s your plan.</h2>
   <ol class="plan">
-    <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled</small></div><span class="mins">2 min</span></li>
+    <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions</small></div><span class="mins">2 min</span></li>
     <li tabindex="0" onclick="nav('/lesson/english-literature-aqa/a-christmas-carol/4')"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — nearest exam</small></div><span class="mins">15 min</span></li>
     <li tabindex="0" onclick="nav('/lesson/computer-science/computer-systems/3')"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — 3 weeks stale</small></div><span class="mins">8 min</span></li>
   </ol>
@@ -611,7 +611,7 @@ function buildDayOneToday(){
   <ol class="plan">
     ${revisitRow(url,w,ps)}
     ${row2}
-    <li tabindex="0" class="${ps.cards?'done':''}"><span class="n">${ps.cards?'✓':'3'}</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>
+    <li tabindex="0" class="${ps.cards?'done':''}"><span class="n">${ps.cards?'✓':'3'}</span><div><b>Flashcards</b><small>${window.svStrength&&svStrength.flashDue()?svStrength.flashDue()+' due':'mixed deck'}</small></div><span class="mins">2 min</span></li>
   </ol>
   <p class="momentum"><span class="hl">${(function(){ const st=svDoneStats();
     const said=(st.total&&window.svProgress)?svProgress.saidNow(SUBJECTS):null; if(said) return said;
@@ -634,9 +634,9 @@ function buildDayOneToday(){
    (slipped or about to, worst first, capped by the budget — js/strength.js) */
 function revisitRow(url,w,ps){
   if(!svDoneStats().total||!window.svStrength||!svStrength.revisit)
-    return `<li tabindex="0" class="${ps.warm?'done':''}" ${url&&!w?`onclick="openWarmup('${url}')"`:''}><span class="n">${ps.warm?'✓':'1'}</span><div><b>Warm up</b><small>${w?`done today · ${w.correct} of ${w.total}`:'10 quick questions · finds your level'}</small></div><span class="mins">2 min</span></li>`;
+    return `<li tabindex="0" class="${ps.warm?'done':''}" ${url&&!w?`onclick="openWarmup('${url}')"`:''}><span class="n">${ps.warm?'✓':'1'}</span><div><b>Warm up</b><small>${w?`${w.correct} of ${w.total} right`:'10 quick questions'}</small></div><span class="mins">2 min</span></li>`;
   const rv=svStrength.revisit(SUBJECTS), done=svStrength.revisitDone();
-  const small=done?`done today · ${done.correct} of ${done.total} right`:rv.today.length?`${rv.today.length} of ${rv.total} due · worst first`:'nothing due today';
+  const small=done?`${done.correct} of ${done.total} still secure`:rv.today.length?`${rv.today.length} of ${rv.total} due`:'none due';
   const live=!done&&rv.today.length;
   return `<li tabindex="0" class="${done?'done':''}" ${live?`onclick="openRevisit('${url||''}')"`:''}><span class="n">${done?'✓':'1'}</span><div><b>Revisit</b><small>${small}</small></div><span class="mins">${rv.today.length?rv.mins:2} min</span></li>`;
 }
