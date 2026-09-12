@@ -403,6 +403,7 @@
   .podtitle{font-size:.8rem;color:var(--sec);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:220px}
   .podtitle:empty{display:none}
   @media (max-width:700px){ .podtitle{display:none} }
+  @media (max-width:480px){ #podnext{display:none} .top{gap:8px} }   /* room for the reading button; skip lives on the lock screen too */
 
   .signoff{font-family:var(--hand);font-size:1.15rem;color:var(--mut);text-align:right;padding:0 .3rem}
   .legalrow{margin:1.6rem 0 0;text-align:center;font-size:.76rem;color:var(--mut)}
@@ -537,6 +538,42 @@
     .ublock .utrack{grid-row:2;grid-column:1/-1;margin:.25rem 0 0}
     .ublock{margin:0;padding-left:.6rem;padding-right:.6rem}
   }
+  /* ---- dark mode: evening on the same shelf (js/dash-a11y.js; shared with the lessons' toggle).
+     The paper goes to a deep warm brown, cards a shade lighter, the painted props stay, the pencil
+     marks flip to chalk, and the lamp is the light in the room. ---- */
+  body.dark-mode{--paper:#181614;--card:#211f1c;--ink:#ece9e4;--sec:#b3aea6;--mut:#8a857c;--line:#36332e;--linel:#2b2925;--anchor:#c9b48f}
+  html.dark-mode{background:#181614}
+  body.dark-mode .brand{color:#f1ede6}
+  body.dark-mode .card{border-color:var(--line);box-shadow:none}
+  body.dark-mode .hl{background:linear-gradient(101deg,transparent 1.5%,rgba(255,200,60,.26) 7%,rgba(255,206,80,.2) 93%,transparent 98.5%)}
+  body.dark-mode h1::after,body.dark-mode .starttile b::after,body.dark-mode .plancol .arrow{filter:invert(.88) brightness(1.1)}
+  body.dark-mode .avatar{background:#ece9e4;color:#181614}
+  body.dark-mode .cosy:hover,body.dark-mode .starttile:hover,body.dark-mode .door:hover,body.dark-mode .card.exam:hover{border-color:#5a5448}
+  body.dark-mode .plan li:hover:not(.inert){background:rgba(255,235,200,.06)}
+  body.dark-mode .ublock.band-g{box-shadow:inset 0 0 0 1px #7fb27a}
+  body.dark-mode .ublock.band-a{box-shadow:inset 0 0 0 1px #e0ac4a}
+  body.dark-mode .ublock.band-r{box-shadow:inset 0 0 0 1px #e0705a}
+  body.dark-mode .card.plan li.done .n{color:#8fc9a6}
+  body.dark-mode .ltile.sel{color:#181614}
+  body.dark-mode .sdetail .cont,body.dark-mode .sdetail .go{color:#181614}
+  body.dark-mode .lightwash{background:linear-gradient(to right, rgba(0,0,0,.55), rgba(0,0,0,.25) 34%, transparent 58%);opacity:1}
+  body.dark-mode .shelfstage .lampglow,body.dark-mode .shelfstage .bulb{opacity:1}   /* evening: the lamp is on */
+  body.dark-mode .lampglow{background:linear-gradient(to bottom, rgba(255,190,110,.55) 22%, rgba(255,170,90,.42) 40%, rgba(252,150,70,.22) 66%, rgba(252,146,64,.08) 86%, transparent 97%)}
+  body.dark-mode .selprompt{color:var(--mut)}
+  body.dark-mode .fcmodal{background:rgba(0,0,0,.6)}
+  body.dark-mode .fcmodal .x,body.dark-mode .phonemodal .x{background:#ece9e4;color:#181614}
+  body.dark-mode .bigcard .face{background:#26231f;box-shadow:0 30px 70px -25px rgba(0,0,0,.8)}
+  body.dark-mode .bigcard .qq{color:#ece9e4}
+  body.dark-mode .bigcard .face.front::after{color:#6b665c}
+  body.dark-mode .fcbtns .fb{background:#181614;color:var(--sec)}
+  body.dark-mode .fcbtns .fb.ok:hover{background:#1c2f24;color:#9fd3b4}body.dark-mode .fcbtns .fb.no:hover{background:#3a221c;color:#f0a893}
+  body.dark-mode .fcmark.m-emerging{color:#f0846f}body.dark-mode .fcmark.m-developing{color:#e9a24a}body.dark-mode .fcmark.m-secure{color:#7fb6dc}body.dark-mode .fcmark.m-mastered{color:#8fd3a6}
+  body.dark-mode .podrow button{background:var(--card)}
+  body.dark-mode .cal .d.gone::after{color:rgba(240,140,120,.4)}
+  body.dark-mode .sdetail .sub .pg-due{color:#e0906f}
+  body.dark-mode .savebar{background:var(--card)}
+  body.dark-mode .svtimer{color:var(--sec)}
+  body.dark-mode .svtimer-pop{background:var(--card);border-color:var(--line)}body.dark-mode .svtimer-pop button{background:var(--paper);color:var(--ink);border-color:var(--line)}
 </style>
 </head>
 <body>
@@ -658,6 +695,7 @@
 <!-- planner modal + day tooltip are injected by planner.js (shared with the desk) -->
 
 <script src="js/school-session.js"></script>
+<script src="js/dash-a11y.js"></script>
 <script src="js/demo-students.js"></script>
 <script src="dash-data.js"></script>
 <script src="sync.js"></script>
