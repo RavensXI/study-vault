@@ -150,13 +150,11 @@ function buildSchedule() {
   var shape = plShape();
   PL_FIT = {};                                          // per subject: lessons that fit before its first exam
   PL_SUBJECTS.forEach(function (su) { lastSeen[su.slug] = -999; queues[su.slug] = plQueue(su); PL_FIT[su.slug] = { left: queues[su.slug].length, fit: 0, first: (plExams(su)[0] || {}).d || null }; });
-  /* today only: lessons whose real strength has faded come back as a quick quiz first */
+  /* today only: the revisit slot (js/strength.js revisit) — slipped or about to, worst first, capped by the budget */
   var dueNow = [];
-  /* practice sets and listening lessons have no quick quiz to come back to */
-  if (window.svStrength) PL_SUBJECTS.forEach(function (su) { if (su.slug === 'music') return;
-    svStrength.due(su, 4).filter(function (r) { return !(window.svIsPracticeUnit && svIsPracticeUnit(su, r.unit)); }).slice(0, 2)
-      .forEach(function (r) { dueNow.push({ on: T0, s: su, unit: r.unit, unitName: r.unitName, num: r.num, total: r.total }); }); });
-  retrieval = retrieval.concat(dueNow.slice(0, 2));
+  if (window.svStrength && svStrength.revisit && !svStrength.revisitDone())
+    svStrength.revisit(PL_SUBJECTS).today.forEach(function (r) { dueNow.push({ on: T0, s: r.su, unit: r.unit, unitName: r.unitName, num: r.num, total: r.total }); });
+  retrieval = retrieval.concat(dueNow);
   for (var d = new Date(T0), di = 0; d <= PL_LAST; d = new Date(d.getTime() + 864e5), di++) {
     if (offKind(d)) continue;
     var active = PL_SUBJECTS.filter(function (su) {
@@ -190,9 +188,9 @@ function buildSchedule() {
     /* quizzes that fell due today (or slid off a rest day onto it) */
     var due = retrieval.filter(function (r) { return r.on <= d; });
     retrieval = retrieval.filter(function (r) { return r.on > d; });
-    due.slice(0, 2).forEach(function (r) {
-      picks.push({ s: r.s, act: 'knowledge check', unit: r.unit, unitName: r.unitName, num: r.num, total: r.total,
-                   title: plTitle(r.s, r.unit, r.num), url: plUrl(r.s, r.unit, r.num) + '#kc', min: 5, quiz: true });
+    due.slice(0, di === 0 ? 4 : 2).forEach(function (r) {
+      picks.push({ s: r.s, act: 'revisit', unit: r.unit, unitName: r.unitName, num: r.num, total: r.total,
+                   title: plTitle(r.s, r.unit, r.num), url: plUrl(r.s, r.unit, r.num) + '#kc', min: 2, quiz: true });
     });
     /* the mixed deck: today it is sized by what is actually due; later days a short sitting */
     var dueCards = (di === 0 && window.svStrength) ? svStrength.flashDue() : 0;
@@ -229,7 +227,7 @@ function svPlanPrimary() {
   return { su: x.s, unitName: x.unitName, unitSlug: x.unit, total: x.total, num: x.num, url: x.url, title: x.title, act: x.act, min: x.min };
 }
 function sessLabel(x) { return x.title || (x.s ? (x.unitName + ' · ' + (x.act === 'practice' ? 'set' : 'lesson') + ' ' + x.num) : x.act); }
-function actWord(x) { return x.quiz ? 'quick quiz' : x.act === 'quiz-first' ? 'quick check' : x.act === 'review' ? 'review' : x.mixed ? '' : x.act; }
+function actWord(x) { return x.quiz ? 'revisit' : x.act === 'quiz-first' ? 'quick check' : x.act === 'review' ? 'review' : x.mixed ? '' : x.act; }
 
 /* ---- day tooltip (shared by both views' mini calendars) ---- */
 var DOWNAME = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];

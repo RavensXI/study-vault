@@ -609,7 +609,7 @@ function buildDayOneToday(){
   <div class="datestamp" id="today"></div>
   <h2>Here’s your plan.</h2>
   <ol class="plan">
-    <li tabindex="0" class="${ps.warm?'done':''}" ${url&&!w?`onclick="openWarmup('${url}')"`:''}><span class="n">${ps.warm?'✓':'1'}</span><div><b>Warm up</b><small>${w?`done today · ${w.correct} of ${w.total}`:'10 quick questions · finds your level'}</small></div><span class="mins">2 min</span></li>
+    ${revisitRow(url,w,ps)}
     ${row2}
     <li tabindex="0" class="${ps.cards?'done':''}"><span class="n">${ps.cards?'✓':'3'}</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>
   </ol>
@@ -630,8 +630,25 @@ function buildDayOneToday(){
   <p class="doable">${SVUSER&&SVUSER.email?('Signed in as '+SVUSER.email+'.')
     :'<a href="/welcome?view=save" style="color:inherit">Nothing saved yet — sign up to save your progress.</a>'}</p>`;
 }
+/* row 1: the day-one warm-up until something has been studied; then the revisit
+   (slipped or about to, worst first, capped by the budget — js/strength.js) */
+function revisitRow(url,w,ps){
+  if(!svDoneStats().total||!window.svStrength||!svStrength.revisit)
+    return `<li tabindex="0" class="${ps.warm?'done':''}" ${url&&!w?`onclick="openWarmup('${url}')"`:''}><span class="n">${ps.warm?'✓':'1'}</span><div><b>Warm up</b><small>${w?`done today · ${w.correct} of ${w.total}`:'10 quick questions · finds your level'}</small></div><span class="mins">2 min</span></li>`;
+  const rv=svStrength.revisit(SUBJECTS), done=svStrength.revisitDone();
+  const small=done?`done today · ${done.correct} of ${done.total} right`:rv.today.length?`${rv.today.length} of ${rv.total} due · worst first`:'nothing due today';
+  const live=!done&&rv.today.length;
+  return `<li tabindex="0" class="${done?'done':''}" ${live?`onclick="openRevisit('${url||''}')"`:''}><span class="n">${done?'✓':'1'}</span><div><b>Revisit</b><small>${small}</small></div><span class="mins">${rv.today.length?rv.mins:2} min</span></li>`;
+}
+function openRevisit(url){ if(!window.svWarmup||!window.svStrength) return; const rv=svStrength.revisit(SUBJECTS); if(rv.today.length) svWarmup.open({lessons:rv.today,target:url||null,nav}); }
 function startWithWarmup(url){
-  if(window.svWarmup && !svWarmup.doneToday()) svWarmup.open({subjects:SUBJECTS,target:url,nav});
+  if(!window.svWarmup){ nav(url); return; }
+  if(svDoneStats().total&&window.svStrength&&svStrength.revisit){
+    const rv=svStrength.revisit(SUBJECTS);
+    if(rv.today.length&&!svStrength.revisitDone()) svWarmup.open({lessons:rv.today,target:url,nav}); else nav(url);
+    return;
+  }
+  if(!svWarmup.doneToday()) svWarmup.open({subjects:SUBJECTS,target:url,nav});
   else nav(url);
 }
 function openWarmup(url){ if(window.svWarmup) svWarmup.open({subjects:SUBJECTS,target:url,nav}); }

@@ -54,25 +54,46 @@
     return out;
   }
   /* -> {s, prior, reps, last} */
-  function lesson(su, unit, num) {
+  /* ahead: project the score N days into the future (the revisit slot looks three days out) */
+  function lesson(su, unit, num, ahead) {
     var ev = evidence(su.sub, unit, num);
     if (!ev.length) { var p = priorFor(su.slug, su.sub, unit); return { s: p == null ? 0 : p, prior: p != null, reps: 0, last: null }; }
     var best = 0, reps = ev.length;
-    ev.forEach(function (e) { best = Math.max(best, decay(e.v, e.d, e.reps || reps)); });
+    ev.forEach(function (e) { best = Math.max(best, decay(e.v, e.d + (ahead || 0), e.reps || reps)); });
     return { s: Math.round(best), prior: false, reps: reps, last: Math.min.apply(null, ev.map(function (e) { return e.d; })) };
   }
   function band(s) { return s >= 70 ? 'g' : s >= 40 ? 'a' : 'r'; }
   function unit(su, u) { var n = u[1] || 0; if (!n) return null; var t = 0; for (var i = 1; i <= n; i++) t += lesson(su, u[3], i).s; return Math.round(t / n); }
   function subject(su) { var t = 0, c = 0; (su.units || []).forEach(function (u) { var v = unit(su, u); if (v != null) { t += v; c++; } }); return c ? Math.round(t / c) : 0; }
   /* lessons with REAL evidence whose strength has faded: due for a quick quiz */
-  function due(su, limit) {
+  var REVISIT_LINE = 55;
+  function due(su, limit, ahead) {
     var out = [];
     (su.units || []).forEach(function (u) {
-      for (var i = 1; i <= (u[1] || 0); i++) { var r = lesson(su, u[3], i); if (!r.prior && r.reps && r.s < 55) out.push({ unit: u[3], unitName: u[0], num: i, total: u[1], s: r.s }); }
+      for (var i = 1; i <= (u[1] || 0); i++) { var r = lesson(su, u[3], i, ahead); if (!r.prior && r.reps && r.s < REVISIT_LINE) out.push({ unit: u[3], unitName: u[0], num: i, total: u[1], s: lesson(su, u[3], i).s }); }
     });
     out.sort(function (a, b) { return a.s - b.s; });
     return limit ? out.slice(0, limit) : out;
   }
+  /* the revisit slot: lessons that have slipped below the line, or will within
+     three days, worst first — capped per day by the budget so a month away does
+     not become a wall of quizzes (20 min -> 2, 45 -> 3, 60 -> 4). Article
+     lessons only: practice sets and set works have no quick quiz to come back to. */
+  function revisitCap() { return Math.max(2, Math.round(budget() / 15)); }
+  function revisit(subjects) {
+    var all = [];
+    (subjects || []).forEach(function (su) {
+      if (!su.sub || su.slug === 'music') return;
+      due(su, 0, 3).forEach(function (r) {
+        if (window.svIsPracticeUnit && svIsPracticeUnit(su, r.unit)) return;
+        all.push({ su: su, sub: su.sub, unit: r.unit, unitName: r.unitName, n: r.num, num: r.num, total: r.total, s: r.s });
+      });
+    });
+    all.sort(function (a, b) { return a.s - b.s; });
+    var cap = revisitCap(), today = all.slice(0, cap);
+    return { today: today, total: all.length, cap: cap, mins: today.length * 2 };
+  }
+  function revisitDone() { var r = g('sv-revisit', null); return (r && r.date === new Date().toISOString().slice(0, 10)) ? r : null; }
   function flashDue() {
     var cards = (g('sv-flashcard-progress', { cards: {} }) || {}).cards || {}, today = new Date().toISOString().slice(0, 10), n = 0;
     for (var k in cards) if ((cards[k].nextReview || '9999') <= today) n++;
@@ -86,6 +107,6 @@
   }
   function budget() { var w = g('sv-welcome', {}); return (w && +w.budget) || 45; }
   function setBudget(m) { var w = g('sv-welcome', {}); w.budget = m; try { localStorage.setItem('sv-welcome', JSON.stringify(w)); } catch (e) {} if (window.svProgressPushSoon) svProgressPushSoon(); }
-  window.svStrength = { lesson: lesson, unit: unit, subject: subject, band: band, due: due, flashDue: flashDue,
+  window.svStrength = { lesson: lesson, unit: unit, subject: subject, band: band, due: due, flashDue: flashDue, revisit: revisit, revisitDone: revisitDone, revisitCap: revisitCap,
                         rag: rag, setRag: setRag, prior: priorFor, budget: budget, setBudget: setBudget };
 })();

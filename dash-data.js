@@ -303,6 +303,7 @@ function svPlanState() {
     return { warm: warm, lesson: lesson, cards: cards, any: warm || lesson || cards, mins: m0 };
   }
   try { var w = JSON.parse(localStorage.getItem('sv-warmup')); warm = !!(w && w.date === today); } catch (e) {}
+  try { var rv = JSON.parse(localStorage.getItem('sv-revisit')); if (rv && rv.date === today) warm = true; } catch (e) {}
   try { cards = localStorage.getItem('sv-flash-day') === today; } catch (e) {}
   try {
     var when = JSON.parse(localStorage.getItem('sv-lessons-when')) || {};

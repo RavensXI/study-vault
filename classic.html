@@ -658,10 +658,33 @@ function refreshDayOnePlan(){
 }
 /* Start = warm-up first (once a day), then straight into the lesson */
 function startWithWarmup(url){
-  if(window.svWarmup && !svWarmup.doneToday()) svWarmup.open({subjects:SUBJECTS,target:url,nav});
+  if(!window.svWarmup){ nav(url); return; }
+  if(svDoneStats().total&&window.svStrength&&svStrength.revisit){   /* after day one the first slot is the revisit */
+    const rv=svStrength.revisit(SUBJECTS);
+    if(rv.today.length&&!svStrength.revisitDone()) svWarmup.open({lessons:rv.today,target:url,nav}); else nav(url);
+    return;
+  }
+  if(!svWarmup.doneToday()) svWarmup.open({subjects:SUBJECTS,target:url,nav});
   else nav(url);
 }
+/* row 1 of the plan: the day-one warm-up (a level-finder) until something has
+   been studied; from then on the revisit — lessons that have slipped, or will
+   within three days, worst first, capped by the budget */
+function wireRevisitRow(url){
+  const li=document.querySelector('.card.plan ol li'); if(!li) return false;
+  if(!svDoneStats().total||!window.svStrength||!svStrength.revisit) return false;
+  const rv=svStrength.revisit(SUBJECTS), done=svStrength.revisitDone();
+  const small=done?'done today · '+done.correct+' of '+done.total+' right'
+    :rv.today.length?rv.today.length+' of '+rv.total+' due · worst first':'nothing due today';
+  li.innerHTML='<span class="n">'+(done?'✓':'1')+'</span><div><b>Revisit</b><small>'+small+'</small></div><span class="mins">'+(rv.today.length?rv.mins:2)+' min</span>';
+  li.classList.toggle('done',!!done);
+  if(done||!rv.today.length){ li.classList.add('inert'); li.style.cursor='default'; li.onclick=null; return true; }
+  li.classList.remove('inert'); li.style.cursor='pointer';
+  li.onclick=()=>svWarmup.open({lessons:rv.today,target:url||null,nav});
+  return true;
+}
 function wireWarmupRow(url){
+  if(wireRevisitRow(url)) return;
   const li=document.querySelector('.card.plan ol li');
   if(!li||!url) return;
   const w=svWarmup.doneToday(), small=li.querySelector('small');
