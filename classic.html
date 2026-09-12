@@ -97,6 +97,32 @@
   body[data-startvar="5"] .start{background:none;color:var(--rust);box-shadow:inset 0 0 0 2px var(--rust);border-radius:0 0 4px 4px}
   body[data-startvar="5"] .start svg{fill:var(--rust)}
   body[data-startvar="5"] .start:hover{background:color-mix(in srgb,var(--rust) 8%,transparent);filter:none}
+  /* 6-9 · the plan beside a Start tile on its right */
+  body[data-startvar="6"] .startrow,body[data-startvar="7"] .startrow,body[data-startvar="8"] .startrow,body[data-startvar="9"] .startrow{display:none}
+  body[data-startvar="6"] .plan,body[data-startvar="7"] .plan,body[data-startvar="8"] .plan,body[data-startvar="9"] .plan{padding-bottom:.8rem}
+  .plancol{display:grid;grid-template-columns:minmax(0,1fr) 218px;gap:12px;align-items:stretch}
+  .starttile{border:1px solid var(--line);border-radius:4px;background:var(--card);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;font-family:var(--head);color:var(--ink);padding:1rem;transition:filter .15s,border-color .15s}
+  .starttile .disc{width:64px;height:64px;border-radius:50%;background:var(--rust);display:grid;place-items:center;box-shadow:0 8px 18px rgba(192,99,37,.35)}
+  .starttile .disc svg{width:24px;height:24px;fill:#fff;margin-left:3px}
+  .starttile b{font-size:1.05rem;font-weight:800}
+  .starttile small{font-size:.85rem;color:var(--mut)}
+  .starttile:hover{border-color:#c9ba9e}
+  /* 6 · solid rust tile */
+  body[data-startvar="6"] .starttile{background:var(--rust);border-color:var(--rust);color:#fff}
+  body[data-startvar="6"] .starttile .disc{background:rgba(255,255,255,.18);box-shadow:none}
+  body[data-startvar="6"] .starttile small{color:rgba(255,255,255,.85)}
+  body[data-startvar="6"] .starttile:hover{filter:brightness(1.06)}
+  /* 7 · cream tile, rust disc (the default look) */
+  /* 8 · ink tile, rust disc */
+  body[data-startvar="8"] .starttile{background:#221E19;border-color:#221E19;color:#faf8f5}
+  body[data-startvar="8"] .starttile small{color:#b9ad98}
+  /* 9 · cream tile, hand-lettered inside the desk's sketched ring */
+  body[data-startvar="9"] .starttile .disc{display:none}
+  body[data-startvar="9"] .starttile .ring{position:relative;display:grid;place-items:center;padding:.9rem 1.3rem}
+  body[data-startvar="9"] .starttile .ring svg{position:absolute;inset:-6px -10px;width:calc(100% + 20px);height:calc(100% + 12px);fill:none;stroke:var(--rust);stroke-width:2.2;stroke-linecap:round}
+  body[data-startvar="9"] .starttile .ring b{font:600 1.6rem var(--hand);color:var(--rust)}
+  body[data-startvar="9"] .starttile small{font-family:var(--hand);font-size:1.05rem;color:var(--sec)}
+  @media (max-width:700px){ .plancol{grid-template-columns:1fr} .starttile{flex-direction:row;padding:.7rem 1rem} }
   .startnote{font-family:var(--hand);font-size:1.15rem;color:var(--mut)}
 
   /* ---- subjects ---- */
@@ -115,7 +141,7 @@
   /* THE SHELF: static per-subject books (one image each, reused for every
      student — zero per-student cost) on a shared walnut ledge. Pale = not
      studied; the colour fills up AND deepens from the shelf as it is learned. */
-  .shelfstage{position:relative;margin-top:34px;   /* clearance so a lifted/selected spine never covers the heading + metrics above */
+  .shelfstage{position:relative;margin-top:52px;   /* clearance so a lifted/selected spine never covers the heading + metrics above */
     --bkshadow:drop-shadow(0 3px 3px rgba(28,18,8,.15))}                 /* lamp off: soft neutral shadow */
   .shelfstage.lit{--bkshadow:drop-shadow(-6px 2px 3px rgba(28,18,8,.30))}  /* lamp on: shadow cast left */
   .shelf{display:flex;align-items:flex-end;justify-content:flex-start;gap:3px;height:212px;padding:0 6px 0 10px;position:relative;z-index:2;pointer-events:none}
@@ -123,7 +149,7 @@
   /* the picture on the wall: this week's, in a chunky painted frame, hung a little askew from a nail */
   /* the painted frame (assets/lw/shelf/frame_wall.webp, nail and twine included) hangs a little askew from its nail;
      the week's picture sits in the opening measured from the frame's own alpha (frame_wall.json) */
-  .wallhang{position:absolute;left:55%;bottom:50px;width:21%;aspect-ratio:755/781;z-index:1;transform:rotate(-2.4deg);transform-origin:52% 2%}
+  .wallhang{position:absolute;left:56%;bottom:56px;width:18%;aspect-ratio:755/781;z-index:1;transform:rotate(-2.4deg);transform-origin:52% 2%}
   .wallhang[hidden]{display:none}
   .wallhang .frame{position:absolute;inset:0;width:100%;height:100%;display:block;filter:drop-shadow(0 4px 5px rgba(40,25,10,.3))}
   .wallhang .pic{position:absolute;left:14.2%;top:34.1%;width:71.5%;height:51.7%;object-fit:cover;display:block}
@@ -822,6 +848,15 @@ fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
 }).catch(()=>{});
 /* ?startvar=N — the five Start treatments (design review); 3 moves the control up beside the heading */
 (function(){ const v=_dq.get('startvar'); if(!v) return; document.body.dataset.startvar=v;
+  if(['6','7','8','9'].includes(v)){ const plan=document.querySelector('.card.plan'), sb=document.getElementById('startbtn'); if(plan&&sb){
+    const col=document.createElement('div'); col.className='plancol'; plan.parentNode.insertBefore(col,plan); col.appendChild(plan);
+    const t=document.createElement('button'); t.className='starttile'; t.type='button'; col.appendChild(t);
+    const RING='<svg viewBox="0 0 260 96" preserveAspectRatio="none"><path d="M18 52 C14 22, 74 8, 132 10 C 196 12, 250 22, 246 50 C 242 80, 180 90, 118 88 C 58 86, 20 78, 18 52 Z"/></svg>';
+    const sync=()=>{ const txt=sb.textContent.trim(), m=txt.match(/^(.*?)\s*·\s*(.*)$/), word=m?m[1]:txt, mins=m?m[2]:'';
+      t.innerHTML=(v==='9')?'<span class="ring">'+RING+'<b>'+word+'</b></span><small>'+mins+'</small>'
+        :'<span class="disc"><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></span><b>'+word+'</b><small>'+mins+'</small>'; };
+    sync(); new MutationObserver(sync).observe(sb,{childList:true,subtree:true,characterData:true});
+    t.onclick=()=>sb.click(); } }
   if(v==='3'){ const h=document.querySelector('.h1row'), sb=document.getElementById('startbtn'); if(h&&sb){
     const d=document.createElement('button'); d.className='startdisc'; d.type='button';
     const sync=()=>{ d.innerHTML='<span>'+sb.textContent.trim()+'</span><i><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></i>'; };
