@@ -314,7 +314,14 @@
   .door.more p{display:block}
   .door .go{display:none}
   /* the podcast is a player in the top bar: play, skip, and the title of what is playing */
-  .podbar{display:flex;align-items:center;min-width:0;max-width:300px;flex:none}
+  .podbar{display:flex;align-items:center;gap:8px;min-width:0;max-width:340px;flex:none}
+  .podradio{height:30px;width:auto;flex:none}
+  /* the title window: a marquee once it is longer than the window, like a radio display */
+  .podtitle{display:inline-block}
+  .podtitle.scroll{overflow:hidden;white-space:nowrap;text-overflow:clip}
+  .podtitle.scroll span{display:inline-block;padding-right:2.5rem;animation:podscroll var(--dur,14s) linear infinite}
+  @keyframes podscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media (prefers-reduced-motion:reduce){ .podtitle.scroll span{animation:none} }
   .podrow{display:flex;align-items:center;gap:8px;min-width:0}
   .podrow button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--card);
     cursor:pointer;display:grid;place-items:center;color:var(--anchor)}
@@ -328,7 +335,9 @@
   @media (max-height:780px){ .signoff{display:none} }
 
   /* ---- flashcards modal (same deck as the desk) ---- */
-  .fcmodal{position:fixed;inset:0;background:rgba(38,30,18,.55);display:none;place-items:center;z-index:60}
+  .fcmodal{position:fixed;inset:0;background:rgba(38,30,18,.45);display:none;place-items:center;z-index:60}
+  body.fc-open .top,body.fc-open .wrap,body.fc-open .savebar{filter:blur(14px)}
+  .bigcard .face.front::after{content:'⟳';position:absolute;right:.9rem;bottom:.7rem;font-size:1.1rem;color:#b9ad98;line-height:1}
   .fcmodal.open{display:grid}
   .fcmodal .x{position:absolute;top:18px;right:22px;width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
     background:#fffdf8;color:#26231e;font-size:19px;font-weight:700}
@@ -456,6 +465,7 @@
   <span class="datestamp" id="today"></span>
   <span class="sp"></span>
   <span class="podbar" id="poddoor" role="group" aria-label="Podcast">
+    <img class="podradio" src="assets/lw/desk4-radio-a-cut.webp" alt="">
     <span class="podrow">
       <button id="podplay" aria-label="Play a podcast"><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></button>
       <button id="podnext" aria-label="Next episode"><svg viewBox="0 0 16 16"><path d="M3 2l8 6-8 6zM12 2h2v12h-2z"/></svg></button>
@@ -546,7 +556,7 @@
       </span>
     </span>
   </button>
-  <div class="fcmeta"><span class="cnt" id="fcCnt"></span><span class="hint" id="fchint">tap to flip · read the answer, then mark it — the line shows when</span></div>
+  <div class="fcmeta"><span class="cnt" id="fcCnt"></span></div>
 </div>
 
 <div class="phonemodal" id="phonemodal" aria-modal="true" role="dialog" aria-label="Shorts">
@@ -602,7 +612,7 @@ svDashInit(SUBJECTS,{view:'classic',onUnits:function(){
       /* on the way back from a lesson: due cards come up uninvited, three of them */
       try{ if(localStorage.getItem('sv-cards-nudge')&&window.svStrength&&svStrength.flashDue()>0&&!document.querySelector('.fcmodal.open')){
         localStorage.removeItem('sv-cards-nudge'); FC.length=Math.min(FC.length,3); fcDeal(); fcmodal.classList.add('open');
-        const h=document.getElementById('fchint'); if(h) h.textContent='three quick cards before your plan · keeps what you learned fresh'; } }catch(e){}
+        } }catch(e){}
       if(_dq.get('fc')){ fcDeal();   /* staging: re-deal so the real card shows */
         if(_dq.get('fc')==='2'){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } } }
   });
@@ -1312,6 +1322,8 @@ function openCards(){
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE) refreshDayOnePlan(); }
 document.getElementById('fcdoor').onclick=openCards;
+/* frost the page whenever the card modal is open, whichever path opened it */
+new MutationObserver(()=>document.body.classList.toggle('fc-open',fcmodal.classList.contains('open'))).observe(fcmodal,{attributes:true,attributeFilter:['class']});
 /* the week chip: one figure closed, the lines open, on tap */
 (function(){ const wc=document.querySelector('.card.week'); if(!wc) return;
   wc.addEventListener('click',e=>{ if(e.target.closest('#duerow')) return; if(!wc.classList.contains('open')||e.target.closest('h3')) wc.classList.toggle('open'); }); })();
@@ -1407,11 +1419,18 @@ function playPod(next){
   const p=PODCASTS[podQ[podPos]];
   player.src=p.u; player.play().catch(()=>{}); podOn=true;
   podplay.innerHTML=ICOPAUSE;
-  podtitle.textContent=p.t+' · '+p.s;
+  podTitle(p.t+' · '+p.s);
+}
+/* the title window: static when it fits, a slow loop when it does not */
+function podTitle(t){
+  podtitle.classList.remove('scroll'); podtitle.textContent=t;
+  requestAnimationFrame(()=>{ if(podtitle.scrollWidth>podtitle.clientWidth+2){
+    podtitle.innerHTML='<span>'+t.replace(/</g,'&lt;')+' · '+t.replace(/</g,'&lt;')+'</span>';
+    podtitle.style.setProperty('--dur',Math.max(10,Math.round(t.length/3))+'s'); podtitle.classList.add('scroll'); } });
 }
 podplay.onclick=()=>{ if(!podOn){ playPod(podPos<0); } else if(player.paused){ player.play(); podplay.innerHTML=ICOPAUSE; } else { player.pause(); podplay.innerHTML=ICOPLAY; } };
 document.getElementById('podnext').onclick=()=>playPod(true);
-player.addEventListener('ended',()=>playPod(true));
+player.addEventListener('ended',()=>{ try{ if(window.svPodcastDone) svPodcastDone(PODCASTS[podQ[podPos]]); }catch(e){} playPod(true); });
 
 /* cards due today — read the real Leitner store (sv-flashcard-progress,
    shared with the lesson flashcards and /revise) */

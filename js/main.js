@@ -1242,8 +1242,9 @@ function initNarration() {
       playBtn.setAttribute('aria-label', 'Play podcast');
       fabPlay.classList.remove('playing');
       fab.classList.remove('visible');
-      // Clear saved position — they finished the episode
+      // Clear saved position — they finished the episode, and that counts (Tom, 12 Sep 2026)
       localStorage.removeItem('sv-podcast-pos-' + location.pathname);
+      if (window.svTickTask) svTickTask('podcast');
     } else if (currentIndex + 1 < manifest.length) {
       loadClip(currentIndex + 1);
       audio.play();
@@ -2855,6 +2856,11 @@ function initLessonProgress() {
       }
     };
   }
+  /* any task ticked by something that happened, not by a click (a finished podcast) */
+  window.svTickTask = function (id) {
+    if (!tasks.some(function (t) { return t.id === id; })) return;
+    if (!state[id]) { state[id] = true; saveState(state); syncAll(); }
+  };
 
   // ---- Highlight mode auto-tick ----
   // Tick when the student has any highlight on this lesson; untick if

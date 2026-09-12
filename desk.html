@@ -811,7 +811,7 @@ const lcd=document.getElementById('lcd'), mq=document.getElementById('mq'), rmod
       knob=document.getElementById('knob'), knob2=document.getElementById('knob2');
 let stations=[], mode=-1;                      // -1 = podcasts
 const player=new Audio(); player.volume=.55;
-player.addEventListener('ended',()=>{ if(mode>=0) nextTrack(); else if(podOn) playPod(); });
+player.addEventListener('ended',()=>{ if(mode>=0) nextTrack(); else if(podOn){ try{ if(window.svPodcastDone) svPodcastDone(PODCASTS[podQ[podPos]]); }catch(e){} playPod(); } });
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function pretty(u){ return decodeURIComponent(u.split('/').pop()).replace(/\.(mp3|m4a|wav)$/i,'').replace(/[_-]+/g,' ').toUpperCase(); }
 async function listDir(url){

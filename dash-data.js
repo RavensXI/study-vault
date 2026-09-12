@@ -359,7 +359,9 @@ function svUnitMedia(SUBJECTS, cb) {
           });
           var pc = (row.related_media || []).find(function (m) { return m.category === 'Podcasts'; });
           var ep = pc && (pc.items || []).find(function (it) { return it.url && it.url.indexOf('.r2.dev/') >= 0; });
-          if (ep) pods.push({ t: row.title || ('Lesson ' + row.lesson_number), s: s.su.name, u: ep.url });
+          var pkey = 'sv_progress_' + s.su.sub + '_' + s.unit + '_' + row.lesson_number, pdone = false;
+          try { pdone = !!(JSON.parse(localStorage.getItem(pkey) || '{}').podcast); } catch (e) {}
+          if (ep && !pdone) pods.push({ t: row.title || ('Lesson ' + row.lesson_number), s: s.su.name, u: ep.url, sub: s.su.sub, unit: s.unit, n: row.lesson_number });
         });
         return { deck: deck, pods: pods };
       })
@@ -513,6 +515,16 @@ function svFlashDeck(SUBJECTS, cb, opts) {
   }).catch(function () { cb([]); });
 }
 window.svFlashDeck = svFlashDeck; window.svFlashMark = svFlashMark; window.svFlashLevel = svFlashLevel;
+/* a podcast listened to the end counts for its lesson (the lesson page's "Listen to podcast" task) */
+function svPodcastDone(pod) {
+  if (!pod || !pod.sub || !pod.unit || !pod.n) return;
+  try {
+    var key = 'sv_progress_' + pod.sub + '_' + pod.unit + '_' + pod.n, st = JSON.parse(localStorage.getItem(key) || '{}');
+    if (!st.podcast) { st.podcast = true; localStorage.setItem(key, JSON.stringify(st)); }
+    if (window.svProgressPushSoon) svProgressPushSoon();
+  } catch (e) {}
+}
+window.svPodcastDone = svPodcastDone;
 
 /* signed-in avatar menu: who you are, edit subjects, sign out. Signing out
    removes the signed-in marker and the Supabase session token; the device
