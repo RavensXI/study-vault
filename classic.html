@@ -746,7 +746,7 @@ if(DAYONE){
   if(SVUSER&&SVUSER.email){
     /* signed in: the avatar is you — click it for edit-subjects / sign out */
     const _av=document.querySelector('.top .avatar');
-    if(_av){ _av.textContent=SVUSER.email[0].toUpperCase(); _av.title=SVUSER.email; svAvatarMenu(_av); }
+    if(_av){ _av.textContent=svAvatarLetter(); _av.title=SVUSER.name||SVUSER.email; svAvatarMenu(_av); }
   }else{
     const bar=document.createElement('div'); bar.className='savebar';
     bar.innerHTML='<span>Nothing is saved yet. Sign up to save your progress.</span>'+
@@ -761,7 +761,7 @@ if(DAYONE){
 
 /* date + exam countdown + mini month */
 const now=new Date();
-document.getElementById('today').textContent=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+document.getElementById('today').textContent=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})+(window.svGreeting&&svGreeting()?' · '+svGreeting():'');
 /* exam timetable lives in dash-data.js (EXAMS) so both dashboard views count
    down from the SAME dates. examsFor stays as the planner's local name. */
 function examsFor(s){ return svExamsFor(s); }

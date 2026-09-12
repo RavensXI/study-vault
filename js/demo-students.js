@@ -112,7 +112,7 @@
       if (c) { var m = t / c; rag[sl] = m < 0.67 ? 'r' : m < 1.34 ? 'a' : 'g'; }
     });
     /* wipe this browser's student state, then seed */
-    var drop = ['sv-welcome', 'sv-welcome-decision', 'sv-lessons-done', 'sv-lessons-when', 'sv-kc-log', 'sv-lesson-keys', 'sv-flashcard-progress', 'sv-flash-log', 'sv-flash-day', 'sv-practice-log', 'sv-warmup', 'sv-warmup-log', 'sv-cards-nudge', 'sv-said-now', 'sv-week-seen', 'sv-plan-skip', 'sv-plan-holidays', 'studyvault-visited'];
+    var drop = ['sv-user', 'sv-welcome', 'sv-welcome-decision', 'sv-lessons-done', 'sv-lessons-when', 'sv-kc-log', 'sv-lesson-keys', 'sv-flashcard-progress', 'sv-flash-log', 'sv-flash-day', 'sv-practice-log', 'sv-warmup', 'sv-warmup-log', 'sv-cards-nudge', 'sv-said-now', 'sv-week-seen', 'sv-plan-skip', 'sv-plan-holidays', 'studyvault-visited'];
     drop.forEach(function (k) { localStorage.removeItem(k); });
     Object.keys(localStorage).filter(function (k) { return k.indexOf('sv_progress_') === 0 || k.indexOf('studyvault-kc-') === 0; }).forEach(function (k) { localStorage.removeItem(k); });
     localStorage.setItem('sv-welcome', JSON.stringify({ picked: spec.picked, boards: spec.boards, topics: spec.topics, meta: {}, tiers: {}, guess: {}, rag: rag, budget: spec.budget }));
@@ -127,6 +127,8 @@
     localStorage.setItem('sv-flash-log', JSON.stringify(flog));
     localStorage.setItem('sv-practice-log', JSON.stringify(plog));
     localStorage.setItem('sv-demo-student', who);
+    var NAME = { priya: 'Priya', josh: 'Josh', amira: 'Amira' }[who];
+    localStorage.setItem('sv-user', JSON.stringify({ email: who + '@demo.studyvault.co.uk', name: NAME, demo: true }));
     q.delete('demo'); var rest = q.toString();
     location.replace(location.pathname + (rest ? '?' + rest : ''));
   }).catch(function (e) { console.error('demo seed failed', e); });

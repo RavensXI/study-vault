@@ -101,6 +101,15 @@ var DAYONE = !!(WIZ && Array.isArray(WIZ.picked) && WIZ.picked.length);
 var SVUSER = null;
 try { SVUSER = JSON.parse(localStorage.getItem('sv-user') || 'null'); } catch (e) {}
 if (_dq.get('user')) SVUSER = { email: _dq.get('user') };   /* staging */
+/* the avatar letter and a greeting come from the first name when we have one */
+function svFirstName() { return (SVUSER && SVUSER.name) ? String(SVUSER.name).trim().split(/\s+/)[0] : ''; }
+function svAvatarLetter() { var n = svFirstName(); return (n ? n[0] : (SVUSER && SVUSER.email ? SVUSER.email[0] : 'S')).toUpperCase(); }
+function svGreeting() {
+  var n = svFirstName(); if (!n) return '';
+  var back = false; try { back = Object.keys(JSON.parse(localStorage.getItem('sv-lessons-done') || '{}')).some(function (k) { return true; }); } catch (e) {}
+  return (back ? 'Welcome back, ' : 'Hello, ') + n;
+}
+window.svFirstName = svFirstName; window.svAvatarLetter = svAvatarLetter; window.svGreeting = svGreeting;
 
 var DONE = {};
 try { DONE = JSON.parse(localStorage.getItem('sv-lessons-done')) || {}; } catch (e) {}
@@ -533,7 +542,7 @@ function svAvatarMenu(av) {
       document.head.appendChild(st);
     }
     menu = document.createElement('div'); menu.className = 'sv-avmenu';
-    menu.innerHTML = '<div class="who">Signed in as ' + esc(SVUSER.email) + '</div>'
+    menu.innerHTML = '<div class="who">' + (SVUSER.name ? esc(SVUSER.name) + ' · ' : 'Signed in as ') + esc(SVUSER.email) + '</div>'
       + '<a href="/welcome?view=picker">Edit subjects &amp; boards</a>'
       + '<button type="button" class="out">Sign out</button>';
     document.body.appendChild(menu);

@@ -1296,6 +1296,7 @@
     </div>
 
     <div class="door savecard">
+      <input class="field" id="savename" type="text" placeholder="First name" aria-label="First name" autocomplete="given-name" maxlength="40">
       <input class="field" id="savemail" type="email" placeholder="Email address" aria-label="Email address" autocomplete="email">
       <input class="field" id="savepass" type="password" placeholder="Choose a password" aria-label="Choose a password" autocomplete="new-password">
       <button class="cta" id="savebtn">Create my free account</button>
@@ -2340,6 +2341,7 @@ const savebtn=document.getElementById('savebtn');
 if(savebtn) savebtn.onclick=async()=>{
   const em=document.getElementById('savemail').value.trim();
   const pw=document.getElementById('savepass').value;
+  const nm=(document.getElementById('savename').value||'').trim().slice(0,40);
   const say=t=>{ document.getElementById('savemsg').textContent=t; };
   if(!/.+@.+\..+/.test(em)) return say('That email doesn’t look right.');
   if(pw.length<8) return say('Your password needs at least 8 characters.');
@@ -2348,11 +2350,14 @@ if(savebtn) savebtn.onclick=async()=>{
   try{
     let setup={}; try{ setup=JSON.parse(localStorage.getItem('sv-welcome')||'{}'); }catch(e){}
     const res=await SBC.auth.signUp({email:em,password:pw,
-      options:{data:{sv_welcome:setup},emailRedirectTo:location.origin+'/classic'}});
+      options:{data:{sv_welcome:setup,sv_name:nm||null},emailRedirectTo:location.origin+'/classic'}});
     if(res.error) say(res.error.message);
-    else if(res.data&&res.data.user&&!res.data.session)
-      say('Account created — check your inbox to confirm your email. Everything you set up is saved to it.');
-    else say('Account created — you’re in.');
+    else{
+      try{ localStorage.setItem('sv-user',JSON.stringify({email:em,name:nm||null})); }catch(e){}
+      if(res.data&&res.data.user&&!res.data.session)
+        say('Account created — check your inbox to confirm your email. Everything you set up is saved to it.');
+      else say('Account created — you’re in.');
+    }
   }catch(e){ say('Something went wrong — try again.'); }
   savebtn.disabled=false; savebtn.textContent='Create my free account';
 };
@@ -2422,7 +2427,7 @@ if(sibtn) sibtn.onclick=async()=>{
          (sync.js merges it in additively; metadata never carries it) */
       try{ if(window.svProgressFetch) svProgressFetch(res.data&&res.data.session&&res.data.session.access_token)
         .then(function(remote){ if(window.svProgressMerge) svProgressMerge(remote); }); }catch(e){}
-      try{ localStorage.setItem('sv-user',JSON.stringify({email:u?u.email:em})); }catch(e){}
+      try{ localStorage.setItem('sv-user',JSON.stringify({email:u?u.email:em,name:(u&&u.user_metadata&&u.user_metadata.sv_name)||null})); }catch(e){}
       say('Signed in — opening your StudyVault…');
       document.body.classList.remove('ready');
       /* A page that sent the student here to sign in can ask for them back:

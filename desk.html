@@ -627,7 +627,7 @@ function buildDayOneToday(){
   ${w?`<div class="noteline">Warm-up today: <b>${w.correct}/${w.total}</b></div>`:''}`
  :`<div class="noteline">Nothing here yet — it fills in as you revise.</div>
   <div class="noteline">Warm-ups, your best subject, radio episodes: all of it lands on this page.</div>`}
-  <p class="doable">${SVUSER&&SVUSER.email?('Signed in as '+SVUSER.email+'.')
+  <p class="doable">${SVUSER&&SVUSER.email?((SVUSER.name?SVUSER.name+' · ':'Signed in as ')+SVUSER.email+'.')
     :'<a href="/welcome?view=save" style="color:inherit">Nothing saved yet — sign up to save your progress.</a>'}</p>`;
 }
 /* row 1: the day-one warm-up until something has been studied; then the revisit
@@ -665,7 +665,7 @@ if(DAYONE){
   buildDayOneToday();
   const _av=document.querySelector('.avatar');
   if(_av){
-    if(SVUSER&&SVUSER.email){ _av.textContent=SVUSER.email[0].toUpperCase(); _av.title=SVUSER.email; svAvatarMenu(_av); }
+    if(SVUSER&&SVUSER.email){ _av.textContent=svAvatarLetter(); _av.title=SVUSER.name||SVUSER.email; svAvatarMenu(_av); }
     else{ const a=document.createElement('a'); a.className='tidy'; a.style.textDecoration='none';
       a.href='/welcome?view=save'; a.textContent='Sign up & save your progress'; _av.replaceWith(a); }
   }
@@ -721,7 +721,7 @@ function subjSpread(s){
 const pgL=document.getElementById('pgL'), pgR=document.getElementById('pgR');
 let current='today';
 function setSpread(l,r){ pgL.innerHTML=l; pgR.innerHTML=r; const t=document.getElementById('today');
-  if(t) t.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}); }
+  if(t) t.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})+(window.svGreeting&&svGreeting()?' · '+svGreeting():''); }
 function turnTo(l,r){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){ setSpread(l,r); return; }
   pgL.classList.add('fade'); pgR.classList.add('fade');
