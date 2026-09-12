@@ -65,8 +65,8 @@
   .plan b{font-family:var(--read);font-weight:600;font-size:.98rem;line-height:1.25;display:block}
   .plan small{font-size:.8rem;color:var(--mut);display:block;margin-top:.1rem}
   .plan .mins{font-size:.83rem;font-weight:600;color:var(--mut);text-align:right;padding-top:.2rem;font-variant-numeric:tabular-nums}
-  .startrow{display:flex;align-items:center;gap:14px;margin-top:.55rem}
-  .start{display:inline-flex;align-items:center;gap:10px;padding:.6rem 1.35rem;border:none;border-radius:4px;
+  .startrow{display:flex;align-items:stretch;margin:.6rem -1.2rem -.8rem}
+  .start{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:.8rem 1.35rem;border:none;border-radius:0 0 4px 4px;width:100%;
     background:var(--anchor);color:#fff;font-family:var(--head);font-weight:700;font-size:.95rem;cursor:pointer;
     box-shadow:inset 0 -2px 0 rgba(0,0,0,.22);transition:filter .15s}
   .start:focus-visible{outline:3px solid color-mix(in srgb,var(--anchor) 40%,#fff);outline-offset:2px}
@@ -95,6 +95,12 @@
     --bkshadow:drop-shadow(0 3px 3px rgba(28,18,8,.15))}                 /* lamp off: soft neutral shadow */
   .shelfstage.lit{--bkshadow:drop-shadow(-6px 2px 3px rgba(28,18,8,.30))}  /* lamp on: shadow cast left */
   .shelf{display:flex;align-items:flex-end;justify-content:flex-start;gap:3px;height:212px;padding:0 6px 0 10px;position:relative;z-index:2}
+  /* the framed picture on the wall: this week's, behind the books and the lamp */
+  .wallpic{position:absolute;left:56%;bottom:92px;width:25%;aspect-ratio:3/2;z-index:1;
+    padding:4px;background:#f7f2e6;border:5px solid #5a4632;box-shadow:0 2px 3px rgba(60,40,20,.35),inset 0 0 0 1px #8a7357;transform:rotate(-1deg)}
+  .wallpic img{display:block;width:100%;height:100%;object-fit:cover}
+  .wallpic[hidden]{display:none}
+  @media (max-width:700px){ .wallpic{display:none} }
   .bookend{height:calc(var(--beh,210px) * var(--bes,1));width:auto;align-self:flex-end;margin-right:-6px;pointer-events:none;
     filter:drop-shadow(-7px 5px 4px rgba(40,28,12,.30))}
   /* lamp on the right, arm reaching left; its shade is the light source for the scene */
@@ -424,7 +430,8 @@
   @media (min-width:981px) and (min-height:760px) and (max-height:900px){
     .savebar{display:none}
     .shelfstage{zoom:.86;margin-top:16px}
-    .plan{padding-top:.5rem;padding-bottom:.6rem}
+    .plan{padding-top:.5rem}
+    .startrow{margin-bottom:-.8rem}
     .plan li{padding:.22rem .4rem}
     .h1row{margin-bottom:.35rem}
     .wrap{padding-bottom:12px}
@@ -533,6 +540,7 @@
 
     <div class="sechead"><h2>Your subjects</h2><span id="subcount"></span></div>
     <div class="shelfstage">
+      <div class="wallpic" id="wallpic" hidden><img id="wallpicimg" src="" alt=""></div>
       <div class="shelf" id="shelf" role="tablist" aria-label="Your subjects"></div>
       <img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt="">
       <div class="lightwash"></div>
@@ -768,6 +776,15 @@ if(DAYONE){
   }
 }
 
+/* the wall picture: the week's entry in _weekly_doodles.json (shared with the desk calendar) */
+fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
+  const d=new Date(), m=new Date(d); m.setDate(d.getDate()-((d.getDay()+6)%7));
+  const k=m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0');
+  const w=cal[k]; if(!w) return;
+  const img=document.getElementById('wallpicimg'), box=document.getElementById('wallpic');
+  img.onload=()=>{ box.hidden=false; }; img.onerror=()=>{ box.hidden=true; };
+  box.title=w.cap; img.src='assets/lw/'+w.art;
+}).catch(()=>{});
 /* date + exam countdown + mini month */
 const now=new Date();
 document.getElementById('today').textContent=(window.svGreeting&&svGreeting()?svGreeting()+' · ':'')+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
