@@ -261,6 +261,7 @@
   .dot::after{content:'';position:absolute;left:50%;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;opacity:.4}
   .dot.r::after{background:#b5442f}.dot.a::after{background:#d19a2f}.dot.g::after{background:#4e7a4a}
   .dot.n::after{background:none;box-shadow:inset 0 0 0 1.5px #8f877a}
+  .udots.set .dot{cursor:default}
   .dot[aria-pressed="true"]{border-color:var(--ink)}.dot[aria-pressed="true"]::after{opacity:1;width:10px;height:10px;margin:-5px 0 0 -5px}
   .ublock .ud{display:block;font-size:.7rem;color:var(--mut);font-variant-numeric:tabular-nums}
   /* drill into a topic -> pick any lesson (select, then confirm) */
@@ -963,17 +964,17 @@ function renderSubjectPanel(s){
     '<span class="sp"></span>'+
     '<button class="cont">Where you left off →</button></div>'+
     '<div class="units">'+
-      s.units.map((u,ui)=>{ const k=s.sub+'/'+u[3], cur=window.svStrength?svStrength.rag()[k]:null;
-        /* recall, in words, only once there is something to say */
-        let word=''; if(window.svStrength){ const hasEv=(()=>{ for(let n=1;n<=(u[1]||0);n++){ if(!svStrength.lesson(s,u[3],n).prior&&svStrength.lesson(s,u[3],n).reps) return true; } return false; })();
-          if(hasEv){ const v=svStrength.unit(s,u); word=v>=70?'secure':v>=40?'holding':'fading'; } }
+      s.units.map((u,ui)=>{ const k=s.sub+'/'+u[3];
+        /* the pips are WHERE YOU ARE: the evidence band once the unit has any, the student's own rating until then */
+        const now=window.svProgress?svProgress.band(s,u):null, cur=now||(window.svStrength?svStrength.rag()[k]:null);
+        const word=now?({g:'secure',a:'holding',r:'fading'})[now]:'';
         return '<button class="ublock'+(word?' rc-'+word:'')+'" data-u="'+ui+'" title="'+u[0]+' — pick a lesson">'+
         '<span class="un">'+u[0]+'</span>'+
         '<span class="utrack"><i style="width:'+Math.round(u[2]/u[1]*100)+'%"></i></span>'+
         '<span class="ud">'+u[2]+' / '+u[1]+' lessons'+(word?' · <em>'+word+'</em>':'')+'</span>'+
-        '<span class="udots">'+['n','r','a','g'].map(v=>'<span role="button" tabindex="0" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'" aria-label="'+({n:'not started yet',r:'struggling',a:'getting there',g:'know it'})[v]+'"></span>').join('')+'</span></button>'; }).join('')+
+        '<span class="udots'+(now?' set':'')+'">'+(now?['r','a','g']:['n','r','a','g']).map(v=>'<span role="button" tabindex="0" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'"'+(now?' aria-disabled="true" title="From your quizzes, answers and cards"':'')+' aria-label="'+(now?({r:'fading',a:'holding',g:'secure'}):({n:'not started yet',r:'struggling',a:'getting there',g:'know it'}))[v]+'"></span>').join('')+'</span></button>'; }).join('')+
     '</div>';
-  el.querySelectorAll('.udots .dot').forEach(b=>{ const hit=ev=>{ ev.stopPropagation(); ev.preventDefault(); const k=b.dataset.k, v=b.dataset.v, cur=svStrength.rag()[k];
+  el.querySelectorAll('.udots .dot').forEach(b=>{ const hit=ev=>{ ev.stopPropagation(); ev.preventDefault(); if(b.getAttribute('aria-disabled')==='true') return; const k=b.dataset.k, v=b.dataset.v, cur=svStrength.rag()[k];
       svStrength.setRag(k, cur===v?null:v);
       b.parentElement.querySelectorAll('.dot').forEach(x=>x.setAttribute('aria-pressed',String(svStrength.rag()[k]===x.dataset.v)));
       if(window.svPlannerRefresh) svPlannerRefresh(); };

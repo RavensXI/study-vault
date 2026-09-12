@@ -4,7 +4,7 @@
    planner's fit (planner.js):
      counts(su)   -> {secure, holding, fading, notyet, total, done}   the subject headline
      track(su)    -> 'on track for 11 May' | 'about 6 lessons behind' | null
-     saidNow(...) -> "Cells: you said struggling. It's holding now."   their own rating as the yardstick
+     saidNow(...) -> "Cells is holding — better than you rated it."   their own rating as the yardstick
      week()       -> the last seven days, and lastWeek() for the first visit of a new week
    Tone: say what happened, name the topic, use their words. Never speak when
    nothing changed, never negative, no streaks, no badges. */
@@ -58,6 +58,14 @@
   /* "you said / now": a unit whose evidence has climbed above the student's own rating.
      Needs real evidence on at least two lessons (or a quarter of the unit). Told once per
      band, kept in sv-said-now so the line stays until something newer is true. */
+  /* where a unit is NOW: the evidence band once any lesson has real evidence, else null */
+  function band(su, u) {
+    var ev = [], n = u[1] || 0;
+    for (var i = 1; i <= n; i++) { var r = L(su, u[3], i); if (!r.prior && r.reps) ev.push(r.s); }
+    if (!ev.length) return null;
+    var avg = ev.reduce(function (a, b) { return a + b; }, 0) / ev.length;
+    return avg >= 70 ? 'g' : avg >= 40 ? 'a' : 'r';
+  }
   function nowBand(su, u) {
     var ev = [], n = u[1] || 0;
     for (var i = 1; i <= n; i++) { var r = L(su, u[3], i); if (!r.prior && r.reps) ev.push(r.s); }
@@ -75,8 +83,8 @@
         var prev = told[key];
         if (prev && RANK_NOW[prev.band] >= RANK_NOW[now]) return;
         var text = said === 'n'
-          ? 'You hadn’t started ' + u[0] + '. It’s ' + NOW[now] + ' now.'
-          : u[0] + ': you said ' + SAID[said] + '. It’s ' + NOW[now] + ' now.';
+          ? u[0] + ' is ' + NOW[now] + ' already.'
+          : u[0] + ' is ' + NOW[now] + ' — better than you rated it.';
         told[key] = { band: now, d: today(), t: Date.now(), text: text, sub: su.slug };
         changed = true;
       });
@@ -126,5 +134,5 @@
     return out;
   }
 
-  window.svProgress = { counts: counts, headline: headline, track: track, saidNow: saidNow, week: week, lastWeek: lastWeek, review: review, lines: lines, shortDate: shortDate };
+  window.svProgress = { counts: counts, headline: headline, track: track, band: band, saidNow: saidNow, week: week, lastWeek: lastWeek, review: review, lines: lines, shortDate: shortDate };
 })();
