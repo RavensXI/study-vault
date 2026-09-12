@@ -231,7 +231,7 @@
   .sdetail h3{font-family:var(--read);font-size:1.1rem;font-weight:600;margin:0;white-space:nowrap;color:var(--ink)}
   .sdetail .sub{font-size:.76rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .card.week .weeksaid{margin:.6rem 0 0;font-family:var(--read);font-size:.9rem;color:var(--ink)}
-  .sdetail .sub .pg-fade{color:#a3542f}.sdetail .sub .pg-track{color:var(--ink);font-weight:600}.sdetail .sub .pg-pct{opacity:.7}
+  .sdetail .sub .pg-due{color:#a3542f}.sdetail .sub .pg-track{color:var(--ink);font-weight:600}.sdetail .sub .pg-pct{opacity:.7}
   .sdetail .sp{flex:1}
   /* crafted button — a pressable slab, not a pill */
   .sdetail .cont,.sdetail .go{font-family:var(--head);font-weight:600;font-size:.82rem;color:#fff;background:var(--tc);
@@ -254,7 +254,7 @@
   .ublock .utrack{display:block;height:3px;background:var(--linel);margin:.5rem 0 .3rem;overflow:hidden}
   .ublock .utrack i{display:block;height:100%;background:var(--tc)}
   .ublock .ud em{font-style:normal;font-weight:600;color:#4e7a4a}
-  .ublock.rc-holding .ud em{color:#b07a1f}.ublock.rc-fading .ud em{color:#a3542f}
+  .ublock.rc-developing .ud em{color:#b07a1f}.ublock.rc-emerging .ud em{color:#a3542f}.ublock .ud em.due{color:#a3542f}
   /* the four dots are the rating control itself: not started / struggling / getting there / know it */
   .udots{display:flex;gap:4px;margin-top:.35rem}
   .dot{display:inline-block;width:16px;height:16px;border-radius:4px;border:1px solid var(--line);background:var(--card);cursor:pointer;position:relative;padding:0}
@@ -603,7 +603,7 @@ svDashInit(SUBJECTS,{view:'classic',onUnits:function(){
       /* on the way back from a lesson: due cards come up uninvited, three of them */
       try{ if(localStorage.getItem('sv-cards-nudge')&&window.svStrength&&svStrength.flashDue()>0&&!document.querySelector('.fcmodal.open')){
         localStorage.removeItem('sv-cards-nudge'); FC.length=Math.min(FC.length,3); fcDeal(); fcmodal.classList.add('open');
-        const h=document.getElementById('fchint'); if(h) h.textContent='three quick cards before your plan · keeps what you learned from fading'; } }catch(e){}
+        const h=document.getElementById('fchint'); if(h) h.textContent='three quick cards before your plan · keeps what you learned fresh'; } }catch(e){}
       if(_dq.get('fc')){ fcDeal();   /* staging: re-deal so the real card shows */
         if(_dq.get('fc')==='2'){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } } }
   });
@@ -640,7 +640,7 @@ function refreshDayOnePlan(){
   if(sb&&target) sb.onclick=()=>startWithWarmup(target);
   /* the highlight line tells the truth about where you are, not "day one" forever */
   const hl=document.querySelector('.momentum .hl'), st0=svDoneStats();
-  /* their own rating as the yardstick beats any count: "Cells: you said struggling. It's holding now." */
+  /* their own rating as the yardstick beats any count: "Cells is developing — better than you rated it." */
   const said=(st0.total&&window.svProgress)?svProgress.saidNow(SUBJECTS):null;
   if(hl) hl.textContent = said ? said : !st0.total ? 'day one — your first session is ready.'
     : (svPlanState().lesson ? 'today’s lesson is done — anything more is a bonus.'
@@ -967,12 +967,12 @@ function renderSubjectPanel(s){
       s.units.map((u,ui)=>{ const k=s.sub+'/'+u[3];
         /* the pips are WHERE YOU ARE: the evidence band once the unit has any, the student's own rating until then */
         const now=window.svProgress?svProgress.band(s,u):null, cur=now||(window.svStrength?svStrength.rag()[k]:null);
-        const word=now?({g:'secure',a:'holding',r:'fading'})[now]:'';
+        const word=now?svProgress.words[now]:'', due=now?svProgress.dueIn(s,u):0;
         return '<button class="ublock'+(word?' rc-'+word:'')+'" data-u="'+ui+'" title="'+u[0]+' — pick a lesson">'+
         '<span class="un">'+u[0]+'</span>'+
         '<span class="utrack"><i style="width:'+Math.round(u[2]/u[1]*100)+'%"></i></span>'+
-        '<span class="ud">'+u[2]+' / '+u[1]+' lessons'+(word?' · <em>'+word+'</em>':'')+'</span>'+
-        '<span class="udots'+(now?' set':'')+'">'+(now?['r','a','g']:['n','r','a','g']).map(v=>'<span role="button" tabindex="0" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'"'+(now?' aria-disabled="true" title="From your quizzes, answers and cards"':'')+' aria-label="'+(now?({r:'fading',a:'holding',g:'secure'}):({n:'not started yet',r:'struggling',a:'getting there',g:'know it'}))[v]+'"></span>').join('')+'</span></button>'; }).join('')+
+        '<span class="ud">'+u[2]+' / '+u[1]+' lessons'+(word?' · <em>'+word+'</em>':'')+(due?' · <em class="due">'+due+' to revisit</em>':'')+'</span>'+
+        '<span class="udots'+(now?' set':'')+'">'+(now?['r','a','g']:['n','r','a','g']).map(v=>'<span role="button" tabindex="0" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'"'+(now?' aria-disabled="true" title="From your quizzes, answers and cards"':'')+' aria-label="'+(now?svProgress.words:({n:'not started yet',r:'struggling',a:'getting there',g:'know it'}))[v]+'"></span>').join('')+'</span></button>'; }).join('')+
     '</div>';
   el.querySelectorAll('.udots .dot').forEach(b=>{ const hit=ev=>{ ev.stopPropagation(); ev.preventDefault(); if(b.getAttribute('aria-disabled')==='true') return; const k=b.dataset.k, v=b.dataset.v, cur=svStrength.rag()[k];
       svStrength.setRag(k, cur===v?null:v);

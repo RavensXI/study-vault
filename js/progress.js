@@ -2,9 +2,11 @@
    Students should see themselves getting better, not how busy they have been.
    Four things, all read from the strength model (js/strength.js) and the
    planner's fit (planner.js):
-     counts(su)   -> {secure, holding, fading, notyet, total, done}   the subject headline
+     counts(su)   -> {secure, developing, due, notyet, total, done}   the subject headline
+                     bands are the school words (emerging / developing / secure); decay is not a band
+                     but a prompt — a lesson with evidence below the revisit line counts as "due a revisit"
      track(su)    -> 'on track for 11 May' | 'about 6 lessons behind' | null
-     saidNow(...) -> "Cells is holding — better than you rated it."   their own rating as the yardstick
+     saidNow(...) -> "Cells is developing — better than you rated it."   their own rating as the yardstick
      week()       -> the last seven days, and lastWeek() for the first visit of a new week
    Tone: say what happened, name the topic, use their words. Never speak when
    nothing changed, never negative, no streaks, no badges. */
@@ -13,30 +15,33 @@
   function g(k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } }
   function today() { return new Date().toISOString().slice(0, 10); }
   var SAID = { n: 'not started', r: 'struggling', a: 'getting there', g: 'confident' };
-  var NOW = { r: 'fading', a: 'holding', g: 'secure' };
+  var NOW = { r: 'emerging', a: 'developing', g: 'secure' };
+  var REVISIT = 55;   /* the planner's due line (js/strength.js due()) */
   var RANK_SAID = { n: 0, r: 0, a: 1, g: 2 }, RANK_NOW = { r: 0, a: 1, g: 2 };
 
   /* one lesson: {s, prior, reps} from the strength model */
   function L(su, unit, n) { return window.svStrength ? svStrength.lesson(su, unit, n) : { s: 0, prior: true, reps: 0 }; }
 
   function counts(su) {
-    var c = { secure: 0, holding: 0, fading: 0, notyet: 0, total: 0, done: 0 };
+    var c = { secure: 0, developing: 0, due: 0, notyet: 0, total: 0, done: 0 };
     (su.units || []).forEach(function (u) {
       c.total += u[1] || 0; c.done += u[2] || 0;
       for (var n = 1; n <= (u[1] || 0); n++) {
         var r = L(su, u[3], n);
         if (r.prior || !r.reps) { c.notyet++; continue; }
-        if (r.s >= 70) c.secure++; else if (r.s >= 40) c.holding++; else c.fading++;
+        if (r.s < REVISIT) c.due++; else if (r.s >= 70) c.secure++; else c.developing++;
       }
     });
     return c;
   }
+  /* lessons in one unit that are due a revisit */
+  function dueIn(su, u) { var d = 0; for (var n = 1; n <= (u[1] || 0); n++) { var r = L(su, u[3], n); if (!r.prior && r.reps && r.s < REVISIT) d++; } return d; }
   /* the headline: only the groups that exist, "not yet" always last */
   function headline(su) {
     var c = counts(su), parts = [];
     if (c.secure) parts.push(c.secure + ' secure');
-    if (c.holding) parts.push(c.holding + ' holding');
-    if (c.fading) parts.push('<span class="pg-fade">' + c.fading + ' fading</span>');
+    if (c.developing) parts.push(c.developing + ' developing');
+    if (c.due) parts.push('<span class="pg-due">' + c.due + ' due a revisit</span>');
     parts.push(c.notyet + ' not yet');
     return parts.join(' · ');
   }
@@ -134,5 +139,5 @@
     return out;
   }
 
-  window.svProgress = { counts: counts, headline: headline, track: track, band: band, saidNow: saidNow, week: week, lastWeek: lastWeek, review: review, lines: lines, shortDate: shortDate };
+  window.svProgress = { counts: counts, headline: headline, track: track, band: band, dueIn: dueIn, words: NOW, saidNow: saidNow, week: week, lastWeek: lastWeek, review: review, lines: lines, shortDate: shortDate };
 })();
