@@ -822,6 +822,44 @@ fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
     t.innerHTML='<span class="disc"><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></span><b>'+word+'</b><small>'+mins+'</small>'; };
   sync(); new MutationObserver(sync).observe(sb,{childList:true,subtree:true,characterData:true});
   t.onclick=()=>sb.click(); })();
+/* ?place — placement tool (Tom, 12 Sep 2026): drag the arrow and the picture frame, slide their size and
+   tilt, read the values off the panel. Staging only; nothing is saved by it. */
+if(_dq.has('place')){ (function(){
+  const st=document.createElement('style'); st.textContent=`
+    .placebox{position:fixed;right:14px;bottom:14px;z-index:9999;background:#fff;border:1px solid #d9d0bf;border-radius:6px;padding:.7rem .9rem;font:13px/1.4 Inter,system-ui,sans-serif;color:#2d2a26;box-shadow:0 10px 30px rgba(40,28,12,.2);width:300px}
+    .placebox h4{margin:0 0 .4rem;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#8a7a5c}
+    .placebox label{display:grid;grid-template-columns:52px 1fr 46px;gap:8px;align-items:center;margin:.25rem 0}
+    .placebox input[type=range]{width:100%}
+    .placebox pre{margin:.5rem 0 0;font-size:11px;background:#faf8f5;border:1px solid #efeadf;padding:.4rem .5rem;white-space:pre-wrap;user-select:all}
+    .placebox button{margin-top:.4rem;font:600 12px Inter,system-ui,sans-serif;padding:.35rem .7rem;border:1px solid #c9ba9e;background:#fff;border-radius:4px;cursor:pointer}
+    .place-drag{cursor:move!important;pointer-events:auto!important;outline:2px dashed rgba(192,99,37,.6);outline-offset:4px}`;
+  document.head.appendChild(st);
+  const arrow=document.querySelector('.plancol .arrow'), frame=document.getElementById('wallpic');
+  const A={right:166,top:38,w:96,rot:38}, F={left:59.5,bottom:88,w:14.5,rot:-2.4};
+  function applyA(){ arrow.style.right=A.right+'px'; arrow.style.top=A.top+'px'; arrow.style.width=A.w+'px'; arrow.style.transform='scaleX(-1) rotate('+A.rot+'deg)'; out(); }
+  function applyF(){ frame.style.left=F.left+'%'; frame.style.bottom=F.bottom+'px'; frame.style.width=F.w+'%'; frame.style.transform='rotate('+F.rot+'deg)'; out(); }
+  const box=document.createElement('div'); box.className='placebox';
+  box.innerHTML='<h4>Arrow</h4><label>size<input type="range" id="pa_w" min="50" max="220" value="'+A.w+'"><span id="pa_wv"></span></label>'
+    +'<label>tilt<input type="range" id="pa_r" min="-90" max="90" value="'+A.rot+'"><span id="pa_rv"></span></label>'
+    +'<h4 style="margin-top:.6rem">Picture</h4><label>size<input type="range" id="pf_w" min="8" max="30" step=".5" value="'+F.w+'"><span id="pf_wv"></span></label>'
+    +'<label>tilt<input type="range" id="pf_r" min="-15" max="15" step=".2" value="'+F.rot+'"><span id="pf_rv"></span></label>'
+    +'<pre id="pout"></pre><button id="pcopy">Copy values</button>';
+  document.body.appendChild(box);
+  function out(){ box.querySelector('#pa_wv').textContent=A.w+'px'; box.querySelector('#pa_rv').textContent=A.rot+'°'; box.querySelector('#pf_wv').textContent=F.w+'%'; box.querySelector('#pf_rv').textContent=F.rot+'°';
+    box.querySelector('#pout').textContent='arrow: right '+Math.round(A.right)+'px · top '+Math.round(A.top)+'px · width '+A.w+'px · rotate '+A.rot+'deg\npicture: left '+F.left.toFixed(1)+'% · bottom '+Math.round(F.bottom)+'px · width '+F.w+'% · rotate '+F.rot+'deg'; }
+  box.querySelector('#pa_w').oninput=e=>{ A.w=+e.target.value; applyA(); }; box.querySelector('#pa_r').oninput=e=>{ A.rot=+e.target.value; applyA(); };
+  box.querySelector('#pf_w').oninput=e=>{ F.w=+e.target.value; applyF(); }; box.querySelector('#pf_r').oninput=e=>{ F.rot=+e.target.value; applyF(); };
+  box.querySelector('#pcopy').onclick=()=>{ navigator.clipboard&&navigator.clipboard.writeText(box.querySelector('#pout').textContent); };
+  /* drag to move: the arrow in px within its column; the picture in % / px within the shelf stage */
+  function drag(el,onMove){ el.classList.add('place-drag'); let sx,sy,on=false;
+    el.addEventListener('pointerdown',e=>{ on=true; sx=e.clientX; sy=e.clientY; el.setPointerCapture(e.pointerId); e.preventDefault(); e.stopPropagation(); });
+    el.addEventListener('pointermove',e=>{ if(!on) return; onMove(e.clientX-sx,e.clientY-sy); sx=e.clientX; sy=e.clientY; });
+    el.addEventListener('pointerup',()=>{ on=false; }); el.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); },true); }
+  drag(arrow,(dx,dy)=>{ A.right-=dx; A.top+=dy; applyA(); });
+  const stage=document.querySelector('.shelfstage');
+  drag(frame,(dx,dy)=>{ F.left+=dx/stage.clientWidth*100; F.bottom-=dy; applyF(); });
+  frame.hidden=false; applyA(); applyF();
+})(); }
 /* date + exam countdown + mini month */
 const now=new Date();
 document.getElementById('today').textContent=(window.svGreeting&&svGreeting()?svGreeting()+' · ':'')+now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
