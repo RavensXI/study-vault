@@ -289,7 +289,12 @@ function initPracticeQuestions() {
     const esc = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     // Insert double newline before Level headings so they become separate blocks
-    const normalized = esc.replace(/\n(Level\s+\d)/gi, '\n\n$1');
+    let normalized = esc.replace(/\n(Level\s+\d)/gi, '\n\n$1');
+    // Band ladders (Mastering / Secure / Developing / Emerging) may arrive with a
+    // single newline or run inline ("... text. Secure: ..."); each band starts its own block.
+    normalized = normalized.replace(/(^|\n|[.!?;)]\s+)(?=(?:Mastering|Secure|Developing|Emerging):)/g, function(m, pre) {
+      return pre.replace(/\s+$/, '') + '\n\n';
+    });
     const blocks = normalized.split(/\n\n+/);
 
     let html = '';

@@ -8412,8 +8412,40 @@
       de: ['\u00e4','\u00f6','\u00fc','\u00df'],
       all: ['\u00e1','\u00e9','\u00ed','\u00f3','\u00fa','\u00f1','\u00fc','\u00f6','\u00e4','\u00df','\u00ea','\u00e8','\u00e7','\u00e0','\u00e2','\u00ee','\u00f4','\u00f9','\u00fb','\u0153','\u00bf','\u00a1']
     };
+    // Language of the practice subject, from the problem's own target_lang or the
+    // subject slug in the URL (/practice/spanish-aqa/... -> 'es', /practice/latin-eduqas/... -> 'la').
+    var SLUG_LANG = { spanish: 'es', french: 'fr', german: 'de', latin: 'la' };
+    function practiceLang(p) {
+      if (p && p.target_lang) return p.target_lang;
+      var m = (window.location.pathname || '').match(/^\/practice\/([a-z]+)/);
+      return (m && SLUG_LANG[m[1]]) || null;
+    }
+    function isLatinPractice(p) { return practiceLang(p) === 'la'; }
+    // Latin reorder / sentence-builder marking. Word order is free, so an answer is right when it
+    // uses exactly the model's words (multiset), ends on the model's final word (verb-final is the
+    // usual constraint), and keeps each preposition directly before the word it governs.
+    var LATIN_PREPS = ['a','ab','ad','ante','apud','circum','contra','cum','de','e','ex','in','inter','ob','per','post','prae','pro','propter','sine','sub','super','trans'];
+    function latinOrderOk(given, model) {
+      if (!given || !model || given.length !== model.length) return false;
+      var norm = function(w) { return String(w).toLowerCase().replace(/[.,;:!?]+$/, ''); };
+      var g = given.map(norm), m = model.map(norm);
+      if (g[g.length - 1] !== m[m.length - 1]) return false;
+      if (g.slice().sort().join('') !== m.slice().sort().join('')) return false;
+      for (var i = 0; i < m.length - 1; i++) {
+        if (LATIN_PREPS.indexOf(m[i]) === -1) continue;
+        var gi = g.indexOf(m[i]);
+        if (gi === -1 || gi === g.length - 1 || g[gi + 1] !== m[i + 1]) return false;
+      }
+      return true;
+    }
+    // `**word**` markers in English prompts (gap-fill, sentence builder, translate) -> <strong>.
+    function mdStrong(s) {
+      return String(s == null ? '' : s).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    }
     function renderAccentBar(targetLang) {
-      var chars = ACCENT_CHARS[targetLang] || ACCENT_CHARS.all;
+      // Latin has no accented letters; an unknown language gets no bar rather than the mixed set.
+      var chars = ACCENT_CHARS[targetLang || practiceLang(null)];
+      if (!chars) return '';
       var h = '<div class="accent-bar">';
       chars.forEach(function(c) {
         h += '<button type="button" class="accent-btn" data-char="' + c + '" onclick="insertAccent(\'' + c + '\')">' + c + '</button>';
@@ -8521,7 +8553,7 @@
       _engState.gf = { filled: 0, total: gaps.length, activeGap: 0, gapValues: new Array(gaps.length) };
       var h = '';
       if (p.english && !hasBank) {
-        h += '<div class="gf-english"><span class="gf-english-label">English:</span> ' + p.english + '</div>';
+        h += '<div class="gf-english"><span class="gf-english-label">English:</span> ' + mdStrong(p.english) + '</div>';
       }
       h += '<div class="gf-sentence">';
       for (var i = 0; i < parts.length; i++) {
@@ -8603,11 +8635,12 @@
     // ---- Translate ----
     function renderTR(p) {
       var dir = p.direction || 'to_english';
-      var langFlags = { es: 'ES \ud83c\uddea\ud83c\uddf8', fr: 'FR \ud83c\uddeb\ud83c\uddf7', de: 'DE \ud83c\udde9\ud83c\uddea' };
-      var sourceLang = dir === 'to_english' ? (langFlags[p.target_lang] || p.target_lang || 'Source') : 'EN \ud83c\uddec\ud83c\udde7';
-      var targetLang = dir === 'to_english' ? 'EN \ud83c\uddec\ud83c\udde7' : (langFlags[p.target_lang] || p.target_lang || 'Target');
+      var langFlags = { es: 'ES \ud83c\uddea\ud83c\uddf8', fr: 'FR \ud83c\uddeb\ud83c\uddf7', de: 'DE \ud83c\udde9\ud83c\uddea', la: 'Latin' };
+      var trLang = practiceLang(p);
+      var sourceLang = dir === 'to_english' ? (langFlags[trLang] || trLang || 'Source') : 'EN \ud83c\uddec\ud83c\udde7';
+      var targetLang = dir === 'to_english' ? 'EN \ud83c\uddec\ud83c\udde7' : (langFlags[trLang] || trLang || 'Target');
       var h = '<div class="tr-direction"><span class="tr-badge">' + sourceLang + '</span> <span class="tr-arrow">\u2192</span> <span class="tr-badge">' + targetLang + '</span></div>';
-      h += '<div class="tr-source">' + p.source_text + '</div>';
+      h += '<div class="tr-source">' + mdStrong(p.source_text) + '</div>';
       if (p.hints && p.hints.length) {
         h += '<details class="tr-hints"><summary>Show vocab hints</summary><ul>';
         p.hints.forEach(function(hint) { h += '<li>' + hint + '</li>'; });
@@ -8710,7 +8743,7 @@
       _engState.sb = { placed: [], allTiles: shuffled, correct: correct, distractors: distractors, distractorLabels: p.distractor_labels || {} };
       var h = '';
       if (p.english) {
-        h += '<div class="sb-english"><span class="sb-english-label">English:</span> ' + p.english + '</div>';
+        h += '<div class="sb-english"><span class="sb-english-label">English:</span> ' + mdStrong(p.english) + '</div>';
       }
       h += '<div class="sb-answer-zone" id="sb-answer-zone"></div>';
       h += '<div class="sb-tile-bank" id="sb-tile-bank">';
@@ -8959,13 +8992,26 @@
         var order=_engState.reorderOrder;var items=_engState.reorderItems;
         if(order.length<items.length){alert('Click all items in order first.');return;}
         var correct=true;
-        order.forEach(function(shuffIdx,pos){
-          var el=document.querySelector('.reorder-item[data-idx="'+shuffIdx+'"]');
-          if(items[shuffIdx].origIdx===problem.correct_order[pos]){el.classList.add('result-correct');}
-          else{el.classList.add('result-incorrect');correct=false;}
-        });
+        var roModel=problem.correct_order.map(function(ci){return problem.items[ci];});
+        var roLatin=isLatinPractice(problem);
+        if(roLatin){
+          // Latin word order is free: accept the same words with the same final word (verb-final),
+          // prepositions still glued to the word they govern. Any other order is wrong.
+          var roGiven=order.map(function(shuffIdx){return items[shuffIdx].text;});
+          correct=latinOrderOk(roGiven,roModel);
+          order.forEach(function(shuffIdx){
+            var el=document.querySelector('.reorder-item[data-idx="'+shuffIdx+'"]');
+            el.classList.add(correct?'result-correct':'result-incorrect');
+          });
+        } else {
+          order.forEach(function(shuffIdx,pos){
+            var el=document.querySelector('.reorder-item[data-idx="'+shuffIdx+'"]');
+            if(items[shuffIdx].origIdx===problem.correct_order[pos]){el.classList.add('result-correct');}
+            else{el.classList.add('result-incorrect');correct=false;}
+          });
+        }
         isCorrect=correct;
-        feedHtml='<div style="font-size:0.82rem"><p>'+(isCorrect?'Perfect order!':'Not quite right. The correct order is: '+problem.items.map(function(_,i){return problem.items[problem.correct_order[i]];}).join(' \u2192 '))+'</p></div>';
+        feedHtml='<div style="font-size:0.82rem"><p>'+(isCorrect?'Perfect order!':'Not quite right. '+(roLatin?'One natural order is: ':'The correct order is: ')+roModel.join(' \u2192 '))+'</p></div>';
       }
       else if(type==='vocab_match'){
         isCorrect=_engState.vm.matched>=_engState.vm.total;
@@ -9037,16 +9083,25 @@
         var sbOk=true;
         var sbZone=document.getElementById('sb-answer-zone');
         var sbPlacedEls=sbZone?sbZone.querySelectorAll('.sb-placed-tile'):[];
-        sbPlacedEls.forEach(function(el,pos){
-          var tIdx=parseInt(el.dataset.tileIdx);
-          var tile=sbTiles[tIdx];
-          if(pos<sbCorrect.length&&tile.text===sbCorrect[pos]){
-            el.classList.add('sb-correct-tile');
-          } else {
-            el.classList.add('sb-wrong-tile');
-            sbOk=false;
-          }
-        });
+        var sbLatin=isLatinPractice(problem);
+        if(sbLatin){
+          // Latin: same words, same final word, prepositions kept with their noun (see latinOrderOk).
+          var sbGiven=[];
+          sbPlacedEls.forEach(function(el){sbGiven.push(sbTiles[parseInt(el.dataset.tileIdx)].text);});
+          sbOk=latinOrderOk(sbGiven,sbCorrect);
+          sbPlacedEls.forEach(function(el){el.classList.add(sbOk?'sb-correct-tile':'sb-wrong-tile');});
+        } else {
+          sbPlacedEls.forEach(function(el,pos){
+            var tIdx=parseInt(el.dataset.tileIdx);
+            var tile=sbTiles[tIdx];
+            if(pos<sbCorrect.length&&tile.text===sbCorrect[pos]){
+              el.classList.add('sb-correct-tile');
+            } else {
+              el.classList.add('sb-wrong-tile');
+              sbOk=false;
+            }
+          });
+        }
         if(sbPlaced.length!==sbCorrect.length)sbOk=false;
         sbTiles.forEach(function(t,i){
           if(t.isDistractor){
@@ -9059,7 +9114,7 @@
           }
         });
         isCorrect=sbOk;
-        feedHtml='<div style="font-size:0.82rem"><p>'+(sbOk?'Perfect! Correct sentence.':'Not quite. Correct: <strong>'+sbCorrect.join(' ')+'</strong>')+'</p></div>';
+        feedHtml='<div style="font-size:0.82rem"><p>'+(sbOk?'Perfect! Correct sentence.':'Not quite. '+(sbLatin?'One natural order: ':'Correct: ')+'<strong>'+sbCorrect.join(' ')+'</strong>')+'</p></div>';
       }
       else if(type==='spot_correct'){
         var scState=_engState.sc;
