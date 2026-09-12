@@ -284,6 +284,11 @@
   .sdetail{min-height:100px;padding:.6rem 1rem .7rem;position:relative;overflow:visible;display:flex;flex-direction:column;gap:.4rem;
     background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:none}
   .sdetail[hidden]{display:none}
+  .sdetail{transition:opacity .55s ease}
+  .sdetail.fading{opacity:.35}
+  .sdetail.swap{animation:panelswap .45s ease}
+  @keyframes panelswap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){ .sdetail.swap{animation:none} }
   .sdetail .top{display:flex;align-items:baseline;gap:10px;flex:none;flex-wrap:nowrap}
   .sdetail h3{font-family:var(--read);font-size:1.1rem;font-weight:600;margin:0;white-space:nowrap;color:var(--ink)}
   .sdetail .sub{font-size:.76rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1061,14 +1066,20 @@ function deselectSubject(){                 // click a selected spine again -> i
   const cur=document.querySelector('.bk[aria-selected="true"]');
   selSlug=null;
   document.querySelectorAll('.bk').forEach(sp=>sp.setAttribute('aria-selected','false'));
-  if(DOCK){ if(cur){ cur.classList.add('returning'); cur.style.removeProperty('--dock'); setTimeout(()=>cur.classList.remove('returning','taken'),780); } _closeGap(null); }
-  else if(cur && !matchMedia('(prefers-reduced-motion:reduce)').matches){   // replay the pull-out in reverse
+  const el=document.getElementById('sdetail'), p=document.getElementById('selprompt');
+  if(DOCK){ if(cur){ cur.classList.add('returning'); cur.style.removeProperty('--dock'); setTimeout(()=>cur.classList.remove('returning','taken'),780); } _closeGap(null);
+    /* the page stays under the book while it goes home; only then does the panel clear */
+    el.classList.add('fading'); const tok=++_panelTok;
+    setTimeout(()=>{ if(tok!==_panelTok) return; el.hidden=true; el.innerHTML=''; el.classList.remove('fading'); if(p) p.hidden=false; },780);
+    return; }
+  if(cur && !matchMedia('(prefers-reduced-motion:reduce)').matches){   // replay the pull-out in reverse
     cur.classList.add('returning');
     cur.addEventListener('animationend',()=>cur.classList.remove('returning'),{once:true});
   }
-  const el=document.getElementById('sdetail'); el.hidden=true; el.innerHTML='';
-  const p=document.getElementById('selprompt'); if(p) p.hidden=false;
+  el.hidden=true; el.innerHTML='';
+  if(p) p.hidden=false;
 }
+let _panelTok=0;
 function selectSubject(slug,silent){
   if(!silent && slug===selSlug){ deselectSubject(); return; }   // toggle off (same spine)
   const prev=document.querySelector('.bk[aria-selected="true"]');
@@ -1077,8 +1088,10 @@ function selectSubject(slug,silent){
   if(prev && prev.dataset.slug!==slug && !silent && !matchMedia('(prefers-reduced-motion:reduce)').matches){
     prev.setAttribute('aria-selected','false');
     prev.classList.add('returning');
-    const el=document.getElementById('sdetail'); el.hidden=true; el.innerHTML='';   // close the panel while it returns
-    if(DOCK){ prev.style.removeProperty('--dock'); _closeGap(null); setTimeout(()=>{ prev.classList.remove('returning','taken'); _pullOut(slug); },780); return; }
+    const el=document.getElementById('sdetail');
+    if(DOCK){ prev.style.removeProperty('--dock'); _closeGap(null); el.classList.add('fading'); ++_panelTok;
+      setTimeout(()=>{ prev.classList.remove('returning','taken'); _pullOut(slug); },780); return; }
+    el.hidden=true; el.innerHTML='';   // close the panel while it returns
     prev.addEventListener('animationend',()=>{ prev.classList.remove('returning'); _pullOut(slug); },{once:true});
     return;
   }
@@ -1175,6 +1188,7 @@ function renderSubjectPanel(s){
     '</div>';
   el.querySelector('.cont').onclick=()=>nav(urlFor(s,nxt));
   el.querySelectorAll('.ublock').forEach(x=>x.onclick=()=>showLessons(s,s.units[+x.dataset.u]));
+  el.classList.remove('fading'); el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap');
   requestAnimationFrame(_redock);
 }
 /* topic drilled open: pick a lesson tile to see its title, then confirm with the button */
