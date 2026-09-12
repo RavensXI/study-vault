@@ -488,6 +488,19 @@ function initPracticeQuestions() {
 
       const data = await resp.json();
       aiFeedbackBody.innerHTML = formatAiResponse(data.result || '(no response)');
+      /* the AI's mark out of the question's marks: half or better is what
+         counts, for the completion tick and for the test-out (Tom, 12 Sep 2026) */
+      var mm = String(data.result || '').match(/(\d+)\s*(?:\/|out of)\s*(\d+)/i);
+      var got = mm ? +mm[1] : 0, outOf = mm ? +mm[2] : +marksMatch;
+      var ok = outOf > 0 && got / outOf >= 0.5;
+      if (ok && window.svTickPractice) svTickPractice();
+      if (window.__svTestoutStage === 'practice') {
+        window.__svTestoutStage = null;
+        var v = document.createElement('div'); v.className = 'sv-testout-verdict' + (ok ? ' ok' : '');
+        if (ok) { if (window.svMarkCovered) svMarkCovered(); v.innerHTML = '<b>Covered.</b> ' + got + '/' + outOf + ' — that’s this lesson done. <a href="/classic">Back to my plan</a>'; }
+        else v.innerHTML = '<b>Not this time.</b> ' + got + '/' + outOf + ' — complete the full lesson and it will come round again.';
+        if (!(window.svTestoutVerdict && svTestoutVerdict(ok, got, outOf))) aiFeedbackBody.insertAdjacentElement('afterbegin', v);
+      }
       aiUsageIncrement();
       aiUpdateLimitPill();
       // keep the answer + AI feedback for teacher review (account-synced, capped)
@@ -1234,8 +1247,9 @@ function initNarration() {
       playBtn.setAttribute('aria-label', 'Play podcast');
       fabPlay.classList.remove('playing');
       fab.classList.remove('visible');
-      // Clear saved position — they finished the episode
+      // Clear saved position — they finished the episode, and that counts (Tom, 12 Sep 2026)
       localStorage.removeItem('sv-podcast-pos-' + location.pathname);
+      if (window.svTickTask) svTickTask('podcast');
     } else if (currentIndex + 1 < manifest.length) {
       loadClip(currentIndex + 1);
       audio.play();
@@ -1841,6 +1855,21 @@ function initKnowledgeCheck() {
   const unit = document.body.dataset.unit || 'unknown';
   const lesson = document.body.dataset.lesson || 'unknown';
   const storageKey = 'studyvault-kc-' + unit + '/' + lesson;
+  /* strength model (js/strength.js): flashcard progress is keyed by lesson id,
+     everything else by subject/unit/n — keep the map so the two can meet */
+  try {
+    var _km = location.pathname.match(/\/(lesson|practice)\/([^/]+)\/([^/]+)\/(\d+)/);
+    if (_km && window._lessonId) { var _keys = JSON.parse(localStorage.getItem('sv-lesson-keys') || '{}'); _keys[window._lessonId] = _km[2] + '/' + _km[3] + '/' + _km[4]; localStorage.setItem('sv-lesson-keys', JSON.stringify(_keys)); }
+  } catch (e) {}
+  /* ?quiz=1 — the plan sent them to TEST OUT of this lesson: the quiz opens
+     first; 4/5 or better marks the lesson covered, less and they read it */
+  const QUIZ_FIRST = new URLSearchParams(location.search).get('quiz') === '1'
+    || !!(window.svTestoutShould && svTestoutShould());
+  window.__svQuizFirst = false;
+  if (QUIZ_FIRST && !window.__svQuizFirstOpened && window.svTestoutOpen) {
+    window.__svQuizFirstOpened = true;
+    setTimeout(function () { svTestoutOpen(); }, 400);
+  }
 
   // Show saved score on button
   const scoreEl = document.getElementById('knowledge-check-score');
@@ -2106,12 +2135,37 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
     else if (pct >= 60) msg = 'Solid effort. Review what you missed and try again.';
     else msg = 'Read through the lesson and give it another go.';
 
+    var testout = '', passed = window.__svQuizFirst && pct >= 80;
+    if (window.__svQuizFirst) {
+      testout = passed
+        ? '<p class="kc-result-msg kc-testout">Halfway there. One exam question next — half marks and this lesson is covered.</p>'
+        : '<p class="kc-result-msg kc-testout">Not this time. Complete the full lesson; the quiz comes round again in a few days.</p>';
+    }
     body.innerHTML =
       '<div class="kc-result">' +
         '<div class="kc-result-score">' + score + '/' + total + '</div>' +
         '<div class="kc-result-label">' + pct + '% correct</div>' +
-        '<p class="kc-result-msg">' + msg + '</p>' +
+        '<p class="kc-result-msg">' + msg + '</p>' + testout +
       '</div>';
+    try { localStorage.setItem('sv-cards-nudge', '1'); } catch (e) {}
+    if (window.__svQuizFirst) {
+      footer.innerHTML = passed
+        ? '<button class="kc-btn kc-btn-primary" id="kc-testout-next">Try the question</button>'
+        : '<button class="kc-btn kc-btn-secondary" id="kc-testout-plan">Back to my plan</button><button class="kc-btn kc-btn-primary" id="kc-close">Complete the full lesson</button>';
+      var tq = overlay.querySelector('#kc-testout-next');
+      if (tq) tq.addEventListener('click', function () {
+        if (window.svTestoutStage2 && svTestoutStage2()) return;   /* the shell hosts the question */
+        window.__svTestoutStage = 'practice'; closeKC();
+        var pb = document.querySelector('.sv-practice-btn'); if (pb) pb.click();
+        else { var ps = document.getElementById('practice'); if (ps) ps.scrollIntoView({ behavior: 'smooth' }); }
+        setTimeout(function () { var ta = document.getElementById('practice-answer'); if (ta) ta.focus(); }, 500);
+      });
+      var tp = overlay.querySelector('#kc-testout-plan');
+      if (tp) tp.addEventListener('click', function () { location.href = '/classic'; });
+      var tc = overlay.querySelector('#kc-close'); if (tc) tc.addEventListener('click', closeKC);
+      overlay.querySelector('#kc-retry') && overlay.querySelector('#kc-retry').remove();
+      return;
+    }
     footer.innerHTML =
       '<button class="kc-btn kc-btn-secondary" id="kc-retry">Try again</button>' +
       '<button class="kc-btn kc-btn-primary" id="kc-close">Close</button>';
@@ -2470,10 +2524,25 @@ function initLessonProgress() {
     return { pct: avail ? Math.round(got / avail * 100) : 0,
              complete: avail > 0 && got / avail >= 0.5 };
   }
+  /* test-out (js/strength.js plan): a passed quick quiz marks the lesson covered
+     without the weighted checklist — same records a finished lesson writes */
+  window.svMarkCovered = function () {
+    try {
+      /* the weighted checklist would un-mark it on the next save: record the test-out on the lesson's own state */
+      var st0 = getState(); st0.testout = true; localStorage.setItem(storageKey, JSON.stringify(st0));
+      try { if (typeof state === 'object' && state) state.testout = true; } catch (e1) {}   // the live record the quiz is about to save
+      var key = pathMatch[1] + '/' + pathMatch[2], num = parseInt(pathMatch[3], 10);
+      var roll = JSON.parse(localStorage.getItem('sv-lessons-done') || '{}'); var arr = roll[key] || [];
+      if (arr.indexOf(num) < 0) arr.push(num); roll[key] = arr; localStorage.setItem('sv-lessons-done', JSON.stringify(roll));
+      var when = JSON.parse(localStorage.getItem('sv-lessons-when') || '{}'); var wkey = key + '/' + num;
+      if (!when[wkey]) when[wkey] = new Date().toISOString().slice(0, 10); localStorage.setItem('sv-lessons-when', JSON.stringify(when));
+      if (window.svProgressPushSoon) svProgressPushSoon();
+    } catch (e) {}
+  };
   function updateRollup(s) {
     try {
       var wres = weighted(s);
-      var complete = wres.complete;
+      var complete = wres.complete || !!s.testout;   // a passed quiz-first counts as covered
       var key = pathMatch[1] + '/' + pathMatch[2];
       var num = parseInt(pathMatch[3], 10);
       var roll = {};
@@ -2481,6 +2550,7 @@ function initLessonProgress() {
       var arr = roll[key] || [];
       var ix = arr.indexOf(num);
       var newlyDone = complete && ix < 0;
+      if (newlyDone) { try { localStorage.setItem('sv-cards-nudge', '1'); } catch (e0) {} }
       if (complete && ix < 0) arr.push(num);
       if (!complete && ix >= 0) arr.splice(ix, 1);
       roll[key] = arr;
@@ -2597,7 +2667,7 @@ function initLessonProgress() {
   if (practiceBtn && window.practiceQuestions && window.practiceQuestions.length > 0) {
     tasks.push({
       id: 'practice-question',
-      label: 'Answer an exam question',
+      label: 'Answer an exam question (half marks or better)',
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>',
       iconClass: 'lesson-progress-icon--practice',
       auto: true
@@ -2779,18 +2849,23 @@ function initLessonProgress() {
   bindClicks(gutter, '.gutter-progress-item');
 
   // ---- Practice-question auto-tick ----
-  // Tick when the student clicks "AI mark my answer" (asks for feedback).
-  // Capture phase so we fire before the button's own handler does anything
-  // that might prevent default propagation.
+  // Ticks when the AI marks an answer at half marks or better (Tom, 12 Sep
+  // 2026: asking for a mark is not the same as answering the question). The
+  // marking handler calls this once it has parsed the mark.
   if (practiceBtn && tasks.some(function (t) { return t.id === 'practice-question'; })) {
-    practiceBtn.addEventListener('click', function () {
+    window.svTickPractice = function () {
       if (!state['practice-question']) {
         state['practice-question'] = true;
         saveState(state);
         syncAll();
       }
-    }, true);
+    };
   }
+  /* any task ticked by something that happened, not by a click (a finished podcast) */
+  window.svTickTask = function (id) {
+    if (!tasks.some(function (t) { return t.id === id; })) return;
+    if (!state[id]) { state[id] = true; saveState(state); syncAll(); }
+  };
 
   // ---- Highlight mode auto-tick ----
   // Tick when the student has any highlight on this lesson; untick if

@@ -101,6 +101,15 @@ var DAYONE = !!(WIZ && Array.isArray(WIZ.picked) && WIZ.picked.length);
 var SVUSER = null;
 try { SVUSER = JSON.parse(localStorage.getItem('sv-user') || 'null'); } catch (e) {}
 if (_dq.get('user')) SVUSER = { email: _dq.get('user') };   /* staging */
+/* the avatar letter and a greeting come from the first name when we have one */
+function svFirstName() { return (SVUSER && SVUSER.name) ? String(SVUSER.name).trim().split(/\s+/)[0] : ''; }
+function svAvatarLetter() { var n = svFirstName(); return (n ? n[0] : (SVUSER && SVUSER.email ? SVUSER.email[0] : 'S')).toUpperCase(); }
+function svGreeting() {
+  var n = svFirstName(); if (!n) return '';
+  var back = false; try { back = Object.keys(JSON.parse(localStorage.getItem('sv-lessons-done') || '{}')).some(function (k) { return true; }); } catch (e) {}
+  return (back ? 'Welcome back, ' : 'Hello, ') + n;
+}
+window.svFirstName = svFirstName; window.svAvatarLetter = svAvatarLetter; window.svGreeting = svGreeting;
 
 var DONE = {};
 try { DONE = JSON.parse(localStorage.getItem('sv-lessons-done')) || {}; } catch (e) {}
@@ -303,6 +312,7 @@ function svPlanState() {
     return { warm: warm, lesson: lesson, cards: cards, any: warm || lesson || cards, mins: m0 };
   }
   try { var w = JSON.parse(localStorage.getItem('sv-warmup')); warm = !!(w && w.date === today); } catch (e) {}
+  try { var rv = JSON.parse(localStorage.getItem('sv-revisit')); if (rv && rv.date === today) warm = true; } catch (e) {}
   try { cards = localStorage.getItem('sv-flash-day') === today; } catch (e) {}
   try {
     var when = JSON.parse(localStorage.getItem('sv-lessons-when')) || {};
@@ -349,7 +359,9 @@ function svUnitMedia(SUBJECTS, cb) {
           });
           var pc = (row.related_media || []).find(function (m) { return m.category === 'Podcasts'; });
           var ep = pc && (pc.items || []).find(function (it) { return it.url && it.url.indexOf('.r2.dev/') >= 0; });
-          if (ep) pods.push({ t: row.title || ('Lesson ' + row.lesson_number), s: s.su.name, u: ep.url });
+          var pkey = 'sv_progress_' + s.su.sub + '_' + s.unit + '_' + row.lesson_number, pdone = false;
+          try { pdone = !!(JSON.parse(localStorage.getItem(pkey) || '{}').podcast); } catch (e) {}
+          if (ep && !pdone) pods.push({ t: row.title || ('Lesson ' + row.lesson_number), s: s.su.name, u: ep.url, sub: s.su.sub, unit: s.unit, n: row.lesson_number });
         });
         return { deck: deck, pods: pods };
       })
@@ -382,7 +394,8 @@ function svFlashProgress() {
   try { var p = JSON.parse(localStorage.getItem(FC_KEY)); if (p && p.cards) return p; } catch (e) {}
   return { cards: {}, streak: { current: 0, lastStudy: null } };
 }
-function svFlashLevel(box) { return box >= 5 ? 'Mastered' : box >= 4 ? 'Secure' : box >= 2 ? 'Developing' : 'Emerging'; }
+/* the same three words the unit pips use (emerging / developing / secure), read off the Leitner box */
+function svFlashLevel(box) { return box >= 4 ? 'Secure' : box >= 2 ? 'Developing' : 'Emerging'; }
 function svFlashShuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 
 /* self-mark against the shared store — identical box logic to js/main.js */
@@ -409,15 +422,31 @@ function svFlashMark(key, correct) {
 /* today's session: DUE cards (any studied lesson) + NEW cards (reached units),
    deduped, due-first, capped. cb(deck) where each card is
    {key,q,a,slug,name,sub,unit,n,level}. Empty deck => nothing due, all caught up. */
-function svFlashDeck(SUBJECTS, cb) {
+/* opts.exclude: card keys already dealt this visit (a second sitting never repeats the first);
+   opts.more: keep going past the due backlog — new cards, then cards from the lessons whose
+   strength is lowest (js/strength.js), so "Want more?" always has something worth doing */
+function svFlashDeck(SUBJECTS, cb, opts) {
+  opts = opts || {}; var EX = opts.exclude || {};
   var prog = svFlashProgress();
   var today = new Date().toISOString().slice(0, 10);
   var bySub = {}; (SUBJECTS || []).forEach(function (su) { if (su.sub) bySub[su.sub] = su; });
   var dueLids = [], seenLid = {};
   Object.keys(prog.cards || {}).forEach(function (k) {
     if ((prog.cards[k].nextReview || '9999') > today) return;
+    if (EX[k]) return;
     var lid = k.split(':')[0]; if (!seenLid[lid]) { seenLid[lid] = 1; dueLids.push(lid); }
   });
+  /* the weakest lessons with real evidence, for a sitting that has cleared the backlog */
+  var weakSrcs = {};
+  if (opts.more && window.svStrength) {
+    var weak = [];
+    (SUBJECTS || []).forEach(function (su) {
+      if (!su.sub || su.mode === 'p') return;
+      (su.units || []).forEach(function (u) { for (var n = 1; n <= (u[1] || 0); n++) { var r = svStrength.lesson(su, u[3], n); if (!r.prior && r.reps) weak.push({ su: su, unit: u[3], n: n, s: r.s }); } });
+    });
+    weak.sort(function (a, b) { return a.s - b.s; });
+    weak.slice(0, 6).forEach(function (w) { var k = w.su.sub + '/' + w.unit; (weakSrcs[k] = weakSrcs[k] || { su: w.su, unit: w.unit, ns: [] }).ns.push(w.n); });
+  }
   var newSrcs = [];
   (SUBJECTS || []).forEach(function (su) {
     if (!su.sub || su.mode === 'p') return;
@@ -438,6 +467,10 @@ function svFlashDeck(SUBJECTS, cb) {
     jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,name,subjects!inner(slug,school_id))&units.slug=eq.' + encodeURIComponent(s.unit) + '&units.subjects.slug=eq.' + encodeURIComponent(s.su.sub) + '&units.subjects.school_id=is.null&lesson_number=lte.' + s.next, { headers: { apikey: ANON } })
       .then(function (r) { return r.json(); }).then(function (rows) { return { kind: 'new', su: s.su, rows: rows }; }).catch(function () { return { kind: 'new', su: s.su, rows: [] }; }));
   });
+  Object.keys(weakSrcs).forEach(function (k) { var w = weakSrcs[k];
+    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,name,subjects!inner(slug,school_id))&units.slug=eq.' + encodeURIComponent(w.unit) + '&units.subjects.slug=eq.' + encodeURIComponent(w.su.sub) + '&units.subjects.school_id=is.null&lesson_number=in.(' + w.ns.join(',') + ')', { headers: { apikey: ANON } })
+      .then(function (r) { return r.json(); }).then(function (rows) { return { kind: 'weak', su: w.su, rows: rows }; }).catch(function () { return { kind: 'weak', su: w.su, rows: [] }; }));
+  });
   if (!jobs.length) { cb([]); return; }
   Promise.all(jobs).then(function (results) {
     var dueCards = [], newCards = [], seen = {};
@@ -454,8 +487,9 @@ function svFlashDeck(SUBJECTS, cb) {
         var su = bySub[sub] || res.su;
         (row.flashcard_questions || []).forEach(function (f, i) {
           if (!f || !(f.q || f.question) || !(f.a || f.answer)) return;
-          var key = row.id + ':q' + i; if (seen[key]) return;
+          var key = row.id + ':q' + i; if (seen[key] || EX[key]) return;
           if (res.kind === 'due') { if (prog.cards[key] && (prog.cards[key].nextReview || '9999') <= today) { seen[key] = 1; dueCards.push(mk(row, su, i, f)); } }
+          else if (res.kind === 'weak') { seen[key] = 1; newCards.push(mk(row, su, i, f)); }
           else if (!prog.cards[key]) { seen[key] = 1; newCards.push(mk(row, su, i, f)); }
         });
       });
@@ -481,6 +515,16 @@ function svFlashDeck(SUBJECTS, cb) {
   }).catch(function () { cb([]); });
 }
 window.svFlashDeck = svFlashDeck; window.svFlashMark = svFlashMark; window.svFlashLevel = svFlashLevel;
+/* a podcast listened to the end counts for its lesson (the lesson page's "Listen to podcast" task) */
+function svPodcastDone(pod) {
+  if (!pod || !pod.sub || !pod.unit || !pod.n) return;
+  try {
+    var key = 'sv_progress_' + pod.sub + '_' + pod.unit + '_' + pod.n, st = JSON.parse(localStorage.getItem(key) || '{}');
+    if (!st.podcast) { st.podcast = true; localStorage.setItem(key, JSON.stringify(st)); }
+    if (window.svProgressPushSoon) svProgressPushSoon();
+  } catch (e) {}
+}
+window.svPodcastDone = svPodcastDone;
 
 /* signed-in avatar menu: who you are, edit subjects, sign out. Signing out
    removes the signed-in marker and the Supabase session token; the device
@@ -510,7 +554,7 @@ function svAvatarMenu(av) {
       document.head.appendChild(st);
     }
     menu = document.createElement('div'); menu.className = 'sv-avmenu';
-    menu.innerHTML = '<div class="who">Signed in as ' + esc(SVUSER.email) + '</div>'
+    menu.innerHTML = '<div class="who">' + (SVUSER.name ? esc(SVUSER.name) + ' · ' : 'Signed in as ') + esc(SVUSER.email) + '</div>'
       + '<a href="/welcome?view=picker">Edit subjects &amp; boards</a>'
       + '<button type="button" class="out">Sign out</button>';
     document.body.appendChild(menu);

@@ -32,6 +32,7 @@ General rule for tuning: keep total = 100, `E < 50`, every other ≥ `(T − E)`
 Completion% = **(sum of completed weights) ÷ (sum of *available* weights) × 100**, with the threshold at 50% of available. So:
 - **Practice-first lessons** (Maths, MFL, Eng-Lang, science calc units): the practice question *is* the lesson → 100% on completion, no escape hatch needed.
 - A lesson genuinely missing one activity rescales cleanly; the same relative shape holds.
+- **The practice tick needs a mark, not a click** (Tom, 12 Sep 2026): the exam-question activity counts only when the AI marks the answer at **half marks or better**. Asking for a mark and scoring 1/4 leaves it unticked. (Before this, quiz + any practice attempt reached the 50% threshold, so a failed quick check still completed the lesson.)
 
 ## Architecture / what's needed to build it
 

@@ -52,6 +52,8 @@
   .top>*{pointer-events:auto}
   .brand{font-family:'Young Serif',serif;font-size:1.05rem;font-weight:400;color:#1d1c1a}
   .brandlock{height:.30em;width:auto;margin-left:1px;vertical-align:baseline}
+  .schoollogo{height:34px;width:auto;max-width:150px;object-fit:contain;flex:none;margin-left:10px}
+  .schoollogo[hidden]{display:none}
   .brandlogo{height:34px;display:block}
   .avatar{width:30px;height:30px;border-radius:50%;background:#221E19;color:#faf8f5;
     display:grid;place-items:center;font-weight:700;font-size:.78rem}
@@ -397,6 +399,7 @@
 <div class="top">
   <span style="display:flex;align-items:center;gap:1rem">
     <span class="brand">StudyVault<img class="brandlock" src="assets/studyvault-lock-rust.svg" alt=""></span>
+    <img class="schoollogo" id="schoollogo" alt="" hidden>
     <a class="tidy" href="/classic" style="text-decoration:none">classic view</a>
     <button class="tidy" id="tidy" title="Wipe it all down — stains, shavings, the lot">clean desk</button>
   </span>
@@ -501,7 +504,7 @@
         </span>
       </span>
     </button>
-    <div class="meta"><small>tap to flip &middot; read the answer, then mark it &mdash; the line shows when</small><span class="metaR"><span class="cnt" id="fcCnt"></span></span></div>
+    <div class="meta"><small id="fchint">tap to flip &middot; read the answer, then mark it &mdash; the line shows when</small><span class="metaR"><span class="cnt" id="fcCnt"></span></span></div>
   </div>
 </div>
 
@@ -515,9 +518,14 @@
 <script>/* the desk is a 2752px painting: on a phone it is a postage stamp, so phones get the classic view */
 if(Math.min(screen.width,innerWidth)<700&&!/[?&]force=1/.test(location.search)) location.replace('/classic'+location.search);</script>
 <script src="/js/account-sync.js"></script>
+<script src="js/school-session.js"></script>
+<script src="js/demo-students.js"></script>
   <script src="dash-data.js"></script>
 <script src="sync.js"></script>
 <script src="warmup.js"></script>
+<script src="js/strength.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/timer.js"></script>
 <script src="planner.js"></script>
 <script>
 /* ---------- data: Sam's subjects, wired to REAL free-tier content ----------
@@ -545,7 +553,11 @@ svDashInit(SUBJECTS,{view:'desk',onUnits:function(){
   if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); }
   /* today's spaced-repetition sitting: due cards first, then new, capped ~20 */
   if(window.svFlashDeck) svFlashDeck(SUBJECTS,deck=>{
-    if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0; fcPreview();
+    if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0; if(typeof noteDealt==='function') noteDealt(); fcPreview(); window.svDeckSize=FC.length; if(DAYONE&&typeof buildDayOneToday==='function'){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); }
+      /* on the way back from a lesson: due cards come up uninvited, three of them */
+      try{ if(localStorage.getItem('sv-cards-nudge')&&window.svStrength&&svStrength.flashDue()>0&&!document.getElementById('fcmodal').classList.contains('open')){
+        localStorage.removeItem('sv-cards-nudge'); FC.length=Math.min(FC.length,3); fcDeal(); document.getElementById('fcmodal').classList.add('open');
+        const h=document.getElementById('fchint'); if(h) h.textContent='three quick cards before your plan · keeps what you learned fresh'; } }catch(e){}
       /* if the modal is already open (fast fingers / staging), swap the
          fallback card for the real deck's first card */
       const m=document.getElementById('fcmodal');
@@ -571,7 +583,7 @@ let TODAY_L=`
   <div class="datestamp" id="today"></div>
   <h2>Here’s your plan.</h2>
   <ol class="plan">
-    <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled</small></div><span class="mins">2 min</span></li>
+    <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions</small></div><span class="mins">2 min</span></li>
     <li tabindex="0" onclick="nav('/lesson/english-literature-aqa/a-christmas-carol/4')"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — nearest exam</small></div><span class="mins">15 min</span></li>
     <li tabindex="0" onclick="nav('/lesson/computer-science/computer-systems/3')"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — 3 weeks stale</small></div><span class="mins">8 min</span></li>
   </ol>
@@ -595,18 +607,19 @@ function buildDayOneToday(){
   const w=window.svWarmup?svWarmup.doneToday():null;
   const ps=svPlanState();
   const row2=t
-    ?`<li tabindex="0" class="${ps.lesson?'done':''}" onclick="nav('${t.url}')"><span class="n">${ps.lesson?'✓':'2'}</span><div><b>${t.title||('Continue: '+t.unitName)}</b><small>${t.su.name} · ${t.unitName} · ${t.act==='practice'?'set':'lesson'} ${t.num} of ${t.total}</small></div><span class="mins">${t.min||15} min</span></li>`
+    ?`<li tabindex="0" class="${ps.lesson?'done':''}" onclick="nav('${t.url}')"><span class="n">${ps.lesson?'✓':'2'}</span><div><b>${t.redo?'Redo: ':''}${t.title||('Continue: '+t.unitName)}</b><small>${t.su.name} · ${t.unitName}</small></div><span class="mins">${t.min||15} min</span></li>`
     :`<li tabindex="0" class="${ps.lesson?'done':''}" ${url?`onclick="nav('${url}')"`:''}><span class="n">${ps.lesson?'✓':'2'}</span><div><b>First lesson</b><small>${svDayOneSubject(SUBJECTS)?svDayOneSubject(SUBJECTS).name:'your first subject'} · start at the beginning</small></div><span class="mins">15 min</span></li>`;
   const startLbl=ps.any?(ps.mins?`Keep going · ${ps.mins} min`:'One more? · 15 min'):'Start · 19 min';
   TODAY_L=`
   <div class="datestamp" id="today"></div>
   <h2>Here’s your plan.</h2>
   <ol class="plan">
-    <li tabindex="0" class="${ps.warm?'done':''}" ${url&&!w?`onclick="openWarmup('${url}')"`:''}><span class="n">${ps.warm?'✓':'1'}</span><div><b>Warm up</b><small>${w?`done today · ${w.correct} of ${w.total}`:'10 quick questions · finds your level'}</small></div><span class="mins">2 min</span></li>
+    ${revisitRow(url,w,ps)}
     ${row2}
-    <li tabindex="0" class="${ps.cards?'done':''}"><span class="n">${ps.cards?'✓':'3'}</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>
+    <li tabindex="0" class="${ps.cards?'done':''}" onclick="openCards()"><span class="n">${ps.cards?'✓':'3'}</span><div><b>Flashcards</b><small>${window.svDeckSize?window.svDeckSize+' cards':'mixed deck'}</small></div><span class="mins">2 min</span></li>
   </ol>
   <p class="momentum"><span class="hl">${(function(){ const st=svDoneStats();
+    const said=(st.total&&window.svProgress)?svProgress.saidNow(SUBJECTS):null; if(said) return said;
     return !st.total ? 'day one — your first session is ready.'
       : ps.lesson ? 'today’s lesson is done — anything more is a bonus.'
       : st.total+' lesson'+(st.total===1?'':'s')+' in — picking up where you left off.'; })()}</span></p>
@@ -614,16 +627,33 @@ function buildDayOneToday(){
   const st=svDoneStats();
   TODAY_R=`
   <h3>This week</h3>
-  ${st.total?`<div class="noteline">Lessons this week: <b>${st.week}</b></div>
+  ${st.total?`${window.svProgress?(function(){ const wk=svProgress.week(); return svProgress.lines(wk).map(l=>'<div class="noteline">'+l[0]+': <b>'+l[1]+'</b></div>').join(''); })():`<div class="noteline">Lessons this week: <b>${st.week}</b></div>`}
   <div class="noteline">Finished so far: <b>${st.total} ${st.total===1?'lesson':'lessons'}</b></div>
   ${w?`<div class="noteline">Warm-up today: <b>${w.correct}/${w.total}</b></div>`:''}`
  :`<div class="noteline">Nothing here yet — it fills in as you revise.</div>
   <div class="noteline">Warm-ups, your best subject, radio episodes: all of it lands on this page.</div>`}
-  <p class="doable">${SVUSER&&SVUSER.email?('Signed in as '+SVUSER.email+'.')
+  <p class="doable">${SVUSER&&SVUSER.email?((SVUSER.name?SVUSER.name+' · ':'Signed in as ')+SVUSER.email+'.')
     :'<a href="/welcome?view=save" style="color:inherit">Nothing saved yet — sign up to save your progress.</a>'}</p>`;
 }
+/* row 1: the day-one warm-up until something has been studied; then the revisit
+   (slipped or about to, worst first, capped by the budget — js/strength.js) */
+function revisitRow(url,w,ps){
+  if(!svDoneStats().total||!window.svStrength||!svStrength.revisit)
+    return `<li tabindex="0" class="${ps.warm?'done':''}" ${url&&!w?`onclick="openWarmup('${url}')"`:''}><span class="n">${ps.warm?'✓':'1'}</span><div><b>Warm up</b><small>${w?`${w.correct} of ${w.total} right`:'10 quick questions'}</small></div><span class="mins">2 min</span></li>`;
+  const rv=svStrength.revisit(SUBJECTS), done=svStrength.revisitDone();
+  const small=done?`${done.correct} of ${done.total} still secure`:rv.today.length?`${rv.today.length} of ${rv.total} due`:'none due';
+  const live=!done&&rv.today.length;
+  return `<li tabindex="0" class="${done?'done':''}" ${live?`onclick="openRevisit('${url||''}')"`:''}><span class="n">${done?'✓':'1'}</span><div><b>Revisit</b><small>${small}</small></div><span class="mins">${rv.today.length?rv.mins:2} min</span></li>`;
+}
+function openRevisit(url){ if(!window.svWarmup||!window.svStrength) return; const rv=svStrength.revisit(SUBJECTS); if(rv.today.length) svWarmup.open({lessons:rv.today,target:url||null,nav}); }
 function startWithWarmup(url){
-  if(window.svWarmup && !svWarmup.doneToday()) svWarmup.open({subjects:SUBJECTS,target:url,nav});
+  if(!window.svWarmup){ nav(url); return; }
+  if(svDoneStats().total&&window.svStrength&&svStrength.revisit){
+    const rv=svStrength.revisit(SUBJECTS);
+    if(rv.today.length&&!svStrength.revisitDone()) svWarmup.open({lessons:rv.today,target:url,nav}); else nav(url);
+    return;
+  }
+  if(!svWarmup.doneToday()) svWarmup.open({subjects:SUBJECTS,target:url,nav});
   else nav(url);
 }
 function openWarmup(url){ if(window.svWarmup) svWarmup.open({subjects:SUBJECTS,target:url,nav}); }
@@ -640,7 +670,7 @@ if(DAYONE){
   buildDayOneToday();
   const _av=document.querySelector('.avatar');
   if(_av){
-    if(SVUSER&&SVUSER.email){ _av.textContent=SVUSER.email[0].toUpperCase(); _av.title=SVUSER.email; svAvatarMenu(_av); }
+    if(SVUSER&&SVUSER.email){ _av.textContent=svAvatarLetter(); _av.title=SVUSER.name||SVUSER.email; svAvatarMenu(_av); }
     else{ const a=document.createElement('a'); a.className='tidy'; a.style.textDecoration='none';
       a.href='/welcome?view=save'; a.textContent='Sign up & save your progress'; _av.replaceWith(a); }
   }
@@ -678,7 +708,7 @@ function subjSpread(s){
     <div class="subjpg">
       ${s.units.map(u=>`<div class="unit" tabindex="0" onclick="nav('${urlFor(s,u)}')"><b>${u[0]}</b><small>${u[2]} / ${u[1]}</small></div>`).join('')}
     </div>
-    <p class="momentum" style="margin-top:auto">${done} of ${total} topics · ${pct}% complete</p>`;
+    <p class="momentum" style="margin-top:auto">${window.svProgress?svProgress.headline(s).replace(/<[^>]+>/g,''):(done+' of '+total+' topics · '+pct+'% complete')}${window.svProgress&&svProgress.track(s)?' · '+svProgress.track(s):''}</p>`;
   const R=(lad?`
     <div class="splate" style="background-image:url('${lad[stage-1].replace('.png','-page.png')}')"></div>
     <p class="scap">${stageWord[0].toUpperCase()+stageWord.slice(1)} — ${pct}% drawn.<br>The picture finishes as you do.</p>`:`
@@ -696,7 +726,7 @@ function subjSpread(s){
 const pgL=document.getElementById('pgL'), pgR=document.getElementById('pgR');
 let current='today';
 function setSpread(l,r){ pgL.innerHTML=l; pgR.innerHTML=r; const t=document.getElementById('today');
-  if(t) t.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}); }
+  if(t) t.textContent=(window.svGreeting&&svGreeting()?svGreeting()+' · ':'')+new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}); }
 function turnTo(l,r){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){ setSpread(l,r); return; }
   pgL.classList.add('fade'); pgR.classList.add('fade');
@@ -786,7 +816,7 @@ const lcd=document.getElementById('lcd'), mq=document.getElementById('mq'), rmod
       knob=document.getElementById('knob'), knob2=document.getElementById('knob2');
 let stations=[], mode=-1;                      // -1 = podcasts
 const player=new Audio(); player.volume=.55;
-player.addEventListener('ended',()=>{ if(mode>=0) nextTrack(); else if(podOn) playPod(); });
+player.addEventListener('ended',()=>{ if(mode>=0) nextTrack(); else if(podOn){ try{ if(window.svPodcastDone) svPodcastDone(PODCASTS[podQ[podPos]]); }catch(e){} playPod(); } });
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function pretty(u){ return decodeURIComponent(u.split('/').pop()).replace(/\.(mp3|m4a|wav)$/i,'').replace(/[_-]+/g,' ').toUpperCase(); }
 async function listDir(url){
@@ -1023,8 +1053,8 @@ let fci=0, fcShowA=false;
    not have to sit on the drawn rules, so it never looks wrong. */
 function fcPreview(){
   cardsEl.style.setProperty('--fcc','#8a5a44');
-  const _t=document.getElementById('fcText'); _t.textContent='Flashcards'; _t.className='q';
-  document.getElementById('fcSubj').textContent=fci+' / '+FC.length; }
+  const _t=document.getElementById('fcText'); _t.textContent=fcSittingDone?'Want more?':'Flashcards'; _t.className='q';
+  document.getElementById('fcSubj').textContent=fcSittingDone?'':fci+' / '+FC.length; }
 fcPreview();
 /* step the card font down for longer Q/A so it never spills past the edge */
 function fcFit(el,s){ s=String(s||''); el.classList.toggle('long', s.length>70); el.classList.toggle('xlong', s.length>150); }
@@ -1042,7 +1072,23 @@ function fcDeal(){
   document.getElementById('fcCnt').textContent=(fci+1)+' / '+FC.length;
   fcShowA=false; bigcard.classList.remove('showa');
 }
-cardsEl.onclick=()=>{ if(dragBlockClick) return; if(fci>=FC.length) fci=0; fcDeal(); fcmodal.classList.add('open');
+
+window.__svDealt=window.__svDealt||{};
+function noteDealt(){ FC.forEach(c=>{ if(c.key) __svDealt[c.key]=1; }); }
+var fcSittingDone=false;
+function openCards(){
+  if(fcSittingDone){   /* Want more? — the backlog next, then the weakest lessons; never a repeat today */
+    if(!window.svFlashDeck) return;
+    svFlashDeck(SUBJECTS,deck=>{ if(!deck.length) return; FC.length=0; deck.forEach(c=>FC.push(c)); noteDealt(); fci=0; fcSittingDone=false; fcPreview();
+      fcDeal(); fcmodal.classList.add('open'); },{more:true,exclude:__svDealt});
+    return;
+  }
+  if(fci>=FC.length) fci=0; fcDeal(); fcmodal.classList.add('open');
+  try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
+  if(window.svProgressPushSoon) svProgressPushSoon();
+  if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } }
+cardsEl.onclick=()=>{ if(dragBlockClick) return; openCards(); };
+const _cardsOnclickOld=()=>{ if(dragBlockClick) return; if(fci>=FC.length) fci=0; fcDeal(); fcmodal.classList.add('open');
   try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } };
@@ -1071,7 +1117,7 @@ function fcMark(ok){
   if(window.svFlashMark && f.key) f.level=svFlashMark(f.key,ok);
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(fci+1<FC.length){ fci++; fcDeal(); }
-  else { fci++; fcmodal.classList.remove('open'); fcPreview();   /* whole sitting done: N / N */
+  else { fci++; fcSittingDone=true; fcmodal.classList.remove('open'); fcPreview();   /* whole sitting done: the pile offers more */
     if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } }
 }
 ['ok','no'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
@@ -1101,12 +1147,20 @@ document.getElementById('closephone').onclick=()=>{ modal.classList.remove('open
 modal.addEventListener('click',e=>{ if(e.target===modal){ modal.classList.remove('open'); frame.src=''; } });
 addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('open')){ modal.classList.remove('open'); frame.src=''; } });
 
+/* the school's logo beside the wordmark, when there is one */
+(function(){ const img=document.getElementById('schoollogo'); if(!img) return;
+  const logos={'unity-college':'/images/unity-college-logo.png','severn-vale':'/images/severn-vale-logo.png'};
+  let slug=(window.SVUSER&&SVUSER.school_slug)||null, name=(window.SVUSER&&SVUSER.school_name)||'';
+  try{ if(!slug&&window.SchoolSession&&SchoolSession.isActive()){ const ss=SchoolSession.get(); slug=ss.school_slug; name=ss.school_name||''; } }catch(e){}
+  const url=slug&&(logos[slug]||(window.SVUSER&&SVUSER.school_logo)); if(!url) return;
+  img.src=url; img.alt=name; img.title=name; img.hidden=false; })();
 /* ---------- the wristwatch: real time on the dial + revision timer ---------- */
 { const hh=document.getElementById('hh'), mh=document.getElementById('mh'), sh=document.getElementById('sh');
   const tarc=document.getElementById('tarc'), tcirc=document.getElementById('tcirc');
   const wpop=document.getElementById('wpop'), wstop=document.getElementById('wstop');
   const C=1495;
-  let tEnd=0, tTotal=0;
+  const _t0=window.svTimer?svTimer.read():null;   /* a timer set on any other page carries on here */
+  let tEnd=_t0?_t0.end:0, tTotal=_t0?_t0.total:0;
   /* a soft two-note chime when the timer runs out — the flash alone was silent.
      The AudioContext is unlocked on the start tap (a user gesture) so the
      autoplay policy lets it sound minutes later. */
@@ -1130,6 +1184,7 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('o
      time reads true against the PAINTED dial, not the screen. */
   const TILT=45;
   function tickWatch(){
+    if(window.svTimer){ const t=svTimer.read(); if(t&&t.end!==tEnd){ tEnd=t.end; tTotal=t.total; wstop.style.display=''; } else if(!t&&tEnd&&tEnd-Date.now()>0){ tEnd=0; tcirc.style.strokeDashoffset=C; wstop.style.display='none'; } }
     const n=new Date();
     const s=n.getSeconds(), m=n.getMinutes()+s/60, h=(n.getHours()%12)+m/60;
     sh.style.transform='rotate('+(s*6+TILT)+'deg)';
@@ -1137,19 +1192,20 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('o
     hh.style.transform='rotate('+(h*30+TILT)+'deg)';
     if(tEnd){
       const left=tEnd-Date.now();
-      if(left<=0){ tEnd=0; wstop.style.display='none';
+      if(left<=0){ tEnd=0; wstop.style.display='none'; if(window.svTimer) svTimer.stop();
         tarc.classList.add('wflash'); chime();
         setTimeout(()=>{ tarc.classList.remove('wflash'); tcirc.style.strokeDashoffset=C; },1900);
       } else tcirc.style.strokeDashoffset=C*(1-left/tTotal);
     }
   }
+  if(tEnd){ wstop.style.display=''; }
   setInterval(tickWatch,1000); tickWatch();
   document.getElementById('watch').onclick=()=>{ wpop.classList.toggle('open'); };
   wpop.querySelectorAll('button').forEach(b=>b.onclick=e=>{
     e.stopPropagation();
     const min=+b.dataset.min;
-    if(min){ unlockChime(); tTotal=min*60000; tEnd=Date.now()+tTotal; tcirc.style.strokeDashoffset=0; wstop.style.display=''; }
-    else { tEnd=0; tcirc.style.strokeDashoffset=C; wstop.style.display='none'; }
+    if(min){ unlockChime(); tTotal=min*60000; tEnd=Date.now()+tTotal; tcirc.style.strokeDashoffset=0; wstop.style.display=''; if(window.svTimer) svTimer.set(min); }
+    else { tEnd=0; tcirc.style.strokeDashoffset=C; wstop.style.display='none'; if(window.svTimer) svTimer.stop(); }
     wpop.classList.remove('open'); tickWatch();
   });
   addEventListener('keydown',e=>{ if(e.key==='Escape') wpop.classList.remove('open'); });

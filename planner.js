@@ -99,13 +99,37 @@ function plTitle(su, unit, num) {
 }
 
 /* ---- the queue of what each subject still has to do, in order ---- */
+/* the subject's remaining lessons, red-rated units first (the student's own
+   RAG, unit level over subject level), otherwise in unit order. Each item
+   carries its entry point: a lesson the student rated amber/green (or that
+   has strength from before) is quiz-first - pass and it is covered. */
+function plRagOf(su, unit) {
+  if (!window.svStrength) return 'a';
+  var r = svStrength.rag(); return r[su.sub + '/' + unit] || r[su.slug] || 'a';
+}
 function plQueue(su) {
-  var q = [];
-  (su.units || []).forEach(function (u) {
-    var done = u[4] || [];
-    for (var n = 1; n <= (u[1] || 0); n++) if (done.indexOf(n) < 0) q.push({ unit: u[3], unitName: u[0], num: n, total: u[1] });
+  var q = [], order = { n: 0, r: 0, a: 1, g: 1 };
+  /* a lesson whose revisit was failed this fortnight is redone before anything new */
+  if (window.svStrength && svStrength.redo) svStrength.redo(su).forEach(function (r) { q.push({ unit: r.unit, unitName: r.unitName, num: r.num, total: r.total, quizFirst: false, redo: true }); });   // red units first; the rest keep the unit order (green ones become quiz-first, not last)
+  var units = (su.units || []).map(function (u, i) { return { u: u, i: i, r: order[plRagOf(su, u[3])] }; });
+  units.sort(function (a, b) { return (a.r - b.r) || (a.i - b.i); });
+  units.forEach(function (w) {
+    var u = w.u, done = u[4] || [];
+    for (var n = 1; n <= (u[1] || 0); n++) {
+      if (done.indexOf(n) >= 0) continue;
+      var st = window.svStrength ? svStrength.lesson(su, u[3], n) : null;
+      /* no test-out for practice sets (they are the test) or Music (set works are listened to, not quizzed out of) */
+      var canQF = su.slug !== 'music' && !(window.svIsPracticeUnit && svIsPracticeUnit(su, u[3]));
+      q.push({ unit: u[3], unitName: u[0], num: n, total: u[1], quizFirst: canQF && !!(st && st.s >= 35) });
+    }
   });
   return q;
+}
+/* the daily budget -> how many subject sessions a day, and their minutes */
+function plBudget() { return (window.svStrength && svStrength.budget()) || 45; }
+function plShape() {
+  var b = plBudget();
+  return b <= 20 ? { n: 1, mins: [15] } : b <= 45 ? { n: 2, mins: [25, 15] } : { n: 3, mins: [25, 15, 15] };
 }
 function plUrl(su, unit, num) {
   return '/' + ((window.svIsPracticeUnit && svIsPracticeUnit(su, unit)) ? 'practice' : 'lesson') + '/' + su.sub + '/' + unit + '/' + num;
@@ -118,13 +142,21 @@ function plLessonDone(su, unit, num) {
   return set.indexOf(num) >= 0;
 }
 
-var PL_SUBJECTS = [], PL_LAST = null, PL_ONCHANGE = null;
+var PL_SUBJECTS = [], PL_LAST = null, PL_ONCHANGE = null, PL_FIT = {};
+window.svPlanFit = function (slug) { return PL_FIT[slug] || null; };   /* js/progress.js: the on-track word */
 var SCHED = {};
 function buildSchedule() {
   SCHED = {};
   if (!PL_SUBJECTS.length || !PL_LAST) return;
   var lastSeen = {}, queues = {}, retrieval = [];      // retrieval: quizzes due on a date
-  PL_SUBJECTS.forEach(function (su) { lastSeen[su.slug] = -999; queues[su.slug] = plQueue(su); });
+  var shape = plShape();
+  PL_FIT = {};                                          // per subject: lessons that fit before its first exam
+  PL_SUBJECTS.forEach(function (su) { lastSeen[su.slug] = -999; queues[su.slug] = plQueue(su); PL_FIT[su.slug] = { left: queues[su.slug].length, fit: 0, first: (plExams(su)[0] || {}).d || null }; });
+  /* today only: the revisit slot (js/strength.js revisit) — slipped or about to, worst first, capped by the budget */
+  var dueNow = [];
+  if (window.svStrength && svStrength.revisit && !svStrength.revisitDone())
+    svStrength.revisit(PL_SUBJECTS).today.forEach(function (r) { dueNow.push({ on: T0, s: r.su, unit: r.unit, unitName: r.unitName, num: r.num, total: r.total }); });
+  retrieval = retrieval.concat(dueNow);
   for (var d = new Date(T0), di = 0; d <= PL_LAST; d = new Date(d.getTime() + 864e5), di++) {
     if (offKind(d)) continue;
     var active = PL_SUBJECTS.filter(function (su) {
@@ -134,16 +166,20 @@ function buildSchedule() {
     var scored = active.map(function (su) {
       var nxt = plExams(su).find(function (e) { return e.d >= d; });
       var urg = 1 + 8 / ((nxt ? Math.round((nxt.d - d) / 864e5) : 400) + 3);
-      return { su: su, score: (di - lastSeen[su.slug]) * urg };
+      /* the student's own rating of the SUBJECT: red comes round more often, green less */
+      var rw = { n: 1.4, r: 1.4, a: 1, g: 0.7 }[(window.svStrength && svStrength.rag()[su.slug]) || 'a'] || 1;
+      return { su: su, score: (di - lastSeen[su.slug]) * urg * rw };
     }).sort(function (a, b) { return b.score - a.score || a.su.slug.localeCompare(b.su.slug); });
     var picks = [], k = iso(d);
-    scored.slice(0, 2).forEach(function (p, pi) {
+    scored.slice(0, shape.n).forEach(function (p, pi) {
       var su = p.su; lastSeen[su.slug] = di;
       var q = queues[su.slug], item = q.length ? q.shift() : null;
       var practice = item && window.svIsPracticeUnit && svIsPracticeUnit(su, item.unit);
       if (item) {
-        picks.push({ s: su, act: practice ? 'practice' : 'lesson', unit: item.unit, unitName: item.unitName, num: item.num, total: item.total,
-                     title: plTitle(su, item.unit, item.num), url: plUrl(su, item.unit, item.num), min: pi ? 15 : 25 });
+        var qf = item.quizFirst && !practice;
+        if (PL_FIT[su.slug].first && d <= PL_FIT[su.slug].first) PL_FIT[su.slug].fit++;
+        picks.push({ s: su, act: practice ? 'practice' : (qf ? 'quiz-first' : 'lesson'), unit: item.unit, unitName: item.unitName, num: item.num, total: item.total, redo: !!item.redo,
+                     title: plTitle(su, item.unit, item.num), url: plUrl(su, item.unit, item.num) + (qf ? '?quiz=1' : ''), min: qf ? 10 : shape.mins[pi] });
         /* the quick quiz on it three days on: retrieval, not re-reading */
         if (!practice) retrieval.push({ on: new Date(d.getTime() + 3 * 864e5), s: su, unit: item.unit, unitName: item.unitName, num: item.num, total: item.total });
       } else {
@@ -154,12 +190,14 @@ function buildSchedule() {
     /* quizzes that fell due today (or slid off a rest day onto it) */
     var due = retrieval.filter(function (r) { return r.on <= d; });
     retrieval = retrieval.filter(function (r) { return r.on > d; });
-    due.slice(0, 2).forEach(function (r) {
-      picks.push({ s: r.s, act: 'knowledge check', unit: r.unit, unitName: r.unitName, num: r.num, total: r.total,
-                   title: plTitle(r.s, r.unit, r.num), url: plUrl(r.s, r.unit, r.num) + '#kc', min: 5, quiz: true });
+    due.slice(0, di === 0 ? 4 : 2).forEach(function (r) {
+      picks.push({ s: r.s, act: 'revisit', unit: r.unit, unitName: r.unitName, num: r.num, total: r.total,
+                   title: plTitle(r.s, r.unit, r.num), url: plUrl(r.s, r.unit, r.num) + '#kc', min: 2, quiz: true });
     });
-    /* the mixed deck: one short interleaved session a day, no subject attached */
-    picks.push({ s: null, act: 'flashcards', title: 'Flashcards — mixed deck', url: '/classic?fc=1', min: 5, mixed: true });
+    /* the mixed deck: today it is sized by what is actually due; later days a short sitting */
+    var dueCards = (di === 0 && window.svStrength) ? svStrength.flashDue() : 0;
+    picks.push({ s: null, act: 'flashcards', title: di === 0 && dueCards ? dueCards + ' cards due' : 'Flashcards — mixed deck',
+                 url: '/classic?fc=1', min: di === 0 && dueCards ? Math.min(12, Math.ceil(dueCards / 4) + 1) : 5, mixed: true });
     SCHED[k] = picks;
   }
 }
@@ -170,6 +208,7 @@ function examsOn(d) {
 }
 function sessDone(x) {
   if (!x || !x.s) return x && x.mixed ? plFlashToday() : false;
+  if (x.act === 'quiz-first') return plLessonDone(x.s, x.unit, x.num) || plKcDone(x.s, x.unit, x.num);
   if (x.quiz) return plKcDone(x.s, x.unit, x.num);
   if (x.act === 'review') return false;
   return plLessonDone(x.s, x.unit, x.num);
@@ -185,12 +224,12 @@ function svPlanToday() { var p = planFor(T0); return p ? p.sessions : null; }
 /* the dashboards' row 2: today's first real lesson, in svContinueTarget's shape */
 function svPlanPrimary() {
   var s = svPlanToday(); if (!s) return null;
-  var x = s.find(function (y) { return y.s && (y.act === 'lesson' || y.act === 'practice'); });
+  var x = s.find(function (y) { return y.s && (y.act === 'lesson' || y.act === 'practice' || y.act === 'quiz-first'); });
   if (!x) return null;
-  return { su: x.s, unitName: x.unitName, unitSlug: x.unit, total: x.total, num: x.num, url: x.url, title: x.title, act: x.act, min: x.min };
+  return { su: x.s, unitName: x.unitName, unitSlug: x.unit, total: x.total, num: x.num, url: x.url, title: x.title, act: x.act, min: x.min, redo: !!x.redo };
 }
 function sessLabel(x) { return x.title || (x.s ? (x.unitName + ' · ' + (x.act === 'practice' ? 'set' : 'lesson') + ' ' + x.num) : x.act); }
-function actWord(x) { return x.quiz ? 'quick quiz' : x.act === 'review' ? 'review' : x.mixed ? '' : x.act; }
+function actWord(x) { return x.quiz ? 'revisit' : x.redo ? 'redo' : x.act === 'quiz-first' ? 'quick check' : x.act === 'review' ? 'review' : x.mixed ? '' : x.act; }
 
 /* ---- day tooltip (shared by both views' mini calendars) ---- */
 var DOWNAME = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];
@@ -303,6 +342,7 @@ var PL_HTML =
   '<p class="plsub" id="plsub"></p>' +
   '<div class="plctl">' +
   '<span class="lbl2">Revise on</span><span class="wkday" id="wkday"></span>' +
+  '<span class="lbl2">Most days</span><span class="wkday" id="plbudget"></span>' +
   '<span class="replan" id="replan">replanned ✓</span><span class="sp"></span>' +
   '<button type="button" class="plbtn" id="plics">Next 2 weeks to my calendar</button>' +
   '<button type="button" class="plbtn" id="plicsex" hidden>Exam dates to my calendar</button></div>' +
@@ -310,6 +350,7 @@ var PL_HTML =
   '<div class="plgrid" id="plgrid"></div>' +
   '<div class="pldaysheet" id="pldaysheet"></div>' +
   '<ul class="plagenda" id="plagenda"></ul>' +
+  '<p class="plfoot" id="plfit"></p>' +
   '<p class="plfoot" id="plfoot">Built from your subjects, where you are in each one, and the exam boards&rsquo; timetables. ' +
   'Finish a lesson early or take a day off and everything after it moves along &mdash; nothing is lost.</p></div>';
 
@@ -327,9 +368,29 @@ function plSubtitle() {
     + '. Each session is a real lesson, picked up from where you are. Tap a day to see it in full, or to make it a holiday.';
 }
 function replan(quiet) {
-  buildSchedule(); plSubtitle(); buildPlan(); buildAgenda(); if (plsel) buildDaySheet(plsel);
+  buildSchedule(); plSubtitle(); buildFit(); buildPlan(); buildAgenda(); if (plsel) buildDaySheet(plsel);
   if (!quiet) flashReplan();
   if (PL_ONCHANGE) try { PL_ONCHANGE(); } catch (e) {}
+}
+function buildBudget() {
+  var w = document.getElementById('plbudget'); if (!w) return; w.innerHTML = '';
+  [[20, '20 min'], [45, '45 min'], [60, '1 hour']].forEach(function (o) {
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = o[1];
+    b.setAttribute('aria-pressed', String(plBudget() === o[0]));
+    b.onclick = function () { if (window.svStrength) svStrength.setBudget(o[0]); buildBudget(); replan(); };
+    w.appendChild(b);
+  });
+}
+/* the honest line: which subjects will not be covered before their first paper at this budget */
+function buildFit() {
+  var el = document.getElementById('plfit'); if (!el) return;
+  var short = [];
+  PL_SUBJECTS.forEach(function (su) {
+    var f = PL_FIT[su.slug]; if (!f || !f.first || !f.left) return;
+    if (f.fit < f.left) short.push(su.name + ' (' + f.fit + ' of ' + f.left + ')');
+  });
+  el.textContent = short.length ? 'Won’t all fit before the paper at ' + plBudget() + ' min a day: ' + short.join(' · ')
+                                : 'Everything fits before its paper at ' + plBudget() + ' min a day.';
 }
 function buildWk() {
   var w = document.getElementById('wkday'); w.innerHTML = '';
@@ -419,7 +480,7 @@ function buildDaySheet(d) {
     var total = (p.sessions || []).reduce(function (a, x) { return a + x.min; }, 0);
     html += '<div class="acts">';
     if (d >= T0 && p.off !== 'rest') html += '<button type="button" class="plbtn" id="plhol">' + (p.off === 'holiday' ? 'Put this day back' : 'Make this a holiday') + '</button>';
-    if (d >= T0 && p.sessions) html += '<button type="button" class="plbtn" id="plpush">Push today’s work along</button>';
+    if (d >= T0 && p.sessions) html += '<button type="button" class="plbtn" id="plpush">Skip today</button>';
     if (p.sessions && total) html += '<span class="plsub" style="margin:0;align-self:center">' + total + ' min in all</span>';
     html += '</div>';
   }
@@ -542,6 +603,6 @@ function svPlannerOpen(month) {
   plSubtitle();
   var b = document.getElementById('plicsex'); if (b) b.hidden = !anyRealExams();
   if (!plsel) plsel = new Date(T0);
-  buildWk(); buildPlan(); buildAgenda(); buildDaySheet(plsel);
+  buildWk(); buildBudget(); buildFit(); buildPlan(); buildAgenda(); buildDaySheet(plsel);
   document.getElementById('plmodal').classList.add('open');
 }

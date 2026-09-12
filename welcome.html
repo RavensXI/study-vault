@@ -573,7 +573,7 @@
   .wizstage::after{content:"";position:absolute;left:0;right:0;bottom:-16px;height:16px;pointer-events:none;
     background:linear-gradient(var(--paper),transparent)}
   body[data-view="picker"] .wizstage,body[data-view="year"] .wizstage,body[data-view="boards"] .wizstage,
-  body[data-view="tier"] .wizstage,body[data-view="topics"] .wizstage,body[data-view="save"] .wizstage{display:block}
+  body[data-view="tier"] .wizstage,body[data-view="topics"] .wizstage,body[data-view="save"] .wizstage,body[data-view="feel"] .wizstage,body[data-view="budget"] .wizstage{display:block}
   .wizstage .wizprog{margin-bottom:.9rem;transition:margin .42s cubic-bezier(.16,1,.3,1)}
   .wizstage .shelfstage{margin:0 auto;height:calc(250px*var(--ms,1));transition:height .42s cubic-bezier(.16,1,.3,1)}
   .wizstage .stagewrap{position:relative;height:250px;transform-origin:top center;transform:scale(var(--ms,1));transition:transform .42s cubic-bezier(.16,1,.3,1)}
@@ -602,6 +602,8 @@
   @media (prefers-reduced-motion:reduce){ .view.leave,.wizstage .bk.out{animation:none} }
   body[data-view="landing"] .view-landing{display:block}
   body[data-view="picker"] .view-picker{display:block}
+  body[data-view="feel"] .view-feel{display:block}
+  body[data-view="budget"] .view-budget{display:block}
   body[data-view="boards"] .view-boards{display:block}
   body[data-view="topics"] .view-topics{display:block}
   body[data-view="save"] .view-save{display:block}
@@ -664,6 +666,37 @@
   .verdict .note{display:inline-block;margin-top:.35rem;font-size:.86rem;color:var(--mut)}
   /* topics step: one decision at a time — a single focused question card */
   .stepcard{max-width:780px;margin:1.7rem auto 0;text-align:center}
+  /* the feel screen: one row per subject, three ink dots; a budget row */
+  .feelcard{text-align:left}
+  .feelunit{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.2rem 1rem;padding:.6rem 0;border-top:1px solid var(--linel)}
+  .feelunit:first-of-type{border-top:0}
+  .fu-name{border:0;background:none;padding:0;text-align:left;font:600 1rem var(--read);color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:.4rem}
+  .fu-name svg{width:12px;height:12px;flex:none;opacity:.55;transition:transform .2s}
+  .fu-name[aria-expanded="true"] svg{transform:rotate(90deg)}
+  .fu-inc{grid-column:1/-1;font-family:var(--head);font-size:.86rem;color:var(--sec);padding:.15rem 0 .35rem 1.15rem}
+  .fu-inc p{margin:0 0 .35rem;color:var(--ink)}
+  .fu-inc ol{margin:0;padding-left:1.2rem;columns:2;column-gap:2rem}
+  .fu-inc li{break-inside:avoid;padding:.08rem 0}
+  .feelcard .wait{font-size:.86rem;color:var(--mut);padding:.6rem 0;text-align:center}
+  .feelsub{display:block;font-family:var(--head);font-weight:400;font-size:.9rem;color:var(--mut);margin-top:.2rem}
+  .dots{display:flex;gap:.45rem}
+  .dot{width:38px;height:38px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;position:relative;padding:0}
+  .dot::after{content:'';position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;opacity:.35}
+  .dot.r::after{background:#b5442f}.dot.a::after{background:#d19a2f}.dot.g::after{background:#4e7a4a}
+  .dot.n::after{background:none;box-shadow:inset 0 0 0 2px #8f877a}
+  .dot[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+  .dot[aria-pressed="true"]::after{opacity:1;width:18px;height:18px;margin:-9px 0 0 -9px}
+  .dotkey{display:flex;justify-content:flex-end;gap:1.2rem;font-size:.74rem;color:var(--mut);margin:0 0 .3rem}
+  .dotkey span::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:.35rem;vertical-align:middle}
+  .dotkey .kr::before{background:#b5442f}.dotkey .ka::before{background:#d19a2f}.dotkey .kg::before{background:#4e7a4a}
+  .dotkey .kn::before{box-shadow:inset 0 0 0 1.5px #8f877a}
+  .budget .bopts{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:center}
+  .budget .bopts button{border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:1rem 1.6rem;font:600 1.05rem var(--head);color:var(--ink);cursor:pointer;min-width:120px}
+  .budget .bopts button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .budget p{display:none}
+  html.mob .fu-name{font-size:.95rem}
+  html.mob .fu-inc ol{columns:1}
+  html.mob .feelunit .dots .dot{width:34px;height:34px}
   .tprog{font-size:.76rem;font-weight:600;color:var(--mut);letter-spacing:.14em;text-transform:uppercase}
   .tsubj{display:flex;align-items:center;justify-content:center;gap:10px;margin:.7rem 0 .1rem}
   .tsubj img{height:34px;width:auto;filter:saturate(1.4) brightness(1.1)}
@@ -1194,7 +1227,7 @@
 
     <div class="picker-foot">
       <button class="backlink" onclick="go('year')">&larr; Year</button>
-      <button class="cta" id="bnext" disabled style="opacity:.45" onclick="enterDash()">See my StudyVault &rarr;</button>
+      <button class="cta" id="bnext" disabled style="opacity:.45" onclick="go('feel')">See my StudyVault &rarr;</button>
     </div>
   </div>
 
@@ -1231,6 +1264,30 @@
     </div>
   </div>
 
+  <!-- ================= FEEL: how confident, and how long most days (optional) ================= -->
+  <div class="view view-feel">
+    <div class="picker-head">
+      <h1 id="feelh"></h1>
+      <p>How are you doing with each topic? Tap a topic to see what&rsquo;s in it.</p>
+    </div>
+    <div class="stepcard feelcard" id="feelcard"></div>
+    <div class="picker-foot">
+      <button class="backlink" id="feelback">&larr; Back</button>
+      <button class="cta" id="feelnext">Next &rarr;</button>
+    </div>
+  </div>
+
+  <div class="view view-budget">
+    <div class="picker-head">
+      <h1>How long most days?</h1>
+    </div>
+    <div class="stepcard feelcard"><div class="budget"><div class="bopts" id="bopts"></div></div></div>
+    <div class="picker-foot">
+      <button class="backlink" id="budgetback">&larr; Back</button>
+      <button class="cta" id="budgetnext">See my StudyVault &rarr;</button>
+    </div>
+  </div>
+
   <!-- ================= SAVE: the only moment we ask for anything ================= -->
   <div class="view view-save">
     <div class="picker-head">
@@ -1239,6 +1296,7 @@
     </div>
 
     <div class="door savecard">
+      <input class="field" id="savename" type="text" placeholder="First name" aria-label="First name" autocomplete="given-name" maxlength="40">
       <input class="field" id="savemail" type="email" placeholder="Email address" aria-label="Email address" autocomplete="email">
       <input class="field" id="savepass" type="password" placeholder="Choose a password" aria-label="Choose a password" autocomplete="new-password">
       <button class="cta" id="savebtn">Create my free account</button>
@@ -1784,8 +1842,10 @@ function renderYearView(){
 }
 /* the strip at the top of every wizard screen: how many taps are left */
 function renderProg(view){
-  const steps=['picker','year','boards'].concat(tierNeeded().length?['tier']:[]).concat(topicsNeeded().length?['topics']:[]);
-  const at=steps.indexOf(view);
+  const base=['picker','year','boards'].concat(tierNeeded().length?['tier']:[]).concat(topicsNeeded().length?['topics']:[]);
+  const feels=feelSubs().map((sl,i)=>'feel'+i);
+  const steps=base.concat(feels).concat(['budget']);
+  const at=view==='feel'?base.length+fstep:steps.indexOf(view);
   document.querySelectorAll('.wizprog').forEach(el=>{
     el.innerHTML=steps.map((s,i)=>'<span class="'+(i<at?'done':(i===at?'cur':''))+'"></span>').join('');
   });
@@ -1902,7 +1962,7 @@ function syncBoards(){
      Either way the wizard ends INSIDE the product, never at a sign-up gate. */
   const needT=topicsNeeded().length>0, needTier=tierNeeded().length>0;
   nx.innerHTML=needTier?'Continue &rarr;':(needT?'Choose your topics &rarr;':'See my StudyVault &rarr;');
-  nx.onclick=()=>{ if(needTier) go('tier'); else if(needT) go('topics'); else enterDash(); };
+  nx.onclick=()=>{ if(needTier) go('tier'); else if(needT) go('topics'); else { fstep=0; go('feel'); } };
   renderProg('boards');
 }
 /* ---- the tier screen: one row per tiered subject whose board we have built ---- */
@@ -1940,7 +2000,7 @@ function syncTier(){
   const nx=document.getElementById('tiernext'), ready=!left.length, needT=topicsNeeded().length>0;
   nx.disabled=!ready; nx.style.opacity=ready?'1':'.45';
   nx.innerHTML=needT?'Choose your topics &rarr;':'See my StudyVault &rarr;';
-  nx.onclick=()=>{ if(needT) go('topics'); else enterDash(); };
+  nx.onclick=()=>{ if(needT) go('topics'); else { fstep=0; go('feel'); } };
 }
 /* one focused decision per screen: flatten every needed group into steps */
 let tstep=0, TSTEP_OVR=null;
@@ -2000,7 +2060,7 @@ function renderTopics(){
   bk.innerHTML=tstep>0?'&larr; Back':(tierNeeded().length?'&larr; Tier':'&larr; Exam boards');
   bk.onclick=()=>{ if(tstep>0){ tstep--; renderTopics(); } else go(tierNeeded().length?'tier':'boards'); };
   nx.innerHTML=last?'See my StudyVault &rarr;':'Next &rarr;';
-  nx.onclick=last?()=>enterDash():()=>{ tstep++; renderTopics(); };
+  nx.onclick=last?()=>{ fstep=0; go('feel'); }:()=>{ tstep++; renderTopics(); };
   syncTopic();
 }
 /* the wizard ends INSIDE the product: the real dashboard, no sign-up gate */
@@ -2009,6 +2069,82 @@ function dashUrl(){ try{ return localStorage.getItem('sv-dash-view')==='desk'?'/
    ?view=picker), return to the dashboard the student was using. On the fresh
    onboarding path, go back to the landing view. */
 function pickerBack(){ if(new URLSearchParams(location.search).get('view')==='picker') location.href=dashUrl(); else go('landing'); }
+/* the feel screen: one subject per step. Every topic (unit) gets a rating —
+   not started yet / struggling / getting there / confident — and the subject's colour is the
+   average of its topics. A topic opens to show what's in it (its lessons).
+   Then one more step: minutes most days. Topics come from Supabase per subject. */
+const WSUB={maths:{aqa:'maths-aqa',edexcel:'maths-edexcel',ocr:'maths-ocr',eduqas:'maths-eduqas'},lang:{aqa:'english-language-aqa',edexcel:'english-language-edexcel',ocr:'english-language-ocr',eduqas:'english-language-eduqas'},lit:{aqa:'english-literature-aqa',edexcel:'english-literature-edexcel',ocr:'english-literature-ocr',eduqas:'english-literature-eduqas'},science:{aqa:'science-aqa',edexcel:'science-edexcel',ocr:'science-ocr'},triple:{aqa:'separate-sciences',edexcel:'separate-sciences-edexcel',ocr:'separate-sciences-ocr'},history:{aqa:'history-aqa',edexcel:'history-edexcel',ocr:'history-ocr',eduqas:'history-eduqas'},geog:{aqa:'geography-aqa',edexcel:'geography-edexcel-a',ocr:'geography-ocr',eduqas:'geography-eduqas'},french:{aqa:'french-aqa',edexcel:'french-edexcel'},spanish:{aqa:'spanish-aqa',edexcel:'spanish-edexcel'},german:{aqa:'german-aqa',edexcel:'german-edexcel'},cs:{aqa:'computer-science-aqa',edexcel:'computer-science-edexcel',ocr:'computer-science',eduqas:'computer-science-eduqas'},business:{aqa:'business-aqa',edexcel:'business-edexcel',ocr:'business-ocr'},pe:{aqa:'physical-education-aqa',edexcel:'physical-education-edexcel',ocr:'physical-education-ocr'},psych:{aqa:'psychology-aqa'},rs:{aqa:'religious-studies-aqa',edexcel:'religious-studies-edexcel',ocr:'religious-studies-ocr',eduqas:'religious-studies-eduqas'},socio:{aqa:'sociology-aqa',eduqas:'sociology-eduqas'},econ:{aqa:'economics-aqa'},stats:{aqa:'statistics-aqa'},media:{aqa:'media-studies-aqa'},film:{eduqas:'film-studies-eduqas'},drama:{aqa:'drama-aqa'},music:{aqa:'music-aqa',edexcel:'music-edexcel',ocr:'music-ocr',eduqas:'music-eduqas'},mtech:{ncfe:'music-technology'},dt:{aqa:'design-technology',eduqas:'design-technology-eduqas'},eng:{aqa:'engineering-aqa',eduqas:'engineering-eduqas'},electronics:{eduqas:'electronics-eduqas'},it:{ocr:'it-ocr'},astro:{edexcel:'astronomy-edexcel'},geology:{eduqas:'geology-eduqas'},classics:{ocr:'classical-civilisation-ocr'},citizenship:{aqa:'citizenship-aqa'},food:{aqa:'food-preparation-and-nutrition-aqa',eduqas:'food-preparation-and-nutrition-eduqas'},hosp:{eduqas:'hospitality-catering'},hsc:{edexcel:'health-social-care-edexcel',ocr:'health-social-care-ocr',eduqas:'health-social-care-eduqas'}};
+const WUNITS={};   // sub slug -> [{name,slug,subtitle,lessons:[title]}]
+function wSub(sl){ const m=WSUB[sl]||{}; return m[boards[sl]]||Object.values(m)[0]||null; }
+function feelSubs(){ return picked.filter(sl=>!!wSub(sl)); }
+function loadUnits(sub,cb){
+  if(WUNITS[sub]) return cb(WUNITS[sub]);
+  fetch('https://baipckgywpnwapobwtsy.supabase.co/rest/v1/subjects?select=slug,units(name,slug,subtitle,sort_order,lessons(lesson_number,title,status))&school_id=is.null&slug=eq.'+encodeURIComponent(sub)+'&units.lessons.status=eq.live&units.lessons.order=lesson_number',{headers:{apikey:'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'}})
+    .then(r=>r.json()).then(rows=>{ const row=rows&&rows[0];
+      WUNITS[sub]=((row&&row.units)||[]).filter(u=>(u.lessons||[]).length).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0))
+        .map(u=>({name:u.name,slug:u.slug,subtitle:u.subtitle||'',lessons:(u.lessons||[]).map(l=>l.title)})); cb(WUNITS[sub]); })
+    .catch(()=>cb([]));
+}
+let RAG={}, BUDGET=45, fstep=0;
+try{ const w=JSON.parse(localStorage.getItem('sv-welcome')||'{}'); RAG=w.rag||{}; BUDGET=+w.budget||45; }catch(e){}
+/* the subject's colour is the average of its topics' */
+/* which topics belong to THIS student — the same scoping the dashboard applies
+   (dash-data.js keepUnit): the options chosen in the wizard sculpt the course */
+const DRAMA_PLAYS=['the-crucible','blood-brothers','noughts-and-crosses','around-the-world-80-days','things-i-know-to-be-true','romeo-and-juliet','a-taste-of-honey','the-great-wave','the-empress'];
+const MUSIC_OPTIONAL_AOS=['aos2-popular-music','aos3-traditional-music','aos4-since-1910'];
+function feelKeep(sl,uslug){
+  const raw=Object.keys(topics[sl]||{}).sort((a,b)=>a-b).reduce((o,k)=>{ const v=topics[sl][k]; return o.concat(Array.isArray(v)?v:[v]); },[]).filter(Boolean);
+  if(sl==='history'||sl==='lit') return !raw.length||raw.indexOf(uslug)>=0;
+  if(sl==='drama') return DRAMA_PLAYS.indexOf(uslug)<0||!raw.length||raw.indexOf(uslug)>=0;
+  if(sl==='music') return MUSIC_OPTIONAL_AOS.indexOf(uslug)<0||!raw.length||raw.indexOf(uslug)>=0;
+  if(sl==='rs'&&raw.length) return raw.some(r=>uslug===r||uslug.indexOf(r+'-')===0);
+  return true;
+}
+function feelUnits(sl){ return (WUNITS[wSub(sl)]||[]).filter(u=>feelKeep(sl,u.slug)); }
+function ragRoll(sl){ const sub=wSub(sl), us=feelUnits(sl); const v={n:0,r:0,a:1,g:2}; let n=0,t=0;
+  us.forEach(u=>{ const x=RAG[sub+'/'+u.slug]; if(x in v){ n++; t+=v[x]; } });
+  if(!n) return null; const m=t/n; return m<0.67?'r':m<1.34?'a':'g'; }
+function renderFeel(){
+  renderWizShelf(picked);
+  const subs=feelSubs(); if(!subs.length){ go('budget'); return; }
+  fstep=Math.max(0,Math.min(fstep,subs.length-1));
+  const sl=subs[fstep], su=SUBJECTS.find(x=>x.slug===sl), sub=wSub(sl);
+  document.getElementById('feelh').innerHTML=su.name+'<span class="feelsub">'+(BOARDLBL[boards[sl]]||'')+' &middot; '+(fstep+1)+' of '+subs.length+'</span>';
+  const fc=document.getElementById('feelcard'), nx=document.getElementById('feelnext');
+  const key='<div class="dotkey"><span class="kn">not started yet</span><span class="kr">struggling</span><span class="ka">getting there</span><span class="kg">confident</span></div>';
+  fc.innerHTML=key+'<div class="wait">loading the topics&hellip;</div>';
+  const dots=(k,cur)=>['n','r','a','g'].map(v=>'<button type="button" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'" aria-label="'+({n:'not started yet',r:'struggling',a:'getting there',g:'confident'})[v]+'"></button>').join('');
+  const chev='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2l4 4-4 4"/></svg>';
+  const sync=()=>{ const units=feelUnits(sl); const done=units.every(u=>RAG[sub+'/'+u.slug]);
+    nx.disabled=!done; nx.style.opacity=done?'':'.45'; };
+  loadUnits(sub,()=>{
+    if(feelSubs()[fstep]!==sl) return;
+    const units=feelUnits(sl);
+    fc.innerHTML=key+(units.length?units.map(u=>{ const k=sub+'/'+u.slug;
+        return '<div class="feelunit" data-k="'+k+'"><button type="button" class="fu-name" aria-expanded="false">'+u.name+chev+'</button>'+
+          '<span class="dots">'+dots(k,RAG[k])+'</span>'+
+          '<div class="fu-inc" hidden>'+(u.subtitle?'<p>'+u.subtitle+'</p>':'')+'<ol>'+u.lessons.map(t=>'<li>'+t+'</li>').join('')+'</ol></div></div>'; }).join('')
+      :'<div class="wait">no topics listed yet</div>');
+    fc.querySelectorAll('.dot').forEach(b=>b.onclick=()=>{ const k=b.dataset.k, v=b.dataset.v;
+      if(RAG[k]===v) delete RAG[k]; else RAG[k]=v;
+      b.parentElement.querySelectorAll('.dot').forEach(x=>x.setAttribute('aria-pressed',String(RAG[k]===x.dataset.v)));
+      const roll=ragRoll(sl); if(roll) RAG[sl]=roll; else delete RAG[sl]; persist(); sync(); });
+    fc.querySelectorAll('.fu-name').forEach(b=>b.onclick=()=>{ const inc=b.parentElement.querySelector('.fu-inc'); const open=inc.hidden; inc.hidden=!open; b.setAttribute('aria-expanded',String(open)); });
+    sync();
+  });
+  nx.disabled=true; nx.style.opacity='.45';
+  const advance=()=>{ if(fstep<subs.length-1){ fstep++; renderFeel(); renderProg('feel'); scrollTo({top:0,behavior:'smooth'}); } else go('budget'); };
+  document.getElementById('feelback').onclick=()=>{ if(fstep>0){ fstep--; renderFeel(); renderProg('feel'); } else { const ss=topicSteps(); go(ss.length?'topics':(tierNeeded().length?'tier':'boards')); } };
+  nx.onclick=()=>{ if(nx.disabled) return; const roll=ragRoll(sl); if(roll) RAG[sl]=roll; persist(); advance(); };
+}
+function renderBudget(){
+  renderWizShelf(picked);
+  const box=document.getElementById('bopts');
+  box.innerHTML=[[20,'20 min'],[45,'45 min'],[60,'An hour']].map(o=>'<button type="button" data-b="'+o[0]+'" aria-pressed="'+(BUDGET===o[0])+'">'+o[1]+'</button>').join('');
+  box.querySelectorAll('button').forEach(b=>b.onclick=()=>{ BUDGET=+b.dataset.b; box.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.b===BUDGET))); persist(); });
+  document.getElementById('budgetback').onclick=()=>{ const subs=feelSubs(); if(subs.length){ fstep=subs.length-1; go('feel'); } else { const ss=topicSteps(); go(ss.length?'topics':(tierNeeded().length?'tier':'boards')); } };
+  document.getElementById('budgetnext').onclick=()=>enterDash();
+}
 function enterDash(){ persist(); document.body.classList.remove('ready');
   setTimeout(()=>{ location.href=dashUrl(); },180); }
 function renderSave(){
@@ -2027,7 +2163,7 @@ function go(v){
     document.body.dataset.view=v;
     const ve=document.querySelector('.view-'+v); if(ve){ ve.classList.remove('enter'); void ve.offsetWidth; ve.classList.add('enter'); }
     renderProg(v);
-    if(v==='picker'||v==='year'||v==='save') renderWizShelf(picked);
+    if(v==='picker'||v==='year'||v==='save'||v==='feel'||v==='budget') renderWizShelf(picked);
     if(v==='year') renderYearView();
     if(v==='boards') renderBoards();
     if(v==='tier') renderTier();
@@ -2038,6 +2174,8 @@ function go(v){
       renderTopics();
     }
     if(v==='save') renderSave();
+    if(v==='feel') renderFeel();
+    if(v==='budget') renderBudget();
     if(cur==='landing'||v==='landing'||reduced) scrollTo(0,0); else scrollTo({top:0,behavior:'smooth'});
     if(window.__wizExpand) window.__wizExpand();
   };
@@ -2057,7 +2195,7 @@ function persist(){ if(RESTORING) return; try{
     meta[sl]={board:su.alt&&su.alt[boards[sl]]?su.alt[boards[sl]]:(BOARDLBL[boards[sl]]||''),topics:names,
       tier:tiers[sl]||null,guessed:!!guess[sl]};
   });
-  localStorage.setItem('sv-welcome',JSON.stringify({picked:picked,boards:boards,topics:topics,meta:meta,tiers:tiers,guess:guess}));
+  localStorage.setItem('sv-welcome',JSON.stringify({picked:picked,boards:boards,topics:topics,meta:meta,tiers:tiers,guess:guess,rag:RAG,budget:BUDGET}));
   /* the tier answer goes where every lesson and practice page already looks for it,
      keyed by the real subject slug; "not sure" and unanswered both mean Higher */
   try{
@@ -2079,6 +2217,11 @@ function persist(){ if(RESTORING) return; try{
     }).catch(()=>{});
   },1200);
 }catch(e){} }
+/* ?fresh — walk the flow as a brand-new student: this browser's shelf, ratings and progress are cleared first */
+if(new URLSearchParams(location.search).has('fresh')){ try{
+  ['sv-welcome','sv-welcome-decision','sv-lessons-done','sv-lessons-when','sv-kc-log','sv-lesson-keys','sv-flashcard-progress','sv-cards-nudge','sv-plan-skip','sv-plan-holidays']
+    .forEach(k=>localStorage.removeItem(k));
+  Object.keys(localStorage).filter(k=>k.indexOf('sv_progress_')===0).forEach(k=>localStorage.removeItem(k)); }catch(e){} }
 let firstVisit=true, RESTORING=false;
 (function restore(){ try{
   firstVisit=localStorage.getItem('sv-welcome')===null;
@@ -2198,6 +2341,7 @@ const savebtn=document.getElementById('savebtn');
 if(savebtn) savebtn.onclick=async()=>{
   const em=document.getElementById('savemail').value.trim();
   const pw=document.getElementById('savepass').value;
+  const nm=(document.getElementById('savename').value||'').trim().slice(0,40);
   const say=t=>{ document.getElementById('savemsg').textContent=t; };
   if(!/.+@.+\..+/.test(em)) return say('That email doesn’t look right.');
   if(pw.length<8) return say('Your password needs at least 8 characters.');
@@ -2206,11 +2350,14 @@ if(savebtn) savebtn.onclick=async()=>{
   try{
     let setup={}; try{ setup=JSON.parse(localStorage.getItem('sv-welcome')||'{}'); }catch(e){}
     const res=await SBC.auth.signUp({email:em,password:pw,
-      options:{data:{sv_welcome:setup},emailRedirectTo:location.origin+'/classic'}});
+      options:{data:{sv_welcome:setup,sv_name:nm||null},emailRedirectTo:location.origin+'/classic'}});
     if(res.error) say(res.error.message);
-    else if(res.data&&res.data.user&&!res.data.session)
-      say('Account created — check your inbox to confirm your email. Everything you set up is saved to it.');
-    else say('Account created — you’re in.');
+    else{
+      try{ localStorage.setItem('sv-user',JSON.stringify({email:em,name:nm||null})); }catch(e){}
+      if(res.data&&res.data.user&&!res.data.session)
+        say('Account created — check your inbox to confirm your email. Everything you set up is saved to it.');
+      else say('Account created — you’re in.');
+    }
   }catch(e){ say('Something went wrong — try again.'); }
   savebtn.disabled=false; savebtn.textContent='Create my free account';
 };
@@ -2266,7 +2413,9 @@ if(sibtn) sibtn.onclick=async()=>{
           picked:[...new Set([...(acct.picked||[]),...(loc.picked||[])])],
           boards:Object.assign({},loc.boards||{},acct.boards||{}),
           topics:twoDeep(loc.topics,acct.topics),
-          meta:richerMeta(loc.meta,acct.meta)
+          meta:richerMeta(loc.meta,acct.meta),
+          rag:Object.assign({},acct.rag||{},loc.rag||{}),
+          budget:loc.budget||acct.budget||45
         };
         if(merged.picked.length){
           localStorage.setItem('sv-welcome',JSON.stringify(merged));
@@ -2278,7 +2427,7 @@ if(sibtn) sibtn.onclick=async()=>{
          (sync.js merges it in additively; metadata never carries it) */
       try{ if(window.svProgressFetch) svProgressFetch(res.data&&res.data.session&&res.data.session.access_token)
         .then(function(remote){ if(window.svProgressMerge) svProgressMerge(remote); }); }catch(e){}
-      try{ localStorage.setItem('sv-user',JSON.stringify({email:u?u.email:em})); }catch(e){}
+      try{ localStorage.setItem('sv-user',JSON.stringify({email:u?u.email:em,name:(u&&u.user_metadata&&u.user_metadata.sv_name)||null})); }catch(e){}
       say('Signed in — opening your StudyVault…');
       document.body.classList.remove('ready');
       /* A page that sent the student here to sign in can ask for them back:

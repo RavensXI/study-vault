@@ -37,7 +37,10 @@
     '.wu-sum p{color:#54524d;font-size:.95rem;line-height:1.45;margin:.5rem auto 1.2rem;max-width:30ch}',
     '.wu-go{display:inline-block;font-weight:700;font-size:.98rem;background:#221E19;color:#faf8f5;border:none;border-radius:12px;padding:.85rem 1.5rem;cursor:pointer}',
     '.wu-go:hover{background:#3a342c}',
-    '.wu-load{text-align:center;color:#7f7c75;font-size:.9rem;padding:1.4rem 0}'
+    '.wu-load{text-align:center;color:#7f7c75;font-size:.9rem;padding:1.4rem 0}',
+    '.wu-line{display:flex;justify-content:space-between;gap:1rem;font-size:.92rem;padding:.4rem 0;border-top:1px solid #efece6}',
+    '.wu-line b{color:#9a3a25;font-weight:600;white-space:nowrap;text-align:right}.wu-line.ok b{color:#1e5b3e}',
+    '.wu-sum p{margin:.3rem 0 .8rem;color:#5c574f;font-size:.95rem}'
   ].join('\n');
 
   function todayStr() { return new Date().toISOString().slice(0, 10); }
@@ -109,6 +112,38 @@
     });
   }
 
+  /* the revisit: every knowledge check of the given lessons, lesson by lesson (worst first, as given) */
+  function fetchLessons(list) {
+    var groups = {};
+    (list || []).forEach(function (l) { var k = l.sub + '/' + l.unit; (groups[k] = groups[k] || { sub: l.sub, unit: l.unit, name: (l.su && l.su.name) || l.sub, ns: [] }).ns.push(l.n || l.num); });
+    return Promise.all(Object.keys(groups).map(function (k) {
+      var gp = groups[k];
+      var url = SUPA + '/rest/v1/lessons?select=lesson_number,title,knowledge_checks,units!inner(slug,subjects!inner(slug,school_id))'
+        + '&units.slug=eq.' + encodeURIComponent(gp.unit) + '&units.subjects.slug=eq.' + encodeURIComponent(gp.sub)
+        + '&units.subjects.school_id=is.null&lesson_number=in.(' + gp.ns.join(',') + ')';
+      return fetch(url, { headers: { apikey: ANON } }).then(function (r) { return r.json(); }).then(function (rows) {
+        var by = {};
+        (rows || []).forEach(function (row) {
+          var qs = [];
+          (row.knowledge_checks || []).forEach(function (kc) {
+            if (Array.isArray(kc.options) && typeof kc.correct === 'number' && kc.q) {
+              var mixed = shuffleOpts(kc.options, kc.correct);
+              qs.push({ q: kc.q, opts: mixed.opts, correct: mixed.correct, sub: gp.sub, unit: gp.unit, n: row.lesson_number,
+                        title: row.title || ('Lesson ' + row.lesson_number), from: gp.name + ' · ' + (row.title || 'Lesson ' + row.lesson_number) });
+            }
+          });
+          by[row.lesson_number] = qs;
+        });
+        return { key: k, by: by };
+      }).catch(function () { return { key: k, by: {} }; });
+    })).then(function (per) {
+      var lookup = {}; per.forEach(function (x) { lookup[x.key] = x.by; });
+      var pool = [];
+      (list || []).forEach(function (l) { var qs = (lookup[l.sub + '/' + l.unit] || {})[l.n || l.num] || []; pool = pool.concat(qs); });
+      return pool;
+    });
+  }
+
   function shuffle(a) {
     for (var i = a.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t;
@@ -134,6 +169,8 @@
     var SUBJECTS = opts.subjects || window.SUBJECTS || [];
     var nav = opts.nav || function (u) { location.href = u; };
     var target = opts.target || null;
+    var REV = Array.isArray(opts.lessons);           /* the revisit slot, not the day-one warm-up */
+    var LABEL = REV ? 'Revisit' : 'Warm-up';
     var goLesson = function () { close(); if (target) nav(target); };
 
     if (!document.getElementById('wu-style')) {
@@ -141,27 +178,43 @@
       document.head.appendChild(st);
     }
     var veil = document.createElement('div'); veil.className = 'wu-veil';
-    veil.innerHTML = '<div class="wu-card"><div class="wu-load">Pulling together your warm-up…</div></div>';
+    veil.innerHTML = '<div class="wu-card"><div class="wu-load">' + (REV ? 'Pulling together your revisit…' : 'Pulling together your warm-up…') + '</div></div>';
     document.body.appendChild(veil);
     requestAnimationFrame(function () { veil.classList.add('in'); });
     function close() { veil.classList.remove('in'); setTimeout(function () { veil.remove(); }, 260); }
     veil.addEventListener('click', function (e) { if (e.target === veil) close(); });
 
-    fetchPool(SUBJECTS).then(function (pool) {
-      if (pool.length < 4) { goLesson(); return; }   /* too thin to be worth it */
+    (REV ? fetchLessons(opts.lessons) : fetchPool(SUBJECTS)).then(function (pool) {
+      if (pool.length < (REV ? 1 : 4)) { goLesson(); return; }   /* too thin to be worth it */
+      window.__svWarmPool = pool;
       var card = veil.querySelector('.wu-card');
       var i = 0, correct = 0, locked = false, marks = [], misses = [], unitAtt = {};
 
+      /* the revisit counts in LESSONS, like the plan row does: "Revisit · lesson 1 of 3",
+         the lesson named underneath with its own question count, dots for that lesson only */
+      var lkey = function (c) { return c.sub + '/' + c.unit + '/' + c.n; };
+      var lessonKeys = []; pool.forEach(function (c) { var k = lkey(c); if (lessonKeys.indexOf(k) < 0) lessonKeys.push(k); });
       function renderQ() {
         var c = pool[i]; locked = false;
+        var kick, from, dots;
+        if (REV) {
+          var k0 = lkey(c), li = lessonKeys.indexOf(k0);
+          var idx = pool.map(function (x, k) { return lkey(x) === k0 ? k : -1; }).filter(function (k) { return k >= 0; });
+          kick = '◆ ' + LABEL + ' · lesson ' + (li + 1) + ' of ' + lessonKeys.length;
+          from = esc(c.from) + ' · ' + (idx.indexOf(i) + 1) + ' of ' + idx.length;
+          dots = idx.map(function (k) { return '<i class="' + (k < i ? (marks[k] ? 'ok' : 'no') : (k === i ? 'on' : '')) + '"></i>'; }).join('');
+        } else {
+          kick = '◆ ' + LABEL + ' · ' + (i + 1) + ' of ' + pool.length;
+          from = esc(c.from);
+          dots = pool.map(function (_, k) { return '<i class="' + (k < i ? (marks[k] ? 'ok' : 'no') : (k === i ? 'on' : '')) + '"></i>'; }).join('');
+        }
         card.innerHTML =
-          '<div class="wu-kick"><span>◆ Warm-up · ' + (i + 1) + ' of ' + pool.length + '</span>'
+          '<div class="wu-kick"><span>' + kick + '</span>'
           + '<button class="wu-skip">Skip →</button></div>'
-          + '<div class="wu-from">' + esc(c.from) + '</div>'
+          + '<div class="wu-from">' + from + '</div>'
           + '<div class="wu-q">' + esc(c.q) + '</div>'
           + c.opts.map(function (o, k) { return '<button class="wu-opt" data-i="' + k + '">' + esc(o) + '</button>'; }).join('')
-          + '<div class="wu-dots">' + pool.map(function (_, k) {
-              return '<i class="' + (k < i ? (marks[k] ? 'ok' : 'no') : (k === i ? 'on' : '')) + '"></i>'; }).join('') + '</div>';
+          + '<div class="wu-dots">' + dots + '</div>';
         card.querySelector('.wu-skip').addEventListener('click', goLesson);
         [].forEach.call(card.querySelectorAll('.wu-opt'), function (b) {
           b.addEventListener('click', function () {
@@ -186,6 +239,7 @@
       }
 
       function renderSummary() {
+        if (REV) { renderRevisitSummary(); return; }
         try { localStorage.setItem(LSKEY, JSON.stringify({ date: todayStr(), correct: correct, total: pool.length })); } catch (e) {}
         /* the running log is the teacher-facing record (one entry per day,
            misses carry their lesson so weaknesses aggregate by topic) */
@@ -204,6 +258,39 @@
           + (target ? '<button class="wu-go">Start today’s lesson →</button>' : '') + '</div>';
         var go = card.querySelector('.wu-go');
         if (go) go.addEventListener('click', goLesson);
+        if (typeof window.svWarmupDone === 'function') try { window.svWarmupDone(); } catch (e) {}
+      }
+
+      /* the revisit writes a real quiz result per lesson (sv-kc-log), so the
+         strength model resets each lesson's clock; 4/5 keeps the word it had */
+      function renderRevisitSummary() {
+        var per = {}, order = [];
+        pool.forEach(function (c, k) {
+          var key = c.sub + '/' + c.unit + '/' + c.n;
+          if (!per[key]) { per[key] = { s: 0, t: 0, title: c.title, miss: [] }; order.push(key); }
+          per[key].t++; if (marks[k]) per[key].s++;
+        });
+        misses.forEach(function (m) { var key = m.sub + '/' + m.unit + '/' + m.n; if (per[key]) per[key].miss.push({ q: m.q, chose: m.chose, right: m.right }); });
+        try {
+          var kclg = JSON.parse(localStorage.getItem('sv-kc-log')) || {};
+          order.forEach(function (key) { kclg[key] = { s: per[key].s, t: per[key].t, d: todayStr(), miss: per[key].miss.slice(0, 5) }; });
+          localStorage.setItem('sv-kc-log', JSON.stringify(kclg));
+          localStorage.setItem('sv-revisit', JSON.stringify({ date: todayStr(), correct: order.filter(function (key) { var r = per[key]; return window.svStrength && svStrength.passed ? svStrength.passed(r.s, r.t) : (r.t && r.s / r.t >= 0.8); }).length, total: order.length, questions: correct, ofQuestions: pool.length,
+            lessons: order.map(function (key) { return { key: key, s: per[key].s, t: per[key].t, title: per[key].title }; }) }));
+        } catch (e) {}
+        if (window.svProgressPushSoon) svProgressPushSoon();
+        var pass = function (r) { return window.svStrength && svStrength.passed ? svStrength.passed(r.s, r.t) : (r.t && r.s / r.t >= 0.8); };
+        var suOf = {}; (opts.lessons || []).forEach(function (l) { suOf[l.sub + '/' + l.unit + '/' + (l.n || l.num)] = l.su; });
+        var rows = order.map(function (key) { var r = per[key], ok = pass(r), parts = key.split('/');
+          var nx = (ok && window.svStrength && svStrength.nextCheck && suOf[key]) ? svStrength.nextCheck(suOf[key], parts[1], +parts[2]) : null;
+          var what = ok ? 'secure' + (nx ? ' · next check in ' + nx + (nx === 1 ? ' day' : ' days') : '') : 'back in your plan to redo';
+          return '<div class="wu-line' + (ok ? ' ok' : '') + '"><span>' + esc(r.title) + '</span><b>' + r.s + ' of ' + r.t + ' · ' + what + '</b></div>'; }).join('');
+        var kept = order.filter(function (key) { return pass(per[key]); }).length;
+        card.innerHTML = '<div class="wu-kick"><span>◆ Revisit done</span></div>'
+          + '<div class="wu-sum"><div class="wu-big">' + kept + ' of ' + order.length + '</div><p>' + (kept === order.length ? 'All still secure.' : kept ? 'still secure. The rest go back into your plan as lessons.' : 'None held. They go back into your plan as lessons.') + '</p>' + rows
+          + (target ? '<button class="wu-go">Start today’s lesson →</button>' : '<button class="wu-go">Back to my plan →</button>') + '</div>';
+        var go = card.querySelector('.wu-go');
+        if (go) go.addEventListener('click', target ? goLesson : close);
         if (typeof window.svWarmupDone === 'function') try { window.svWarmupDone(); } catch (e) {}
       }
 
