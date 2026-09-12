@@ -58,7 +58,7 @@
     + '.svtour .x{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(0,0,0,.45);color:#fff;font-size:18px;cursor:pointer;z-index:2}'
     + '.svtour .step{font-size:.78rem;color:var(--mut,#84806f);font-variant-numeric:tabular-nums}'
     + '@media (max-width:700px){.svtour{padding:0;align-items:end}.svtour .card{width:100%;max-height:100dvh;height:100dvh;grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto;border-radius:0}'
-    + '.svtour .vid{border-radius:0;min-height:0}.svtour video{max-height:none;height:100%;width:auto;max-width:100%}.svtour .side{padding:1rem 1.1rem 1.1rem}.svtour h3{font-size:1.15rem}.svtour p{font-size:.92rem}}'
+    + '.svtour .vid{border-radius:0;min-height:0;height:100%;display:block}.svtour video{max-height:none;height:100%;width:100%;object-fit:contain}.svtour .side{padding:1rem 1.1rem 1.1rem}.svtour h3{font-size:1.15rem}.svtour p{font-size:.92rem}}'
     + 'body.dark-mode .svtour .x{background:rgba(255,255,255,.18)}';
 
   var el = null, idx = 0;
