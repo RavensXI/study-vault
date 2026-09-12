@@ -208,14 +208,14 @@
     mix-blend-mode:screen}
   .shelfstage.lit .lightwash,.shelfstage.lit .lampglow,.shelfstage.lit .bulb{opacity:1}
   .bk{position:relative;height:var(--bkh,204px);border:none;background:none;padding:0;cursor:grab;touch-action:none;
-    transform:translateX(calc(var(--shift,0px)*var(--fit,1))) rotate(var(--lean,0deg));filter:var(--bkshadow);
-    transition:transform .28s cubic-bezier(.34,1.4,.5,1),filter .55s ease;transform-origin:bottom center}
+    transform:translateX(calc((var(--shift,0px) + var(--gapx,0px))*var(--fit,1))) rotate(calc(var(--lean,0deg) + var(--nudge,0deg)));filter:var(--bkshadow);
+    transition:transform .38s cubic-bezier(.34,1.4,.5,1),filter .55s ease;transform-origin:bottom center}
   .bk img{display:block}
   .bk img.cold{height:var(--bkh,204px);width:auto;filter:var(--coldf, saturate(1.20) brightness(0.92) contrast(1.30) sepia(0.10) hue-rotate(-8deg))}
   .bk img.warm{position:absolute;inset:0;height:100%;width:100%;filter:var(--warmf, saturate(1.64) brightness(1.15) contrast(0.93))}
   .bk::before{content:"";position:absolute;left:4%;right:4%;bottom:1px;height:15px;z-index:-1;
     background:radial-gradient(52% 120% at 50% 0%,rgba(34,22,8,.55),rgba(34,22,8,.18) 55%,transparent 78%);filter:blur(2.5px)}
-  .bk:hover{transform:translateX(calc(var(--shift,0px)*var(--fit,1))) rotate(var(--lean,0deg)) translateY(-5px)}
+  .bk:hover{transform:translateX(calc((var(--shift,0px) + var(--gapx,0px))*var(--fit,1))) rotate(calc(var(--lean,0deg) + var(--nudge,0deg))) translateY(-5px)}
   /* taken off the shelf, in stages: slide DOWN out of the slot → turn 90° while sliding to the frame
      centre → draw closer (enlarge). --pull-dx (set per-book in JS) is the x-shift to the frame centre,
      so every book ends in the same central spot regardless of which slot it came from. */
@@ -239,6 +239,19 @@
     100% {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(0)    rotate(var(--lean,0deg)) scale(1)}     /* slotted back into the shelf */
   }
   @media (prefers-reduced-motion:reduce){ .bk[aria-selected="true"],.bk.returning{animation:none} }
+  /* DOCK (desktop): instead of hovering over its neighbours, the chosen book slides down off the
+     shelf and lies in the panel's header as the subject's name; the neighbours close the gap with
+     a small lean. --dock is measured per pick in JS (js: _dockTransform). */
+  body.dock .bk[aria-selected="true"]{animation:none;transform:var(--dock,translateY(60px));transform-origin:center center;z-index:20;
+    transition:transform .75s cubic-bezier(.4,0,.2,1)}
+  body.dock .bk[aria-selected="true"]:hover{transform:var(--dock,translateY(60px))}
+  body.dock .bk.returning{animation:none;transform-origin:center center;z-index:20;transition:transform .75s cubic-bezier(.4,0,.2,1)}
+  body.dock .bk.taken::before{opacity:0}
+  .sdetail .top .bookslot{flex:none;width:188px;height:46px}
+  .sdetail .top.withbook{align-items:center}
+  .sdetail .top.withbook>h3{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .sdetail .top.withbook>.back+h3,.sdetail .top.withbook>.back~h3{position:static;width:auto;height:auto;overflow:visible;clip:auto}
+  @media (prefers-reduced-motion:reduce){ body.dock .bk[aria-selected="true"],body.dock .bk.returning{transition:none} }
   .bk:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:6px}
   /* drag to reorder; drop with a little physics */
   .bk.dragging{z-index:50;transition:none;cursor:grabbing;
@@ -1024,11 +1037,32 @@ function placeLampBits(){
     glow.style.clipPath='polygon('+P(ox+nx*tw,oy+ny*tw)+', '+P(ox-nx*tw,oy-ny*tw)+', '+P(ax-nx*bw,ay-ny*bw)+', '+P(ax+nx*bw,ay+ny*bw)+')'; }
 }
 addEventListener('resize',()=>{ clearTimeout(window.__fitT); window.__fitT=setTimeout(fitShelf,120); });
+const DOCK=matchMedia('(min-width:701px)').matches;   // phones keep the pull-out; desktops dock the book in the panel
+if(DOCK) document.body.classList.add('dock');
+/* the chosen book's journey: from its slot on the shelf to the slot in the panel's header, lying landscape */
+function _dockTransform(bk){
+  const shelf=bk.parentElement, slot=document.querySelector('.sdetail .top .bookslot');
+  if(!slot||!bk.offsetWidth) return null;
+  const sr=shelf.getBoundingClientRect(), tr=slot.getBoundingClientRect();
+  const zf=shelf.offsetWidth?sr.width/shelf.offsetWidth:1;   // short screens zoom the stage: offsets are unzoomed, rects are not
+  const cx=sr.left+(bk.offsetLeft+bk.offsetWidth/2)*zf, cy=sr.top+(bk.offsetTop+bk.offsetHeight/2)*zf;
+  const k=Math.min(1,(tr.width-6)/(bk.offsetHeight*zf));
+  return 'translate('+Math.round((tr.left+tr.width/2-cx)/zf)+'px,'+Math.round((tr.top+tr.height/2-cy)/zf)+'px) rotate(-90deg) scale('+k.toFixed(3)+')';
+}
+/* the neighbours close the gap the book left, with a small lean into it that settles */
+function _closeGap(bk){
+  const bks=[...document.querySelectorAll('.bk')], i=bks.indexOf(bk), w=bk?bk.offsetWidth:0;
+  bks.forEach((b,j)=>{ b.style.setProperty('--gapx', (bk&&j>i)?(-w)+'px':'0px'); });
+  if(bk){ const l=bks[i-1], r=bks[i+1];
+    if(l) l.style.setProperty('--nudge','4deg'); if(r) r.style.setProperty('--nudge','-4deg');
+    setTimeout(()=>{ if(l) l.style.setProperty('--nudge','0deg'); if(r) r.style.setProperty('--nudge','0deg'); },420); }
+}
 function deselectSubject(){                 // click a selected spine again -> it slots back into the shelf
   const cur=document.querySelector('.bk[aria-selected="true"]');
   selSlug=null;
   document.querySelectorAll('.bk').forEach(sp=>sp.setAttribute('aria-selected','false'));
-  if(cur && !matchMedia('(prefers-reduced-motion:reduce)').matches){   // replay the pull-out in reverse
+  if(DOCK){ if(cur){ cur.classList.add('returning'); cur.style.removeProperty('--dock'); setTimeout(()=>cur.classList.remove('returning','taken'),780); } _closeGap(null); }
+  else if(cur && !matchMedia('(prefers-reduced-motion:reduce)').matches){   // replay the pull-out in reverse
     cur.classList.add('returning');
     cur.addEventListener('animationend',()=>cur.classList.remove('returning'),{once:true});
   }
@@ -1044,6 +1078,7 @@ function selectSubject(slug,silent){
     prev.setAttribute('aria-selected','false');
     prev.classList.add('returning');
     const el=document.getElementById('sdetail'); el.hidden=true; el.innerHTML='';   // close the panel while it returns
+    if(DOCK){ prev.style.removeProperty('--dock'); _closeGap(null); setTimeout(()=>{ prev.classList.remove('returning','taken'); _pullOut(slug); },780); return; }
     prev.addEventListener('animationend',()=>{ prev.classList.remove('returning'); _pullOut(slug); },{once:true});
     return;
   }
@@ -1054,6 +1089,17 @@ function _pullOut(slug){
   const bk=[...document.querySelectorAll('.bk')].find(sp=>sp.dataset.slug===slug);
   const applySel=()=>{ if(slug!==selSlug) return;   // set aria-selected -> starts the pull-out animation
     document.querySelectorAll('.bk').forEach(sp=>sp.setAttribute('aria-selected',String(sp.dataset.slug===slug))); };
+  if(DOCK){
+    renderSubjectPanel(SUBJECTS.find(x=>x.slug===slug));   // the panel first: its header holds the slot we measure
+    if(bk){ let tries=0; const measure=()=>{
+        if(slug!==selSlug || !bk.isConnected) return;
+        const t=_dockTransform(bk);
+        if(t){ bk.style.setProperty('--dock',t); bk.classList.add('taken'); _closeGap(bk); applySel(); return; }
+        if(tries++<30){ requestAnimationFrame(measure); return; }
+        applySel(); };
+      measure(); } else applySel();
+    return;
+  }
   if(bk){
     // measure the x-shift to the frame centre FIRST (once the painted spine has a width), THEN start
     // the animation — a running CSS animation won't reliably pick up a --pull-dx set after it began.
@@ -1071,6 +1117,9 @@ function _pullOut(slug){
   } else applySel();
   renderSubjectPanel(SUBJECTS.find(x=>x.slug===slug));
 }
+/* the docked book must follow the header when the panel re-renders (unit drill-down) or the window resizes */
+function _redock(){ if(!DOCK) return; const bk=document.querySelector('.bk[aria-selected="true"]'); if(!bk) return; const t=_dockTransform(bk); if(t) bk.style.setProperty('--dock',t); }
+addEventListener('resize',()=>{ clearTimeout(window.__redockT); window.__redockT=setTimeout(_redock,160); });
 /* default panel: resume button + the subject's topics (click one to pick a lesson) */
 function renderSubjectPanel(s){
   if(window.svNeedsOptionPick && svNeedsOptionPick(s)){   /* choose-your-options subject, none picked -> sculpt first */
@@ -1096,7 +1145,7 @@ function renderSubjectPanel(s){
           +(u?' onclick="nav(\''+u+'\')" title="Start '+tn.replace(/"/g,'&quot;')+' at lesson 1"':' style="cursor:default"')+'>'
           +'<span class="un">'+tn+'</span><span class="utrack"><i style="width:0%"></i></span>'
           +'<span class="ud">'+(u?'start here':'not started')+'</span></'+(u?'button':'div')+'>'; }).join('');
-    el0.innerHTML='<div class="top"><h3>'+s.name+'</h3>'+
+    el0.innerHTML='<div class="top withbook"><span class="bookslot"></span><h3>'+s.name+'</h3>'+
       '<span class="sub">'+(s.board?s.board+' · ':'')+'ready when you are</span>'+
       '<span class="sp"></span><button class="cont">Start lesson 1 →</button></div>'+
       '<div class="units">'+rows+'</div>';
@@ -1111,7 +1160,7 @@ function renderSubjectPanel(s){
   const el=document.getElementById('sdetail');
   el.hidden=false;
   el.style.setProperty('--tc',s.c);
-  el.innerHTML='<div class="top"><h3>'+s.name+'</h3>'+
+  el.innerHTML='<div class="top withbook"><span class="bookslot"></span><h3>'+s.name+'</h3>'+
     '<span class="sub" title="'+(window.svProgress?svProgress.headline(s).replace(/<[^>]+>/g,'')+' · ':'')+d+' of '+t+' lessons">'+
     (window.svProgress&&svProgress.track(s)?'<span class="pg-track">'+svProgress.track(s)+'</span>':'')+'</span>'+
     '<span class="sp"></span>'+
@@ -1126,6 +1175,7 @@ function renderSubjectPanel(s){
     '</div>';
   el.querySelector('.cont').onclick=()=>nav(urlFor(s,nxt));
   el.querySelectorAll('.ublock').forEach(x=>x.onclick=()=>showLessons(s,s.units[+x.dataset.u]));
+  requestAnimationFrame(_redock);
 }
 /* topic drilled open: pick a lesson tile to see its title, then confirm with the button */
 const TITLE_FETCHED={};
@@ -1155,12 +1205,13 @@ function showLessons(s,u){
   let tiles='';
   for(let k=1;k<=n;k++){ const done=dset?dset.includes(k):k<=u[2], next=k===nextK;
     tiles+='<button class="ltile'+(done?' done':'')+(next?' next':'')+'" data-n="'+k+'">'+k+'</button>'; }
-  el.innerHTML='<div class="top"><button class="back" title="Back to topics">‹</button>'+
+  el.innerHTML='<div class="top withbook"><span class="bookslot"></span><button class="back" title="Back to topics">‹</button>'+
     '<h3>'+u[0]+'</h3><span class="sub">'+u[2]+' of '+n+' lessons</span></div>'+
     '<div class="lessons">'+tiles+'</div>'+
     '<div class="lpick"><span class="lpn"></span><span class="lpt"></span>'+
       '<button class="go">Let’s learn →</button></div>';
   const tileEls=[...el.querySelectorAll('.ltile')];
+  requestAnimationFrame(_redock);
   function sel(k){
     tileEls.forEach(t=>t.classList.toggle('sel',+t.dataset.n===k));
     el.querySelector('.lpn').textContent='Lesson '+k;
