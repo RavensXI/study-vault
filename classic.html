@@ -41,7 +41,9 @@
   @media (max-width:560px){ .datestamp{display:none} .scard h3,.scard .meta{padding-right:86px} }
 
   .h1row{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin:.2rem 0 .55rem}
-  h1{font-size:clamp(1.5rem,2.6vw,1.9rem);font-weight:800;letter-spacing:-.02em;margin:0}
+  h1{font-size:clamp(1.5rem,2.6vw,1.9rem);font-weight:800;letter-spacing:-.02em;margin:0;position:relative;padding-bottom:7px}
+  h1::after,.starttile b::after{content:'';position:absolute;left:2px;right:2px;bottom:-4px;height:11px;
+    background:url('assets/lw/shelf/underline_sketch.webp') center/100% 100% no-repeat;opacity:.85;pointer-events:none}
   .momentum{font-family:var(--read);font-size:.92rem;color:var(--sec);margin:0}
   /* LAW 1: the home surface fits the viewport on desktop */
   @media (min-width:981px) and (min-height:760px){   /* shorter windows scroll like a normal page */
@@ -79,13 +81,13 @@
   .plan{padding-bottom:.8rem}
   .plancol{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:44px;align-items:stretch;position:relative}
   .plancol .arrow{position:absolute;right:151px;top:64px;width:132px;height:auto;pointer-events:none;transform:scaleX(-1) rotate(25deg);opacity:.92;z-index:3}
-  body[data-arrowflip] .plancol .arrow{transform:scaleX(-1) scaleY(-1) rotate(-25deg)}
   .starttile{border:1px solid var(--line);border-radius:4px;background:var(--card);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.45rem;font-family:var(--head);color:var(--ink);padding:1rem;transition:border-color .15s}
   .starttile .disc{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;transform:rotate(-6deg);
     background:radial-gradient(circle at 34% 28%,#d9843f 0%,#c56a2a 45%,#a8521c 100%);
     box-shadow:0 0 0 1.5px #3a2615,inset 0 0 0 2px rgba(255,255,255,.18),inset -3px -4px 0 rgba(90,40,10,.18)}
   .starttile .disc svg{width:24px;height:24px;fill:#fff8ee;margin-left:3px}
-  .starttile b{font-size:1.05rem;font-weight:800}
+  .starttile b{font-size:1.05rem;font-weight:800;position:relative;padding-bottom:5px}
+  .starttile b::after{left:-4px;right:-4px;bottom:-5px;height:9px}
   .starttile small{font-size:.85rem;color:var(--mut)}
   .starttile:hover{border-color:#c9ba9e}
   .starttile:hover .disc{filter:brightness(1.06)}
@@ -117,7 +119,7 @@
   /* the picture on the wall: this week's, in a chunky painted frame, hung a little askew from a nail */
   /* the painted frame (assets/lw/shelf/frame_wall.webp, nail and twine included) hangs a little askew from its nail;
      the week's picture sits in the opening measured from the frame's own alpha (frame_wall.json) */
-  .wallhang{position:absolute;left:61.9%;bottom:107px;width:14.5%;aspect-ratio:755/781;z-index:1;transform:rotate(-3deg);transform-origin:52% 2%}
+  .wallhang{position:absolute;left:61.9%;bottom:107px;width:14.5%;aspect-ratio:755/781;z-index:1;transform:rotate(2.4deg);transform-origin:52% 2%}
   .wallhang[hidden]{display:none}
   .wallhang .frame{position:absolute;inset:0;width:100%;height:100%;display:block;filter:drop-shadow(0 4px 5px rgba(40,25,10,.3))}
   .wallhang .pic{position:absolute;left:14.2%;top:34.1%;width:71.5%;height:51.7%;object-fit:cover;display:block}
@@ -814,7 +816,6 @@ fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
   img.onload=()=>{ box.hidden=false; }; img.onerror=()=>{ box.hidden=true; };
   document.getElementById('walltip').textContent=w.cap; img.src='assets/lw/'+w.art;
 }).catch(()=>{});
-if(_dq.has('arrowflip')) document.body.dataset.arrowflip='1';   /* staging: the arrow's curve the other way */
 /* the Start tile mirrors the Start button (which keeps all the logic) */
 (function(){ const plan=document.querySelector('.card.plan'), sb=document.getElementById('startbtn'); if(!plan||!sb) return;
   const col=document.createElement('div'); col.className='plancol'; plan.parentNode.insertBefore(col,plan); col.appendChild(plan);
@@ -837,7 +838,7 @@ if(_dq.has('arrange')){ (function(){
     .place-drag{cursor:move!important;pointer-events:auto!important;outline:2px dashed rgba(192,99,37,.6);outline-offset:4px}`;
   document.head.appendChild(st);
   const arrow=document.querySelector('.plancol .arrow'), frame=document.getElementById('wallpic');
-  const A={right:151,top:64,w:132,rot:25}, F={left:61.9,bottom:107,w:14.5,rot:-3};
+  const A={right:151,top:64,w:132,rot:25}, F={left:61.9,bottom:107,w:14.5,rot:2.4};
   function applyA(){ arrow.style.right=A.right+'px'; arrow.style.top=A.top+'px'; arrow.style.width=A.w+'px'; arrow.style.transform='scaleX(-1) rotate('+A.rot+'deg)'; out(); }
   function applyF(){ frame.style.left=F.left+'%'; frame.style.bottom=F.bottom+'px'; frame.style.width=F.w+'%'; frame.style.transform='rotate('+F.rot+'deg)'; out(); }
   const box=document.createElement('div'); box.className='placebox';
