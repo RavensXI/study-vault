@@ -23,7 +23,7 @@
     opacity:0;transition:opacity .3s ease}
   body.ready{opacity:1}
 
-  .top{max-width:1180px;margin:0 auto;padding:18px clamp(16px,4vw,32px) 6px;display:flex;align-items:center;gap:14px}
+  .top{max-width:1000px;margin:0 auto;padding:18px clamp(16px,4vw,32px) 6px;display:flex;align-items:center;gap:14px}
   .brand{font-family:'Young Serif',serif;font-size:1.22rem;font-weight:400;color:#1d1c1a;white-space:nowrap;flex:none}
   .brandlock{height:.30em;width:auto;margin-left:.5px;vertical-align:baseline}   /* the padlock is the full stop */
   .brandlogo{height:30px;display:block}
@@ -35,7 +35,7 @@
   .avatar{width:32px;height:32px;border-radius:50%;background:#221E19;color:#faf8f5;
     display:grid;place-items:center;font-weight:700;font-size:.8rem}
 
-  .wrap{max-width:1180px;margin:0 auto;padding:10px clamp(16px,4vw,32px) 56px;
+  .wrap{max-width:1000px;margin:0 auto;padding:10px clamp(16px,4vw,32px) 56px;
     display:grid;grid-template-columns:minmax(0,1fr);gap:34px}
   .cosy{white-space:nowrap}
   @media (max-width:560px){ .datestamp{display:none} .scard h3,.scard .meta{padding-right:86px} }
@@ -253,13 +253,10 @@
   .ublock .utrack{display:block;height:3px;background:var(--linel);margin:.5rem 0 .3rem;overflow:hidden}
   .ublock .utrack i{display:block;height:100%;background:var(--tc)}
   /* the band, as a tint on the tile: emerging / developing / secure. Untouched units stay plain. */
-  .ublock{border-radius:8px;margin:0 2px}
-  .ublock.band-g{background:color-mix(in srgb,#4e7a4a 12%,transparent)}
-  .ublock.band-a{background:color-mix(in srgb,#d19a2f 16%,transparent)}
-  .ublock.band-r{background:color-mix(in srgb,#b5442f 12%,transparent)}
-  .ublock.band-g:hover{background:color-mix(in srgb,#4e7a4a 20%,transparent)}
-  .ublock.band-a:hover{background:color-mix(in srgb,#d19a2f 26%,transparent)}
-  .ublock.band-r:hover{background:color-mix(in srgb,#b5442f 20%,transparent)}
+  .ublock{margin:0 3px;border-radius:0}
+  .ublock.band-g{box-shadow:inset 0 0 0 1px #4e7a4a}
+  .ublock.band-a{box-shadow:inset 0 0 0 1px #c9922a}
+  .ublock.band-r{box-shadow:inset 0 0 0 1px #b5442f}
   .ublock .utrack{margin-bottom:.45rem}
   /* drill into a topic -> pick any lesson (select, then confirm) */
   .sdetail .back{flex:none;width:24px;height:24px;border:1px solid var(--line);background:var(--card);border-radius:3px;
@@ -281,6 +278,10 @@
   .rail{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 4px}
   .rail>.card{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:.6rem;padding:.5rem .85rem;min-height:54px;box-sizing:border-box}
   .exam{align-items:baseline;gap:.5rem}
+  .exam::after,.week h3::after{content:'›';margin-left:auto;font-size:1.25rem;line-height:1;color:var(--mut);align-self:center}
+  .week h3::after{margin-left:.6rem}
+  .week.open h3::after{content:'×';font-size:1rem}
+  .exam:hover::after,.week:hover h3::after{color:var(--ink)}
   .exam .big{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;line-height:1}
   .exam .lbl{font-size:.78rem;color:var(--mut);line-height:1.15;white-space:nowrap}
   .cal{display:none;grid-column:1 / -1;margin-top:.45rem;border-top:1px solid var(--linel);padding-top:.7rem}
@@ -312,14 +313,16 @@
   .door p{font-size:.8rem;color:var(--mut);margin:0;display:none}
   .door.more p{display:block}
   .door .go{display:none}
-  #poddoor img{display:none}
-  /* the podcast is a player, not a door */
-  .podrow{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+  /* the podcast is a player in the top bar: play, skip, and the title of what is playing */
+  .podbar{display:flex;align-items:center;min-width:0;max-width:360px}
+  .podrow{display:flex;align-items:center;gap:8px;min-width:0}
   .podrow button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--card);
     cursor:pointer;display:grid;place-items:center;color:var(--anchor)}
   .podrow button:hover{border-color:var(--anchor)}
   .podrow svg{width:12px;height:12px;fill:currentColor}
-  .podtitle{font-size:.78rem;color:var(--sec);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+  .podtitle{font-size:.8rem;color:var(--sec);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:280px}
+  .podtitle:empty{display:none}
+  @media (max-width:700px){ .podtitle{display:none} }
 
   .signoff{font-family:var(--hand);font-size:1.15rem;color:var(--mut);text-align:right;padding:0 .3rem}
   @media (max-height:780px){ .signoff{display:none} }
@@ -442,7 +445,7 @@
     .ublock:first-child{border-top:none;padding-left:.2rem}
     .ublock .un{min-height:0;-webkit-line-clamp:2}
     .ublock .utrack{grid-row:2;grid-column:1/-1;margin:.25rem 0 0}
-    .ublock{margin:0;border-radius:0;padding-left:.6rem;padding-right:.6rem}
+    .ublock{margin:0;padding-left:.6rem;padding-right:.6rem}
   }
 </style>
 </head>
@@ -452,6 +455,13 @@
   <span class="brand">StudyVault<img class="brandlock" src="assets/studyvault-lock-rust.svg" alt=""></span>
   <span class="datestamp" id="today"></span>
   <span class="sp"></span>
+  <span class="podbar" id="poddoor" role="group" aria-label="Podcast">
+    <span class="podrow">
+      <button id="podplay" aria-label="Play a podcast"><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></button>
+      <button id="podnext" aria-label="Next episode"><svg viewBox="0 0 16 16"><path d="M3 2l8 6-8 6zM12 2h2v12h-2z"/></svg></button>
+      <span class="podtitle" id="podtitle"></span>
+    </span>
+  </span>
   <a class="cosy" href="/desk">Cosy desk ↗</a>
   <span class="avatar" title="Sam">S</span>
 </div>
@@ -506,18 +516,6 @@
       <span class="go">→</span>
     </button>
 
-    <div class="card door" id="poddoor" role="group" aria-label="Podcasts">
-      <img src="assets/lw/desk4-radio-a-cut.webp" alt="">
-      <span style="min-width:0">
-        <h3>Podcast</h3>
-        <span class="podrow">
-          <button id="podplay" aria-label="Play"><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></button>
-          <button id="podnext" aria-label="Next episode"><svg viewBox="0 0 16 16"><path d="M3 2l8 6-8 6zM12 2h2v12h-2z"/></svg></button>
-          <span class="podtitle" id="podtitle"></span>
-        </span>
-      </span>
-      <span class="go"></span>
-    </div>
 
   </div>
 
