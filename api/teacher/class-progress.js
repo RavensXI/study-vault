@@ -15,6 +15,8 @@ const { supabase } = require('../pipeline/_lib/supabase');
  *                  parent complain and a school withdraw.
  *   NEVER          flashcard spacing state, planner preferences, rest days,
  *                  shorts watched. No teaching value, real privacy cost.
+ *                  (Which CARDS a pupil keeps failing is attainment, and is
+ *                  sent — see weakCards below. When they are next due is not.)
  *
  * This is children's data: UK GDPR and the Age Appropriate Design Code make
  * minimisation a legal requirement, not a courtesy. Every field below has to
@@ -193,6 +195,176 @@ function missedQuestions(kc, into, studentId) {
   });
 }
 
+/* ---- Weak cards -------------------------------------------------------------
+   The flashcard signal, per card. A pupil can hold a unit well and still fail
+   ONE card in it every time — "the terms of the Treaty of Versailles" inside a
+   Conflict and Tension deck that is otherwise in box 4. That is a thing a
+   teacher can fix in five minutes on Monday, which is why it is worth sending.
+
+   What leaves the server is attainment: which card, how weak, and the DATE it
+   was last missed. The spacing state itself (nextReview, the streak, the
+   timestamps in the log) stays on this side — flashsr and flashlog are on
+   NEVER_SEND, and they are read here before the scrub and never copied out.
+
+   Card keys are "<lesson uuid>:q<index>" into lessons.flashcard_questions; the
+   mark log carries subject/unit/lesson-number and the question text. Both are
+   joined to the course through the same byLessonId map lesson_visits uses, so a
+   card from another subject is dropped on the way in. */
+const WEAK_BOX          = 2;    // Leitner box 1–2 = not yet learned
+const FINE_BOX          = 3;    // box 3+ = holding
+const MIN_CARD_ATTEMPTS = 2;    // one wrong go at a new card is not a weak card
+const WRONG_RUN         = 2;    // ...but two wrong marks in a row is
+const PUPIL_WEAK_CARDS  = 5;
+const CLASS_HOTSPOTS    = 10;
+const MIN_HOTSPOT_PUPILS = 2;   // one pupil's blind spot is not a class teaching point
+const UNIT_FINE_SHARE   = 0.7;
+const UNIT_FINE_MIN_CARDS = 3;
+const UNIT_FINE_KC_ACC  = 70;
+const UNIT_FINE_KC_MIN  = 10;
+
+function cardIdxOf(key) {
+  const at = String(key).lastIndexOf(':');
+  return at < 0 ? null : { lid: key.slice(0, at), idx: key.slice(at + 1) };
+}
+
+/* One pupil's card evidence, gathered before the blob is scrubbed.
+   Returns the box-weak cards, the log-weak cards (a run of wrong marks), the
+   last date each card text was missed, and per-unit "is the rest fine" data.
+   Question TEXT is joined later, once we know which lessons need fetching. */
+function collectCards(flashsr, flashlog, kcScoped, course, subjectSlug, idByKey) {
+  const cards = (flashsr && flashsr.cards) || {};
+  const byBox = [];            // { lid, idx, box, attempts }
+  const unitCards = {};        // unit slug -> { fine: n, tried: n }
+  const cardState = {};        // "lid:idx" -> { box, attempts }
+
+  Object.keys(cards).forEach(function (k) {
+    const at = cardIdxOf(k);
+    if (!at) return;
+    const where = course.byLessonId[at.lid];
+    if (!where) return;                                  // not this subject: dropped
+    const c = cards[k] || {};
+    if (typeof c.box !== 'number') return;
+    const attempts = typeof c.attempts === 'number' ? c.attempts : 0;
+    cardState[at.lid + ':' + at.idx] = { box: c.box, attempts: attempts };
+    const weak = c.box <= WEAK_BOX && attempts >= MIN_CARD_ATTEMPTS;
+    if (weak) byBox.push({ lid: at.lid, idx: at.idx, box: c.box, attempts: attempts });
+    if (!weak && attempts >= 1) {
+      if (!unitCards[where.unit]) unitCards[where.unit] = { fine: 0, tried: 0 };
+      unitCards[where.unit].tried++;
+      if (c.box >= FINE_BOX) unitCards[where.unit].fine++;
+    }
+  });
+
+  /* The mark log, newest first (it is written by unshift; sort anyway). Per
+     card text: how many wrong marks sit at the top of its history, and the
+     date of the most recent miss. Timestamps are read for order only. */
+  const marks = {};            // "lid|text" -> { lid, q, run, open, lastWrong }
+  const log = Array.isArray(flashlog) ? flashlog.slice() : [];
+  log.sort(function (a, b) { return ((b && b.t) || 0) - ((a && a.t) || 0); });
+  log.forEach(function (e) {
+    if (!e || !e.q || !e.unit || !e.n) return;
+    if (!subjectSlug || e.sub !== subjectSlug) return;   // exact slug: unit slugs repeat across boards
+    const lid = idByKey[e.unit + '/' + e.n];
+    if (!lid) return;
+    const q = String(e.q).slice(0, 120);
+    const key = lid + '|' + q;
+    if (!marks[key]) marks[key] = { lid: lid, q: q, run: 0, open: true, lastWrong: null };
+    const m = marks[key];
+    if (e.ok) { m.open = false; return; }
+    if (m.open) m.run++;
+    const d = typeof e.d === 'string' ? e.d.slice(0, 10) : null;
+    if (d && (!m.lastWrong || d > m.lastWrong)) m.lastWrong = d;
+  });
+  const byLog = Object.keys(marks).map(function (k) { return marks[k]; })
+    .filter(function (m) { return m.run >= WRONG_RUN; });
+
+  /* lesson-level evidence per unit, from the same kc rows the screen uses */
+  const unitKc = {};
+  Object.keys(kcScoped || {}).forEach(function (k) {
+    const v = kcScoped[k] || {};
+    if (typeof v.s !== 'number' || typeof v.t !== 'number') return;
+    const unit = String(k).split('/')[1] || '';
+    if (!unitKc[unit]) unitKc[unit] = { right: 0, total: 0 };
+    unitKc[unit].right += v.s; unitKc[unit].total += v.t;
+  });
+
+  return { byBox: byBox, byLog: byLog, marks: marks, cardState: cardState,
+           unitCards: unitCards, unitKc: unitKc };
+}
+
+/* "Otherwise fine": the unit's other cards are mostly holding, or the quiz
+   evidence for the unit is good. The weak card is then an exception, which is
+   the most actionable kind, so those sort first. */
+function unitIsFine(ev, unit) {
+  const uc = ev.unitCards[unit];
+  if (uc && uc.tried >= UNIT_FINE_MIN_CARDS && uc.fine / uc.tried >= UNIT_FINE_SHARE) return true;
+  const kc = ev.unitKc[unit];
+  if (kc && kc.total >= UNIT_FINE_KC_MIN && (kc.right / kc.total) * 100 >= UNIT_FINE_KC_ACC) return true;
+  return false;
+}
+
+/* Join one pupil's evidence to question text. Returns the FULL weak list,
+   ranked; the caller caps it for the response and uses the whole of it for
+   the class roll-up. */
+function weakCardsFor(ev, textOf, course, subjectSlug, unitLabel) {
+  const out = {};
+  function place(key, lid, idx, question, box, attempts, lastWrong) {
+    const where = course.byLessonId[lid];
+    if (!where || !question) return;
+    if (!out[key]) {
+      out[key] = { key: key, subject: subjectSlug, unitSlug: where.unit, unitName: unitLabel(where.unit),
+                   lessonNumber: where.lesson,
+                   lessonTitle: course.lessonTitle[where.unit + '/' + where.lesson] || null,
+                   question: String(question).slice(0, 200),
+                   box: box, attempts: attempts, lastWrong: lastWrong || null,
+                   unitFine: unitIsFine(ev, where.unit) };
+      return;
+    }
+    const it = out[key];
+    if (it.box == null && box != null) { it.box = box; it.attempts = attempts; }
+    if (lastWrong && (!it.lastWrong || lastWrong > it.lastWrong)) it.lastWrong = lastWrong;
+  }
+
+  ev.byBox.forEach(function (c) {
+    const qs = textOf[c.lid];
+    const i = parseInt(String(c.idx).replace(/^q/, ''), 10);
+    const q = qs && qs[i];
+    if (!q) return;                                      // deck regenerated: index no longer names a card
+    const m = ev.marks[c.lid + '|' + q.slice(0, 120)];
+    place(c.lid + ':' + c.idx, c.lid, c.idx, q, c.box, c.attempts, m ? m.lastWrong : null);
+  });
+
+  ev.byLog.forEach(function (m) {
+    const qs = textOf[m.lid] || [];
+    let i = -1;
+    for (let j = 0; j < qs.length; j++) { if (qs[j].slice(0, 120) === m.q) { i = j; break; } }
+    if (i >= 0) {
+      const st = ev.cardState[m.lid + ':q' + i] || {};
+      place(m.lid + ':q' + i, m.lid, 'q' + i, qs[i],
+            typeof st.box === 'number' ? st.box : null,
+            typeof st.attempts === 'number' ? st.attempts : null, m.lastWrong);
+    } else {
+      /* the text the pupil actually saw, even if the deck has since changed */
+      place(m.lid + ':t:' + m.q, m.lid, null, m.q, null, null, m.lastWrong);
+    }
+  });
+
+  return Object.keys(out).map(function (k) { return out[k]; })
+    .sort(function (a, b) {
+      if (a.unitFine !== b.unitFine) return a.unitFine ? -1 : 1;
+      const ab = a.box == null ? 99 : a.box, bb = b.box == null ? 99 : b.box;
+      if (ab !== bb) return ab - bb;
+      return (b.attempts || 0) - (a.attempts || 0);
+    });
+}
+
+/* flashcard_questions rows are [{q|question, a|answer}] — normalise to text */
+function questionTexts(list) {
+  return (Array.isArray(list) ? list : []).map(function (it) {
+    return String((it && (it.q || it.question)) || '');
+  });
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -229,7 +401,7 @@ module.exports = async function handler(req, res) {
   if (!ids.length) {
     return res.status(200).json(Object.assign({}, shell, {
       size: 0, students: [], misconceptions: [], weakestUnits: [], missedItems: [],
-      attainment: null, lessonAttainment: [], coverage: null, activity: {}
+      attainment: null, lessonAttainment: [], coverage: null, activity: {}, cardHotspots: []
     }));
   }
 
@@ -250,9 +422,23 @@ module.exports = async function handler(req, res) {
   const activity = { 'this week': 0, 'last week': 0, 'this month': 0, 'over a month': 0, never: 0 };
   let classRight = 0, classAnswered = 0, withEvidence = 0;
 
+  /* "unit-slug/lesson-number" -> lesson id, the reverse of byLessonId, so a
+     mark-log entry (which carries slugs) meets a card key (which carries ids) */
+  const idByKey = {};
+  Object.keys(course.byLessonId).forEach(function (lid) {
+    const at = course.byLessonId[lid];
+    idByKey[at.unit + '/' + at.lesson] = lid;
+  });
+  const subjectSlug = classSubject ? classSubject.slug : null;
+  const cardEvidence = {};   // pupil id -> collectCards() output, joined to text below
+
   ids.forEach(function (id) {
     const row = (rows || []).find(function (r) { return r.person_id === id; });
     const blob = (row && row.blob) || {};
+    /* card evidence is read BEFORE the scrub and reduced to attainment; the
+       raw spacing state and the timestamped log go no further than this */
+    cardEvidence[id] = collectCards(blob.flashsr, blob.flashlog, pick(blob.kc, base),
+                                    course, subjectSlug, idByKey);
     NEVER_SEND.forEach(function (k) { delete blob[k]; });   // belt and braces
 
     const bucket = bucketLastActive(lastSubjectActivity(blob, base));
@@ -319,6 +505,48 @@ module.exports = async function handler(req, res) {
   function unitLabel(slug) {
     return course.unitName[slug] || String(slug || '').replace(/-/g, ' ');
   }
+
+  /* Question text for the weak cards only — one fetch for the lessons any
+     pupil's evidence points at, never the whole course's decks. */
+  const needText = {};
+  Object.keys(cardEvidence).forEach(function (id) {
+    const ev = cardEvidence[id];
+    ev.byBox.forEach(function (c) { needText[c.lid] = 1; });
+    ev.byLog.forEach(function (m) { needText[m.lid] = 1; });
+  });
+  const textOf = {};
+  const needIds = Object.keys(needText);
+  for (let i = 0; i < needIds.length; i += 100) {
+    const { data: deck } = await supabase
+      .from('lessons').select('id, flashcard_questions').in('id', needIds.slice(i, i + 100));
+    (deck || []).forEach(function (l) { textOf[l.id] = questionTexts(l.flashcard_questions); });
+  }
+
+  const hotTally = {};   // card key -> { card, pupils: {} }
+  students.forEach(function (s) {
+    const all = weakCardsFor(cardEvidence[s.id], textOf, course, subjectSlug, unitLabel);
+    all.forEach(function (c) {
+      if (!hotTally[c.key]) hotTally[c.key] = { card: c, pupils: {} };
+      hotTally[c.key].pupils[s.id] = 1;
+    });
+    s.weakCards = all.slice(0, PUPIL_WEAK_CARDS).map(function (c) {
+      return { subject: c.subject, unitSlug: c.unitSlug, unitName: c.unitName,
+               lessonNumber: c.lessonNumber, lessonTitle: c.lessonTitle,
+               question: c.question, box: c.box, attempts: c.attempts,
+               lastWrong: c.lastWrong, unitFine: c.unitFine };
+    });
+  });
+
+  /* The class roll-up: a card weak for several pupils is a teaching point,
+     not five separate conversations. Needs two pupils, like missedItems. */
+  const cardHotspots = Object.keys(hotTally).map(function (k) {
+    const h = hotTally[k], c = h.card;
+    return { subject: c.subject, unitSlug: c.unitSlug, unitName: c.unitName,
+             lessonNumber: c.lessonNumber, lessonTitle: c.lessonTitle,
+             question: c.question, pupils: Object.keys(h.pupils).length };
+  }).filter(function (h) { return h.pupils >= MIN_HOTSPOT_PUPILS; })
+    .sort(function (a, b) { return b.pupils - a.pupils || a.question.localeCompare(b.question); })
+    .slice(0, CLASS_HOTSPOTS);
 
   const misconceptions = Object.keys(misTally)
     .map(function (k) {
@@ -444,6 +672,7 @@ module.exports = async function handler(req, res) {
     misconceptions: misconceptions,
     weakestUnits: weakestUnits,
     missedItems: missedItems,
-    activity: activity
+    activity: activity,
+    cardHotspots: cardHotspots
   }));
 };

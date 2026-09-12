@@ -138,6 +138,12 @@
     .right{color:var(--good);font-weight:600}
     .where{color:var(--mut);font-size:.78rem}
     .thin{color:var(--sec);font-size:.89rem}
+    /* one line per weak card: the unit, then the card's own question */
+    .spots{list-style:none;font-size:.8rem;color:var(--sec);line-height:1.45;max-width:420px}
+    .spots li+li{margin-top:4px}
+    .spots em{font-style:normal;color:var(--mut)}
+    .pack .spots{font-size:.88rem;max-width:none}
+    .pack .spots li+li{margin-top:5px}
 
     .empty{color:var(--sec);font-size:.94rem;background:var(--card);border:1px dashed var(--line);
            border-radius:16px;padding:30px;text-align:center}
@@ -318,6 +324,7 @@
   var codeWrap  = document.getElementById('codewrap');
 
   var CLASSES = [];
+  var LAST = null;     // the class-progress response on screen; the pack reads weak cards from it
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -466,6 +473,23 @@
     }
     h += '</div>';
 
+    /* Cards several pupils keep failing. Per-card attainment from the flashcard
+       boxes and the self-mark log, joined to the question text server-side.
+       There is no empty state on purpose: with nothing to show, the block is
+       not drawn at all. */
+    if ((d.cardHotspots || []).length) {
+      h += '<div class="section"><h3>Card hotspots</h3>' +
+           '<div class="sheet"><div class="scroller"><table><thead><tr>' +
+           '<th>Card</th><th>Unit</th><th class="num">Pupils</th></tr></thead><tbody>';
+      d.cardHotspots.forEach(function (c) {
+        h += '<tr><td>' + esc(c.question) + '</td>' +
+             '<td class="where">' + esc(c.unitName || c.unitSlug || '—') +
+             (c.lessonNumber ? ' &middot; L' + esc(c.lessonNumber) : '') + '</td>' +
+             '<td class="num">' + c.pupils + '</td></tr>';
+      });
+      h += '</tbody></table></div></div></div>';
+    }
+
     /* Named error patterns. These are only written when a wrong answer MATCHED a
        known misconception, never on a guess — which is why the empty state has
        to say "none matched" rather than "no data". The tally has been coming
@@ -537,19 +561,33 @@
     }
     h += '</div>';
 
+    /* The weak-spots column exists only when at least one pupil has a weak
+       card; otherwise the table keeps its five columns and nothing is drawn. */
+    var anySpots = (d.students || []).some(function (s) { return (s.weakCards || []).length; });
     h += '<div class="section"><h3>Students &mdash; click a name for a parents&rsquo; evening pack</h3><div class="sheet"><div class="scroller"><table><thead><tr>' +
          '<th>Name</th><th class="num">Lessons done</th><th class="num">Quiz accuracy</th>' +
-         '<th class="num">Practice</th><th>Last active</th></tr></thead><tbody>';
+         '<th class="num">Practice</th><th>Last active</th>' +
+         (anySpots ? '<th>Weak spots</th>' : '') + '</tr></thead><tbody>';
     (d.students || []).forEach(function (s) {
       h += '<tr><td><button class="namebtn" data-pack="' + esc(s.id) + '">' +
              esc(s.name) + '</button></td>' +
            '<td class="num">' + s.lessonsComplete + '</td>' +
            '<td class="num">' + (s.quizAccuracy == null ? '—' : s.quizAccuracy + '%') + '</td>' +
            '<td class="num">' + (s.practiceAnswered >= 40 ? '40+' : s.practiceAnswered) + '</td>' +
-           '<td>' + esc(s.lastActive) + '</td></tr>';
+           '<td>' + esc(s.lastActive) + '</td>' +
+           (anySpots ? '<td>' + spotsHtml(s.weakCards) + '</td>' : '') + '</tr>';
     });
     h += '</tbody></table></div></div></div>';
     return h;
+  }
+
+  /* "Conflict and Tension · What were the terms of the Treaty of Versailles?"
+     — one line per weak card, unit first. Empty list: empty string. */
+  function spotsHtml(cards) {
+    if (!(cards || []).length) return '';
+    return '<ul class="spots">' + cards.map(function (c) {
+      return '<li><em>' + esc(c.unitName || c.unitSlug || '') + '</em> &middot; ' + esc(c.question) + '</li>';
+    }).join('') + '</ul>';
   }
 
   function showCreate(on) {
@@ -593,6 +631,7 @@
     viewEl.textContent = 'Loading ' + c.name + '…';
     try {
       var d = await api('/api/teacher/class-progress?class_id=' + encodeURIComponent(id));
+      LAST = d;
       viewEl.className = '';
       viewEl.innerHTML = viewHtml(d);
     } catch (e) {
@@ -758,6 +797,13 @@
           }).join('')
         : '<span class="thin">No repeated misses.</span>') +
       '</div></div>';
+
+    /* the cards this pupil keeps failing — from the class response already on
+       screen, so the pack costs no extra call; absent, nothing is drawn */
+    var me = ((LAST && LAST.students) || []).filter(function (s) { return s.id === p.student.id; })[0];
+    if (me && (me.weakCards || []).length) {
+      h += '<h4>Weak spots</h4>' + spotsHtml(me.weakCards);
+    }
 
     if (p.warmups.length) {
       h += '<h4>Daily warm-up quiz</h4><div class="wubars">' +
