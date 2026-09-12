@@ -258,7 +258,7 @@ def main():
             for size, cfg in SIZES.items():
                 if a.size and size not in a.size: continue
                 phone = size == 'phone'
-                vs = {'width': cfg['viewport']['width'] * cfg['scale'], 'height': cfg['viewport']['height'] * cfg['scale']}
+                vs = dict(cfg['viewport'])   # the screencast is in CSS px; a larger frame just leaves the page in one corner
                 ctx = browser.new_context(viewport=cfg['viewport'], device_scale_factor=cfg['scale'], is_mobile=phone, has_touch=phone,
                                           record_video_dir=tmp, record_video_size=vs)
                 t0 = time.time()
