@@ -5,7 +5,7 @@
      counts(su)   -> {secure, developing, due, notyet, total, done}   the subject headline
                      bands are the school words (emerging / developing / secure); decay is not a band
                      but a prompt — a lesson with evidence below the revisit line counts as "due a revisit"
-     track(su)    -> 'on track for 11 May' | 'about 6 lessons behind' | null
+     track(su)    -> 'on track for 11 May' | '≈ 6 lessons behind schedule' | null
      saidNow(...) -> "Good progress on Cells — developing now."   said only when the evidence beats their own rating
      week()       -> the last seven days, and lastWeek() for the first visit of a new week
    Tone: say what happened, name the topic, use their words. Never speak when
@@ -57,7 +57,7 @@
     if (!f.left) return 'nothing left before ' + shortDate(f.first);
     if (f.fit >= f.left) return 'on track for ' + shortDate(f.first);
     var behind = f.left - f.fit;
-    return 'about ' + behind + ' lesson' + (behind === 1 ? '' : 's') + ' behind';
+    return '≈ ' + behind + ' lesson' + (behind === 1 ? '' : 's') + ' behind schedule';
   }
 
   /* "you said / now": a unit whose evidence has climbed above the student's own rating.
