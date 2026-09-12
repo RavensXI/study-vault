@@ -40,7 +40,7 @@
   .cosy{white-space:nowrap}
   @media (max-width:560px){ .datestamp{display:none} .scard h3,.scard .meta{padding-right:86px} }
 
-  .h1row{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin:.2rem 0 .55rem}
+  .h1row{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin:.2rem 0 1.15rem}
   h1{font-size:clamp(1.5rem,2.6vw,1.9rem);font-weight:800;letter-spacing:-.02em;margin:0;position:relative;padding-bottom:7px}
   h1::after,.starttile b::after{content:'';position:absolute;left:2px;right:2px;bottom:-4px;height:11px;
     background:url('assets/lw/shelf/underline_sketch.webp') center/100% 100% no-repeat;opacity:.85;pointer-events:none}
@@ -53,7 +53,7 @@
   .hl{background:linear-gradient(101deg,transparent 1.5%,rgba(255,222,84,.5) 7%,rgba(255,226,96,.4) 93%,transparent 98.5%);
     border-radius:6px;padding:1px 7px;margin:0 -3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 
-  .card{background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:none}
+  .card{background:var(--card);border:1px solid #d5c9b3;border-radius:4px;box-shadow:0 1px 0 rgba(60,40,20,.05)}
 
   /* ---- today's plan ---- */
   .plan{padding:.7rem 1.2rem .8rem}
@@ -119,6 +119,19 @@
   /* the picture on the wall: this week's, in a chunky painted frame, hung a little askew from a nail */
   /* the painted frame (assets/lw/shelf/frame_wall.webp, nail and twine included) hangs a little askew from its nail;
      the week's picture sits in the opening measured from the frame's own alpha (frame_wall.json) */
+  /* the fishbowl on the ledge: tap, and the fish does a few lengths */
+  .fishbowl{position:absolute;left:54.5%;bottom:40px;width:9%;aspect-ratio:700/688;z-index:3;border:0;background:none;padding:0;cursor:pointer}
+  .fishbowl .bowl{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}
+  .fishbowl .fish{position:absolute;left:30%;top:44%;width:34%;height:auto;transform-origin:50% 50%;transition:none;z-index:0}
+  .fishbowl.swim .fish{animation:swim 5.4s ease-in-out 1}
+  @keyframes swim{
+    0%{left:30%;top:44%;transform:scaleX(1) rotate(0)} 22%{left:52%;top:38%;transform:scaleX(1) rotate(-8deg)}
+    30%{left:52%;top:40%;transform:scaleX(-1) rotate(4deg)} 55%{left:22%;top:52%;transform:scaleX(-1) rotate(8deg)}
+    62%{left:22%;top:50%;transform:scaleX(1) rotate(-4deg)} 85%{left:50%;top:42%;transform:scaleX(1) rotate(-6deg)}
+    100%{left:30%;top:44%;transform:scaleX(1) rotate(0)} }
+  .fishbowl:focus-visible{outline:3px solid var(--rust);outline-offset:3px;border-radius:50%}
+  @media (max-width:700px){ .fishbowl{display:none} }
+  @media (prefers-reduced-motion:reduce){ .fishbowl.swim .fish{animation:none} }
   .wallhang{position:absolute;left:61.9%;bottom:107px;width:14.5%;aspect-ratio:755/781;z-index:1;transform:rotate(2.4deg);transform-origin:52% 2%}
   .wallhang[hidden]{display:none}
   .wallhang .frame{position:absolute;inset:0;width:100%;height:100%;display:block;filter:drop-shadow(0 4px 5px rgba(40,25,10,.3))}
@@ -310,7 +323,7 @@
   .lpick .go{align-self:center}
   /* ---- the strip under the plan: countdown · this week · cards · shorts · podcast ----
      one line; "This week" opens to a full-width row beneath it; everything else is one tap */
-  .rail{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 4px}
+  .rail{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 22px}
   .rail>.card{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:.6rem;padding:.5rem .85rem;min-height:54px;box-sizing:border-box}
   .exam{align-items:baseline;gap:.5rem}
   .exam::after,.week h3::after{content:'›';margin-left:auto;font-size:1.25rem;line-height:1;color:var(--mut);align-self:center}
@@ -573,6 +586,7 @@
         <span class="walltip" id="walltip"></span>
       </div>
       <div class="shelf" id="shelf" role="tablist" aria-label="Your subjects"></div>
+      <button class="fishbowl" id="fishbowl" type="button" aria-label="Fishbowl"><img class="bowl" src="assets/lw/shelf/prop_fishbowl.webp" alt=""><img class="fish" src="assets/lw/shelf/prop_fish.webp" alt=""></button>
       <img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt="">
       <div class="lightwash"></div>
       <div class="lampglow"></div>
@@ -816,6 +830,10 @@ fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
   img.onload=()=>{ box.hidden=false; }; img.onerror=()=>{ box.hidden=true; };
   document.getElementById('walltip').textContent=w.cap; img.src='assets/lw/'+w.art;
 }).catch(()=>{});
+/* the fish: one tap, a few lengths, then back to its spot */
+(function(){ const fb=document.getElementById('fishbowl'); if(!fb) return;
+  fb.addEventListener('click',()=>{ fb.classList.remove('swim'); void fb.offsetWidth; fb.classList.add('swim'); });
+  fb.querySelector('.fish').addEventListener('animationend',()=>fb.classList.remove('swim')); })();
 /* the Start tile mirrors the Start button (which keeps all the logic) */
 (function(){ const plan=document.querySelector('.card.plan'), sb=document.getElementById('startbtn'); if(!plan||!sb) return;
   const col=document.createElement('div'); col.className='plancol'; plan.parentNode.insertBefore(col,plan); col.appendChild(plan);
@@ -991,7 +1009,14 @@ function placeLampBits(){
   const zf=lr.width/(lamp.offsetWidth||lr.width);   // real px per local px (the stage may be zoomed)
   const L=(lr.left-sr.left)/zf, T=(lr.top-sr.top)/zf, W=lr.width/zf, H=lr.height/zf;
   cord.style.left=(L+W*0.337)+'px'; cord.style.top=(T+H*0.292)+'px'; cord.style.height=(H*0.27)+'px';
-  if(bulb){ bulb.style.left=(L+W*0.41)+'px'; bulb.style.top=(T+H*0.33)+'px'; }
+  /* the bulb pokes out of the shade's mouth: 20% across, 37% down the lamp's box */
+  if(bulb){ bulb.style.left=(L+W*0.20)+'px'; bulb.style.top=(T+H*0.37)+'px'; }
+  /* the cone: apex at the bulb, throwing down-left across the shelf; proportions follow the lamp's height */
+  const glow=document.querySelector('.lampglow');
+  if(glow&&bulb){ const k=H/250, ox=L+W*0.20, oy=T+H*0.37, ax=ox-92*k, ay=oy+236*k;
+    let dx=ax-ox, dy=ay-oy; const len=Math.hypot(dx,dy)||1; dx/=len; dy/=len; const nx=-dy, ny=dx, tw=36*k, bw=133*k;
+    const P=(x,y)=>x.toFixed(0)+'px '+y.toFixed(0)+'px';
+    glow.style.clipPath='polygon('+P(ox+nx*tw,oy+ny*tw)+', '+P(ox-nx*tw,oy-ny*tw)+', '+P(ax-nx*bw,ay-ny*bw)+', '+P(ax+nx*bw,ay+ny*bw)+')'; }
 }
 addEventListener('resize',()=>{ clearTimeout(window.__fitT); window.__fitT=setTimeout(fitShelf,120); });
 function deselectSubject(){                 // click a selected spine again -> it slots back into the shelf
