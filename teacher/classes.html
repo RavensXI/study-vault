@@ -26,7 +26,7 @@
 <body>
   <!-- The teacher screen, rebuilt 13 Sep 2026 as one page with two tabs.
        "This week" is the Monday briefing: one sentence that says what to do,
-       then Reteach this / Going cold / Have a word, then every table below a
+       then Go over these again / Being forgotten / Pupils to talk to, then every table below a
        divider. "Markbook" is one band per pupil per unit, with a drawer for a
        pupil and a unit. The lesson starter is a button on the reteach panel,
        not a screen of its own. Every figure comes from
@@ -98,7 +98,7 @@
   </main>
 
   <!-- the projected starter: one question at a time, the class's wrong answer hidden until the teacher shows it -->
-  <div class="starter" id="starter" hidden role="dialog" aria-modal="true" aria-label="Lesson starter">
+  <div class="starter" id="starter" hidden role="dialog" aria-modal="true" aria-label="Show on the board">
     <header class="top"><div class="top-in">
       <a class="brand" href="#" id="starterBrand">StudyVault<img class="brandlock" src="/assets/studyvault-lock-rust.svg" alt=""></a>
       <span class="datestamp" id="starterDate"></span><span class="sp"></span>
@@ -150,7 +150,14 @@
   function pct(n) { return n == null ? '&mdash;' : n + '%'; }
   function initials(name) { return String(name || '').split(/\s+/).map(function (p) { return p[0] || ''; }).join('').slice(0, 2).toUpperCase(); }
   function surnameFirst(name) { var p = String(name || '').trim().split(/\s+/); return p.length > 1 ? p[p.length - 1] + ', ' + p.slice(0, -1).join(' ') : name; }
-  function bandWord(b) { return b === 'g' ? 'secure' : b === 'a' ? 'developing' : b === 'r' ? 'emerging' : 'not yet'; }
+  function bandWord(b) { return b === 'g' ? 'secure' : b === 'a' ? 'developing' : b === 'r' ? 'emerging' : 'nothing yet'; }
+  function plural(n, one, many) { return n + ' ' + (n === 1 ? one : (many || one + 's')); }
+  /* "up 3" / "down 2" against last Monday's figure, in plain words */
+  function delta(now, then, what) {
+    if (now == null || then == null) return '';
+    var d = now - then; if (!d) return 'same as last Monday';
+    return (d > 0 ? 'up ' : 'down ') + Math.abs(d) + (what ? ' ' + what : '') + ' since last Monday';
+  }
   function barCls(s) { return s == null ? '' : s < 40 ? 'low' : s < 70 ? 'mid' : ''; }
   function weeksAgo(days) { if (days == null) return ''; if (days < 7) return 'this week'; var w = Math.round(days / 7); return w + (w === 1 ? ' week ago' : ' weeks ago'); }
   function shortQ(q) { return String(q || '').length > 90 ? String(q).slice(0, 87) + '…' : q; }
@@ -174,38 +181,33 @@
     return d;
   }
 
-  /* ---- "since you last looked": a per-class stamp on this device, never sent anywhere ---- */
-  function sinceLooked(classId) {
-    var k = 'sv-teacher-seen:' + classId, prev = null;
-    try { prev = localStorage.getItem(k); localStorage.setItem(k, new Date().toISOString().slice(0, 10)); } catch (e) {}
-    if (!prev) return null;
-    return Math.max(0, Math.round((Date.now() - new Date(prev + 'T00:00:00').getTime()) / 864e5));
-  }
-
   /* ================= THIS WEEK ================= */
-  function briefingHtml(d, since) {
-    var subj = d.class.subject || 'this subject', a = d.attainment || {}, ps = [];
+  function briefingHtml(d) {
+    var subj = d.class.subject || 'this subject', a = d.attainment || {}, lw = d.lastWeek, ps = [];
     var top = (d.missedItems || [])[0], cold = (d.goingCold || [])[0], words = d.haveAWord || [];
     if (top) {
-      ps.push('<p><b>' + esc(top.right || shortQ(top.question)) + '</b> is the thing to reteach. ' + top.commonWrongCount + (top.met ? ' of the ' + top.met + ' who met it' : ' of them') +
+      ps.push('<p><b>Go over ' + esc(top.right || shortQ(top.question)) + ' again.</b> ' + top.commonWrongCount + (top.met ? ' of the ' + top.met + ' who answered' : ' of them') +
         ' chose &ldquo;' + esc(top.commonWrongAnswer) + '&rdquo; on the ' + esc(top.unit) + ' quiz.</p>');
     } else if (!a.answered) {
-      ps.push('<p><b>No quiz answers in ' + esc(subj) + ' yet.</b> Once the class has done a lesson or two, this line tells you what to reteach, what is fading and who to have a word with.</p>');
+      ps.push('<p><b>No quiz answers in ' + esc(subj) + ' yet.</b> Once the class has done a lesson or two, this line tells you what to go over again, what is being forgotten, and who to talk to.</p>');
     } else {
-      ps.push('<p><b>Nothing to reteach yet.</b> No question has been missed by two or more of them so far.</p>');
+      ps.push('<p><b>Nothing to go over again yet.</b> No question has been got wrong by two or more pupils so far.</p>');
     }
     if (cold) {
-      ps.push('<p><span class="rust">' + esc(cold.unit) + ' is going cold.</span> ' + cold.dropped + ' were secure on it and are now under the revisit line; it is the strongest candidate for a do-now.' +
-        (words.length ? ' ' + words.length + (words.length === 1 ? ' pupil is' : ' pupils are') + ' worth a word, named under <b>Have a word</b>.' : '') + '</p>');
+      var then = lw && lw.units && lw.units[cold.slug] ? lw.units[cold.slug].under : null;
+      ps.push('<p><span class="rust">' + esc(cold.unit) + ' is being forgotten.</span> ' + cold.dropped + ' pupils knew it and now need to revise it again' +
+        (then != null && then !== cold.under ? ' (' + cold.under + ' need to now, ' + then + ' last Monday)' : '') + '.' +
+        (words.length ? ' ' + plural(words.length, 'pupil is', 'pupils are') + ' worth talking to, named under <b>Pupils to talk to</b>.' : '') + '</p>');
     } else if (words.length) {
-      ps.push('<p>' + words.length + (words.length === 1 ? ' pupil is' : ' pupils are') + ' worth a word, named under <b>Have a word</b>.</p>');
+      ps.push('<p>' + plural(words.length, 'pupil is', 'pupils are') + ' worth talking to, named under <b>Pupils to talk to</b>.</p>');
     }
-    var kick = since == null ? 'This week' : (since === 0 ? 'Since you last looked &middot; today' : 'Since you last looked &middot; ' + since + (since === 1 ? ' day' : ' days'));
+    var kick = lw ? 'Since last Monday' : 'This week';
+    var recallD = lw ? delta(a.accuracy, lw.recall, 'points') : '', evD = lw ? delta(a.studentsWithEvidence, lw.withEvidence) : '';
     return '<section class="card brief"><div class="brief-say"><div class="kicker">' + kick + '</div>' + ps.join('') + '</div>' +
       '<div class="figs">' +
-      '<div><b>' + (a.accuracy == null ? '&mdash;' : a.accuracy + '%') + '</b><small>recall across the class <i>&middot; ' + (a.answered ? 'over ' + a.answered + ' answers' : 'no quiz answers yet') + '</i></small></div>' +
-      '<div><b>' + (d.goingCold || []).length + '</b><small>topics going cold <i>&middot; learned, then faded</i></small></div>' +
-      '<div><b>' + (a.studentsWithEvidence || 0) + ' <i>of ' + d.size + '</i></b><small>have quiz evidence in ' + esc(subj) + '</small></div>' +
+      '<div><b>' + (a.accuracy == null ? '&mdash;' : a.accuracy + '%') + '</b><small>of quiz answers right <i>&middot; ' + (a.answered ? 'over ' + a.answered + ' answers' : 'no quiz answers yet') + (recallD ? ' &middot; ' + recallD : '') + '</i></small></div>' +
+      '<div><b>' + (d.goingCold || []).length + '</b><small>' + ((d.goingCold || []).length === 1 ? 'topic' : 'topics') + ' being forgotten <i>&middot; learned, then not revised</i></small></div>' +
+      '<div><b>' + (a.studentsWithEvidence || 0) + ' <i>of ' + d.size + '</i></b><small>have done a quiz in ' + esc(subj) + (evD ? ' <i>&middot; ' + evD + '</i>' : '') + '</small></div>' +
       '</div></section>';
   }
   /* the weekly read: Markdown-lite (bold headings, bullets, paragraphs) */
@@ -225,84 +227,86 @@
   function readHtml(d) {
     var r = d.weeklyRead;
     var week = r ? new Date(r.week + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) : '';
-    if (!r) return '<section class="card read"><div class="panel-h"><h2>This week&rsquo;s read</h2><span class="n">Monday</span></div><div class="read-b"><p class="thin">Every Monday morning, once the class has ' + 6 + ' or more marked answers in a week, a short read of those answers lands here and in your inbox: the pattern across them, one thing to model, who is worth a word, and what the quizzes suggest.</p></div></section>';
-    return '<section class="card read"><div class="panel-h"><h2>This week&rsquo;s read</h2><span class="n">week of ' + esc(week) + '</span></div><div class="read-b">' + mdLite(r.read_md) + '</div>' +
-      '<div class="panel-f"><span class="count">AI-drafted from ' + r.answers + ' marked answers by ' + r.pupils + ' pupils, plus the quizzes they got wrong. Check it before you act on it. Processed in the UK.</span></div></section>';
+    if (!r) return '<section class="card read"><div class="panel-h"><h2>This week&rsquo;s summary</h2><span class="n">Mondays</span></div><div class="read-b"><p class="thin">Every Monday morning, once the class has written 6 or more marked answers in a week, a short summary of those answers appears here and in your inbox: what keeps coming up, one thing to show them, which pupils to talk to, and what the quizzes show.</p></div></section>';
+    return '<section class="card read"><div class="panel-h"><h2>This week&rsquo;s summary</h2><span class="n">week of ' + esc(week) + '</span></div><div class="read-b">' + mdLite(r.read_md) + '</div>' +
+      '<div class="panel-f"><span class="count">Written by AI from ' + r.answers + ' marked answers by ' + r.pupils + ' pupils, and the quiz questions they got wrong. Check it before you act on it. Processed in the UK.</span></div></section>';
   }
   function panelsHtml(d) {
-    var items = (d.missedItems || []).slice(0, 3), cold = d.goingCold || [], words = d.haveAWord || [];
+    var items = (d.missedItems || []).slice(0, 3), cold = d.goingCold || [], words = d.haveAWord || [], lw = d.lastWeek;
     var h = '<div class="panels">';
-    h += '<section class="card panel"><div class="panel-h"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><h2>Reteach this</h2><span class="n">' + items.length + '</span></div><div class="panel-b">';
-    if (!items.length) h += '<p class="thin" style="padding:12px 0">Nothing yet. A question lands here once two or more pupils get it wrong.</p>';
+    h += '<section class="card panel"><div class="panel-h"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><h2>Go over these again</h2><span class="n">' + items.length + '</span></div><div class="panel-b">';
+    if (!items.length) h += '<p class="thin" style="padding:12px 0">Nothing yet. A question appears here once two or more pupils get it wrong.</p>';
     items.forEach(function (q) {
-      h += '<div class="item"><span class="q">' + esc(q.question) + '</span><span class="where">' + esc(q.unit) + (q.lesson ? ' &middot; L' + q.lesson : '') + '</span>' +
+      h += '<div class="item"><span class="q">' + esc(q.question) + '</span><span class="where">' + esc(q.unit) + (q.lesson ? ' &middot; lesson ' + q.lesson : '') + '</span>' +
         '<div class="ans">' + (q.commonWrongAnswer ? '<div class="row"><span class="lab">Chose</span><span class="wrong">' + esc(q.commonWrongAnswer) + '</span></div>' : '') +
         (q.right ? '<div class="row"><span class="lab">Answer</span><span class="right">' + esc(q.right) + '</span></div>' : '') + '</div>' +
-        '<div class="barline"><span class="count">' + q.students + (q.met ? ' of ' + q.met + ' who met it' : ' pupils') + '</span></div></div>';
+        '<div class="barline"><span class="count">' + q.students + (q.met ? ' of the ' + q.met + ' who answered got it wrong' : ' pupils got it wrong') + '</span></div></div>';
     });
-    h += '</div>' + (items.length ? '<div class="panel-f"><button class="btn wide" type="button" data-starter><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="5,3 19,12 5,21"/></svg>Project these as a starter</button></div>' : '') + '</section>';
+    h += '</div>' + (items.length ? '<div class="panel-f"><button class="btn wide" type="button" data-starter><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="5,3 19,12 5,21"/></svg>Show these on the board</button></div>' : '') + '</section>';
 
-    h += '<section class="card panel"><div class="panel-h"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M4.9 5.6l14.2 12.8M19.1 5.6 4.9 18.4M2.5 12h19"/></svg><h2>Going cold</h2><span class="n">' + cold.length + '</span></div><div class="panel-b">';
-    if (!cold.length) h += '<p class="thin" style="padding:12px 0">Nothing is fading yet. A topic lands here when pupils who were secure on it drop under the revisit line.</p>';
+    h += '<section class="card panel"><div class="panel-h"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M4.9 5.6l14.2 12.8M19.1 5.6 4.9 18.4M2.5 12h19"/></svg><h2>Being forgotten</h2><span class="n">' + cold.length + '</span></div><div class="panel-b">';
+    if (!cold.length) h += '<p class="thin" style="padding:12px 0">Nothing yet. A topic appears here when pupils who knew it have not revised it and now need to.</p>';
     cold.forEach(function (u) {
-      h += '<div class="item"><span class="q">' + esc(u.unit) + '</span><span class="where">' + u.lessons + ' lessons' + (u.lastDays != null ? ' &middot; last evidence ' + weeksAgo(u.lastDays) : '') + '</span>' +
-        '<div class="barline"><span class="bar ' + barCls(u.score) + '"><i style="width:' + (u.score || 0) + '%"></i></span><span>' + (u.score == null ? '&mdash;' : u.score) + '</span></div>' +
-        '<span class="count">' + u.under + ' of ' + u.pupils + ' under the revisit line &middot; ' + u.dropped + ' of them were secure</span></div>';
+      var then = lw && lw.units && lw.units[u.slug] ? lw.units[u.slug].under : null;
+      h += '<div class="item"><span class="q">' + esc(u.unit) + '</span><span class="where">' + u.lessons + ' lessons' + (u.lastDays != null ? ' &middot; last quiz or lesson ' + weeksAgo(u.lastDays) : '') + '</span>' +
+        '<div class="barline"><span class="bar ' + barCls(u.score) + '"><i style="width:' + (u.score || 0) + '%"></i></span><span>' + (u.score == null ? '&mdash;' : u.score + ' out of 100') + '</span></div>' +
+        '<span class="count">' + u.under + ' of ' + u.pupils + ' need to revise it again' + (then != null ? ' (' + then + ' last Monday)' : '') + ' &middot; ' + u.dropped + ' of them knew it well before</span></div>';
     });
-    h += '</div><div class="panel-f"><span class="count">Strength decays from the date each pupil last retrieved it. Secure 70+ &middot; developing 40&ndash;69 &middot; revisit under 55.</span></div></section>';
+    h += '</div><div class="panel-f"><span class="count">Scores fall over time unless a pupil revises again. 70 and over = secure, 40 to 69 = developing, under 55 = needs revising again.</span></div></section>';
 
-    h += '<section class="card panel"><div class="panel-h"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg><h2>Have a word</h2><span class="n">' + words.length + '</span></div><div class="panel-b">';
-    if (!words.length) h += '<p class="thin" style="padding:12px 0">Nobody stands out. A pupil lands here for a drop, low recall with real evidence, weak marked answers, or no evidence at all.</p>';
+    h += '<section class="card panel"><div class="panel-h"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg><h2>Pupils to talk to</h2><span class="n">' + words.length + '</span></div><div class="panel-b">';
+    if (!words.length) h += '<p class="thin" style="padding:12px 0">Nobody stands out. A pupil appears here if they knew a topic and have forgotten it, get most quiz answers wrong, score low on marked answers, or have not started.</p>';
     words.forEach(function (w) {
       h += '<div class="who"><span class="ini">' + esc(initials(w.name)) + '</span><div><b><button class="namebtn" type="button" data-pupil="' + esc(w.id) + '">' + esc(w.name) + '</button></b><span>' + esc(w.why) + '</span></div></div>';
     });
-    h += '</div><div class="panel-f"><span class="count">Tap a name for their row in the markbook, or open a parents&rsquo; evening pack from there.</span></div></section></div>';
+    h += '</div><div class="panel-f"><span class="count">Tap a name to see their row in the markbook. A parents&rsquo; evening pack opens from there.</span></div></section></div>';
     return h;
   }
   function sheet(title, head, rows, hint) {
     return '<section class="section"><h3>' + title + '</h3><div class="sheet"><div class="scroller"><table><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div></div>' + (hint ? '<p class="hint">' + hint + '</p>' : '') + '</section>';
   }
   function everythingHtml(d) {
-    var h = '<div class="rule"><h2>Everything else</h2><i></i><small>the full picture, when you have longer than five minutes</small></div>';
+    var lw = d.lastWeek;
+    var h = '<div class="rule"><h2>All the detail</h2><i></i><small>for when you have more than five minutes</small></div>';
     if ((d.marks || []).length) {
-      h += sheet('Where the marks are going &mdash; from answers marked on the platform', '<th>Question size</th><th>Most often in</th><th>Class average</th><th>Share of marks</th><th class="num">Answers</th>',
-        d.marks.map(function (m) { return '<tr><td>' + m.marks + '-mark questions</td><td>' + esc(m.unit) + '</td><td>' + m.average + ' <span class="sub">of ' + m.marks + '</span></td><td>' + m.percent + '%</td><td class="num">' + m.answers + '</td></tr>'; }).join(''),
-        'Every answer here was written by a pupil and marked on StudyVault. Three answers or more before a row appears.');
+      h += sheet('Marks by question type', '<th>Question size</th><th>Most often in</th><th>Class average</th><th>Share of marks</th><th class="num">Answers</th>',
+        d.marks.map(function (m) { return '<tr><td>' + m.marks + '-mark questions</td><td>' + esc(m.unit) + '</td><td>' + m.average + ' <span class="sub">out of ' + m.marks + '</span></td><td>' + m.percent + '%</td><td class="num">' + m.answers + '</td></tr>'; }).join(''),
+        'Every answer here was written by a pupil and marked on StudyVault. A row appears once there are three answers or more.');
     }
     var mi = d.missedItems || [];
     h += sheet('Questions the class gets wrong', '<th>Question</th><th>They chose</th><th>Answer</th><th class="num">Pupils</th>',
-      mi.length ? mi.map(function (q) { return '<tr><td>' + esc(q.question) + '<span class="sub">' + esc(q.unit) + (q.lesson ? ' &middot; L' + q.lesson : '') + '</span></td><td class="wrong">' + esc(q.commonWrongAnswer || '') + (q.commonWrongCount > 1 ? ' <span class="sub">&times;' + q.commonWrongCount + '</span>' : '') + '</td><td class="right">' + esc(q.right || '') + '</td><td class="num">' + q.students + '</td></tr>'; }).join('')
-        : '<tr><td colspan="4" class="thin">No question has been missed by two or more pupils yet.</td></tr>',
-      'Only questions two or more of them missed. One wrong answer is a pupil having an off day, so it is not shown.');
+      mi.length ? mi.map(function (q) { return '<tr><td>' + esc(q.question) + '<span class="sub">' + esc(q.unit) + (q.lesson ? ' &middot; lesson ' + q.lesson : '') + '</span></td><td class="wrong">' + esc(q.commonWrongAnswer || '') + (q.commonWrongCount > 1 ? ' <span class="sub">&times;' + q.commonWrongCount + '</span>' : '') + '</td><td class="right">' + esc(q.right || '') + '</td><td class="num">' + q.students + '</td></tr>'; }).join('')
+        : '<tr><td colspan="4" class="thin">No question has been got wrong by two or more pupils yet.</td></tr>',
+      'Only questions two or more pupils got wrong. One wrong answer is a pupil having an off day, so it is not shown.');
     var ub = d.unitBands || [];
-    h += sheet('Topics, in the words the pupils see', '<th>Unit</th><th class="num">Secure</th><th class="num">Developing</th><th class="num">Emerging</th><th class="num">Not yet</th><th>Class now</th>',
-      ub.length ? ub.map(function (u) { return '<tr><td>' + esc(u.unit) + '</td><td class="num">' + u.secure + '</td><td class="num">' + u.developing + '</td><td class="num">' + u.emerging + '</td><td class="num">' + u.notYet + '</td><td><span class="band ' + (u.band || 'n') + '">' + esc(u.word || 'not started') + '</span>' + (u.score != null ? ' <span class="sub" style="display:inline">' + u.score + '</span>' : '') + '</td></tr>'; }).join('')
-        : '<tr><td colspan="6" class="thin">No unit has evidence yet.</td></tr>',
-      'Same three words the pupils see on their own dashboard: emerging, developing, secure. A pupil counts once per unit, on the average of the lessons they have evidence for. Flashcards are not counted here, so a teacher&rsquo;s view can sit a little below the pupil&rsquo;s own.');
+    h += sheet('How well each topic is known', '<th>Topic</th><th class="num">Secure</th><th class="num">Developing</th><th class="num">Emerging</th><th class="num">Nothing yet</th><th>Class now</th>' + (lw ? '<th>Since last Monday</th>' : ''),
+      ub.length ? ub.map(function (u) {
+        var t = lw && lw.units ? lw.units[u.slug] : null, ch = '';
+        if (t) { var ds = u.secure - (t.secure || 0), du = u.under - (t.under || 0); ch = (ds ? (ds > 0 ? '+' : '') + ds + ' secure' : '') + (ds && du ? ', ' : '') + (du ? (du > 0 ? '+' : '') + du + ' need revising' : ''); if (!ch) ch = 'no change'; }
+        return '<tr><td>' + esc(u.unit) + '</td><td class="num">' + u.secure + '</td><td class="num">' + u.developing + '</td><td class="num">' + u.emerging + '</td><td class="num">' + u.notYet + '</td><td><span class="band ' + (u.band || 'n') + '">' + esc(u.word || 'not started') + '</span>' + (u.score != null ? ' <span class="sub" style="display:inline">' + u.score + '</span>' : '') + '</td>' + (lw ? '<td>' + esc(ch || 'new topic') + '</td>' : '') + '</tr>'; }).join('')
+        : '<tr><td colspan="' + (lw ? 7 : 6) + '" class="thin">No topic has a quiz or lesson yet.</td></tr>',
+      'The same three words the pupils see on their own dashboard. Secure means they know it well (70 and over), developing means getting there (40 to 69), emerging means it needs work (under 40). A pupil counts once per topic. Flashcards are not counted here, so a teacher&rsquo;s view can sit a little below the pupil&rsquo;s own.');
     var rows = (d.markbook && d.markbook.rows) || [];
     var act = {}; (d.students || []).forEach(function (s) { act[s.id] = s; });
-    h += sheet('The class &mdash; click a name for a parents&rsquo; evening pack', '<th>Name</th><th class="num">Lessons done</th><th class="num">Recall</th><th class="num">Answers marked</th><th>Weakest topic</th><th>Last worked on ' + esc(d.class.subject || 'this subject') + '</th>',
+    h += sheet('The class &mdash; click a name for a parents&rsquo; evening pack', '<th>Name</th><th class="num">Lessons done</th><th class="num">Quiz answers right</th><th class="num">Answers marked</th><th>Weakest topic</th><th>Last worked on ' + esc(d.class.subject || 'this subject') + '</th>',
       rows.map(function (r) { var s = act[r.id] || {}; return '<tr><td><button class="namebtn" type="button" data-pack="' + esc(r.id) + '">' + esc(r.name) + '</button></td><td class="num">' + (s.lessonsComplete || 0) + '</td><td class="num">' + pct(r.recall) + '</td><td class="num">' + (r.marks ? r.marks.answers : 0) + '</td><td>' + esc(r.weakest || '&mdash;') + '</td><td>' + esc(s.lastActive || 'never') + '</td></tr>'; }).join(''),
-      '&ldquo;Last worked on&rdquo; is bucketed on purpose, and it is never a time of day. A teacher needs to know who has stopped, not when somebody was at their desk.');
+      '&ldquo;Last worked on&rdquo; is a rough bucket on purpose, never a time of day. You need to know who has stopped, not when somebody was at their desk.');
     var cov = d.coverage;
     if (cov) {
-      h += sheet('Where the class has got to', '<th>Unit</th><th>Lessons reached</th><th class="num">Started it</th><th class="num">Typical lessons done</th>',
+      h += sheet('How far through each topic', '<th>Topic</th><th>Lessons reached</th><th class="num">Started it</th><th class="num">Typical lessons done</th>',
         (cov.units || []).map(function (u) { var c = u.percent == null ? '' : u.percent < 34 ? 'low' : u.percent < 67 ? 'mid' : ''; return '<tr><td>' + esc(u.unit) + (u.practice ? ' <span class="sub">practice set</span>' : '') + '</td><td><span class="cov ' + c + '"><i style="width:' + (u.percent || 0) + '%"></i></span>' + u.touched + ' of ' + u.lessons + '</td><td class="num">' + u.studentsStarted + ' of ' + d.size + '</td><td class="num">' + u.avgDone + '</td></tr>'; }).join('') || '<tr><td colspan="4" class="thin">Nothing reached yet.</td></tr>',
-        (cov.unitsUntouched ? cov.unitsUntouched + ' other units on this course have nothing recorded. On a course that offers more options than any one class takes, that is expected.' : ''));
+        (cov.unitsUntouched ? cov.unitsUntouched + ' other topics on this course have nothing recorded. On a course with more options than any one class takes, that is expected.' : ''));
     }
     var mis = d.misconceptions || [];
     if (mis.length) {
-      h += sheet('Misconceptions the class shares', '<th>What they think</th><th>Where</th><th class="num">Pupils</th><th class="num">Times</th>',
-        mis.map(function (m) { return '<tr><td>' + esc(m.tag) + '</td><td>' + esc(m.unitName || m.unit) + (m.lesson ? ' &middot; L' + m.lesson : '') + '</td><td class="num">' + m.students + '</td><td class="num">' + m.count + '</td></tr>'; }).join(''), '');
+      h += sheet('Mistakes the class shares', '<th>What they think</th><th>Where</th><th class="num">Pupils</th><th class="num">Times</th>',
+        mis.map(function (m) { return '<tr><td>' + esc(m.tag) + '</td><td>' + esc(m.unitName || m.unit) + (m.lesson ? ' &middot; lesson ' + m.lesson : '') + '</td><td class="num">' + m.students + '</td><td class="num">' + m.count + '</td></tr>'; }).join(''), '');
     } else {
-      h += '<p class="hint" style="margin-top:22px">Named misconceptions are only captured on practice-format subjects (Maths, English Language, languages, science calculations). For this subject, the questions table above is the misconception view.</p>';
+      h += '<p class="hint" style="margin-top:22px">Named mistakes are only picked up on practice-format subjects (Maths, English Language, languages, science calculations). For this subject, the questions table above does that job.</p>';
     }
     return h;
   }
-  function weekHtml(d) {
-    var since = sinceLooked(d.class.id);
-    return briefingHtml(d, since) + readHtml(d) + panelsHtml(d) + everythingHtml(d);
-  }
+  function weekHtml(d) { return briefingHtml(d) + readHtml(d) + panelsHtml(d) + everythingHtml(d); }
 
   /* ================= MARKBOOK ================= */
   var ORDER = sessionStorage.getItem('sv-teacher-order') || 'weak';
@@ -313,7 +317,7 @@
   function rowDrops(r) { return Object.keys(r.cells).filter(function (k) { return r.cells[k].drop; }).length; }
   function bookHtml(d) {
     var mb = d.markbook || { units: [], rows: [] }, units = mb.units || [], rows = (mb.rows || []).slice();
-    if (!units.length) return '<div class="empty">No evidence in ' + esc(d.class.subject || 'this subject') + ' yet. The markbook fills as the class does lessons and quizzes.</div>';
+    if (!units.length) return '<div class="empty">Nothing in ' + esc(d.class.subject || 'this subject') + ' yet. The markbook fills as the class does lessons and quizzes.</div>';
     if (ORDER === 'weak') rows.sort(function (a, b) { return rowScore(a) - rowScore(b) || a.name.localeCompare(b.name); });
     else if (ORDER === 'faded') rows.sort(function (a, b) { return rowDrops(b) - rowDrops(a) || rowScore(a) - rowScore(b); });
     else rows.sort(function (a, b) { return surnameFirst(a.name).localeCompare(surnameFirst(b.name)); });
@@ -322,18 +326,18 @@
     if (VIEW === 'types' && !types.length) VIEW = 'units';
     var vu = units.find(function (u) { return u.slug === VIEW_UNIT; });
     var h = '<div class="toolbar"><label for="orderSel">Order by</label><select id="orderSel">' +
-      '<option value="weak"' + (ORDER === 'weak' ? ' selected' : '') + '>Weakest first</option><option value="name"' + (ORDER === 'name' ? ' selected' : '') + '>Surname</option><option value="faded"' + (ORDER === 'faded' ? ' selected' : '') + '>Most faded</option></select>' +
-      '<label for="viewSel">Columns</label><select id="viewSel"><option value="units"' + (VIEW === 'units' ? ' selected' : '') + '>Units</option><option value="lessons"' + (VIEW === 'lessons' ? ' selected' : '') + '>Lessons in one unit</option>' + (types.length ? '<option value="types"' + (VIEW === 'types' ? ' selected' : '') + '>Exam question types</option>' : '') + '</select>' +
-      (VIEW === 'lessons' ? '<select id="unitSel" aria-label="Unit">' + units.map(function (u) { return '<option value="' + esc(u.slug) + '"' + (u.slug === VIEW_UNIT ? ' selected' : '') + '>' + esc(u.name) + '</option>'; }).join('') + '</select>' : '') +
-      '<span class="sp"></span><span>' + rows.length + ' pupils &middot; ' + (VIEW === 'units' ? 'one band per pupil per unit' : VIEW === 'lessons' ? 'one band per pupil per lesson' : 'share of marks per question type') + ' &middot; click any cell</span></div>';
+      '<option value="weak"' + (ORDER === 'weak' ? ' selected' : '') + '>Weakest first</option><option value="name"' + (ORDER === 'name' ? ' selected' : '') + '>Surname</option><option value="faded"' + (ORDER === 'faded' ? ' selected' : '') + '>Most forgotten</option></select>' +
+      '<label for="viewSel">Columns</label><select id="viewSel"><option value="units"' + (VIEW === 'units' ? ' selected' : '') + '>Topics</option><option value="lessons"' + (VIEW === 'lessons' ? ' selected' : '') + '>Lessons in one topic</option>' + (types.length ? '<option value="types"' + (VIEW === 'types' ? ' selected' : '') + '>Exam question types</option>' : '') + '</select>' +
+      (VIEW === 'lessons' ? '<select id="unitSel" aria-label="Topic">' + units.map(function (u) { return '<option value="' + esc(u.slug) + '"' + (u.slug === VIEW_UNIT ? ' selected' : '') + '>' + esc(u.name) + '</option>'; }).join('') + '</select>' : '') +
+      '<span class="sp"></span><span>' + rows.length + ' pupils &middot; click any box for the detail</span></div>';
     h += '<div class="gridwrap"><div class="gridscroll"><table class="grid"><thead><tr><th class="pupilhead">Pupil</th>';
     var lessonNums = [];
     if (VIEW === 'units') h += units.map(function (u) { return '<th>' + esc(u.name) + '<small>' + u.lessons + ' lessons</small></th>'; }).join('') + '<th>Marked answers<small>share of marks</small></th>';
     else if (VIEW === 'lessons') {
       var seen = {}; rows.forEach(function (r) { Object.keys(r.lessons || {}).forEach(function (k) { var p = k.split('/'); if (p[0] === VIEW_UNIT) seen[+p[1]] = 1; }); });
       lessonNums = Object.keys(seen).map(Number).sort(function (a, b) { return a - b; });
-      h += lessonNums.map(function (n) { return '<th>L' + n + '<small>' + esc(vu ? vu.name.slice(0, 18) : '') + '</small></th>'; }).join('');
-      if (!lessonNums.length) h += '<th>No lesson evidence yet</th>';
+      h += lessonNums.map(function (n) { return '<th>Lesson ' + n + '<small>' + esc(vu ? vu.name.slice(0, 18) : '') + '</small></th>'; }).join('');
+      if (!lessonNums.length) h += '<th>No lessons or quizzes yet</th>';
     } else h += types.map(function (t) { return '<th>' + esc(t) + '<small>share of marks</small></th>'; }).join('');
     h += '</tr></thead><tbody>';
     rows.forEach(function (r) {
@@ -341,14 +345,14 @@
       if (VIEW === 'units') {
         units.forEach(function (u) {
           var c = r.cells[u.slug];
-          if (!c) h += '<td>' + cellBtn('n', 'not yet', '&mdash;') + '</td>';
+          if (!c) h += '<td>' + cellBtn('n', 'nothing yet', '&mdash;') + '</td>';
           else h += '<td>' + cellBtn(c.band + (c.drop ? ' due' : ''), bandWord(c.band), c.score + (c.drop ? ' &darr;' : '') + (c.q === 0 ? ' &middot; read only' : ''), esc(r.id) + '|' + esc(u.slug)) + '</td>';
         });
-        h += '<td>' + (r.marks ? cellBtn(r.marks.percent >= 70 ? 'g' : r.marks.percent >= 40 ? 'a' : 'r', r.marks.percent + '%', r.marks.answers + (r.marks.answers === 1 ? ' answer' : ' answers'), esc(r.id) + '|') : cellBtn('n', 'none', '&mdash;')) + '</td>';
+        h += '<td>' + (r.marks ? cellBtn(r.marks.percent >= 70 ? 'g' : r.marks.percent >= 40 ? 'a' : 'r', r.marks.percent + '%', plural(r.marks.answers, 'answer'), esc(r.id) + '|') : cellBtn('n', 'none', '&mdash;')) + '</td>';
       } else if (VIEW === 'lessons') {
         lessonNums.forEach(function (n) {
           var l = (r.lessons || {})[VIEW_UNIT + '/' + n];
-          if (!l) h += '<td>' + cellBtn('n', 'not yet', '&mdash;') + '</td>';
+          if (!l) h += '<td>' + cellBtn('n', 'nothing yet', '&mdash;') + '</td>';
           else h += '<td>' + cellBtn(l.band, bandWord(l.band), l.s + (l.quiz ? '' : ' &middot; read only'), esc(r.id) + '|' + esc(VIEW_UNIT)) + '</td>';
         });
         if (!lessonNums.length) h += '<td></td>';
@@ -356,7 +360,7 @@
         types.forEach(function (t) {
           var x = (r.types || {})[t];
           if (!x) h += '<td>' + cellBtn('n', 'none', '&mdash;') + '</td>';
-          else h += '<td>' + cellBtn(x.percent >= 70 ? 'g' : x.percent >= 40 ? 'a' : 'r', x.percent + '%', x.answers + (x.answers === 1 ? ' answer' : ' answers'), esc(r.id) + '|') + '</td>';
+          else h += '<td>' + cellBtn(x.percent >= 70 ? 'g' : x.percent >= 40 ? 'a' : 'r', x.percent + '%', plural(x.answers, 'answer'), esc(r.id) + '|') + '</td>';
         });
       }
       h += '</tr>';
@@ -367,13 +371,13 @@
       var allAns = rows.reduce(function (n, r) { return n + (r.marks ? r.marks.answers : 0); }, 0);
       h += '<td>' + (allAns ? allAns + ' answers marked' : '&mdash;') + '</td>';
     } else if (VIEW === 'lessons') {
-      lessonNums.forEach(function (n) { var t = 0, c = 0; rows.forEach(function (r) { var l = (r.lessons || {})[VIEW_UNIT + '/' + n]; if (l) { t += l.s; c++; } }); var s = c ? Math.round(t / c) : null; h += '<td>' + (s == null ? '&mdash;' : bandWord(s >= 70 ? 'g' : s >= 40 ? 'a' : 'r') + ' &middot; ' + s + ' <span class="sub" style="display:inline">(' + c + ')</span>') + '</td>'; });
+      lessonNums.forEach(function (n) { var t = 0, c = 0; rows.forEach(function (r) { var l = (r.lessons || {})[VIEW_UNIT + '/' + n]; if (l) { t += l.s; c++; } }); var s = c ? Math.round(t / c) : null; h += '<td>' + (s == null ? '&mdash;' : bandWord(s >= 70 ? 'g' : s >= 40 ? 'a' : 'r') + ' &middot; ' + s + ' <span class="sub" style="display:inline">(' + c + ' pupils)</span>') + '</td>'; });
       if (!lessonNums.length) h += '<td></td>';
     } else {
       types.forEach(function (t) { var g = 0, o = 0, a = 0; rows.forEach(function (r) { var x = (r.types || {})[t]; if (x) { g += x.percent * x.answers; o += 100 * x.answers; a += x.answers; } }); h += '<td>' + (a ? Math.round(g / o * 100) + '% &middot; ' + a + ' answers' : '&mdash;') + '</td>'; });
     }
     h += '</tr></tfoot></table></div></div>';
-    h += '<div class="keyrow"><span><i class="swatch g"></i> secure 70+</span><span><i class="swatch a"></i> developing 40&ndash;69</span><span><i class="swatch r"></i> emerging under 40</span><span><i class="swatch n"></i> no evidence yet</span><span><i class="swatch due"></i> was secure, now under the revisit line</span><span>&ldquo;read only&rdquo; = lessons read but never quizzed, so the score has faded</span></div>';
+    h += '<div class="keyrow"><span><i class="swatch g"></i> secure = knows it well (70 and over)</span><span><i class="swatch a"></i> developing = getting there (40 to 69)</span><span><i class="swatch r"></i> emerging = needs work (under 40)</span><span><i class="swatch n"></i> nothing yet = no lesson or quiz</span><span><i class="swatch due"></i> outlined = knew it, now needs to revise it again</span><span>&ldquo;read only&rdquo; = read the lesson, no quiz yet, so the score has dropped</span></div>';
     h += '<section class="card drawer" id="drawer" hidden></section>';
     return h;
   }
@@ -386,9 +390,9 @@
     if (!answers.length) answers = (r.answers || []).slice(0, 3);
     var h = '<div class="drawer-l"><button class="x" type="button" data-drawer-close aria-label="Close">&times;</button>' +
       '<h2>' + esc(r.name) + (u ? ' &middot; ' + esc(u.name) : ' &middot; marked answers') + '</h2>' +
-      '<p class="sub2">' + (c ? bandWord(c.band).replace(/^./, function (m) { return m.toUpperCase(); }) + ' &middot; ' + c.score + (c.drop ? ' &middot; was secure on this, now under the revisit line' : '') + ' &middot; evidence on ' + c.n + ' of ' + (u ? u.lessons : '?') + ' lessons' + (c.q === 0 ? ' &middot; read, never quizzed' : '') : (r.marks ? r.marks.percent + '% of marks over ' + r.marks.answers + ' answers' : 'No marked answers yet')) + '</p>';
-    h += '<h4>What ' + esc(first) + ' keeps getting wrong</h4><ul>' + (misses.length ? misses.map(function (m) { return '<li><b>&ldquo;' + esc(m.q) + '&rdquo;</b><span>' + (m.chose ? 'chose &ldquo;' + esc(m.chose) + '&rdquo; &middot; ' : '') + 'wrong ' + (m.times === 1 ? 'once' : m.times === 2 ? 'twice' : m.times + ' times') + (m.lesson ? ' &middot; L' + m.lesson : '') + '</span></li>'; }).join('') : '<li class="thin">No repeated misses' + (u ? ' in this unit' : '') + '.</li>') + '</ul>';
-    h += '<h4>On extended writing</h4><ul>' + (answers.length ? answers.map(function (a) { var un = (mb.units || []).find(function (x) { return x.slug === a.unit; }); return '<li><b>' + a.got + ' of ' + a.marks + '</b> on a ' + a.marks + '-mark question' + (un ? ' &middot; ' + esc(un.name) : '') + (a.note ? '<span>the marker: &ldquo;' + esc(a.note) + '&rdquo;</span>' : '') + '</li>'; }).join('') : '<li class="thin">No answers marked yet.</li>') + '</ul></div>';
+      '<p class="sub2">' + (c ? bandWord(c.band).replace(/^./, function (m) { return m.toUpperCase(); }) + ' &middot; ' + c.score + ' out of 100' + (c.drop ? ' &middot; knew this, now needs to revise it again' : '') + ' &middot; ' + c.n + ' of ' + (u ? u.lessons : '?') + ' lessons have a quiz or were read' + (c.q === 0 ? ' &middot; read, no quiz yet' : '') : (r.marks ? r.marks.percent + '% of marks over ' + plural(r.marks.answers, 'answer') : 'No marked answers yet')) + '</p>';
+    h += '<h4>What ' + esc(first) + ' keeps getting wrong</h4><ul>' + (misses.length ? misses.map(function (m) { return '<li><b>&ldquo;' + esc(m.q) + '&rdquo;</b><span>' + (m.chose ? 'chose &ldquo;' + esc(m.chose) + '&rdquo; &middot; ' : '') + 'wrong ' + (m.times === 1 ? 'once' : m.times === 2 ? 'twice' : m.times + ' times') + (m.lesson ? ' &middot; lesson ' + m.lesson : '') + '</span></li>'; }).join('') : '<li class="thin">No question got wrong more than once' + (u ? ' in this topic' : '') + '.</li>') + '</ul>';
+    h += '<h4>Marked answers</h4><ul>' + (answers.length ? answers.map(function (a) { var un = (mb.units || []).find(function (x) { return x.slug === a.unit; }); return '<li><b>' + a.got + ' out of ' + a.marks + '</b> on a ' + a.marks + '-mark question' + (un ? ' &middot; ' + esc(un.name) : '') + (a.note ? '<span>the marker said: &ldquo;' + esc(a.note) + '&rdquo;</span>' : '') + '</li>'; }).join('') : '<li class="thin">No answers marked yet.</li>') + '</ul></div>';
     h += '<div class="drawer-r"><h4>Compared with the class</h4><ul>';
     (mb.units || []).forEach(function (uu) {
       var cc = r.cells[uu.slug]; if (!cc) return;
@@ -412,7 +416,7 @@
     var it = ST.items[i]; if (!it) return; ST.i = i;
     document.getElementById('stOf').textContent = (i + 1) + ' of ' + ST.items.length;
     document.getElementById('stWhere').textContent = it.unit + (it.lesson ? ' · lesson ' + it.lesson : '');
-    document.getElementById('stTally').textContent = it.students + (it.met ? ' of the ' + it.met + ' who met it' : ' pupils') + ' got this wrong';
+    document.getElementById('stTally').textContent = it.students + (it.met ? ' of the ' + it.met + ' who answered' : ' pupils') + ' got this wrong';
     document.getElementById('stQ').textContent = it.question;
     document.getElementById('stSaidLab').textContent = (it.commonWrongCount || it.students) + ' of you said';
     document.getElementById('stSaid').textContent = it.commonWrongAnswer || '(different wrong answers)';
@@ -457,7 +461,7 @@
     document.getElementById('h1').textContent = d.class.name + (d.class.subject ? ' · ' + d.class.subject : '');
     var c = CLASSES.find(function (x) { return x.id === d.class.id; }) || {};
     var joined = c.size != null ? c.size : d.size;
-    document.getElementById('h1note').innerHTML = joined + ' in the class' + (d.attainment && d.attainment.studentsWithEvidence != null ? ' &middot; ' + d.attainment.studentsWithEvidence + ' with quiz evidence' : '');
+    document.getElementById('h1note').innerHTML = joined + ' in the class' + (d.attainment && d.attainment.studentsWithEvidence != null ? ' &middot; ' + d.attainment.studentsWithEvidence + ' have done a quiz' : '');
   }
 
   /* ---- class picking, creating, code (kept from the previous screen) ---- */
@@ -539,7 +543,7 @@
     var hl = p.headline, first = String(p.student.name).split(' ')[0];
     var h = '<div class="packbar"><button class="backlink" data-backtoclass>&larr; back to the class</button><button class="btn" data-print>Print</button></div>' +
       '<div class="pack"><div class="phead"><div><h2>' + esc(p.student.name) + '</h2></div><div class="pmeta"><span class="pbrand">StudyVault</span><br>' + esc(p.class.name) + (p.class.subject ? ' &middot; ' + esc(p.class.subject) : '') + '<br>' + new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) + '</div></div>';
-    h += '<div class="kv"><div><b>' + hl.lessonsFinished + '</b><small>lessons finished</small></div><div><b>' + hl.questionsAnswered + '</b><small>questions answered</small></div><div><b>' + (hl.recallAccuracy == null ? '&mdash;' : hl.recallAccuracy + '%') + '</b><small>recall accuracy</small></div><div><b>' + hl.daysRevised + '</b><small>days revised, last 4 weeks</small></div></div>';
+    h += '<div class="kv"><div><b>' + hl.lessonsFinished + '</b><small>lessons finished</small></div><div><b>' + hl.questionsAnswered + '</b><small>questions answered</small></div><div><b>' + (hl.recallAccuracy == null ? '&mdash;' : hl.recallAccuracy + '%') + '</b><small>quiz answers right</small></div><div><b>' + hl.daysRevised + '</b><small>days revised, last 4 weeks</small></div></div>';
     h += '<h4>Topics &mdash; how much is sticking when ' + esc(first) + ' is quizzed</h4>';
     if (!p.units.length) h += '<p class="thin">No quiz evidence in this subject yet.</p>';
     else {
@@ -567,7 +571,7 @@
     try {
       var d = await api('/api/teacher/pack-summary', { class_id: classId, student_id: studentId });
       if (box) { box.classList.remove('thin'); box.textContent = d.draft; }
-      if (foot) foot.textContent = d.generated ? 'AI-drafted from the evidence above · check it before you say it · processed in the UK (' + d.servedBy + ')' : 'Not enough evidence to draft from.';
+      if (foot) foot.textContent = d.generated ? 'Written by AI from the evidence above · check it before you say it · processed in the UK (' + d.servedBy + ')' : 'Not enough evidence to draft from.';
     } catch (e) { if (box) { box.classList.add('thin'); box.textContent = 'No draft: ' + e.message; } if (foot) foot.textContent = 'The figures above are unaffected. They come straight from the work.'; }
   }
 

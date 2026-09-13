@@ -16,7 +16,9 @@
  * cost cap, storage). This file only loops, emails and reports.
  */
 const { supabase } = require('../pipeline/_lib/supabase');
-const { runRead } = require('../teacher/_lib/weekly-read');
+const { runRead, mondayOf } = require('../teacher/_lib/weekly-read');
+const { computeClassProgress, snapshotOf } = require('../teacher/class-progress');
+const { baseSubject } = require('../teacher/_lib/scope');
 const { sendEmail, escHtml } = require('../_lib/notify');
 
 const BASE = 'https://www.studyvault.co.uk';
@@ -45,19 +47,29 @@ function mdToHtml(md) {
   return out;
 }
 
+/* the Monday snapshot: what the class screen shows today, kept so next Monday can say what moved */
+async function takeSnapshot(cls) {
+  let subject = null, base = '';
+  if (cls.subject_id) { const { data: s } = await supabase.from('subjects').select('id, slug, name').eq('id', cls.subject_id).maybeSingle(); if (s) { subject = s; base = baseSubject(s.slug); } }
+  const d = await computeClassProgress(cls.id, cls, subject, base);
+  const week = mondayOf(new Date());
+  const { error } = await supabase.from('class_snapshots').upsert({ class_id: cls.id, week: week, data: snapshotOf(d) }, { onConflict: 'class_id,week' });
+  return error ? { error: error.message } : { ok: true, week: week };
+}
+
 async function emailRead(cls, read) {
   if (!cls.teacher_id) return { skipped: 'no teacher' };
   const { data: t } = await supabase.from('profiles').select('email, full_name').eq('id', cls.teacher_id).maybeSingle();
   if (!t || !t.email) return { skipped: 'no email' };
   const link = BASE + '/teacher/classes';
-  const subject = cls.name + ': this week’s read';
+  const subject = cls.name + ': this week’s summary';
   const html = '<div style="font-family:Georgia,serif;color:#26231e;max-width:640px;margin:0 auto;padding:8px 4px">' +
     '<p style="font-family:Helvetica,Arial,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#84806f;margin:0 0 .6rem">StudyVault &middot; ' + escHtml(cls.name) + (cls.subjectName ? ' &middot; ' + escHtml(cls.subjectName) : '') + '</p>' +
-    '<h1 style="font-size:20px;margin:0 0 1rem">This week&rsquo;s read</h1>' +
+    '<h1 style="font-size:20px;margin:0 0 1rem">This week&rsquo;s summary</h1>' +
     mdToHtml(read.read_md) +
-    '<p style="font-family:Helvetica,Arial,sans-serif;font-size:12px;color:#84806f;border-top:1px solid #e4dfd2;padding-top:.8rem;margin-top:1.2rem">AI-drafted from ' + read.answers + ' marked answers by ' + read.pupils + ' pupils this week, plus the quizzes they got wrong. Check it before you act on it. Processed in the UK. ' +
+    '<p style="font-family:Helvetica,Arial,sans-serif;font-size:12px;color:#84806f;border-top:1px solid #e4dfd2;padding-top:.8rem;margin-top:1.2rem">Written by AI from ' + read.answers + ' marked answers by ' + read.pupils + ' pupils this week, and the quiz questions they got wrong. Check it before you act on it. Processed in the UK. ' +
     '<a href="' + link + '" style="color:#c06325">Open the class &rarr;</a></p></div>';
-  const text = 'This week’s read for ' + cls.name + '\n\n' + read.read_md + '\n\nAI-drafted from ' + read.answers + ' marked answers by ' + read.pupils + ' pupils. Check it before you act on it. ' + link;
+  const text = 'This week’s summary for ' + cls.name + '\n\n' + read.read_md + '\n\nWritten by AI from ' + read.answers + ' marked answers by ' + read.pupils + ' pupils. Check it before you act on it. ' + link;
   const r = await sendEmail({ to: t.email, subject: subject, html: html, text: text });
   if (r && r.ok) await supabase.from('class_reads').update({ emailed_at: new Date().toISOString() }).eq('id', read.id);
   return r;
@@ -87,6 +99,7 @@ module.exports = async function handler(req, res) {
     try {
       const r = await runRead(cls.id, { force: q.force === '1', dry: q.dry === '1' });
       const item = { class: cls.name, id: cls.id };
+      if (q.dry !== '1') item.snapshot = await takeSnapshot(cls);
       if (r.dry) { item.dry = true; item.answers = r.answers; item.pupils = r.pupils; item.packet = r.packet; }
       else if (r.skipped) item.skipped = r.reason;
       else if (r.error) item.error = r.error;

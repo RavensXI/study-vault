@@ -195,26 +195,26 @@ function missedQuestions(kc, into, studentId) {
   });
 }
 
-module.exports = async function handler(req, res) {
-  if (req.method !== 'GET' && req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+/* The most recent Monday snapshot before today, for "since last Monday" on the screen */
+async function lastSnapshot(classId) {
+  const today = new Date().toISOString().slice(0, 10);
+  const { data } = await supabase.from('class_snapshots').select('week, data').eq('class_id', classId).lt('week', today).order('week', { ascending: false }).limit(1).maybeSingle();
+  return data ? Object.assign({ week: data.week }, data.data) : null;
+}
 
-  const auth = await requireTeacher(req, res);
-  if (!auth) return;
+/* What a Monday snapshot keeps: class-level counts only */
+function snapshotOf(d) {
+  const units = {};
+  (d.unitBands || []).forEach(function (u) { units[u.slug] = { score: u.score, secure: u.secure, developing: u.developing, emerging: u.emerging, notYet: u.notYet, under: u.under }; });
+  return { recall: d.attainment ? d.attainment.accuracy : null, answered: d.attainment ? d.attainment.answered : 0, withEvidence: d.attainment ? d.attainment.studentsWithEvidence : 0,
+           marked: (d.markbook && d.markbook.rows || []).reduce(function (n, r) { return n + (r.marks ? r.marks.answers : 0); }, 0), units: units };
+}
 
-  const classId = (req.query && req.query.class_id) || (req.body && req.body.class_id);
-
-  /* Ownership, school and subject scoping in one place, shared with the pack.
-     You may see a class you teach; a school_admin may see any class in their own
-     school; platform_admin sees anything; nobody sees another school. */
-  const scope = await loadClassFor(auth, classId);
-  if (!scope.ok) return res.status(scope.status || 400).json({ error: scope.error });
-
-  const cls = scope.cls;
-  const classSubject = scope.subject;
-  const base = scope.base;
-
+/**
+ * The whole class picture as one object. The HTTP handler below authorises and
+ * then calls this; the Monday cron calls it directly to take the week's snapshot.
+ */
+async function computeClassProgress(classId, cls, classSubject, base) {
   /* The class is the only door to a pupil. Everything below reads from this
      list, so a free-tier user — who is in no class_members row — cannot appear
      in a teacher view by any path. */
@@ -229,18 +229,19 @@ module.exports = async function handler(req, res) {
   };
 
   if (!ids.length) {
-    return res.status(200).json(Object.assign({}, shell, {
+    return Object.assign({}, shell, {
       size: 0, students: [], misconceptions: [], weakestUnits: [], missedItems: [],
       attainment: null, lessonAttainment: [], coverage: null, activity: {},
-      markbook: { units: [], questionTypes: [], rows: [] }, unitBands: [], goingCold: [], haveAWord: [], marks: []
-    }));
+      markbook: { units: [], questionTypes: [], rows: [] }, unitBands: [], goingCold: [], haveAWord: [], marks: [], lastWeek: null
+    });
   }
 
-  const [{ data: rows }, { data: people }, course, weeklyRead] = await Promise.all([
+  const [{ data: rows }, { data: people }, course, weeklyRead, lastWeek] = await Promise.all([
     supabase.from('progress').select('person_id, blob, updated_at').in('person_id', ids),
     supabase.from('profiles').select('id, full_name').in('id', ids),
     loadCurriculum(classSubject ? classSubject.id : null),
-    latestRead(classId).catch(function () { return null; })
+    latestRead(classId).catch(function () { return null; }),
+    lastSnapshot(classId).catch(function () { return null; })
   ]);
   const nameOf = {};
   (people || []).forEach(function (p) { nameOf[p.id] = p.full_name || 'Student'; });
@@ -527,11 +528,12 @@ module.exports = async function handler(req, res) {
     const dn = doneOf[id] || {};
     const doneUnits = Object.keys(dn).filter(function (k) { return (dn[k] || []).length; });
     const maxLesson = doneUnits.reduce(function (m, k) { return Math.max(m, Math.max.apply(null, dn[k].map(Number))); }, 0);
-    if (drops.length) words.push({ id: id, name: st.name, rank: 0, why: 'Was secure on ' + unitLabel(drops[0]) + ', ' + strength.bandWord(pu[drops[0]].band) + ' on it now' + (drops.length > 1 ? ' (and ' + (drops.length - 1) + ' more)' : '') + '.' });
-    else if (st.quizAccuracy != null && st.quizAccuracy < 45 && st.kcAnswered >= 10) words.push({ id: id, name: st.name, rank: 1, why: st.quizAccuracy + '% recall over ' + st.kcAnswered + ' quiz answers, the lowest here with real evidence.' });
-    else if (ans.length >= 3 && of && got / of < 0.4) words.push({ id: id, name: st.name, rank: 2, why: 'Averaging ' + Math.round(got / ans.length * 10) / 10 + ' of ' + Math.round(of / ans.length) + ' marks on marked answers, over ' + ans.length + ' marked.' });
-    else if (doneUnits.length >= 3 && maxLesson <= 2) words.push({ id: id, name: st.name, rank: 3, why: 'Has opened ' + doneUnits.length + ' units and finished nothing past lesson 2.' });
-    else if (!slugs.length) words.push({ id: id, name: st.name, rank: 4, why: 'In the class, but no quiz or lesson evidence in ' + (classSubject ? classSubject.name : 'this subject') + ' yet.' });
+    /* plain words (Tom, 13 Sep 2026): say what happened, not the model's name for it */
+    if (drops.length) words.push({ id: id, name: st.name, rank: 0, why: 'Knew ' + unitLabel(drops[0]) + ' well, now needs to revise it again' + (drops.length > 1 ? ' (and ' + (drops.length - 1) + ' more ' + (drops.length > 2 ? 'topics' : 'topic') + ')' : '') + '.' });
+    else if (st.quizAccuracy != null && st.quizAccuracy < 45 && st.kcAnswered >= 10) words.push({ id: id, name: st.name, rank: 1, why: 'Got ' + st.quizAccuracy + '% of ' + st.kcAnswered + ' quiz answers right, the lowest in the class.' });
+    else if (ans.length >= 3 && of && got / of < 0.4) words.push({ id: id, name: st.name, rank: 2, why: 'Scores about ' + Math.round(got / ans.length * 10) / 10 + ' out of ' + Math.round(of / ans.length) + ' on marked answers, over ' + ans.length + ' of them.' });
+    else if (doneUnits.length >= 3 && maxLesson <= 2) words.push({ id: id, name: st.name, rank: 3, why: 'Has started ' + doneUnits.length + ' topics and not got past lesson 2 in any of them.' });
+    else if (!slugs.length) words.push({ id: id, name: st.name, rank: 4, why: 'Has not done a lesson or quiz in ' + (classSubject ? classSubject.name : 'this subject') + ' yet.' });
   });
   const haveAWord = words.sort(function (a, b) { return a.rank - b.rank || a.name.localeCompare(b.name); }).slice(0, 5);
 
@@ -564,7 +566,7 @@ module.exports = async function handler(req, res) {
     })
   };
 
-  return res.status(200).json(Object.assign({}, shell, {
+  return Object.assign({}, shell, {
     size: ids.length,
     students: students,
     markbook: markbook,
@@ -579,6 +581,29 @@ module.exports = async function handler(req, res) {
     misconceptions: misconceptions,
     weakestUnits: weakestUnits,
     missedItems: missedItems,
-    activity: activity
-  }));
+    activity: activity,
+    lastWeek: lastWeek
+  });
+}
+
+module.exports = async function handler(req, res) {
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const auth = await requireTeacher(req, res);
+  if (!auth) return;
+
+  const classId = (req.query && req.query.class_id) || (req.body && req.body.class_id);
+
+  /* Ownership, school and subject scoping in one place, shared with the pack.
+     You may see a class you teach; a school_admin may see any class in their own
+     school; platform_admin sees anything; nobody sees another school. */
+  const scope = await loadClassFor(auth, classId);
+  if (!scope.ok) return res.status(scope.status || 400).json({ error: scope.error });
+
+  const out = await computeClassProgress(classId, scope.cls, scope.subject, scope.base);
+  return res.status(200).json(out);
 };
+module.exports.computeClassProgress = computeClassProgress;
+module.exports.snapshotOf = snapshotOf;

@@ -112,16 +112,16 @@ async function buildPacket(classId, opts) {
   };
 }
 
-const SYSTEM = 'You write a short weekly read for a busy secondary teacher about one class, from the evidence in the packet and nothing else. ' +
-  'Plain British English, short sentences, no jargon, no praise of the tool. Never invent a fact, a pupil, a quote or a number; every claim must be traceable to the packet. ' +
+const SYSTEM = 'You write a short weekly summary for a busy secondary teacher about one class, from the evidence in the packet and nothing else. ' +
+  'Plain British English a teacher understands at a glance: short sentences, everyday words, no metaphors, no jargon, no praise of the tool. Say "got wrong", "left out", "did not explain", not "under-developed" or "lacked mechanism". Never invent a fact, a pupil, a quote or a number; every claim must be traceable to the packet. ' +
   'When you quote, quote the PUPIL\'S OWN WORDS from their answer, in quotation marks, never the marker\'s feedback. If the evidence is thin, say so rather than stretch it. ' +
   'Name pupils only where the evidence about them is specific and fixable. This is for the teacher only.';
 function userPrompt(packet) {
-  return 'Write the weekly read for this class in exactly this shape, in Markdown:\n\n' +
-    '**The pattern this week** — 2 to 4 sentences: the habits that recur ACROSS several marked answers (not one pupil), with counts. Quote one or two short phrases from pupils\' answers as evidence.\n\n' +
-    '**One thing to model next lesson** — 2 to 3 sentences: the single most useful thing to demonstrate, tied to the question types they attempted.\n\n' +
-    '**Worth a word** — up to three pupils, one line each: name, the specific fixable habit, the evidence (which question, and what they wrote).\n\n' +
-    '**From the quizzes** — 1 to 2 sentences on the most-missed quiz questions and what the wrong answers suggest the class believes. If there are none, say so in one line.\n\n' +
+  return 'Write the weekly summary for this class in exactly this shape, in Markdown:\n\n' +
+    '**What keeps coming up** — 2 to 4 sentences: the mistakes or habits that appear ACROSS several marked answers (not one pupil), with counts. Quote one or two short phrases from pupils\' answers as evidence.\n\n' +
+    '**One thing to show them next lesson** — 2 to 3 sentences: the single most useful thing to demonstrate, tied to the question types they attempted.\n\n' +
+    '**Pupils to talk to** — up to three pupils, one line each: name, the specific fixable habit, the evidence (which question, and what they wrote).\n\n' +
+    '**What the quizzes show** — 1 to 2 sentences on the quiz questions most got wrong and what the wrong answers suggest the class believes. If there are none, say so in one line.\n\n' +
     'Under 260 words in total. Do not add a title or a word count.\n\nPACKET:\n' + JSON.stringify(packet, null, 1);
 }
 
