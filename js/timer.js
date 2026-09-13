@@ -29,6 +29,9 @@
     /* a painted kitchen timer (assets/lw/shelf/prop_timer.webp); the rust arc runs round its dial while it counts */
     + '.svtimer .dial{position:relative;width:29px;height:32px;display:block}'
     + '.svtimer .dial img{width:100%;height:100%;object-fit:contain;display:block}'
+    /* lesson pages: a line icon like the rest of the header (the painted timer stays on the dashboards) */
+    + '.svtimer.icon .dial{width:28px;height:28px}.svtimer.icon .dial .stopwatch{width:100%;height:100%;display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}'
+    + '.svtimer.icon .dial .arcsvg{top:57%;width:20px;height:20px}.svtimer.icon .dial .arc{stroke-width:2.2}'
     + '.svtimer .dial .arcsvg{position:absolute;left:50%;top:56%;width:23px;height:23px;transform:translate(-50%,-50%);overflow:visible}'
     + '.svtimer .dial .arc{fill:none;stroke:#c06325;stroke-width:2.4;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .9s linear}'
     + '.svtimer .left{font-variant-numeric:tabular-nums;min-width:0}.svtimer .left:empty{display:none}'
@@ -39,13 +42,17 @@
     + '.svtimer-pop button:hover{border-color:#c06325;color:#c06325}.svtimer-pop button.stop{color:#9a3a25}'
     + '@media (max-width:700px){.svtimer .left{font-size:.76rem}}';
 
-  function mount(where) {
+  function mount(where, opts) {
     if (!where || document.querySelector('.svtimer')) return null;
+    opts = opts || {};
     if (!document.getElementById('svtimer-css')) { var st = document.createElement('style'); st.id = 'svtimer-css'; st.textContent = CSS; document.head.appendChild(st); }
     var wrap = document.createElement('span'); wrap.style.position = 'relative'; wrap.style.display = 'inline-flex'; wrap.className = 'svtimer-wrap';
-    var b = document.createElement('button'); b.type = 'button'; b.className = 'svtimer'; b.setAttribute('aria-label', 'Revision timer');
-    var R = 9.6, C = 2 * Math.PI * R;
-    b.innerHTML = '<span class="dial" aria-hidden="true"><img src="/assets/lw/shelf/prop_timer.webp" alt="">'
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'svtimer' + (opts.icon ? ' icon' : ''); b.setAttribute('aria-label', 'Revision timer');
+    var R = opts.icon ? 7.6 : 9.6, C = 2 * Math.PI * R;
+    var face = opts.icon
+      ? '<svg class="stopwatch" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="8"/><path d="M10 2.5h4M12 2.5v3M18.5 6.5l1.5-1.5"/></svg>'
+      : '<img src="/assets/lw/shelf/prop_timer.webp" alt="">';
+    b.innerHTML = '<span class="dial" aria-hidden="true">' + face
       + '<svg class="arcsvg" viewBox="0 0 21 21"><circle class="arc" cx="10.5" cy="10.5" r="' + R + '" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + C.toFixed(2) + '"/></svg></span><span class="left"></span>';
     var pop = document.createElement('span'); pop.className = 'svtimer-pop';
     pop.innerHTML = '<button data-min="15">15 min</button><button data-min="25">25 min</button><button data-min="45">45 min</button><button class="stop" data-min="0">Stop</button>';
@@ -73,8 +80,9 @@
      The desk has its own wristwatch and mounts nothing. */
   function auto() {
     if (document.getElementById('watch')) return;
-    var at = document.querySelector('.top .podbar') || document.getElementById('nav-next-lesson');
-    if (at) mount(at);
+    var pod = document.querySelector('.top .podbar');
+    if (pod) mount(pod);
+    else { var nx = document.getElementById('nav-next-lesson'); if (nx) mount(nx, { icon: true }); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auto); else auto();
 })();
