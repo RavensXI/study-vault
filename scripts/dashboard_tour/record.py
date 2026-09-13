@@ -18,6 +18,7 @@ from playwright.sync_api import sync_playwright
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 OUT = os.path.join(ROOT, 'assets', 'tour')
 H = 'http://127.0.0.1:8907'
+HEIGHTS = {'books': 1000, 'rings': 1000}     # desktop clips where the topics panel opens under the shelf
 SIZES = {
     'desktop': dict(viewport={'width': 1200, 'height': 780}, scale=1),
     'phone': dict(viewport={'width': 390, 'height': 760}, scale=2),
@@ -45,17 +46,27 @@ INIT = r"""
   addEventListener('mousemove', e => { if (!ensure()) return; cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px'; cur.classList.add('on'); }, true);
   addEventListener('mousedown', () => { if (cur) cur.classList.add('down'); }, true);
   addEventListener('mouseup', () => { if (cur) cur.classList.remove('down'); }, true);
+  let target = null, tpad = 6;
+  function place() {
+    if (!ring || !target) return;
+    const gone = !document.contains(target) || target.hidden || getComputedStyle(target).display === 'none' || getComputedStyle(target).visibility === 'hidden';
+    const r = target.getBoundingClientRect();
+    if (gone || (!r.width && !r.height)) { ring.style.opacity = '0'; return; }
+    ring.style.opacity = '1';
+    ring.style.left = (r.left - tpad) + 'px'; ring.style.top = (r.top - tpad) + 'px';
+    ring.style.width = (r.width + tpad * 2) + 'px'; ring.style.height = (r.height + tpad * 2) + 'px';
+  }
+  (function tick() { place(); requestAnimationFrame(tick); })();
   window.__ring = (sel, pad) => {
     if (!ensure()) return false;
     const el = typeof sel === 'string' ? document.querySelector(sel) : sel;
-    if (!el) { if (ring) ring.remove(); ring = null; return false; }
-    const r = el.getBoundingClientRect(); pad = pad == null ? 6 : pad;
-    if (!ring) { ring = document.createElement('div'); ring.className = 'tour-ring'; document.documentElement.appendChild(ring); }
-    ring.style.left = (r.left - pad) + 'px'; ring.style.top = (r.top - pad) + 'px';
-    ring.style.width = (r.width + pad * 2) + 'px'; ring.style.height = (r.height + pad * 2) + 'px';
+    if (!el) { if (ring) ring.remove(); ring = null; target = null; return false; }
+    target = el; tpad = pad == null ? 6 : pad;
+    if (!ring) { ring = document.createElement('div'); ring.className = 'tour-ring'; ring.style.transition = 'opacity .2s'; document.documentElement.appendChild(ring); }
+    place();
     return true;
   };
-  window.__unring = () => { if (ring) ring.remove(); ring = null; };
+  window.__unring = () => { if (ring) ring.remove(); ring = null; target = null; };
   /* keep every one-time hint out of the picture */
   try {
     localStorage.setItem('sv-dash-tour-v1', '1'); localStorage.setItem('sv-reader-tour-v1', '1');
@@ -103,16 +114,18 @@ class Clip:
         self.pg.mouse.move(x, y, steps=steps); self.pg.wait_for_timeout(250)
         return x, y
 
-    def click(self, sel, dx=0.5, dy=0.5, hold=140):
+    def click(self, sel, dx=0.5, dy=0.5, hold=140, keep=False):
         p = self.move_to(sel, dx, dy)
         if not p: return
         self.pg.mouse.down(); self.pg.wait_for_timeout(hold); self.pg.mouse.up()
+        if not keep: self.unring()      # the ring never outlives the screen it was drawn on
 
-    def ring(self, sel, pad=6):
-        self.pg.evaluate("([s,p])=>__ring(s,p)", [sel, pad])
+    def ring(self, sel, pad=6, nth=0):
+        self.pg.evaluate("([s,p,n])=>__ring(document.querySelectorAll(s)[n]||null,p)", [sel, pad, nth])
 
     def unring(self):
-        self.pg.evaluate("__unring()")
+        try: self.pg.evaluate("__unring()")
+        except Exception: pass      # the click navigated; the ring went with the old page
 
     def pause(self, ms):
         self.pg.wait_for_timeout(ms)
@@ -129,7 +142,6 @@ def clip_revisit(c):
     c.demo('amira'); c.go('/classic'); c.start()
     c.ring('.card.plan ol li:first-child', 3); c.pause(1200)
     c.click('.card.plan ol li:first-child'); c.pause(1800)
-    c.unring()
     # answer the first question, whichever option is right
     if c.pg.locator('.wu-opt').count():
         c.click('.wu-opt >> nth=0'); c.pause(1600)
@@ -153,10 +165,11 @@ def clip_quickcheck(c):
 def clip_books(c):
     c.demo('amira'); c.go('/classic'); c.start()
     sel = '.bk >> nth=3'
-    c.ring('.shelf', 2); c.pause(900); c.unring()
+    c.ring('.bk', 4, nth=3); c.pause(900)
     c.click(sel); c.pause(2200)
     c.ring('.sdetail', 4); c.move_to('.sdetail .top'); c.pause(1400); c.unring()
     if c.pg.locator('.ublock').count():
+        c.ring('.units', 3); c.pause(900)
         c.click('.ublock >> nth=1'); c.pause(1500)
         c.ring('.lessons', 4); c.pause(1600); c.unring()
     c.pause(500)
@@ -174,16 +187,18 @@ def clip_rings(c):
 def clip_week(c):
     c.demo('amira'); c.go('/classic'); c.start()
     c.ring('.card.week', 3); c.pause(900)
-    c.click('.card.week'); c.pause(1800)
+    c.click('.card.week'); c.pause(600)
+    c.ring('.card.week', 3); c.pause(1400)
     c.ring('.card.week .weeksaid', 4); c.pause(1800); c.unring()
     c.pause(600)
 
 def clip_flashcards(c):
     c.demo('amira'); c.go('/classic'); c.start()
     c.ring('#fcdoor', 3); c.pause(900)
-    c.click('#fcdoor'); c.pause(1800); c.unring()
+    c.click('#fcdoor'); c.pause(1800)
     c.click('.bigcard'); c.pause(2000)
     if c.pg.locator('.fcbtns .fb.ok').count():
+        c.ring('.fcbtns', 4); c.pause(900)
         c.click('.fcbtns .fb.ok'); c.pause(1500)
     c.pause(500)
 
@@ -191,15 +206,15 @@ def clip_podcast(c):
     c.demo('amira'); c.go('/classic'); c.start()
     c.ring('.podbar', 5); c.pause(900)
     c.pg.evaluate("player.muted=true")
-    c.click('#podplay'); c.pause(2800)
-    if not c.phone: c.click('#podnext'); c.pause(2200)   # the skip button is off the phone bar (lock screen has it)
+    c.click('#podplay', keep=True); c.pause(2800)
+    if not c.phone: c.click('#podnext', keep=True); c.pause(2200)   # the skip button is off the phone bar (lock screen has it)
     c.unring(); c.pause(400)
 
 def clip_timer(c):
     c.demo('amira'); c.go('/classic'); c.start()
     c.ring('.svtimer', 5); c.pause(900)
-    c.click('.svtimer'); c.pause(1200)
-    c.click('.svtimer-pop button[data-min="25"]'); c.pause(2600); c.unring(); c.pause(400)
+    c.click('.svtimer', keep=True); c.pause(1200)
+    c.click('.svtimer-pop button[data-min="25"]', keep=True); c.pause(2600); c.unring(); c.pause(400)
 
 def clip_restday(c):
     c.demo('amira', {'sv-plan-prefs': {'rest': [time.localtime().tm_wday + 1 if time.localtime().tm_wday < 6 else 0], 'hols': []}})
@@ -209,7 +224,9 @@ def clip_restday(c):
 def clip_planner(c):
     c.demo('amira'); c.go('/classic'); c.start()
     c.ring('.card.exam', 3); c.pause(900)
-    c.click('.card.exam'); c.pause(2200); c.unring()
+    c.click('.card.exam'); c.pause(2200)
+    try: c.pg.wait_for_load_state()
+    except Exception: pass
     if c.pg.locator('.plsheet').count() and not c.phone:
         c.move_to('.plsheet .plday >> nth=9'); c.pause(1800)
     elif c.phone: c.pause(1600)
@@ -218,7 +235,8 @@ def clip_planner(c):
 def clip_reading(c):
     c.demo('amira'); c.go('/classic'); c.start()
     c.ring('.svset', 5); c.pause(900)
-    c.click('.svset'); c.pause(1200); c.unring()
+    c.click('.svset'); c.pause(1200)
+    c.ring('.svset-pop .row:first-of-type', 3); c.pause(600)
     c.click('.svset-pop .sw'); c.pause(2200)
     c.click('.svset-pop .sw'); c.pause(1200)
     c.click('.svset-pop [data-font="atkinson"]'); c.pause(1600)
@@ -258,8 +276,10 @@ def main():
             for size, cfg in SIZES.items():
                 if a.size and size not in a.size: continue
                 phone = size == 'phone'
-                vs = dict(cfg['viewport'])   # the screencast is in CSS px; a larger frame just leaves the page in one corner
-                ctx = browser.new_context(viewport=cfg['viewport'], device_scale_factor=cfg['scale'], is_mobile=phone, has_touch=phone,
+                vp = dict(cfg['viewport'])
+                if not phone and cid in HEIGHTS: vp['height'] = HEIGHTS[cid]
+                vs = dict(vp)   # the screencast is in CSS px; a larger frame just leaves the page in one corner
+                ctx = browser.new_context(viewport=vp, device_scale_factor=cfg['scale'], is_mobile=phone, has_touch=phone,
                                           record_video_dir=tmp, record_video_size=vs)
                 t0 = time.time()
                 pg = ctx.new_page(); pg.add_init_script(INIT)
