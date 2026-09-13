@@ -1,0 +1,199 @@
+/* ============================================================
+   Teacher dashboard mockups — shared skin
+   ------------------------------------------------------------
+   The student dashboard's paper-and-ink language (classic.html),
+   applied to a staff screen: same tokens, 4px geometry, hairline
+   borders, rust as the single accent.
+
+   House rules honoured here:
+     - no pill shapes (nothing rounder than 4px)
+     - no coloured left-border stripes on any container
+     - rust #c06325 is the only accent; brown --anchor for links
+     - Caveat appears exactly once, on the date stamp
+   MOCKUP FILES ONLY. Nothing in production links this.
+   ============================================================ */
+
+:root{
+  --paper:#f6f1e7; --card:#fffdf8; --ink:#26231e; --sec:#57534a; --mut:#84806f;
+  --line:#e4dfd2; --linel:#efeadf; --edge:#d5c9b3; --inset:#faf6ec;
+  --anchor:#5b4632; --rust:#c06325;
+  --good:#2f6f4f; --goodbg:#eef4ef; --goodline:#cfe1d5;
+  --bad:#a8412f;  --badbg:#f7ece9;  --badline:#eddcd7;
+  --warm:#8a6d1f; --warmbg:#f7f1e0; --warmline:#e6d9b4;
+  --head:'Schibsted Grotesk',system-ui,-apple-system,sans-serif;
+  --read:'Literata',Georgia,serif;
+  --hand:'Caveat',cursive;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--paper);-webkit-text-size-adjust:100%}
+body{font-family:var(--head);color:var(--ink);background:var(--paper);
+     line-height:1.55;-webkit-font-smoothing:antialiased}
+
+/* ---- masthead ---------------------------------------------------- */
+.top{border-bottom:1px solid var(--line);background:var(--paper)}
+.top-in{max-width:1120px;margin:0 auto;padding:0 clamp(16px,3.5vw,28px);
+        min-height:60px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{font-family:'Young Serif',Georgia,serif;font-size:1.2rem;font-weight:400;
+       color:#1d1c1a;text-decoration:none;white-space:nowrap;flex:none}
+.brandlock{height:.30em;width:auto;margin-left:1px;vertical-align:baseline}
+.datestamp{font-family:var(--hand);font-size:1.3rem;color:var(--mut);
+           margin:2px 0 0 2px;white-space:nowrap;min-width:0;
+           overflow:hidden;text-overflow:ellipsis}
+.top .sp{flex:1 1 auto}
+.mocktag{font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+         color:var(--rust);background:#f7ece2;border:1px solid #e6cdb6;
+         border-radius:3px;padding:3px 7px;flex:none}
+.topnav{display:flex;align-items:center;gap:16px;font-size:.85rem;flex:none}
+.topnav a{color:var(--sec);text-decoration:none}
+.topnav a:hover{color:var(--ink)}
+.topnav select{font:inherit;font-size:.85rem;font-weight:600;color:var(--ink);
+  background:var(--card);border:1px solid var(--edge);border-radius:4px;padding:6px 9px}
+.avatar{width:30px;height:30px;flex:none;border-radius:50%;background:#221e19;color:#faf8f5;
+        display:grid;place-items:center;font-weight:700;font-size:.76rem}
+
+/* ---- page frame -------------------------------------------------- */
+.wrap{max-width:1120px;margin:0 auto;padding:22px clamp(16px,3.5vw,28px) 72px}
+h1{font-family:var(--head);font-size:clamp(1.4rem,2.4vw,1.75rem);font-weight:800;
+   letter-spacing:-.02em;position:relative;padding-bottom:7px;display:inline-block}
+h1::after{content:'';position:absolute;left:2px;right:2px;bottom:-3px;height:10px;
+  background:url('/assets/lw/shelf/underline_sketch.webp') center/100% 100% no-repeat;
+  opacity:.85;pointer-events:none}
+.h1row{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin:.2rem 0 1.4rem}
+.h1note{font-family:var(--read);font-size:.92rem;color:var(--sec)}
+
+.card{background:var(--card);border:1px solid var(--edge);border-radius:4px;
+      box-shadow:0 1px 0 rgba(60,40,20,.05)}
+
+/* ---- the briefing ------------------------------------------------- */
+.brief{display:grid;grid-template-columns:minmax(0,1fr) 318px;gap:0;
+       align-items:stretch;margin-bottom:26px;overflow:hidden}
+.brief-say{padding:18px 22px}
+.brief-say .kicker{font-size:.7rem;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--mut);margin-bottom:7px}
+.brief-say p{font-family:var(--read);font-size:1.02rem;line-height:1.62;color:var(--ink);max-width:62ch}
+.brief-say p + p{margin-top:.55rem}
+.brief-say b{font-weight:700}
+.brief-say .rust{color:var(--rust);font-weight:700}
+.figs{border-left:1px solid var(--line);background:var(--inset);
+      display:grid;grid-template-rows:repeat(3,1fr)}
+.figs div{padding:11px 20px;display:flex;align-items:baseline;gap:10px}
+.figs div + div{border-top:1px solid var(--line)}
+.figs b{font-family:var(--read);font-size:1.5rem;font-weight:700;line-height:1.1;
+        flex:none;font-variant-numeric:tabular-nums}
+.figs small{font-size:.8rem;color:var(--sec);line-height:1.35}
+.figs i{font-style:normal;color:var(--mut)}
+
+/* ---- action panels ------------------------------------------------ */
+.panels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.panel{display:flex;flex-direction:column;overflow:hidden}
+.panel-h{display:flex;align-items:center;gap:9px;padding:12px 16px;
+         border-bottom:1px solid var(--line);background:var(--inset)}
+.panel-h h2{font-family:var(--head);font-size:.95rem;font-weight:700;letter-spacing:-.01em}
+.panel-h .n{margin-left:auto;font-size:.76rem;font-weight:700;color:var(--sec);
+            background:var(--card);border:1px solid var(--line);border-radius:3px;padding:1px 6px;
+            font-variant-numeric:tabular-nums}
+.panel-h svg{width:16px;height:16px;flex:none;stroke:var(--rust);fill:none;stroke-width:1.9;
+             stroke-linecap:round;stroke-linejoin:round}
+.panel-b{padding:4px 16px 14px;flex:1}
+.panel-f{padding:10px 16px;border-top:1px solid var(--line);background:var(--inset)}
+
+.item{padding:12px 0;border-bottom:1px solid var(--linel)}
+.item:last-child{border-bottom:none}
+.item .q{font-family:var(--read);font-size:.94rem;font-weight:600;line-height:1.4;display:block}
+.item .where{display:block;font-size:.76rem;color:var(--mut);margin-top:3px}
+.ans{margin-top:8px;font-size:.85rem;line-height:1.5}
+.ans .row{display:flex;gap:7px;align-items:baseline}
+.ans .row + .row{margin-top:3px}
+.ans .lab{flex:none;width:52px;font-size:.72rem;font-weight:700;letter-spacing:.05em;
+          text-transform:uppercase;color:var(--mut);padding-top:2px}
+.ans .wrong{color:var(--bad);font-weight:600}
+.ans .right{color:var(--good);font-weight:600}
+.count{font-size:.78rem;color:var(--sec);font-variant-numeric:tabular-nums}
+
+/* strength bar — a filled measure, never an edge stripe */
+.bar{display:block;height:7px;background:#ece5d7;border-radius:2px;overflow:hidden;margin-top:7px}
+.bar i{display:block;height:100%;background:#8aa896;border-radius:2px}
+.bar.low i{background:#b8624e}
+.bar.mid i{background:#c09442}
+.barline{display:flex;align-items:center;gap:10px;margin-top:6px}
+.barline .bar{flex:1;margin-top:0}
+.barline span{font-size:.76rem;color:var(--mut);font-variant-numeric:tabular-nums;flex:none}
+
+/* named pupils */
+.who{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--linel)}
+.who:last-child{border-bottom:none}
+.who .ini{width:29px;height:29px;flex:none;border-radius:50%;background:#ece3d2;color:#5b4632;
+          display:grid;place-items:center;font-size:.72rem;font-weight:700;margin-top:1px}
+.who b{display:block;font-size:.9rem;font-weight:700}
+.who span{display:block;font-size:.8rem;color:var(--sec);line-height:1.45}
+
+/* ---- buttons ------------------------------------------------------ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;
+     font-size:.86rem;font-weight:700;cursor:pointer;background:var(--rust);color:#fff;
+     border:1px solid #a8521c;border-radius:4px;padding:8px 15px;text-decoration:none;
+     box-shadow:inset 0 -2px 0 rgba(0,0,0,.18)}
+.btn:hover{filter:brightness(1.06)}
+.btn svg{width:14px;height:14px;fill:#fff;stroke:none}
+.btn.ghost{background:var(--card);color:var(--anchor);border-color:var(--edge);box-shadow:none}
+.btn.ghost:hover{border-color:#b9a98c;color:var(--ink);filter:none}
+.btn.wide{width:100%}
+.linkish{background:none;border:none;font:inherit;font-size:.83rem;font-weight:600;
+         color:var(--anchor);cursor:pointer;padding:0;text-decoration:none}
+.linkish:hover{text-decoration:underline}
+
+/* ---- "everything else" -------------------------------------------- */
+.rule{display:flex;align-items:center;gap:14px;margin:40px 0 18px}
+.rule h2{font-family:var(--read);font-size:1.08rem;font-weight:600;flex:none}
+.rule i{flex:1 1 24px;height:1px;background:var(--line);min-width:24px}
+.rule small{font-size:.82rem;color:var(--mut);flex:0 1 auto;min-width:0}
+
+.section{margin-top:26px}
+.section > h3{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+              color:var(--mut);margin-bottom:9px}
+.sheet{background:var(--card);border:1px solid var(--edge);border-radius:4px;overflow:hidden;
+       box-shadow:0 1px 0 rgba(60,40,20,.05)}
+.scroller{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{text-align:left;font-size:.71rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);
+   font-weight:700;padding:10px 14px;background:var(--inset);border-bottom:1px solid var(--line);
+   white-space:nowrap}
+td{padding:10px 14px;border-top:1px solid var(--linel);vertical-align:top}
+tbody tr:first-child td{border-top:none}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td .sub{display:block;font-size:.76rem;color:var(--mut)}
+.namebtn{background:none;border:none;font:inherit;font-weight:600;color:var(--anchor);
+         cursor:pointer;padding:0;text-align:left}
+.namebtn:hover{text-decoration:underline}
+.quote{font-family:var(--read);font-style:italic;color:var(--sec)}
+.hint{font-size:.81rem;color:var(--mut);margin-top:8px;max-width:78ch}
+
+/* band words — bordered boxes, never capsules */
+.band{display:inline-block;font-size:.72rem;font-weight:700;border-radius:3px;padding:1px 6px;
+      border:1px solid;white-space:nowrap}
+.band.g{color:var(--good);background:var(--goodbg);border-color:var(--goodline)}
+.band.a{color:var(--warm);background:var(--warmbg);border-color:var(--warmline)}
+.band.r{color:var(--bad);background:var(--badbg);border-color:var(--badline)}
+.band.n{color:var(--mut);background:var(--inset);border-color:var(--line)}
+
+.foot{margin-top:46px;padding-top:16px;border-top:1px solid var(--line);
+      font-size:.8rem;color:var(--mut);max-width:80ch}
+.foot a{color:var(--anchor)}
+
+/* ---- phone -------------------------------------------------------- */
+@media (max-width:900px){
+  .panels{grid-template-columns:1fr}
+  .brief{grid-template-columns:1fr}
+  .figs{border-left:none;border-top:1px solid var(--line);grid-template-rows:none}
+}
+@media (max-width:560px){
+  .datestamp{display:none}
+  .top-in{min-height:54px;padding-top:8px;padding-bottom:8px}
+  .topnav{width:100%;order:3}
+  .topnav select{flex:1;min-width:0}
+  .h1row{margin-bottom:1rem}
+  .figs div{padding:10px 16px}
+  .rule h2{font-size:1rem}
+  /* the aside beside the divider is a nicety; on a phone it costs a line it
+     has not earned, and left in it pushed the page 112px wider than the screen */
+  .rule small{display:none}
+}

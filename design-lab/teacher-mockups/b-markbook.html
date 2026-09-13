@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B · The markbook — teacher mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Young+Serif&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mock.css">
+<style>
+  /* ---- the grid ----
+     One object that answers "which topic" and "which pupil" together.
+     Cells carry a WORD as well as a tint, so it reads without colour. */
+  .gridwrap{background:var(--card);border:1px solid var(--edge);border-radius:4px;
+            box-shadow:0 1px 0 rgba(60,40,20,.05);overflow:hidden}
+  .gridscroll{overflow-x:auto}
+  table.grid{width:100%;border-collapse:separate;border-spacing:0;font-size:.85rem}
+  table.grid th,table.grid td{padding:0;border:0}
+  table.grid thead th{background:var(--inset);border-bottom:1px solid var(--line);
+    font-size:.72rem;font-weight:700;letter-spacing:.03em;color:var(--sec);
+    text-align:center;padding:9px 8px;vertical-align:bottom;line-height:1.3;min-width:106px}
+  table.grid thead th.pupilhead{text-align:left;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--mut);min-width:170px}
+  table.grid thead th small{display:block;font-weight:500;color:var(--mut);font-size:.68rem}
+  /* the global th rule uppercases and mutes; a pupil's name is neither a
+     column label nor a quiet one, so it is put back to ordinary ink here */
+  table.grid tbody th{position:sticky;left:0;z-index:2;background:var(--card);
+    border-top:1px solid var(--linel);border-right:1px solid var(--line);
+    text-align:left;padding:7px 12px;font-weight:600;font-size:.87rem;white-space:nowrap;
+    text-transform:none;letter-spacing:0;color:var(--ink)}
+  table.grid thead th.pupilhead{position:sticky;left:0;z-index:3}
+  table.grid tbody tr:hover th,table.grid tbody tr:hover td{background:#fbf6ea}
+  table.grid td{border-top:1px solid var(--linel);text-align:center;padding:5px 7px}
+  /* rows worth a look are already at the top under "weakest first"; colouring
+     their names as well would read as marking the child rather than the work */
+  table.grid tbody tr.flag th{color:var(--ink)}
+  .cell{display:block;width:100%;font:inherit;font-size:.73rem;font-weight:700;cursor:pointer;
+        border:1px solid;border-radius:3px;padding:4px 2px;line-height:1.2}
+  .cell small{display:block;font-weight:600;font-size:.66rem;opacity:.75;font-variant-numeric:tabular-nums}
+  .cell.g{color:var(--good);background:var(--goodbg);border-color:var(--goodline)}
+  .cell.a{color:var(--warm);background:var(--warmbg);border-color:var(--warmline)}
+  .cell.r{color:var(--bad);background:var(--badbg);border-color:var(--badline)}
+  .cell.n{color:var(--mut);background:var(--inset);border-color:var(--line)}
+  .cell.due{box-shadow:inset 0 0 0 1px var(--rust)}
+  .cell:hover{filter:brightness(.97)}
+  table.grid tfoot td,table.grid tfoot th{border-top:1px solid var(--line);background:var(--inset);
+    padding:9px 8px;font-size:.78rem;font-weight:700;color:var(--sec);text-align:center}
+  table.grid tfoot th{text-align:left;padding-left:12px;position:sticky;left:0;z-index:2;
+    text-transform:uppercase;letter-spacing:.06em;font-size:.7rem;color:var(--mut)}
+
+  .keyrow{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:10px 0 0;
+          font-size:.79rem;color:var(--mut)}
+  .keyrow span{display:inline-flex;align-items:center;gap:6px}
+  .swatch{width:13px;height:13px;border-radius:2px;border:1px solid;flex:none}
+  .swatch.g{background:var(--goodbg);border-color:var(--goodline)}
+  .swatch.a{background:var(--warmbg);border-color:var(--warmline)}
+  .swatch.r{background:var(--badbg);border-color:var(--badline)}
+  .swatch.n{background:var(--inset);border-color:var(--line)}
+  .swatch.due{background:var(--card);border-color:var(--rust);box-shadow:inset 0 0 0 1px var(--rust)}
+
+  .toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .toolbar label{font-size:.79rem;font-weight:600;color:var(--mut)}
+  .toolbar select{font:inherit;font-size:.85rem;color:var(--ink);background:var(--card);
+    border:1px solid var(--edge);border-radius:4px;padding:7px 10px}
+  .toolbar .sp{flex:1}
+
+  /* the drawer that opens when a cell is clicked — shown open in the mockup */
+  .drawer{margin-top:18px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:0;overflow:hidden}
+  .drawer-l{padding:18px 22px}
+  .drawer-r{border-left:1px solid var(--line);background:var(--inset);padding:18px 20px}
+  .drawer h2{font-family:var(--read);font-size:1.12rem;font-weight:600;margin-bottom:3px}
+  .drawer .sub2{font-size:.82rem;color:var(--mut);margin-bottom:12px}
+  .drawer h4{font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+             color:var(--mut);margin:16px 0 7px}
+  .drawer h4:first-child{margin-top:0}
+  .drawer ul{list-style:none}
+  .drawer li{padding:7px 0;border-top:1px solid var(--linel);font-size:.87rem}
+  .drawer li:first-child{border-top:none}
+  .drawer li b{font-weight:600}
+  .drawer li span{display:block;font-size:.78rem;color:var(--mut)}
+  @media (max-width:900px){ .drawer{grid-template-columns:1fr} .drawer-r{border-left:none;border-top:1px solid var(--line)} }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="index.html">StudyVault<img class="brandlock" src="/assets/studyvault-lock-rust.svg" alt=""></a>
+    <span class="datestamp">Monday 14 September</span>
+    <span class="mocktag">Mockup &middot; illustrative data</span>
+    <span class="sp"></span>
+    <nav class="topnav">
+      <select aria-label="Class">
+        <option>11H1 &middot; History</option>
+        <option>10H3 &middot; History</option>
+      </select>
+      <a href="#">Sign out</a>
+      <span class="avatar">TS</span>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="h1row">
+    <h1>11H1 &middot; the markbook</h1>
+    <span class="h1note">24 of 28 have joined &middot; one band per pupil per unit &middot; click any cell</span>
+  </div>
+
+  <div class="toolbar">
+    <label for="sort">Order by</label>
+    <select id="sort"><option>Weakest first</option><option>Surname</option><option>Most faded</option></select>
+    <label for="col">Columns</label>
+    <select id="col"><option>Units</option><option>Lessons in one unit</option><option>Exam question types</option></select>
+    <span class="sp"></span>
+    <a class="btn ghost" href="#">Print for the department meeting</a>
+  </div>
+
+  <div class="gridwrap"><div class="gridscroll">
+    <table class="grid">
+      <thead>
+        <tr>
+          <th class="pupilhead">Pupil</th>
+          <th>Conflict &amp;&nbsp;Tension<small>1918&ndash;39 &middot; 23 lessons</small></th>
+          <th>Germany<small>1890&ndash;1945 &middot; 26 lessons</small></th>
+          <th>Health &amp;&nbsp;the&nbsp;People<small>c1000&ndash;now &middot; 25 lessons</small></th>
+          <th>Elizabethan<small>1568&ndash;1603 &middot; 22 lessons</small></th>
+          <th>Marked answers<small>share of marks</small></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="flag"><th>Barrett, Chloe</th>
+          <td><button class="cell n">not yet<small>&mdash;</small></button></td>
+          <td><button class="cell n">not yet<small>&mdash;</small></button></td>
+          <td><button class="cell n">not yet<small>&mdash;</small></button></td>
+          <td><button class="cell n">not yet<small>&mdash;</small></button></td>
+          <td><button class="cell n">none<small>&mdash;</small></button></td></tr>
+
+        <tr class="flag"><th>Okafor, Ryan</th>
+          <td><button class="cell r">emerging<small>31</small></button></td>
+          <td><button class="cell r">emerging<small>24</small></button></td>
+          <td><button class="cell a">developing<small>47</small></button></td>
+          <td><button class="cell n">not yet<small>&mdash;</small></button></td>
+          <td><button class="cell r">34%<small>2 answers</small></button></td></tr>
+
+        <tr class="flag"><th>Iqbal, Maya</th>
+          <td><button class="cell r">emerging<small>36</small></button></td>
+          <td><button class="cell n">not yet<small>&mdash;</small></button></td>
+          <td><button class="cell r">emerging<small>39</small></button></td>
+          <td><button class="cell n">not yet<small>&mdash;</small></button></td>
+          <td><button class="cell n">1 answer<small>thin</small></button></td></tr>
+
+        <tr><th>Webb, Aaron</th>
+          <td><button class="cell a">developing<small>52</small></button></td>
+          <td><button class="cell r due">emerging<small>34 &darr;</small></button></td>
+          <td><button class="cell a">developing<small>61</small></button></td>
+          <td><button class="cell n">not yet<small>&mdash;</small></button></td>
+          <td><button class="cell a">51%<small>4 answers</small></button></td></tr>
+
+        <tr><th>Dunne, Jack</th>
+          <td><button class="cell a">developing<small>58</small></button></td>
+          <td><button class="cell r due">emerging<small>38 &darr;</small></button></td>
+          <td><button class="cell g">secure<small>74</small></button></td>
+          <td><button class="cell n">not yet<small>&mdash;</small></button></td>
+          <td><button class="cell r">38%<small>6 answers</small></button></td></tr>
+
+        <tr><th>Nowak, Zofia</th>
+          <td><button class="cell a due">developing<small>49 &darr;</small></button></td>
+          <td><button class="cell a">developing<small>55</small></button></td>
+          <td><button class="cell g">secure<small>78</small></button></td>
+          <td><button class="cell r">emerging<small>30</small></button></td>
+          <td><button class="cell a">57%<small>5 answers</small></button></td></tr>
+
+        <tr><th>Ellis, Harry</th>
+          <td><button class="cell g">secure<small>71</small></button></td>
+          <td><button class="cell a due">developing<small>51 &darr;</small></button></td>
+          <td><button class="cell a">developing<small>64</small></button></td>
+          <td><button class="cell n">not yet<small>&mdash;</small></button></td>
+          <td><button class="cell a">55%<small>3 answers</small></button></td></tr>
+
+        <tr><th>Kaur, Simran</th>
+          <td><button class="cell g">secure<small>76</small></button></td>
+          <td><button class="cell a">developing<small>60</small></button></td>
+          <td><button class="cell g">secure<small>81</small></button></td>
+          <td><button class="cell a">developing<small>44</small></button></td>
+          <td><button class="cell g">71%<small>8 answers</small></button></td></tr>
+
+        <tr><th>Shah, Priya</th>
+          <td><button class="cell g">secure<small>84</small></button></td>
+          <td><button class="cell g">secure<small>79</small></button></td>
+          <td><button class="cell g">secure<small>88</small></button></td>
+          <td><button class="cell a">developing<small>57</small></button></td>
+          <td><button class="cell g">74%<small>11 answers</small></button></td></tr>
+
+        <tr><th>Thompson, Leo</th>
+          <td><button class="cell a">developing<small>63</small></button></td>
+          <td><button class="cell a due">developing<small>50 &darr;</small></button></td>
+          <td><button class="cell g">secure<small>72</small></button></td>
+          <td><button class="cell n">not yet<small>&mdash;</small></button></td>
+          <td><button class="cell a">49%<small>4 answers</small></button></td></tr>
+
+        <tr><th>Ahmed, Yusuf</th>
+          <td><button class="cell a">developing<small>56</small></button></td>
+          <td><button class="cell r due">emerging<small>37 &darr;</small></button></td>
+          <td><button class="cell a">developing<small>59</small></button></td>
+          <td><button class="cell r">emerging<small>33</small></button></td>
+          <td><button class="cell a">52%<small>3 answers</small></button></td></tr>
+
+        <tr><th>Brennan, Katie</th>
+          <td><button class="cell g">secure<small>73</small></button></td>
+          <td><button class="cell a">developing<small>62</small></button></td>
+          <td><button class="cell n">not yet<small>&mdash;</small></button></td>
+          <td><button class="cell a">developing<small>48</small></button></td>
+          <td><button class="cell g">68%<small>7 answers</small></button></td></tr>
+      </tbody>
+      <tfoot>
+        <tr><th>Class now</th>
+          <td>developing &middot; 61</td><td>emerging &middot; 44</td>
+          <td>secure &middot; 70</td><td>barely started</td><td>54% of marks</td></tr>
+      </tfoot>
+    </table>
+  </div></div>
+
+  <div class="keyrow">
+    <span><i class="swatch g"></i> secure 70+</span>
+    <span><i class="swatch a"></i> developing 40&ndash;69</span>
+    <span><i class="swatch r"></i> emerging under 40</span>
+    <span><i class="swatch n"></i> no evidence yet</span>
+    <span><i class="swatch due"></i> was stronger, now under the revisit line</span>
+    <span style="margin-left:auto">12 of 24 shown &middot; weakest first</span>
+  </div>
+
+  <!-- the drawer: shown open, as it appears after clicking Dunne / Germany -->
+  <section class="card drawer">
+    <div class="drawer-l">
+      <h2>Jack Dunne &middot; Germany 1890&ndash;1945</h2>
+      <p class="sub2">Emerging &middot; 38 &middot; was secure on this in June &middot; 9 of 26 lessons finished</p>
+
+      <h4>What he keeps getting wrong</h4>
+      <ul>
+        <li><b>&ldquo;What did the Enabling Act allow?&rdquo;</b>
+            <span>chose &ldquo;ban every other political party&rdquo; &middot; wrong twice &middot; L11</span></li>
+        <li><b>&ldquo;Who led the SA until 1934?&rdquo;</b>
+            <span>chose &ldquo;Heinrich Himmler&rdquo; &middot; wrong once &middot; L14</span></li>
+      </ul>
+
+      <h4>On extended writing</h4>
+      <ul>
+        <li><b>3 of 8</b> on the last 8-mark explain question
+            <span>the marker: &ldquo;a second point is named but never developed&rdquo;</span></li>
+        <li><b>5 of 12</b> on the last essay
+            <span>the marker: &ldquo;the conclusion restates rather than judges&rdquo;</span></li>
+      </ul>
+    </div>
+    <div class="drawer-r">
+      <h4>Compared with the class</h4>
+      <ul>
+        <li><b>Germany</b> <span>him 38 &middot; class 44</span>
+            <span class="bar low" style="margin-top:6px"><i style="width:38%"></i></span></li>
+        <li><b>Conflict and Tension</b> <span>him 58 &middot; class 61</span>
+            <span class="bar mid" style="margin-top:6px"><i style="width:58%"></i></span></li>
+        <li><b>Health and the People</b> <span>him 74 &middot; class 70</span>
+            <span class="bar" style="margin-top:6px"><i style="width:74%"></i></span></li>
+      </ul>
+      <a class="btn ghost wide" style="margin-top:16px" href="#">Parents&rsquo; evening pack &rarr;</a>
+    </div>
+  </section>
+
+  <p class="foot">
+    <b>Mockup &middot; illustrative data.</b> Nothing on this page is real pupil work.
+    Every cell is attainment. There is no column for time spent, sessions, or when a pupil
+    worked, and there is no work to set from here.
+  </p>
+
+</main>
+</body>
+</html>
