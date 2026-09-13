@@ -351,6 +351,7 @@
     return { left: l, top: t, right: rt, bottom: b, width: rt - l, height: b - t };
   }
   function maybeStartTour() {
+    if (window.svLessonTour) return;                 // the recorded tour (js/lesson-tour.js) runs instead (13 Sep 2026)
     if (window.SV_EMBED) return;                     // embedded lesson: never tour inside a frame
     if (tourPolling || tourStarted) return;
     if (isListeningLesson()) return;
@@ -370,6 +371,7 @@
     })(20);
   }
   function startTour() {
+    if (window.svLessonTour) { svLessonTour.open(0); return; }   // "Tour" button replays the recorded tour
     if (document.querySelector('.sv-tour-card')) return;
     if (isListeningLesson()) return;
     tourStarted = true;
