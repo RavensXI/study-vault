@@ -1,282 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Classes — StudyVault</title>
+  <title>Your classes — StudyVault</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/brand.css">
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Young+Serif&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/teacher.css">
   <link rel="stylesheet" href="/css/scrollbar.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="/js/auth-gate.js" data-role="admin,teacher" data-auth="teacher"></script>
   <style>
-    /* The teacher area used to be three pages in two visual languages: an old
-       slate-and-purple dashboard, a newer prototype, and a classes screen I
-       first built to match the OLD one. This uses the tokens the student site
-       actually ships (welcome.html), so staff and students see one product. */
-    :root{
-      --paper:#f6f1e7; --card:#fffdf8; --ink:#26231e; --sec:#57534a; --mut:#84806f;
-      --line:#e4dfd2; --linel:#efeadf; --anchor:#5b4632;
-      --good:#2f6f4f; --bad:#a8412f; --warn:#8a6d1f;
-      --head:'Schibsted Grotesk',system-ui,sans-serif;
-      --read:'Literata',Georgia,serif;
-      --ease:cubic-bezier(.22,1,.36,1);
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    html{background:var(--paper)}
-    body{font-family:var(--head);color:var(--ink);background:var(--paper);line-height:1.55;
-         -webkit-font-smoothing:antialiased}
-
-    /* ---- masthead ---- */
-    .top{border-bottom:1px solid var(--line);background:var(--paper)}
-    .top-in{max-width:1120px;margin:0 auto;padding:0 26px;height:62px;
-            display:flex;align-items:center;justify-content:space-between;gap:20px}
-    .brand{font-size:1.24rem;font-weight:500;color:#3d3428;text-decoration:none;letter-spacing:-.01em}
-    .top nav{display:flex;align-items:center;gap:18px;font-size:.87rem}
-    .top nav a{color:var(--sec);text-decoration:none}
-    .top nav a:hover{color:var(--ink)}
-    .top nav a.auth-logout-btn{color:var(--anchor)!important;font-weight:600}
-
-    .wrap{max-width:1120px;margin:0 auto;padding:30px 26px 80px}
-
-    h1{font-family:var(--read);font-size:1.85rem;font-weight:600;letter-spacing:-.012em}
-    .sub{color:var(--sec);font-size:.95rem;margin:.35rem 0 0;max-width:64ch}
-
-    /* ---- the class bar: one place for picking, creating and the code ----
-       Tom's note: the dropdown, the create flow and the code belong together.
-       Splitting them across two screens was what made this feel like two
-       products bolted together. */
-    .classbar{background:var(--card);border:1px solid var(--line);border-radius:16px;
-              padding:16px 18px;margin:22px 0 0;
-              display:flex;align-items:center;gap:18px;flex-wrap:wrap;
-              box-shadow:0 1px 2px rgba(38,35,30,.04)}
-    .pickwrap{display:flex;align-items:center;gap:10px}
-    .pickwrap label{font-size:.8rem;font-weight:600;color:var(--mut)}
-    select,input{font:inherit;font-size:.95rem;color:var(--ink);background:#fff;
-                 border:1px solid var(--line);border-radius:10px;padding:9px 12px}
-    select:focus,input:focus{outline:2px solid var(--anchor);outline-offset:-1px}
-    #classSelect{font-weight:600;min-width:230px}
-    .roll{font-size:.88rem;color:var(--sec)}
-
-    .codewrap{display:flex;align-items:center;gap:10px}
-    /* only pushed right inside the class bar; the same block is reused in the
-       "class is ready" panel, where it should sit under the heading */
-    .classbar .codewrap{margin-left:auto}
-    .made .codewrap{margin-top:4px}
-    .codelabel{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
-    /* read out to a room, so it is large and unambiguous */
-    .code{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:1.42rem;
-          font-weight:700;letter-spacing:.17em;color:var(--anchor);
-          background:#f0e9db;border:1px solid var(--line);padding:7px 14px;border-radius:11px}
-    .copy{border:1px solid var(--line);background:#fff;color:var(--sec);border-radius:10px;
-          padding:8px 13px;font:inherit;font-size:.82rem;cursor:pointer}
-    .copy:hover{border-color:var(--anchor);color:var(--ink)}
-    .copy.done{background:#e9f2ec;border-color:#bcd8c7;color:var(--good)}
-    .shut{font-size:.76rem;color:var(--bad);background:#f7ece9;border:1px solid #eddcd7;
-          padding:3px 9px;border-radius:20px}
-
-    /* ---- create ---- */
-    .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;
-           padding:22px;margin-top:16px;max-width:660px;box-shadow:0 1px 2px rgba(38,35,30,.04)}
-    .panel h2{font-family:var(--read);font-size:1.16rem;font-weight:600;margin-bottom:14px}
-    .fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .field{display:flex;flex-direction:column;gap:5px}
-    .field.wide{grid-column:1/-1}
-    label{font-size:.8rem;font-weight:600;color:var(--mut)}
-    .btn{font:inherit;font-size:.93rem;font-weight:600;cursor:pointer;background:var(--anchor);
-         color:#fdfaf3;border:1px solid var(--anchor);border-radius:11px;padding:10px 22px}
-    .btn:hover{background:#4a3829;border-color:#4a3829}
-    .btn[disabled]{opacity:.55;cursor:not-allowed}
-    .btn.ghost{background:transparent;color:var(--sec);border-color:var(--line)}
-    .btn.ghost:hover{background:#f0e9db;color:var(--ink)}
-    .actions{display:flex;align-items:center;gap:12px;margin-top:16px}
-    .note{font-size:.85rem;color:var(--sec)}
-    .err{color:var(--bad);font-size:.86rem}
-
-    .made{background:#eef4ef;border:1px solid #cfe1d5;border-radius:16px;padding:18px 20px;margin-top:16px}
-    .made h2{font-family:var(--read);font-size:1.1rem;font-weight:600;color:#1f4d36;margin-bottom:8px}
-    .made p{font-size:.9rem;color:#28553d;margin-top:8px}
-
-    /* ---- the class itself ---- */
-    .section{margin-top:30px}
-    .section h3{font-size:.78rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
-                color:var(--mut);margin-bottom:10px}
-    .bars{display:flex;flex-wrap:wrap;gap:8px}
-    .pill{font-size:.83rem;background:var(--card);border:1px solid var(--line);border-radius:20px;
-          padding:5px 13px;color:var(--sec)}
-    .pill b{color:var(--ink);font-weight:700}
-
-    /* ---- the attainment strip ----
-       Three figures a teacher can read from the doorway. Deliberately not four:
-       the fourth slot on the old prototype was "total study hours", which is the
-       kind of number that gets a school a complaint rather than a lesson plan. */
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
-    .stats div{background:var(--card);border:1px solid var(--line);border-radius:16px;
-               padding:14px 16px;box-shadow:0 1px 2px rgba(38,35,30,.04)}
-    .stats b{display:block;font-family:var(--read);font-size:1.75rem;font-weight:700;line-height:1.15}
-    .stats small{display:block;font-size:.78rem;color:var(--sec);margin-top:2px}
-    .stats i{font-style:normal;color:var(--mut)}
-
-    .sheet{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;
-           box-shadow:0 1px 2px rgba(38,35,30,.04)}
-    /* a coverage bar inside a table cell — same component the pack uses */
-    .cov{position:relative;display:block;height:9px;width:120px;background:#ece5d7;border-radius:5px}
-    .cov i{display:block;height:100%;background:#5b8f6d;border-radius:5px}
-    .cov.low i{background:#b8624e}
-    .cov.mid i{background:#c09442}
-    .tag{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:.8rem;color:var(--anchor)}
-    .hint{font-size:.82rem;color:var(--mut);margin-top:8px}
-    .scroller{overflow-x:auto}
-    table{width:100%;border-collapse:collapse;font-size:.89rem}
-    th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);
-       font-weight:700;padding:12px 14px;background:#f4eee2;border-bottom:1px solid var(--line);white-space:nowrap}
-    td{padding:11px 14px;border-top:1px solid var(--linel);vertical-align:top}
-    tr:first-child td{border-top:none}
-    td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-    .wrong{color:var(--bad);font-weight:600}
-    .right{color:var(--good);font-weight:600}
-    .where{color:var(--mut);font-size:.78rem}
-    .thin{color:var(--sec);font-size:.89rem}
-
-    .empty{color:var(--sec);font-size:.94rem;background:var(--card);border:1px dashed var(--line);
-           border-radius:16px;padding:30px;text-align:center}
-    .empty a{color:var(--anchor);font-weight:600}
-    .loading{color:var(--mut);font-size:.9rem;padding:22px 0}
-    [hidden]{display:none!important}
-
-    .buildbar{margin-top:44px;padding-top:26px;border-top:1px solid var(--line);
-              display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
-    .buildbar h3{font-family:var(--read);font-size:1.05rem;font-weight:600;
-                 text-transform:none;letter-spacing:0;color:var(--ink);margin-bottom:4px}
-    .buildbar p{font-size:.85rem;color:var(--sec);max-width:62ch}
-
-    /* ---- parents' evening pack ----
-       A printable page about one pupil. Screen and paper share a layout so a
-       teacher is not surprised by what comes out of the printer. */
-    .packbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:18px 0 12px}
-    .backlink{background:none;border:none;font:inherit;font-size:.9rem;color:var(--anchor);
-              cursor:pointer;font-weight:600;padding:0}
-    .backlink:hover{text-decoration:underline}
-    .pack{background:#fff;border:1px solid var(--line);border-radius:16px;padding:30px 34px;
-          box-shadow:0 1px 2px rgba(38,35,30,.04)}
-    .phead{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;
-           border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:20px}
-    .phead h2{font-family:var(--read);font-size:1.7rem;font-weight:700}
-    .pmeta{text-align:right;font-size:.82rem;color:var(--sec);line-height:1.5}
-    .pbrand{font-weight:700;color:var(--ink)}
-    .kv{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
-    .kv div{background:#faf6ec;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
-    .kv b{display:block;font-family:var(--read);font-size:1.5rem;font-weight:700;line-height:1.1}
-    .kv small{display:block;font-size:.74rem;color:var(--sec);margin-top:3px}
-    .pack h4{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-             color:var(--mut);margin:22px 0 9px}
-    .ubar{position:relative;display:block;height:9px;background:#ece5d7;border-radius:5px;
-          width:150px;overflow:visible}
-    .ubar i{display:block;height:100%;background:#5b8f6d;border-radius:5px}
-    .ubar.low i{background:#b8624e}
-    .ubar.mid i{background:#c09442}
-    .ubar .cls{position:absolute;top:-3px;width:2px;height:15px;background:var(--ink);opacity:.55}
-    .legend{font-size:.78rem;color:var(--mut);margin-top:8px;line-height:1.5}
-    .two{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:6px}
-    .missrow{border-top:1px solid var(--linel);padding:8px 0}
-    .missrow b{font-weight:600;font-size:.9rem}
-    .missrow span{display:block;font-size:.79rem;color:var(--mut)}
-    .wubars{display:flex;align-items:flex-end;gap:10px;height:74px}
-    .wubars i{flex:0 0 34px;display:flex;flex-direction:column;justify-content:flex-end;
-              align-items:center;height:100%;font-style:normal}
-    .wubars em{font-style:normal;font-size:.74rem;font-weight:700;color:var(--sec)}
-    /* flex:0 0 auto or the bar is a shrinkable flex item and its percentage
-       height is ignored — every day then renders the same height and the chart
-       says nothing, which is worse than no chart because it looks like data. */
-    .wubars b{display:block;width:100%;background:#8aa896;border-radius:4px 4px 0 0;
-              min-height:3px;flex:0 0 auto}
-    .wubars small{font-size:.68rem;color:var(--mut);margin-top:4px}
-    .draft{background:#faf6ec;border:1px solid var(--line);border-radius:12px;padding:16px 18px;
-           font-family:var(--read);font-size:.95rem;line-height:1.65}
-    .draftfoot{font-size:.76rem;color:var(--mut);margin-top:8px}
-    .namebtn{background:none;border:none;font:inherit;color:var(--anchor);font-weight:600;
-             cursor:pointer;padding:0;text-align:left}
-    .namebtn:hover{text-decoration:underline}
-
-    @media print{
-      .top,.classbar,.packbar,.sub,h1,#made,#createPanel{display:none!important}
-      body,html{background:#fff}
-      .wrap{padding:0;max-width:none}
-      .pack{border:none;border-radius:0;box-shadow:none;padding:0}
-      .draft{background:#fff}
-      @page{margin:16mm}
-    }
-
-    @media (max-width:660px){
-      .fields{grid-template-columns:1fr}
-      .stats{grid-template-columns:1fr}
-      .kv{grid-template-columns:repeat(2,1fr)}
-      .two{grid-template-columns:1fr}
-      .codewrap{margin-left:0;width:100%}
-      .classbar{gap:12px}
-    }
+    /* auth-gate injects its Sign out control into .admin-nav; give it the house look */
+    .topnav a.auth-logout-btn{color:var(--anchor)!important;font-weight:600}
+    .topnav a.hidden-link[hidden]{display:none}
   </style>
 </head>
 <body>
+  <!-- The teacher screen, rebuilt 13 Sep 2026 as one page with two tabs.
+       "This week" is the Monday briefing: one sentence that says what to do,
+       then Reteach this / Going cold / Have a word, then every table below a
+       divider. "Markbook" is one band per pupil per unit, with a drawer for a
+       pupil and a unit. The lesson starter is a button on the reteach panel,
+       not a screen of its own. Every figure comes from
+       /api/teacher/class-progress, which enforces the data boundary:
+       attainment through, activity bucketed, study habits never sent. -->
   <header class="top">
     <div class="top-in">
-      <a class="brand" href="/"><span class="header-logo">Study<b>Vault</b><svg class="logo-lock" viewBox="512 384 1023 1280" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></span></a>
-      <!-- admin-nav is the hook js/auth-gate.js looks for when injecting its
-           Sign out control. Without one of its two class names the button is
-           never added, and a stale session admits you forever. -->
-      <nav class="admin-nav">
-        <!-- Content tools appear only for staff with edit rights (my-classes canEdit) -->
-        <a href="/teacher/review" id="lnk-review" hidden>Review content</a>
-        <a href="/teacher/editor" id="lnk-editor" hidden>Edit lessons</a>
+      <a class="brand" href="/teacher/classes">StudyVault<img class="brandlock" src="/assets/studyvault-lock-rust.svg" alt=""></a>
+      <span class="datestamp" id="today"></span>
+      <span class="sp"></span>
+      <!-- admin-nav is the hook js/auth-gate.js looks for when injecting Sign out -->
+      <nav class="topnav admin-nav">
+        <select id="classSelect" aria-label="Class" hidden></select>
+        <a href="/teacher/review" id="lnk-review" class="hidden-link" hidden>Review content</a>
+        <a href="/teacher/editor" id="lnk-editor" class="hidden-link" hidden>Edit lessons</a>
+        <span class="avatar" id="avatar" title="">·</span>
       </nav>
     </div>
   </header>
 
   <main class="wrap">
-    <h1>Your classes</h1>
-    <p class="sub">Pick a class to see how they are getting on, or make a new one and read
-      the code out. Students join as ordinary StudyVault users — there is nothing for your
-      IT department to set up.</p>
+    <div class="h1row">
+      <h1 id="h1">Your classes</h1>
+      <span class="h1note" id="h1note"></span>
+    </div>
 
-    <div class="classbar" id="classbar" hidden>
-      <div class="pickwrap">
-        <label for="classSelect">Class</label>
-        <select id="classSelect"></select>
-      </div>
+    <!-- the class bar: join code and roll for the chosen class; a door to a new one -->
+    <div class="card classbar" id="classbar" hidden>
       <span class="roll" id="roll"></span>
       <div class="codewrap" id="codewrap">
-        <span class="codelabel">Join code</span>
+        <label for="code">Join code</label>
         <span class="code" id="code">——————</span>
         <button class="copy" id="copyBtn" type="button">Copy</button>
+        <button class="linkish" id="newClassBtn" type="button">New class</button>
       </div>
     </div>
 
     <div id="made"></div>
 
-    <!-- Create sits in the same place as the picker, because "make a class" and
-         "look at a class" are the same job at different moments. -->
-    <section class="panel" id="createPanel" hidden>
+    <section class="card panelform" id="createPanel" hidden>
       <h2>New class</h2>
       <div class="fields">
-        <div class="field">
-          <label for="cname">Class name</label>
-          <input id="cname" maxlength="40" placeholder="10 Set 1" autocomplete="off">
-        </div>
-        <div class="field">
-          <label for="cyear">Year group</label>
-          <select id="cyear">
-            <option value="">Not set</option>
-            <option value="7">Year 7</option><option value="8">Year 8</option>
-            <option value="9">Year 9</option><option value="10">Year 10</option>
-            <option value="11" selected>Year 11</option>
-          </select>
-        </div>
-        <div class="field wide">
-          <label for="csubject">Subject</label>
-          <select id="csubject"><option value="">Loading…</option></select>
-        </div>
+        <div class="field"><label for="cname">Class name</label><input id="cname" maxlength="40" placeholder="11H1" autocomplete="off"></div>
+        <div class="field"><label for="cyear">Year group</label>
+          <select id="cyear"><option value="">Not set</option><option value="7">Year 7</option><option value="8">Year 8</option><option value="9">Year 9</option><option value="10">Year 10</option><option value="11" selected>Year 11</option></select></div>
+        <div class="field wide"><label for="csubject">Subject</label><select id="csubject"><option value="">Loading…</option></select></div>
       </div>
       <div class="actions">
         <button class="btn" id="make" type="button">Create class</button>
@@ -285,566 +75,462 @@
       </div>
     </section>
 
+    <div class="tabs" id="tabs" role="tablist" hidden>
+      <button type="button" role="tab" aria-selected="true" data-tab="week">This week</button>
+      <button type="button" role="tab" aria-selected="false" data-tab="book">Markbook</button>
+    </div>
+
     <div id="view" class="loading">Loading…</div>
 
-    <!-- Building from your own resources is a different MODE of work from the
-         daily loop above: setup, done when a department joins, not something
-         you do between lessons. It gets its own door rather than a seat in the
-         nav, so the everyday screen never implies a teacher is expected to
-         operate a content factory. -->
     <section class="buildbar" id="buildbar" hidden>
       <div>
         <h3>Build lessons from your own resources</h3>
-        <p>Upload your schemes of work and we build lessons around them. Your files never
-           leave this computer — only the text is read, it is processed in the UK, and it
-           is deleted once your lessons go live.</p>
+        <p>Upload your schemes of work and we build lessons around them. Only the text is read, it is processed in the UK, and it is deleted once your lessons go live.</p>
       </div>
       <a class="btn ghost" href="/teacher/upload">Start a build &rarr;</a>
     </section>
   </main>
 
+  <!-- the projected starter: one question at a time, the class's wrong answer hidden until the teacher shows it -->
+  <div class="starter" id="starter" hidden role="dialog" aria-modal="true" aria-label="Lesson starter">
+    <header class="top"><div class="top-in">
+      <a class="brand" href="#" id="starterBrand">StudyVault<img class="brandlock" src="/assets/studyvault-lock-rust.svg" alt=""></a>
+      <span class="datestamp" id="starterDate"></span><span class="sp"></span>
+      <nav class="topnav"><button class="linkish" type="button" id="starterClose">&larr; back to the class</button></nav>
+    </div></header>
+    <div class="stage">
+      <div class="slidemeta"><span class="of" id="stOf"></span><span class="where" id="stWhere"></span><span class="tally" id="stTally"></span></div>
+      <section class="card qcard">
+        <p class="q" id="stQ"></p>
+        <p class="handnote">Ask them first. Then show what the class actually said.</p>
+        <div class="reveal">
+          <button class="btn" id="stReveal" type="button">Show what the class said</button>
+          <div class="answers" id="stAnswers">
+            <div class="abox said"><div class="lab" id="stSaidLab">They said</div><div class="val" id="stSaid"></div></div>
+            <div class="abox was"><div class="lab">The answer</div><div class="val" id="stWas"></div></div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="pager"><div class="pager-in">
+      <button class="btn ghost" type="button" id="stPrev">&larr; Previous</button>
+      <div class="dots" id="stDots"></div>
+      <button class="btn ghost" type="button" id="stNext">Next &rarr;</button>
+      <span class="sp"></span>
+    </div></div>
+  </div>
+
 <script>
 (function () {
   var SUPA = 'https://baipckgywpnwapobwtsy.supabase.co';
   var ANON = 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
+  var dq = new URLSearchParams(location.search);
+  /* local development: render a saved API response instead of signing in
+     (design-lab/_fixture.json from scripts/_teacher_probe.js, or the richer
+     illustrative one). Only ever on localhost. */
+  var FIXTURE = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && dq.get('fixture');
+
+  var viewEl = document.getElementById('view'), selEl = document.getElementById('classSelect'),
+      barEl = document.getElementById('classbar'), createEl = document.getElementById('createPanel'),
+      codeEl = document.getElementById('code'), rollEl = document.getElementById('roll'),
+      tabsEl = document.getElementById('tabs'), subjEl = document.getElementById('csubject');
+  var CLASSES = [], DATA = null, TAB = sessionStorage.getItem('sv-teacher-tab') || 'week';
   var NEW = '__new__';
 
-  var viewEl    = document.getElementById('view');
-  var subjEl    = document.getElementById('csubject');
-  var selEl     = document.getElementById('classSelect');
-  var barEl     = document.getElementById('classbar');
-  var createEl  = document.getElementById('createPanel');
-  var codeEl    = document.getElementById('code');
-  var rollEl    = document.getElementById('roll');
-  var codeWrap  = document.getElementById('codewrap');
+  document.getElementById('today').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('starterDate').textContent = document.getElementById('today').textContent;
 
-  var CLASSES = [];
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function pct(n) { return n == null ? '&mdash;' : n + '%'; }
+  function initials(name) { return String(name || '').split(/\s+/).map(function (p) { return p[0] || ''; }).join('').slice(0, 2).toUpperCase(); }
+  function surnameFirst(name) { var p = String(name || '').trim().split(/\s+/); return p.length > 1 ? p[p.length - 1] + ', ' + p.slice(0, -1).join(' ') : name; }
+  function bandWord(b) { return b === 'g' ? 'secure' : b === 'a' ? 'developing' : b === 'r' ? 'emerging' : 'not yet'; }
+  function barCls(s) { return s == null ? '' : s < 40 ? 'low' : s < 70 ? 'mid' : ''; }
+  function weeksAgo(days) { if (days == null) return ''; if (days < 7) return 'this week'; var w = Math.round(days / 7); return w + (w === 1 ? ' week ago' : ' weeks ago'); }
+  function shortQ(q) { return String(q || '').length > 90 ? String(q).slice(0, 87) + '…' : q; }
 
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
-    });
-  }
-
-  /* Credentials: three ways to be signed in as staff, and the page must find
-     whichever applies or say plainly that none does. */
+  /* ---- credentials + api (unchanged from the previous screen) ---- */
   var token = null, pw = null;
   async function credentials() {
-    try {
-      var sb = window.supabase.createClient(SUPA, ANON);
-      var s = await sb.auth.getSession();
-      if (s && s.data && s.data.session) token = s.data.session.access_token;
-    } catch (e) {}
-    if (!token) {
-      try {
-        var raw = localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token');
-        if (raw) token = JSON.parse(raw).access_token || null;
-      } catch (e) {}
-    }
-    try {
-      var saved = JSON.parse(sessionStorage.getItem('studyvault-auth') ||
-                             localStorage.getItem('studyvault-auth') || 'null');
-      if (saved && saved.pw) pw = saved.pw;
-    } catch (e) {}
+    try { var sb = window.supabase.createClient(SUPA, ANON); var s = await sb.auth.getSession(); if (s && s.data && s.data.session) token = s.data.session.access_token; } catch (e) {}
+    if (!token) { try { var raw = localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token'); if (raw) token = JSON.parse(raw).access_token || null; } catch (e) {} }
+    try { var saved = JSON.parse(sessionStorage.getItem('studyvault-auth') || localStorage.getItem('studyvault-auth') || 'null'); if (saved && saved.pw) pw = saved.pw; } catch (e) {}
     return !!(token || pw);
   }
-
   async function api(path, body) {
     var headers = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = 'Bearer ' + token;
-    else if (pw) headers['X-Admin-Password'] = pw;
+    if (token) headers['Authorization'] = 'Bearer ' + token; else if (pw) headers['X-Admin-Password'] = pw;
     var opts = { headers: headers };
-    if (body !== undefined) {
-      opts.method = 'POST';
-      if (pw && !token) body._admin_password = pw;
-      opts.body = JSON.stringify(body);
-    }
-    var r = await fetch(path, opts);
-    var d = await r.json();
-    if (r.status === 401) {
-      /* No usable session (expired, signed out elsewhere, or arrived here
-         without signing in): go to the sign-in page rather than show the
-         API's raw "Not authenticated" text (Tom hit this on 6 Sep 2026). */
-      window.location.replace('/teacher/login');
-      throw new Error('Sign in to see your classes.');
-    }
+    if (body !== undefined) { opts.method = 'POST'; if (pw && !token) body._admin_password = pw; opts.body = JSON.stringify(body); }
+    var r = await fetch(path, opts); var d = await r.json();
+    if (r.status === 401) { window.location.replace('/teacher/login'); throw new Error('Sign in to see your classes.'); }
     if (!r.ok) throw new Error(d.error || d.detail || ('Request failed (' + r.status + ')'));
     return d;
   }
 
-  /* ---- the class view -----------------------------------------------------
-     Everything here comes from /api/teacher/class-progress, which enforces the
-     data boundary server-side: attainment through, last-active bucketed, study
-     habits never sent. Nothing below tries to be cleverer than that. */
-  /* A course made only of practice units carries no knowledge check at all, so a
-     blank attainment panel there is the format working, not the data missing.
-     Saying which it is costs one line and saves a support email. */
-  function allPractice(d) {
-    var u = (d.coverage && d.coverage.units) || [];
-    return u.length > 0 && u.every(function (x) { return x.practice; });
+  /* ---- "since you last looked": a per-class stamp on this device, never sent anywhere ---- */
+  function sinceLooked(classId) {
+    var k = 'sv-teacher-seen:' + classId, prev = null;
+    try { prev = localStorage.getItem(k); localStorage.setItem(k, new Date().toISOString().slice(0, 10)); } catch (e) {}
+    if (!prev) return null;
+    return Math.max(0, Math.round((Date.now() - new Date(prev + 'T00:00:00').getTime()) / 864e5));
   }
 
-  function statsHtml(d) {
-    var a = d.attainment;
-    if (!a) return '';
-    var acc = a.accuracy == null ? '&mdash;' : a.accuracy + '%';
-    var evidence = a.accuracy == null
-      ? (a.answered ? 'only ' + a.answered + ' answers so far' : 'no quiz answers yet')
-      : 'over ' + a.answered + ' answers';
-    var cov = d.coverage;
-    return '<div class="stats">' +
-      '<div><b>' + acc + '</b><small>recall accuracy &middot; <i>' + evidence + '</i></small></div>' +
-      '<div><b>' + a.studentsWithEvidence + ' <i>of ' + a.size + '</i></b>' +
-        '<small>have been quizzed in this subject</small></div>' +
-      '<div><b>' + (cov ? cov.lessonsTouched : 0) +
-        (cov && cov.lessonsInStartedUnits ? ' <i>of ' + cov.lessonsInStartedUnits + '</i>' : '') + '</b>' +
-        '<small>lessons reached in the units they have started</small></div></div>';
+  /* ================= THIS WEEK ================= */
+  function briefingHtml(d, since) {
+    var subj = d.class.subject || 'this subject', a = d.attainment || {}, ps = [];
+    var top = (d.missedItems || [])[0], cold = (d.goingCold || [])[0], words = d.haveAWord || [];
+    if (top) {
+      ps.push('<p><b>' + esc(top.right || shortQ(top.question)) + '</b> is the thing to reteach. ' + top.commonWrongCount + (top.met ? ' of the ' + top.met + ' who met it' : ' of them') +
+        ' chose &ldquo;' + esc(top.commonWrongAnswer) + '&rdquo; on the ' + esc(top.unit) + ' quiz.</p>');
+    } else if (!a.answered) {
+      ps.push('<p><b>No quiz answers in ' + esc(subj) + ' yet.</b> Once the class has done a lesson or two, this line tells you what to reteach, what is fading and who to have a word with.</p>');
+    } else {
+      ps.push('<p><b>Nothing to reteach yet.</b> No question has been missed by two or more of them so far.</p>');
+    }
+    if (cold) {
+      ps.push('<p><span class="rust">' + esc(cold.unit) + ' is going cold.</span> ' + cold.dropped + ' were secure on it and are now under the revisit line; it is the strongest candidate for a do-now.' +
+        (words.length ? ' ' + words.length + (words.length === 1 ? ' pupil is' : ' pupils are') + ' worth a word, named under <b>Have a word</b>.' : '') + '</p>');
+    } else if (words.length) {
+      ps.push('<p>' + words.length + (words.length === 1 ? ' pupil is' : ' pupils are') + ' worth a word, named under <b>Have a word</b>.</p>');
+    }
+    var kick = since == null ? 'This week' : (since === 0 ? 'Since you last looked &middot; today' : 'Since you last looked &middot; ' + since + (since === 1 ? ' day' : ' days'));
+    return '<section class="card brief"><div class="brief-say"><div class="kicker">' + kick + '</div>' + ps.join('') + '</div>' +
+      '<div class="figs">' +
+      '<div><b>' + (a.accuracy == null ? '&mdash;' : a.accuracy + '%') + '</b><small>recall across the class <i>&middot; ' + (a.answered ? 'over ' + a.answered + ' answers' : 'no quiz answers yet') + '</i></small></div>' +
+      '<div><b>' + (d.goingCold || []).length + '</b><small>topics going cold <i>&middot; learned, then faded</i></small></div>' +
+      '<div><b>' + (a.studentsWithEvidence || 0) + ' <i>of ' + d.size + '</i></b><small>have quiz evidence in ' + esc(subj) + '</small></div>' +
+      '</div></section>';
   }
-
-  function viewHtml(d) {
-    var act = d.activity || {};
-    var order = ['this week','last week','this month','over a month','never'];
-    var pills = order.filter(function (k) { return act[k]; }).map(function (k) {
-      return '<span class="pill"><b>' + act[k] + '</b> ' + esc(k) + '</span>';
-    }).join('');
-
-    var h = statsHtml(d);
-
-    h += '<div class="section"><h3>Last worked on ' + esc(d.class.subject || 'this subject') + '</h3>' +
-            '<div class="bars">' + (pills || '<span class="thin">No activity recorded yet.</span>') + '</div></div>';
-
-    /* Curriculum coverage: which lessons have been REACHED, in which units.
-       A completion count and an opened-but-unfinished count, both aggregated
-       over the class. No day, no duration, no per-child grid — this answers
-       "what have they got to", not "when were they at their desk". */
-    h += '<div class="section"><h3>Where the class has got to</h3>';
-    var cov = d.coverage;
-    if (!cov || !cov.units.length) {
-      h += '<div class="empty">Nobody has opened a lesson in this subject yet. ' +
-           'Once they do, this shows which units they have reached and how far into ' +
-           'each one they are.</div>';
-    } else {
-      h += '<div class="sheet"><div class="scroller"><table><thead><tr>' +
-           '<th>Unit</th><th class="num">Lessons reached</th><th class="num">Started it</th>' +
-           '<th class="num">Typical lessons done</th></tr></thead><tbody>';
-      cov.units.forEach(function (u) {
-        var pct = u.percent == null ? 0 : u.percent;
-        var cls = pct < 40 ? 'low' : (pct < 80 ? 'mid' : '');
-        h += '<tr><td>' + esc(u.unit) +
-             (u.practice ? ' <span class="where">practice</span>' : '') + '</td>' +
-             '<td class="num"><span class="cov ' + cls + '" style="display:inline-block;vertical-align:middle;' +
-             'margin-right:8px"><i style="width:' + pct + '%"></i></span>' +
-             u.touched + (u.lessons ? ' of ' + u.lessons : '') + '</td>' +
-             '<td class="num">' + u.studentsStarted + ' of ' + d.size + '</td>' +
-             '<td class="num">' + u.avgDone + '</td></tr>';
-      });
-      h += '</tbody></table></div></div>';
-      if (cov.unitsUntouched) {
-        h += '<p class="hint">' + cov.unitsUntouched + ' other unit' +
-             (cov.unitsUntouched === 1 ? '' : 's') + ' on this course ' +
-             (cov.unitsUntouched === 1 ? 'has' : 'have') + ' nothing recorded. On a course ' +
-             'that offers more options than any one class takes, that is expected.</p>';
-      }
-    }
-    h += '</div>';
-
-    h += '<div class="section"><h3>Questions the class gets wrong</h3>';
-    if (!(d.missedItems || []).length) {
-      h += '<div class="empty">Nothing yet that two or more of them missed. One wrong answer is ' +
-           'a pupil having an off day, so it is not shown here.</div>';
-    } else {
-      h += '<div class="sheet"><div class="scroller"><table><thead><tr>' +
-           '<th>Question</th><th>They chose</th><th>Answer</th><th class="num">Students</th>' +
-           '</tr></thead><tbody>';
-      d.missedItems.forEach(function (q) {
-        h += '<tr><td>' + esc(q.question) + '<br><span class="where">' + esc(q.where) + '</span></td>' +
-             '<td class="wrong">' + esc(q.commonWrongAnswer || '—') +
-             (q.commonWrongCount > 1 ? ' <span class="where">×' + q.commonWrongCount + '</span>' : '') + '</td>' +
-             '<td class="right">' + esc(q.right || '—') + '</td>' +
-             '<td class="num">' + q.students + '</td></tr>';
-      });
-      h += '</tbody></table></div></div>';
-    }
-    h += '</div>';
-
-    /* Named error patterns. These are only written when a wrong answer MATCHED a
-       known misconception, never on a guess — which is why the empty state has
-       to say "none matched" rather than "no data". The tally has been coming
-       back from the API since August and was simply never drawn. */
-    h += '<div class="section"><h3>Misconceptions the class shares</h3>';
-    if (!(d.misconceptions || []).length) {
-      h += '<div class="empty">No named misconception has been matched in this class yet. ' +
-           'These are only recorded when a wrong answer matches a known error pattern, ' +
-           'so an empty table means nothing has been diagnosed &mdash; not that nobody has ' +
-           'made a mistake. The table above shows every wrong answer.</div>';
-    } else {
-      h += '<div class="sheet"><div class="scroller"><table><thead><tr>' +
-           '<th>Error pattern</th><th>Where</th><th class="num">Students</th>' +
-           '<th class="num">Times</th></tr></thead><tbody>';
-      d.misconceptions.forEach(function (m) {
-        h += '<tr><td class="tag">' + esc(String(m.tag).replace(/-/g, ' ')) + '</td>' +
-             '<td class="where">' + esc(m.unitName || m.unit || '—') +
-             (m.lesson ? ' &middot; L' + esc(m.lesson) : '') + '</td>' +
-             '<td class="num">' + m.students + '</td>' +
-             '<td class="num">' + m.count + '</td></tr>';
-      });
-      h += '</tbody></table></div></div>';
-    }
-    h += '</div>';
-
-    /* Attainment lesson by lesson: the same knowledge-check rows as the pupil
-       column, tallied down the class instead of across one child. */
-    h += '<div class="section"><h3>Weakest lessons</h3>';
-    if (!(d.lessonAttainment || []).length) {
-      h += '<div class="empty">' + (allPractice(d)
-        ? 'This course is practice-first, so it carries no knowledge-check quiz. ' +
-          'There is no recall accuracy to report for it, and that is the format ' +
-          'working rather than anything missing.'
-        : 'No lesson yet has quiz answers from two or more of them. One pupil’s ' +
-          'score is not a class picture, so nothing is averaged here until a second ' +
-          'has been quizzed on the same lesson.') + '</div>';
-    } else {
-      h += '<div class="sheet"><div class="scroller"><table><thead><tr>' +
-           '<th>Lesson</th><th class="num">Accuracy</th><th class="num">Students</th>' +
-           '<th class="num">Answers</th></tr></thead><tbody>';
-      d.lessonAttainment.forEach(function (l) {
-        var cls = l.accuracy < 55 ? 'low' : (l.accuracy < 72 ? 'mid' : '');
-        h += '<tr><td>' + esc(l.title || ('Lesson ' + l.lesson)) +
-             '<br><span class="where">' + esc(l.unit) + ' &middot; L' + l.lesson + '</span></td>' +
-             '<td class="num"><span class="cov ' + cls + '" style="display:inline-block;vertical-align:middle;' +
-             'margin-right:8px"><i style="width:' + l.accuracy + '%"></i></span>' + l.accuracy + '%</td>' +
-             '<td class="num">' + l.students + '</td>' +
-             '<td class="num">' + l.answered + '</td></tr>';
-      });
-      h += '</tbody></table></div></div>';
-      if (d.attainment && d.attainment.lessonsWithEvidence > d.attainment.lessonsShown) {
-        h += '<p class="hint">' + (d.attainment.lessonsWithEvidence - d.attainment.lessonsShown) +
-             ' more lessons have some quiz evidence, but too little to average yet.</p>';
-      }
-    }
-    h += '</div>';
-
-    h += '<div class="section"><h3>Weakest units</h3>';
-    if (!(d.weakestUnits || []).length) {
-      h += '<div class="empty">Not enough warm-up attempts yet to say.</div>';
-    } else {
-      h += '<div class="sheet"><div class="scroller"><table><thead><tr><th>Unit</th>' +
-           '<th class="num">Accuracy</th><th class="num">Attempts</th></tr></thead><tbody>';
-      d.weakestUnits.forEach(function (u) {
-        h += '<tr><td>' + esc(u.unit) + '</td><td class="num">' + u.accuracy + '%</td>' +
-             '<td class="num">' + u.attempts + '</td></tr>';
-      });
-      h += '</tbody></table></div></div>';
-    }
-    h += '</div>';
-
-    h += '<div class="section"><h3>Students &mdash; click a name for a parents&rsquo; evening pack</h3><div class="sheet"><div class="scroller"><table><thead><tr>' +
-         '<th>Name</th><th class="num">Lessons done</th><th class="num">Quiz accuracy</th>' +
-         '<th class="num">Practice</th><th>Last active</th></tr></thead><tbody>';
-    (d.students || []).forEach(function (s) {
-      h += '<tr><td><button class="namebtn" data-pack="' + esc(s.id) + '">' +
-             esc(s.name) + '</button></td>' +
-           '<td class="num">' + s.lessonsComplete + '</td>' +
-           '<td class="num">' + (s.quizAccuracy == null ? '—' : s.quizAccuracy + '%') + '</td>' +
-           '<td class="num">' + (s.practiceAnswered >= 40 ? '40+' : s.practiceAnswered) + '</td>' +
-           '<td>' + esc(s.lastActive) + '</td></tr>';
+  function panelsHtml(d) {
+    var items = (d.missedItems || []).slice(0, 3), cold = d.goingCold || [], words = d.haveAWord || [];
+    var h = '<div class="panels">';
+    h += '<section class="card panel"><div class="panel-h"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><h2>Reteach this</h2><span class="n">' + items.length + '</span></div><div class="panel-b">';
+    if (!items.length) h += '<p class="thin" style="padding:12px 0">Nothing yet. A question lands here once two or more pupils get it wrong.</p>';
+    items.forEach(function (q) {
+      h += '<div class="item"><span class="q">' + esc(q.question) + '</span><span class="where">' + esc(q.unit) + (q.lesson ? ' &middot; L' + q.lesson : '') + '</span>' +
+        '<div class="ans">' + (q.commonWrongAnswer ? '<div class="row"><span class="lab">Chose</span><span class="wrong">' + esc(q.commonWrongAnswer) + '</span></div>' : '') +
+        (q.right ? '<div class="row"><span class="lab">Answer</span><span class="right">' + esc(q.right) + '</span></div>' : '') + '</div>' +
+        '<div class="barline"><span class="count">' + q.students + (q.met ? ' of ' + q.met + ' who met it' : ' pupils') + '</span></div></div>';
     });
-    h += '</tbody></table></div></div></div>';
+    h += '</div>' + (items.length ? '<div class="panel-f"><button class="btn wide" type="button" data-starter><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="5,3 19,12 5,21"/></svg>Project these as a starter</button></div>' : '') + '</section>';
+
+    h += '<section class="card panel"><div class="panel-h"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M4.9 5.6l14.2 12.8M19.1 5.6 4.9 18.4M2.5 12h19"/></svg><h2>Going cold</h2><span class="n">' + cold.length + '</span></div><div class="panel-b">';
+    if (!cold.length) h += '<p class="thin" style="padding:12px 0">Nothing is fading yet. A topic lands here when pupils who were secure on it drop under the revisit line.</p>';
+    cold.forEach(function (u) {
+      h += '<div class="item"><span class="q">' + esc(u.unit) + '</span><span class="where">' + u.lessons + ' lessons' + (u.lastDays != null ? ' &middot; last evidence ' + weeksAgo(u.lastDays) : '') + '</span>' +
+        '<div class="barline"><span class="bar ' + barCls(u.score) + '"><i style="width:' + (u.score || 0) + '%"></i></span><span>' + (u.score == null ? '&mdash;' : u.score) + '</span></div>' +
+        '<span class="count">' + u.under + ' of ' + u.pupils + ' under the revisit line &middot; ' + u.dropped + ' of them were secure</span></div>';
+    });
+    h += '</div><div class="panel-f"><span class="count">Strength decays from the date each pupil last retrieved it. Secure 70+ &middot; developing 40&ndash;69 &middot; revisit under 55.</span></div></section>';
+
+    h += '<section class="card panel"><div class="panel-h"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg><h2>Have a word</h2><span class="n">' + words.length + '</span></div><div class="panel-b">';
+    if (!words.length) h += '<p class="thin" style="padding:12px 0">Nobody stands out. A pupil lands here for a drop, low recall with real evidence, weak marked answers, or no evidence at all.</p>';
+    words.forEach(function (w) {
+      h += '<div class="who"><span class="ini">' + esc(initials(w.name)) + '</span><div><b><button class="namebtn" type="button" data-pupil="' + esc(w.id) + '">' + esc(w.name) + '</button></b><span>' + esc(w.why) + '</span></div></div>';
+    });
+    h += '</div><div class="panel-f"><span class="count">Tap a name for their row in the markbook, or open a parents&rsquo; evening pack from there.</span></div></section></div>';
     return h;
   }
-
-  function showCreate(on) {
-    createEl.hidden = !on;
-    if (on) {
-      viewEl.innerHTML = '';
-      codeWrap.hidden = true;
-      rollEl.textContent = '';
-      document.getElementById('cname').focus();
-    } else {
-      codeWrap.hidden = false;
+  function sheet(title, head, rows, hint) {
+    return '<section class="section"><h3>' + title + '</h3><div class="sheet"><div class="scroller"><table><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div></div>' + (hint ? '<p class="hint">' + hint + '</p>' : '') + '</section>';
+  }
+  function everythingHtml(d) {
+    var h = '<div class="rule"><h2>Everything else</h2><i></i><small>the full picture, when you have longer than five minutes</small></div>';
+    if ((d.marks || []).length) {
+      h += sheet('Where the marks are going &mdash; from answers marked on the platform', '<th>Question size</th><th>Most often in</th><th>Class average</th><th>Share of marks</th><th class="num">Answers</th>',
+        d.marks.map(function (m) { return '<tr><td>' + m.marks + '-mark questions</td><td>' + esc(m.unit) + '</td><td>' + m.average + ' <span class="sub">of ' + m.marks + '</span></td><td>' + m.percent + '%</td><td class="num">' + m.answers + '</td></tr>'; }).join(''),
+        'Every answer here was written by a pupil and marked on StudyVault. Three answers or more before a row appears.');
     }
+    var mi = d.missedItems || [];
+    h += sheet('Questions the class gets wrong', '<th>Question</th><th>They chose</th><th>Answer</th><th class="num">Pupils</th>',
+      mi.length ? mi.map(function (q) { return '<tr><td>' + esc(q.question) + '<span class="sub">' + esc(q.unit) + (q.lesson ? ' &middot; L' + q.lesson : '') + '</span></td><td class="wrong">' + esc(q.commonWrongAnswer || '') + (q.commonWrongCount > 1 ? ' <span class="sub">&times;' + q.commonWrongCount + '</span>' : '') + '</td><td class="right">' + esc(q.right || '') + '</td><td class="num">' + q.students + '</td></tr>'; }).join('')
+        : '<tr><td colspan="4" class="thin">No question has been missed by two or more pupils yet.</td></tr>',
+      'Only questions two or more of them missed. One wrong answer is a pupil having an off day, so it is not shown.');
+    var ub = d.unitBands || [];
+    h += sheet('Topics, in the words the pupils see', '<th>Unit</th><th class="num">Secure</th><th class="num">Developing</th><th class="num">Emerging</th><th class="num">Not yet</th><th>Class now</th>',
+      ub.length ? ub.map(function (u) { return '<tr><td>' + esc(u.unit) + '</td><td class="num">' + u.secure + '</td><td class="num">' + u.developing + '</td><td class="num">' + u.emerging + '</td><td class="num">' + u.notYet + '</td><td><span class="band ' + (u.band || 'n') + '">' + esc(u.word || 'not started') + '</span>' + (u.score != null ? ' <span class="sub" style="display:inline">' + u.score + '</span>' : '') + '</td></tr>'; }).join('')
+        : '<tr><td colspan="6" class="thin">No unit has evidence yet.</td></tr>',
+      'Same three words the pupils see on their own dashboard: emerging, developing, secure. A pupil counts once per unit, on the average of the lessons they have evidence for. Flashcards are not counted here, so a teacher&rsquo;s view can sit a little below the pupil&rsquo;s own.');
+    var rows = (d.markbook && d.markbook.rows) || [];
+    var act = {}; (d.students || []).forEach(function (s) { act[s.id] = s; });
+    h += sheet('The class &mdash; click a name for a parents&rsquo; evening pack', '<th>Name</th><th class="num">Lessons done</th><th class="num">Recall</th><th class="num">Answers marked</th><th>Weakest topic</th><th>Last worked on ' + esc(d.class.subject || 'this subject') + '</th>',
+      rows.map(function (r) { var s = act[r.id] || {}; return '<tr><td><button class="namebtn" type="button" data-pack="' + esc(r.id) + '">' + esc(r.name) + '</button></td><td class="num">' + (s.lessonsComplete || 0) + '</td><td class="num">' + pct(r.recall) + '</td><td class="num">' + (r.marks ? r.marks.answers : 0) + '</td><td>' + esc(r.weakest || '&mdash;') + '</td><td>' + esc(s.lastActive || 'never') + '</td></tr>'; }).join(''),
+      '&ldquo;Last worked on&rdquo; is bucketed on purpose, and it is never a time of day. A teacher needs to know who has stopped, not when somebody was at their desk.');
+    var cov = d.coverage;
+    if (cov) {
+      h += sheet('Where the class has got to', '<th>Unit</th><th>Lessons reached</th><th class="num">Started it</th><th class="num">Typical lessons done</th>',
+        (cov.units || []).map(function (u) { var c = u.percent == null ? '' : u.percent < 34 ? 'low' : u.percent < 67 ? 'mid' : ''; return '<tr><td>' + esc(u.unit) + (u.practice ? ' <span class="sub">practice set</span>' : '') + '</td><td><span class="cov ' + c + '"><i style="width:' + (u.percent || 0) + '%"></i></span>' + u.touched + ' of ' + u.lessons + '</td><td class="num">' + u.studentsStarted + ' of ' + d.size + '</td><td class="num">' + u.avgDone + '</td></tr>'; }).join('') || '<tr><td colspan="4" class="thin">Nothing reached yet.</td></tr>',
+        (cov.unitsUntouched ? cov.unitsUntouched + ' other units on this course have nothing recorded. On a course that offers more options than any one class takes, that is expected.' : ''));
+    }
+    var mis = d.misconceptions || [];
+    if (mis.length) {
+      h += sheet('Misconceptions the class shares', '<th>What they think</th><th>Where</th><th class="num">Pupils</th><th class="num">Times</th>',
+        mis.map(function (m) { return '<tr><td>' + esc(m.tag) + '</td><td>' + esc(m.unitName || m.unit) + (m.lesson ? ' &middot; L' + m.lesson : '') + '</td><td class="num">' + m.students + '</td><td class="num">' + m.count + '</td></tr>'; }).join(''), '');
+    } else {
+      h += '<p class="hint" style="margin-top:22px">Named misconceptions are only captured on practice-format subjects (Maths, English Language, languages, science calculations). For this subject, the questions table above is the misconception view.</p>';
+    }
+    return h;
+  }
+  function weekHtml(d) {
+    var since = sinceLooked(d.class.id);
+    return briefingHtml(d, since) + panelsHtml(d) + everythingHtml(d);
   }
 
+  /* ================= MARKBOOK ================= */
+  var ORDER = sessionStorage.getItem('sv-teacher-order') || 'weak';
+  function rowScore(r) { var v = Object.keys(r.cells).map(function (k) { return r.cells[k].score; }); return v.length ? v.reduce(function (a, b) { return a + b; }, 0) / v.length : -1; }
+  function rowDrops(r) { return Object.keys(r.cells).filter(function (k) { return r.cells[k].drop; }).length; }
+  function bookHtml(d) {
+    var mb = d.markbook || { units: [], rows: [] }, units = mb.units || [], rows = (mb.rows || []).slice();
+    if (!units.length) return '<div class="empty">No evidence in ' + esc(d.class.subject || 'this subject') + ' yet. The markbook fills as the class does lessons and quizzes.</div>';
+    if (ORDER === 'weak') rows.sort(function (a, b) { return rowScore(a) - rowScore(b) || a.name.localeCompare(b.name); });
+    else if (ORDER === 'faded') rows.sort(function (a, b) { return rowDrops(b) - rowDrops(a) || rowScore(a) - rowScore(b); });
+    else rows.sort(function (a, b) { return surnameFirst(a.name).localeCompare(surnameFirst(b.name)); });
+    var h = '<div class="toolbar"><label for="orderSel">Order by</label><select id="orderSel">' +
+      '<option value="weak"' + (ORDER === 'weak' ? ' selected' : '') + '>Weakest first</option><option value="name"' + (ORDER === 'name' ? ' selected' : '') + '>Surname</option><option value="faded"' + (ORDER === 'faded' ? ' selected' : '') + '>Most faded</option></select>' +
+      '<span class="sp"></span><span>' + rows.length + ' pupils &middot; one band per pupil per unit &middot; click any cell</span></div>';
+    h += '<div class="gridwrap"><div class="gridscroll"><table class="grid"><thead><tr><th class="pupilhead">Pupil</th>' +
+      units.map(function (u) { return '<th>' + esc(u.name) + '<small>' + u.lessons + ' lessons</small></th>'; }).join('') + '<th>Marked answers<small>share of marks</small></th></tr></thead><tbody>';
+    rows.forEach(function (r) {
+      h += '<tr><th><button type="button" data-pupil="' + esc(r.id) + '">' + esc(surnameFirst(r.name)) + '</button></th>';
+      units.forEach(function (u) {
+        var c = r.cells[u.slug];
+        if (!c) h += '<td><button class="cell n" type="button" tabindex="-1">not yet<small>&mdash;</small></button></td>';
+        else h += '<td><button class="cell ' + c.band + (c.drop ? ' due' : '') + '" type="button" data-cell="' + esc(r.id) + '|' + esc(u.slug) + '">' + bandWord(c.band) + '<small>' + c.score + (c.drop ? ' &darr;' : '') + (c.q === 0 ? ' &middot; read only' : '') + '</small></button></td>';
+      });
+      h += '<td>' + (r.marks ? '<button class="cell ' + (r.marks.percent >= 70 ? 'g' : r.marks.percent >= 40 ? 'a' : 'r') + '" type="button" data-cell="' + esc(r.id) + '|">' + r.marks.percent + '%<small>' + r.marks.answers + (r.marks.answers === 1 ? ' answer' : ' answers') + '</small></button>' : '<button class="cell n" type="button" tabindex="-1">none<small>&mdash;</small></button>') + '</td></tr>';
+    });
+    h += '</tbody><tfoot><tr><th>Class now</th>';
+    units.forEach(function (u) { var b = (d.unitBands || []).find(function (x) { return x.slug === u.slug; }) || {}; h += '<td>' + esc(b.word || 'not started') + (b.score != null ? ' &middot; ' + b.score : '') + '</td>'; });
+    var mk = (d.marks || []); var allAns = rows.reduce(function (n, r) { return n + (r.marks ? r.marks.answers : 0); }, 0);
+    h += '<td>' + (allAns ? allAns + ' answers marked' : '&mdash;') + '</td></tr></tfoot></table></div></div>';
+    h += '<div class="keyrow"><span><i class="swatch g"></i> secure 70+</span><span><i class="swatch a"></i> developing 40&ndash;69</span><span><i class="swatch r"></i> emerging under 40</span><span><i class="swatch n"></i> no evidence yet</span><span><i class="swatch due"></i> was secure, now under the revisit line</span><span>&ldquo;read only&rdquo; = lessons read but never quizzed, so the score has faded</span></div>';
+    h += '<section class="card drawer" id="drawer" hidden></section>';
+    return h;
+  }
+  function drawerHtml(d, pupilId, slug) {
+    var mb = d.markbook, r = (mb.rows || []).find(function (x) { return x.id === pupilId; }); if (!r) return '';
+    var u = (mb.units || []).find(function (x) { return x.slug === slug; }), c = slug ? r.cells[slug] : null;
+    var first = String(r.name).split(' ')[0];
+    var misses = (r.misses || []).filter(function (m) { return !slug || m.unit === slug; }).slice(0, 4);
+    var answers = (r.answers || []).filter(function (a) { return !slug || a.unit === slug; }).slice(0, 4);
+    if (!answers.length) answers = (r.answers || []).slice(0, 3);
+    var h = '<div class="drawer-l"><button class="x" type="button" data-drawer-close aria-label="Close">&times;</button>' +
+      '<h2>' + esc(r.name) + (u ? ' &middot; ' + esc(u.name) : ' &middot; marked answers') + '</h2>' +
+      '<p class="sub2">' + (c ? bandWord(c.band).replace(/^./, function (m) { return m.toUpperCase(); }) + ' &middot; ' + c.score + (c.drop ? ' &middot; was secure on this, now under the revisit line' : '') + ' &middot; evidence on ' + c.n + ' of ' + (u ? u.lessons : '?') + ' lessons' + (c.q === 0 ? ' &middot; read, never quizzed' : '') : (r.marks ? r.marks.percent + '% of marks over ' + r.marks.answers + ' answers' : 'No marked answers yet')) + '</p>';
+    h += '<h4>What ' + esc(first) + ' keeps getting wrong</h4><ul>' + (misses.length ? misses.map(function (m) { return '<li><b>&ldquo;' + esc(m.q) + '&rdquo;</b><span>' + (m.chose ? 'chose &ldquo;' + esc(m.chose) + '&rdquo; &middot; ' : '') + 'wrong ' + (m.times === 1 ? 'once' : m.times === 2 ? 'twice' : m.times + ' times') + (m.lesson ? ' &middot; L' + m.lesson : '') + '</span></li>'; }).join('') : '<li class="thin">No repeated misses' + (u ? ' in this unit' : '') + '.</li>') + '</ul>';
+    h += '<h4>On extended writing</h4><ul>' + (answers.length ? answers.map(function (a) { var un = (mb.units || []).find(function (x) { return x.slug === a.unit; }); return '<li><b>' + a.got + ' of ' + a.marks + '</b> on a ' + a.marks + '-mark question' + (un ? ' &middot; ' + esc(un.name) : '') + (a.note ? '<span>the marker: &ldquo;' + esc(a.note) + '&rdquo;</span>' : '') + '</li>'; }).join('') : '<li class="thin">No answers marked yet.</li>') + '</ul></div>';
+    h += '<div class="drawer-r"><h4>Compared with the class</h4><ul>';
+    (mb.units || []).forEach(function (uu) {
+      var cc = r.cells[uu.slug]; if (!cc) return;
+      var b = (d.unitBands || []).find(function (x) { return x.slug === uu.slug; }) || {};
+      h += '<li><b>' + esc(uu.name) + '</b><span>' + esc(first) + ' ' + cc.score + (b.score != null ? ' &middot; class ' + b.score : '') + '</span><span class="bar ' + barCls(cc.score) + '" style="margin-top:6px"><i style="width:' + cc.score + '%"></i></span></li>';
+    });
+    h += '</ul><button class="btn ghost wide" type="button" style="margin-top:16px" data-pack="' + esc(r.id) + '">Parents&rsquo; evening pack &rarr;</button></div>';
+    return h;
+  }
+  function openDrawer(pupilId, slug) {
+    var dr = document.getElementById('drawer'); if (!dr || !DATA) return;
+    dr.innerHTML = drawerHtml(DATA, pupilId, slug); dr.hidden = false;
+    document.querySelectorAll('.cell.on').forEach(function (c) { c.classList.remove('on'); });
+    var cell = document.querySelector('.cell[data-cell="' + pupilId + '|' + (slug || '') + '"]'); if (cell) cell.classList.add('on');
+    dr.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  /* ================= THE STARTER ================= */
+  var ST = { items: [], i: 0 };
+  function starterShow(i) {
+    var it = ST.items[i]; if (!it) return; ST.i = i;
+    document.getElementById('stOf').textContent = (i + 1) + ' of ' + ST.items.length;
+    document.getElementById('stWhere').textContent = it.unit + (it.lesson ? ' · lesson ' + it.lesson : '');
+    document.getElementById('stTally').textContent = it.students + (it.met ? ' of the ' + it.met + ' who met it' : ' pupils') + ' got this wrong';
+    document.getElementById('stQ').textContent = it.question;
+    document.getElementById('stSaidLab').textContent = (it.commonWrongCount || it.students) + ' of you said';
+    document.getElementById('stSaid').textContent = it.commonWrongAnswer || '(different wrong answers)';
+    document.getElementById('stWas').textContent = it.right || '';
+    document.getElementById('stAnswers').classList.remove('on');
+    document.getElementById('stReveal').hidden = false;
+    document.getElementById('stPrev').disabled = i === 0; document.getElementById('stNext').disabled = i >= ST.items.length - 1;
+    var dots = document.getElementById('stDots'); dots.innerHTML = ST.items.map(function (_, k) { return '<button class="dot" type="button" data-dot="' + k + '"' + (k === i ? ' aria-current="true"' : '') + ' aria-label="Question ' + (k + 1) + '"></button>'; }).join('');
+  }
+  function starterOpen() {
+    ST.items = (DATA && DATA.missedItems || []).slice(0, 6); if (!ST.items.length) return;
+    document.getElementById('starter').hidden = false; document.body.style.overflow = 'hidden'; starterShow(0);
+  }
+  function starterClose() { document.getElementById('starter').hidden = true; document.body.style.overflow = ''; }
+  document.getElementById('stReveal').addEventListener('click', function () { document.getElementById('stAnswers').classList.add('on'); this.hidden = true; });
+  document.getElementById('stPrev').addEventListener('click', function () { starterShow(ST.i - 1); });
+  document.getElementById('stNext').addEventListener('click', function () { starterShow(ST.i + 1); });
+  document.getElementById('stDots').addEventListener('click', function (e) { var b = e.target.closest('[data-dot]'); if (b) starterShow(+b.getAttribute('data-dot')); });
+  document.getElementById('starterClose').addEventListener('click', function (e) { e.preventDefault(); starterClose(); });
+  document.getElementById('starterBrand').addEventListener('click', function (e) { e.preventDefault(); starterClose(); });
+  document.addEventListener('keydown', function (e) {
+    if (document.getElementById('starter').hidden) return;
+    if (e.key === 'Escape') starterClose(); else if (e.key === 'ArrowRight') starterShow(ST.i + 1); else if (e.key === 'ArrowLeft') starterShow(ST.i - 1);
+    else if (e.key === ' ' || e.key === 'Enter') { if (!document.getElementById('stReveal').hidden) { e.preventDefault(); document.getElementById('stReveal').click(); } }
+  });
+
+  /* ================= RENDER ================= */
+  function setTab(t) {
+    TAB = t; sessionStorage.setItem('sv-teacher-tab', t);
+    document.querySelectorAll('#tabs [data-tab]').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-tab') === t ? 'true' : 'false'); });
+    render();
+  }
+  function render() {
+    if (!DATA) return;
+    viewEl.className = '';
+    viewEl.innerHTML = TAB === 'book' ? bookHtml(DATA) : weekHtml(DATA);
+    var os = document.getElementById('orderSel'); if (os) os.addEventListener('change', function () { ORDER = this.value; sessionStorage.setItem('sv-teacher-order', ORDER); render(); });
+  }
+  function headline(d) {
+    document.getElementById('h1').textContent = d.class.name + (d.class.subject ? ' · ' + d.class.subject : '');
+    var c = CLASSES.find(function (x) { return x.id === d.class.id; }) || {};
+    var joined = c.size != null ? c.size : d.size;
+    document.getElementById('h1note').innerHTML = joined + ' in the class' + (d.attainment && d.attainment.studentsWithEvidence != null ? ' &middot; ' + d.attainment.studentsWithEvidence + ' with quiz evidence' : '');
+  }
+
+  /* ---- class picking, creating, code (kept from the previous screen) ---- */
+  function showCreate(on) {
+    createEl.hidden = !on; tabsEl.hidden = on || !CLASSES.length; barEl.hidden = on || !CLASSES.length;
+    if (on) { viewEl.innerHTML = ''; document.getElementById('cname').focus(); }
+  }
   async function selectClass(id) {
     if (id === NEW) { showCreate(true); return; }
     showCreate(false);
-    var c = CLASSES.filter(function (x) { return x.id === id; })[0];
-    if (!c) return;
-
+    var c = CLASSES.find(function (x) { return x.id === id; }); if (!c) return;
     sessionStorage.setItem('sv-teacher-class', id);
     codeEl.textContent = c.joinCode || '——————';
     document.getElementById('copyBtn').setAttribute('data-code', c.joinCode || '');
-    rollEl.textContent = c.size + (c.size === 1 ? ' student' : ' students') +
-                         (c.subject ? ' · ' + c.subject : '');
-    var badge = document.getElementById('shutBadge');
-    if (badge) badge.remove();
-    if (!c.joinOpen) {
-      codeWrap.insertAdjacentHTML('beforeend', '<span class="shut" id="shutBadge">Closed</span>');
-    }
-
+    rollEl.textContent = c.size + (c.size === 1 ? ' student' : ' students') + (c.subject ? ' · ' + c.subject : '') + ' · read the code out; they go to studyvault.co.uk/join';
+    var badge = document.getElementById('shutBadge'); if (badge) badge.remove();
+    if (!c.joinOpen) document.getElementById('codewrap').insertAdjacentHTML('beforeend', '<span class="shut" id="shutBadge">Closed</span>');
+    document.getElementById('h1').textContent = c.name + (c.subject ? ' · ' + c.subject : '');
     if (!c.size) {
-      viewEl.className = '';
-      viewEl.innerHTML = '<div class="empty">Nobody has joined <strong>' + esc(c.name) +
-        '</strong> yet. Read out <strong>' + esc(c.joinCode) + '</strong> — they go to ' +
-        '<strong>studyvault.co.uk/join</strong> and enter it.</div>';
+      tabsEl.hidden = true; viewEl.className = '';
+      viewEl.innerHTML = '<div class="empty">Nobody has joined <strong>' + esc(c.name) + '</strong> yet. Read out <strong>' + esc(c.joinCode) + '</strong>: they go to <strong>studyvault.co.uk/join</strong> and enter it.</div>';
       return;
     }
-
-    viewEl.className = 'loading';
-    viewEl.textContent = 'Loading ' + c.name + '…';
+    viewEl.className = 'loading'; viewEl.textContent = 'Loading ' + c.name + '…';
     try {
-      var d = await api('/api/teacher/class-progress?class_id=' + encodeURIComponent(id));
-      viewEl.className = '';
-      viewEl.innerHTML = viewHtml(d);
-    } catch (e) {
-      viewEl.className = '';
-      viewEl.innerHTML = '<div class="empty">Could not load that class. ' + esc(e.message) + '</div>';
-    }
+      DATA = await api('/api/teacher/class-progress?class_id=' + encodeURIComponent(id));
+      tabsEl.hidden = false; headline(DATA); render();
+    } catch (e) { viewEl.className = ''; viewEl.innerHTML = '<div class="empty">Could not load that class. ' + esc(e.message) + '</div>'; }
   }
-
   function paintPicker() {
-    var opts = CLASSES.map(function (c) {
-      return '<option value="' + esc(c.id) + '">' + esc(c.name) +
-             (c.subject ? ' · ' + esc(c.subject) : '') + '</option>';
-    }).join('');
-    selEl.innerHTML = opts + '<option value="' + NEW + '">＋ New class…</option>';
-    barEl.hidden = false;
+    selEl.innerHTML = CLASSES.map(function (c) { return '<option value="' + esc(c.id) + '">' + esc(c.name) + (c.subject ? ' · ' + esc(c.subject) : '') + '</option>'; }).join('') + '<option value="' + NEW + '">＋ New class…</option>';
+    selEl.hidden = false;
   }
-
   function paintSubjects(subjects) {
-    var own = subjects.filter(function (s) { return s.own; });
-    var gen = subjects.filter(function (s) { return !s.own; });
-    function opts(list) {
-      return list.map(function (s) {
-        return '<option value="' + esc(s.id) + '">' + esc(s.name) + '</option>';
-      }).join('');
-    }
+    var own = subjects.filter(function (s) { return s.own; }), gen = subjects.filter(function (s) { return !s.own; });
+    function opts(list) { return list.map(function (s) { return '<option value="' + esc(s.id) + '">' + esc(s.name) + '</option>'; }).join(''); }
     var html = '<option value="">Choose a subject…</option>';
     if (own.length) html += '<optgroup label="Your school">' + opts(own) + '</optgroup>';
     html += '<optgroup label="' + (own.length ? 'All subjects' : 'Subjects') + '">' + opts(gen) + '</optgroup>';
     subjEl.innerHTML = html;
   }
-
   async function load(selectId) {
     try {
       var d = await api('/api/teacher/my-classes');
       CLASSES = d.classes || [];
-      /* Guarded. An earlier version of this line referenced an element whose
-         markup had silently failed to insert, so load() threw here and the
-         class list never populated at all — one optional flourish taking the
-         whole screen down. Nothing in this function should be able to do that. */
-      var bb = document.getElementById('buildbar');
-      if (bb) bb.hidden = !d.canBuild;
-      ['lnk-review', 'lnk-editor'].forEach(function (id) {
-        var a = document.getElementById(id);
-        if (a) a.hidden = !d.canEdit;
-      });
+      var bb = document.getElementById('buildbar'); if (bb) bb.hidden = !d.canBuild;
+      ['lnk-review', 'lnk-editor'].forEach(function (id) { var a = document.getElementById(id); if (a) a.hidden = !d.canEdit; });
       paintSubjects(d.subjects || []);
-
-      if (!CLASSES.length) {
-        barEl.hidden = true;
-        viewEl.className = '';
-        viewEl.innerHTML = '';
-        showCreate(true);
-        document.getElementById('makenote').textContent =
-          'You have no classes yet — this is where you start.';
-        return;
-      }
-
+      var tn = (d.teacher && d.teacher.name) || null;
+      if (!tn) { try { tn = (JSON.parse(sessionStorage.getItem('studyvault-auth') || 'null') || {}).full_name || null; } catch (e) {} }
+      if (tn) { var av = document.getElementById('avatar'); av.textContent = initials(tn); av.title = tn; }
+      if (!CLASSES.length) { showCreate(true); document.getElementById('makenote').textContent = 'You have no classes yet. This is where you start.'; return; }
       paintPicker();
       var want = selectId || sessionStorage.getItem('sv-teacher-class');
       if (!CLASSES.some(function (c) { return c.id === want; })) want = CLASSES[0].id;
-      selEl.value = want;
-      await selectClass(want);
-    } catch (e) {
-      viewEl.className = '';
-      viewEl.innerHTML = '<div class="empty">Could not load your classes. ' + esc(e.message) + '</div>';
-    }
+      selEl.value = want; await selectClass(want);
+    } catch (e) { viewEl.className = ''; viewEl.innerHTML = '<div class="empty">Could not load your classes. ' + esc(e.message) + '</div>'; }
   }
-
   selEl.addEventListener('change', function () { selectClass(this.value); });
-  document.getElementById('cancelCreate').addEventListener('click', function () {
-    if (!CLASSES.length) return;                       // nothing to go back to
-    showCreate(false);
-    selEl.value = sessionStorage.getItem('sv-teacher-class') || CLASSES[0].id;
-    selectClass(selEl.value);
-  });
-
+  document.getElementById('newClassBtn').addEventListener('click', function () { showCreate(true); });
+  document.getElementById('cancelCreate').addEventListener('click', function () { if (!CLASSES.length) return; showCreate(false); selEl.value = sessionStorage.getItem('sv-teacher-class') || CLASSES[0].id; selectClass(selEl.value); });
   document.getElementById('make').addEventListener('click', async function () {
     var btn = this, note = document.getElementById('makenote');
-    var name = document.getElementById('cname').value.trim();
-    var subject = subjEl.value;
-    var year = document.getElementById('cyear').value;
-
+    var name = document.getElementById('cname').value.trim(), subject = subjEl.value, year = document.getElementById('cyear').value;
     note.className = 'note'; note.textContent = '';
-    if (!name)    { note.className = 'err'; note.textContent = 'Give the class a name.'; return; }
+    if (!name) { note.className = 'err'; note.textContent = 'Give the class a name.'; return; }
     if (!subject) { note.className = 'err'; note.textContent = 'Choose a subject.'; return; }
-
     btn.disabled = true; note.textContent = 'Creating…';
     try {
-      var d = await api('/api/teacher/create-class',
-        { name: name, subject_id: subject, year_group: year || null });
-      document.getElementById('made').innerHTML =
-        '<div class="made"><h2>' + esc(d.class.name) + ' is ready</h2>' +
-        '<div class="codewrap"><span class="code">' + esc(d.class.joinCode) + '</span>' +
-        '<button class="copy" data-code="' + esc(d.class.joinCode) + '">Copy</button></div>' +
-        '<p>Read that out. Your students go to <strong>studyvault.co.uk/join</strong> and enter it.</p></div>';
-      document.getElementById('cname').value = '';
-      note.textContent = '';
-      await load(d.class.id);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (e) {
-      note.className = 'err'; note.textContent = e.message;
-    } finally { btn.disabled = false; }
+      var d = await api('/api/teacher/create-class', { name: name, subject_id: subject, year_group: year || null });
+      document.getElementById('made').innerHTML = '<div class="card made"><h2>' + esc(d.class.name) + ' is ready</h2><div class="codewrap" style="margin-left:0"><span class="code">' + esc(d.class.joinCode) + '</span><button class="copy" data-code="' + esc(d.class.joinCode) + '">Copy</button></div><p>Read that out. Your students go to <strong>studyvault.co.uk/join</strong> and enter it.</p></div>';
+      document.getElementById('cname').value = ''; note.textContent = '';
+      await load(d.class.id); window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) { note.className = 'err'; note.textContent = e.message; } finally { btn.disabled = false; }
   });
 
-  /* ---- parents' evening pack ------------------------------------------
-     Per-pupil detail, printable. This is the one screen that shows per-child
-     effort (days revised, a run of warm-up scores) rather than aggregating it.
-     That is a deliberate exception, reasoned out in api/teacher/_lib/pack.js:
-     the pack is printed for that child's own parent, where effort is ordinary
-     report content. None of it appears on the class screen. */
+  /* ---- the parents' evening pack (unchanged in substance) ---- */
   function packHtml(p) {
-    var hl = p.headline;
-    var first = String(p.student.name).split(' ')[0];
-
-    var h = '<div class="packbar">' +
-      '<button class="backlink" data-backtoclass>&larr; back to the class</button>' +
-      '<button class="btn" data-print>Print</button></div>' +
-      '<div class="pack"><div class="phead"><div><h2>' + esc(p.student.name) + '</h2></div>' +
-      '<div class="pmeta"><span class="pbrand">StudyVault</span><br>' +
-      esc(p.class.name) + (p.class.subject ? ' &middot; ' + esc(p.class.subject) : '') + '<br>' +
-      new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) +
-      '</div></div>';
-
-    h += '<div class="kv">' +
-      '<div><b>' + hl.lessonsFinished + '</b><small>lessons finished</small></div>' +
-      '<div><b>' + hl.questionsAnswered + '</b><small>questions answered</small></div>' +
-      '<div><b>' + (hl.recallAccuracy == null ? '&mdash;' : hl.recallAccuracy + '%') +
-        '</b><small>recall accuracy</small></div>' +
-      '<div><b>' + hl.daysRevised + '</b><small>days revised, last 4 weeks</small></div></div>';
-
+    var hl = p.headline, first = String(p.student.name).split(' ')[0];
+    var h = '<div class="packbar"><button class="backlink" data-backtoclass>&larr; back to the class</button><button class="btn" data-print>Print</button></div>' +
+      '<div class="pack"><div class="phead"><div><h2>' + esc(p.student.name) + '</h2></div><div class="pmeta"><span class="pbrand">StudyVault</span><br>' + esc(p.class.name) + (p.class.subject ? ' &middot; ' + esc(p.class.subject) : '') + '<br>' + new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) + '</div></div>';
+    h += '<div class="kv"><div><b>' + hl.lessonsFinished + '</b><small>lessons finished</small></div><div><b>' + hl.questionsAnswered + '</b><small>questions answered</small></div><div><b>' + (hl.recallAccuracy == null ? '&mdash;' : hl.recallAccuracy + '%') + '</b><small>recall accuracy</small></div><div><b>' + hl.daysRevised + '</b><small>days revised, last 4 weeks</small></div></div>';
     h += '<h4>Topics &mdash; how much is sticking when ' + esc(first) + ' is quizzed</h4>';
-    if (!p.units.length) {
-      h += '<p class="thin">No quiz evidence in this subject yet.</p>';
-    } else {
+    if (!p.units.length) h += '<p class="thin">No quiz evidence in this subject yet.</p>';
+    else {
       h += '<div class="scroller"><table><tbody>';
       p.units.forEach(function (u) {
         var cls = u.accuracy == null ? '' : (u.accuracy < 55 ? 'low' : (u.accuracy < 72 ? 'mid' : ''));
-        h += '<tr><td style="font-weight:600;max-width:230px">' + esc(u.unit) + '</td>' +
-          '<td><span class="ubar ' + cls + '"><i style="width:' + (u.accuracy || 0) + '%"></i>' +
-          (u.classAccuracy == null ? '' :
-            '<span class="cls" style="left:' + u.classAccuracy + '%"></span>') +
-          '</span></td>' +
-          '<td class="thin">' + (u.accuracy == null
-            ? 'not enough evidence yet'
-            : '<b>' + u.accuracy + '%</b> of ' + u.answered + ' questions right') + '</td>' +
-          '<td class="thin">' + u.lessonsDone + ' lessons done</td></tr>';
+        h += '<tr><td style="font-weight:600;max-width:230px">' + esc(u.unit) + '</td><td><span class="ubar ' + cls + '"><i style="width:' + (u.accuracy || 0) + '%"></i>' + (u.classAccuracy == null ? '' : '<span class="cls" style="left:' + u.classAccuracy + '%"></span>') + '</span></td><td class="thin">' + (u.accuracy == null ? 'not enough evidence yet' : '<b>' + u.accuracy + '%</b> of ' + u.answered + ' questions right') + '</td><td class="thin">' + u.lessonsDone + ' lessons done</td></tr>';
       });
-      h += '</tbody></table></div>' +
-        '<div class="legend">Every figure counts real quiz questions ' + esc(first) +
-        ' has answered while revising. Bar = share answered correctly &middot; ' +
-        'thin line = class average.</div>';
+      h += '</tbody></table></div><div class="legend">Every figure counts real quiz questions ' + esc(first) + ' has answered while revising. Bar = share answered correctly &middot; thin line = class average.</div>';
     }
-
-    h += '<div class="two"><div><h4>Strongest topics</h4>' +
-      (p.strongest.length
-        ? p.strongest.map(function (x) { return esc(x.unit) + ' &mdash; ' + x.accuracy + '% right'; }).join('<br>')
-        : '<span class="thin">Not enough evidence yet.</span>') +
-      '</div><div><h4>Keeps getting wrong</h4>' +
-      (p.keepsMissing.length
-        ? p.keepsMissing.map(function (m) {
-            return '<div class="missrow"><b>' + esc(m.question) + '</b>' +
-                   '<span>wrong ' + m.times + ' times &middot; ' + esc(m.unit) + '</span></div>';
-          }).join('')
-        : '<span class="thin">No repeated misses.</span>') +
-      '</div></div>';
-
-    if (p.warmups.length) {
-      h += '<h4>Daily warm-up quiz</h4><div class="wubars">' +
-        p.warmups.map(function (w) {
-          return '<i><em>' + w.right + '</em><b style="height:' +
-            Math.round((w.right / w.total) * 100) + '%"></b><small>' +
-            w.date.slice(8) + '</small></i>';
-        }).join('') +
-        '</div><div class="legend">Quick recall questions at the start of a revision ' +
-        'session &middot; number = questions right that day &middot; dates along the bottom</div>';
-    }
-
-    h += '<h4>Teacher summary &mdash; draft</h4>' +
-         '<div id="draftbox" class="draft thin">Drafting from the evidence above&hellip;</div>' +
-         '<div class="draftfoot" id="draftfoot"></div></div>';
+    h += '<div class="two"><div><h4>Strongest topics</h4>' + (p.strongest.length ? p.strongest.map(function (x) { return esc(x.unit) + ' &mdash; ' + x.accuracy + '% right'; }).join('<br>') : '<span class="thin">Not enough evidence yet.</span>') +
+      '</div><div><h4>Keeps getting wrong</h4>' + (p.keepsMissing.length ? p.keepsMissing.map(function (m) { return '<div class="missrow"><b>' + esc(m.question) + '</b><span>wrong ' + m.times + ' times &middot; ' + esc(m.unit) + '</span></div>'; }).join('') : '<span class="thin">No repeated misses.</span>') + '</div></div>';
+    if (p.warmups.length) h += '<h4>Daily warm-up quiz</h4><div class="wubars">' + p.warmups.map(function (w) { return '<i><em>' + w.right + '</em><b style="height:' + Math.round((w.right / w.total) * 100) + '%"></b><small>' + w.date.slice(8) + '</small></i>'; }).join('') + '</div><div class="legend">Quick recall questions at the start of a revision session &middot; number = questions right that day &middot; dates along the bottom</div>';
+    h += '<h4>Teacher summary &mdash; draft</h4><div id="draftbox" class="draft thin">Drafting from the evidence above&hellip;</div><div class="draftfoot" id="draftfoot"></div></div>';
     return h;
   }
-
   async function openPack(studentId) {
-    var classId = selEl.value;
-    viewEl.className = 'loading';
-    viewEl.textContent = 'Building the pack...';
+    var classId = selEl.value || (DATA && DATA.class.id);
+    tabsEl.hidden = true; viewEl.className = 'loading'; viewEl.textContent = 'Building the pack...';
     try {
-      var p = await api('/api/teacher/student-pack?class_id=' + encodeURIComponent(classId) +
-                        '&student_id=' + encodeURIComponent(studentId));
-      viewEl.className = '';
-      viewEl.innerHTML = packHtml(p);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (e) {
-      viewEl.className = '';
-      viewEl.innerHTML = '<div class="empty">Could not build that pack. ' + esc(e.message) + '</div>';
-      return;
-    }
-
-    /* The draft is a SEPARATE call so the pack is readable straight away. The
-       numbers are the pack; the paragraph is a convenience on top, and it must
-       never be what the teacher waits for. */
-    var box = document.getElementById('draftbox');
-    var foot = document.getElementById('draftfoot');
+      var p = await api('/api/teacher/student-pack?class_id=' + encodeURIComponent(classId) + '&student_id=' + encodeURIComponent(studentId));
+      viewEl.className = ''; viewEl.innerHTML = packHtml(p); window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) { viewEl.className = ''; viewEl.innerHTML = '<div class="empty">Could not build that pack. ' + esc(e.message) + '<br><br><button class="backlink" data-backtoclass>&larr; back to the class</button></div>'; return; }
+    var box = document.getElementById('draftbox'), foot = document.getElementById('draftfoot');
     try {
       var d = await api('/api/teacher/pack-summary', { class_id: classId, student_id: studentId });
-      if (box) {
-        box.classList.remove('thin');
-        box.textContent = d.draft;
-      }
-      if (foot) {
-        foot.textContent = d.generated
-          ? 'AI-drafted from the evidence above \u00b7 check it before you say it \u00b7 processed in the UK (' + d.servedBy + ')'
-          : 'Not enough evidence to draft from.';
-      }
-    } catch (e) {
-      if (box) { box.classList.add('thin'); box.textContent = 'No draft: ' + e.message; }
-      if (foot) {
-        foot.textContent = 'The figures above are unaffected \u2014 they come straight from the work.';
-      }
-    }
+      if (box) { box.classList.remove('thin'); box.textContent = d.draft; }
+      if (foot) foot.textContent = d.generated ? 'AI-drafted from the evidence above · check it before you say it · processed in the UK (' + d.servedBy + ')' : 'Not enough evidence to draft from.';
+    } catch (e) { if (box) { box.classList.add('thin'); box.textContent = 'No draft: ' + e.message; } if (foot) foot.textContent = 'The figures above are unaffected. They come straight from the work.'; }
   }
 
+  /* ---- clicks ---- */
   document.addEventListener('click', function (ev) {
-    var n = ev.target.closest('[data-pack]');
-    if (n) { openPack(n.getAttribute('data-pack')); return; }
+    var t;
+    if ((t = ev.target.closest('[data-tab]'))) { setTab(t.getAttribute('data-tab')); return; }
+    if ((t = ev.target.closest('[data-starter]'))) { starterOpen(); return; }
+    if ((t = ev.target.closest('[data-cell]'))) { var p = t.getAttribute('data-cell').split('|'); openDrawer(p[0], p[1] || null); return; }
+    if ((t = ev.target.closest('[data-pupil]'))) { var id = t.getAttribute('data-pupil'); if (TAB !== 'book') { setTab('book'); } var r = DATA && DATA.markbook.rows.find(function (x) { return x.id === id; }); var slug = r ? (Object.keys(r.cells).sort(function (a, b) { return r.cells[a].score - r.cells[b].score; })[0] || null) : null; openDrawer(id, slug); var row = document.querySelector('.grid [data-pupil="' + id + '"]'); if (row) row.scrollIntoView({ block: 'center' }); return; }
+    if ((t = ev.target.closest('[data-drawer-close]'))) { var dr = document.getElementById('drawer'); if (dr) dr.hidden = true; document.querySelectorAll('.cell.on').forEach(function (c) { c.classList.remove('on'); }); return; }
+    if ((t = ev.target.closest('[data-pack]'))) { openPack(t.getAttribute('data-pack')); return; }
     if (ev.target.closest('[data-print]')) { window.print(); return; }
-    if (ev.target.closest('[data-backtoclass]')) { selectClass(selEl.value); return; }
-  });
-
-  document.addEventListener('click', function (ev) {
-    var b = ev.target.closest('.copy');
-    if (!b) return;
-    var code = b.getAttribute('data-code') || codeEl.textContent;
-    navigator.clipboard.writeText(code).then(function () {
-      b.textContent = 'Copied'; b.classList.add('done');
-      setTimeout(function () { b.textContent = 'Copy'; b.classList.remove('done'); }, 1600);
-    }).catch(function () { b.textContent = code; });
-  });
-
-  credentials().then(function (ok) {
-    if (!ok) {
-      viewEl.className = '';
-      viewEl.innerHTML = '<div class="empty">This page needs a teacher sign-in. You are on the ' +
-        'site, but not with a teacher account — classes belong to a teacher.<br><br>' +
-        '<a href="/teacher/login?signout=1">Sign in as a teacher &rarr;</a></div>';
-      subjEl.innerHTML = '<option value="">Sign in to choose a subject</option>';
-      return;
+    if (ev.target.closest('[data-backtoclass]')) { tabsEl.hidden = false; render(); return; }
+    if ((t = ev.target.closest('.copy'))) {
+      var code = t.getAttribute('data-code') || codeEl.textContent;
+      navigator.clipboard.writeText(code).then(function () { t.textContent = 'Copied'; t.classList.add('done'); setTimeout(function () { t.textContent = 'Copy'; t.classList.remove('done'); }, 1600); }).catch(function () { t.textContent = code; });
     }
-    load();
   });
+
+  /* ---- boot ---- */
+  if (FIXTURE) {
+    fetch('/design-lab/' + (FIXTURE === 'thin' ? '_fixture.json' : '_fixture_rich.json')).then(function (r) { return r.json(); }).then(function (d) {
+      DATA = d; CLASSES = [{ id: d.class.id, name: d.class.name, subject: d.class.subject, size: d.size, joinCode: 'ABC123', joinOpen: true }];
+      paintPicker(); selEl.value = d.class.id; barEl.hidden = false; codeEl.textContent = 'ABC123'; rollEl.textContent = d.size + ' students · ' + (d.class.subject || '') + ' · local fixture';
+      tabsEl.hidden = false; headline(d); render();
+    });
+  } else {
+    credentials().then(function (ok) {
+      if (!ok) { viewEl.className = ''; viewEl.innerHTML = '<div class="empty">This page needs a teacher sign-in. You are on the site, but not with a teacher account.<br><br><a href="/teacher/login?signout=1">Sign in as a teacher &rarr;</a></div>'; subjEl.innerHTML = '<option value="">Sign in to choose a subject</option>'; return; }
+      load();
+    });
+  }
 })();
 </script>
 </body>

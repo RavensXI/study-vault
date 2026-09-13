@@ -35,6 +35,7 @@ const { supabase } = require('../pipeline/_lib/supabase');
    eventually grows two behaviours. */
 const { NEVER_SEND, baseSubject, inScope, pick, loadClassFor } = require('./_lib/scope');
 const { loadCurriculum } = require('./_lib/curriculum');
+const strength = require('./_lib/strength');
 
 /* Evidence thresholds. Every one of these exists so the screen never prints a
    confident percentage over three answers. A thin number is worse than a blank
@@ -229,7 +230,8 @@ module.exports = async function handler(req, res) {
   if (!ids.length) {
     return res.status(200).json(Object.assign({}, shell, {
       size: 0, students: [], misconceptions: [], weakestUnits: [], missedItems: [],
-      attainment: null, lessonAttainment: [], coverage: null, activity: {}
+      attainment: null, lessonAttainment: [], coverage: null, activity: {},
+      markbook: { units: [], rows: [] }, unitBands: [], goingCold: [], haveAWord: [], marks: []
     }));
   }
 
@@ -249,6 +251,17 @@ module.exports = async function handler(req, res) {
   const coverTally = {};     // which lessons of the course have been reached
   const activity = { 'this week': 0, 'last week': 0, 'this month': 0, 'over a month': 0, never: 0 };
   let classRight = 0, classAnswered = 0, withEvidence = 0;
+  /* 13 Sep 2026 — the Monday-briefing screen: per pupil per unit strength in the
+     pupil's own words (secure / developing / emerging), what each pupil keeps
+     getting wrong, and their marked answers. All attainment; nothing about when
+     or how long. Assembled here so the markbook, "going cold" and "have a word"
+     all read from one pass over the class. */
+  const pupilUnits = {};     // id -> { unitSlug: {s, peak, n, band, drop} }
+  const pupilMisses = {};    // id -> [{unit, lesson, q, chose, right, times}]
+  const pupilAnswers = {};   // id -> [{unit, lesson, marks, got, note}]
+  const marksTally = {};     // marks available -> {answers, got, of, units:{}}
+  const doneOf = {};         // id -> subject-scoped done map (for "opened N units")
+  const NOW = Date.now();
 
   ids.forEach(function (id) {
     const row = (rows || []).find(function (r) { return r.person_id === id; });
@@ -260,6 +273,7 @@ module.exports = async function handler(req, res) {
 
     const kcScoped = pick(blob.kc, base);
     const doneScoped = pick(blob.done, base);
+    doneOf[id] = doneScoped;
 
     const mine = quizAccuracy(kcScoped);
     Object.keys(kcScoped).forEach(function (k) {
@@ -273,6 +287,7 @@ module.exports = async function handler(req, res) {
       name: nameOf[id] || 'Student',
       lessonsComplete: countComplete(doneScoped),
       quizAccuracy: mine,
+      kcAnswered: Object.keys(kcScoped).reduce(function (n, k) { return n + (((kcScoped[k] || {}).t) || 0); }, 0),
       practiceAnswered: Array.isArray(blob.practice)
         ? blob.practice.filter(function (x) { return inScope((x && (x.k || x.key)) || '', base); }).length
         : 0,
@@ -281,6 +296,32 @@ module.exports = async function handler(req, res) {
 
     warmupByUnit(blob.warmlog, unitTally, base);
     missedQuestions(kcScoped, questionTally, id);
+
+    const practiceScoped = Array.isArray(blob.practice)
+      ? blob.practice.filter(function (x) { return x && inScope(x.k || x.key || '', base); }) : [];
+    pupilUnits[id] = strength.units(strength.lessons(kcScoped, doneScoped, pick(blob.when, base), practiceScoped, NOW));
+    /* the questions this pupil keeps getting wrong, folded by question */
+    const mm = {};
+    Object.keys(kcScoped).forEach(function (k) {
+      const parts = k.split('/');
+      (((kcScoped[k] || {}).miss) || []).forEach(function (m) {
+        if (!m || !m.q) return;
+        const key = parts[1] + '|' + m.q;
+        if (!mm[key]) mm[key] = { unit: parts[1], lesson: parseInt(parts[2], 10), q: String(m.q).slice(0, 160), chose: m.chose ? String(m.chose).slice(0, 100) : null, right: m.right ? String(m.right).slice(0, 100) : null, times: 0 };
+        mm[key].times++;
+      });
+    });
+    pupilMisses[id] = Object.keys(mm).map(function (k) { return mm[k]; }).sort(function (a, b) { return b.times - a.times; }).slice(0, 12);
+    /* marked answers: the mark, the marks available, and the marker's first note */
+    pupilAnswers[id] = practiceScoped.map(function (e) {
+      const mk = strength.markOf(e); if (!mk) return null;
+      const parts = String(e.k || e.key || '').split('/');
+      const note = String(e.r || '').replace(/^[^\n]*\b(mark|score)[^\n]*\n?/i, '').replace(/\s+/g, ' ').trim().slice(0, 140);
+      const row = { unit: parts[1] || '', lesson: parseInt(parts[2], 10) || null, marks: mk.of, got: mk.got, note: note || null };
+      const mt = marksTally[mk.of] || (marksTally[mk.of] = { marks: mk.of, answers: 0, got: 0, of: 0, units: {} });
+      mt.answers++; mt.got += mk.got; mt.of += mk.of; mt.units[row.unit] = (mt.units[row.unit] || 0) + 1;
+      return row;
+    }).filter(Boolean).slice(0, 8);
     tallyLessonKc(kcScoped, lessonKc, id);
     tallyCoverage(doneScoped, coverTally, id);
 
@@ -349,7 +390,11 @@ module.exports = async function handler(req, res) {
        answer is a misconception; scattered wrong answers are just difficulty */
     const top = Object.keys(q.chose)
       .sort(function (a, b) { return q.chose[b] - q.chose[a]; })[0] || null;
-    return { where: q.where, question: q.question, right: q.right,
+    const wp = String(q.where).split('/');
+    const met = lessonKc[wp[1] + '/' + wp[2]];
+    return { where: q.where, unit: unitLabel(wp[1]), lesson: parseInt(wp[2], 10) || null,
+             met: met ? Object.keys(met.students).length : null,
+             question: q.question, right: q.right,
              misses: q.misses, students: Object.keys(q.students).length,
              commonWrongAnswer: top, commonWrongCount: top ? q.chose[top] : 0 };
   }).filter(function (q) { return q.students >= 2; })
@@ -435,9 +480,78 @@ module.exports = async function handler(req, res) {
     units: coverUnits
   } : null;
 
+  /* ---- the briefing's panels and the markbook (13 Sep 2026) ---- */
+  const unitsTouched = {};
+  ids.forEach(function (id) { Object.keys(pupilUnits[id] || {}).forEach(function (u) { unitsTouched[u] = 1; }); });
+  const markUnits = course.units.filter(function (u) { return unitsTouched[u.slug]; }).map(function (u) {
+    return { slug: u.slug, name: u.name, lessons: course.liveCount[u.slug] || 0, practice: !!course.practiceUnit[u.slug] };
+  });
+  const unitBands = markUnits.map(function (u) {
+    const c = { g: 0, a: 0, r: 0, n: 0 }; let tot = 0, cnt = 0, under = 0, dropped = 0, last = 999;
+    ids.forEach(function (id) {
+      const x = (pupilUnits[id] || {})[u.slug];
+      if (!x) { c.n++; return; }
+      c[x.band]++; tot += x.s; cnt++; if (x.s < strength.REVISIT_LINE) under++; if (x.drop) dropped++; last = Math.min(last, x.last);
+    });
+    const score = cnt ? Math.round(tot / cnt) : null;
+    return { unit: u.name, slug: u.slug, lessons: u.lessons, secure: c.g, developing: c.a, emerging: c.r, notYet: c.n,
+             pupils: cnt, score: score, band: score == null ? null : strength.band(score),
+             word: score == null ? 'not started' : strength.bandWord(strength.band(score)),
+             under: under, dropped: dropped, lastDays: cnt ? last : null };
+  });
+  /* going cold: learned, then faded. Needs a few pupils and more than one slip. */
+  const goingCold = unitBands.filter(function (u) { return u.pupils >= 3 && u.dropped >= 2; })
+    .sort(function (a, b) { return b.dropped - a.dropped || b.under - a.under; }).slice(0, 4);
+
+  /* have a word: a short list, one reason each, worst reasons first */
+  const words = [];
+  students.forEach(function (st) {
+    const id = st.id, pu = pupilUnits[id] || {}, slugs = Object.keys(pu);
+    const drops = slugs.filter(function (u) { return pu[u].drop; });
+    const ans = pupilAnswers[id] || [];
+    const got = ans.reduce(function (n, a) { return n + a.got; }, 0), of = ans.reduce(function (n, a) { return n + a.marks; }, 0);
+    const dn = doneOf[id] || {};
+    const doneUnits = Object.keys(dn).filter(function (k) { return (dn[k] || []).length; });
+    const maxLesson = doneUnits.reduce(function (m, k) { return Math.max(m, Math.max.apply(null, dn[k].map(Number))); }, 0);
+    if (drops.length) words.push({ id: id, name: st.name, rank: 0, why: 'Was secure on ' + unitLabel(drops[0]) + ', ' + strength.bandWord(pu[drops[0]].band) + ' on it now' + (drops.length > 1 ? ' (and ' + (drops.length - 1) + ' more)' : '') + '.' });
+    else if (st.quizAccuracy != null && st.quizAccuracy < 45 && st.kcAnswered >= 10) words.push({ id: id, name: st.name, rank: 1, why: st.quizAccuracy + '% recall over ' + st.kcAnswered + ' quiz answers, the lowest here with real evidence.' });
+    else if (ans.length >= 3 && of && got / of < 0.4) words.push({ id: id, name: st.name, rank: 2, why: 'Averaging ' + Math.round(got / ans.length * 10) / 10 + ' of ' + Math.round(of / ans.length) + ' marks on marked answers, over ' + ans.length + ' marked.' });
+    else if (doneUnits.length >= 3 && maxLesson <= 2) words.push({ id: id, name: st.name, rank: 3, why: 'Has opened ' + doneUnits.length + ' units and finished nothing past lesson 2.' });
+    else if (!slugs.length) words.push({ id: id, name: st.name, rank: 4, why: 'In the class, but no quiz or lesson evidence in ' + (classSubject ? classSubject.name : 'this subject') + ' yet.' });
+  });
+  const haveAWord = words.sort(function (a, b) { return a.rank - b.rank || a.name.localeCompare(b.name); }).slice(0, 5);
+
+  /* where the marks are going: by the marks a question carries */
+  const marks = Object.keys(marksTally).map(function (k) {
+    const m = marksTally[k];
+    const topUnit = Object.keys(m.units).sort(function (a, b) { return m.units[b] - m.units[a]; })[0];
+    return { marks: m.marks, answers: m.answers, average: Math.round(m.got / m.answers * 10) / 10, percent: Math.round(m.got / m.of * 100), unit: unitLabel(topUnit) };
+  }).filter(function (m) { return m.answers >= 3; }).sort(function (a, b) { return a.marks - b.marks; });
+
+  /* the markbook: one row per pupil, one cell per unit the class has touched */
+  const markbook = {
+    units: markUnits,
+    rows: students.map(function (st) {
+      const pu = pupilUnits[st.id] || {}, cells = {};
+      markUnits.forEach(function (u) { const x = pu[u.slug]; if (x) cells[u.slug] = { band: x.band, score: x.s, n: x.n, q: x.q, drop: x.drop }; });
+      const ans = pupilAnswers[st.id] || [];
+      const got = ans.reduce(function (n, a) { return n + a.got; }, 0), of = ans.reduce(function (n, a) { return n + a.marks; }, 0);
+      let weakest = null;
+      Object.keys(pu).forEach(function (u) { if (!weakest || pu[u].s < pu[weakest].s) weakest = u; });
+      return { id: st.id, name: st.name, cells: cells, marks: of ? { percent: Math.round(got / of * 100), answers: ans.length } : null,
+               recall: st.quizAccuracy, weakest: weakest ? unitLabel(weakest) : null,
+               misses: pupilMisses[st.id] || [], answers: ans };
+    })
+  };
+
   return res.status(200).json(Object.assign({}, shell, {
     size: ids.length,
     students: students,
+    markbook: markbook,
+    unitBands: unitBands,
+    goingCold: goingCold,
+    haveAWord: haveAWord,
+    marks: marks,
     attainment: attainment,
     lessonAttainment: lessonAttainment,
     coverage: coverage,

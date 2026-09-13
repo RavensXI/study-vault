@@ -76,6 +76,7 @@ module.exports = async function handler(req, res) {
        we designed the class-derived access to avoid. */
     canBuild: !!auth.profile.school_id,
     canEdit,
+    teacher: { name: auth.profile.full_name || null },   /* for the avatar initials only */
     classes: classes.map(function (c) {
       return {
         id: c.id,
