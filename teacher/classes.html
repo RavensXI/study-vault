@@ -56,6 +56,7 @@
     <!-- the class bar: join code and roll for the chosen class; a door to a new one -->
     <div class="card classbar" id="classbar" hidden>
       <span class="roll" id="roll"></span>
+      <span class="rollwrap"><label for="rollIn">on your register</label><input id="rollIn" type="number" min="1" max="60" inputmode="numeric" placeholder="28" aria-label="How many pupils are on your register"></span>
       <div class="codewrap" id="codewrap">
         <label for="code">Join code</label>
         <span class="code" id="code">——————</span>
@@ -123,8 +124,11 @@
       <div class="dots" id="stDots"></div>
       <button class="btn ghost" type="button" id="stNext">Next &rarr;</button>
       <span class="sp"></span>
+      <button class="btn ghost" type="button" data-sheet>Print a sheet</button>
     </div></div>
   </div>
+  <!-- the printed sheet: the same questions, no answers, a line for a name -->
+  <div class="donow" id="donow" aria-hidden="true"></div>
 
 <script>
 (function () {
@@ -242,7 +246,7 @@
         (q.right ? '<div class="row"><span class="lab">Answer</span><span class="right">' + esc(q.right) + '</span></div>' : '') + '</div>' +
         '<div class="barline"><span class="count">' + q.students + (q.met ? ' of the ' + q.met + ' who answered got it wrong' : ' pupils got it wrong') + '</span></div></div>';
     });
-    h += '</div>' + (items.length ? '<div class="panel-f"><button class="btn wide" type="button" data-starter><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="5,3 19,12 5,21"/></svg>Show these on the board</button></div>' : '') + '</section>';
+    h += '</div>' + (items.length ? '<div class="panel-f" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-starter style="flex:1"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="5,3 19,12 5,21"/></svg>Show these on the board</button><button class="btn ghost" type="button" data-sheet title="Print the questions as a sheet to hand out">Print a sheet</button></div>' : '') + '</section>';
 
     h += '<section class="card panel"><div class="panel-h"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M4.9 5.6l14.2 12.8M19.1 5.6 4.9 18.4M2.5 12h19"/></svg><h2>Being forgotten</h2><span class="n">' + cold.length + '</span></div><div class="panel-b">';
     if (!cold.length) h += '<p class="thin" style="padding:12px 0">Nothing yet. A topic appears here when pupils who knew it have not revised it and now need to.</p>';
@@ -262,12 +266,17 @@
     h += '</div><div class="panel-f"><span class="count">Tap a name to see their row in the markbook. A parents&rsquo; evening pack opens from there.</span></div></section></div>';
     return h;
   }
-  function sheet(title, head, rows, hint) {
-    return '<section class="section"><h3>' + title + '</h3><div class="sheet"><div class="scroller"><table><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div></div>' + (hint ? '<p class="hint">' + hint + '</p>' : '') + '</section>';
+  var OPEN = {}; try { OPEN = JSON.parse(sessionStorage.getItem('sv-teacher-open') || '{}'); } catch (e) {}
+  function sheet(title, head, rows, hint, alwaysOpen) {
+    var key = title.replace(/<[^>]+>|&[a-z]+;/g, '').slice(0, 24);
+    var open = alwaysOpen || OPEN[key];
+    return '<details class="section" data-key="' + esc(key) + '"' + (open ? ' open' : '') + '><summary><h3>' + title + '</h3><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>' +
+      '<div class="sheet"><div class="scroller"><table><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div></div>' + (hint ? '<p class="hint">' + hint + '</p>' : '') + '</details>';
   }
+  document.addEventListener('toggle', function (e) { var d = e.target; if (d && d.matches && d.matches('details.section')) { OPEN[d.getAttribute('data-key')] = d.open; try { sessionStorage.setItem('sv-teacher-open', JSON.stringify(OPEN)); } catch (x) {} } }, true);
   function everythingHtml(d) {
     var lw = d.lastWeek;
-    var h = '<div class="rule"><h2>All the detail</h2><i></i><small>for when you have more than five minutes</small></div>';
+    var h = '<div class="rule"><h2>All the detail</h2><i></i><small>tap a heading to open it</small></div>';
     if ((d.marks || []).length) {
       h += sheet('Marks by question type', '<th>Question size</th><th>Most often in</th><th>Class average</th><th>Share of marks</th><th class="num">Answers</th>',
         d.marks.map(function (m) { return '<tr><td>' + m.marks + '-mark questions</td><td>' + esc(m.unit) + '</td><td>' + m.average + ' <span class="sub">out of ' + m.marks + '</span></td><td>' + m.percent + '%</td><td class="num">' + m.answers + '</td></tr>'; }).join(''),
@@ -286,11 +295,6 @@
         return '<tr><td>' + esc(u.unit) + '</td><td class="num">' + u.secure + '</td><td class="num">' + u.developing + '</td><td class="num">' + u.emerging + '</td><td class="num">' + u.notYet + '</td><td><span class="band ' + (u.band || 'n') + '">' + esc(u.word || 'not started') + '</span>' + (u.score != null ? ' <span class="sub" style="display:inline">' + u.score + '</span>' : '') + '</td>' + (lw ? '<td>' + esc(ch || 'new topic') + '</td>' : '') + '</tr>'; }).join('')
         : '<tr><td colspan="' + (lw ? 7 : 6) + '" class="thin">No topic has a quiz or lesson yet.</td></tr>',
       'The same three words the pupils see on their own dashboard. Secure means they know it well (70 and over), developing means getting there (40 to 69), emerging means it needs work (under 40). A pupil counts once per topic. Flashcards are not counted here, so a teacher&rsquo;s view can sit a little below the pupil&rsquo;s own.');
-    var rows = (d.markbook && d.markbook.rows) || [];
-    var act = {}; (d.students || []).forEach(function (s) { act[s.id] = s; });
-    h += sheet('The class &mdash; click a name for a parents&rsquo; evening pack', '<th>Name</th><th class="num">Lessons done</th><th class="num">Quiz answers right</th><th class="num">Answers marked</th><th>Weakest topic</th><th>Last worked on ' + esc(d.class.subject || 'this subject') + '</th>',
-      rows.map(function (r) { var s = act[r.id] || {}; return '<tr><td><button class="namebtn" type="button" data-pack="' + esc(r.id) + '">' + esc(r.name) + '</button></td><td class="num">' + (s.lessonsComplete || 0) + '</td><td class="num">' + pct(r.recall) + '</td><td class="num">' + (r.marks ? r.marks.answers : 0) + '</td><td>' + esc(r.weakest || '&mdash;') + '</td><td>' + esc(s.lastActive || 'never') + '</td></tr>'; }).join(''),
-      '&ldquo;Last worked on&rdquo; is a rough bucket on purpose, never a time of day. You need to know who has stopped, not when somebody was at their desk.');
     var cov = d.coverage;
     if (cov) {
       h += sheet('How far through each topic', '<th>Topic</th><th>Lessons reached</th><th class="num">Started it</th><th class="num">Typical lessons done</th>',
@@ -330,13 +334,14 @@
       '<label for="viewSel">Columns</label><select id="viewSel"><option value="units"' + (VIEW === 'units' ? ' selected' : '') + '>Topics</option><option value="lessons"' + (VIEW === 'lessons' ? ' selected' : '') + '>Lessons in one topic</option>' + (types.length ? '<option value="types"' + (VIEW === 'types' ? ' selected' : '') + '>Exam question types</option>' : '') + '</select>' +
       (VIEW === 'lessons' ? '<select id="unitSel" aria-label="Topic">' + units.map(function (u) { return '<option value="' + esc(u.slug) + '"' + (u.slug === VIEW_UNIT ? ' selected' : '') + '>' + esc(u.name) + '</option>'; }).join('') + '</select>' : '') +
       '<span class="sp"></span><span>' + rows.length + ' pupils &middot; click any box for the detail</span></div>';
-    h += '<div class="gridwrap"><div class="gridscroll"><table class="grid"><thead><tr><th class="pupilhead">Pupil</th>';
+    var cols = VIEW === 'units' ? units.length + 1 : VIEW === 'types' ? types.length : 12;
+    h += '<div class="gridwrap"><div class="gridscroll"><table class="grid' + (cols > 6 ? ' many' : '') + '"><thead><tr><th class="pupilhead">Pupil</th>';
     var lessonNums = [];
     if (VIEW === 'units') h += units.map(function (u) { return '<th>' + esc(u.name) + '<small>' + u.lessons + ' lessons</small></th>'; }).join('') + '<th>Marked answers<small>share of marks</small></th>';
     else if (VIEW === 'lessons') {
       var seen = {}; rows.forEach(function (r) { Object.keys(r.lessons || {}).forEach(function (k) { var p = k.split('/'); if (p[0] === VIEW_UNIT) seen[+p[1]] = 1; }); });
       lessonNums = Object.keys(seen).map(Number).sort(function (a, b) { return a - b; });
-      h += lessonNums.map(function (n) { return '<th>Lesson ' + n + '<small>' + esc(vu ? vu.name.slice(0, 18) : '') + '</small></th>'; }).join('');
+      h += lessonNums.map(function (n) { return '<th title="Lesson ' + n + '">L' + n + '</th>'; }).join('');
       if (!lessonNums.length) h += '<th>No lessons or quizzes yet</th>';
     } else h += types.map(function (t) { return '<th>' + esc(t) + '<small>share of marks</small></th>'; }).join('');
     h += '</tr></thead><tbody>';
@@ -352,8 +357,8 @@
       } else if (VIEW === 'lessons') {
         lessonNums.forEach(function (n) {
           var l = (r.lessons || {})[VIEW_UNIT + '/' + n];
-          if (!l) h += '<td>' + cellBtn('n', 'nothing yet', '&mdash;') + '</td>';
-          else h += '<td>' + cellBtn(l.band, bandWord(l.band), l.s + (l.quiz ? '' : ' &middot; read only'), esc(r.id) + '|' + esc(VIEW_UNIT)) + '</td>';
+          if (!l) h += '<td>' + cellBtn('n', '&mdash;', 'nothing') + '</td>';
+          else h += '<td>' + cellBtn(l.band, String(l.s), l.quiz ? bandWord(l.band) : 'read only', esc(r.id) + '|' + esc(VIEW_UNIT)) + '</td>';
         });
         if (!lessonNums.length) h += '<td></td>';
       } else {
@@ -379,6 +384,11 @@
     h += '</tr></tfoot></table></div></div>';
     h += '<div class="keyrow"><span><i class="swatch g"></i> secure = knows it well (70 and over)</span><span><i class="swatch a"></i> developing = getting there (40 to 69)</span><span><i class="swatch r"></i> emerging = needs work (under 40)</span><span><i class="swatch n"></i> nothing yet = no lesson or quiz</span><span><i class="swatch due"></i> outlined = knew it, now needs to revise it again</span><span>&ldquo;read only&rdquo; = read the lesson, no quiz yet, so the score has dropped</span></div>';
     h += '<section class="card drawer" id="drawer" hidden></section>';
+    var rows = (d.markbook && d.markbook.rows) || [];
+    var act = {}; (d.students || []).forEach(function (s) { act[s.id] = s; });
+    h += sheet('The class &mdash; click a name for a parents&rsquo; evening pack', '<th>Name</th><th class="num">Lessons done</th><th class="num">Quiz answers right</th><th class="num">Answers marked</th><th>Weakest topic</th><th>Last worked on ' + esc(d.class.subject || 'this subject') + '</th>',
+      rows.map(function (r) { var s = act[r.id] || {}; return '<tr><td><button class="namebtn" type="button" data-pack="' + esc(r.id) + '">' + esc(r.name) + '</button></td><td class="num">' + (s.lessonsComplete || 0) + '</td><td class="num">' + pct(r.recall) + '</td><td class="num">' + (r.marks ? r.marks.answers : 0) + '</td><td>' + esc(r.weakest || '&mdash;') + '</td><td>' + esc(s.lastActive || 'never') + '</td></tr>'; }).join(''),
+      '&ldquo;Last worked on&rdquo; is a rough bucket on purpose, never a time of day. You need to know who has stopped, not when somebody was at their desk.');
     return h;
   }
   function drawerHtml(d, pupilId, slug) {
@@ -430,6 +440,19 @@
     ST.items = (DATA && DATA.missedItems || []).slice(0, 6); if (!ST.items.length) return;
     document.getElementById('starter').hidden = false; document.body.style.overflow = 'hidden'; starterShow(0);
   }
+  function printSheet() {
+    var items = (DATA && DATA.missedItems || []).slice(0, 6); if (!items.length) return;
+    var box = document.getElementById('donow');
+    box.innerHTML = '<h1>' + esc(DATA.class.name) + (DATA.class.subject ? ' &middot; ' + esc(DATA.class.subject) : '') + ' &middot; starter</h1>' +
+      '<p class="meta">Name <span></span> Date <span></span></p><ol>' +
+      items.map(function (q) { return '<li>' + esc(q.question) + '<span class="lines"></span></li>'; }).join('') + '</ol>' +
+      '<p class="foot">The questions the class got wrong most this week on StudyVault.</p>';
+    document.body.classList.add('printing-sheet');
+    var done = function () { document.body.classList.remove('printing-sheet'); window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    window.print();
+    setTimeout(done, 1500);
+  }
   function starterClose() { document.getElementById('starter').hidden = true; document.body.style.overflow = ''; }
   document.getElementById('stReveal').addEventListener('click', function () { document.getElementById('stAnswers').classList.add('on'); this.hidden = true; });
   document.getElementById('stPrev').addEventListener('click', function () { starterShow(ST.i - 1); });
@@ -461,7 +484,7 @@
     document.getElementById('h1').textContent = d.class.name + (d.class.subject ? ' · ' + d.class.subject : '');
     var c = CLASSES.find(function (x) { return x.id === d.class.id; }) || {};
     var joined = c.size != null ? c.size : d.size;
-    document.getElementById('h1note').innerHTML = joined + ' in the class' + (d.attainment && d.attainment.studentsWithEvidence != null ? ' &middot; ' + d.attainment.studentsWithEvidence + ' have done a quiz' : '');
+    document.getElementById('h1note').innerHTML = (c.roll ? joined + ' of ' + c.roll + ' have joined' + (c.roll > joined ? ' &middot; ' + (c.roll - joined) + ' still to join' : '') : joined + ' in the class') + (d.attainment && d.attainment.studentsWithEvidence != null ? ' &middot; ' + d.attainment.studentsWithEvidence + ' have done a quiz' : '');
   }
 
   /* ---- class picking, creating, code (kept from the previous screen) ---- */
@@ -476,7 +499,8 @@
     sessionStorage.setItem('sv-teacher-class', id);
     codeEl.textContent = c.joinCode || '——————';
     document.getElementById('copyBtn').setAttribute('data-code', c.joinCode || '');
-    rollEl.textContent = c.size + (c.size === 1 ? ' student' : ' students') + (c.subject ? ' · ' + c.subject : '') + ' · read the code out; they go to studyvault.co.uk/join';
+    rollEl.textContent = c.size + (c.roll ? ' of ' + c.roll : '') + ' joined' + (c.subject ? ' · ' + c.subject : '') + ' · read the code out; they go to studyvault.co.uk/join';
+    var ri = document.getElementById('rollIn'); ri.value = c.roll || ''; ri.dataset.classId = c.id;
     var badge = document.getElementById('shutBadge'); if (badge) badge.remove();
     if (!c.joinOpen) document.getElementById('codewrap').insertAdjacentHTML('beforeend', '<span class="shut" id="shutBadge">Closed</span>');
     document.getElementById('h1').textContent = c.name + (c.subject ? ' · ' + c.subject : '');
@@ -521,6 +545,14 @@
     } catch (e) { viewEl.className = ''; viewEl.innerHTML = '<div class="empty">Could not load your classes. ' + esc(e.message) + '</div>'; }
   }
   selEl.addEventListener('change', function () { selectClass(this.value); });
+  document.getElementById('rollIn').addEventListener('change', async function () {
+    var id = this.dataset.classId, v = this.value.trim(); if (!id) return;
+    var c = CLASSES.find(function (x) { return x.id === id; });
+    try {
+      if (!FIXTURE) await api('/api/teacher/update-class', { class_id: id, roll: v === '' ? null : parseInt(v, 10) });
+      if (c) { c.roll = v === '' ? null : parseInt(v, 10); rollEl.textContent = c.size + (c.roll ? ' of ' + c.roll : '') + ' joined' + (c.subject ? ' · ' + c.subject : '') + ' · read the code out; they go to studyvault.co.uk/join'; if (DATA) headline(DATA); }
+    } catch (e) { alert(e.message); }
+  });
   document.getElementById('newClassBtn').addEventListener('click', function () { showCreate(true); });
   document.getElementById('cancelCreate').addEventListener('click', function () { if (!CLASSES.length) return; showCreate(false); selEl.value = sessionStorage.getItem('sv-teacher-class') || CLASSES[0].id; selectClass(selEl.value); });
   document.getElementById('make').addEventListener('click', async function () {
@@ -580,6 +612,7 @@
     var t;
     if ((t = ev.target.closest('[data-tab]'))) { setTab(t.getAttribute('data-tab')); return; }
     if ((t = ev.target.closest('[data-starter]'))) { starterOpen(); return; }
+    if ((t = ev.target.closest('[data-sheet]'))) { printSheet(); return; }
     if ((t = ev.target.closest('[data-cell]'))) { var p = t.getAttribute('data-cell').split('|'); openDrawer(p[0], p[1] || null); return; }
     if ((t = ev.target.closest('[data-pupil]'))) { var id = t.getAttribute('data-pupil'); if (TAB !== 'book') { setTab('book'); } var r = DATA && DATA.markbook.rows.find(function (x) { return x.id === id; }); var slug = r ? (Object.keys(r.cells).sort(function (a, b) { return r.cells[a].score - r.cells[b].score; })[0] || null) : null; openDrawer(id, slug); var row = document.querySelector('.grid [data-pupil="' + id + '"]'); if (row) row.scrollIntoView({ block: 'center' }); return; }
     if ((t = ev.target.closest('[data-drawer-close]'))) { var dr = document.getElementById('drawer'); if (dr) dr.hidden = true; document.querySelectorAll('.cell.on').forEach(function (c) { c.classList.remove('on'); }); return; }
@@ -595,8 +628,8 @@
   /* ---- boot ---- */
   if (FIXTURE) {
     fetch('/design-lab/' + (FIXTURE === 'thin' ? '_fixture.json' : '_fixture_rich.json')).then(function (r) { return r.json(); }).then(function (d) {
-      DATA = d; CLASSES = [{ id: d.class.id, name: d.class.name, subject: d.class.subject, size: d.size, joinCode: 'ABC123', joinOpen: true }];
-      paintPicker(); selEl.value = d.class.id; barEl.hidden = false; codeEl.textContent = 'ABC123'; rollEl.textContent = d.size + ' students · ' + (d.class.subject || '') + ' · local fixture';
+      DATA = d; CLASSES = [{ id: d.class.id, name: d.class.name, subject: d.class.subject, size: d.size, roll: d.size + 4, joinCode: 'ABC123', joinOpen: true }];
+      paintPicker(); selEl.value = d.class.id; barEl.hidden = false; codeEl.textContent = 'ABC123'; rollEl.textContent = d.size + ' of ' + (d.size + 4) + ' joined · ' + (d.class.subject || '') + ' · local fixture'; document.getElementById('rollIn').value = d.size + 4; document.getElementById('rollIn').dataset.classId = d.class.id;
       tabsEl.hidden = false; headline(d); render();
     });
   } else {

@@ -25,7 +25,7 @@ module.exports = async function handler(req, res) {
 
   let q = supabase
     .from('classes')
-    .select('id, name, year_group, subject_id, join_code, join_open, teacher_id, school_id')
+    .select('id, name, year_group, subject_id, join_code, join_open, teacher_id, school_id, roll')
     .order('name');
 
   /* A teacher sees their own. A school admin sees their school's. Only
@@ -85,6 +85,7 @@ module.exports = async function handler(req, res) {
         subject: subjectName[c.subject_id] || null,
         joinCode: c.join_code,
         joinOpen: c.join_open !== false,
+        roll: c.roll || null,
         size: size[c.id] || 0
       };
     }),
