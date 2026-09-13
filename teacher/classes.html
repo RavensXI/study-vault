@@ -332,7 +332,8 @@
       '<option value="weak"' + (ORDER === 'weak' ? ' selected' : '') + '>Weakest first</option><option value="name"' + (ORDER === 'name' ? ' selected' : '') + '>Surname</option><option value="faded"' + (ORDER === 'faded' ? ' selected' : '') + '>Most forgotten</option></select>' +
       '<label for="viewSel">Columns</label><select id="viewSel"><option value="units"' + (VIEW === 'units' ? ' selected' : '') + '>Topics</option><option value="lessons"' + (VIEW === 'lessons' ? ' selected' : '') + '>Lessons in one topic</option>' + (types.length ? '<option value="types"' + (VIEW === 'types' ? ' selected' : '') + '>Exam question types</option>' : '') + '</select>' +
       (VIEW === 'lessons' ? '<select id="unitSel" aria-label="Topic">' + units.map(function (u) { return '<option value="' + esc(u.slug) + '"' + (u.slug === VIEW_UNIT ? ' selected' : '') + '>' + esc(u.name) + '</option>'; }).join('') + '</select>' : '') +
-      '<span class="sp"></span><span>' + rows.length + ' pupils &middot; click any box for the detail</span></div>';
+      '<span class="sp"></span><span>' + rows.length + ' pupils &middot; click any box for the detail</span>' +
+      '<span class="gridnav" id="gridnav" hidden><button type="button" class="copy" data-gridnav="-1" aria-label="Scroll left">&larr;</button><button type="button" class="copy" data-gridnav="1" aria-label="Scroll right">&rarr;</button><small>or drag the grid</small></span></div>';
     var cols = VIEW === 'units' ? units.length + 1 : VIEW === 'types' ? types.length : 12;
     h += '<div class="gridwrap"><div class="gridscroll"><table class="grid' + (cols > 6 ? ' many' : '') + '"><thead><tr><th class="pupilhead">Pupil</th>';
     var lessonNums = [];
@@ -411,6 +412,28 @@
     h += '</ul><button class="btn ghost wide" type="button" style="margin-top:16px" data-pack="' + esc(r.id) + '">Parents&rsquo; evening pack &rarr;</button></div>';
     return h;
   }
+  /* a wide grid moves by dragging it, by the arrows, or by a mouse wheel with no horizontal axis;
+     nobody should have to scroll to the bottom to find the sideways bar (Tom, 13 Sep 2026) */
+  function wireGridDrag() {
+    var g = document.querySelector('.gridscroll'), nav = document.getElementById('gridnav'); if (!g) return;
+    var wide = g.scrollWidth > g.clientWidth + 4;
+    if (nav) nav.hidden = !wide;
+    if (!wide) return;
+    g.classList.add('draggable');
+    var down = null, moved = false;
+    g.addEventListener('pointerdown', function (e) { if (e.button !== 0) return; down = { x: e.clientX, left: g.scrollLeft, id: e.pointerId }; moved = false; });
+    g.addEventListener('pointermove', function (e) {
+      if (!down) return;
+      var dx = e.clientX - down.x;
+      if (!moved && Math.abs(dx) > 6) { moved = true; g.classList.add('dragging'); try { g.setPointerCapture(down.id); } catch (x) {} }
+      if (moved) { g.scrollLeft = down.left - dx; e.preventDefault(); }
+    });
+    var up = function () { if (moved) { g.classList.remove('dragging'); setTimeout(function () { moved = false; }, 0); } down = null; };
+    g.addEventListener('pointerup', up); g.addEventListener('pointercancel', up); g.addEventListener('lostpointercapture', up);
+    g.addEventListener('click', function (e) { if (moved) { e.stopPropagation(); e.preventDefault(); } }, true);
+    g.addEventListener('wheel', function (e) { if (!e.shiftKey && Math.abs(e.deltaX) < 1 && Math.abs(e.deltaY) > 0 && g.scrollWidth > g.clientWidth) { g.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
+    if (nav) nav.querySelectorAll('[data-gridnav]').forEach(function (b) { b.addEventListener('click', function () { g.scrollBy({ left: +b.getAttribute('data-gridnav') * Math.max(240, g.clientWidth * 0.6), behavior: 'smooth' }); }); });
+  }
   function openDrawer(pupilId, slug) {
     var dr = document.getElementById('drawer'); if (!dr || !DATA) return;
     dr.innerHTML = drawerHtml(DATA, pupilId, slug); dr.hidden = false;
@@ -481,6 +504,7 @@
     var os = document.getElementById('orderSel'); if (os) os.addEventListener('change', function () { ORDER = this.value; sessionStorage.setItem('sv-teacher-order', ORDER); render(); });
     var vs = document.getElementById('viewSel'); if (vs) vs.addEventListener('change', function () { VIEW = this.value; sessionStorage.setItem('sv-teacher-view', VIEW); render(); });
     var us = document.getElementById('unitSel'); if (us) us.addEventListener('change', function () { VIEW_UNIT = this.value; sessionStorage.setItem('sv-teacher-view-unit', VIEW_UNIT); render(); });
+    wireGridDrag();
   }
   function headline(d) {
     document.getElementById('h1').textContent = d.class.name + (d.class.subject ? ' · ' + d.class.subject : '');
@@ -596,6 +620,7 @@
   }
   async function openPack(studentId) {
     var classId = selEl.value || (DATA && DATA.class.id);
+    if (FIXTURE) { alert('Parents\u2019 evening packs come from the live site; this local preview has no API behind it.'); return; }
     tabsEl.hidden = true; viewEl.className = 'loading'; viewEl.textContent = 'Building the pack...';
     try {
       var p = await api('/api/teacher/student-pack?class_id=' + encodeURIComponent(classId) + '&student_id=' + encodeURIComponent(studentId));
