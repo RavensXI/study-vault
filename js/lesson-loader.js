@@ -310,7 +310,7 @@
       if (navCohortYear) {
         siblings = siblings.filter(function (s) {
           if (s.lesson_number === params.lessonNumber) return true;
-          var y = navYearMap[unit.slug + '/' + s.lesson_number];
+          var y = navYearMap[unit.slug + '/' + s.lesson_number] || navYearMap[unit.slug];
           return !y || y === navCohortYear;
         });
       }

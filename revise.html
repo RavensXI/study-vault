@@ -1187,6 +1187,15 @@
 
       units = res.data || [];
 
+      /* a unit held to one cohort's exam year (subjects.settings.exam_year_lessons,
+         bare "unit-slug" -> year) only appears for that year's students */
+      var subjRow = subjects.find(function (s) { return s.id === subjectId; });
+      var unitYears = subjRow && subjRow.settings && subjRow.settings.exam_year_lessons;
+      var myYear = parseInt(localStorage.getItem('studyvault-exam-year') || '', 10);
+      if (unitYears && myYear) {
+        units = units.filter(function (u) { var y = unitYears[u.slug]; return !y || y === myYear; });
+      }
+
       unitSel.innerHTML = '<option value="">Choose a unit</option>';
       units.forEach(function (u) {
         var opt = document.createElement('option');

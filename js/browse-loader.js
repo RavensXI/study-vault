@@ -437,6 +437,27 @@
     overviewTier = overviewTier || 'higher';
     var foundationFilter = (TIERED_OVERVIEW.indexOf(subjectSlug) !== -1 && overviewTier === 'foundation');
     var higherFilter = (TIERED_OVERVIEW.indexOf(subjectSlug) !== -1 && overviewTier === 'higher');
+    // Cohort-year scoping for WHOLE units: subjects.settings.exam_year_lessons
+    // may also carry a bare "unit-slug" -> year (Latin narratives: Livy and
+    // Virgil are prescribed for the 2027 exams only; the unit is rebuilt for
+    // each cohort whose set texts change). A student with a wizard year sees
+    // only their year's units; no year set, or staff, see everything.
+    var unitYearMap = subject.settings && subject.settings.exam_year_lessons;
+    if (unitYearMap) {
+      var landingCohortYear = parseInt(localStorage.getItem('studyvault-exam-year') || '', 10);
+      var landingStaff = false;
+      try {
+        var _la = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
+        landingStaff = !!(_la && ['admin', 'platform_admin', 'teacher', 'school_admin'].indexOf(_la.role) !== -1);
+      } catch (e) {}
+      if (landingCohortYear && !landingStaff) {
+        units = units.filter(function (u) {
+          var y = unitYearMap[u.slug];
+          return !y || y === landingCohortYear;
+        });
+      }
+    }
+
     var countPromises = units.map(function (u) {
       var q = sb.from('lessons').select('id', { count: 'exact', head: true })
         .eq('unit_id', u.id).eq('status', 'live');
@@ -723,7 +744,7 @@
       } catch (e) {}
       if (cohortYear && !browseStaff) {
         lessons = lessons.filter(function (l) {
-          var y = yearMap[unitSlug + '/' + l.lesson_number];
+          var y = yearMap[unitSlug + '/' + l.lesson_number] || yearMap[unitSlug];
           return !y || y === cohortYear;
         });
       }

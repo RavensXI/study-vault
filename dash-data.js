@@ -124,8 +124,19 @@ function doneIn(sub, unit) { return DONE[sub + '/' + unit] || []; }
    compulsory and never listed here, so it is always kept */
 var MUSIC_OPTIONAL_AOS = ['aos2-popular-music', 'aos3-traditional-music', 'aos4-since-1910'];
 
+/* a unit held to one cohort's exam year (subjects.settings.exam_year_lessons, bare
+   "unit-slug" -> year): only that year's students see it; no year set sees all */
+function svUnitForCohort(settings, uslug) {
+  var y = settings && settings.exam_year_lessons && settings.exam_year_lessons[uslug];
+  if (!y) return true;
+  var mine = 0; try { mine = parseInt(localStorage.getItem('studyvault-exam-year') || '', 10); } catch (e) {}
+  return !mine || y === mine;
+}
+window.svUnitForCohort = svUnitForCohort;
+
 /* which units belong to THIS student (their topic choices scope the course) */
 function keepUnit(su, uslug) {
+  if (su.settings && !svUnitForCohort(su.settings, uslug)) return false;
   var raw = su.topicsRaw || [];
   var allRaw = (WIZ && WIZ.topics && WIZ.topics[su.slug])
     ? Object.values(WIZ.topics[su.slug]).flat() : [];
@@ -646,6 +657,7 @@ function svDashInit(SUBJECTS, opts) {
         if (!su) return;
         // mixed-format subjects: which of these units are practice-first
         su.practiceUnits = (row.settings && row.settings.practice_units) || [];
+        su.settings = row.settings || {};
         var us = (row.units || []).sort(function (a, b) { return (a.sort_order || 0) - (b.sort_order || 0); })
           .filter(function (u) { return keepUnit(su, u.slug); });
         if (!us.length) return;

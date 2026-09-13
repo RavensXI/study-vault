@@ -1148,14 +1148,14 @@
 
       var subjects = [];
       if (schoolId) {
-        var bespokeRes = await sb.from('subjects').select('id, slug, name').eq('school_id', schoolId).in('slug', fetchSlugs);
+        var bespokeRes = await sb.from('subjects').select('id, slug, name, settings').eq('school_id', schoolId).in('slug', fetchSlugs);
         if (bespokeRes.data) subjects = subjects.concat(bespokeRes.data);
       }
 
       var foundSlugs = subjects.map(function (s) { return s.slug; });
       var missingSlugs = fetchSlugs.filter(function (s) { return foundSlugs.indexOf(s) === -1; });
       if (missingSlugs.length > 0) {
-        var genericRes = await sb.from('subjects').select('id, slug, name').is('school_id', null).in('slug', missingSlugs);
+        var genericRes = await sb.from('subjects').select('id, slug, name, settings').is('school_id', null).in('slug', missingSlugs);
         if (genericRes.data) subjects = subjects.concat(genericRes.data);
       }
 
@@ -1173,6 +1173,17 @@
       var units = unitRes.data || [];
 
       units = units.filter(function (u) { return SKIP_UNITS.indexOf(u.slug) === -1; });
+
+      /* a unit held to one cohort's exam year (subjects.settings.exam_year_lessons,
+         bare "unit-slug" -> year) is never planned for another year's student */
+      var _planYear = parseInt(localStorage.getItem('studyvault-exam-year') || '', 10);
+      if (_planYear) {
+        units = units.filter(function (u) {
+          var subject = subjectById[u.subject_id];
+          var y = subject && subject.settings && subject.settings.exam_year_lessons && subject.settings.exam_year_lessons[u.slug];
+          return !y || y === _planYear;
+        });
+      }
 
       /* Scope to the options the student actually sits.
          The picker asks which set texts, which History options, which religions
