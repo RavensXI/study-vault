@@ -231,7 +231,7 @@ module.exports = async function handler(req, res) {
     return res.status(200).json(Object.assign({}, shell, {
       size: 0, students: [], misconceptions: [], weakestUnits: [], missedItems: [],
       attainment: null, lessonAttainment: [], coverage: null, activity: {},
-      markbook: { units: [], rows: [] }, unitBands: [], goingCold: [], haveAWord: [], marks: []
+      markbook: { units: [], questionTypes: [], rows: [] }, unitBands: [], goingCold: [], haveAWord: [], marks: []
     }));
   }
 
@@ -257,6 +257,9 @@ module.exports = async function handler(req, res) {
      or how long. Assembled here so the markbook, "going cold" and "have a word"
      all read from one pass over the class. */
   const pupilUnits = {};     // id -> { unitSlug: {s, peak, n, band, drop} }
+  const pupilLessons = {};   // id -> { "unit/n": {s, band, quiz} }  (the markbook's lessons-in-one-unit view)
+  const pupilTypes = {};     // id -> { type: {got, of, answers} }   (the markbook's question-type view)
+  const typeSeen = {};       // type -> answers across the class
   const pupilMisses = {};    // id -> [{unit, lesson, q, chose, right, times}]
   const pupilAnswers = {};   // id -> [{unit, lesson, marks, got, note}]
   const marksTally = {};     // marks available -> {answers, got, of, units:{}}
@@ -299,7 +302,10 @@ module.exports = async function handler(req, res) {
 
     const practiceScoped = Array.isArray(blob.practice)
       ? blob.practice.filter(function (x) { return x && inScope(x.k || x.key || '', base); }) : [];
-    pupilUnits[id] = strength.units(strength.lessons(kcScoped, doneScoped, pick(blob.when, base), practiceScoped, NOW));
+    const lessonMap = strength.lessons(kcScoped, doneScoped, pick(blob.when, base), practiceScoped, NOW);
+    pupilUnits[id] = strength.units(lessonMap);
+    pupilLessons[id] = {};
+    Object.keys(lessonMap).forEach(function (k) { const l = lessonMap[k]; pupilLessons[id][k] = { s: l.s, band: strength.band(l.s), quiz: l.quiz }; });
     /* the questions this pupil keeps getting wrong, folded by question */
     const mm = {};
     Object.keys(kcScoped).forEach(function (k) {
@@ -318,6 +324,12 @@ module.exports = async function handler(req, res) {
       const parts = String(e.k || e.key || '').split('/');
       const note = String(e.r || '').replace(/^[^\n]*\b(mark|score)[^\n]*\n?/i, '').replace(/\s+/g, ' ').trim().slice(0, 140);
       const row = { unit: parts[1] || '', lesson: parseInt(parts[2], 10) || null, marks: mk.of, got: mk.got, note: note || null };
+      /* question type, as the question carries it ("8 marks · Explain Significance"); older entries only know the marks */
+      const ty = (e.t && String(e.t).replace(/^\d+\s*marks?\s*[·\-–—:]\s*/i, '').trim()) || (mk.of + '-mark');
+      const pt = pupilTypes[id] || (pupilTypes[id] = {});
+      const tt = pt[ty] || (pt[ty] = { got: 0, of: 0, answers: 0 });
+      tt.got += mk.got; tt.of += mk.of; tt.answers++;
+      typeSeen[ty] = (typeSeen[ty] || 0) + 1;
       const mt = marksTally[mk.of] || (marksTally[mk.of] = { marks: mk.of, answers: 0, got: 0, of: 0, units: {} });
       mt.answers++; mt.got += mk.got; mt.of += mk.of; mt.units[row.unit] = (mt.units[row.unit] || 0) + 1;
       return row;
@@ -528,9 +540,12 @@ module.exports = async function handler(req, res) {
     return { marks: m.marks, answers: m.answers, average: Math.round(m.got / m.answers * 10) / 10, percent: Math.round(m.got / m.of * 100), unit: unitLabel(topUnit) };
   }).filter(function (m) { return m.answers >= 3; }).sort(function (a, b) { return a.marks - b.marks; });
 
-  /* the markbook: one row per pupil, one cell per unit the class has touched */
+  /* the markbook: one row per pupil, one cell per unit the class has touched;
+     plus the two other views — lessons within a unit, and marks by question type */
+  const questionTypes = Object.keys(typeSeen).sort(function (a, b) { return typeSeen[b] - typeSeen[a]; }).slice(0, 8);
   const markbook = {
     units: markUnits,
+    questionTypes: questionTypes,
     rows: students.map(function (st) {
       const pu = pupilUnits[st.id] || {}, cells = {};
       markUnits.forEach(function (u) { const x = pu[u.slug]; if (x) cells[u.slug] = { band: x.band, score: x.s, n: x.n, q: x.q, drop: x.drop }; });
@@ -538,8 +553,11 @@ module.exports = async function handler(req, res) {
       const got = ans.reduce(function (n, a) { return n + a.got; }, 0), of = ans.reduce(function (n, a) { return n + a.marks; }, 0);
       let weakest = null;
       Object.keys(pu).forEach(function (u) { if (!weakest || pu[u].s < pu[weakest].s) weakest = u; });
+      const types = {};
+      questionTypes.forEach(function (t) { const x = (pupilTypes[st.id] || {})[t]; if (x) types[t] = { percent: Math.round(x.got / x.of * 100), answers: x.answers }; });
       return { id: st.id, name: st.name, cells: cells, marks: of ? { percent: Math.round(got / of * 100), answers: ans.length } : null,
                recall: st.quizAccuracy, weakest: weakest ? unitLabel(weakest) : null,
+               lessons: pupilLessons[st.id] || {}, types: types,
                misses: pupilMisses[st.id] || [], answers: ans };
     })
   };

@@ -529,7 +529,7 @@ function initPracticeQuestions() {
         const ppm = location.pathname.match(/\/(lesson|practice)\/([^/]+)\/([^/]+)\/(\d+)/);
         plog.unshift({ d: new Date().toISOString().slice(0, 10),
           k: ppm ? ppm[2] + '/' + ppm[3] + '/' + ppm[4] : '',
-          q: q.text.slice(0, 240), m: parseInt(marksMatch, 10),
+          q: q.text.slice(0, 240), m: parseInt(marksMatch, 10), t: String(q.type || '').slice(0, 60) || undefined,
           a: answer.slice(0, 1500), r: (data.result || '').slice(0, 1800) });
         localStorage.setItem('sv-practice-log', JSON.stringify(plog.slice(0, 40)));
       } catch (e2) {}

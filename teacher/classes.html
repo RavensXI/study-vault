@@ -285,6 +285,9 @@
 
   /* ================= MARKBOOK ================= */
   var ORDER = sessionStorage.getItem('sv-teacher-order') || 'weak';
+  var VIEW = sessionStorage.getItem('sv-teacher-view') || 'units';   // units | lessons | types
+  var VIEW_UNIT = sessionStorage.getItem('sv-teacher-view-unit') || '';
+  function cellBtn(cls, label, small, data) { return '<button class="cell ' + cls + '" type="button"' + (data ? ' data-cell="' + data + '"' : ' tabindex="-1"') + '>' + label + '<small>' + small + '</small></button>'; }
   function rowScore(r) { var v = Object.keys(r.cells).map(function (k) { return r.cells[k].score; }); return v.length ? v.reduce(function (a, b) { return a + b; }, 0) / v.length : -1; }
   function rowDrops(r) { return Object.keys(r.cells).filter(function (k) { return r.cells[k].drop; }).length; }
   function bookHtml(d) {
@@ -293,24 +296,62 @@
     if (ORDER === 'weak') rows.sort(function (a, b) { return rowScore(a) - rowScore(b) || a.name.localeCompare(b.name); });
     else if (ORDER === 'faded') rows.sort(function (a, b) { return rowDrops(b) - rowDrops(a) || rowScore(a) - rowScore(b); });
     else rows.sort(function (a, b) { return surnameFirst(a.name).localeCompare(surnameFirst(b.name)); });
+    var types = mb.questionTypes || [];
+    if (VIEW === 'lessons' && !units.some(function (u) { return u.slug === VIEW_UNIT; })) VIEW_UNIT = units[0].slug;
+    if (VIEW === 'types' && !types.length) VIEW = 'units';
+    var vu = units.find(function (u) { return u.slug === VIEW_UNIT; });
     var h = '<div class="toolbar"><label for="orderSel">Order by</label><select id="orderSel">' +
       '<option value="weak"' + (ORDER === 'weak' ? ' selected' : '') + '>Weakest first</option><option value="name"' + (ORDER === 'name' ? ' selected' : '') + '>Surname</option><option value="faded"' + (ORDER === 'faded' ? ' selected' : '') + '>Most faded</option></select>' +
-      '<span class="sp"></span><span>' + rows.length + ' pupils &middot; one band per pupil per unit &middot; click any cell</span></div>';
-    h += '<div class="gridwrap"><div class="gridscroll"><table class="grid"><thead><tr><th class="pupilhead">Pupil</th>' +
-      units.map(function (u) { return '<th>' + esc(u.name) + '<small>' + u.lessons + ' lessons</small></th>'; }).join('') + '<th>Marked answers<small>share of marks</small></th></tr></thead><tbody>';
+      '<label for="viewSel">Columns</label><select id="viewSel"><option value="units"' + (VIEW === 'units' ? ' selected' : '') + '>Units</option><option value="lessons"' + (VIEW === 'lessons' ? ' selected' : '') + '>Lessons in one unit</option>' + (types.length ? '<option value="types"' + (VIEW === 'types' ? ' selected' : '') + '>Exam question types</option>' : '') + '</select>' +
+      (VIEW === 'lessons' ? '<select id="unitSel" aria-label="Unit">' + units.map(function (u) { return '<option value="' + esc(u.slug) + '"' + (u.slug === VIEW_UNIT ? ' selected' : '') + '>' + esc(u.name) + '</option>'; }).join('') + '</select>' : '') +
+      '<span class="sp"></span><span>' + rows.length + ' pupils &middot; ' + (VIEW === 'units' ? 'one band per pupil per unit' : VIEW === 'lessons' ? 'one band per pupil per lesson' : 'share of marks per question type') + ' &middot; click any cell</span></div>';
+    h += '<div class="gridwrap"><div class="gridscroll"><table class="grid"><thead><tr><th class="pupilhead">Pupil</th>';
+    var lessonNums = [];
+    if (VIEW === 'units') h += units.map(function (u) { return '<th>' + esc(u.name) + '<small>' + u.lessons + ' lessons</small></th>'; }).join('') + '<th>Marked answers<small>share of marks</small></th>';
+    else if (VIEW === 'lessons') {
+      var seen = {}; rows.forEach(function (r) { Object.keys(r.lessons || {}).forEach(function (k) { var p = k.split('/'); if (p[0] === VIEW_UNIT) seen[+p[1]] = 1; }); });
+      lessonNums = Object.keys(seen).map(Number).sort(function (a, b) { return a - b; });
+      h += lessonNums.map(function (n) { return '<th>L' + n + '<small>' + esc(vu ? vu.name.slice(0, 18) : '') + '</small></th>'; }).join('');
+      if (!lessonNums.length) h += '<th>No lesson evidence yet</th>';
+    } else h += types.map(function (t) { return '<th>' + esc(t) + '<small>share of marks</small></th>'; }).join('');
+    h += '</tr></thead><tbody>';
     rows.forEach(function (r) {
       h += '<tr><th><button type="button" data-pupil="' + esc(r.id) + '">' + esc(surnameFirst(r.name)) + '</button></th>';
-      units.forEach(function (u) {
-        var c = r.cells[u.slug];
-        if (!c) h += '<td><button class="cell n" type="button" tabindex="-1">not yet<small>&mdash;</small></button></td>';
-        else h += '<td><button class="cell ' + c.band + (c.drop ? ' due' : '') + '" type="button" data-cell="' + esc(r.id) + '|' + esc(u.slug) + '">' + bandWord(c.band) + '<small>' + c.score + (c.drop ? ' &darr;' : '') + (c.q === 0 ? ' &middot; read only' : '') + '</small></button></td>';
-      });
-      h += '<td>' + (r.marks ? '<button class="cell ' + (r.marks.percent >= 70 ? 'g' : r.marks.percent >= 40 ? 'a' : 'r') + '" type="button" data-cell="' + esc(r.id) + '|">' + r.marks.percent + '%<small>' + r.marks.answers + (r.marks.answers === 1 ? ' answer' : ' answers') + '</small></button>' : '<button class="cell n" type="button" tabindex="-1">none<small>&mdash;</small></button>') + '</td></tr>';
+      if (VIEW === 'units') {
+        units.forEach(function (u) {
+          var c = r.cells[u.slug];
+          if (!c) h += '<td>' + cellBtn('n', 'not yet', '&mdash;') + '</td>';
+          else h += '<td>' + cellBtn(c.band + (c.drop ? ' due' : ''), bandWord(c.band), c.score + (c.drop ? ' &darr;' : '') + (c.q === 0 ? ' &middot; read only' : ''), esc(r.id) + '|' + esc(u.slug)) + '</td>';
+        });
+        h += '<td>' + (r.marks ? cellBtn(r.marks.percent >= 70 ? 'g' : r.marks.percent >= 40 ? 'a' : 'r', r.marks.percent + '%', r.marks.answers + (r.marks.answers === 1 ? ' answer' : ' answers'), esc(r.id) + '|') : cellBtn('n', 'none', '&mdash;')) + '</td>';
+      } else if (VIEW === 'lessons') {
+        lessonNums.forEach(function (n) {
+          var l = (r.lessons || {})[VIEW_UNIT + '/' + n];
+          if (!l) h += '<td>' + cellBtn('n', 'not yet', '&mdash;') + '</td>';
+          else h += '<td>' + cellBtn(l.band, bandWord(l.band), l.s + (l.quiz ? '' : ' &middot; read only'), esc(r.id) + '|' + esc(VIEW_UNIT)) + '</td>';
+        });
+        if (!lessonNums.length) h += '<td></td>';
+      } else {
+        types.forEach(function (t) {
+          var x = (r.types || {})[t];
+          if (!x) h += '<td>' + cellBtn('n', 'none', '&mdash;') + '</td>';
+          else h += '<td>' + cellBtn(x.percent >= 70 ? 'g' : x.percent >= 40 ? 'a' : 'r', x.percent + '%', x.answers + (x.answers === 1 ? ' answer' : ' answers'), esc(r.id) + '|') + '</td>';
+        });
+      }
+      h += '</tr>';
     });
     h += '</tbody><tfoot><tr><th>Class now</th>';
-    units.forEach(function (u) { var b = (d.unitBands || []).find(function (x) { return x.slug === u.slug; }) || {}; h += '<td>' + esc(b.word || 'not started') + (b.score != null ? ' &middot; ' + b.score : '') + '</td>'; });
-    var mk = (d.marks || []); var allAns = rows.reduce(function (n, r) { return n + (r.marks ? r.marks.answers : 0); }, 0);
-    h += '<td>' + (allAns ? allAns + ' answers marked' : '&mdash;') + '</td></tr></tfoot></table></div></div>';
+    if (VIEW === 'units') {
+      units.forEach(function (u) { var b = (d.unitBands || []).find(function (x) { return x.slug === u.slug; }) || {}; h += '<td>' + esc(b.word || 'not started') + (b.score != null ? ' &middot; ' + b.score : '') + '</td>'; });
+      var allAns = rows.reduce(function (n, r) { return n + (r.marks ? r.marks.answers : 0); }, 0);
+      h += '<td>' + (allAns ? allAns + ' answers marked' : '&mdash;') + '</td>';
+    } else if (VIEW === 'lessons') {
+      lessonNums.forEach(function (n) { var t = 0, c = 0; rows.forEach(function (r) { var l = (r.lessons || {})[VIEW_UNIT + '/' + n]; if (l) { t += l.s; c++; } }); var s = c ? Math.round(t / c) : null; h += '<td>' + (s == null ? '&mdash;' : bandWord(s >= 70 ? 'g' : s >= 40 ? 'a' : 'r') + ' &middot; ' + s + ' <span class="sub" style="display:inline">(' + c + ')</span>') + '</td>'; });
+      if (!lessonNums.length) h += '<td></td>';
+    } else {
+      types.forEach(function (t) { var g = 0, o = 0, a = 0; rows.forEach(function (r) { var x = (r.types || {})[t]; if (x) { g += x.percent * x.answers; o += 100 * x.answers; a += x.answers; } }); h += '<td>' + (a ? Math.round(g / o * 100) + '% &middot; ' + a + ' answers' : '&mdash;') + '</td>'; });
+    }
+    h += '</tr></tfoot></table></div></div>';
     h += '<div class="keyrow"><span><i class="swatch g"></i> secure 70+</span><span><i class="swatch a"></i> developing 40&ndash;69</span><span><i class="swatch r"></i> emerging under 40</span><span><i class="swatch n"></i> no evidence yet</span><span><i class="swatch due"></i> was secure, now under the revisit line</span><span>&ldquo;read only&rdquo; = lessons read but never quizzed, so the score has faded</span></div>';
     h += '<section class="card drawer" id="drawer" hidden></section>';
     return h;
@@ -388,6 +429,8 @@
     viewEl.className = '';
     viewEl.innerHTML = TAB === 'book' ? bookHtml(DATA) : weekHtml(DATA);
     var os = document.getElementById('orderSel'); if (os) os.addEventListener('change', function () { ORDER = this.value; sessionStorage.setItem('sv-teacher-order', ORDER); render(); });
+    var vs = document.getElementById('viewSel'); if (vs) vs.addEventListener('change', function () { VIEW = this.value; sessionStorage.setItem('sv-teacher-view', VIEW); render(); });
+    var us = document.getElementById('unitSel'); if (us) us.addEventListener('change', function () { VIEW_UNIT = this.value; sessionStorage.setItem('sv-teacher-view-unit', VIEW_UNIT); render(); });
   }
   function headline(d) {
     document.getElementById('h1').textContent = d.class.name + (d.class.subject ? ' · ' + d.class.subject : '');
