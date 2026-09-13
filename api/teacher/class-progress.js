@@ -36,6 +36,7 @@ const { supabase } = require('../pipeline/_lib/supabase');
 const { NEVER_SEND, baseSubject, inScope, pick, loadClassFor } = require('./_lib/scope');
 const { loadCurriculum } = require('./_lib/curriculum');
 const strength = require('./_lib/strength');
+const { latestRead } = require('./_lib/weekly-read');
 
 /* Evidence thresholds. Every one of these exists so the screen never prints a
    confident percentage over three answers. A thin number is worse than a blank
@@ -235,10 +236,11 @@ module.exports = async function handler(req, res) {
     }));
   }
 
-  const [{ data: rows }, { data: people }, course] = await Promise.all([
+  const [{ data: rows }, { data: people }, course, weeklyRead] = await Promise.all([
     supabase.from('progress').select('person_id, blob, updated_at').in('person_id', ids),
     supabase.from('profiles').select('id, full_name').in('id', ids),
-    loadCurriculum(classSubject ? classSubject.id : null)
+    loadCurriculum(classSubject ? classSubject.id : null),
+    latestRead(classId).catch(function () { return null; })
   ]);
   const nameOf = {};
   (people || []).forEach(function (p) { nameOf[p.id] = p.full_name || 'Student'; });
@@ -566,6 +568,7 @@ module.exports = async function handler(req, res) {
     size: ids.length,
     students: students,
     markbook: markbook,
+    weeklyRead: weeklyRead,
     unitBands: unitBands,
     goingCold: goingCold,
     haveAWord: haveAWord,

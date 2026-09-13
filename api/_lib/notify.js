@@ -54,10 +54,26 @@ async function notifyAdmin({ subject, html, text }) {
   }
 }
 
+/* Send to one named address (the weekly read goes to the class's teacher). Same
+   guard as notifyAdmin: no key, no send, no throw. */
+async function sendEmail({ to, subject, html, text }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || !to) { console.warn('[notify] sendEmail skipped', !apiKey ? 'no RESEND_API_KEY' : 'no recipient'); return { skipped: true }; }
+  const fromAddress = process.env.NOTIFY_FROM || 'StudyVault <onboarding@resend.dev>';
+  try {
+    const resp = await fetch('https://api.resend.com/emails', {
+      method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: fromAddress, to: to, subject, html: html || `<pre>${escHtml(text || '')}</pre>`, text: text || '' }),
+    });
+    if (!resp.ok) { console.error('[notify] Resend send failed:', resp.status, await resp.text()); return { ok: false, status: resp.status }; }
+    return { ok: true };
+  } catch (e) { console.error('[notify] Resend request error:', e); return { ok: false, error: String(e) }; }
+}
+
 function escHtml(s) {
   return String(s || '').replace(/[<>&"']/g, c => ({
     '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;',
   }[c]));
 }
 
-module.exports = { notifyAdmin, escHtml };
+module.exports = { notifyAdmin, sendEmail, escHtml };

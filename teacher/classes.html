@@ -208,6 +208,27 @@
       '<div><b>' + (a.studentsWithEvidence || 0) + ' <i>of ' + d.size + '</i></b><small>have quiz evidence in ' + esc(subj) + '</small></div>' +
       '</div></section>';
   }
+  /* the weekly read: Markdown-lite (bold headings, bullets, paragraphs) */
+  function mdLite(md) {
+    var inline = function (s) { return esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>'); };
+    var out = '', para = [], list = [];
+    var flushP = function () { if (para.length) { out += '<p>' + inline(para.join(' ')) + '</p>'; para = []; } };
+    var flushL = function () { if (list.length) { out += '<ul>' + list.map(function (l) { return '<li>' + inline(l) + '</li>'; }).join('') + '</ul>'; list = []; } };
+    String(md || '').split('\n').forEach(function (line) {
+      if (/^\s*[-•]\s+/.test(line)) { flushP(); list.push(line.replace(/^\s*[-•]\s+/, '')); }
+      else if (!line.trim()) { flushP(); flushL(); }
+      else { flushL(); para.push(line.trim()); }
+    });
+    flushP(); flushL();
+    return out;
+  }
+  function readHtml(d) {
+    var r = d.weeklyRead;
+    var week = r ? new Date(r.week + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) : '';
+    if (!r) return '<section class="card read"><div class="panel-h"><h2>This week&rsquo;s read</h2><span class="n">Monday</span></div><div class="read-b"><p class="thin">Every Monday morning, once the class has ' + 6 + ' or more marked answers in a week, a short read of those answers lands here and in your inbox: the pattern across them, one thing to model, who is worth a word, and what the quizzes suggest.</p></div></section>';
+    return '<section class="card read"><div class="panel-h"><h2>This week&rsquo;s read</h2><span class="n">week of ' + esc(week) + '</span></div><div class="read-b">' + mdLite(r.read_md) + '</div>' +
+      '<div class="panel-f"><span class="count">AI-drafted from ' + r.answers + ' marked answers by ' + r.pupils + ' pupils, plus the quizzes they got wrong. Check it before you act on it. Processed in the UK.</span></div></section>';
+  }
   function panelsHtml(d) {
     var items = (d.missedItems || []).slice(0, 3), cold = d.goingCold || [], words = d.haveAWord || [];
     var h = '<div class="panels">';
@@ -280,7 +301,7 @@
   }
   function weekHtml(d) {
     var since = sinceLooked(d.class.id);
-    return briefingHtml(d, since) + panelsHtml(d) + everythingHtml(d);
+    return briefingHtml(d, since) + readHtml(d) + panelsHtml(d) + everythingHtml(d);
   }
 
   /* ================= MARKBOOK ================= */
