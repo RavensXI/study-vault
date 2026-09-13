@@ -10,6 +10,12 @@
   <link rel="stylesheet" href="/css/teacher.css">
   <link rel="stylesheet" href="/css/scrollbar.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    /* local fixture preview (?fixture=1 on localhost): satisfy the gate with a throwaway staff session so the page renders a saved API response. Never applies on the real site. */
+    if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /[?&]fixture=/.test(location.search)) {
+      try { sessionStorage.setItem('studyvault-auth', JSON.stringify({ role: 'teacher', full_name: 'Fixture Teacher' })); } catch (e) {}
+    }
+  </script>
   <script src="/js/auth-gate.js" data-role="admin,teacher" data-auth="teacher"></script>
   <style>
     /* auth-gate injects its Sign out control into .admin-nav; give it the house look */
