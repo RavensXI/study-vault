@@ -39,8 +39,9 @@ body{font-family:var(--head);color:var(--ink);background:var(--paper);
            overflow:hidden;text-overflow:ellipsis}
 .top .sp{flex:1 1 auto}
 .topnav{display:flex;align-items:center;gap:16px;font-size:.85rem;flex:none}
-.topnav a{color:var(--sec);text-decoration:none}
-.topnav a:hover{color:var(--ink)}
+.topnav a{color:var(--sec);text-decoration:none;position:relative}
+.topnav a::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1.5px;background:var(--rust);transform:scaleX(0);transform-origin:left center;transition:transform .18s ease}
+.topnav a:hover{color:var(--ink)}.topnav a:hover::after{transform:scaleX(1)}
 .topnav select{font:inherit;font-size:.85rem;font-weight:600;color:var(--ink);
   background:var(--card);border:1px solid var(--edge);border-radius:4px;padding:6px 9px}
 .avatar{width:30px;height:30px;flex:none;border-radius:50%;background:#221e19;color:#faf8f5;
@@ -199,12 +200,20 @@ td .sub{display:block;font-size:.76rem;color:var(--mut)}
   .rule small{display:none}
 }
 
-/* ---- tabs: This week / Markbook ---------------------------------- */
+/* the sliding underline from the lesson header: draws in from the left on hover, gone when you leave (Tom, 13 Sep 2026) */
+.slideline{position:relative;text-decoration:none}
+.slideline::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:1.5px;background:var(--rust);transform:scaleX(0);transform-origin:left center;transition:transform .18s ease}
+.slideline:hover::after,.slideline:focus-visible::after{transform:scaleX(1)}
+
+/* ---- tabs: spread across the bar; the rust line slides in on hover and stays under the chosen one ---- */
 .tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin:0 0 22px}
-.tabs button{font:inherit;font-size:.92rem;font-weight:700;color:var(--sec);background:none;border:none;
-  border-bottom:3px solid transparent;padding:10px 4px;margin-right:22px;cursor:pointer;margin-bottom:-1px}
+.tabs button{flex:1 1 0;text-align:center;font:inherit;font-size:.92rem;font-weight:700;color:var(--sec);background:none;border:none;
+  padding:11px 4px;cursor:pointer;position:relative}
+.tabs button::after{content:"";position:absolute;left:8%;right:8%;bottom:-1px;height:3px;background:var(--rust);transform:scaleX(0);transform-origin:left center;transition:transform .18s ease}
 .tabs button:hover{color:var(--ink)}
-.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--rust)}
+.tabs button:hover::after,.tabs button:focus-visible::after{transform:scaleX(1)}
+.tabs button[aria-selected="true"]{color:var(--ink)}
+.tabs button[aria-selected="true"]::after{transform:scaleX(1)}
 .tabpanel[hidden]{display:none}
 
 /* ---- class bar: pick, code, create ------------------------------- */
