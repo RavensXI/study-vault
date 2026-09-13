@@ -85,6 +85,8 @@
     <div class="tabs" id="tabs" role="tablist" hidden>
       <button type="button" role="tab" aria-selected="true" data-tab="week">This week</button>
       <button type="button" role="tab" aria-selected="false" data-tab="book">Markbook</button>
+      <button type="button" role="tab" aria-selected="false" data-tab="questions">Questions</button>
+      <button type="button" role="tab" aria-selected="false" data-tab="topics">Topics</button>
     </div>
 
     <div id="view" class="loading">Loading…</div>
@@ -266,29 +268,25 @@
     h += '</div><div class="panel-f"><span class="count">Tap a name to see their row in the markbook. A parents&rsquo; evening pack opens from there.</span></div></section></div>';
     return h;
   }
-  var OPEN = {}; try { OPEN = JSON.parse(sessionStorage.getItem('sv-teacher-open') || '{}'); } catch (e) {}
-  function sheet(title, head, rows, hint, alwaysOpen) {
-    var key = title.replace(/<[^>]+>|&[a-z]+;/g, '').slice(0, 24);
-    var open = alwaysOpen || OPEN[key];
-    return '<details class="section" data-key="' + esc(key) + '"' + (open ? ' open' : '') + '><summary><h3>' + title + '</h3><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>' +
-      '<div class="sheet"><div class="scroller"><table><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div></div>' + (hint ? '<p class="hint">' + hint + '</p>' : '') + '</details>';
+  function sheet(title, head, rows, hint) {
+    return '<section class="section"><h3>' + title + '</h3><div class="sheet"><div class="scroller"><table><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div></div>' + (hint ? '<p class="hint">' + hint + '</p>' : '') + '</section>';
   }
-  document.addEventListener('toggle', function (e) { var d = e.target; if (d && d.matches && d.matches('details.section')) { OPEN[d.getAttribute('data-key')] = d.open; try { sessionStorage.setItem('sv-teacher-open', JSON.stringify(OPEN)); } catch (x) {} } }, true);
-  function everythingHtml(d) {
+  function detailHtml(d, part) {
     var lw = d.lastWeek;
-    var h = '<div class="rule"><h2>All the detail</h2><i></i><small>tap a heading to open it</small></div>';
-    if ((d.marks || []).length) {
+    var h = '';
+    if (part === 'marks' && (d.marks || []).length) {
       h += sheet('Marks by question type', '<th>Question size</th><th>Most often in</th><th>Class average</th><th>Share of marks</th><th class="num">Answers</th>',
         d.marks.map(function (m) { return '<tr><td>' + m.marks + '-mark questions</td><td>' + esc(m.unit) + '</td><td>' + m.average + ' <span class="sub">out of ' + m.marks + '</span></td><td>' + m.percent + '%</td><td class="num">' + m.answers + '</td></tr>'; }).join(''),
         'Every answer here was written by a pupil and marked on StudyVault. A row appears once there are three answers or more.');
     }
+    if (part !== 'questions' && part !== 'topics') return h;
     var mi = d.missedItems || [];
-    h += sheet('Questions the class gets wrong', '<th>Question</th><th>They chose</th><th>Answer</th><th class="num">Pupils</th>',
+    if (part === 'questions') h += sheet('Questions the class gets wrong', '<th>Question</th><th>They chose</th><th>Answer</th><th class="num">Pupils</th>',
       mi.length ? mi.map(function (q) { return '<tr><td>' + esc(q.question) + '<span class="sub">' + esc(q.unit) + (q.lesson ? ' &middot; lesson ' + q.lesson : '') + '</span></td><td class="wrong">' + esc(q.commonWrongAnswer || '') + (q.commonWrongCount > 1 ? ' <span class="sub">&times;' + q.commonWrongCount + '</span>' : '') + '</td><td class="right">' + esc(q.right || '') + '</td><td class="num">' + q.students + '</td></tr>'; }).join('')
         : '<tr><td colspan="4" class="thin">No question has been got wrong by two or more pupils yet.</td></tr>',
       'Only questions two or more pupils got wrong. One wrong answer is a pupil having an off day, so it is not shown.');
     var ub = d.unitBands || [];
-    h += sheet('How well each topic is known', '<th>Topic</th><th class="num">Secure</th><th class="num">Developing</th><th class="num">Emerging</th><th class="num">Nothing yet</th><th>Class now</th>' + (lw ? '<th>Since last Monday</th>' : ''),
+    if (part === 'topics') h += sheet('How well each topic is known', '<th>Topic</th><th class="num">Secure</th><th class="num">Developing</th><th class="num">Emerging</th><th class="num">Nothing yet</th><th>Class now</th>' + (lw ? '<th>Since last Monday</th>' : ''),
       ub.length ? ub.map(function (u) {
         var t = lw && lw.units ? lw.units[u.slug] : null, ch = '';
         if (t) { var ds = u.secure - (t.secure || 0), du = u.under - (t.under || 0); ch = (ds ? (ds > 0 ? '+' : '') + ds + ' secure' : '') + (ds && du ? ', ' : '') + (du ? (du > 0 ? '+' : '') + du + ' need revising' : ''); if (!ch) ch = 'no change'; }
@@ -296,21 +294,22 @@
         : '<tr><td colspan="' + (lw ? 7 : 6) + '" class="thin">No topic has a quiz or lesson yet.</td></tr>',
       'The same three words the pupils see on their own dashboard. Secure means they know it well (70 and over), developing means getting there (40 to 69), emerging means it needs work (under 40). A pupil counts once per topic. Flashcards are not counted here, so a teacher&rsquo;s view can sit a little below the pupil&rsquo;s own.');
     var cov = d.coverage;
-    if (cov) {
+    if (part === 'topics' && cov) {
       h += sheet('How far through each topic', '<th>Topic</th><th>Lessons reached</th><th class="num">Started it</th><th class="num">Typical lessons done</th>',
         (cov.units || []).map(function (u) { var c = u.percent == null ? '' : u.percent < 34 ? 'low' : u.percent < 67 ? 'mid' : ''; return '<tr><td>' + esc(u.unit) + (u.practice ? ' <span class="sub">practice set</span>' : '') + '</td><td><span class="cov ' + c + '"><i style="width:' + (u.percent || 0) + '%"></i></span>' + u.touched + ' of ' + u.lessons + '</td><td class="num">' + u.studentsStarted + ' of ' + d.size + '</td><td class="num">' + u.avgDone + '</td></tr>'; }).join('') || '<tr><td colspan="4" class="thin">Nothing reached yet.</td></tr>',
         (cov.unitsUntouched ? cov.unitsUntouched + ' other topics on this course have nothing recorded. On a course with more options than any one class takes, that is expected.' : ''));
     }
     var mis = d.misconceptions || [];
+    if (part !== 'questions') return h;
     if (mis.length) {
       h += sheet('Mistakes the class shares', '<th>What they think</th><th>Where</th><th class="num">Pupils</th><th class="num">Times</th>',
         mis.map(function (m) { return '<tr><td>' + esc(m.tag) + '</td><td>' + esc(m.unitName || m.unit) + (m.lesson ? ' &middot; lesson ' + m.lesson : '') + '</td><td class="num">' + m.students + '</td><td class="num">' + m.count + '</td></tr>'; }).join(''), '');
     } else {
-      h += '<p class="hint" style="margin-top:22px">Named mistakes are only picked up on practice-format subjects (Maths, English Language, languages, science calculations). For this subject, the questions table above does that job.</p>';
+      h += '<p class="hint" style="margin-top:18px">Named mistakes are only picked up on practice-format subjects (Maths, English Language, languages, science calculations). For this subject, the questions table above does that job.</p>';
     }
     return h;
   }
-  function weekHtml(d) { return briefingHtml(d) + readHtml(d) + panelsHtml(d) + everythingHtml(d); }
+  function weekHtml(d) { return briefingHtml(d) + readHtml(d) + panelsHtml(d); }
 
   /* ================= MARKBOOK ================= */
   var ORDER = sessionStorage.getItem('sv-teacher-order') || 'weak';
@@ -475,7 +474,10 @@
   function render() {
     if (!DATA) return;
     viewEl.className = '';
-    viewEl.innerHTML = TAB === 'book' ? bookHtml(DATA) : weekHtml(DATA);
+    viewEl.innerHTML = TAB === 'book' ? bookHtml(DATA) + detailHtml(DATA, 'marks')
+      : TAB === 'questions' ? detailHtml(DATA, 'questions')
+      : TAB === 'topics' ? detailHtml(DATA, 'topics')
+      : weekHtml(DATA);
     var os = document.getElementById('orderSel'); if (os) os.addEventListener('change', function () { ORDER = this.value; sessionStorage.setItem('sv-teacher-order', ORDER); render(); });
     var vs = document.getElementById('viewSel'); if (vs) vs.addEventListener('change', function () { VIEW = this.value; sessionStorage.setItem('sv-teacher-view', VIEW); render(); });
     var us = document.getElementById('unitSel'); if (us) us.addEventListener('change', function () { VIEW_UNIT = this.value; sessionStorage.setItem('sv-teacher-view-unit', VIEW_UNIT); render(); });
