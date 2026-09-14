@@ -12,7 +12,7 @@
  *   read    blob.done["sub/unit"] ∋ n, blob.when[key] -> 45, dated when it was read
  *   answer  blob.practice[] = {k, m, r, d}           -> 25 + 75·(mark/marks), dated d
  * Each piece halves over a half-life that grows with the number of retrieval
- * events (3, 6, 12, 24, 48 days). Strength is the strongest piece after decay.
+ * events (7, 14, 28, 56, 112 days; doubled 14 Sep 2026, must match js/strength.js). Strength is the strongest piece after decay.
  *
  * Flashcards are NOT an input here. Their spacing state is on the never-send
  * list (feedback_teacher_data_boundary), so a teacher's view of a pupil can be
@@ -22,7 +22,7 @@
  * under 40. The revisit line (55) is where the student's plan brings a lesson
  * back; "dropped" = was secure on the undecayed evidence, now under that line.
  */
-const HALF = [3, 6, 12, 24, 48];
+const HALF = [7, 14, 28, 56, 112];
 const REVISIT_LINE = 55;
 
 function daysSince(iso, now) {

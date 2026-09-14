@@ -9,14 +9,14 @@
      cards    sv-flashcard-progress cards lessonId:qN {box,nextReview}
               via sv-lesson-keys {lessonId: key}    -> 20 + 80·(avg box/5)
    Each piece decays by half over a half-life that grows with the number of
-   retrieval events (3, 6, 12, 24, 48 days). Strength is the strongest piece
+   retrieval events (7, 14, 28, 56, 112 days; doubled from 3-48 on 14 Sep 2026 so a topic quizzed once holds about five days and a topic revisited four times holds about three months). Strength is the strongest piece
    after decay. No evidence => the RAG prior, if the student gave one.
 
    RAG prior (sv-welcome.rag): subject slug or "subjectSlug/unitSlug" -> 'r'|'a'|'g'
      red 10 · amber 35 · green 60. It orders the plan and picks the entry
      point (green/amber: quiz first); real retrieval overwrites it. */
 (function () {
-  var HALF = [3, 6, 12, 24, 48];
+  var HALF = [7, 14, 28, 56, 112];
   var CARD_IV = [0, 1, 2, 4, 7, 14];
   function g(k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } }
   function daysSince(iso) { if (!iso) return 999; var t = new Date(iso + 'T00:00:00'); return Math.max(0, (Date.now() - t) / 864e5); }

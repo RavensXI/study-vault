@@ -99,7 +99,7 @@ Plus tables: `class_members` (the only door to a pupil), `profiles`,
 
 **Retrieval strength, per lesson, 0–100.** `js/strength.js` takes four kinds
 of evidence and decays each one by half over a half-life that lengthens with
-repetition (3, 6, 12, 24, 48 days), then takes the strongest surviving piece.
+repetition (7, 14, 28, 56, 112 days), then takes the strongest surviving piece.
 Three of its four inputs are already in the blob:
 
 - quiz — `kc` → `25 + 75·(s/t)`, dated `d`
