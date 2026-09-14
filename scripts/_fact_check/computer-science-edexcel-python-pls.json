@@ -1,0 +1,107 @@
+{
+ "subject": "computer-science-edexcel-python-pls",
+ "checked": 2,
+ "counts": {
+  "high": 0,
+  "medium": 6,
+  "low": 6
+ },
+ "findings": [
+  {
+   "severity": "medium",
+   "field": "content_html",
+   "claim": "Study the code and its output carefully, because this exact pattern &mdash; combining a string, an integer and a real number in one line &mdash; appears constantly in exam tasks.",
+   "problem": "Unevidenced claim about exam frequency. Neither the 1CP2 specification extract nor the PLS v6 states anything about how often a particular formatting pattern is set in Paper 2 tasks; the PLS simply gives this as an illustrative example.",
+   "correction": "Study the code and its output carefully, because this example from the PLS combines all three options — a string, an integer and a real number — in one format string.",
+   "lesson": "programming-python-L07"
+  },
+  {
+   "severity": "medium",
+   "field": "content_html",
+   "claim": "The number of placeholders in the string does not match the number of values given to <code>.format()</code>, which raises an error.",
+   "problem": "Only wrong in one direction. Verified in Python 3: \"{:d} {:d}\".format(1) raises IndexError, but supplying more values than placeholders is silently ignored — \"{}\".format(1, 2, 3) returns '1' with no error. As written the claim is factually incorrect for surplus values.",
+   "correction": "Giving <code>.format()</code> fewer values than there are placeholders raises an error (an IndexError); note that surplus values are simply ignored, so a mismatch will not always be reported.",
+   "lesson": "programming-python-L07"
+  },
+  {
+   "severity": "medium",
+   "field": "flashcard_questions",
+   "claim": "{\"q\": \"What error occurs if the number of placeholders doesn't match the number of values in .format()?\", \"a\": \"Python raises an IndexError.\"}",
+   "problem": "The card is factually wrong as stated: an IndexError is raised only when there are too few values. Verified in Python 3 that extra values are ignored without error, so a 'mismatch' does not always produce an error.",
+   "correction": "{\"q\": \"What error occurs if .format() is given fewer values than there are placeholders?\", \"a\": \"Python raises an IndexError; surplus values, by contrast, are ignored silently.\"}",
+   "lesson": "programming-python-L07"
+  },
+  {
+   "severity": "low",
+   "field": "content_html",
+   "claim": "<code>round (&lt;x&gt;, &lt;n&gt;)</code> changes the actual value stored, so later maths uses the rounded figure.",
+   "problem": "Imprecise. The PLS v6 built-in subprograms table describes round as returning a rounded value ('Rounds <x> to the number of <n> digits after the decimal'); it does not modify the variable passed to it. round(total, 2) leaves total unchanged unless the result is assigned.",
+   "correction": "<code>round (&lt;x&gt;, &lt;n&gt;)</code> returns a new rounded number, so if you store that result, later maths uses the rounded figure.",
+   "lesson": "programming-python-L07"
+  },
+  {
+   "severity": "low",
+   "field": "flashcard_questions",
+   "claim": "{\"q\": \"What is the key difference between round(x, 2) and a format placeholder like {:.2f}?\", \"a\": \"round() changes the stored value; the placeholder only changes the display.\"}",
+   "problem": "Same imprecision as the body text: round() returns a rounded value rather than altering the variable given to it (PLS v6, built-in subprograms table).",
+   "correction": "{\"q\": \"What is the key difference between round(x, 2) and a format placeholder like {:.2f}?\", \"a\": \"round() returns a rounded value you can store and reuse; the placeholder only changes how the value is displayed.\"}",
+   "lesson": "programming-python-L07"
+  },
+  {
+   "severity": "medium",
+   "field": "exam_tip_html",
+   "claim": "only use the exact subprogram names and argument order shown in the PLS &mdash; markers can only credit constructs listed there ... anything else risks losing marks even if it draws correctly in your own editor.",
+   "problem": "Contradicts the PLS v6 Introduction (the source text), which states that Pearson will not go beyond the PLS when setting tasks but that a student successfully using constructs not included in the document will still be awarded marks in Paper 2 if the solution is valid. The assertion about what markers can credit and about 'losing marks' is an unevidenced claim about examiner behaviour.",
+   "correction": "Stick to the subprogram names and argument order shown in the PLS: everything Pearson sets can be solved with PLS constructs, and the PLS is supplied as an insert so you can check them in the exam. (The PLS does note that a valid solution using constructs outside the subset will still be awarded marks, but working inside the subset is the safest, quickest route.) If a trace table question involves <code>random.randint</code>, remember it can return either endpoint you specify, so work out both extremes when reasoning about possible values.",
+   "lesson": "programming-python-L08"
+  },
+  {
+   "severity": "medium",
+   "field": "glossary_terms",
+   "claim": "constant — A named value provided by a library module that never changes, such as math.pi for the value of pi.",
+   "problem": "Wrong definition of a constant. The PLS states only that 'Constants are conventionally named in all uppercase characters', and specification point 6.3.2 treats constants as ordinary program values; a constant is any named value that does not change while the program runs, not something that must come from a library module. As written, a student defining 'constant' in a 2-mark Define question would give a non-creditable answer.",
+   "correction": "constant — A named value that is set once and does not change while the program runs; constants are conventionally named in all uppercase characters. Library modules can also supply constants, such as <code>math.pi</code> for the value of pi.",
+   "lesson": "programming-python-L08"
+  },
+  {
+   "severity": "medium",
+   "field": "glossary_terms",
+   "claim": "parameter — A value passed into a subprogram when it is called, which the subprogram uses while it runs.",
+   "problem": "This is the definition of an argument, not a parameter, and it duplicates the lesson's own (correct) 'arguments' entry, so the two glossary terms contradict each other. A parameter is the named variable in the subprogram definition (e.g. <code>&lt;paramA&gt;</code> in <code>def &lt;procname&gt; (&lt;paramA&gt;, &lt;paramB&gt;):</code> in the PLS Subprograms table) that receives the argument value when the subprogram is called.",
+   "correction": "parameter — A variable named in a subprogram's definition, such as <code>&lt;paramA&gt;</code> in <code>def calculate (paramA, paramB):</code>, which receives the value of the matching argument when the subprogram is called.",
+   "lesson": "programming-python-L08"
+  },
+  {
+   "severity": "low",
+   "field": "content_html",
+   "claim": "<code>time.sleep (&lt;sec&gt;)</code> pauses the program for the number of seconds given as its <dfn class=\"term\" data-def=\"A value passed into a subprogram when it is called, which the subprogram uses while it runs.\">parameter</dfn>.",
+   "problem": "Terminology inconsistent with the lesson's own (correct) definition of 'arguments' earlier in the same lesson: the value supplied in the call, e.g. the 1 in <code>time.sleep(1)</code>, is an argument; <code>&lt;sec&gt;</code> is the parameter in the PLS definition.",
+   "correction": "<code>time.sleep (&lt;sec&gt;)</code> pauses the program for the number of seconds given as its <dfn class=\"term\" data-def=\"Values placed inside the brackets of a subprogram call, which are passed in to be used by that subprogram.\">argument</dfn>.",
+   "lesson": "programming-python-L08"
+  },
+  {
+   "severity": "low",
+   "field": "content_html",
+   "claim": "Filling: call <code>&lt;turtle&gt;.begin_fill ()</code> before drawing a shape, set <code>&lt;turtle&gt;.fillcolor (&lt;colour&gt;)</code>, then call <code>&lt;turtle&gt;.end_fill ()</code> once the shape is complete.",
+   "problem": "The stated order contradicts the lesson's own worked example, which correctly sets <code>t.fillcolor(\"blue\")</code> before <code>t.begin_fill()</code>. The PLS describes <code>fillcolor</code> as setting the colour used to fill and <code>begin_fill</code> as being called 'just before drawing a shape to be filled', so the fill colour should be set first to avoid confusion.",
+   "correction": "Filling: set <code>&lt;turtle&gt;.fillcolor (&lt;colour&gt;)</code>, call <code>&lt;turtle&gt;.begin_fill ()</code> just before drawing the shape, then call <code>&lt;turtle&gt;.end_fill ()</code> once the shape is complete.",
+   "lesson": "programming-python-L08"
+  },
+  {
+   "severity": "low",
+   "field": "content_html",
+   "claim": "Leaving out <code>turtle.done ()</code> at the end of a drawing program, so the window closes immediately instead of staying open.",
+   "problem": "Overstated: the PLS says the turtle window closes as soon as the program completes only 'in some development environments', and it gives two ways to keep it open — <code>turtle.done ()</code> or a final <code>input ()</code> line.",
+   "correction": "Leaving out <code>turtle.done ()</code> at the end of a drawing program, so that in some development environments the window closes as soon as the program finishes (a final <code>input ()</code> line also keeps it open, though scrollbars will not work).",
+   "lesson": "programming-python-L08"
+  },
+  {
+   "severity": "low",
+   "field": "knowledge_checks",
+   "claim": "\"turtle .left(degrees)\"",
+   "problem": "Stray space between the object name and the dot; the PLS writes this as <code>&lt;turtle&gt;.left (&lt;degrees&gt;)</code>, and <code>turtle .left(degrees)</code> as printed is not the form students should copy.",
+   "correction": "\"turtle.left(degrees)\"",
+   "lesson": "programming-python-L08"
+  }
+ ]
+}
