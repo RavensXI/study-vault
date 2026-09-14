@@ -56,10 +56,24 @@ function plBoardOf(su) {
   var m = /-(aqa|edexcel|ocr|eduqas|wjec|ncfe)(-b)?$/.exec(su.sub || '');
   return m ? (m[1] === 'wjec' ? 'eduqas' : m[1]) : null;
 }
+/* the timetable's key for a subject: the board suffix stripped from its slug, with the
+   same aliases js/exam-countdown.js uses; PL_BASE is the fallback for the old families */
+var PL_ALIAS = { 'mathematics': 'maths', 'combined-science': 'science', 'science-severnvale': 'science',
+  'religious-studies': 'religious-education', 'food-preparation-and-nutrition': 'food-technology', 'food': 'food-technology',
+  'gcse-music': 'music', 'sport-science': 'cambridge-nationals-sport-science' };
+function plKeysOf(su) {
+  var keys = [], b = String(su.sub || '').replace(/-(aqa|edexcel|ocr|eduqas|wjec|ncfe)(-[a-z])?$/, '');
+  if (b) { keys.push(PL_ALIAS[b] || b); if (PL_ALIAS[b]) keys.push(b); }
+  if (PL_BASE[su.slug]) keys.push(PL_BASE[su.slug]);
+  return keys;
+}
 /* exams for a subject: real if the timetable has the board+subject, else the provisional table */
 function plExams(su) {
-  var board = plBoardOf(su), base = PL_BASE[su.slug];
-  if (PL_REAL && board && base && PL_REAL[board] && PL_REAL[board][base]) {
+  var board = plBoardOf(su), base = null, keys = plKeysOf(su);
+  /* a school's bespoke subject has no board in its slug: the timetable says which board it sits */
+  if (!board && PL_REAL && PL_REAL.unity_boards) keys.some(function (k) { if (PL_REAL.unity_boards[k]) { board = PL_REAL.unity_boards[k]; return true; } });
+  if (PL_REAL && board && PL_REAL[board]) keys.some(function (k) { if (PL_REAL[board][k]) { base = k; return true; } });
+  if (base) {
     return PL_REAL[board][base].map(function (p) {
       var y = +p.date.slice(0, 4), mo = +p.date.slice(5, 7), da = +p.date.slice(8, 10);
       return { d: new Date(y, mo - 1, da), label: p.paper + (p.session ? ' (' + p.session.toUpperCase() + ')' : ''), real: true };
