@@ -99,19 +99,26 @@ function plTitle(su, unit, num) {
 }
 
 /* ---- the queue of what each subject still has to do, in order ---- */
-/* the subject's remaining lessons, red-rated units first (the student's own
-   RAG, unit level over subject level), otherwise in unit order. Each item
-   carries its entry point: a lesson the student rated amber/green (or that
-   has strength from before) is quiz-first - pass and it is covered. */
+/* the subject's remaining lessons: struggling units first, then getting there,
+   then confident, and units the student has NOT STARTED YET last of all - the
+   class has not reached them, so they belong later in the year, not in this
+   week's revision (Tom, 14 Sep 2026). A not-started unit with any lesson done
+   counts as started. Within a band, unit order. Each item carries its entry
+   point: a lesson the student rated amber/green (or that has strength from
+   before) is quiz-first - pass and it is covered. */
 function plRagOf(su, unit) {
   if (!window.svStrength) return 'a';
   var r = svStrength.rag(); return r[su.sub + '/' + unit] || r[su.slug] || 'a';
 }
 function plQueue(su) {
-  var q = [], order = { n: 0, r: 0, a: 1, g: 1 };
+  var q = [], order = { r: 0, a: 1, g: 2, n: 3 };
   /* a lesson whose revisit was failed this fortnight is redone before anything new */
   if (window.svStrength && svStrength.redo) svStrength.redo(su).forEach(function (r) { q.push({ unit: r.unit, unitName: r.unitName, num: r.num, total: r.total, quizFirst: false, redo: true }); });   // red units first; the rest keep the unit order (green ones become quiz-first, not last)
-  var units = (su.units || []).map(function (u, i) { return { u: u, i: i, r: order[plRagOf(su, u[3])] }; });
+  var units = (su.units || []).map(function (u, i) {
+    var rag = plRagOf(su, u[3]);
+    if (rag === 'n' && (u[4] || []).length) rag = 'a';        // started after all
+    return { u: u, i: i, r: order[rag] };
+  });
   units.sort(function (a, b) { return (a.r - b.r) || (a.i - b.i); });
   units.forEach(function (w) {
     var u = w.u, done = u[4] || [];
@@ -166,8 +173,10 @@ function buildSchedule() {
     var scored = active.map(function (su) {
       var nxt = plExams(su).find(function (e) { return e.d >= d; });
       var urg = 1 + 8 / ((nxt ? Math.round((nxt.d - d) / 864e5) : 400) + 3);
-      /* the student's own rating of the SUBJECT: red comes round more often, green less */
-      var rw = { n: 1.4, r: 1.4, a: 1, g: 0.7 }[(window.svStrength && svStrength.rag()[su.slug]) || 'a'] || 1;
+      /* the student's own rating of the SUBJECT: red comes round more often, green
+         less, and a subject not started yet least of all - it is taught later in
+         the year, so the plan should reach it later too (Tom, 14 Sep 2026) */
+      var rw = { n: 0.6, r: 1.4, a: 1, g: 0.7 }[(window.svStrength && svStrength.rag()[su.slug]) || 'a'] || 1;
       return { su: su, score: (di - lastSeen[su.slug]) * urg * rw };
     }).sort(function (a, b) { return b.score - a.score || a.su.slug.localeCompare(b.su.slug); });
     var picks = [], k = iso(d);
