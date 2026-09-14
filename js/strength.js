@@ -8,6 +8,11 @@
      read     sv-lessons-done/when                  -> 45, dated when it was read
      cards    sv-flashcard-progress cards lessonId:qN {box,nextReview}
               via sv-lesson-keys {lessonId: key}    -> 20 + 80·(avg box/5)
+     shorts    sv-shorts-checks [{d,sub,unit,n,ok}]  -> a NUDGE, not a piece: right +5,
+              wrong -8, each fading over 14 days, the sum kept within -15..+10 and
+              the result kept inside the band the real evidence earned. Shorts can
+              hold a topic up or pull it under the revisit line; they never start a
+              topic and never move it up a band (Tom, 14 Sep 2026).
    Each piece decays by half over a half-life that grows with the number of
    retrieval events (7, 14, 28, 56, 112 days; doubled from 3-48 on 14 Sep 2026 so a topic quizzed once holds about five days and a topic revisited four times holds about three months). Strength is the strongest piece
    after decay. No evidence => the RAG prior, if the student gave one.
@@ -53,16 +58,40 @@
     }
     return out;
   }
-  /* -> {s, prior, reps, last} */
+  function band(s) { return s >= 70 ? 'g' : s >= 40 ? 'a' : 'r'; }
+  function bandWord(b) { return b === 'g' ? 'secure' : b === 'a' ? 'developing' : 'emerging'; }
+  var SHORT_HALF = 14, SHORT_RIGHT = 5, SHORT_WRONG = -8, SHORT_MIN = -15, SHORT_MAX = 10;
+  /* the shorts nudge for one lesson: every check answered on a short from it, faded */
+  function shortsNudge(sub, unit, num, ahead) {
+    var t = 0;
+    (g('sv-shorts-checks', []) || []).forEach(function (r) {
+      if (!r || r.sub !== sub || r.unit !== unit || +r.n !== +num) return;
+      t += (r.ok ? SHORT_RIGHT : SHORT_WRONG) * Math.pow(0.5, (daysSince(r.d) + (ahead || 0)) / SHORT_HALF);
+    });
+    return Math.max(SHORT_MIN, Math.min(SHORT_MAX, t));
+  }
+  /* keep a nudged score inside the band the real evidence earned */
+  function inBand(s, b) { var lo = b === 'g' ? 70 : b === 'a' ? 40 : 0, hi = b === 'g' ? 100 : b === 'a' ? 69 : 39; return Math.max(lo, Math.min(hi, s)); }
+  /* -> {s, prior, reps, last, base, nudge} */
   /* ahead: project the score N days into the future (the revisit slot looks three days out) */
   function lesson(su, unit, num, ahead) {
     var ev = evidence(su.sub, unit, num);
-    if (!ev.length) { var p = priorFor(su.slug, su.sub, unit); return { s: p == null ? 0 : p, prior: p != null, reps: 0, last: null }; }
+    if (!ev.length) { var p = priorFor(su.slug, su.sub, unit); return { s: p == null ? 0 : p, prior: p != null, reps: 0, last: null, base: p == null ? 0 : p, nudge: 0 }; }
     var best = 0, reps = ev.length;
     ev.forEach(function (e) { best = Math.max(best, decay(e.v, e.d + (ahead || 0), e.reps || reps)); });
-    return { s: Math.round(best), prior: false, reps: reps, last: Math.min.apply(null, ev.map(function (e) { return e.d; })) };
+    var base = Math.round(best), nudge = Math.round(shortsNudge(su.sub, unit, num, ahead));
+    var s = nudge ? inBand(base + nudge, band(base)) : base;
+    return { s: s, prior: false, reps: reps, last: Math.min.apply(null, ev.map(function (e) { return e.d; })), base: base, nudge: s - base };
   }
-  function band(s) { return s >= 70 ? 'g' : s >= 40 ? 'a' : 'r'; }
+  /* the same, from a subject slug alone (the shorts feed has no subject object) */
+  function lessonBySub(sub, unit, num, ahead) { return lesson({ sub: sub, slug: '' }, unit, num, ahead); }
+  /* distinct lessons that a shorts check or a flashcard touched today */
+  function todayTouched(kind) {
+    var today = new Date().toISOString().slice(0, 10), seen = {}, n = 0;
+    var log = g(kind === 'cards' ? 'sv-flash-log' : 'sv-shorts-checks', []) || [];
+    log.forEach(function (r) { if (!r || r.d !== today || !r.sub || !r.unit) return; var k = r.sub + '/' + r.unit + '/' + r.n; if (!seen[k]) { seen[k] = 1; n++; } });
+    return n;
+  }
   function unit(su, u) { var n = u[1] || 0; if (!n) return null; var t = 0; for (var i = 1; i <= n; i++) t += lesson(su, u[3], i).s; return Math.round(t / n); }
   function subject(su) { var t = 0, c = 0; (su.units || []).forEach(function (u) { var v = unit(su, u); if (v != null) { t += v; c++; } }); return c ? Math.round(t / c) : 0; }
   /* lessons with REAL evidence whose strength has faded: due for a quick quiz */
@@ -127,6 +156,7 @@
   }
   function budget() { var w = g('sv-welcome', {}); return (w && +w.budget) || 45; }
   function setBudget(m) { var w = g('sv-welcome', {}); w.budget = m; try { localStorage.setItem('sv-welcome', JSON.stringify(w)); } catch (e) {} if (window.svProgressPushSoon) svProgressPushSoon(); }
-  window.svStrength = { lesson: lesson, unit: unit, subject: subject, band: band, due: due, flashDue: flashDue, revisit: revisit, revisitDone: revisitDone, revisitCap: revisitCap, passed: passed, failedRecently: failedRecently, redo: redo, nextCheck: nextCheck,
+  window.svStrength = { lesson: lesson, lessonBySub: lessonBySub, shortsNudge: shortsNudge, todayTouched: todayTouched, bandWord: bandWord, REVISIT_LINE: REVISIT_LINE,
+                        unit: unit, subject: subject, band: band, due: due, flashDue: flashDue, revisit: revisit, revisitDone: revisitDone, revisitCap: revisitCap, passed: passed, failedRecently: failedRecently, redo: redo, nextCheck: nextCheck,
                         rag: rag, setRag: setRag, prior: priorFor, budget: budget, setBudget: setBudget };
 })();

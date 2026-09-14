@@ -378,6 +378,8 @@
   .week .ln b{color:var(--ink);font-weight:600;text-align:right}
 
   .door{cursor:pointer;text-align:left;font-family:var(--head);color:inherit;transition:border-color .2s,background .2s}
+  .door .counted{display:block;font-family:var(--read);font-size:.74rem;color:var(--mut);line-height:1.2;margin-top:.1rem;text-align:left;white-space:nowrap}
+  .door .counted:empty{display:none}
   .rail>.door{padding-right:.85rem}
   .door:hover{border-color:#c9ba9e;background:color-mix(in srgb,var(--anchor) 4%,transparent)}
   .door img{width:36px;height:28px;object-fit:contain;display:block;flex:none}
@@ -639,13 +641,13 @@
 
     <button class="card door" id="fcdoor">
       <img src="assets/lw/desk4-cards-a-cut.webp" alt="">
-      <span><h3>Flashcards</h3><p></p></span>
+      <span><h3>Flashcards</h3><p></p><small class="counted" id="fccounted"></small></span>
       <span class="go">→</span>
     </button>
 
     <button class="card door" id="shortsdoor">
       <img src="assets/lw/desk4-phone-c-cut.webp" alt="">
-      <span><h3>Shorts</h3><p></p></span>
+      <span><h3>Shorts</h3><p></p><small class="counted" id="shortscounted"></small></span>
       <span class="go">→</span>
     </button>
 
@@ -1580,6 +1582,16 @@ function openCards(){
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE) refreshDayOnePlan(); }
 document.getElementById('fcdoor').onclick=openCards;
+/* the two things outside the lessons say what they counted for today, in the same
+   words as the topic outlines: a flashcard or a shorts answer moves a topic's score */
+function doorsCounted(){
+  if(!window.svStrength) return;
+  const line=n=> n ? `Counted for ${n} ${n===1?'topic':'topics'} today` : '';
+  const f=document.getElementById('fccounted'), s=document.getElementById('shortscounted');
+  if(f) f.textContent=line(svStrength.todayTouched('cards'));
+  if(s) s.textContent=line(svStrength.todayTouched('shorts'));
+}
+doorsCounted();
 /* frost the page whenever the card modal is open, whichever path opened it */
 new MutationObserver(()=>document.body.classList.toggle('fc-open',fcmodal.classList.contains('open'))).observe(fcmodal,{attributes:true,attributeFilter:['class']});
 /* the week chip: one figure closed, the lines open, on tap */
@@ -1617,7 +1629,7 @@ function fcMark(ok){
   if(window.svFlashMark && f.key) f.level=svFlashMark(f.key,ok);
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(fci+1<FC.length){ fci++; fcDeal(); }
-  else { fcmodal.classList.remove('open'); fcSittingDone=true; doorMore(); if(DAYONE) refreshDayOnePlan(); }   /* sitting done; the door offers more */
+  else { fcmodal.classList.remove('open'); fcSittingDone=true; doorMore(); doorsCounted(); if(DAYONE) refreshDayOnePlan(); }   /* sitting done; the door offers more */
 }
 ['ok','no'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
   e.stopPropagation(); if(fcShowA) fcMark(k==='ok'); }); });
@@ -1638,8 +1650,11 @@ document.getElementById('shortsdoor').onclick=()=>{
   /* on a phone the feed IS the screen: no phone drawn inside a phone */
   if(matchMedia('(max-width:700px)').matches){ location.href='/shorts'+q+'&back=1'; return; }
   frame.src='/shorts.html'+q; pm.classList.add('open'); };
-document.getElementById('closephone').onclick=()=>{ pm.classList.remove('open'); frame.src=''; };
-pm.addEventListener('click',e=>{ if(e.target===pm){ pm.classList.remove('open'); frame.src=''; } });
+/* the feed writes its answers to the same storage; when the phone closes, the
+   dashboard reads them back so the outlines and the plan move straight away */
+function closePhone(){ pm.classList.remove('open'); frame.src=''; doorsCounted(); if(DAYONE) refreshDayOnePlan(); }
+document.getElementById('closephone').onclick=closePhone;
+pm.addEventListener('click',e=>{ if(e.target===pm) closePhone(); });
 addEventListener('keydown',e=>{ if(e.key!=='Escape') return;
   fcmodal.classList.remove('open'); pm.classList.remove('open'); frame.src=''; });
 

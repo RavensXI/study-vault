@@ -305,7 +305,9 @@ async function computeClassProgress(classId, cls, classSubject, base) {
 
     const practiceScoped = Array.isArray(blob.practice)
       ? blob.practice.filter(function (x) { return x && inScope(x.k || x.key || '', base); }) : [];
-    const lessonMap = strength.lessons(kcScoped, doneScoped, pick(blob.when, base), practiceScoped, NOW);
+    const shortsScoped = Array.isArray(blob.shortschecks)
+      ? blob.shortschecks.filter(function (x) { return x && x.sub && (!base || baseSubject(x.sub) === base); }) : [];
+    const lessonMap = strength.lessons(kcScoped, doneScoped, pick(blob.when, base), practiceScoped, NOW, shortsScoped);
     pupilUnits[id] = strength.units(lessonMap);
     pupilLessons[id] = {};
     Object.keys(lessonMap).forEach(function (k) { const l = lessonMap[k]; pupilLessons[id][k] = { s: l.s, band: strength.band(l.s), quiz: l.quiz }; });

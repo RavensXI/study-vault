@@ -75,9 +75,18 @@
     display:flex;flex-direction:column;padding:1.9rem 1.5rem}
   .check .kick{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--acc);display:flex;align-items:center;gap:.4rem}
   .check .from{font-family:var(--font-read);font-size:.82rem;color:var(--mut);margin:.15rem 0 1.2rem}
-  .check .q{font-family:var(--font-read);font-size:1.3rem;line-height:1.32;color:var(--ink);margin-bottom:1.3rem}
-  .opt{font-family:var(--font-head);font-weight:500;font-size:.98rem;text-align:left;width:100%;background:var(--bg);
-    border:1px solid var(--line);border-radius:11px;padding:.85rem .95rem;margin-bottom:.65rem;cursor:pointer;color:var(--ink);
+  .check .q{font-family:var(--font-read);font-size:1.42rem;line-height:1.3;color:var(--ink);margin-bottom:1.2rem}
+  .check .count{display:flex;gap:.35rem;margin:.2rem 0 .9rem}
+  .check .count i{flex:1;height:3px;border-radius:2px;background:var(--line)}
+  .check .count i.on{background:var(--acc)}
+  .check.answered{cursor:pointer}
+  .check .moved{margin-top:.2rem;font-family:var(--font-read);font-size:.92rem;color:var(--sec);line-height:1.45}
+  .check .moved h4{font-family:var(--font-head);font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:0 0 .4rem}
+  .check .moved div{padding:.45rem 0;border-top:1px solid var(--line)}
+  .check .moved b{color:var(--ink);font-weight:600}
+  .check .tapon{font-size:.78rem;color:var(--mut);margin-top:.5rem}
+  .opt{font-family:var(--font-head);font-weight:500;font-size:1.02rem;line-height:1.3;text-align:left;width:100%;background:var(--bg);
+    border:1px solid var(--line);border-radius:11px;padding:.95rem 1rem;margin-bottom:.6rem;cursor:pointer;color:var(--ink);
     transition:border-color .15s,background .15s,transform .1s}
   .opt:hover{border-color:color-mix(in srgb,var(--acc) 45%,var(--line))}
   .opt:active{transform:scale(.99)}
@@ -137,6 +146,7 @@
   <button class="fsbtn" id="fsbtn" title="Fullscreen" style="display:none"></button>
 
 <script src="/js/account-sync.js"></script>
+  <script src="/js/strength.js"></script>
   <script src="/js/free-user.js"></script>
 <script src="/js/school-session.js"></script>
 <script>
@@ -144,7 +154,7 @@ const MANIFEST = "/data/_shorts_manifest.json";
 const QUESTIONS_URL = "/data/_shorts_questions.json";
 const SITE = "https://www.studyvault.co.uk";   // Lesson deep-links (design-lab has no /lesson router)
 const CHECK_EVERY = 3;    // a check card appears after this many genuinely-watched shorts
-const QS_PER_CHECK = 2;   // questions per check card (drawn from that window's shorts)
+const QS_PER_CHECK = 3;   // questions per check card: one for each short just watched
 const WATCH_FRAC = 0.5;   // count a short as watched once past half (or played to the end)
 const CHROME_MS = 10000;  // chrome fades this long after a short starts playing
 const DAILY_TARGET = 20;  // today's session: this many shorts, then the done card
@@ -215,7 +225,21 @@ function buildPlaylist(items, n){
   items.forEach(e=>{ if(!inFeed.has(keyOf(e))) (by[e.subject]=by[e.subject]||[]).push(e); });
   const queues = Object.values(by);
   if(!queues.length) return [];
-  queues.forEach(q=>q.sort((a,b)=>{ const da=w[keyOf(a)]||'', db=w[keyOf(b)]||''; return da<db?-1:da>db?1:0; }));
+  // inside a subject: topics that are slipping first (studied, under or near the
+  // revisit line), then other studied topics, then topics never studied; a unit
+  // the student rated "not started yet" is left out, as the plan leaves it out.
+  // Within a group the least recently watched goes first.
+  const rank=e=>{
+    if(!window.svStrength) return 1;
+    const r=svStrength.rag()[e.subject+'/'+e.unit]; if(r==='n') return 9;
+    const l=svStrength.lessonBySub(e.subject, e.unit, e.lesson_number);
+    if(l.prior || !l.reps) return 2;
+    return l.s < 60 ? 0 : 1;
+  };
+  queues.forEach(q=>q.sort((a,b)=>{ const ra=rank(a), rb=rank(b); if(ra!==rb) return ra-rb; const da=w[keyOf(a)]||'', db=w[keyOf(b)]||''; return da<db?-1:da>db?1:0; }));
+  queues.forEach((q,i)=>{ queues[i]=q.filter(e=>rank(e)!==9); });
+  for(let i=queues.length-1;i>=0;i--) if(!queues[i].length) queues.splice(i,1);
+  if(!queues.length) return [];
   let seed=0; for(const c of todayStr()) seed=(seed*31+c.charCodeAt(0))>>>0;
   for(let i=0;i<seed%queues.length;i++) queues.push(queues.shift());
   const out=[];
@@ -413,47 +437,74 @@ function makeCheck(seeds){
   el.innerHTML=`<div class="check">
     <div class="kick"></div>
     <div class="from"></div>
+    <div class="count"></div>
     <div class="q"></div>
     <div class="opts"></div>
     <div class="foot"></div>
     <div class="swipe">swipe up to continue ↑</div>
   </div>`;
   const check=el.querySelector('.check');
-  let i=0, locked=false;
+  let i=0, locked=false, timer=0;
+  const moves=[];                      // what each answer did to its topic, in plain words
+  const strengthOf=s=> (window.svStrength ? svStrength.lessonBySub(s.subject, s.unit, s.lesson_number) : null);
   const renderQ=()=>{
     const s=seeds[i], c=realCheck(s), topic=s.topic||titleCase(s.unit);
     locked=false;
     check.style.setProperty('--acc',accent(s.subject));
     check.querySelector('.kick').textContent=`◆ Quick check${seeds.length>1?` · ${i+1} of ${seeds.length}`:''}`;
     check.querySelector('.from').textContent=`from a short you just watched — ${subjName(s.subject)} · ${topic}`;
+    check.querySelector('.count').innerHTML=seeds.map((x,k)=>`<i class="${k<=i?'on':''}"></i>`).join('');
     check.querySelector('.q').textContent=c.q;
-    check.querySelector('.foot').textContent='Answer to keep your streak going.';
+    check.querySelector('.foot').textContent='';
     const opts=check.querySelector('.opts');
     opts.innerHTML=c.opts.map((o,k)=>`<button class="opt" data-i="${k}"></button>`).join('');
     [...opts.children].forEach((b,k)=>{ b.textContent=c.opts[k]; b.addEventListener('click',()=>answer(b,c)); });
   };
+  const advance=()=>{ clearTimeout(timer); timer=0; if(i<seeds.length-1){ i++; renderQ(); } else finish(); };
   const answer=(b,c)=>{
     if(locked) return; locked=true;
-    const ok=+b.dataset.i===c.correct;
-    try{ const s=seeds[i], lg=JSON.parse(localStorage.getItem('sv-shorts-checks'))||[];
+    const s=seeds[i], ok=+b.dataset.i===c.correct, before=strengthOf(s);
+    try{ const lg=JSON.parse(localStorage.getItem('sv-shorts-checks'))||[];
       const rec={d:new Date().toISOString().slice(0,10),lid:s.lesson_id,sub:s.subject,unit:s.unit,n:s.lesson_number,ti:s.topic_index,topic:s.topic,ok:ok};
       if(!ok){ rec.q=(c.q||'').slice(0,160); rec.chose=String(c.opts[+b.dataset.i]||'').slice(0,90); rec.right=String(c.opts[c.correct]||'').slice(0,90); }
       lg.unshift(rec);
       localStorage.setItem('sv-shorts-checks',JSON.stringify(lg.slice(0,300))); }catch(e){}
+    if(window.svProgressPushSoon) svProgressPushSoon();
+    moves.push(moveLine(s, before, strengthOf(s), ok));
     b.classList.add(ok?'correct':'wrong');
     if(!ok) check.querySelector(`.opt[data-i="${c.correct}"]`).classList.add('correct');
-    const foot=check.querySelector('.foot');
-    const verdict= ok?'<b>Nice — that one stuck.</b>':'<b>Worth another look.</b> This topic comes back soon.';
-    if(i<seeds.length-1){
-      foot.innerHTML=`${verdict}<button class="nextq">Next question →</button>`;
-      foot.querySelector('.nextq').addEventListener('click',()=>{ i++; renderQ(); });
-    } else {
-      foot.innerHTML=verdict;
-      check.classList.add('answered');
-    }
+    check.querySelector('.foot').innerHTML= ok?'<b>Right.</b>':'<b>Not this time.</b>';
+    timer=setTimeout(advance, ok?900:1600);   // tap anywhere to move on sooner
   };
+  const finish=()=>{
+    check.querySelector('.kick').textContent='◆ Quick check · done';
+    check.querySelector('.from').textContent='';
+    check.querySelector('.count').innerHTML='';
+    check.querySelector('.q').textContent=`${moves.filter(m=>m.ok).length} of ${moves.length} right.`;
+    // one line per topic, however many of the questions came from it
+    const byName={}; moves.forEach(m=>{ (byName[m.name]=byName[m.name]||{name:m.name,n:0,ok:0,text:m.text}); byName[m.name].n++; if(m.ok) byName[m.name].ok++; byName[m.name].text=m.text; });
+    const rows=Object.values(byName).map(m=>`<div><b>${m.name}</b>${m.n>1?` · ${m.ok} of ${m.n} right`:''}<br>${m.text}</div>`).join('');
+    check.querySelector('.opts').innerHTML=`<div class="moved"><h4>What this did to your topics</h4>${rows}</div>`;
+    check.querySelector('.foot').innerHTML='';
+    check.classList.add('answered');
+    updateDone();
+  };
+  check.addEventListener('click',e=>{ if(locked && timer && !e.target.closest('.opt')) advance(); });
   renderQ();
   return el;
+}
+// one plain line per topic: where it stands now and what the answer did
+function moveLine(s, before, after, ok){
+  const name=`${subjName(s.subject)} · ${titleCase(s.unit)} lesson ${s.lesson_number}`;
+  if(!after || after.prior || !after.reps) return {name, ok, text:'not counted yet. Do the lesson or its quiz first, then shorts add to it.'};
+  const word=svStrength.bandWord(svStrength.band(after.s));
+  const d=after.s-(before?before.s:after.s);
+  const under=after.s<svStrength.REVISIT_LINE, wasUnder=before && before.s<svStrength.REVISIT_LINE;
+  let text=word+(d>0?`, up ${d}`:d<0?`, down ${-d}`:'');
+  if(under && !wasUnder) text+='. Under the line, so it is back on your plan';
+  else if(under) text+='. Still under the line';
+  else if(d===0) text+='. No change';
+  return {name, ok, text};
 }
 
 // ---- watched log, today's stats, streak (all localStorage — survive refresh) ----
@@ -503,6 +554,10 @@ function updateDone(){
   d.querySelector('.d-topics').textContent=t;
   d.querySelector('.d-subjects').textContent=n;
   d.querySelector('.d-streak').textContent=streakNow();
+  const c=window.svStrength ? svStrength.todayTouched('shorts') : 0;
+  let cl=d.querySelector('.d-counted');
+  if(!cl){ cl=document.createElement('p'); cl.className='d-line d-counted'; d.querySelector('.stat').insertAdjacentElement('afterend', cl); }
+  cl.textContent = c ? `Your quick-check answers counted towards ${c} ${c===1?'topic':'topics'} today.` : 'Answer the quick checks and they count towards your topics.';
   const left=pool.filter(e=>!inFeed.has(keyOf(e))).length;
   const btn=d.querySelector('.d-more');
   if(left===0){ btn.disabled=true; btn.textContent='That’s everything for now'; }
