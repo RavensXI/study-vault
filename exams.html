@@ -1181,7 +1181,7 @@
         units = units.filter(function (u) {
           var subject = subjectById[u.subject_id];
           var y = subject && subject.settings && subject.settings.exam_year_lessons && subject.settings.exam_year_lessons[u.slug];
-          return !y || y === _planYear;
+          return !y || (Array.isArray(y) ? y.indexOf(_planYear) >= 0 : y === _planYear);
         });
       }
 

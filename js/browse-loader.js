@@ -234,6 +234,11 @@
       { board: 'Eduqas', slug: 'film-studies-eduqas' },
       { board: 'WJEC', slug: 'film-studies-eduqas' }
     ],
+    'media-studies': [
+      { board: 'AQA', slug: 'media-studies-aqa' },
+      { board: 'Eduqas', slug: 'media-studies-eduqas' },
+      { board: 'WJEC', slug: 'media-studies-eduqas' }
+    ],
     'hospitality-catering': [
       { board: 'Eduqas', slug: 'hospitality-catering' },
       { board: 'WJEC', slug: 'hospitality-catering' }
@@ -454,7 +459,7 @@
       if (landingCohortYear && !landingStaff) {
         units = units.filter(function (u) {
           var y = unitYearMap[u.slug];
-          return !y || y === landingCohortYear;
+          return !y || (Array.isArray(y) ? y.indexOf(landingCohortYear) >= 0 : y === landingCohortYear);
         });
       }
     }
@@ -746,7 +751,7 @@
       if (cohortYear && !browseStaff) {
         lessons = lessons.filter(function (l) {
           var y = yearMap[unitSlug + '/' + l.lesson_number] || yearMap[unitSlug];
-          return !y || y === cohortYear;
+          return !y || (Array.isArray(y) ? y.indexOf(cohortYear) >= 0 : y === cohortYear);
         });
       }
     }

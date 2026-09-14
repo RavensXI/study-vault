@@ -311,7 +311,7 @@
         siblings = siblings.filter(function (s) {
           if (s.lesson_number === params.lessonNumber) return true;
           var y = navYearMap[unit.slug + '/' + s.lesson_number] || navYearMap[unit.slug];
-          return !y || y === navCohortYear;
+          return !y || (Array.isArray(y) ? y.indexOf(navCohortYear) >= 0 : y === navCohortYear);
         });
       }
     }

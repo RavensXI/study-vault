@@ -1193,7 +1193,7 @@
       var unitYears = subjRow && subjRow.settings && subjRow.settings.exam_year_lessons;
       var myYear = parseInt(localStorage.getItem('studyvault-exam-year') || '', 10);
       if (unitYears && myYear) {
-        units = units.filter(function (u) { var y = unitYears[u.slug]; return !y || y === myYear; });
+        units = units.filter(function (u) { var y = unitYears[u.slug]; return !y || (Array.isArray(y) ? y.indexOf(myYear) >= 0 : y === myYear); });
       }
 
       unitSel.innerHTML = '<option value="">Choose a unit</option>';
