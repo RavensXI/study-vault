@@ -571,15 +571,43 @@ function svAvatarMenu(av) {
         + 'margin-bottom:.35rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
         + '.sv-avmenu button,.sv-avmenu a{display:block;width:100%;text-align:left;background:none;border:none;'
         + 'font:inherit;color:#26231e;padding:.5rem .65rem;border-radius:7px;cursor:pointer;text-decoration:none}'
-        + '.sv-avmenu button:hover,.sv-avmenu a:hover{background:#f4efe4}';
+        + '.sv-avmenu button:hover,.sv-avmenu a:hover{background:#f4efe4}'
+        + '.sv-avmenu .cls{padding:.35rem .65rem .5rem;color:#57534a;font-size:.82rem;line-height:1.4;'
+        + 'border-bottom:1px solid #efeadf;margin-bottom:.35rem}'
+        + '.sv-avmenu .cls b{font-weight:600;color:#26231e}';
       document.head.appendChild(st);
     }
     menu = document.createElement('div'); menu.className = 'sv-avmenu';
     menu.innerHTML = '<div class="who">' + (SVUSER.name ? esc(SVUSER.name) + ' · ' : 'Signed in as ') + esc(SVUSER.email) + '</div>'
+      + '<div class="cls" hidden></div>'
       + '<a href="/welcome?view=picker">Edit subjects &amp; boards</a>'
+      + '<a href="/join">Join a class</a>'
       + (window.svDashTour ? '<button type="button" class="tour">Show me around</button>' : '')
       + '<button type="button" class="out">Sign out</button>';
     document.body.appendChild(menu);
+    /* the classes they are in: "In 10X with Mr Shaun" — so a student can see the
+       join worked and who can now see their work. Read once per page; the menu
+       may open many times. */
+    var clsEl = menu.querySelector('.cls');
+    function showClasses(list) {
+      if (!clsEl || !list || !list.length) return;
+      clsEl.innerHTML = list.map(function (c) {
+        return 'In <b>' + esc(c.name) + '</b>' + (c.teacher ? ' with ' + esc(c.teacher) : '')
+          + (c.subject ? ' · ' + esc(c.subject) : '');
+      }).join('<br>');
+      clsEl.hidden = false;
+    }
+    if (svAvatarMenu._classes) showClasses(svAvatarMenu._classes);
+    else if (!svAvatarMenu._asked) {
+      svAvatarMenu._asked = true;
+      var tok = null;
+      try { var raw = JSON.parse(localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token') || 'null');
+        if (raw && raw.access_token) tok = raw.access_token; } catch (e3) {}
+      if (tok) fetch('/api/class/mine', { headers: { 'Authorization': 'Bearer ' + tok } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) { if (d && d.classes) { svAvatarMenu._classes = d.classes; showClasses(d.classes); } })
+        .catch(function () {});
+    }
     var r = av.getBoundingClientRect();
     menu.style.top = (r.bottom + 8) + 'px';
     menu.style.left = Math.max(8, Math.min(window.innerWidth - menu.offsetWidth - 8, r.right - menu.offsetWidth)) + 'px';
