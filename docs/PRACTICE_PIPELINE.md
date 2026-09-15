@@ -363,3 +363,7 @@ Planning agent decides which reference to fetch based on the subject's dominant 
 Full practice reference details with Supabase IDs, fetch snippets, and subject mapping lists are in `REFERENCE_LESSONS.md`.
 
 Agent prompt template for each stage, and the full stage orchestration script, live in `scripts/factory/`. This doc is the entry point, not the runbook.
+
+## End-to-end gate (added 15 Sep 2026)
+
+`python scripts/_qa_practice_e2e.py --subject <slug>` renders every problem on the real practice page, submits the stored answer through the real checker and requires "Correct"; it also fails on `[object Object]`/`undefined`/`NaN` in the question or feedback and on a question with two pictures (inline SVG plus chart panel). Run it before any practice lesson is flipped. It exists because the JSON validator blessed the `{numerator, denominator}` fraction shape while the page only read `[num, den]`, and every fraction answer in Statistics was marked wrong for weeks. One picture per problem: an inline SVG in `display` OR a `chart` object, never both.
