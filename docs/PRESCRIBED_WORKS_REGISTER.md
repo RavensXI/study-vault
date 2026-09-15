@@ -31,7 +31,7 @@ Maths, all sciences (required practicals are stable in-spec), Geography (case st
 ## Annual June cycle (do together)
 
 1. Re-run this register (diff board lists vs live units).
-2. AQA Media: download new CSP booklet (secure portal), refresh CSP lessons.
+2. AQA Media: download new CSP booklet (secure portal), refresh CSP lessons. Search 15 Sep 2026: the 2027 GCSE booklet is NOT online anywhere public (school-hosted copies stop at 2025; the A-level 2027 booklet is public but not the GCSE one). AQA news 14 Sep 2026: for summer 2028 the video game CSP Blackpink The Game (service ended 31 Aug 2026) is replaced by LEGO Fortnite; the Blackpink music video stays. Both the 2027 and 2028 GCSE booklets sit on AQA Centre Services (teacher login).
 3. AQA History: check announced sites for cohort+1.
 4. Spec-currency audit (`_gen_spec_audit_worklist.py` → workflow).
 5. Exam dates JSON for the new year.
