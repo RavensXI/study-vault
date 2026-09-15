@@ -1,0 +1,574 @@
+<title>Retro Fact-Check Tracker</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;600&display=swap">
+<style>
+  body{background:#faf8f5;color:#2d2a26;font-family:Inter,system-ui,sans-serif;margin:0;padding:1.2rem 1rem 3rem;line-height:1.45}
+  .wrap{max-width:780px;margin:0 auto}
+  h1{font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:1.5rem;margin:.4rem 0 .3rem}
+  p.intro{color:#5b564e;font-size:.9rem;margin:0 0 1rem;max-width:66ch}
+  h2{font-size:.95rem;font-weight:700;margin:1.8rem 0 .5rem}
+  .pills{display:flex;gap:.7rem;flex-wrap:wrap;margin:1rem 0}
+  .pill{background:#fff;border:1px solid #e8e3db;border-radius:12px;padding:.6rem .95rem;flex:1 1 130px}
+  .pill b{display:block;font-size:1.2rem;font-variant-numeric:tabular-nums}
+  .pill span{font-size:.74rem;color:#5b564e}
+  .bar{height:10px;background:#eee8df;border-radius:6px;overflow:hidden;margin:.4rem 0 1.2rem}
+  .bar i{display:block;height:100%;background:#4f7d63;width:93%}
+  .barnote{font-size:.78rem;color:#5b564e;margin:-0.9rem 0 1rem}
+  .tablewrap{overflow-x:auto}
+  table{border-collapse:collapse;font-size:.8rem;width:100%}
+  td,th{border-bottom:1px solid #eee8df;padding:.3rem .5rem;text-align:left;vertical-align:top}
+  th{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:#8d8880}
+  .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  tr.grp td{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:#8d8880;padding-top:.9rem;border-bottom:none}
+  .st{font-size:.72rem;font-weight:600;padding:.1rem .5rem;border-radius:8px;white-space:nowrap}
+  .st.u{background:#fbeee9;color:#9a3a25}
+  .st.p{background:#fdf6e3;color:#8a6d1a}
+  .st.g{background:#eaf2ec;color:#3f6f52}
+  .note{font-size:.72rem;color:#8d8880;font-weight:400;white-space:normal;max-width:38ch}
+  footer{margin-top:2rem;color:#8d8880;font-size:.74rem}
+</style>
+<div class="wrap">
+<h1>Retro Fact-Check Tracker</h1>
+<p class="intro">Fact-checking every lesson built before the mandatory gate (~May 2026). Historic finding rate: 11&ndash;15% of lessons carry something mark-affecting. This page re-renders from <code>scripts/_retrofc/_state.json</code> after every batch &mdash; same link throughout.</p>
+<div class="pills">
+  <div class="pill"><b>3,249</b><span>lessons checked or gate-built</span></div>
+  <div class="pill"><b>241</b><span>lessons in partially-checked subjects</span></div>
+  <div class="pill"><b style="color:#9a3a25">0</b><span>lessons still to check</span></div>
+  <div class="pill"><b>8694 / 22583</b><span>findings / edits applied (one finding often needs many edits)</span></div>
+  <div class="pill"><b>586 / 2501</b><span>explainer videos to regenerate / checked (Gemini video check, GCSE-stakes gate)</span></div>
+</div>
+<div class="bar"><i></i></div>
+<p class="barnote">93% of the corpus fully covered (practice-first subjects are separately machine-verified and excluded from the bar).</p>
+
+<h2>Subjects</h2>
+<div class="tablewrap"><table>
+<tr><th>Subject</th><th class="num">Live lessons</th><th>Status</th><th class="num">Findings</th><th class="num">Edits applied</th></tr>
+<tr class="grp"><td colspan="5">Priority 1 · English Literature</td></tr>
+<tr><td>english-literature-aqa<div class="note">28 of 28 queued units checked by the overnight loop (latest: animal-farm); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">222</td><td><span class="st g">Checked ✓ · 2026-09-02</span></td><td class="num">484</td><td class="num">1800</td></tr>
+<tr><td>english-literature-edexcel<div class="note">28 of 28 queued units checked by the overnight loop (latest: lord-of-the-flies); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">215</td><td><span class="st g">Checked ✓ · 2026-09-02</span></td><td class="num">558</td><td class="num">2258</td></tr>
+<tr><td>english-literature-eduqas<div class="note">24 of 24 queued units checked by the overnight loop (latest: anita-and-me); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">197</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">552</td><td class="num">3251</td></tr>
+<tr><td>english-literature-ocr<div class="note">16 of 19 queued units checked by the overnight loop (latest: romeo-and-juliet); mechanical relabel + band-ladder passes still pending as separate workstreams | ⚠ NEEDS REBUILD (wrong texts/cluster, not fixable by edits): poetry-conflict, poetry-love-and-relationships, poetry-youth-and-age</div></td><td class="num">156</td><td><span class="st p">Partially checked · 2026-09-02</span></td><td class="num">423</td><td class="num">1823</td></tr>
+<tr class="grp"><td colspan="5">Priority 2 · Sciences</td></tr>
+<tr><td>science-aqa<div class="note">6 of 6 queued units checked by the overnight loop (latest: physics-paper-2); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">70</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">133</td><td class="num">171</td></tr>
+<tr><td>separate-sciences-ocr-b<div class="note">12 of 12 queued units checked by the overnight loop (latest: physics-particle-models-universe); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">53</td><td><span class="st g">Checked ✓ · 2026-09-05</span></td><td class="num">278</td><td class="num">401</td></tr>
+<tr><td>separate-sciences-ocr<div class="note">6 of 6 queued units checked by the overnight loop (latest: physics-paper-2); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">51</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">146</td><td class="num">260</td></tr>
+<tr><td>separate-sciences-edexcel<div class="note">6 of 6 queued units checked by the overnight loop (latest: physics-paper-2); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">50</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">173</td><td class="num">357</td></tr>
+<tr><td>science-edexcel<div class="note">6 of 6 queued units checked by the overnight loop (latest: physics-paper-2); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">48</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">105</td><td class="num">213</td></tr>
+<tr><td>science-ocr<div class="note">6 of 6 queued units checked by the overnight loop (latest: physics-paper-2); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">48</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">124</td><td class="num">240</td></tr>
+<tr><td>science-ocr-b<div class="note">6 of 6 queued units checked by the overnight loop (latest: physics-paper-2); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">48</td><td><span class="st g">Checked ✓ · 2026-09-05</span></td><td class="num">132</td><td class="num">176</td></tr>
+<tr><td>separate-sciences<div class="note">6 of 6 queued units checked by the overnight loop (latest: physics-paper-2); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">48</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">99</td><td class="num">214</td></tr>
+<tr class="grp"><td colspan="5">Priority 3 · History</td></tr>
+<tr><td>history-aqa<div class="note">16 of 16 queued units checked by the overnight loop (latest: restoration-england); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">218</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">808</td><td class="num">3017</td></tr>
+<tr><td>history-edexcel<div class="note">17 of 17 queued units checked by the overnight loop (latest: russia-soviet-union); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">202</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">695</td><td class="num">2231</td></tr>
+<tr><td>history-eduqas<div class="note">built with the mandatory fact-check gate (or fully checked)</div></td><td class="num">167</td><td><span class="st g">Gate-built ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>history-ocr<div class="note">12 of 12 queued units checked by the overnight loop (latest: personal-rule-restoration-1629-1660); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">117</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">443</td><td class="num">1409</td></tr>
+<tr class="grp"><td colspan="5">Priority 4 · Geography</td></tr>
+<tr><td>geography-aqa<div class="note">2 of 2 queued units checked by the overnight loop (latest: paper-1); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">49</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">100</td><td class="num">121</td></tr>
+<tr><td>geography-eduqas<div class="note">7 of 7 queued units checked by the overnight loop (latest: development-resources); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">32</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">160</td><td class="num">169</td></tr>
+<tr><td>geography-edexcel-a<div class="note">3 of 3 queued units checked by the overnight loop (latest: paper-2-human-environment); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">29</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">93</td><td class="num">94</td></tr>
+<tr><td>geography-edexcel-b<div class="note">3 of 3 queued units checked by the overnight loop (global-geographical-issues finished 6 Sep after a narration retry); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">28</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">52</td><td class="num">65</td></tr>
+<tr><td>geography-ocr<div class="note">2 of 2 queued units checked by the overnight loop (latest: living-in-the-uk-today); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">20</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">67</td><td class="num">136</td></tr>
+<tr class="grp"><td colspan="5">Priority 5 · RS, Geology, Astronomy</td></tr>
+<tr><td>religious-studies-aqa<div class="note">20 of 20 queued units checked by the overnight loop (latest: theme-f-human-rights-social-justice); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">74</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">309</td><td class="num">381</td></tr>
+<tr><td>religious-studies-edexcel<div class="note">15 of 15 queued units checked by the overnight loop (latest: paper-4-quran); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">71</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">332</td><td class="num">597</td></tr>
+<tr><td>religious-studies-eduqas<div class="note">15 of 15 queued units checked by the overnight loop (latest: catholic-foundational-good-and-evil); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">53</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">224</td><td class="num">203</td></tr>
+<tr><td>religious-studies-ocr<div class="note">built with the mandatory fact-check gate (or fully checked)</div></td><td class="num">47</td><td><span class="st g">Gate-built ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>geology-eduqas<div class="note">5 of 5 queued units checked by the overnight loop (latest: hazards-resources-and-investigative-geology); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">30</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">103</td><td class="num">102</td></tr>
+<tr><td>astronomy-edexcel<div class="note">2 of 2 queued units checked by the overnight loop (latest: naked-eye-astronomy); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">26</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">43</td><td class="num">46</td></tr>
+<tr class="grp"><td colspan="5">Priority 6 · Business, CS, PE, Sociology, D&T</td></tr>
+<tr><td>design-technology-eduqas<div class="note">9 of 9 queued units checked by the overnight loop (latest: electronic-mechanical-systems); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">47</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">134</td><td class="num">122</td></tr>
+<tr><td>physical-education-aqa<div class="note">2 of 2 queued units checked by the overnight loop (latest: human-body-and-movement); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">33</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">39</td><td class="num">37</td></tr>
+<tr><td>sociology-aqa<div class="note">5 of 5 queued units checked by the overnight loop (latest: social-stratification); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">33</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">58</td><td class="num">45</td></tr>
+<tr><td>sociology-eduqas<div class="note">5 of 5 queued units checked by the overnight loop (latest: crime-deviance); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">33</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">73</td><td class="num">52</td></tr>
+<tr><td>business-aqa<div class="note">6 of 6 queued units checked by the overnight loop (latest: finance); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">30</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">76</td><td class="num">77</td></tr>
+<tr><td>business-edexcel<div class="note">2 of 2 queued units checked by the overnight loop (latest: building-a-business); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">30</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">67</td><td class="num">327</td></tr>
+<tr><td>business-ocr<div class="note">2 of 2 queued units checked by the overnight loop (latest: operations-finance-influences); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">30</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">65</td><td class="num">106</td></tr>
+<tr><td>physical-education-edexcel<div class="note">2 of 2 queued units checked by the overnight loop (latest: fitness-and-body-systems); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">30</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">47</td><td class="num">49</td></tr>
+<tr><td>computer-science-eduqas<div class="note">6 of 6 queued units checked by the overnight loop (latest: algorithms-programming-software); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">29</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">76</td><td class="num">103</td></tr>
+<tr><td>physical-education-ocr<div class="note">2 of 2 queued units checked by the overnight loop (latest: physical-factors-affecting-performance); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">27</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">53</td><td class="num">112</td></tr>
+<tr><td>computer-science-aqa<div class="note">7 of 7 queued units checked by the overnight loop (latest: programming); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">26</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">69</td><td class="num">85</td></tr>
+<tr><td>computer-science-edexcel<div class="note">6 of 6 queued units checked by the overnight loop (latest: programming-python); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">26</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">66</td><td class="num">65</td></tr>
+<tr><td>computer-science<div class="note">2 of 2 queued units checked by the overnight loop (latest: computational-thinking); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">23</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">13</td><td class="num">8</td></tr>
+<tr><td>design-technology<div class="note">3 of 3 queued units checked by the overnight loop (latest: specialist-technical); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">22</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">34</td><td class="num">45</td></tr>
+<tr><td>design-technology-edexcel<div class="note">built with the mandatory fact-check gate (or fully checked)</div></td><td class="num">22</td><td><span class="st g">Gate-built ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr class="grp"><td colspan="5">Priority 7 · Niche and vocational</td></tr>
+<tr><td>drama-aqa<div class="note">9 of 12 queued units checked by the overnight loop (latest: theatre-roles-stagecraft); mechanical relabel + band-ladder passes still pending as separate workstreams | ⚠ NEEDS REBUILD (wrong texts/cluster, not fixable by edits): things-i-know-to-be-true, a-taste-of-honey, the-empress</div></td><td class="num">85</td><td><span class="st p">Partially checked · 2026-09-06</span></td><td class="num">136</td><td class="num">207</td></tr>
+<tr><td>classical-civilisation-ocr<div class="note">10 of 10 queued units checked by the overnight loop (latest: women-religion-and-power); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">51</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">106</td><td class="num">182</td></tr>
+<tr><td>film-studies-eduqas<div class="note">5 of 5 queued units checked by the overnight loop (latest: film-form-and-language); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">42</td><td><span class="st g">Checked ✓ · 2026-09-05</span></td><td class="num">66</td><td class="num">85</td></tr>
+<tr><td>citizenship-aqa<div class="note">2 of 2 queued units checked by the overnight loop (latest: politics-participation-active-citizenship); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">29</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">35</td><td class="num">53</td></tr>
+<tr><td>engineering-aqa<div class="note">4 of 4 queued units checked by the overnight loop (latest: engineering-materials); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">22</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">40</td><td class="num">36</td></tr>
+<tr><td>electronics-eduqas<div class="note">2 of 2 queued units checked by the overnight loop (latest: discovering-electronics); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">20</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">36</td><td class="num">44</td></tr>
+<tr><td>media-studies-aqa<div class="note">4 of 4 queued units checked by the overnight loop (latest: media-language); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">20</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">19</td><td class="num">37</td></tr>
+<tr><td>food-preparation-and-nutrition-aqa<div class="note">built with the mandatory fact-check gate (or fully checked)</div></td><td class="num">18</td><td><span class="st g">Gate-built ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>food-preparation-and-nutrition-eduqas<div class="note">2 of 2 queued units checked by the overnight loop (latest: food-science-and-nutrition); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">16</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">23</td><td class="num">41</td></tr>
+<tr><td>engineering-eduqas<div class="note">4 of 4 queued units checked by the overnight loop (latest: engineering-achievements-and-environment); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">14</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">37</td><td class="num">52</td></tr>
+<tr><td>health-social-care-eduqas<div class="note">2 of 2 queued units checked by the overnight loop (latest: growth-development-lifespan); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">13</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">14</td><td class="num">13</td></tr>
+<tr><td>health-social-care-ocr<div class="note">1 of 1 queued units checked by the overnight loop (latest: principles-of-care); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">13</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">13</td><td class="num">13</td></tr>
+<tr><td>cambridge-nationals-enterprise-and-marketing<div class="note">1 of 1 queued units checked by the overnight loop (latest: enterprise-and-marketing-concepts); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">12</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">9</td><td class="num">10</td></tr>
+<tr><td>health-social-care-edexcel<div class="note">1 of 1 queued units checked by the overnight loop (latest: health-and-wellbeing); mechanical relabel + band-ladder passes still pending as separate workstreams | checked 6 Sep after the spec was sourced (BTEC HSC 2022 / NCFE 603/7008/7)</div></td><td class="num">12</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">6</td><td class="num">2</td></tr>
+<tr><td>it-ocr<div class="note">1 of 1 queued units checked by the overnight loop (latest: it-in-the-digital-world); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">12</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">18</td><td class="num">34</td></tr>
+<tr><td>l12-construction-built-environment<div class="note">3 of 3 queued units checked by the overnight loop (latest: the-construction-sector); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">11</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">25</td><td class="num">55</td></tr>
+<tr><td>cambridge-nationals-child-development<div class="note">1 of 1 queued units checked by the overnight loop (latest: health-and-well-being-for-child-development); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">10</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">8</td><td class="num">6</td></tr>
+<tr><td>cambridge-nationals-creative-imedia<div class="note">1 of 1 queued units checked by the overnight loop (latest: creative-imedia-in-the-media-industry); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">10</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">5</td><td class="num">9</td></tr>
+<tr><td>cambridge-nationals-engineering-design<div class="note">1 of 1 queued units checked by the overnight loop (latest: principles-of-engineering-design); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">10</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">20</td><td class="num">89</td></tr>
+<tr><td>cambridge-nationals-engineering-manufacture<div class="note">1 of 1 queued units checked by the overnight loop (latest: principles-of-engineering-manufacture); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">10</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">19</td><td class="num">32</td></tr>
+<tr><td>cambridge-nationals-engineering-programmable-systems<div class="note">1 of 1 queued units checked by the overnight loop (latest: principles-of-electronic-and-programmable-systems); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">10</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">14</td><td class="num">21</td></tr>
+<tr><td>cambridge-nationals-sport-science<div class="note">1 of 1 queued units checked by the overnight loop (latest: reducing-the-risk-of-sports-injuries); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">10</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">4</td><td class="num">3</td></tr>
+<tr><td>cambridge-nationals-sport-studies<div class="note">1 of 1 queued units checked by the overnight loop (latest: contemporary-issues-in-sport); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">10</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">16</td><td class="num">30</td></tr>
+<tr><td>hospitality-catering<div class="note">1 of 1 queued units checked by the overnight loop (latest: the-hospitality-and-catering-industry); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">10</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">10</td><td class="num">19</td></tr>
+<tr><td>l12-ict<div class="note">3 of 3 queued units checked by the overnight loop (latest: it-systems-and-services); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">10</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">20</td><td class="num">23</td></tr>
+<tr><td>l12-retail-business<div class="note">3 of 3 queued units checked by the overnight loop (latest: the-retail-business-environment); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">10</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">12</td><td class="num">10</td></tr>
+<tr><td>l12-sport-and-coaching-principles<div class="note">3 of 3 queued units checked by the overnight loop (latest: body-systems); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">10</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">17</td><td class="num">20</td></tr>
+<tr><td>statistics-aqa<div class="note">2 of 2 queued units checked by the overnight loop (latest: planning-designing-enquiry); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">9</td><td><span class="st g">Checked ✓ · 2026-09-04</span></td><td class="num">15</td><td class="num">24</td></tr>
+<tr><td>english-language-aqa<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>english-language-edexcel<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>english-language-eduqas<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>english-language-ocr<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>french-aqa<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>french-edexcel<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>german-aqa<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>german-edexcel<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>maths-aqa<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>maths-edexcel<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>maths-eduqas<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>maths-ocr<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>spanish-aqa<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>spanish-edexcel<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr class="grp"><td colspan="5">Priority 8 · Sunsetting</td></tr>
+<tr><td>music-technology<div class="note">5 of 5 queued units checked by the overnight loop (latest: multitrack-recording); mechanical relabel + band-ladder passes still pending as separate workstreams | checked 6 Sep after the spec was sourced (BTEC HSC 2022 / NCFE 603/7008/7)</div></td><td class="num">15</td><td><span class="st g">Checked ✓ · 2026-09-06</span></td><td class="num">29</td><td class="num">44</td></tr>
+<tr class="grp"><td colspan="5">Already gated at build</td></tr>
+<tr><td>psychology-edexcel<div class="note">built with the mandatory fact-check gate (or fully checked)</div></td><td class="num">38</td><td><span class="st g">Gate-built ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>psychology-aqa<div class="note">built with the mandatory fact-check gate (or fully checked)</div></td><td class="num">32</td><td><span class="st g">Gate-built ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>psychology-ocr<div class="note">built with the mandatory fact-check gate (or fully checked)</div></td><td class="num">31</td><td><span class="st g">Gate-built ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>economics-aqa<div class="note">built with the mandatory fact-check gate (or fully checked)</div></td><td class="num">29</td><td><span class="st g">Gate-built ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>music-aqa<div class="note">4 of 4 queued units checked by the overnight loop (latest: aos1-western-classical); mechanical relabel + band-ladder passes still pending as separate workstreams</div></td><td class="num">12</td><td><span class="st g">Checked ✓ · 2026-09-03</span></td><td class="num">43</td><td class="num">71</td></tr>
+<tr><td>music-eduqas<div class="note">built with the mandatory fact-check gate (or fully checked)</div></td><td class="num">10</td><td><span class="st g">Gate-built ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>music-ocr<div class="note">built with the mandatory fact-check gate (or fully checked)</div></td><td class="num">4</td><td><span class="st g">Gate-built ✓</span></td><td class="num"></td><td class="num"></td></tr>
+<tr><td>music-edexcel<div class="note">practice-first; answers machine-verified 14 Aug (zero wrong)</div></td><td class="num">0</td><td><span class="st g">Practice-verified ✓</span></td><td class="num"></td><td class="num"></td></tr>
+</table></div>
+
+<h2>Batch log</h2>
+<div class="tablewrap"><table>
+<tr><th>Date</th><th>Batch</th><th class="num">Findings</th><th class="num">Edits applied</th></tr>
+<tr><td>2026-09-06</td><td>music-technology/multitrack-recording (3L) - autonomous loop (claude)</td><td class="num">8</td><td class="num">6</td></tr>
+<tr><td>2026-09-06</td><td>music-technology/sound-creation (3L) - autonomous loop (claude)</td><td class="num">4</td><td class="num">8</td></tr>
+<tr><td>2026-09-06</td><td>music-technology/music-business (3L) - autonomous loop (claude)</td><td class="num">7</td><td class="num">16</td></tr>
+<tr><td>2026-09-06</td><td>health-social-care-edexcel/health-and-wellbeing (12L) - autonomous loop (claude)</td><td class="num">6</td><td class="num">2</td></tr>
+<tr><td>2026-09-06</td><td>music-technology/daw (3L) - autonomous loop (claude)</td><td class="num">7</td><td class="num">14</td></tr>
+<tr><td>2026-09-06</td><td>music-technology/musical-elements (3L) - autonomous loop (claude)</td><td class="num">3</td><td class="num">0</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/catholic-foundational-good-and-evil (3L) - autonomous loop (claude)</td><td class="num">15</td><td class="num">15</td></tr>
+<tr><td>2026-09-06</td><td>computer-science/computational-thinking (11L) - autonomous loop (claude)</td><td class="num">11</td><td class="num">8</td></tr>
+<tr><td>2026-09-06</td><td>design-technology/specialist-technical (9L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">27</td></tr>
+<tr><td>2026-09-06</td><td>design-technology/core-technical (6L) - autonomous loop (claude)</td><td class="num">6</td><td class="num">2</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-edexcel/programming-python (6L) - autonomous loop (claude)</td><td class="num">15</td><td class="num">17</td></tr>
+<tr><td>2026-09-06</td><td>computer-science/computer-systems (12L) - autonomous loop (claude)</td><td class="num">2</td><td class="num">0</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-edexcel/computers (4L) - autonomous loop (claude)</td><td class="num">11</td><td class="num">15</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-edexcel/issues-impact (3L) - autonomous loop (claude)</td><td class="num">9</td><td class="num">7</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-edexcel/computational-thinking (5L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">19</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-edexcel/networks (4L) - autonomous loop (claude)</td><td class="num">5</td><td class="num">3</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-aqa/programming (5L) - autonomous loop (claude)</td><td class="num">17</td><td class="num">33</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-edexcel/data (4L) - autonomous loop (claude)</td><td class="num">6</td><td class="num">4</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-aqa/databases-sql (3L) - autonomous loop (claude)</td><td class="num">9</td><td class="num">14</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-aqa/ethical-legal-environmental (2L) - autonomous loop (claude)</td><td class="num">8</td><td class="num">10</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-aqa/networks-cyber-security (4L) - autonomous loop (claude)</td><td class="num">3</td><td class="num">4</td></tr>
+<tr><td>2026-09-06</td><td>physical-education-ocr/physical-factors-affecting-performance (14L) - autonomous loop (claude)</td><td class="num">25</td><td class="num">69</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-aqa/computer-systems (4L) - autonomous loop (claude)</td><td class="num">10</td><td class="num">11</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-aqa/data-representation (4L) - autonomous loop (claude)</td><td class="num">9</td><td class="num">5</td></tr>
+<tr><td>2026-09-06</td><td>physical-education-ocr/socio-cultural-issues-and-sports-psychology (13L) - autonomous loop (claude)</td><td class="num">28</td><td class="num">43</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-eduqas/algorithms-programming-software (6L) - autonomous loop (claude)</td><td class="num">17</td><td class="num">26</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-aqa/algorithms (4L) - autonomous loop (claude)</td><td class="num">13</td><td class="num">8</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-eduqas/society-ethics-law (2L) - autonomous loop (claude)</td><td class="num">14</td><td class="num">11</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-eduqas/logic-data-os (4L) - autonomous loop (claude)</td><td class="num">15</td><td class="num">13</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-eduqas/data-representation-storage (6L) - autonomous loop (claude)</td><td class="num">10</td><td class="num">45</td></tr>
+<tr><td>2026-09-06</td><td>business-ocr/operations-finance-influences (15L) - autonomous loop (claude)</td><td class="num">35</td><td class="num">41</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-eduqas/networks-internet-cybersecurity (6L) - autonomous loop (claude)</td><td class="num">10</td><td class="num">4</td></tr>
+<tr><td>2026-09-06</td><td>physical-education-edexcel/fitness-and-body-systems (17L) - autonomous loop (claude)</td><td class="num">29</td><td class="num">33</td></tr>
+<tr><td>2026-09-06</td><td>computer-science-eduqas/hardware-and-systems (5L) - autonomous loop (claude)</td><td class="num">10</td><td class="num">4</td></tr>
+<tr><td>2026-09-06</td><td>physical-education-edexcel/health-and-performance (13L) - autonomous loop (claude)</td><td class="num">18</td><td class="num">16</td></tr>
+<tr><td>2026-09-06</td><td>business-edexcel/building-a-business (15L) - autonomous loop (claude)</td><td class="num">22</td><td class="num">175</td></tr>
+<tr><td>2026-09-06</td><td>business-edexcel/investigating-small-business (15L) - autonomous loop (claude)</td><td class="num">45</td><td class="num">152</td></tr>
+<tr><td>2026-09-06</td><td>business-ocr/business-activity-marketing-people (15L) - autonomous loop (claude)</td><td class="num">30</td><td class="num">65</td></tr>
+<tr><td>2026-09-06</td><td>business-aqa/finance (5L) - autonomous loop (claude)</td><td class="num">14</td><td class="num">14</td></tr>
+<tr><td>2026-09-06</td><td>business-aqa/marketing (6L) - autonomous loop (claude)</td><td class="num">14</td><td class="num">22</td></tr>
+<tr><td>2026-09-06</td><td>business-aqa/business-operations (4L) - autonomous loop (claude)</td><td class="num">16</td><td class="num">14</td></tr>
+<tr><td>2026-09-06</td><td>business-aqa/human-resources (4L) - autonomous loop (claude)</td><td class="num">6</td><td class="num">3</td></tr>
+<tr><td>2026-09-06</td><td>design-technology/designing-making (7L) - autonomous loop (codex)</td><td class="num">8</td><td class="num">16</td></tr>
+<tr><td>2026-09-06</td><td>business-aqa/influences-on-business (5L) - autonomous loop (claude)</td><td class="num">13</td><td class="num">11</td></tr>
+<tr><td>2026-09-06</td><td>business-aqa/business-real-world (6L) - autonomous loop (claude)</td><td class="num">13</td><td class="num">13</td></tr>
+<tr><td>2026-09-06</td><td>sociology-eduqas/crime-deviance (8L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">13</td></tr>
+<tr><td>2026-09-06</td><td>sociology-eduqas/families (6L) - autonomous loop (claude)</td><td class="num">12</td><td class="num">6</td></tr>
+<tr><td>2026-09-06</td><td>sociology-eduqas/social-differentiation-stratification (7L) - autonomous loop (claude)</td><td class="num">21</td><td class="num">17</td></tr>
+<tr><td>2026-09-06</td><td>sociology-eduqas/cultural-transmission-research-methods (6L) - autonomous loop (claude)</td><td class="num">11</td><td class="num">9</td></tr>
+<tr><td>2026-09-06</td><td>sociology-eduqas/education (6L) - autonomous loop (claude)</td><td class="num">9</td><td class="num">7</td></tr>
+<tr><td>2026-09-06</td><td>sociology-aqa/social-stratification (7L) - autonomous loop (claude)</td><td class="num">10</td><td class="num">8</td></tr>
+<tr><td>2026-09-06</td><td>astronomy-edexcel/naked-eye-astronomy (12L) - autonomous loop (claude)</td><td class="num">21</td><td class="num">23</td></tr>
+<tr><td>2026-09-06</td><td>sociology-aqa/education (6L) - autonomous loop (claude)</td><td class="num">18</td><td class="num">16</td></tr>
+<tr><td>2026-09-06</td><td>sociology-aqa/crime-deviance (7L) - autonomous loop (claude)</td><td class="num">9</td><td class="num">5</td></tr>
+<tr><td>2026-09-06</td><td>physical-education-aqa/human-body-and-movement (16L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">22</td></tr>
+<tr><td>2026-09-06</td><td>sociology-aqa/families (7L) - autonomous loop (claude)</td><td class="num">8</td><td class="num">6</td></tr>
+<tr><td>2026-09-06</td><td>sociology-aqa/studying-society-research-methods (6L) - autonomous loop (claude)</td><td class="num">13</td><td class="num">10</td></tr>
+<tr><td>2026-09-06</td><td>design-technology-eduqas/electronic-mechanical-systems (5L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">16</td></tr>
+<tr><td>2026-09-06</td><td>physical-education-aqa/socio-cultural-influences-and-wellbeing (17L) - autonomous loop (claude)</td><td class="num">19</td><td class="num">15</td></tr>
+<tr><td>2026-09-06</td><td>astronomy-edexcel/telescopic-astronomy (14L) - autonomous loop (claude)</td><td class="num">22</td><td class="num">23</td></tr>
+<tr><td>2026-09-06</td><td>design-technology-eduqas/timber-in-depth (5L) - autonomous loop (claude)</td><td class="num">16</td><td class="num">16</td></tr>
+<tr><td>2026-09-06</td><td>design-technology-eduqas/textiles-in-depth (5L) - autonomous loop (claude)</td><td class="num">11</td><td class="num">7</td></tr>
+<tr><td>2026-09-06</td><td>design-technology-eduqas/papers-and-boards-in-depth (5L) - autonomous loop (claude)</td><td class="num">18</td><td class="num">17</td></tr>
+<tr><td>2026-09-06</td><td>design-technology-eduqas/metals-in-depth (5L) - autonomous loop (claude)</td><td class="num">12</td><td class="num">15</td></tr>
+<tr><td>2026-09-06</td><td>design-technology-eduqas/designing-and-making-principles (5L) - autonomous loop (claude)</td><td class="num">16</td><td class="num">17</td></tr>
+<tr><td>2026-09-06</td><td>design-technology-eduqas/polymers-in-depth (5L) - autonomous loop (claude)</td><td class="num">10</td><td class="num">7</td></tr>
+<tr><td>2026-09-06</td><td>design-technology-eduqas/materials-and-properties (6L) - autonomous loop (claude)</td><td class="num">21</td><td class="num">20</td></tr>
+<tr><td>2026-09-06</td><td>geology-eduqas/hazards-resources-and-investigative-geology (7L) - autonomous loop (claude)</td><td class="num">24</td><td class="num">20</td></tr>
+<tr><td>2026-09-06</td><td>design-technology-eduqas/design-technology-our-world (6L) - autonomous loop (claude)</td><td class="num">10</td><td class="num">7</td></tr>
+<tr><td>2026-09-06</td><td>geology-eduqas/geological-time-and-life (5L) - autonomous loop (claude)</td><td class="num">18</td><td class="num">19</td></tr>
+<tr><td>2026-09-06</td><td>geology-eduqas/structures-and-earth-dynamics (6L) - autonomous loop (claude)</td><td class="num">25</td><td class="num">25</td></tr>
+<tr><td>2026-09-06</td><td>geology-eduqas/earth-climate-and-solar-system (5L) - autonomous loop (claude)</td><td class="num">15</td><td class="num">16</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/theme-human-rights (4L) - autonomous loop (claude)</td><td class="num">17</td><td class="num">29</td></tr>
+<tr><td>2026-09-06</td><td>geology-eduqas/rocks-and-minerals (7L) - autonomous loop (claude)</td><td class="num">21</td><td class="num">22</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/theme-relationships (4L) - autonomous loop (claude)</td><td class="num">18</td><td class="num">17</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/theme-good-and-evil (4L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">11</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/theme-life-and-death (4L) - autonomous loop (claude)</td><td class="num">11</td><td class="num">10</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/buddhism (3L) - autonomous loop (claude)</td><td class="num">15</td><td class="num">11</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/sikhism (3L) - autonomous loop (claude)</td><td class="num">15</td><td class="num">12</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/catholic-applied-life-and-death (3L) - autonomous loop (claude)</td><td class="num">14</td><td class="num">10</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/catholic-applied-sin-and-forgiveness (3L) - autonomous loop (claude)</td><td class="num">12</td><td class="num">12</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/islam (3L) - autonomous loop (claude)</td><td class="num">11</td><td class="num">6</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/judaism (4L) - autonomous loop (claude)</td><td class="num">14</td><td class="num">10</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/hinduism (3L) - autonomous loop (claude)</td><td class="num">10</td><td class="num">9</td></tr>
+<tr><td>2026-09-06</td><td>drama-aqa/theatre-roles-stagecraft (5L) - autonomous loop (codex)</td><td class="num">5</td><td class="num">13</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/catholic-christianity (5L) - autonomous loop (claude)</td><td class="num">16</td><td class="num">23</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/christianity (4L) - autonomous loop (claude)</td><td class="num">17</td><td class="num">14</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-eduqas/catholic-foundational-origins-and-meaning (3L) - autonomous loop (claude)</td><td class="num">19</td><td class="num">14</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-4-quran (5L) - autonomous loop (claude)</td><td class="num">17</td><td class="num">45</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-2-sikhism (4L) - autonomous loop (claude)</td><td class="num">19</td><td class="num">47</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-3-philosophy-ethics-catholic (5L) - autonomous loop (claude)</td><td class="num">22</td><td class="num">49</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-3-philosophy-ethics-islam (5L) - autonomous loop (claude)</td><td class="num">24</td><td class="num">31</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-3-philosophy-ethics-christianity (5L) - autonomous loop (claude)</td><td class="num">14</td><td class="num">17</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-4-marks-gospel (5L) - autonomous loop (claude)</td><td class="num">30</td><td class="num">41</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-2-hinduism (4L) - autonomous loop (claude)</td><td class="num">23</td><td class="num">34</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-2-judaism (4L) - autonomous loop (claude)</td><td class="num">33</td><td class="num">40</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-1-islam (6L) - autonomous loop (claude)</td><td class="num">35</td><td class="num">57</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-2-islam (4L) - autonomous loop (claude)</td><td class="num">17</td><td class="num">37</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-1-catholic-christianity (6L) - autonomous loop (claude)</td><td class="num">30</td><td class="num">58</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-2-catholic-christianity (4L) - autonomous loop (claude)</td><td class="num">26</td><td class="num">31</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-2-buddhism (4L) - autonomous loop (claude)</td><td class="num">13</td><td class="num">38</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-2-christianity (4L) - autonomous loop (claude)</td><td class="num">17</td><td class="num">30</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-edexcel/paper-1-christianity (6L) - autonomous loop (claude)</td><td class="num">12</td><td class="num">42</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/theme-f-human-rights-social-justice (3L) - autonomous loop (claude)</td><td class="num">19</td><td class="num">31</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/sikhism-beliefs (4L) - autonomous loop (claude)</td><td class="num">18</td><td class="num">26</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/sikhism-practices (4L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">24</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/hinduism-practices (4L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">18</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/judaism-practices (4L) - autonomous loop (claude)</td><td class="num">15</td><td class="num">24</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/theme-c-existence-of-god (3L) - autonomous loop (claude)</td><td class="num">15</td><td class="num">13</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/judaism-beliefs (4L) - autonomous loop (claude)</td><td class="num">14</td><td class="num">18</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/catholic-christianity-practices (4L) - autonomous loop (claude)</td><td class="num">23</td><td class="num">26</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/catholic-christianity-beliefs (4L) - autonomous loop (claude)</td><td class="num">13</td><td class="num">30</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/hinduism-beliefs (4L) - autonomous loop (claude)</td><td class="num">10</td><td class="num">16</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/buddhism-practices (4L) - autonomous loop (claude)</td><td class="num">17</td><td class="num">22</td></tr>
+<tr><td>2026-09-06</td><td>geography-ocr/living-in-the-uk-today (10L) - autonomous loop (claude)</td><td class="num">47</td><td class="num">87</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/theme-d-peace-conflict (3L) - autonomous loop (claude)</td><td class="num">10</td><td class="num">10</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/buddhism-beliefs (4L) - autonomous loop (claude)</td><td class="num">17</td><td class="num">32</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/theme-e-crime-punishment (3L) - autonomous loop (claude)</td><td class="num">18</td><td class="num">19</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/islam-practices (4L) - autonomous loop (claude)</td><td class="num">18</td><td class="num">19</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/islam-beliefs (4L) - autonomous loop (claude)</td><td class="num">16</td><td class="num">15</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/theme-b-religion-life (3L) - autonomous loop (claude)</td><td class="num">4</td><td class="num">2</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/theme-a-relationships (3L) - autonomous loop (claude)</td><td class="num">13</td><td class="num">9</td></tr>
+<tr><td>2026-09-06</td><td>geography-ocr/the-world-around-us (10L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">49</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/christianity-practices (4L) - autonomous loop (claude)</td><td class="num">16</td><td class="num">12</td></tr>
+<tr><td>2026-09-06</td><td>geography-edexcel-a/paper-2-human-environment (10L) - autonomous loop (claude)</td><td class="num">46</td><td class="num">45</td></tr>
+<tr><td>2026-09-06</td><td>geography-edexcel-b/uk-geographical-issues (10L) - autonomous loop (claude)</td><td class="num">35</td><td class="num">33</td></tr>
+<tr><td>2026-09-06</td><td>religious-studies-aqa/christianity-beliefs (4L) - autonomous loop (claude)</td><td class="num">13</td><td class="num">15</td></tr>
+<tr><td>2026-09-06</td><td>geography-edexcel-a/paper-3-fieldwork-uk-challenges (6L) - autonomous loop (claude)</td><td class="num">25</td><td class="num">32</td></tr>
+<tr><td>2026-09-06</td><td>geography-edexcel-b/people-environment-issues (8L) - autonomous loop (claude)</td><td class="num">17</td><td class="num">32</td></tr>
+<tr><td>2026-09-06</td><td>geography-edexcel-a/paper-1-physical-environment (13L) - autonomous loop (claude)</td><td class="num">22</td><td class="num">17</td></tr>
+<tr><td>2026-09-06</td><td>geography-eduqas/development-resources (5L) - autonomous loop (claude)</td><td class="num">27</td><td class="num">31</td></tr>
+<tr><td>2026-09-06</td><td>geography-eduqas/weather-climate-ecosystems (5L) - autonomous loop (claude)</td><td class="num">29</td><td class="num">31</td></tr>
+<tr><td>2026-09-06</td><td>geography-eduqas/social-environmental-challenges (4L) - autonomous loop (claude)</td><td class="num">17</td><td class="num">16</td></tr>
+<tr><td>2026-09-06</td><td>geography-eduqas/fieldwork-enquiry (3L) - autonomous loop (claude)</td><td class="num">15</td><td class="num">20</td></tr>
+<tr><td>2026-09-06</td><td>geography-eduqas/tectonic-coastal-hazards (4L) - autonomous loop (claude)</td><td class="num">27</td><td class="num">29</td></tr>
+<tr><td>2026-09-06</td><td>geography-aqa/paper-1 (25L) - autonomous loop (claude)</td><td class="num">48</td><td class="num">61</td></tr>
+<tr><td>2026-09-06</td><td>geography-aqa/paper-2 (24L) - autonomous loop (claude)</td><td class="num">52</td><td class="num">60</td></tr>
+<tr><td>2026-09-06</td><td>history-ocr/personal-rule-restoration-1629-1660 (10L) - autonomous loop (claude)</td><td class="num">39</td><td class="num">155</td></tr>
+<tr><td>2026-09-06</td><td>history-ocr/impact-empire-britain-1688-1730 (10L) - autonomous loop (claude)</td><td class="num">29</td><td class="num">171</td></tr>
+<tr><td>2026-09-06</td><td>geography-eduqas/rural-urban-links (5L) - autonomous loop (claude)</td><td class="num">24</td><td class="num">27</td></tr>
+<tr><td>2026-09-06</td><td>history-ocr/english-reformation-1520-1550 (10L) - autonomous loop (claude)</td><td class="num">26</td><td class="num">193</td></tr>
+<tr><td>2026-09-06</td><td>geography-eduqas/landscapes-physical-processes (6L) - autonomous loop (claude)</td><td class="num">21</td><td class="num">15</td></tr>
+<tr><td>2026-09-06</td><td>history-ocr/war-british-society-790-2010 (10L) - autonomous loop (claude)</td><td class="num">48</td><td class="num">101</td></tr>
+<tr><td>2026-09-06</td><td>history-ocr/migration-to-britain-1000-2010 (10L) - autonomous loop (claude)</td><td class="num">28</td><td class="num">124</td></tr>
+<tr><td>2026-09-06</td><td>history-ocr/power-monarchy-democracy-1000-2014 (10L) - autonomous loop (claude)</td><td class="num">41</td><td class="num">96</td></tr>
+<tr><td>2026-09-06</td><td>history-ocr/south-africa-people-state-1960-1994 (9L) - autonomous loop (claude)</td><td class="num">44</td><td class="num">94</td></tr>
+<tr><td>2026-09-06</td><td>history-ocr/usa-people-state-1919-1948 (9L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">143</td></tr>
+<tr><td>2026-09-06</td><td>history-ocr/usa-people-state-1945-1974 (9L) - autonomous loop (claude)</td><td class="num">37</td><td class="num">97</td></tr>
+<tr><td>2026-09-06</td><td>history-ocr/germany-people-state-1925-1955 (9L) - autonomous loop (claude)</td><td class="num">36</td><td class="num">86</td></tr>
+<tr><td>2026-09-06</td><td>history-ocr/china-people-state-1950-1981 (9L) - autonomous loop (claude)</td><td class="num">24</td><td class="num">63</td></tr>
+<tr><td>2026-09-06</td><td>history-ocr/international-relations-1918-1975 (12L) - autonomous loop (claude)</td><td class="num">71</td><td class="num">86</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/russia-soviet-union (14L) - autonomous loop (claude)</td><td class="num">45</td><td class="num">65</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/maos-china (14L) - autonomous loop (claude)</td><td class="num">28</td><td class="num">79</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/usa-conflict-home-abroad (14L) - autonomous loop (claude)</td><td class="num">65</td><td class="num">58</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/spain-new-world (12L) - autonomous loop (claude)</td><td class="num">38</td><td class="num">136</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/conflict-middle-east (12L) - autonomous loop (claude)</td><td class="num">19</td><td class="num">95</td></tr>
+<tr><td>2026-09-06</td><td>drama-aqa/practitioners-styles (4L) - autonomous loop (codex)</td><td class="num">7</td><td class="num">15</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/british-america (12L) - autonomous loop (claude)</td><td class="num">28</td><td class="num">78</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/american-west (13L) - autonomous loop (claude)</td><td class="num">28</td><td class="num">133</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/richard-i-king-john (11L) - autonomous loop (claude)</td><td class="num">42</td><td class="num">126</td></tr>
+<tr><td>2026-09-06</td><td>drama-aqa/live-theatre-review (4L) - autonomous loop (codex)</td><td class="num">9</td><td class="num">11</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/henry-viii-ministers (11L) - autonomous loop (claude)</td><td class="num">53</td><td class="num">81</td></tr>
+<tr><td>2026-09-06</td><td>drama-aqa/the-crucible (8L) - autonomous loop (codex)</td><td class="num">5</td><td class="num">5</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/early-elizabethan-england (11L) - autonomous loop (claude)</td><td class="num">48</td><td class="num">116</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/warfare-british-society (14L) - autonomous loop (claude)</td><td class="num">46</td><td class="num">238</td></tr>
+<tr><td>2026-09-06</td><td>drama-aqa/blood-brothers (8L) - autonomous loop (codex)</td><td class="num">7</td><td class="num">8</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/migrants-in-britain (14L) - autonomous loop (claude)</td><td class="num">58</td><td class="num">362</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/crime-punishment-whitechapel (14L) - autonomous loop (claude)</td><td class="num">88</td><td class="num">302</td></tr>
+<tr><td>2026-09-06</td><td>drama-aqa/noughts-and-crosses (8L) - autonomous loop (codex)</td><td class="num">8</td><td class="num">9</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/weimar-nazi-germany (10L) - autonomous loop (claude)</td><td class="num">31</td><td class="num">109</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/anglo-saxon-norman (8L) - autonomous loop (claude)</td><td class="num">23</td><td class="num">51</td></tr>
+<tr><td>2026-09-06</td><td>classical-civilisation-ocr/women-religion-and-power (5L) - autonomous loop (codex)</td><td class="num">11</td><td class="num">14</td></tr>
+<tr><td>2026-09-06</td><td>history-aqa/restoration-england (14L) - autonomous loop (claude)</td><td class="num">43</td><td class="num">319</td></tr>
+<tr><td>2026-09-06</td><td>history-edexcel/medicine-in-britain (10L) - autonomous loop (claude)</td><td class="num">44</td><td class="num">190</td></tr>
+<tr><td>2026-09-06</td><td>history-aqa/norman-england (14L) - autonomous loop (claude)</td><td class="num">41</td><td class="num">325</td></tr>
+<tr><td>2026-09-06</td><td>drama-aqa/around-the-world-80-days (8L) - autonomous loop (codex)</td><td class="num">16</td><td class="num">41</td></tr>
+<tr><td>2026-09-06</td><td>history-aqa/medieval-england-edward-i (13L) - autonomous loop (claude)</td><td class="num">42</td><td class="num">253</td></tr>
+<tr><td>2026-09-06</td><td>history-aqa/elizabethan-england (14L) - autonomous loop (claude)</td><td class="num">29</td><td class="num">296</td></tr>
+<tr><td>2026-09-06</td><td>history-aqa/britain-migration-empires (14L) - autonomous loop (claude)</td><td class="num">56</td><td class="num">224</td></tr>
+<tr><td>2026-09-06</td><td>drama-aqa/things-i-know-to-be-true (8L) - autonomous loop (codex)</td><td class="num">23</td><td class="num">17</td></tr>
+<tr><td>2026-09-06</td><td>history-aqa/britain-health-people (14L) - autonomous loop (claude)</td><td class="num">41</td><td class="num">183</td></tr>
+<tr><td>2026-09-06</td><td>history-aqa/britain-power-people (14L) - autonomous loop (claude)</td><td class="num">42</td><td class="num">199</td></tr>
+<tr><td>2026-09-06</td><td>history-aqa/conflict-tension-gulf-afghanistan (12L) - autonomous loop (claude)</td><td class="num">50</td><td class="num">221</td></tr>
+<tr><td>2026-09-06</td><td>history-aqa/conflict-tension-asia (13L) - autonomous loop (claude)</td><td class="num">48</td><td class="num">182</td></tr>
+<tr><td>2026-09-06</td><td>history-aqa/conflict-tension-first-world-war (13L) - autonomous loop (claude)</td><td class="num">44</td><td class="num">194</td></tr>
+<tr><td>2026-09-05</td><td>history-aqa/conflict-tension-east-west (14L) - autonomous loop (claude)</td><td class="num">88</td><td class="num">160</td></tr>
+<tr><td>2026-09-05</td><td>drama-aqa/romeo-and-juliet (8L) - autonomous loop (codex)</td><td class="num">21</td><td class="num">32</td></tr>
+<tr><td>2026-09-05</td><td>history-aqa/conflict-tension-inter-war (14L) - autonomous loop (claude)</td><td class="num">56</td><td class="num">145</td></tr>
+<tr><td>2026-09-05</td><td>drama-aqa/a-taste-of-honey (8L) - autonomous loop (codex)</td><td class="num">7</td><td class="num">11</td></tr>
+<tr><td>2026-09-05</td><td>history-aqa/america-expansion-consolidation (13L) - autonomous loop (claude)</td><td class="num">52</td><td class="num">110</td></tr>
+<tr><td>2026-09-05</td><td>drama-aqa/the-great-wave (8L) - autonomous loop (codex)</td><td class="num">16</td><td class="num">37</td></tr>
+<tr><td>2026-09-05</td><td>history-aqa/america-opportunity-inequality (14L) - autonomous loop (claude)</td><td class="num">68</td><td class="num">82</td></tr>
+<tr><td>2026-09-05</td><td>drama-aqa/the-empress (8L) - autonomous loop (codex)</td><td class="num">12</td><td class="num">8</td></tr>
+<tr><td>2026-09-05</td><td>classical-civilisation-ocr/greek-and-roman-mythology (6L) - autonomous loop (codex)</td><td class="num">9</td><td class="num">16</td></tr>
+<tr><td>2026-09-05</td><td>history-aqa/russia-tsardom-communism (14L) - autonomous loop (claude)</td><td class="num">56</td><td class="num">68</td></tr>
+<tr><td>2026-09-05</td><td>classical-civilisation-ocr/greek-and-roman-religion (5L) - autonomous loop (codex)</td><td class="num">19</td><td class="num">24</td></tr>
+<tr><td>2026-09-05</td><td>history-aqa/germany-democracy-dictatorship (14L) - autonomous loop (claude)</td><td class="num">52</td><td class="num">56</td></tr>
+<tr><td>2026-09-05</td><td>history-edexcel/superpower-relations (8L) - autonomous loop (codex)</td><td class="num">11</td><td class="num">12</td></tr>
+<tr><td>2026-09-05</td><td>separate-sciences-ocr-b/physics-particle-models-universe (4L) - autonomous loop (claude)</td><td class="num">29</td><td class="num">32</td></tr>
+<tr><td>2026-09-05</td><td>classical-civilisation-ocr/the-mycenaean-world (5L) - autonomous loop (codex)</td><td class="num">13</td><td class="num">34</td></tr>
+<tr><td>2026-09-05</td><td>separate-sciences-ocr-b/physics-forces-motion-radioactivity (5L) - autonomous loop (claude)</td><td class="num">25</td><td class="num">32</td></tr>
+<tr><td>2026-09-05</td><td>classical-civilisation-ocr/homers-odyssey (5L) - autonomous loop (codex)</td><td class="num">9</td><td class="num">6</td></tr>
+<tr><td>2026-09-05</td><td>separate-sciences-ocr-b/physics-energy-electricity (5L) - autonomous loop (claude)</td><td class="num">19</td><td class="num">34</td></tr>
+<tr><td>2026-09-05</td><td>classical-civilisation-ocr/women-of-legend-and-the-home (5L) - autonomous loop (codex)</td><td class="num">13</td><td class="num">37</td></tr>
+<tr><td>2026-09-05</td><td>separate-sciences-ocr-b/physics-radiation-waves (4L) - autonomous loop (claude)</td><td class="num">28</td><td class="num">37</td></tr>
+<tr><td>2026-09-05</td><td>classical-civilisation-ocr/the-roman-city-and-home (5L) - autonomous loop (codex)</td><td class="num">6</td><td class="num">12</td></tr>
+<tr><td>2026-09-05</td><td>separate-sciences-ocr-b/chemistry-analysis-useful-products (4L) - autonomous loop (claude)</td><td class="num">27</td><td class="num">59</td></tr>
+<tr><td>2026-09-05</td><td>classical-civilisation-ocr/roman-leisure-and-society (5L) - autonomous loop (codex)</td><td class="num">9</td><td class="num">23</td></tr>
+<tr><td>2026-09-05</td><td>separate-sciences-ocr-b/chemistry-materials-reactions (5L) - autonomous loop (claude)</td><td class="num">23</td><td class="num">34</td></tr>
+<tr><td>2026-09-05</td><td>separate-sciences-ocr-b/chemistry-atoms-patterns-bonding (4L) - autonomous loop (claude)</td><td class="num">23</td><td class="num">34</td></tr>
+<tr><td>2026-09-05</td><td>classical-civilisation-ocr/greek-warfare-and-the-persian-wars (5L) - autonomous loop (codex)</td><td class="num">11</td><td class="num">11</td></tr>
+<tr><td>2026-09-05</td><td>separate-sciences-ocr-b/chemistry-earth-air-water (4L) - autonomous loop (claude)</td><td class="num">12</td><td class="num">11</td></tr>
+<tr><td>2026-09-05</td><td>classical-civilisation-ocr/the-roman-army-and-the-values-of-war (5L) - autonomous loop (codex)</td><td class="num">6</td><td class="num">5</td></tr>
+<tr><td>2026-09-05</td><td>separate-sciences-ocr-b/biology-human-body (5L) - autonomous loop (claude)</td><td class="num">27</td><td class="num">45</td></tr>
+<tr><td>2026-09-05</td><td>film-studies-eduqas/film-form-and-language (7L) - autonomous loop (codex)</td><td class="num">5</td><td class="num">9</td></tr>
+<tr><td>2026-09-05</td><td>separate-sciences-ocr-b/biology-life-on-earth-ecosystems (5L) - autonomous loop (claude)</td><td class="num">25</td><td class="num">24</td></tr>
+<tr><td>2026-09-05</td><td>separate-sciences-ocr-b/biology-keeping-healthy (4L) - autonomous loop (claude)</td><td class="num">18</td><td class="num">19</td></tr>
+<tr><td>2026-09-05</td><td>film-studies-eduqas/us-mainstream-comparative (7L) - autonomous loop (codex)</td><td class="num">13</td><td class="num">13</td></tr>
+<tr><td>2026-09-05</td><td>film-studies-eduqas/us-independent (7L) - autonomous loop (codex)</td><td class="num">14</td><td class="num">17</td></tr>
+<tr><td>2026-09-05</td><td>separate-sciences-ocr-b/biology-you-and-your-genes (4L) - autonomous loop (claude)</td><td class="num">22</td><td class="num">40</td></tr>
+<tr><td>2026-09-05</td><td>film-studies-eduqas/global-and-uk-film (20L) - autonomous loop (codex)</td><td class="num">20</td><td class="num">19</td></tr>
+<tr><td>2026-09-05</td><td>science-ocr-b/physics-paper-2 (8L) - autonomous loop (claude)</td><td class="num">26</td><td class="num">29</td></tr>
+<tr><td>2026-09-05</td><td>science-ocr-b/physics-paper-1 (8L) - autonomous loop (claude)</td><td class="num">22</td><td class="num">31</td></tr>
+<tr><td>2026-09-05</td><td>science-ocr-b/chemistry-paper-2 (8L) - autonomous loop (claude)</td><td class="num">30</td><td class="num">40</td></tr>
+<tr><td>2026-09-05</td><td>film-studies-eduqas/developments-in-film-technology (3L) - autonomous loop (codex)</td><td class="num">14</td><td class="num">27</td></tr>
+<tr><td>2026-09-04</td><td>citizenship-aqa/politics-participation-active-citizenship (16L) - autonomous loop (codex)</td><td class="num">20</td><td class="num">28</td></tr>
+<tr><td>2026-09-04</td><td>science-ocr-b/chemistry-paper-1 (8L) - autonomous loop (claude)</td><td class="num">18</td><td class="num">28</td></tr>
+<tr><td>2026-09-04</td><td>citizenship-aqa/life-modern-britain-rights-responsibilities (13L) - autonomous loop (codex)</td><td class="num">15</td><td class="num">25</td></tr>
+<tr><td>2026-09-04</td><td>science-ocr-b/biology-paper-2 (8L) - autonomous loop (claude)</td><td class="num">16</td><td class="num">35</td></tr>
+<tr><td>2026-09-04</td><td>science-ocr-b/biology-paper-1 (8L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">13</td></tr>
+<tr><td>2026-09-04</td><td>engineering-aqa/engineering-materials (5L) - autonomous loop (codex)</td><td class="num">7</td><td class="num">7</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences-ocr/physics-paper-2 (9L) - autonomous loop (claude)</td><td class="num">24</td><td class="num">42</td></tr>
+<tr><td>2026-09-04</td><td>engineering-aqa/manufacturing-processes (6L) - autonomous loop (codex)</td><td class="num">9</td><td class="num">7</td></tr>
+<tr><td>2026-09-04</td><td>engineering-aqa/engineering-systems (7L) - autonomous loop (codex)</td><td class="num">15</td><td class="num">14</td></tr>
+<tr><td>2026-09-04</td><td>engineering-aqa/testing-drawing-and-the-engineering-industry (4L) - autonomous loop (codex)</td><td class="num">9</td><td class="num">8</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences-ocr/physics-paper-1 (8L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">35</td></tr>
+<tr><td>2026-09-04</td><td>electronics-eduqas/discovering-electronics (10L) - autonomous loop (codex)</td><td class="num">24</td><td class="num">17</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences-ocr/chemistry-paper-2 (9L) - autonomous loop (claude)</td><td class="num">29</td><td class="num">68</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences-ocr/chemistry-paper-1 (8L) - autonomous loop (claude)</td><td class="num">21</td><td class="num">30</td></tr>
+<tr><td>2026-09-04</td><td>electronics-eduqas/application-of-electronics (10L) - autonomous loop (codex)</td><td class="num">12</td><td class="num">27</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences-ocr/biology-paper-2 (9L) - autonomous loop (claude)</td><td class="num">27</td><td class="num">51</td></tr>
+<tr><td>2026-09-04</td><td>media-studies-aqa/media-language (5L) - autonomous loop (codex)</td><td class="num">4</td><td class="num">6</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences-ocr/biology-paper-1 (8L) - autonomous loop (claude)</td><td class="num">25</td><td class="num">34</td></tr>
+<tr><td>2026-09-04</td><td>media-studies-aqa/media-representations (5L) - autonomous loop (codex)</td><td class="num">5</td><td class="num">8</td></tr>
+<tr><td>2026-09-04</td><td>science-ocr/physics-paper-2 (8L) - autonomous loop (claude)</td><td class="num">27</td><td class="num">37</td></tr>
+<tr><td>2026-09-04</td><td>media-studies-aqa/media-industries (5L) - autonomous loop (codex)</td><td class="num">6</td><td class="num">14</td></tr>
+<tr><td>2026-09-04</td><td>science-ocr/physics-paper-1 (8L) - autonomous loop (claude)</td><td class="num">18</td><td class="num">55</td></tr>
+<tr><td>2026-09-04</td><td>media-studies-aqa/media-audiences (5L) - autonomous loop (codex)</td><td class="num">4</td><td class="num">9</td></tr>
+<tr><td>2026-09-04</td><td>science-ocr/chemistry-paper-2 (8L) - autonomous loop (claude)</td><td class="num">18</td><td class="num">44</td></tr>
+<tr><td>2026-09-04</td><td>food-preparation-and-nutrition-eduqas/food-science-and-nutrition (9L) - autonomous loop (codex)</td><td class="num">13</td><td class="num">31</td></tr>
+<tr><td>2026-09-04</td><td>food-preparation-and-nutrition-eduqas/food-safety-provenance-and-choice (7L) - autonomous loop (codex)</td><td class="num">10</td><td class="num">10</td></tr>
+<tr><td>2026-09-04</td><td>science-ocr/chemistry-paper-1 (8L) - autonomous loop (claude)</td><td class="num">17</td><td class="num">36</td></tr>
+<tr><td>2026-09-04</td><td>engineering-eduqas/engineering-achievements-and-environment (3L) - autonomous loop (codex)</td><td class="num">8</td><td class="num">9</td></tr>
+<tr><td>2026-09-04</td><td>science-ocr/biology-paper-2 (8L) - autonomous loop (claude)</td><td class="num">24</td><td class="num">38</td></tr>
+<tr><td>2026-09-04</td><td>engineering-eduqas/engineering-materials-and-properties (4L) - autonomous loop (codex)</td><td class="num">8</td><td class="num">17</td></tr>
+<tr><td>2026-09-04</td><td>science-ocr/biology-paper-1 (8L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">30</td></tr>
+<tr><td>2026-09-04</td><td>engineering-eduqas/engineering-processes-and-safe-working (3L) - autonomous loop (codex)</td><td class="num">11</td><td class="num">10</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences-edexcel/physics-paper-2 (8L) - autonomous loop (claude)</td><td class="num">33</td><td class="num">43</td></tr>
+<tr><td>2026-09-04</td><td>engineering-eduqas/solving-engineering-problems (4L) - autonomous loop (codex)</td><td class="num">10</td><td class="num">16</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences-edexcel/physics-paper-1 (9L) - autonomous loop (claude)</td><td class="num">29</td><td class="num">39</td></tr>
+<tr><td>2026-09-04</td><td>health-social-care-eduqas/growth-development-lifespan (7L) - autonomous loop (codex)</td><td class="num">6</td><td class="num">7</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences-edexcel/chemistry-paper-2 (8L) - autonomous loop (claude)</td><td class="num">23</td><td class="num">68</td></tr>
+<tr><td>2026-09-04</td><td>health-social-care-eduqas/self-concept-measuring-health (6L) - autonomous loop (codex)</td><td class="num">8</td><td class="num">6</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences-edexcel/chemistry-paper-1 (9L) - autonomous loop (claude)</td><td class="num">39</td><td class="num">73</td></tr>
+<tr><td>2026-09-04</td><td>health-social-care-ocr/principles-of-care (13L) - autonomous loop (codex)</td><td class="num">13</td><td class="num">13</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences-edexcel/biology-paper-2 (8L) - autonomous loop (claude)</td><td class="num">24</td><td class="num">66</td></tr>
+<tr><td>2026-09-04</td><td>cambridge-nationals-enterprise-and-marketing/enterprise-and-marketing-concepts (12L) - autonomous loop (codex)</td><td class="num">9</td><td class="num">10</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences-edexcel/biology-paper-1 (8L) - autonomous loop (claude)</td><td class="num">25</td><td class="num">68</td></tr>
+<tr><td>2026-09-04</td><td>it-ocr/it-in-the-digital-world (12L) - autonomous loop (codex)</td><td class="num">18</td><td class="num">34</td></tr>
+<tr><td>2026-09-04</td><td>science-edexcel/physics-paper-2 (8L) - autonomous loop (claude)</td><td class="num">24</td><td class="num">56</td></tr>
+<tr><td>2026-09-04</td><td>science-edexcel/physics-paper-1 (8L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">42</td></tr>
+<tr><td>2026-09-04</td><td>science-edexcel/chemistry-paper-2 (8L) - autonomous loop (claude)</td><td class="num">11</td><td class="num">34</td></tr>
+<tr><td>2026-09-04</td><td>l12-construction-built-environment/the-construction-sector (4L) - autonomous loop (codex)</td><td class="num">3</td><td class="num">2</td></tr>
+<tr><td>2026-09-04</td><td>science-edexcel/chemistry-paper-1 (8L) - autonomous loop (claude)</td><td class="num">24</td><td class="num">30</td></tr>
+<tr><td>2026-09-04</td><td>l12-construction-built-environment/construction-technology-and-sustainability (4L) - autonomous loop (codex)</td><td class="num">5</td><td class="num">14</td></tr>
+<tr><td>2026-09-04</td><td>science-edexcel/biology-paper-2 (8L) - autonomous loop (claude)</td><td class="num">18</td><td class="num">32</td></tr>
+<tr><td>2026-09-04</td><td>science-edexcel/biology-paper-1 (8L) - autonomous loop (claude)</td><td class="num">8</td><td class="num">19</td></tr>
+<tr><td>2026-09-04</td><td>l12-construction-built-environment/working-in-construction (3L) - autonomous loop (codex)</td><td class="num">17</td><td class="num">39</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences/physics-paper-2 (8L) - autonomous loop (claude)</td><td class="num">22</td><td class="num">65</td></tr>
+<tr><td>2026-09-04</td><td>cambridge-nationals-child-development/health-and-well-being-for-child-development (10L) - autonomous loop (codex)</td><td class="num">8</td><td class="num">6</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences/physics-paper-1 (8L) - autonomous loop (claude)</td><td class="num">19</td><td class="num">36</td></tr>
+<tr><td>2026-09-04</td><td>cambridge-nationals-creative-imedia/creative-imedia-in-the-media-industry (10L) - autonomous loop (codex)</td><td class="num">5</td><td class="num">9</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences/chemistry-paper-2 (7L) - autonomous loop (claude)</td><td class="num">10</td><td class="num">23</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences/chemistry-paper-1 (9L) - autonomous loop (claude)</td><td class="num">23</td><td class="num">49</td></tr>
+<tr><td>2026-09-04</td><td>cambridge-nationals-engineering-design/principles-of-engineering-design (10L) - autonomous loop (codex)</td><td class="num">20</td><td class="num">89</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences/biology-paper-2 (8L) - autonomous loop (claude)</td><td class="num">16</td><td class="num">28</td></tr>
+<tr><td>2026-09-04</td><td>separate-sciences/biology-paper-1 (8L) - autonomous loop (claude)</td><td class="num">9</td><td class="num">13</td></tr>
+<tr><td>2026-09-04</td><td>cambridge-nationals-engineering-manufacture/principles-of-engineering-manufacture (10L) - autonomous loop (codex)</td><td class="num">19</td><td class="num">32</td></tr>
+<tr><td>2026-09-04</td><td>science-aqa/physics-paper-2 (13L) - autonomous loop (claude)</td><td class="num">30</td><td class="num">41</td></tr>
+<tr><td>2026-09-04</td><td>cambridge-nationals-engineering-programmable-systems/principles-of-electronic-and-programmable-systems (10L) - autonomous loop (codex)</td><td class="num">14</td><td class="num">21</td></tr>
+<tr><td>2026-09-04</td><td>science-aqa/physics-paper-1 (11L) - autonomous loop (claude)</td><td class="num">27</td><td class="num">33</td></tr>
+<tr><td>2026-09-04</td><td>cambridge-nationals-sport-science/reducing-the-risk-of-sports-injuries (10L) - autonomous loop (codex)</td><td class="num">4</td><td class="num">3</td></tr>
+<tr><td>2026-09-04</td><td>science-aqa/chemistry-paper-2 (11L) - autonomous loop (claude)</td><td class="num">13</td><td class="num">20</td></tr>
+<tr><td>2026-09-04</td><td>science-aqa/chemistry-paper-1 (12L) - autonomous loop (claude)</td><td class="num">16</td><td class="num">23</td></tr>
+<tr><td>2026-09-04</td><td>science-aqa/biology-paper-2 (13L) - autonomous loop (claude)</td><td class="num">28</td><td class="num">36</td></tr>
+<tr><td>2026-09-04</td><td>science-aqa/biology-paper-1 (10L) - autonomous loop (claude)</td><td class="num">19</td><td class="num">18</td></tr>
+<tr><td>2026-09-04</td><td>english-literature-eduqas/anita-and-me (8L) - autonomous loop (claude)</td><td class="num">22</td><td class="num">207</td></tr>
+<tr><td>2026-09-04</td><td>cambridge-nationals-sport-studies/contemporary-issues-in-sport (10L) - autonomous loop (codex)</td><td class="num">16</td><td class="num">30</td></tr>
+<tr><td>2026-09-04</td><td>english-literature-eduqas/poetry-anthology (15L) - autonomous loop (claude)</td><td class="num">11</td><td class="num">100</td></tr>
+<tr><td>2026-09-04</td><td>hospitality-catering/the-hospitality-and-catering-industry (10L) - autonomous loop (codex)</td><td class="num">10</td><td class="num">19</td></tr>
+<tr><td>2026-09-04</td><td>english-literature-eduqas/silas-marner (8L) - autonomous loop (claude)</td><td class="num">16</td><td class="num">146</td></tr>
+<tr><td>2026-09-04</td><td>l12-ict/it-systems-and-services (3L) - autonomous loop (codex)</td><td class="num">3</td><td class="num">1</td></tr>
+<tr><td>2026-09-04</td><td>english-literature-eduqas/oranges-are-not-the-only-fruit (8L) - autonomous loop (claude)</td><td class="num">25</td><td class="num">206</td></tr>
+<tr><td>2026-09-04</td><td>l12-ict/data-information-and-networks (3L) - autonomous loop (codex)</td><td class="num">11</td><td class="num">13</td></tr>
+<tr><td>2026-09-04</td><td>l12-ict/the-impact-of-it-and-cybersecurity (4L) - autonomous loop (codex)</td><td class="num">6</td><td class="num">9</td></tr>
+<tr><td>2026-09-04</td><td>english-literature-eduqas/blood-brothers (8L) - autonomous loop (claude)</td><td class="num">21</td><td class="num">181</td></tr>
+<tr><td>2026-09-04</td><td>l12-retail-business/the-retail-business-environment (4L) - autonomous loop (codex)</td><td class="num">4</td><td class="num">3</td></tr>
+<tr><td>2026-09-04</td><td>english-literature-eduqas/a-christmas-carol (8L) - autonomous loop (claude)</td><td class="num">20</td><td class="num">129</td></tr>
+<tr><td>2026-09-04</td><td>l12-retail-business/the-competitive-and-dynamic-environment (3L) - autonomous loop (codex)</td><td class="num">5</td><td class="num">4</td></tr>
+<tr><td>2026-09-04</td><td>english-literature-eduqas/romeo-and-juliet (8L) - autonomous loop (claude)</td><td class="num">15</td><td class="num">39</td></tr>
+<tr><td>2026-09-04</td><td>l12-retail-business/using-retail-business-data (3L) - autonomous loop (codex)</td><td class="num">3</td><td class="num">3</td></tr>
+<tr><td>2026-09-04</td><td>english-literature-eduqas/war-of-the-worlds (8L) - autonomous loop (claude)</td><td class="num">26</td><td class="num">157</td></tr>
+<tr><td>2026-09-04</td><td>l12-sport-and-coaching-principles/body-systems (4L) - autonomous loop (codex)</td><td class="num">9</td><td class="num">12</td></tr>
+<tr><td>2026-09-04</td><td>english-literature-eduqas/macbeth (8L) - autonomous loop (claude)</td><td class="num">29</td><td class="num">81</td></tr>
+<tr><td>2026-09-04</td><td>l12-sport-and-coaching-principles/health-and-fitness (3L) - autonomous loop (codex)</td><td class="num">2</td><td class="num">1</td></tr>
+<tr><td>2026-09-04</td><td>english-literature-eduqas/the-history-boys (8L) - autonomous loop (claude)</td><td class="num">27</td><td class="num">250</td></tr>
+<tr><td>2026-09-04</td><td>l12-sport-and-coaching-principles/principles-of-training (3L) - autonomous loop (codex)</td><td class="num">6</td><td class="num">7</td></tr>
+<tr><td>2026-09-04</td><td>statistics-aqa/planning-designing-enquiry (5L) - autonomous loop (codex)</td><td class="num">7</td><td class="num">13</td></tr>
+<tr><td>2026-09-03</td><td>statistics-aqa/interpreting-results-sec (4L) - autonomous loop (codex)</td><td class="num">8</td><td class="num">11</td></tr>
+<tr><td>2026-09-03</td><td>english-literature-eduqas/an-inspector-calls (8L) - autonomous loop (claude)</td><td class="num">22</td><td class="num">193</td></tr>
+<tr><td>2026-09-03</td><td>english-literature-eduqas/lord-of-the-flies (8L) - autonomous loop (claude)</td><td class="num">41</td><td class="num">196</td></tr>
+<tr><td>2026-09-03</td><td>music-aqa/aos1-western-classical (3L) - autonomous loop (codex)</td><td class="num">10</td><td class="num">7</td></tr>
+<tr><td>2026-09-03</td><td>music-aqa/aos2-popular-music (4L) - autonomous loop (codex)</td><td class="num">6</td><td class="num">28</td></tr>
+<tr><td>2026-09-03</td><td>english-literature-eduqas/a-taste-of-honey (8L) - autonomous loop (claude)</td><td class="num">21</td><td class="num">219</td></tr>
+<tr><td>2026-09-03</td><td>music-aqa/aos3-traditional-music (2L) - autonomous loop (codex)</td><td class="num">6</td><td class="num">14</td></tr>
+<tr><td>2026-09-03</td><td>english-literature-eduqas/the-merchant-of-venice (8L) - autonomous loop (claude)</td><td class="num">25</td><td class="num">29</td></tr>
+<tr><td>2026-09-03</td><td>music-aqa/aos4-since-1910 (3L) - autonomous loop (codex)</td><td class="num">21</td><td class="num">22</td></tr>
+<tr><td>2026-09-03</td><td>english-literature-eduqas/unseen-poetry (7L) - autonomous loop (claude)</td><td class="num">19</td><td class="num">134</td></tr>
+<tr><td>2026-09-03</td><td>english-literature-eduqas/the-woman-in-black (8L) - autonomous loop</td><td class="num">22</td><td class="num">181</td></tr>
+<tr><td>2026-09-03</td><td>english-literature-eduqas/much-ado-about-nothing (8L) - autonomous loop</td><td class="num">28</td><td class="num">45</td></tr>
+<tr><td>2026-09-03</td><td>english-literature-eduqas/pride-and-prejudice (8L) - autonomous loop</td><td class="num">34</td><td class="num">131</td></tr>
+<tr><td>2026-09-03</td><td>english-literature-eduqas/jane-eyre (8L) - autonomous loop</td><td class="num">29</td><td class="num">137</td></tr>
+<tr><td>2026-09-03</td><td>english-literature-eduqas/othello (8L) - autonomous loop</td><td class="num">22</td><td class="num">84</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-eduqas/the-curious-incident (8L) - autonomous loop</td><td class="num">18</td><td class="num">101</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-eduqas/never-let-me-go (8L) - autonomous loop</td><td class="num">19</td><td class="num">148</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-eduqas/henry-v (8L) - autonomous loop</td><td class="num">21</td><td class="num">34</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-eduqas/dr-jekyll-and-mr-hyde (7L) - autonomous loop</td><td class="num">19</td><td class="num">123</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/romeo-and-juliet (8L) - autonomous loop</td><td class="num">18</td><td class="num">62</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/dr-jekyll-and-mr-hyde (7L) - autonomous loop</td><td class="num">31</td><td class="num">127</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/jane-eyre (8L) - autonomous loop</td><td class="num">33</td><td class="num">289</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/pride-and-prejudice (8L) - autonomous loop</td><td class="num">14</td><td class="num">122</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/anita-and-me (8L) - autonomous loop</td><td class="num">22</td><td class="num">99</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/great-expectations (8L) - autonomous loop</td><td class="num">21</td><td class="num">122</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/animal-farm (8L) - autonomous loop</td><td class="num">15</td><td class="num">64</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/the-merchant-of-venice (8L) - autonomous loop</td><td class="num">37</td><td class="num">71</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/macbeth (8L) - autonomous loop</td><td class="num">15</td><td class="num">54</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/much-ado-about-nothing (8L) - autonomous loop</td><td class="num">13</td><td class="num">104</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/an-inspector-calls (8L) - autonomous loop</td><td class="num">37</td><td class="num">98</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/a-christmas-carol (7L) - autonomous loop</td><td class="num">24</td><td class="num">109</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/never-let-me-go (8L) - autonomous loop</td><td class="num">13</td><td class="num">84</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/dna (8L) - autonomous loop</td><td class="num">18</td><td class="num">126</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/poetry-youth-and-age (8L) - autonomous loop</td><td class="num">23</td><td class="num">30</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/poetry-love-and-relationships (8L) - autonomous loop</td><td class="num">21</td><td class="num">29</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/poetry-conflict (8L) - autonomous loop</td><td class="num">24</td><td class="num">18</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/war-of-the-worlds (8L) - autonomous loop</td><td class="num">23</td><td class="num">125</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-ocr/leave-taking (8L) - autonomous loop</td><td class="num">21</td><td class="num">90</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/lord-of-the-flies (8L) - autonomous loop</td><td class="num">23</td><td class="num">23</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/an-inspector-calls (8L) - autonomous loop</td><td class="num">20</td><td class="num">77</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/blood-brothers (8L) - autonomous loop</td><td class="num">18</td><td class="num">98</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/animal-farm (8L) - autonomous loop</td><td class="num">21</td><td class="num">78</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/great-expectations (8L) - autonomous loop</td><td class="num">17</td><td class="num">68</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/the-tempest (7L) - autonomous loop</td><td class="num">10</td><td class="num">72</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/hobsons-choice (7L) - autonomous loop</td><td class="num">32</td><td class="num">76</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/poetry-conflict (8L) - autonomous loop</td><td class="num">6</td><td class="num">12</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/macbeth (7L) - autonomous loop</td><td class="num">9</td><td class="num">69</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/refugee-boy (7L) - autonomous loop</td><td class="num">16</td><td class="num">124</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/frankenstein (8L) - autonomous loop</td><td class="num">15</td><td class="num">54</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/romeo-and-juliet (7L) - autonomous loop</td><td class="num">14</td><td class="num">95</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/poetry-relationships (8L) - autonomous loop</td><td class="num">28</td><td class="num">77</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/the-merchant-of-venice (7L) - autonomous loop</td><td class="num">13</td><td class="num">116</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/coram-boy (7L) - autonomous loop</td><td class="num">32</td><td class="num">90</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/dr-jekyll-and-mr-hyde (7L) - autonomous loop</td><td class="num">20</td><td class="num">41</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/the-woman-in-black (7L) - autonomous loop</td><td class="num">22</td><td class="num">115</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/silas-marner (7L) - autonomous loop</td><td class="num">20</td><td class="num">52</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/the-empress (7L) - autonomous loop</td><td class="num">18</td><td class="num">187</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/anita-and-me (7L) - autonomous loop</td><td class="num">18</td><td class="num">111</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/twelfth-night (7L) - autonomous loop</td><td class="num">16</td><td class="num">102</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/poetry-belonging (8L) - autonomous loop</td><td class="num">21</td><td class="num">45</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/much-ado-about-nothing (7L) - autonomous loop</td><td class="num">16</td><td class="num">101</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/a-christmas-carol (7L) - autonomous loop</td><td class="num">25</td><td class="num">80</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/poetry-time-and-place (8L) - autonomous loop</td><td class="num">30</td><td class="num">116</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/pride-and-prejudice (8L) - autonomous loop</td><td class="num">33</td><td class="num">51</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/journeys-end (7L) - autonomous loop</td><td class="num">24</td><td class="num">77</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-edexcel/jane-eyre (8L) - autonomous loop</td><td class="num">21</td><td class="num">51</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/animal-farm (10L) - autonomous loop</td><td class="num">25</td><td class="num">52</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/julius-caesar (7L) - autonomous loop</td><td class="num">15</td><td class="num">26</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/leave-taking (8L) - autonomous loop</td><td class="num">19</td><td class="num">213</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/the-tempest (7L) - autonomous loop</td><td class="num">11</td><td class="num">24</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/princess-and-the-hustler (7L) - autonomous loop</td><td class="num">15</td><td class="num">79</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/the-sign-of-four (7L) - autonomous loop</td><td class="num">32</td><td class="num">82</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/pigeon-english (7L) - autonomous loop</td><td class="num">13</td><td class="num">104</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/my-name-is-leon (7L) - autonomous loop</td><td class="num">23</td><td class="num">111</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/dna (7L) - autonomous loop</td><td class="num">23</td><td class="num">107</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/a-taste-of-honey (8L) - autonomous loop</td><td class="num">34</td><td class="num">246</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/great-expectations (7L) - autonomous loop</td><td class="num">19</td><td class="num">25</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/frankenstein (7L) - autonomous loop</td><td class="num">15</td><td class="num">18</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/worlds-and-lives (8L) - autonomous loop</td><td class="num">27</td><td class="num">280</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/telling-tales (8L) - autonomous loop</td><td class="num">32</td><td class="num">93</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/power-and-conflict (10L) - autonomous loop</td><td class="num">33</td><td class="num">55</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/pride-and-prejudice (7L) - autonomous loop</td><td class="num">12</td><td class="num">26</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/the-merchant-of-venice (7L) - autonomous loop</td><td class="num">9</td><td class="num">8</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/an-inspector-calls (10L) - autonomous loop</td><td class="num">28</td><td class="num">40</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/anita-and-me (7L) - autonomous loop</td><td class="num">42</td><td class="num">93</td></tr>
+<tr><td>2026-09-02</td><td>english-literature-aqa/romeo-and-juliet (10L) - autonomous loop</td><td class="num">18</td><td class="num">33</td></tr>
+<tr><td>2026-09-01</td><td>english-literature-aqa/a-christmas-carol (8L) - autonomous loop</td><td class="num">17</td><td class="num">24</td></tr>
+<tr><td>2026-09-01</td><td>english-literature-aqa/lord-of-the-flies (7L) - autonomous loop</td><td class="num">9</td><td class="num">49</td></tr>
+<tr><td>2026-09-01</td><td>english-literature-aqa/much-ado-about-nothing (7L) - autonomous loop</td><td class="num">13</td><td class="num">12</td></tr>
+<tr><td>2026-08-30</td><td>Cross-unit: AO2-denial fixed in dna (3 lessons, incl. a KC marking students wrong for the truth) + pigeon-english (26 edits, 10 clips)</td><td class="num">15</td><td class="num">15</td></tr>
+<tr><td>2026-08-30</td><td>Wave 2b: englit-aqa/blood-brothers (7L) — 42 Shakespeare-Essay mislabels, AO2 denial, Macbeth quote in memorisation list; +5 rulings</td><td class="num">118</td><td class="num">118</td></tr>
+<tr><td>2026-08-30</td><td>Wave 2a: englit-aqa/jane-eyre (7L) — misattributed red-room quote x6 fields, Helen Burns typhus/consumption; +6 adjudicated rulings (15 edits)</td><td class="num">37</td><td class="num">26</td></tr>
+<tr><td>2026-08-30</td><td>Infrastructure: MPEG-2 duration parsing fixed in narration lib (root cause of durations bug), e76b044c</td><td class="num">1</td><td class="num">1</td></tr>
+<tr><td>2026-08-30</td><td>Wave 1c: englit-aqa/love-and-relationships (8L) — invented poet name x17, fabricated exemplar quotes; all 9 flags ruled and applied (37 edits)</td><td class="num">32</td><td class="num">32</td></tr>
+<tr><td>2026-08-30</td><td>Wave 1b: englit-aqa/jekyll-and-hyde (8L) — fabricated quote, false SPaG claim; +4 adjudicated rulings (13 edits)</td><td class="num">39</td><td class="num">32</td></tr>
+<tr><td>2026-08-30</td><td>Wave 1a: engllit-aqa/unseen-poetry (4L) — phantom Q28, band boundaries; +4 adjudicated fixes</td><td class="num">13</td><td class="num">11</td></tr>
+<tr><td>2026-08-30</td><td>PILOT: english-literature-aqa/macbeth full unit (10 lessons) — calibration batch</td><td class="num">21</td><td class="num">21</td></tr>
+<tr><td>2026-08-30</td><td>Site-wide duplicate narration ids: 75 lessons repaired, validator gate added</td><td class="num">75</td><td class="num">75</td></tr>
+<tr><td>2026-08-30</td><td>EngLit cascade: BDC name swap (7 lessons), Curious Incident AO labels, Frankenstein x2, Leave Taking x3, 62 flashcard decks</td><td class="num">12</td><td class="num">12</td></tr>
+<tr><td>2026-08-30</td><td>english-literature-ocr unseen-poetry unit: rebuild + style sweep + fact-check + renarration</td><td class="num">9</td><td class="num">6</td></tr>
+<tr><td>2026-08-28</td><td>geology-eduqas hazards L7 rule-of-Vs inversion</td><td class="num">1</td><td class="num">1</td></tr>
+</table></div>
+
+<footer>StudyVault · updated 2026-09-06 · state: scripts/_retrofc/_state.json</footer>
+</div>
