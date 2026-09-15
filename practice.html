@@ -7145,6 +7145,11 @@
         setTimeout(function() {
           var canvas = document.getElementById('panel-chart-canvas');
           if (!canvas) return;
+          // Two problems rendered inside one tick (a fast Next, or the QA gate)
+          // can both reach here; Chart.js refuses a canvas that still belongs
+          // to the earlier chart, so release it first.
+          var prev = (Chart.getChart ? Chart.getChart(canvas) : null);
+          if (prev) { try { prev.destroy(); } catch (e) {} }
           var ctx = canvas.getContext('2d');
           _panelChart = new Chart(ctx, {
             type: problem.chart.type,
