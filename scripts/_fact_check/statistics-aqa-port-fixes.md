@@ -412,3 +412,7 @@ Further checks on the fixed file:
 
 Scripts used: `_pcd_explore.py`, `_pcd_ent2.py`, `_pcd_l04.py`, `_pcd_fix.py`, `_pcd_verify.py`
 (all in the same directory). Supabase was not touched.
+
+## Addendum 15 Sep 2026 — double-rendered graphs
+
+Tom's spot-check (Edexcel numerical-measures L6, bronze): a scatter item drew its inline SVG inside the question AND the practice page drew the item's leftover `chart` object in the DATA panel, with different points. 58 problems in each Statistics bank carried both (the Aug guided rebuild added the SVGs and kept the chart objects). Fix applied to Supabase: the `chart` object is deleted wherever `display` already contains an `<svg` (116 objects across 14 lessons, both boards). Items with a chart object and no SVG (13 AQA, 16 Edexcel) keep the panel. Backup: session scratchpad `_backup_both_banks_prechartdrop_2026-09-15.json`. Rule for the practice factory: a problem carries ONE picture — an inline SVG in `display` OR a `chart` object, never both.
