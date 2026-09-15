@@ -77,6 +77,11 @@ Single Claude call, once per subject+board. Prompt in `PLANNING_PROMPT.md`.
 
 Unit structure rules and calibration heuristics live in `PLANNING_PROMPT.md`. The plan is the contract — everything downstream reads from it.
 
+**Plan check before anything is built (added 15 Sep 2026, after Eduqas Media):**
+1. Compare the proposed units with the sister subject's unit shape (same subject, other board). Anything the sister does not have needs a stated reason.
+2. Strike any unit the pipeline does not build: non-exam assessment / coursework content (we never have the briefs) and exam-technique units or pages (retired — see the capability table above; technique is woven into lessons as `exam_tip_html`). A planner fed a spec's component list will add both.
+3. **Named products need their source.** For every lesson about a set product, set text, set work, CSP, set episode or set video, locate the primary source BEFORE building: the board's set-product fact sheets (Eduqas publishes them at resource.download.wjec.co.uk), the anthology, the score, the text. It goes into the content prompt and the fact-check as the authority (web search off) and into Related Media as a link. A lesson on a named product written from the spec alone comes out generic and is not a revision lesson (Vogue July 2021 is Malala Yousafzai; the first build never said so). If no source can be found, stop and say so.
+
 ---
 
 ## Phase 2 — Subject activation
@@ -226,6 +231,34 @@ Guide HTML structure is `<main class="lesson-content">` + `<aside class="lesson-
 
 ---
 
+## Phase 5b — Widget reuse check
+
+91 interactives are already built (`scripts/widget_pipeline/builds/`) and 279 lessons carry one. Most are model-driven rather than case-study-driven — the sonata-form widget does key arithmetic from any home key, the stratified-sampling widget computes its own allocations — so a widget written for one board usually fits another board's lesson on the same idea **with no code change at all**. Every new build gets checked against the fleet before anyone considers writing a new widget.
+
+**When.** After the content is inserted and the headings are final, before Tom's review pass. The anchor is a heading quoted out of `content_html`, so running it earlier gives anchors that the editor then invalidates.
+
+**The command:**
+
+```
+python scripts/widget_pipeline/match_existing_widgets.py --subject <slug>
+python scripts/widget_pipeline/match_existing_widgets.py --subject <slug> --unit <unit-slug>   # a unit added to a live subject
+python scripts/widget_pipeline/match_existing_widgets.py --subject <slug> --since 2026-09-01   # only the new lessons
+```
+
+It reads Supabase and never writes — not to the database, not to `js/widget-embed.js`. It writes `scripts/widget_pipeline/matches/<slug>.md` and `.json`: for each candidate it names the widget, the lesson key, the anchor heading quoted verbatim from that lesson, a confidence band, the keywords that matched and where, whether a data variant would be needed, and a ready-to-paste MAP snippet.
+
+**Tom approves before the MAP is edited.** The script proposes; nothing is wired until he has said yes to the specific pairings. Then a human pastes the snippets into the `MAP` in `js/widget-embed.js`.
+
+Three things to hold on to while reading the report:
+
+- **Saturation is the failure mode.** `BUILD_GUIDE.md` §0 wants roughly one lesson in three or four to carry an interactive. The script enforces that quota per unit and caps one widget at two lessons per subject; anything cut is listed under "Held back". `--no-saturation-cap` shows the whole field when you want to choose yourself.
+- **"Needs a data variant" is a build, not a wiring.** A widget flagged `variant_needed` in `widget_catalogue.json` carries the right mechanism but names one context's material (the Holderness cells, the Skyfall grades). Reuse means a second deck behind `ctx.variant` — see the variant contract in `CONTRACT.md` — not a MAP line on its own.
+- **A null result is a real answer.** Latin and the Python programming unit returned nothing, correctly: nothing in the fleet teaches their ideas. Do not lower `--min-score` to manufacture a match.
+
+Whenever a new widget IS built, add its row to `scripts/widget_pipeline/widget_catalogue.json` in the same commit — file, misconception, subject families, concept keywords, reuse class. The catalogue is what the next build gets checked against.
+
+---
+
 ## Phase 6 — Ship
 
 1. Run `scripts/_audit_reference_candidates.py` (or equivalent) to sanity-check every shipped lesson against the drift grep (spec codes, Level descriptors, component codes). Zero hits required.
@@ -278,5 +311,7 @@ Narration is the usual bottleneck — runs sequentially per lesson. Everything e
 | `DIAGRAM_PIPELINE.md` | Gemini diagrams (Unity only). GPT-image-2 replacement under evaluation |
 | `REVISION_TECHNIQUES/` | 7 canonical technique templates |
 | `QUESTIONS_PIPELINE.md` | Practice question formats, mark allocations, `getGuideUrl()` |
+| `scripts/widget_pipeline/BUILD_GUIDE.md` | Interactive design authority; `CONTRACT.md` is the host contract |
+| `scripts/widget_pipeline/widget_catalogue.json` | One row per built interactive — what Phase 5b matches against |
 | `LESSON_TEMPLATE.md` | HTML components reference |
 | `scripts/_verify_subject_build.py` | Pre-ship verifier — run as last step of every build (replaces the old MANDATORY_CHECKLIST.md, which never existed as a separate doc) |
