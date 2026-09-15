@@ -4868,6 +4868,24 @@
     }
 
     // ===== RENDER CURRENT PROBLEM =====
+    // Which phone keyboard an answer box opens. A number pad with a decimal
+    // point when every expected value is a plain non-negative number; the full
+    // keyboard when the answer needs a minus sign or anything else, because the
+    // phone number pads have no minus key (Tom, 15 Sep 2026: toggling to the
+    // letters on every box was the complaint).
+    function svKeypad(vals) {
+      var list = Array.isArray(vals) ? vals : [vals];
+      for (var i = 0; i < list.length; i++) {
+        var v = list[i];
+        if (v === undefined || v === null) continue;
+        if (typeof v === 'object') { if (svKeypad([v.numerator, v.denominator, v.a, v.n]) === 'text') return 'text'; continue; }
+        if (typeof v === 'string' && !/^\s*[\d.,]+\s*$/.test(v)) return 'text';
+        var num = (typeof v === 'number') ? v : parseFloat(String(v).replace(/,/g, ''));
+        if (isNaN(num) || num < 0) return 'text';
+      }
+      return 'decimal';
+    }
+
     function renderCurrentProblem() {
       var bank = window._problemBank;
       if (!bank) return;
@@ -5073,18 +5091,19 @@
 
       if (inputType === 'xy_pair') {
         // Simultaneous equations: one x AND one y, checked in order.
-        // inputmode="text" because answers can be negative (iOS numeric keypad has no minus).
+        var kpXY = svKeypad(p.solutions);
         inputHtml = '<label>x =</label>' +
-          '<input type="text" class="problem-input" id="problem-input-a" inputmode="text" autocomplete="off" placeholder="?">' +
+          '<input type="text" class="problem-input" id="problem-input-a" inputmode="' + kpXY + '" autocomplete="off" placeholder="?">' +
           '<span class="problem-input-separator">and</span>' +
           '<label>y =</label>' +
-          '<input type="text" class="problem-input" id="problem-input-b" inputmode="text" autocomplete="off" placeholder="?">';
+          '<input type="text" class="problem-input" id="problem-input-b" inputmode="' + kpXY + '" autocomplete="off" placeholder="?">';
       } else if (inputType === 'two_solutions') {
+        var kpTwo = svKeypad(p.solutions);
         inputHtml = '<label>x =</label>' +
-          '<input type="text" class="problem-input" id="problem-input-a" inputmode="numeric" autocomplete="off" placeholder="?">' +
+          '<input type="text" class="problem-input" id="problem-input-a" inputmode="' + kpTwo + '" autocomplete="off" placeholder="?">' +
           '<span class="problem-input-separator">or</span>' +
           '<label>x =</label>' +
-          '<input type="text" class="problem-input" id="problem-input-b" inputmode="numeric" autocomplete="off" placeholder="?">';
+          '<input type="text" class="problem-input" id="problem-input-b" inputmode="' + kpTwo + '" autocomplete="off" placeholder="?">';
       } else if (inputType === 'multiple_choice') {
         var options = p.options || [];
         // Shuffle options so the correct answer isn't always first
@@ -5108,15 +5127,15 @@
         inputHtml = '<div class="fraction-input">' +
           '<span class="fraction-label">= </span>' +
           '<div class="fraction-stack">' +
-          '<input type="text" class="fraction-num problem-input" id="problem-input-num" inputmode="numeric" autocomplete="off" placeholder="?">' +
+          '<input type="text" class="fraction-num problem-input" id="problem-input-num" inputmode="' + svKeypad(p.solutions) + '" autocomplete="off" placeholder="?">' +
           '<div class="fraction-line"></div>' +
-          '<input type="text" class="fraction-den problem-input" id="problem-input-den" inputmode="numeric" autocomplete="off" placeholder="?">' +
+          '<input type="text" class="fraction-den problem-input" id="problem-input-den" inputmode="decimal" autocomplete="off" placeholder="?">' +
           '</div></div>';
       } else if (inputType === 'standard_form') {
         inputHtml = '<div class="standard-form-input">' +
           '<input type="text" class="sf-a problem-input" id="problem-input-sf-a" inputmode="decimal" autocomplete="off" placeholder="A">' +
           '<span class="sf-multiply">\u00d7 10</span>' +
-          '<sup><input type="text" class="sf-n problem-input" id="problem-input-sf-n" inputmode="numeric" autocomplete="off" placeholder="n"></sup>' +
+          '<sup><input type="text" class="sf-n problem-input" id="problem-input-sf-n" inputmode="' + svKeypad(p.solutions) + '" autocomplete="off" placeholder="n"></sup>' +
           '</div>';
       } else if (ENGLISH_INPUT_TYPES.indexOf(inputType) !== -1) {
         inputHtml = renderEnglishInput(p, inputType);
@@ -5128,7 +5147,7 @@
         // they are answering IN: geography marks units, and a bare "8" teaches
         // the wrong habit on a question whose answer is 8 hours.
         inputHtml = '<label>Answer =</label>' +
-          '<input type="text" class="problem-input problem-input-wide" id="problem-input-a" inputmode="numeric" autocomplete="off" placeholder="?">' +
+          '<input type="text" class="problem-input problem-input-wide" id="problem-input-a" inputmode="' + svKeypad(p.solutions) + '" autocomplete="off" placeholder="?">' +
           (p.unit ? '<span class="problem-answer-unit">' + p.unit + '</span>' : '');
       }
       if (ENGLISH_INPUT_TYPES.indexOf(inputType) === -1) inputsArea.innerHTML = inputHtml;
@@ -5939,7 +5958,7 @@
       }
       if (hasBox) {
         h += '<div class="guided-box-row"><span class="gb-pre">' + (st.pre || '') + '</span>' +
-             '<input type="text" class="guided-input" inputmode="text" autocomplete="off">' +
+             '<input type="text" class="guided-input" inputmode="' + svKeypad(st.answer) + '" autocomplete="off">' +
              (st.post ? '<span class="gb-post">' + st.post + '</span>' : '') +
              '<button class="guided-go" type="button">&#10142;</button>' +
              '<span class="guided-tick" style="display:none">&#10003;</span></div>' +
