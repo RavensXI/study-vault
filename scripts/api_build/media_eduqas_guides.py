@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 """Guide pages for Eduqas GCSE Media Studies (C680QS).
 
-Two sets, one Batch-API job:
-  1. Revision-technique guides adapted from the AQA Media set (pedagogy text
-     passes through; examples that lean on AQA Close Study Products are
-     replaced with the Eduqas set products; the index passes through with the
-     links re-pointed).
-  2. Exam-technique guides written fresh from the specification's assessment
-     section, in the shape of the English Literature exam-guide set (index hub
-     + one page per question type). The two deleted "Exam Technique" lessons
-     are supplied as source material so nothing useful is lost.
+Revision-technique guides adapted from the AQA Media set (pedagogy text
+passes through; examples that lean on AQA Close Study Products are replaced
+with the Eduqas set products; the index passes through with the links
+re-pointed). Exam-technique guides are NOT built: retired in the spring
+pipeline rebuild (see docs/PIPELINE.md, "Exam technique guides are not
+generated").
 
 Usage:
   python scripts/api_build/media_eduqas_guides.py submit
@@ -71,22 +68,10 @@ def submit():
                 + SET_PRODUCTS + "\n\nGUIDE HTML:\n" + html + "\n\nReturn ONLY the adapted HTML fragment.")
         reqs.append({"custom_id": "rt-" + g["slug"], "params": {"model": D.MODEL_CONTENT, "max_tokens": 16000, "thinking": {"type": "disabled"},
                                                                   "system": [{"type": "text", "text": RULES}], "messages": [{"role": "user", "content": user}]}})
-    # exam-technique set, one call returning JSON
-    ex = json.load(io.open(os.path.join(SP, "example_exam_guides_english-literature-aqa.json"), encoding="utf-8"))
-    example_index = next(x for x in ex if x["slug"] == "index")["content_html"]
-    example_page = next(x for x in ex if x["slug"] != "index")["content_html"]
-    deleted = json.load(io.open(os.path.join(SP, "backup_deleted_units_and_lessons.json"), encoding="utf-8"))["lessons"]
-    salvage = "\n\n".join("SOURCE LESSON: %s\n%s" % (l["title"], re.sub(r"<[^>]+>", " ", l["content_html"] or "")[:9000]) for l in deleted if "Exam Technique" in l["title"])
-    user = ("Write the exam-technique guide set for this GCSE Media Studies course: an index hub page plus one page per question type a student meets in the two written papers. "
-            "Derive the question types from the specification's assessment section below (paper structure, sections, what each section asks, the extract question in television, "
-            "the comparison of set products, the industries and audiences short and extended questions). Each page: what the question looks like, the marks and timing, a step-by-step method, "
-            "a model answer paragraph on a named set product, and the common mistakes. Use the structure, CSS classes and tone of the EXAMPLE pages exactly (they are from English Literature; "
-            "copy the shape, not the content). The index must follow the EXAMPLE INDEX shape with a guide-paper block per component and one guide-question-card per page, hrefs as '<slug>.html'.\n\n"
-            "Return ONLY a JSON object: {\"index_html\": \"...\", \"pages\": [{\"slug\": \"kebab-case\", \"title\": \"...\", \"sort_order\": 1, \"content_html\": \"...\"}, ...]}. 5 to 8 pages.\n\n"
-            "SPECIFICATION ASSESSMENT SECTION:\n" + spec_assessment()[:30000] + "\n\n" + SET_PRODUCTS + "\n\nSOURCE MATERIAL (from two withdrawn lessons; reuse what is accurate):\n" + salvage[:18000]
-            + "\n\nEXAMPLE INDEX:\n" + example_index + "\n\nEXAMPLE PAGE:\n" + example_page[:9000])
-    reqs.append({"custom_id": "exam-set", "params": {"model": D.MODEL_CONTENT, "max_tokens": 48000, "thinking": {"type": "disabled"},
-                                                      "system": [{"type": "text", "text": RULES}], "messages": [{"role": "user", "content": user}]}})
+    # NOTE 15 Sep 2026: an exam-technique set was built here and then DELETED the same night.
+    # Exam-technique guides were retired in the spring pipeline rebuild (copyright-adjacent: they
+    # encode mark-scheme structure); per-lesson exam_tip_html and practice mark schemes carry that
+    # load. Do not add them back. Revision-technique adaptation only.
     b = cl.messages.batches.create(requests=reqs)
     st = D.load_state(cfg); st["guides_batch_id"] = b.id; st["passthrough"] = passthrough; D.save_state(cfg, st)
     print("submitted", b.id, len(reqs), "requests")
