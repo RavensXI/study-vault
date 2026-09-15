@@ -134,7 +134,8 @@ def stage_factcheck(cfg):
     st = drv.load_state(cfg); plan = _plan(cfg); man = _manifest(cfg)
     by_key = {drv.lesson_key(u["slug"], l["number"]): (u, l) for u in plan["article_units"] for l in u["lessons"]}
     rules = drv.assessment_rules_block(cfg); cl = drv.client(); reqs = []
-    for cid in st.get("content_ok", []):
+    if not rules: raise SystemExit("assessment_rules_doc missing: the checker would judge exam claims against nothing and call true facts fabricated (it did, 15 Sep)")
+    for cid in (cfg.get("factcheck_only") or st.get("content_ok", [])):
         u, l = by_key[cid]
         obj = json.load(io.open(_cfg_path(cfg, "lessons", cid + ".json"), encoding="utf-8"))
         payload = {k: obj.get(k) for k in ("content_html", "exam_tip_html", "conclusion_html", "knowledge_checks", "flashcard_questions", "glossary_terms", "practice_questions")}
@@ -249,7 +250,14 @@ def _wait(cfg, stage, key_done, poll_stage, every=60, limit=7200):
 
 
 def stage_orchestrate(cfg):
+    os.makedirs(_cfg_path(cfg, "lessons"), exist_ok=True)   # the driver's poll writes here and does not create it
     stage_plan(cfg); stage_prep(cfg); STAGES["submit"](cfg)
+    stage_resume(cfg)
+
+
+def stage_resume(cfg):
+    """Everything after the content batch was submitted (re-entrant)."""
+    os.makedirs(_cfg_path(cfg, "lessons"), exist_ok=True)
     # poll writes content_ok / content_failures when the batch has ended
     t0 = time.time()
     while True:
@@ -284,8 +292,44 @@ def stage_orchestrate(cfg):
 
 
 STAGES = dict(drv.STAGES)
-STAGES.update({"plan": stage_plan, "prep": stage_prep, "factcheck": stage_factcheck, "patch": stage_patch, "media": stage_media,
-               "narrate": stage_narrate, "videoreset": stage_videoreset, "orchestrate": stage_orchestrate})
+def stage_restore(cfg):
+    """Put the validated ORIGINAL model outputs back into run/lessons (undo a bad applyfixes)."""
+    raw = _cfg_path(cfg, "raw_content"); texts = {}
+    for f in os.listdir(raw):
+        if f.endswith(".txt"): texts[f[:-4]] = io.open(os.path.join(raw, f), encoding="utf-8").read()
+    ok, failures = drv.validate_lessons(cfg, texts)
+    print("restored", len(ok), "originals; failures:", failures)
+
+
+def stage_resume2(cfg):
+    """After a triaged factcheck.json is in place: re-check the listed lessons with the
+    assessment rules, merge, apply fixes, patch, media, narrate, videoreset."""
+    st = drv.load_state(cfg); first = json.load(io.open(_cfg_path(cfg, "factcheck.json"), encoding="utf-8"))
+    if cfg.get("factcheck_only"):
+        stage_factcheck(cfg); t0 = time.time()
+        while True:
+            STAGES["pollfactcheck"](cfg); st = drv.load_state(cfg)
+            if st["factcheck_batch_id"] in st.get("collected_batches", []): break
+            if time.time() - t0 > 5400: print("factcheck timed out"); return
+            time.sleep(60)
+        second = json.load(io.open(_cfg_path(cfg, "factcheck.json"), encoding="utf-8"))
+        merged = {"findings": [f for f in first["findings"] if f["lesson"] not in set(cfg["factcheck_only"])] + second["findings"]}
+        drv.write_json(_cfg_path(cfg, "factcheck.json"), merged)
+        print("merged findings:", len(merged["findings"]))
+    STAGES["applyfixes"](cfg); st = drv.load_state(cfg)
+    if st.get("applyfix_batch_id") and st["applyfix_batch_id"] not in st.get("collected_batches", []):
+        t0 = time.time()
+        while True:
+            STAGES["pollapplyfixes"](cfg); st = drv.load_state(cfg)
+            if st["applyfix_batch_id"] in st.get("collected_batches", []): break
+            if time.time() - t0 > 5400: break
+            time.sleep(60)
+    stage_patch(cfg); stage_media(cfg); stage_narrate(cfg); stage_videoreset(cfg)
+    print("RESUME2 COMPLETE")
+
+
+STAGES.update({"restore": stage_restore, "resume2": stage_resume2, "plan": stage_plan, "prep": stage_prep, "factcheck": stage_factcheck, "patch": stage_patch, "media": stage_media,
+               "narrate": stage_narrate, "videoreset": stage_videoreset, "orchestrate": stage_orchestrate, "resume": stage_resume})
 
 
 def main():
