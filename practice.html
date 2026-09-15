@@ -5485,6 +5485,13 @@
           return;
         }
         given = [fracNum, fracDen];
+        // The bank stores a fraction answer as [num, den] or as
+        // [{numerator, denominator}] (the validator accepts both); the checker
+        // works in [num, den]. Without this the object shape cross-multiplied
+        // against undefined and printed "[object Object]/undefined".
+        if (expected[0] && typeof expected[0] === 'object') {
+          expected = [Number(expected[0].numerator), Number(expected[0].denominator)];
+        }
         // Cross-multiply to check equivalence (handles unsimplified fractions)
         isCorrect = (fracNum * expected[1] === expected[0] * fracDen);
         var isUnsimplified = isCorrect && (fracNum !== expected[0] || fracDen !== expected[1]);
