@@ -916,7 +916,8 @@
 
     if (idx === 11) {
       var e1 = w2s(CX - NUC_RX * 0.7, CY - NUC_RY * 0.78);
-      drawLabel('nuclear membrane', e1[0], e1[1], -1, -1, clamp((p - 0.05) / 0.2, 0, 1) * clamp((1 - p) * 4, 0, 1), false);
+      drawLabel('nuclear membrane', e1[0], e1[1], -1, -1,
+        clamp((p - 0.02) / 0.14, 0, 1) * clamp((0.64 - p) / 0.16, 0, 1), false);
     }
 
     if (idx === 15) {
@@ -1502,7 +1503,7 @@
   function slateCount(p) {
     var cols = 6, x0 = 208, y0 = 214, dx = 112, dy = 92;
     var drawn = Math.min(23, Math.floor(clamp(p / 0.6, 0, 1) * 23.999));
-    var lasso = clamp((p - 0.72) / 0.22, 0, 1);
+    var lasso = clamp((p - 0.66) / 0.16, 0, 1);
     for (var k = 0; k < 23; k++) {
       var cxk = x0 + (k % cols) * dx, cyk = y0 + Math.floor(k / cols) * dy;
       var t = clamp((p / 0.6 * 23 - k), 0, 1);
@@ -1510,7 +1511,7 @@
       var dim = lasso > 0.05 && k > 1 ? lerp(1, 0.22, lasso) : 1;
       var sc = REDUCED ? 1 : backOut(t);
       for (var s = -1; s <= 1; s += 2) {
-        wireRod(cxk + s * 13, cyk, s * 0.18, 46 * sc, 3.6 * s, 5, 1,
+        wireRod(cxk + s * 14, cyk, s * 0.18, 46 * sc, 3.6 * s, 6.2, 1,
                 k < 2 && lasso > 0.05 ? 'chalkTeal' : 'chalk', 0.85 * dim, 300 + k * 2 + s, false);
       }
     }
@@ -1526,7 +1527,7 @@
                   lcy + Math.sin(th) * (52 + Math.cos(i * 1.7) * 3)]);
       }
       penPartial(pts, lasso, 'chalkTeal', 1.8, 0.9, 1);
-      caveat('these two pairs', lcx, lcy + 88, 26, 'chalkTeal', clamp((lasso - 0.4) / 0.4, 0, 1), 'center');
+      caveat('these two pairs', lcx, lcy - 76, 26, 'chalkTeal', clamp((lasso - 0.4) / 0.4, 0, 1), 'center');
     }
   }
 

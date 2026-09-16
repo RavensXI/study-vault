@@ -37,7 +37,7 @@ MOMENTS = [
     (8, 1.00, "10-slate-copy-joined"),
     (9, 1.00, "11-slate-two-copies"),
     (10, 1.00, "12-slate-identical"),
-    (11, 0.60, "13-envelope-breaking"),
+    (11, 0.34, "13-envelope-breaking"),
     (12, 0.92, "14-slate-spindle"),
     (13, 0.80, "15-lined-up-at-the-equator"),
     (14, 0.48, "16-chromatids-separating"),
