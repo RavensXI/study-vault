@@ -8,7 +8,7 @@ Serve the repo first, then run this:
 It checks that every clip loads, that each scene is exactly its clip plus
 the beat, that playback advances with the audio, that the scrub jumps
 scenes, that reduced motion still renders, and that the console is clean.
-Twelve frames plus a poster, a phone width and a reduced-motion frame go
+Nineteen frames plus a poster, a phone width and a reduced-motion frame go
 to animations/mitosis/proof/.
 """
 
@@ -25,18 +25,25 @@ SHOT = {"type": "jpeg", "quality": 88}
 
 # (scene index, progress through the clip, file name)
 MOMENTS = [
-    (0, 1.00, "01-one-cell"),
-    (2, 0.95, "02-chromosomes-in-pairs"),
-    (3, 1.00, "03-growth"),
-    (4, 1.00, "04-dna-replicated"),
-    (5, 0.60, "05-envelope-breaking"),
-    (6, 1.00, "06-spindle-attached"),
-    (7, 1.00, "07-lined-up-at-the-equator"),
-    (8, 0.45, "08-chromatids-separating"),
-    (8, 1.00, "09-one-set-each-end"),
-    (9, 1.00, "10-two-nuclei"),
-    (10, 0.75, "11-furrow"),
-    (11, 1.00, "12-two-identical-cells"),
+    (0, 1.00, "01-tissue"),
+    (1, 1.00, "02-neighbours-dividing"),
+    (2, 1.00, "03-wound-closing"),
+    (3, 0.58, "04-slate-cell-cycle"),
+    (4, 0.80, "05-labelled-cell"),
+    (5, 0.86, "06-slate-46-chromosomes"),
+    (6, 0.82, "07-two-pairs"),
+    (7, 0.84, "08-growth"),
+    (8, 0.55, "09-slate-copy-drawing-on"),
+    (8, 1.00, "10-slate-copy-joined"),
+    (9, 1.00, "11-slate-two-copies"),
+    (10, 1.00, "12-slate-identical"),
+    (11, 0.60, "13-envelope-breaking"),
+    (12, 0.92, "14-slate-spindle"),
+    (13, 0.80, "15-lined-up-at-the-equator"),
+    (14, 0.48, "16-chromatids-separating"),
+    (15, 0.86, "17-two-nuclei"),
+    (16, 0.78, "18-furrow"),
+    (17, 1.00, "19-two-identical-cells"),
 ]
 
 
@@ -86,7 +93,7 @@ def main():
         # phone width
         pg.set_viewport_size({"width": 400, "height": 900})
         pg.wait_for_timeout(400)
-        pg.evaluate("() => window.__mitosis.seek(7,1)")
+        pg.evaluate("() => window.__mitosis.seek(13,1)")
         pg.wait_for_timeout(300)
         pg.locator(".mt-card").screenshot(path=str(OUT / "phone-400.jpg"), **SHOT)
         pg.set_viewport_size({"width": 1300, "height": 980})
@@ -103,13 +110,13 @@ def main():
         pg.evaluate("() => window.__mitosis.pause()")
 
         # the segmented scrub jumps to a scene and changes the sentence
-        pg.locator(".mt-seg").nth(7).click()
+        pg.locator(".mt-seg").nth(13).click()
         pg.wait_for_timeout(500)
         st2 = pg.evaluate("() => window.__mitosis.state()")
         sent = pg.inner_text("#mt-sentence")
-        print("scrub to segment 8 ->", st2["idx"], "|", sent[:40])
-        if st2["idx"] != 7 or not sent.startswith("The chromosomes line up"):
-            errs.append("scrub did not jump to scene 8")
+        print("scrub to segment 14 ->", st2["idx"], "|", sent[:44])
+        if st2["idx"] != 13 or not sent.startswith("They take hold"):
+            errs.append("scrub did not jump to scene 14")
         pg.evaluate("() => window.__mitosis.pause()")
 
         # reduced motion: still renders, still steps
@@ -121,9 +128,9 @@ def main():
         pg2.wait_for_function("window.__mitosis && window.__mitosis.ready", timeout=20000)
         pg2.wait_for_timeout(600)
         red = pg2.evaluate("() => window.__mitosis.reduced")
-        pg2.evaluate("() => window.__mitosis.seek(10, 0)")
+        pg2.evaluate("() => window.__mitosis.seek(16, 0)")
         pg2.wait_for_timeout(300)
-        pg2.locator(".mt-card").screenshot(path=str(OUT / "reduced-motion-scene-11.jpg"), **SHOT)
+        pg2.locator(".mt-card").screenshot(path=str(OUT / "reduced-motion-scene-17.jpg"), **SHOT)
         print("reduced motion flag:", red, "errors:", rm_errs or "none")
         if not red or rm_errs:
             errs.append("reduced motion")

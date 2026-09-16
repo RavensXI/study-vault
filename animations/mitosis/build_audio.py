@@ -29,18 +29,24 @@ from scripts.lib.narration import (  # noqa: E402
 VOICE, VOICE_LABEL = get_voice_for_lesson(2)
 
 SCENES = [
-    ("appear",    "Your body makes new cells all the time, to grow, to repair damage and to replace cells that wear out."),
-    ("cycle",     "It does this in a series of stages called the cell cycle."),
-    ("nucleus",   "Inside this cell the nucleus holds the chromosomes, and in body cells they come in pairs."),
-    ("growth",    "First the cell grows and makes more of the structures inside it, such as ribosomes and mitochondria."),
-    ("replicate", "Then the DNA is copied, so each chromosome becomes two identical copies, joined together."),
+    ("field",     "Every second, your body replaces millions of worn-out cells."),
+    ("dividing",  "New skin, new blood, new gut lining: all made by cells dividing."),
+    ("wound",     "When you cut your finger, cell division closes the wound."),
+    ("cycle",     "Cells do this in a series of stages called the cell cycle."),
+    ("inside",    "Inside this cell, the nucleus holds the chromosomes."),
+    ("count",     "In body cells they come in pairs: forty-six in all, in twenty-three pairs."),
+    ("pairs",     "We draw two pairs here, so you can follow them."),
+    ("growth",    "First the cell grows, and makes more ribosomes and mitochondria."),
+    ("copy",      "Then the DNA is copied, so each chromosome becomes two identical copies."),
+    ("joined",    "The two copies stay joined together until they are pulled apart."),
+    ("exact",     "The copy must be exact, or the new cell gets the wrong instructions."),
     ("envelope",  "Now mitosis begins, and the membrane around the nucleus breaks down."),
-    ("spindle",   "Fine fibres stretch out from each end of the cell and take hold of the chromosomes."),
-    ("align",     "The chromosomes line up in a row across the middle of the cell."),
-    ("separate",  "The fibres pull the copies apart, so one set of chromosomes is pulled to each end of the cell."),
+    ("spindle",   "Fine fibres stretch out from each end of the cell."),
+    ("align",     "They take hold of the chromosomes and line them up across the middle."),
+    ("separate",  "Then the fibres pull the copies apart, one set to each end."),
     ("reform",    "A new membrane forms around each set, so the nucleus has divided."),
     ("furrow",    "Finally the cytoplasm and the cell membrane divide, making two cells."),
-    ("settle",    "Each new cell has the same chromosomes as the cell it came from, which is how the body grows and repairs itself."),
+    ("settle",    "Both new cells are genetically identical to the parent, and each can divide again."),
 ]
 
 OUT = Path(__file__).resolve().parent / "audio"
@@ -84,13 +90,13 @@ def main():
         "voice": VOICE,
         "voice_label": VOICE_LABEL,
         "format": "audio-24khz-96kbitrate-mono-mp3",
-        "beat_seconds": 0.55,
+        "beat_seconds": 0.35,
         "speech_seconds": round(total, 2),
-        "total_seconds": round(total + 0.55 * (len(SCENES) - 1), 2),
+        "total_seconds": round(total + 0.35 * (len(SCENES) - 1), 2),
         "scenes": manifest,
     }, indent=2), encoding="utf-8")
 
-    print(f"\nSpeech {total:.1f}s + beats = {total + 0.55 * (len(SCENES) - 1):.1f}s total")
+    print(f"\nSpeech {total:.1f}s + beats = {total + 0.35 * (len(SCENES) - 1):.1f}s total")
     return 0
 
 
