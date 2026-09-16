@@ -743,11 +743,14 @@ def stage_verify(cfg):
                       "hero_image_url", "hero_image_caption"):
                 if not (l.get(f) or "").strip():
                     issues.append("%s missing %s" % (k, f))
-            for f, want in (("practice_questions", 6), ("knowledge_checks", 5),
-                            ("flashcard_questions", 5)):
+            for f, want in (("practice_questions", 6), ("knowledge_checks", 5)):
                 got = len(l.get(f) or [])
                 if got != want:
                     issues.append("%s %s = %d (want %d)" % (k, f, got, want))
+            # FLASHCARD_RULES.md post-retrofit: 8-15 per lesson, 6-18 tolerated
+            nfc = len(l.get("flashcard_questions") or [])
+            if not (6 <= nfc <= 18):
+                issues.append("%s flashcard_questions = %d (want 8-15)" % (k, nfc))
             media = sum(len(c.get("items") or []) for c in (l.get("related_media") or []))
             if media < 9:            # 8 real items + the Lesson Podcast placeholder
                 issues.append("%s related_media has %d items" % (k, media))
