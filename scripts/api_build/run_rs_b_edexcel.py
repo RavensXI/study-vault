@@ -505,6 +505,58 @@ def stage_submit(cfg):
 
 # ---------------------------------------------------------------- stage: factcheck
 
+def stage_fix(cfg):
+    """The driver's fix stage, with a bigger output budget for the lessons that
+    ran out of tokens mid-JSON (Sonnet 5 spends max_tokens on thinking before the
+    object starts, and these RS lessons are long), and with the flashcard and
+    ban-list rules restated so a second attempt does not repeat them."""
+    st = drv.load_state(cfg)
+    failures = st.get("content_failures", {})
+    errored = list(st.get("content_errors", {}))
+    if not failures and not errored:
+        print("nothing to fix")
+        return
+    reqs = {r["custom_id"]: r for r in json.load(
+        io.open(os.path.join(cfg["run_dir"], "requests_content.json"), encoding="utf-8"))}
+    out = []
+    for cid in sorted(set(list(failures) + errored)):
+        base = reqs[cid]
+        probs = failures.get(cid, [])
+        parse_only = probs and all(p.startswith("JSON parse error") for p in probs)
+        user = base["params"]["messages"][0]["content"]
+        p = dict(base["params"])
+        if parse_only:
+            p["max_tokens"] = 64000
+            p["thinking"] = {"type": "disabled"}
+            user += ("\n\nYour previous attempt ran out of output budget part-way through the "
+                     "JSON. Write the same lesson again, complete, and keep the JSON compact.")
+        else:
+            raw = os.path.join(cfg["run_dir"], "raw_content", cid + ".txt")
+            prev = drv.read(raw) if os.path.exists(raw) else ""
+            user += ("\n\nYOUR PREVIOUS ATTEMPT FAILED VALIDATION. Violations:\n- "
+                     + "\n- ".join(probs[:12])
+                     + "\n\nFix exactly those and change nothing else. Reminders that caused them:\n"
+                       "- A flashcard answer is never a list: 'X, Y and Z' becomes separate cards, "
+                       "or the card is rewritten to ask for one thing.\n"
+                       "- A one-word answer is only allowed when the question opens What/Who/When/"
+                       "Which/Name/Give/State, or the answer is a number or a date.\n"
+                       "- Never write a mark-scheme instruction ('Award 1 mark for ...'). Mark "
+                       "guidance uses the site's own ladder: Mastering / Secure / Developing / "
+                       "Emerging.\n"
+                       "- data-narration-id values run n1, n2, n3 ... with no gaps, in document "
+                       "order, across content_html then exam_tip_html then conclusion_html.\n\n"
+                       "Previous attempt JSON:\n" + prev[:60000]
+                     + "\n\nReturn the corrected complete lesson JSON.")
+        p["messages"] = [{"role": "user", "content": user}]
+        if st.get("use_structured", True):
+            p = drv.try_structured(p)
+        out.append({"custom_id": cid, "params": p})
+    batch = drv.client().messages.batches.create(requests=out)
+    st["fix_batch_id"] = batch.id
+    drv.save_state(cfg, st)
+    print("fix batch submitted:", batch.id, "for", [r["custom_id"] for r in out])
+
+
 def stage_factcheck(cfg):
     """The driver's fact-check, with two hard preconditions.
 
@@ -794,7 +846,8 @@ def stage_verify(cfg):
 
 STAGES = dict(drv.STAGES)
 STAGES.update({"plan": stage_plan, "prep": stage_prep, "canary": stage_canary,
-               "submit": stage_submit, "factcheck": stage_factcheck, "heroes": stage_heroes,
+               "submit": stage_submit, "fix": stage_fix,
+               "factcheck": stage_factcheck, "heroes": stage_heroes,
                "narrate": stage_narrate, "guides": stage_guides, "pollguides": stage_pollguides,
                "gate": stage_gate, "verify": stage_verify})
 
