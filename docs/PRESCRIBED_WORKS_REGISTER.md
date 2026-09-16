@@ -12,6 +12,8 @@ The spec-currency audit (`docs/SPEC_CURRENCY_AUDIT_2027.md`) answers "is the qua
 
 Maths, all sciences (required practicals are stable in-spec), Geography (case studies are centre-chosen), RS, MFL, Business, Economics, Computer Science, PE, Statistics, Astronomy, Citizenship, D&T, Engineering, Electronics, Geology, Food, Hospitality & Catering, H&SC, Sociology/Psychology (named studies live inside the spec, so spec-currency covers them), Cambridge Nationals exam units, Music Tech NCFE.
 
+RS checked again 16 Sep 2026 when **Religious Studies B (Edexcel 1RB0)** was built: the specification names scripture passages inside its own content points (Matthew 3:13&ndash;17, Surah 112, Talmud Yoma 83&ndash;84 and so on), and those travel with the spec text, so spec-currency covers them. Nothing rotates by year and there is no set text, set work or anthology to gate. The same is true of every other RS specification we hold.
+
 ## Register — checked 2026-08-06
 
 | Subject | Prescribed works | Our coverage | Verdict |
