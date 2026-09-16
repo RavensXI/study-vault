@@ -491,9 +491,16 @@ def stage_canary(cfg):
 
 
 def stage_submit(cfg):
+    """Everything the canary did not already attempt. A canary lesson that FAILED
+    validation is left out too: it belongs to `fix`, which re-runs it with the
+    violations quoted back, rather than to a second identical attempt."""
     reqs = json.load(io.open(os.path.join(cfg["run_dir"], "requests_content.json"),
                              encoding="utf-8"))
-    _submit(cfg, {r["custom_id"] for r in reqs})
+    raw = os.path.join(cfg["run_dir"], "raw_content")
+    attempted = {f[:-4] for f in os.listdir(raw)} if os.path.isdir(raw) else set()
+    if attempted:
+        print("already attempted (left to `fix` if they failed):", sorted(attempted))
+    _submit(cfg, {r["custom_id"] for r in reqs} - attempted)
 
 
 # ---------------------------------------------------------------- stage: factcheck
