@@ -173,7 +173,11 @@
     ],
     'religious-studies': [
       { board: 'AQA', slug: 'religious-studies-aqa' },
-      { board: 'Edexcel', slug: 'religious-studies-edexcel' },
+      // Edexcel awards two Religious Studies GCSEs: Spec A (1RA0) and
+      // Spec B "Beliefs in Action" (1RB0). Different qualifications, separate rows.
+      { board: 'Edexcel', slug: 'religious-studies-edexcel', label: 'Edexcel (Spec A)' },
+      { board: 'Edexcel B', slug: 'religious-studies-b-edexcel', label: 'Edexcel B (Beliefs in Action)' },
+      { board: 'OCR', slug: 'religious-studies-ocr' },
       { board: 'Eduqas', slug: 'religious-studies-eduqas' },
       { board: 'WJEC', slug: 'religious-studies-eduqas' }
     ],
@@ -276,7 +280,7 @@
       html += 'style="display:flex; justify-content:space-between; align-items:center; padding:1rem 1.25rem; background:#fff; border:1.5px solid #e8e2d8; border-radius:14px; text-decoration:none; color:#2d2a26; font-weight:600; transition:border-color 0.2s, transform 0.15s;" ';
       html += 'onmouseover="this.style.borderColor=\'#c15a3a\'; this.style.transform=\'translateY(-1px)\';" ';
       html += 'onmouseout="this.style.borderColor=\'#e8e2d8\'; this.style.transform=\'translateY(0)\';">';
-      html += '<span>' + esc(b.board) + '</span>';
+      html += '<span>' + esc(b.label || b.board) + '</span>';
       html += '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
       html += '</a>';
     });

@@ -172,6 +172,18 @@
     return slugs;
   }
 
+  // RE Edexcel Spec B (1RB0) — one religion per area of study, and the two must
+  // be different religions. One unit per pick, so the filter is the two slugs.
+  var RE_EDEXCEL_B_SLUGS = ['religious-studies-b-edexcel'];
+
+  function reEdexcelBFilter(pref) {
+    if (!pref || !(pref.area1 || pref.area2)) return null;
+    var slugs = [];
+    if (pref.area1) slugs.push(pref.area1);
+    if (pref.area2) slugs.push(pref.area2);
+    return slugs;
+  }
+
   // Film Studies — lesson-level filter, NOT unit-level. Every unit stays
   // visible; lessons whose slug is in FILM_SELECTABLE but not picked are
   // dropped. Returned to callers via getPickedFilmSlugs.
@@ -329,6 +341,7 @@
     if (RE_OCR_SLUGS.indexOf(subjectSlug) !== -1) return reOcrFilter(pref);
     if (RE_EDUQAS_SLUGS.indexOf(subjectSlug) !== -1) return reEduqasFilter(pref);
     if (RE_EDEXCEL_SLUGS.indexOf(subjectSlug) !== -1) return reEdexcelFilter(pref);
+    if (RE_EDEXCEL_B_SLUGS.indexOf(subjectSlug) !== -1) return reEdexcelBFilter(pref);
     return null;
   }
 

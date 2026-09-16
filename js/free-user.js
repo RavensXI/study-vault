@@ -30,7 +30,7 @@
     business: { aqa: 'business-aqa', edexcel: 'business-edexcel', ocr: 'business-ocr' },
     pe: { aqa: 'physical-education-aqa', edexcel: 'physical-education-edexcel', ocr: 'physical-education-ocr' },
     psych: { aqa: 'psychology-aqa' },
-    rs: { aqa: 'religious-studies-aqa', edexcel: 'religious-studies-edexcel', ocr: 'religious-studies-ocr', eduqas: 'religious-studies-eduqas' },
+    rs: { aqa: 'religious-studies-aqa', edexcel: 'religious-studies-edexcel', 'edexcel b': 'religious-studies-b-edexcel', ocr: 'religious-studies-ocr', eduqas: 'religious-studies-eduqas' },
     socio: { aqa: 'sociology-aqa', eduqas: 'sociology-eduqas' },
     econ: { aqa: 'economics-aqa' }, stats: { aqa: 'statistics-aqa' }, media: { aqa: 'media-studies-aqa' },
     film: { eduqas: 'film-studies-eduqas' }, drama: { aqa: 'drama-aqa' },

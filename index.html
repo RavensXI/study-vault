@@ -1573,6 +1573,7 @@
         'religious-studies-aqa': { name: 'Religious Studies', image: '/images/subject-religious-studies.jpg', accent: '#1e40af', detail: '8 units' },
         'religious-studies-eduqas': { name: 'Religious Studies', image: '/images/subject-religious-studies.jpg', accent: '#7c2d12', detail: '15 units · 53 lessons' },
         'religious-studies-edexcel': { name: 'Religious Studies', image: '/images/subject-religious-studies.jpg', accent: '#7c2d12', detail: '15 units · 71 lessons' },
+        'religious-studies-b-edexcel': { name: 'Religious Studies B', image: '/images/subject-religious-studies.jpg', accent: '#7c2d12', detail: '4 units · 22 lessons' },
         'religious-studies-ocr': { name: 'Religious Studies', image: '/images/subject-religious-studies.jpg', accent: '#7c2d12', detail: '14 units · 47 lessons' },
         'geography-aqa': { name: 'Geography', image: '/images/subject-geography.jpg', accent: '#059669', detail: '3 units' },
         'health-social-care-edexcel': { name: 'Health & Social Care', image: '/images/subject-health-social-care.jpg', accent: '#e11d48', detail: '1 unit · 12 lessons' },
@@ -1898,7 +1899,11 @@
       'engineering': { 'AQA': true, 'Eduqas': true, 'WJEC': true },
       'astronomy': { 'Edexcel': true },
       'history': { 'AQA': true, 'Edexcel': true, 'OCR': true, 'Eduqas': true },
-      'religious-studies': { 'AQA': true, 'AQA Short Course': true, 'Edexcel': true, 'Eduqas': true, 'WJEC': true, 'OCR': true },
+      // Edexcel awards two separate Religious Studies GCSEs: Spec A (1RA0, the
+      // 'Edexcel' pill) and Spec B "Beliefs in Action" (1RB0, 'Edexcel B').
+      // They are different qualifications, not tiers of one — different papers,
+      // different content — so they are separate Supabase rows and pills.
+      'religious-studies': { 'AQA': true, 'AQA Short Course': true, 'Edexcel': true, 'Edexcel B': true, 'Eduqas': true, 'WJEC': true, 'OCR': true },
       'music-technology': { 'NCFE': true },
       'computer-science': { 'OCR': true, 'AQA': true, 'Edexcel': true, 'Eduqas': true, 'WJEC': true },
       'it': { 'OCR': true },
@@ -2318,6 +2323,24 @@
         paper4Options: [
           { slug: 'paper-4-marks-gospel', name: 'Mark’s Gospel' },
           { slug: 'paper-4-quran', name: 'The Qur’an' }
+        ]
+      },
+      'edexcel b': {
+        // Edexcel 1RB0 "Beliefs in Action": three Areas of Study, students take
+        // two, each one religion studied across the same four sections. The two
+        // religions must differ, and Catholic Christianity and Christianity count
+        // as the same religion for that rule. Built so far: Area of Study 1 for
+        // Christianity and Catholic Christianity, Area of Study 2 for Islam and
+        // Judaism — the two pairings almost every centre takes.
+        area1Helper: '(the religion you study for Religion and Ethics)',
+        area2Helper: '(a different religion, for Religion, Peace and Conflict)',
+        area1Options: [
+          { slug: 'area1-christianity', name: 'Christianity' },
+          { slug: 'area1-catholic-christianity', name: 'Catholic Christianity' }
+        ],
+        area2Options: [
+          { slug: 'area2-islam', name: 'Islam' },
+          { slug: 'area2-judaism', name: 'Judaism' }
         ]
       }
     };
@@ -3210,6 +3233,20 @@
       return fwGetREBoard() === 'edexcel';
     }
 
+    // Edexcel Spec B (1RB0) — a different qualification from Spec A, with its
+    // own two-picker step (Area of Study 1 religion, Area of Study 2 religion).
+    function fwIsEdexcelBRE() {
+      return fwGetREBoard() === 'edexcel b';
+    }
+
+    // The two areas of study must be on DIFFERENT religions, and the
+    // specification counts Catholic Christianity and Christianity as the same
+    // religion for that rule. Reduce a unit slug to its religion family.
+    function fwREBFamily(slug) {
+      var r = String(slug || '').replace(/^area[12]-/, '');
+      return (r === 'catholic-christianity') ? 'christianity' : r;
+    }
+
     function fwUpdateREDoneBtn() {
       var btn = document.getElementById('fw-re-done');
       if (!btn) return;
@@ -3230,6 +3267,14 @@
         }
         var examOk = (examChoice === 'paper3') || (examChoice === 'paper4' && !!p4);
         btn.disabled = !(p1 && p2 && !p2Blocked && examOk);
+      } else if (fwIsEdexcelBRE()) {
+        // Spec B: one religion per area of study, and they must differ. Every
+        // Area of Study 2 religion we have built is non-Christian, so the
+        // different-religion rule cannot currently be broken — the check is here
+        // because phase 2 adds Christian options to Area of Study 2.
+        var a1 = (wizardState.re && wizardState.re.area1) || null;
+        var a2 = (wizardState.re && wizardState.re.area2) || null;
+        btn.disabled = !(a1 && a2 && fwREBFamily(a1) !== fwREBFamily(a2));
       } else if (fwIsEduqasRE()) {
         var route = (wizardState.re && wizardState.re.route) || 'a';
         if (route === 'b') {
@@ -3363,10 +3408,73 @@
       var container = document.getElementById('fw-re-container');
       if (!container) return;
       container.innerHTML = '';
-      wizardState.re = { religions: [], themes: [], paper1: null, paper2: null, examChoice: null, paper4: null };
+      wizardState.re = { religions: [], themes: [], paper1: null, paper2: null, examChoice: null,
+                         paper4: null, area1: null, area2: null };
 
       var board = fwGetREBoard();
       var subhead = document.getElementById('fw-re-subhead');
+
+      // ============================================================
+      // EDEXCEL 1RB0 "Beliefs in Action" — one religion per area of study.
+      // Students sit two papers: Area of Study 1 (Religion and Ethics) on one
+      // religion, and Area of Study 2 (Religion, Peace and Conflict) on a
+      // different one. Catholic Christianity and Christianity count as the same
+      // religion, so they can never be paired.
+      // ============================================================
+      if (fwIsEdexcelBRE()) {
+        if (subhead) {
+          subhead.innerHTML = 'Religious Studies B (Beliefs in Action) &mdash; pick the religion you study for <strong>Area of Study 1: Religion and Ethics</strong> and the religion you study for <strong>Area of Study 2: Religion, Peace and Conflict</strong>. They must be different religions.';
+        }
+        var optsB = religiousEducationOptions['edexcel b'];
+        if (!optsB) return;
+
+        var area2OptsEl = null;
+
+        function refreshArea2DisabledState() {
+          if (!area2OptsEl) return;
+          var fam = fwREBFamily(wizardState.re.area1);
+          area2OptsEl.querySelectorAll('.fw-text-btn').forEach(function (b) {
+            var isBlocked = !!fam && fwREBFamily(b.dataset.value) === fam;
+            b.disabled = isBlocked;
+            if (isBlocked && b.classList.contains('selected')) {
+              b.classList.remove('selected');
+              wizardState.re.area2 = null;
+            }
+          });
+        }
+
+        function buildAreaSection(heading, helper, items, areaKey) {
+          var sectionEl = document.createElement('div');
+          sectionEl.className = 'fw-text-section';
+          sectionEl.innerHTML =
+            '<h3>' + heading + ' <span style="font-weight:400;color:#7a7068;font-size:0.8rem">' + helper + '</span></h3>' +
+            '<div class="fw-text-options" data-group="' + areaKey + '"></div>';
+          var optsEl = sectionEl.querySelector('.fw-text-options');
+          items.forEach(function (item) {
+            var btn = document.createElement('button');
+            btn.className = 'fw-text-btn';
+            btn.textContent = item.name;
+            btn.dataset.value = item.slug;
+            btn.addEventListener('click', function () {
+              if (btn.disabled) return;
+              optsEl.querySelectorAll('.fw-text-btn.selected').forEach(function (b) { b.classList.remove('selected'); });
+              btn.classList.add('selected');
+              wizardState.re[areaKey] = item.slug;
+              if (areaKey === 'area1') refreshArea2DisabledState();
+              fwUpdateREDoneBtn();
+            });
+            optsEl.appendChild(btn);
+          });
+          container.appendChild(sectionEl);
+          return optsEl;
+        }
+
+        buildAreaSection('Area of Study 1 Religion', optsB.area1Helper, optsB.area1Options, 'area1');
+        area2OptsEl = buildAreaSection('Area of Study 2 Religion', optsB.area2Helper, optsB.area2Options, 'area2');
+
+        fwUpdateREDoneBtn();
+        return;
+      }
 
       // ============================================================
       // EDEXCEL 1RA0 — Paper 1 + Paper 2 + (Paper 3 OR Paper 4).
@@ -4128,7 +4236,7 @@
       'electronics': { 'eduqas': 'electronics-eduqas', 'wjec': 'electronics-eduqas' },
       'geology': { 'eduqas': 'geology-eduqas', 'wjec': 'geology-eduqas' },
       'latin': { 'eduqas': 'latin-eduqas', 'wjec': 'latin-eduqas' },
-      'religious-studies': { 'aqa': 'religious-studies-aqa', 'aqa short course': 'religious-studies-aqa', 'eduqas': 'religious-studies-eduqas', 'wjec': 'religious-studies-eduqas', 'edexcel': 'religious-studies-edexcel', 'ocr': 'religious-studies-ocr' },
+      'religious-studies': { 'aqa': 'religious-studies-aqa', 'aqa short course': 'religious-studies-aqa', 'eduqas': 'religious-studies-eduqas', 'wjec': 'religious-studies-eduqas', 'edexcel': 'religious-studies-edexcel', 'edexcel b': 'religious-studies-b-edexcel', 'ocr': 'religious-studies-ocr' },
       'spanish': { 'aqa': 'spanish-aqa', 'edexcel': 'spanish-edexcel' },
       'french': { 'aqa': 'french-aqa', 'edexcel': 'french-edexcel' },
       'german': { 'aqa': 'german-aqa', 'edexcel': 'german-edexcel' },
@@ -4221,6 +4329,11 @@
             entry.paper2 = (wizardState.re && wizardState.re.paper2) || null;
             entry.examChoice = (wizardState.re && wizardState.re.examChoice) || null;
             entry.paper4 = (wizardState.re && wizardState.re.paper4) || null;
+          }
+          // Edexcel Spec B: one religion per area of study (reEdexcelBFilter)
+          if (board === 'edexcel b') {
+            entry.area1 = (wizardState.re && wizardState.re.area1) || null;
+            entry.area2 = (wizardState.re && wizardState.re.area2) || null;
           }
         }
         prefs.subjects.push(entry);
