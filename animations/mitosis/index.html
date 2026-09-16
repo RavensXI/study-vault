@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The cell cycle and mitosis</title>
+<link rel="icon" href="data:,">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&family=Literata:opsz,wght@7..72,400;7..72,500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f6f1e7;
+    --card: #fffdf8;
+    --ink: #26231e;
+    --second: #57534a;
+    --muted: #84806f;
+    --line: #e4dfd2;
+    --anchor: #5b4632;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  body {
+    font-family: "Literata", Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(16px, 4vw, 44px) 16px clamp(28px, 6vw, 60px);
+  }
+
+  .mt-wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+  }
+
+  .mt-title {
+    font-family: "Schibsted Grotesk", system-ui, sans-serif;
+    font-weight: 600;
+    font-size: clamp(1.02rem, 2.4vw, 1.22rem);
+    letter-spacing: -0.005em;
+    margin: 0 0 14px;
+    color: var(--ink);
+  }
+
+  .mt-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: clamp(10px, 1.6vw, 18px);
+    box-shadow: 0 1px 2px rgba(38, 35, 30, 0.04), 0 10px 30px rgba(38, 35, 30, 0.05);
+  }
+
+  .mt-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1000 / 620;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  #mt-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .mt-sentence {
+    font-family: "Literata", Georgia, serif;
+    font-size: clamp(0.98rem, 2.1vw, 1.12rem);
+    line-height: 1.5;
+    color: var(--ink);
+    text-align: center;
+    max-width: 62ch;
+    margin: clamp(12px, 2vw, 20px) auto clamp(10px, 1.6vw, 16px);
+    min-height: 3.2em;
+    opacity: 1;
+    transition: opacity 260ms cubic-bezier(.16, 1, .3, 1);
+  }
+
+  .mt-sentence.is-fading { opacity: 0; }
+
+  .mt-controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 2px;
+  }
+
+  .mt-play {
+    font-family: "Schibsted Grotesk", system-ui, sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: #fbf7ef;
+    background: var(--ink);
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    padding: 9px 18px;
+    min-width: 104px;
+    cursor: pointer;
+    transition: background 180ms cubic-bezier(.16, 1, .3, 1);
+  }
+
+  .mt-play:hover { background: #3a3630; }
+  .mt-play:focus-visible { outline: 2px solid var(--anchor); outline-offset: 2px; }
+
+  .mt-track {
+    display: flex;
+    flex: 1;
+    gap: 3px;
+    align-items: stretch;
+  }
+
+  .mt-seg {
+    appearance: none;
+    border: 0;
+    background: none;
+    padding: 12px 0;
+    margin: 0;
+    cursor: pointer;
+    display: block;
+    min-width: 0;
+  }
+
+  .mt-seg-bar {
+    display: block;
+    height: 7px;
+    border-radius: 1px;
+    background: #ece5d8;
+    overflow: hidden;
+  }
+
+  .mt-seg-fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--anchor);
+    border-radius: 1px;
+  }
+
+  .mt-seg:hover .mt-seg-bar { background: #ded5c3; }
+  .mt-seg:focus-visible { outline: 2px solid var(--anchor); outline-offset: -2px; border-radius: 2px; }
+
+  .mt-sr {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 560px) {
+    .mt-controls { flex-wrap: wrap; }
+    .mt-track { flex-basis: 100%; order: 2; }
+    .mt-play { order: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="mt-wrap">
+  <h1 class="mt-title">The cell cycle and mitosis</h1>
+
+  <div class="mt-card">
+    <div class="mt-stage">
+      <canvas id="mt-canvas" role="img" aria-label="A drawn animation of one cell dividing by mitosis into two identical cells."></canvas>
+    </div>
+
+    <p class="mt-sentence" id="mt-sentence" aria-live="polite"></p>
+
+    <div class="mt-controls">
+      <button class="mt-play" id="mt-play" type="button">Play</button>
+      <div class="mt-track" id="mt-track" role="group" aria-label="Scenes"></div>
+    </div>
+  </div>
+
+  <p class="mt-sr" id="mt-sr" aria-live="polite"></p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ------------------------------------------------------------------ *
+   * Scenes. One narrated sentence each; the audio clip sets the length. *
+   * ------------------------------------------------------------------ */
+
+  var SCENES = [
+    { key: 'appear',    file: 'audio/scene-01.mp3', fallback: 6.17, span: [0.00, 0.72],
+      text: 'Your body makes new cells all the time, to grow, to repair damage and to replace cells that wear out.' },
+    { key: 'cycle',     file: 'audio/scene-02.mp3', fallback: 3.79, span: [0.05, 0.95],
+      text: 'It does this in a series of stages called the cell cycle.' },
+    { key: 'nucleus',   file: 'audio/scene-03.mp3', fallback: 5.74, span: [0.00, 0.78],
+      text: 'Inside this cell the nucleus holds the chromosomes, and in body cells they come in pairs.' },
+    { key: 'growth',    file: 'audio/scene-04.mp3', fallback: 6.55, span: [0.04, 0.96],
+      text: 'First the cell grows and makes more of the structures inside it, such as ribosomes and mitochondria.' },
+    { key: 'replicate', file: 'audio/scene-05.mp3', fallback: 6.43, span: [0.10, 0.88],
+      text: 'Then the DNA is copied, so each chromosome becomes two identical copies, joined together.' },
+    { key: 'envelope',  file: 'audio/scene-06.mp3', fallback: 4.75, span: [0.16, 0.98],
+      text: 'Now mitosis begins, and the membrane around the nucleus breaks down.' },
+    { key: 'spindle',   file: 'audio/scene-07.mp3', fallback: 4.80, span: [0.02, 0.92],
+      text: 'Fine fibres stretch out from each end of the cell and take hold of the chromosomes.' },
+    { key: 'align',     file: 'audio/scene-08.mp3', fallback: 3.82, span: [0.02, 0.94],
+      text: 'The chromosomes line up in a row across the middle of the cell.' },
+    { key: 'separate',  file: 'audio/scene-09.mp3', fallback: 5.86, span: [0.10, 0.94],
+      text: 'The fibres pull the copies apart, so one set of chromosomes is pulled to each end of the cell.' },
+    { key: 'reform',    file: 'audio/scene-10.mp3', fallback: 4.80, span: [0.02, 0.88],
+      text: 'A new membrane forms around each set, so the nucleus has divided.' },
+    { key: 'furrow',    file: 'audio/scene-11.mp3', fallback: 5.11, span: [0.06, 0.92],
+      text: 'Finally the cytoplasm and the cell membrane divide, making two cells.' },
+    { key: 'settle',    file: 'audio/scene-12.mp3', fallback: 6.79, span: [0.00, 0.70],
+      text: 'Each new cell has the same chromosomes as the cell it came from, which is how the body grows and repairs itself.' }
+  ];
+
+  var BEAT = 0.55;            // quiet gap after each clip before the next scene
+  var W = 1000, H = 620;      // logical drawing size
+  var CX = 500, CY = 322;
+
+  /* ---------------------------- palette ---------------------------- */
+
+  var C = {
+    card:   '#fffdf8',
+    paper:  '#f6f1e7',
+    ink:    '#26231e',
+    second: '#57534a',
+    muted:  '#84806f',
+    line:   '#e4dfd2',
+    brown:  '#5b4632',
+    teal:   '#46706b',
+    cyto:   '#f4e8d1',
+    cytoDeep: '#ecdcbc',
+    nuc:    '#e9d8b4',
+    nucEdge:'#8d7550',
+    mito:   '#a98e5c',
+    mitoEdge:'#7d6638'
+  };
+
+  function rgb(hex) {
+    return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+  }
+  var RGB = {};
+  Object.keys(C).forEach(function (k) { RGB[k] = rgb(C[k]); });
+
+  function col(name, a) {
+    var c = RGB[name] || rgb(name);
+    return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + Math.max(0, Math.min(1, a)) + ')';
+  }
+
+  /* ----------------------------- maths ----------------------------- */
+
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function smooth(t) { return t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t); }
+
+  // The house easing, cubic-bezier(.16, 1, .3, 1), solved properly.
+  function bezierEase(x1, y1, x2, y2) {
+    function cx(t) { return ((1 - t) * (1 - t) * 3 * t * x1) + ((1 - t) * 3 * t * t * x2) + t * t * t; }
+    function cy(t) { return ((1 - t) * (1 - t) * 3 * t * y1) + ((1 - t) * 3 * t * t * y2) + t * t * t; }
+    return function (x) {
+      if (x <= 0) return 0;
+      if (x >= 1) return 1;
+      var lo = 0, hi = 1, t = x, i, v;
+      for (i = 0; i < 24; i++) {
+        v = cx(t);
+        if (Math.abs(v - x) < 0.0004) break;
+        if (v < x) { lo = t; } else { hi = t; }
+        t = (lo + hi) / 2;
+      }
+      return cy(t);
+    };
+  }
+  var EASE = bezierEase(0.16, 1, 0.3, 1);
+
+  // Stable hash noise -> the wobble is the same every frame unless we
+  // deliberately move the "boil" phase on.
+  function hash(a, b) {
+    var s = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
+    return s - Math.floor(s);
+  }
+
+  /* --------------------------- canvas set-up ------------------------ */
+
+  var canvas = document.getElementById('mt-canvas');
+  var ctx = canvas.getContext('2d');
+  var scale = 1, zoom = 1.14;
+
+  function sizeCanvas() {
+    var rect = canvas.getBoundingClientRect();
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var cssW = rect.width || 1000;
+    var px = Math.max(320, Math.round(cssW * dpr));
+    canvas.width = px;
+    canvas.height = Math.round(px * H / W);
+    scale = px / W;
+    zoom = cssW < 560 ? 1.32 : 1.14;   // the cell fills more of a small screen
+  }
+
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* --------------------------- paper grain -------------------------- */
+
+  var grainPattern = null;
+  function buildGrain() {
+    var g = document.createElement('canvas');
+    g.width = 220; g.height = 220;
+    var gc = g.getContext('2d');
+    var img = gc.createImageData(220, 220);
+    var d = img.data;
+    for (var i = 0; i < d.length; i += 4) {
+      var n = Math.random();
+      var v = n < 0.5 ? 120 : 255;
+      d[i] = v; d[i + 1] = v - 6; d[i + 2] = v - 18;
+      d[i + 3] = Math.floor(n * 26);
+    }
+    gc.putImageData(img, 0, 0);
+    grainPattern = ctx.createPattern(g, 'repeat');
+  }
+
+  /* ------------------------- painterly helpers ---------------------- */
+
+  // Closed smooth path through a point list.
+  function pathFrom(pts, dx, dy, sc, c) {
+    var p = new Path2D();
+    var n = pts.length, i;
+    function X(k) { return c.x + (pts[k][0] - c.x) * sc + dx; }
+    function Y(k) { return c.y + (pts[k][1] - c.y) * sc + dy; }
+    var mx = (X(n - 1) + X(0)) / 2, my = (Y(n - 1) + Y(0)) / 2;
+    p.moveTo(mx, my);
+    for (i = 0; i < n; i++) {
+      var j = (i + 1) % n;
+      p.quadraticCurveTo(X(i), Y(i), (X(i) + X(j)) / 2, (Y(i) + Y(j)) / 2);
+    }
+    p.closePath();
+    return p;
+  }
+
+  function centroid(pts) {
+    var x = 0, y = 0, i;
+    for (i = 0; i < pts.length; i++) { x += pts[i][0]; y += pts[i][1]; }
+    return { x: x / pts.length, y: y / pts.length };
+  }
+
+  // Three offset washes plus a twice-drawn hand line: gouache on paper.
+  function paintShape(pts, o) {
+    if (pts.length < 3) return;
+    var a = o.alpha === undefined ? 1 : o.alpha;
+    if (a <= 0.004) return;
+    var c = centroid(pts);
+    var i;
+
+    if (o.fill) {
+      var fa = (o.fillAlpha === undefined ? 0.5 : o.fillAlpha) * a;
+      var jig = [[0, 0, 1], [1.4, -1.1, 0.985], [-1.2, 1.3, 0.992]];
+      var wts = [0.62, 0.3, 0.26];
+      for (i = 0; i < 3; i++) {
+        ctx.fillStyle = col(o.fill, fa * wts[i]);
+        ctx.fill(pathFrom(pts, jig[i][0], jig[i][1], jig[i][2], c));
+      }
+    }
+
+    if (o.edge) {
+      var ea = (o.edgeAlpha === undefined ? 0.55 : o.edgeAlpha) * a;
+      var lw = o.lineWidth || 1.6;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      // pigment gathering at the rim
+      ctx.strokeStyle = col(o.edge, ea * 0.22);
+      ctx.lineWidth = lw * 3.2;
+      ctx.stroke(pathFrom(pts, 0, 0, 1, c));
+      // the drawn line, twice, slightly apart
+      ctx.strokeStyle = col(o.edge, ea);
+      ctx.lineWidth = lw;
+      ctx.stroke(pathFrom(pts, 0.35, -0.25, 1, c));
+      ctx.strokeStyle = col(o.edge, ea * 0.45);
+      ctx.lineWidth = lw * 0.85;
+      ctx.stroke(pathFrom(pts, -0.45, 0.3, 1.004, c));
+    }
+  }
+
+  // A pencil line: open polyline, drawn twice with a whisker of offset.
+  function penLine(pts, colour, width, alpha) {
+    if (pts.length < 2) return;
+    if (alpha <= 0.004) return;
+    var i, p;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    for (var pass = 0; pass < 2; pass++) {
+      var ox = pass ? 0.4 : -0.3, oy = pass ? -0.3 : 0.25;
+      ctx.strokeStyle = col(colour, alpha * (pass ? 0.42 : 1));
+      ctx.lineWidth = width * (pass ? 0.8 : 1);
+      p = new Path2D();
+      p.moveTo(pts[0][0] + ox, pts[0][1] + oy);
+      for (i = 1; i < pts.length - 1; i++) {
+        p.quadraticCurveTo(
+          pts[i][0] + ox, pts[i][1] + oy,
+          (pts[i][0] + pts[i + 1][0]) / 2 + ox, (pts[i][1] + pts[i + 1][1]) / 2 + oy
+        );
+      }
+      p.lineTo(pts[pts.length - 1][0] + ox, pts[pts.length - 1][1] + oy);
+      ctx.stroke(p);
+    }
+  }
+
+  // Periodic wobble so a closed outline never shows a seam.
+  var boil = 0;
+  function wobbleClosed(pts, amp, seed) {
+    var n = pts.length, out = [], i;
+    var ph1 = hash(seed, 1) * 6.283 + boil * 0.9;
+    var ph2 = hash(seed, 2) * 6.283 + boil * 0.6;
+    var ph3 = hash(seed, 3) * 6.283 - boil * 0.7;
+    var c = centroid(pts);
+    for (i = 0; i < n; i++) {
+      var u = i / n;
+      var d = Math.sin(6.283 * 3 * u + ph1) * 0.55
+            + Math.sin(6.283 * 7 * u + ph2) * 0.3
+            + Math.sin(6.283 * 11 * u + ph3) * 0.18;
+      var vx = pts[i][0] - c.x, vy = pts[i][1] - c.y;
+      var m = Math.hypot(vx, vy) || 1;
+      out.push([pts[i][0] + (vx / m) * d * amp, pts[i][1] + (vy / m) * d * amp]);
+    }
+    return out;
+  }
+
+  function ellipsePts(cx, cy, rx, ry, n, rot) {
+    var pts = [], i;
+    rot = rot || 0;
+    var cs = Math.cos(rot), sn = Math.sin(rot);
+    for (i = 0; i < n; i++) {
+      var th = 6.283185 * i / n;
+      var x = rx * Math.cos(th), y = ry * Math.sin(th);
+      pts.push([cx + x * cs - y * sn, cy + x * sn + y * cs]);
+    }
+    return pts;
+  }
+
+  // A rod with rounded ends, as a closed outline, so it paints like
+  // everything else. `spine` is the centre line.
+  function rodOutline(spine, halfW) {
+    var left = [], right = [], i, n = spine.length;
+    for (i = 0; i < n; i++) {
+      var a = spine[Math.max(0, i - 1)], b = spine[Math.min(n - 1, i + 1)];
+      var tx = b[0] - a[0], ty = b[1] - a[1];
+      var m = Math.hypot(tx, ty) || 1;
+      var nx = -ty / m, ny = tx / m;
+      left.push([spine[i][0] + nx * halfW, spine[i][1] + ny * halfW]);
+      right.push([spine[i][0] - nx * halfW, spine[i][1] - ny * halfW]);
+    }
+    // caps
+    function cap(centre, from, to) {
+      var out = [];
+      var a0 = Math.atan2(from[1] - centre[1], from[0] - centre[0]);
+      var a1 = Math.atan2(to[1] - centre[1], to[0] - centre[0]);
+      var d = a1 - a0;
+      while (d <= -Math.PI) d += 6.283185;
+      while (d > Math.PI) d -= 6.283185;
+      for (var k = 1; k < 5; k++) {
+        var a = a0 + d * (k / 5);
+        out.push([centre[0] + Math.cos(a) * halfW, centre[1] + Math.sin(a) * halfW]);
+      }
+      return out;
+    }
+    var end = spine[n - 1], start = spine[0];
+    return left
+      .concat(cap(end, left[n - 1], right[n - 1]))
+      .concat(right.slice().reverse())
+      .concat(cap(start, right[0], left[0]));
+  }
+
+  // Sample a quadratic through three points.
+  function quadPts(a, b, c, n) {
+    var out = [], i;
+    for (i = 0; i <= n; i++) {
+      var t = i / n, u = 1 - t;
+      out.push([
+        u * u * a[0] + 2 * u * t * b[0] + t * t * c[0],
+        u * u * a[1] + 2 * u * t * b[1] + t * t * c[1]
+      ]);
+    }
+    return out;
+  }
+
+  /* ---------------------------- the cell ---------------------------- */
+
+  // Four chromosomes: two pairs. Length says which pair, colour says which
+  // member of the pair. Every daughter must finish with one of each.
+  var CHROMS = [
+    { id: 0, len: 62, colour: 'brown', home: [-78, -28], ang: -0.36, slot: -112 },
+    { id: 1, len: 62, colour: 'teal',  home: [-20, -34], ang:  0.30, slot:   40 },
+    { id: 2, len: 44, colour: 'brown', home: [ 26,  18], ang: -0.44, slot:  -40 },
+    { id: 3, len: 44, colour: 'teal',  home: [ 80,  26], ang:  0.38, slot:  112 }
+  ];
+
+  // Where each chromosome sits inside a daughter nucleus (the same
+  // arrangement in both, because the two sets are the same).
+  var NEST = [
+    { p: [-38, -24], a: -0.30 },
+    { p: [ 34, -22], a:  0.30 },
+    { p: [ 36,  36], a: -0.70 },
+    { p: [-36,  38], a:  0.70 }
+  ];
+  var DN_RX = 88, DN_RY = 80;   // daughter nucleus
+
+  // Organelles get a fixed home in normalised cell space and a side, so
+  // they travel with the right daughter when the cell pinches.
+  var MITO = [], RIBO = [];
+  (function seedOrganelles() {
+    // An even ring of cytoplasm around the nucleus: a golden-angle spiral
+    // through an annulus, with a little hand jitter. Even, never lumpy,
+    // and never on top of the nucleus.
+    var i, a, r, GOLD = 2.399963;
+
+    function place(i, n, r0, r1, turn, seed) {
+      a = i * GOLD + turn;
+      r = Math.sqrt(r0 * r0 + (r1 * r1 - r0 * r0) * (i + 0.5) / n);
+      return [
+        Math.cos(a) * r + (hash(seed, i) - 0.5) * 0.07,
+        Math.sin(a) * r + (hash(seed, i + 50) - 0.5) * 0.07
+      ];
+    }
+
+    for (i = 0; i < 6; i++) {
+      var m = place(i, 6, 0.60, 0.84, 0.55, 3);
+      MITO.push({ nx: m[0], ny: m[1], rot: hash(i + 1, 13) * 3.14, seed: 40 + i });
+    }
+    for (i = 0; i < 28; i++) {
+      var rb = place(i, 28, 0.60, 0.93, 1.9, 4);
+      RIBO.push({ nx: rb[0], ny: rb[1], seed: 80 + i });
+    }
+
+    // Where each one ends up inside its own daughter cell, so nothing is
+    // left stranded in the furrow. Same kind of ring, half the width.
+    [MITO, RIBO].forEach(function (list, li) {
+      var perSide = { '-1': 0, '1': 0 };
+      var counts = { '-1': 0, '1': 0 };
+      list.forEach(function (o) { counts[o.nx >= 0 ? 1 : -1]++; });
+      list.forEach(function (o) {
+        var side = o.nx >= 0 ? 1 : -1;
+        var k = perSide[side]++;
+        var d = place(k, Math.max(1, counts[side]), 0.62, 0.93, li ? 1.2 : 0.3, 9 + li);
+        o.dnx = d[0];
+        o.dny = d[1];
+      });
+    });
+  }());
+
+  /* -------------------------- timeline state ------------------------ */
+
+  var clips = [];
+  var timeline = [];      // { start, clip, dur, end }
+  var total = 0;
+  var idx = 0;            // current scene
+  var local = 0;          // seconds into the current scene
+  var playing = false;
+  var finished = false;
+  var ready = false;
+  var poster = true;      // the still frame before the first click
+  var errors = [];
+
+  function buildTimeline() {
+    var t = 0;
+    timeline = SCENES.map(function (s, i) {
+      var clip = clips[i] && clips[i].duration > 0.2 && isFinite(clips[i].duration)
+        ? clips[i].duration : s.fallback;
+      clip = Math.round(clip * 1000) / 1000;
+      var row = { start: t, clip: clip, dur: clip + BEAT, end: t + clip + BEAT };
+      t = row.end;
+      return row;
+    });
+    total = t;
+  }
+
+  /* ----------------------- scene progress model --------------------- */
+
+  // Each named stage belongs to one scene. Before that scene it is 0,
+  // after it, 1 - so the picture carries forward with no bookkeeping.
+  function stage(sceneIndex) {
+    if (poster) return sceneIndex === 0 ? 1 : 0;
+    if (idx > sceneIndex) return 1;
+    if (idx < sceneIndex) return 0;
+    var s = SCENES[sceneIndex];
+    var clip = timeline[sceneIndex].clip;
+    var p = clamp(local / clip, 0, 1);
+    if (REDUCED) return 1;
+    var a = s.span[0], b = s.span[1];
+    return EASE(clamp((p - a) / (b - a), 0, 1));
+  }
+
+  function raw() {
+    if (poster) return 1;
+    if (REDUCED) return 1;
+    return clamp(local / timeline[idx].clip, 0, 1);
+  }
+
+  /* ----------------------------- drawing ---------------------------- */
+
+  function drawBackground() {
+    ctx.fillStyle = C.card;
+    ctx.fillRect(0, 0, W, H);
+    var g = ctx.createRadialGradient(CX, CY - 40, 80, CX, CY, 700);
+    g.addColorStop(0, 'rgba(255,253,248,0)');
+    g.addColorStop(1, 'rgba(232,224,207,0.5)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  function drawGrain() {
+    if (!grainPattern) return;
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = grainPattern;
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+
+  // Cell size through the cycle.
+  function cellSize(s) {
+    var rx = 232 * (1 + 0.10 * s.grow) * (1 + 0.15 * s.sep);
+    var ry = 176 * (1 + 0.10 * s.grow) * (1 - 0.05 * s.sep);
+    if (!REDUCED) {
+      var br = 1 + Math.sin(clockNow * 0.9) * 0.004;
+      rx *= br; ry *= 1 / br;
+    }
+    return { rx: rx, ry: ry };
+  }
+
+  // One closed outline for the whole cell, with the furrow pinched in.
+  function cellPts(rx, ry, f, n) {
+    var pts = [], i;
+    var sig = rx * 0.33;
+    for (i = 0; i < n; i++) {
+      var th = 6.283185 * i / n;
+      var x0 = rx * Math.cos(th), y0 = ry * Math.sin(th);
+      var pinch = 1 - f * Math.exp(-(x0 * x0) / (2 * sig * sig));
+      pts.push([CX + x0, CY + y0 * pinch]);
+    }
+    return pts;
+  }
+
+  // One daughter after the pinch closes: the same curve, split in two and
+  // allowed to round up and drift apart.
+  function lobePts(side, rx, ry, gap, roundUp, n) {
+    var pts = [], i;
+    var erx = rx * 0.5, ery = ry * 0.74;   // each daughter rounds up
+    var ecx = CX + side * (rx * 0.5 + gap);
+    for (i = 0; i < n; i++) {
+      var t = 2 * i / n;
+      var s = t <= 1 ? t : 2 - t;
+      var sgn = t <= 1 ? -1 : 1;
+      var x0 = side * s * rx;
+      var yTop = ry * Math.sqrt(Math.max(0, 1 - s * s));
+      var tx = CX + x0 + side * gap;
+      var ty = CY + sgn * yTop * (1 - Math.exp(-(x0 * x0) / (2 * Math.pow(rx * 0.33, 2))));
+      var phi = Math.PI * t;
+      var ex = ecx - side * erx * Math.cos(phi);
+      var ey = CY - ery * Math.sin(phi);
+      pts.push([lerp(tx, ex, roundUp), lerp(ty, ey, roundUp)]);
+    }
+    return pts;
+  }
+
+  function drawCytoBlotches(clipPath, rx, ry, cx) {
+    ctx.save();
+    ctx.clip(clipPath);
+    var spots = [[-0.45, -0.3, 0.55], [0.4, 0.25, 0.6], [0.05, -0.55, 0.4], [-0.3, 0.5, 0.45]];
+    for (var i = 0; i < spots.length; i++) {
+      var sx = cx + spots[i][0] * rx, sy = CY + spots[i][1] * ry;
+      var r = spots[i][2] * Math.min(rx, ry);
+      var g = ctx.createRadialGradient(sx, sy, 2, sx, sy, r);
+      g.addColorStop(0, col('cytoDeep', 0.5));
+      g.addColorStop(1, col('cytoDeep', 0));
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(sx, sy, r, 0, 6.2832);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // Anything the cytoplasm has to make room for: the nucleus, the two new
+  // nuclei, the row of chromosomes at the equator, the two sets at the ends.
+  var keepOut = [];
+
+  function organellePos(o, rx, ry, f, gap) {
+    var side = o.nx >= 0 ? 1 : -1;
+    var baseX = CX + o.nx * rx, baseY = CY + o.ny * ry;
+    var lobeCx = CX + side * (rx * 0.5 + gap);
+    var tx = lobeCx + o.dnx * rx * 0.5 * 0.88;
+    var ty = CY + o.dny * ry * 0.74 * 0.88;
+    // they gather into their own half a little ahead of the pinch closing
+    var fm = EASE(clamp(f * 1.45, 0, 1));
+    var p = [lerp(baseX, tx, fm), lerp(baseY, ty, fm)];
+
+    // never let one drift outside the membrane
+    if (f >= 0.999) {
+      var ex0 = rx * 0.5 * 0.92, ey0 = ry * 0.74 * 0.92;
+      var ddx = (p[0] - lobeCx) / ex0, ddy = (p[1] - CY) / ey0;
+      var dd = Math.hypot(ddx, ddy);
+      if (dd > 1) { p[0] = lobeCx + (ddx / dd) * ex0; p[1] = CY + (ddy / dd) * ey0; }
+    } else {
+      var dx0 = clamp(p[0] - CX, -rx * 0.9, rx * 0.9);
+      var sig0 = rx * 0.33;
+      var yMax = ry * Math.sqrt(Math.max(0, 1 - (dx0 / rx) * (dx0 / rx)))
+               * (1 - f * Math.exp(-(dx0 * dx0) / (2 * sig0 * sig0)));
+      p[0] = CX + dx0;
+      p[1] = CY + clamp(p[1] - CY, -yMax * 0.8, yMax * 0.8);
+    }
+    for (var i = 0; i < keepOut.length; i++) {
+      var k = keepOut[i];
+      var ex = k.rx + k.pad, ey = k.ry + k.pad;
+      var dx = (p[0] - k.x) / ex, dy = (p[1] - k.y) / ey;
+      var d = Math.hypot(dx, dy);
+      if (d < 1 && d > 0.0001) {
+        var push = k.w === undefined ? 1 : k.w;
+        p[0] = lerp(p[0], k.x + (dx / d) * ex, push);
+        p[1] = lerp(p[1], k.y + (dy / d) * ey, push);
+      }
+    }
+    return p;
+  }
+
+  function drawMitochondrion(x, y, rot, seed, alpha, scale) {
+    var pts = wobbleClosed(ellipsePts(x, y, 15 * scale, 7.4 * scale, 26, rot), 0.9, seed);
+    paintShape(pts, { fill: 'mito', fillAlpha: 0.5, edge: 'mitoEdge', edgeAlpha: 0.5, lineWidth: 1.15, alpha: alpha });
+    // cristae: one folded line inside
+    var inner = [], i;
+    for (i = 0; i <= 8; i++) {
+      var u = -1 + 2 * i / 8;
+      var px = u * 10 * scale, py = (i % 2 ? 1 : -1) * 2.6 * scale;
+      inner.push([x + px * Math.cos(rot) - py * Math.sin(rot), y + px * Math.sin(rot) + py * Math.cos(rot)]);
+    }
+    penLine(inner, 'mitoEdge', 0.9, 0.4 * alpha);
+  }
+
+  /* ------------------------- chromosome drawing --------------------- */
+
+  // A chromatid is a rod that pinches at the centromere. `off` is how far
+  // its two ends sit to one side of the centromere: positive splays away
+  // from its sister (metaphase), negative trails behind it (anaphase).
+  function chromatidPts(cx, cy, ang, len, off, seed) {
+    var ax = -Math.sin(ang), ay = Math.cos(ang);   // long axis
+    var nx = Math.cos(ang), ny = Math.sin(ang);    // across
+    var half = len / 2;
+    // The control point sits the other side of the waist, so the drawn
+    // curve passes through (cx, cy) - the centromere - with the two ends
+    // swung out by `off`.
+    var a = [cx + ax * -half + nx * off, cy + ay * -half + ny * off];
+    var b = [cx - nx * off, cy - ny * off];
+    var c = [cx + ax * half + nx * off, cy + ay * half + ny * off];
+    var spine = quadPts(a, b, c, 10);
+    // a whisper of hand-drawn drift along the spine
+    for (var i = 1; i < spine.length - 1; i++) {
+      var w = (hash(seed, i) - 0.5) * 1.1;
+      spine[i][0] += nx * w;
+      spine[i][1] += ny * w;
+    }
+    return spine;
+  }
+
+  function paintChromatid(spine, colour, alpha, halfW, seed) {
+    var outline = wobbleClosed(rodOutline(spine, halfW), 0.5, seed);
+    paintShape(outline, {
+      fill: colour, fillAlpha: 0.52, edge: colour, edgeAlpha: 0.72,
+      lineWidth: 1.35, alpha: alpha
+    });
+  }
+
+  /* ------------------------------ scene ----------------------------- */
+
+  var clockNow = 0;
+
+  function draw() {
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    drawBackground();
+    // the cell is drawn a little larger than the frame's own coordinates,
+    // about its centre; the ring and the phase note are not
+    ctx.save();
+    ctx.translate(CX, CY);
+    ctx.scale(zoom, zoom);
+    ctx.translate(-CX, -CY);
+
+    var s = {
+      appear: stage(0),
+      ring:   stage(1),
+      nuc:    stage(2),
+      grow:   stage(3),
+      rep:    stage(4),
+      env:    stage(5),
+      spin:   stage(6),
+      align:  stage(7),
+      sep:    stage(8),
+      reform: stage(9),
+      furrow: stage(10),
+      settle: stage(11)
+    };
+
+    var size = cellSize(s);
+    var rx = size.rx, ry = size.ry;
+    var f = s.furrow;                       // pinch depth, 0..1
+    var split = s.settle;                   // two lobes drifting apart
+    var gap = 16 * split;
+    var roundUp = split;
+    var nucA = s.appear * (1 - s.env);      // the one nucleus, before mitosis
+
+    // the cytoplasm has to make room for these
+    keepOut = [];
+    if (nucA > 0.02) {
+      keepOut.push({ x: CX, y: CY, rx: 112, ry: 92, pad: 13, w: nucA });
+    }
+    if (s.reform > 0.02) {
+      for (var ks = -1; ks <= 1; ks += 2) {
+        keepOut.push({
+          x: CX + ks * (rx * 0.5 + gap), y: CY,
+          rx: DN_RX * s.reform, ry: DN_RY * s.reform, pad: 12, w: s.reform
+        });
+      }
+    }
+    if (s.align > 0.02 && s.reform < 0.98) {
+      keepOut.push({ x: CX, y: CY, rx: 58, ry: ry * 0.86, pad: 6, w: s.align * (1 - s.reform) });
+    }
+    if (s.sep > 0.02 && s.reform < 0.98) {
+      for (var kp = -1; kp <= 1; kp += 2) {
+        keepOut.push({
+          x: CX + kp * rx * 0.56, y: CY, rx: 56, ry: 142, pad: 6,
+          w: s.sep * (1 - s.reform)
+        });
+      }
+    }
+    if (s.spin > 0.02 && s.reform < 0.98) {
+      for (var kq = -1; kq <= 1; kq += 2) {
+        keepOut.push({ x: CX + kq * rx * 0.9, y: CY, rx: 40, ry: 32, pad: 8, w: s.spin * (1 - s.reform) });
+      }
+    }
+
+    // ---- neighbouring cells, only at the very start
+    var neigh = s.appear * (1 - s.ring);
+    if (neigh > 0.01) {
+      var ghosts = [[96, 96, 104, 76], [898, 112, 96, 72], [120, 528, 100, 74], [886, 516, 92, 70], [500, 44, 88, 64], [498, 592, 84, 62]];
+      for (var gi = 0; gi < ghosts.length; gi++) {
+        var gp = wobbleClosed(ellipsePts(ghosts[gi][0], ghosts[gi][1], ghosts[gi][2], ghosts[gi][3], 44), 1.6, 300 + gi);
+        paintShape(gp, { fill: 'cyto', fillAlpha: 0.4, edge: 'brown', edgeAlpha: 0.26, lineWidth: 1.1, alpha: neigh * 0.42 });
+        var gn = wobbleClosed(ellipsePts(ghosts[gi][0] + 6, ghosts[gi][1] - 4, 34, 28, 26), 1.2, 320 + gi);
+        paintShape(gn, { fill: 'nuc', fillAlpha: 0.45, edge: 'nucEdge', edgeAlpha: 0.3, lineWidth: 1, alpha: neigh * 0.42 });
+      }
+    }
+
+    // ---- the cell body
+    var cellAlpha = s.appear;
+    var bodies = [];
+    if (split <= 0.001 && f < 1) {
+      bodies.push({ pts: wobbleClosed(cellPts(rx, ry, f, 132), 1.5, 7), cx: CX, side: 0 });
+    } else {
+      bodies.push({ pts: wobbleClosed(lobePts(-1, rx, ry, gap, roundUp, 92), 1.5, 8), cx: CX - (rx * 0.5 + gap), side: -1 });
+      bodies.push({ pts: wobbleClosed(lobePts(1, rx, ry, gap, roundUp, 92), 1.5, 9), cx: CX + (rx * 0.5 + gap), side: 1 });
+    }
+
+    for (var bi = 0; bi < bodies.length; bi++) {
+      var body = bodies[bi];
+      var cpath = pathFrom(body.pts, 0, 0, 1, centroid(body.pts));
+      ctx.fillStyle = col('cyto', 0.62 * cellAlpha);
+      ctx.fill(cpath);
+      drawCytoBlotches(cpath, bodies.length > 1 ? rx * 0.5 : rx, ry, body.cx);
+      paintShape(body.pts, {
+        fill: 'cyto', fillAlpha: 0.22, edge: 'brown', edgeAlpha: 0.52,
+        lineWidth: 2.1, alpha: cellAlpha
+      });
+    }
+
+    // ---- ribosomes and mitochondria (they double while the cell grows)
+    var riboCount = Math.round(lerp(13, 28, s.grow));
+    for (var ri = 0; ri < RIBO.length; ri++) {
+      if (ri >= riboCount) break;
+      var fade = ri < 13 ? 1 : clamp((s.grow - (ri - 13) / 15 * 0.85) * 3, 0, 1);
+      var rp = organellePos(RIBO[ri], rx, ry, f, gap);
+      ctx.fillStyle = col('mito', 0.5 * cellAlpha * fade);
+      ctx.beginPath();
+      ctx.arc(rp[0], rp[1], 3.1, 0, 6.2832);
+      ctx.fill();
+      ctx.fillStyle = col('mitoEdge', 0.3 * cellAlpha * fade);
+      ctx.beginPath();
+      ctx.arc(rp[0], rp[1], 1.5, 0, 6.2832);
+      ctx.fill();
+    }
+
+    var mitoCount = Math.round(lerp(3, 6, s.grow));
+    for (var mi = 0; mi < MITO.length; mi++) {
+      if (mi >= mitoCount) break;
+      var mFade = mi < 3 ? 1 : clamp((s.grow - (mi - 3) / 3 * 0.8) * 3.2, 0, 1);
+      var mp = organellePos(MITO[mi], rx, ry, f, gap);
+      drawMitochondrion(mp[0], mp[1], MITO[mi].rot, MITO[mi].seed, cellAlpha * mFade, lerp(0.86, 1, mFade));
+    }
+
+    // ---- spindle poles and fibres
+    var spinA = s.spin * (1 - s.reform);
+    var poleX = rx * 0.9;
+    if (spinA > 0.01) {
+      for (var side = -1; side <= 1; side += 2) {
+        var px = CX + side * poleX, py = CY;
+        // the pole: a small burst of short lines
+        for (var k = 0; k < 7; k++) {
+          var a0 = (k / 6 - 0.5) * 2.1;
+          penLine([[px, py], [px - side * 13 * Math.cos(a0), py + 13 * Math.sin(a0)]], 'muted', 1, 0.5 * spinA);
+        }
+        // fibres that miss the chromosomes, for texture
+        for (var k2 = 0; k2 < 5; k2++) {
+          var spread = (k2 / 4 - 0.5) * 2 * ry * 0.5;
+          var tipX = CX + side * rx * 0.12 * (1 - s.sep);
+          penLine(quadPts([px, py], [lerp(px, tipX, 0.5), py + spread * 0.55], [tipX, spread * 0.4 + CY], 10),
+                  'muted', 0.75, 0.16 * spinA);
+        }
+      }
+    }
+
+    // ---- the metaphase plate hairline
+    var plate = s.align * (1 - s.sep * 1.6);
+    if (plate > 0.02) {
+      ctx.save();
+      ctx.setLineDash([2, 7]);
+      ctx.strokeStyle = col('muted', 0.34 * plate);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(CX, CY - ry * 0.82);
+      ctx.lineTo(CX, CY + ry * 0.82);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // ---- nucleus (one, then two)
+    if (nucA > 0.01) {
+      var nrx = 112, nry = 92;
+      var npts = wobbleClosed(ellipsePts(CX, CY, nrx, nry, 56), 1.4, 21);
+      paintShape(npts, { fill: 'nuc', fillAlpha: 0.5, edge: 'nucEdge', edgeAlpha: 0.5, lineWidth: 1.5, alpha: nucA });
+      // the envelope is a double membrane: a second line just inside
+      var inner = wobbleClosed(ellipsePts(CX, CY, nrx - 4.5, nry - 4.5, 56), 1.2, 22);
+      paintShape(inner, { edge: 'nucEdge', edgeAlpha: 0.34, lineWidth: 1, alpha: nucA });
+    }
+
+    // envelope breaking into fragments
+    if (s.env > 0.01 && s.env < 0.995) {
+      var brk = s.env;
+      for (var fi = 0; fi < 18; fi++) {
+        var a1 = 6.283185 * fi / 18, a2 = a1 + 0.2 + hash(fi, 71) * 0.1;
+        var push = 1 + brk * (0.18 + hash(fi, 72) * 0.5);
+        var tilt = (hash(fi, 73) - 0.5) * brk * 0.5;
+        var arc = [];
+        for (var q = 0; q <= 4; q++) {
+          var aa = lerp(a1, a2, q / 4) + tilt;
+          arc.push([CX + Math.cos(aa) * 112 * push, CY + Math.sin(aa) * 92 * push]);
+        }
+        penLine(arc, 'nucEdge', 1.5, 0.75 * (1 - brk * brk));
+      }
+    }
+
+    // reformed nuclei around each set
+    if (s.reform > 0.01) {
+      for (var ds = -1; ds <= 1; ds += 2) {
+        var dcx = CX + ds * (rx * 0.5 + gap);
+        var dpts = wobbleClosed(ellipsePts(dcx, CY, DN_RX * s.reform, DN_RY * s.reform, 48), 1.3, 30 + ds);
+        paintShape(dpts, { fill: 'nuc', fillAlpha: 0.48, edge: 'nucEdge', edgeAlpha: 0.5, lineWidth: 1.45, alpha: s.reform });
+        var dInner = wobbleClosed(ellipsePts(dcx, CY, DN_RX * s.reform - 4.5, DN_RY * s.reform - 4.5, 48), 1.1, 32 + ds);
+        paintShape(dInner, { edge: 'nucEdge', edgeAlpha: 0.32, lineWidth: 1, alpha: s.reform });
+      }
+    }
+
+    // ---- chromosomes
+    var chromA = s.nuc;
+    if (chromA > 0.01) {
+      for (var ci = 0; ci < CHROMS.length; ci++) {
+        var ch = CHROMS[ci];
+        var len = ch.len * lerp(1, 0.9, s.env) * lerp(1, 1.06, s.reform);
+        var halfW = 5.2 * lerp(1, 1.1, s.env) * lerp(1, 0.86, s.reform);
+
+        // where the chromosome (or each of its copies) sits
+        var homeX = CX + ch.home[0], homeY = CY + ch.home[1];
+        var eqX = CX + (hash(ch.id, 5) - 0.5) * 9, eqY = CY + ch.slot;
+        var baseX = lerp(homeX, eqX, s.align);
+        var baseY = lerp(homeY, eqY, s.align);
+        var ang = lerp(ch.ang, 0, s.align);
+
+        // Two copies once the DNA has been replicated. Before that the
+        // second one is simply not there yet (alpha 0), which keeps every
+        // number below continuous.
+        for (var k3 = 0; k3 < 2; k3++) {
+          var kk = k3 === 0 ? -1 : 1;                     // -1 = left copy
+          var born = k3 === 0 ? 1 : s.rep;                // the copy grows in
+          var wOff = 3.4 * s.rep;                         // the two waists part
+
+          // travel: left copy to the left pole, right copy to the right
+          var poleTargetX = CX + kk * (rx * 0.56 + (ch.id % 2 ? 11 : -6));
+          var poleTargetY = CY + ch.slot * 0.86;
+          var nestX = CX + kk * (rx * 0.5 + gap) + NEST[ci].p[0];
+          var nestY = CY + NEST[ci].p[1];
+
+          var travelT = s.sep;
+          var cx0 = baseX + Math.cos(ang) * wOff * kk;
+          var cy0 = baseY + Math.sin(ang) * wOff * kk;
+          var cxN = lerp(cx0, poleTargetX, travelT);
+          var cyN = lerp(cy0, poleTargetY, travelT);
+          cxN = lerp(cxN, nestX, s.reform);
+          cyN = lerp(cyN, nestY, s.reform);
+
+          // shape: a bowed rod -> a sister splayed away -> a trailing V
+          var vMorph = clamp(travelT * 2.4, 0, 1) * (1 - s.reform);
+          // the two daughters must look the same, so the settled bow and
+          // angle are identical on both sides, not mirrored
+          var off = lerp(lerp(lerp(3.4, 9.5 * kk, s.rep), -15 * kk, vMorph), 3.4, s.reform);
+          var angN = lerp(ang, NEST[ci].a, s.reform);
+          var lenN = len * (k3 === 0 ? 1 : lerp(0.55, 1, born));
+
+          var spine = chromatidPts(cxN, cyN, angN, lenN, off, ch.id * 7 + k3);
+          paintChromatid(spine, ch.colour, chromA * born, halfW, ch.id * 13 + k3);
+
+          // the fibre that holds this copy, reaching out from its own pole
+          if (spinA > 0.02 && s.rep > 0.5) {
+            var fpx = CX + kk * poleX, fpy = CY;
+            var grab = clamp((s.spin - 0.18) * 1.7, 0, 1) * (1 - s.reform);
+            if (grab > 0.02) {
+              var tipX = lerp(fpx, cxN, grab), tipY = lerp(fpy, cyN, grab);
+              penLine(quadPts([fpx, fpy], [lerp(fpx, tipX, 0.5), lerp(fpy, tipY, 0.32)], [tipX, tipY], 12),
+                      'muted', 1.05, 0.55 * s.spin);
+            }
+          }
+        }
+      }
+    }
+
+    ctx.restore();
+
+    // ---- the light phase note, only through mitosis
+    drawPhaseLabel();
+
+    // ---- the cycle ring
+    drawRing(s);
+
+    drawGrain();
+  }
+
+  var PHASES = [
+    { scene: 5, word: 'prophase' },
+    { scene: 6, word: 'prophase' },
+    { scene: 7, word: 'metaphase' },
+    { scene: 8, word: 'anaphase' },
+    { scene: 9, word: 'telophase' }
+  ];
+
+  function drawPhaseLabel() {
+    var row = null, i;
+    for (i = 0; i < PHASES.length; i++) { if (PHASES[i].scene === idx) row = PHASES[i]; }
+    if (!row) return;
+    var p = raw();
+    var a = clamp(p * 5, 0, 1) * clamp((1 - p) * 6, 0, 1);
+    if (a < 0.02) return;
+    ctx.save();
+    ctx.globalAlpha = a * 0.9;
+    ctx.fillStyle = col('second', 0.85);
+    ctx.font = '26px "Caveat", ui-rounded, cursive';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(row.word, 58, 78);
+    var wd = ctx.measureText(row.word).width;
+    penLine([[57, 86], [57 + wd * 0.45, 88.5], [57 + wd, 85.5]], 'second', 1.1, 0.45 * a);
+    ctx.restore();
+  }
+
+  // Three arcs: grow and copy, mitosis, divide. No words - the ring just
+  // says where we are.
+  function drawRing(s) {
+    var a = s.ring;
+    if (a < 0.02) return;
+    var cx = 908, cy = 96, r = 40;
+    var arcs = [
+      { from: 0.02, to: 0.30, prog: (clamp(idx - 3, 0, 2) + (idx === 3 || idx === 4 ? raw() : 0)) / 2 },
+      { from: 0.36, to: 0.64, prog: (clamp(idx - 5, 0, 5) + (idx >= 5 && idx <= 9 ? raw() : 0)) / 5 },
+      { from: 0.70, to: 0.98, prog: (clamp(idx - 10, 0, 2) + (idx >= 10 ? raw() : 0)) / 2 }
+    ];
+    for (var i = 0; i < arcs.length; i++) {
+      var pts = [], j, n = 20;
+      var reveal = clamp(a * 3 - i * 0.7, 0, 1);
+      if (reveal < 0.02) continue;
+      for (j = 0; j <= n; j++) {
+        var u = lerp(arcs[i].from, arcs[i].to, j / n);
+        var th = -1.5708 + u * 6.283185;
+        var rr = r + Math.sin(j * 1.7 + i) * 0.5;
+        pts.push([cx + Math.cos(th) * rr, cy + Math.sin(th) * rr]);
+      }
+      var shown = Math.max(2, Math.round(pts.length * reveal));
+      penLine(pts.slice(0, shown), 'brown', 2.4, 0.16 * a);
+      var fill = clamp(arcs[i].prog, 0, 1);
+      if (fill > 0.01) {
+        var fpts = pts.slice(0, Math.max(2, Math.round(pts.length * fill)));
+        penLine(fpts, 'brown', 2.6, 0.62 * a);
+      }
+    }
+  }
+
+  /* ------------------------------ audio ----------------------------- */
+
+  function loadClips() {
+    var pending = SCENES.length;
+    return new Promise(function (resolve) {
+      var done = false;
+      function settle() {
+        if (done) return;
+        done = true;
+        buildTimeline();
+        resolve();
+      }
+      var timer = setTimeout(function () {
+        errors.push('metadata timeout');
+        settle();
+      }, 8000);
+
+      SCENES.forEach(function (sc, i) {
+        var a = new Audio();
+        a.preload = 'auto';
+        a.src = sc.file;
+        a.addEventListener('loadedmetadata', function () {
+          pending--;
+          if (pending === 0) { clearTimeout(timer); settle(); }
+        });
+        a.addEventListener('error', function () {
+          errors.push('clip ' + (i + 1) + ' failed to load');
+          pending--;
+          if (pending === 0) { clearTimeout(timer); settle(); }
+        });
+        a.load();
+        clips.push(a);
+      });
+    });
+  }
+
+  function startClip(i) {
+    var a = clips[i];
+    if (!a) return;
+    try {
+      a.currentTime = 0;
+      var pr = a.play();
+      if (pr && pr.catch) pr.catch(function () { /* headless or blocked */ });
+    } catch (e) { /* ignore */ }
+  }
+
+  function stopClips() {
+    clips.forEach(function (a) { try { a.pause(); } catch (e) {} });
+  }
+
+  /* ---------------------------- interface --------------------------- */
+
+  var sentenceEl = document.getElementById('mt-sentence');
+  var playBtn = document.getElementById('mt-play');
+  var trackEl = document.getElementById('mt-track');
+  var srEl = document.getElementById('mt-sr');
+  var segs = [];
+
+  function buildTrack() {
+    trackEl.innerHTML = '';
+    segs = [];
+    SCENES.forEach(function (sc, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'mt-seg';
+      b.style.flexGrow = String(timeline[i].dur);
+      b.style.flexBasis = '0';
+      b.setAttribute('aria-label', 'Scene ' + (i + 1) + ' of ' + SCENES.length + ': ' + sc.text);
+      var bar = document.createElement('span');
+      bar.className = 'mt-seg-bar';
+      var fill = document.createElement('span');
+      fill.className = 'mt-seg-fill';
+      bar.appendChild(fill);
+      b.appendChild(bar);
+      b.addEventListener('click', function () { poster = false; seek(i, true); });
+      trackEl.appendChild(b);
+      segs.push(fill);
+    });
+  }
+
+  function paintTrack() {
+    for (var i = 0; i < segs.length; i++) {
+      var w = i < idx ? 1 : (i > idx ? 0 : clamp(local / timeline[i].dur, 0, 1));
+      segs[i].style.width = (w * 100).toFixed(1) + '%';
+    }
+  }
+
+  var shownIdx = -1;
+  function paintSentence() {
+    if (shownIdx === idx) return;
+    shownIdx = idx;
+    sentenceEl.classList.add('is-fading');
+    window.setTimeout(function () {
+      sentenceEl.textContent = SCENES[idx].text;
+      sentenceEl.classList.remove('is-fading');
+    }, 140);
+    srEl.textContent = 'Scene ' + (idx + 1) + ' of ' + SCENES.length + '. ' + SCENES[idx].text;
+  }
+
+  function setPlayLabel() {
+    playBtn.textContent = finished ? 'Play again' : (playing ? 'Pause' : 'Play');
+  }
+
+  function seek(i, keepPlaying) {
+    stopClips();
+    idx = clamp(i, 0, SCENES.length - 1);
+    local = 0;
+    finished = false;
+    paintSentence();
+    paintTrack();
+    if (keepPlaying) { playing = true; startClip(idx); }
+    else { playing = false; }
+    setPlayLabel();
+    draw();
+  }
+
+  function play() {
+    if (poster) { poster = false; seek(0, true); return; }
+    if (finished) { seek(0, true); return; }
+    playing = true;
+    finished = false;
+    startClip(idx);
+    if (clips[idx] && local > 0.05) {
+      try { clips[idx].currentTime = Math.min(local, timeline[idx].clip - 0.05); } catch (e) {}
+    }
+    setPlayLabel();
+  }
+
+  function pause() {
+    playing = false;
+    stopClips();
+    setPlayLabel();
+  }
+
+  playBtn.addEventListener('click', function () { playing ? pause() : play(); });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === ' ' && e.target === document.body) {
+      e.preventDefault();
+      playing ? pause() : play();
+    }
+    if (e.key === 'ArrowRight' && trackEl.contains(document.activeElement)) {
+      seek(idx + 1, playing);
+    }
+    if (e.key === 'ArrowLeft' && trackEl.contains(document.activeElement)) {
+      seek(idx - 1, playing);
+    }
+  });
+
+  /* ------------------------------ loop ------------------------------ */
+
+  var lastT = 0;
+
+  function frame(t) {
+    var dt = lastT ? Math.min((t - lastT) / 1000, 0.1) : 0;
+    lastT = t;
+    clockNow = t / 1000;
+    if (!REDUCED) boil = Math.floor(clockNow * 7);
+
+    if (playing && ready) {
+      var a = clips[idx];
+      var clip = timeline[idx].clip;
+      if (a && !a.paused && a.currentTime > 0 && a.currentTime < clip) {
+        local = a.currentTime;              // the voice is the clock
+      } else {
+        local += dt;
+      }
+      if (local >= timeline[idx].dur) {
+        if (idx < SCENES.length - 1) {
+          idx++;
+          local = 0;
+          startClip(idx);
+        } else {
+          local = timeline[idx].dur;
+          playing = false;
+          finished = true;
+          setPlayLabel();
+        }
+      }
+      paintSentence();
+      paintTrack();
+    }
+
+    draw();
+    window.requestAnimationFrame(frame);
+  }
+
+  /* ------------------------------ boot ------------------------------ */
+
+  function boot() {
+    sizeCanvas();
+    buildGrain();
+    buildTimeline();          // provisional, from the recorded lengths
+    buildTrack();
+    sentenceEl.textContent = SCENES[0].text;
+    shownIdx = 0;
+    loadClips().then(function () {
+      ready = true;
+      buildTrack();
+      paintSentence();
+      paintTrack();
+      setPlayLabel();
+      window.requestAnimationFrame(frame);
+
+      window.__mitosis = {
+        ready: true,
+        reduced: REDUCED,
+        beat: BEAT,
+        total: total,
+        errors: errors,
+        scenes: SCENES.map(function (sc, i) {
+          return {
+            n: i + 1, key: sc.key, text: sc.text, file: sc.file,
+            clip: timeline[i].clip, scene: timeline[i].dur, start: timeline[i].start,
+            audioDuration: clips[i] ? clips[i].duration : null,
+            readyState: clips[i] ? clips[i].readyState : -1
+          };
+        }),
+        state: function () { return { idx: idx, local: local, playing: playing, finished: finished }; },
+        seek: function (i, p) {
+          stopClips();
+          playing = false;
+          poster = false;
+          idx = clamp(i, 0, SCENES.length - 1);
+          local = (p === undefined ? 1 : p) * timeline[idx].clip;
+          shownIdx = -1;
+          paintSentence();
+          paintTrack();
+          draw();
+          return { idx: idx, local: local };
+        },
+        play: play,
+        pause: pause
+      };
+    });
+    // one still frame while the clips load
+    draw();
+  }
+
+  window.addEventListener('resize', function () { sizeCanvas(); draw(); });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+}());
+</script>
+</body>
+</html>
