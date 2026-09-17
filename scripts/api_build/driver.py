@@ -1370,6 +1370,15 @@ def stage_insert(cfg):
     uid = {u["slug"]: u["id"] for u in units}
     hero_kw = {}
     n = 0
+    # Rows that already carry a photograph keep their caption: the JSON's
+    # hero_image_caption is the content model's guess at an image it never saw,
+    # and the hero stage wrote the real one (what the photo shows + credit).
+    # A re-insert after a later fact-check round must not put the guess back
+    # (RS B, 17 Sep 2026: all 22 captions were overwritten this way).
+    has_hero = set()
+    for r in supa(cfg, "GET", "/rest/v1/lessons?select=unit_id,lesson_number&hero_image_url=not.is.null"
+                  "&unit_id=in.(%s)" % ",".join(uid.values())):
+        has_hero.add((r["unit_id"], r["lesson_number"]))
     for u in plan["article_units"]:
         for l in u["lessons"]:
             cid = lesson_key(u["slug"], l["number"])
@@ -1386,7 +1395,7 @@ def stage_insert(cfg):
             # ids, slugs and hero images. Titles may change when a rebuild
             # re-shapes the unit; the hero caption describes the photograph that
             # is being kept, so it must NOT be overwritten.
-            if cfg.get("keep_hero_caption"):
+            if cfg.get("keep_hero_caption") or (uid[u["slug"]], l["number"]) in has_hero:
                 patch.pop("hero_image_caption", None)
             if cfg.get("patch_titles"):
                 patch["title"] = l["title"]
