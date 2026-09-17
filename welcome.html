@@ -465,7 +465,7 @@
     html.snappy .sec-library .catslot{margin-bottom:8px}
     html.snappy .caserow.page+.caserow.page,html.snappy .caserow.page+.casefloor{margin-top:0}
   }
-  @media (prefers-reduced-motion:no-preference){ html.snappy{scroll-behavior:smooth} }
+  @media (prefers-reduced-motion:no-preference){ html.snappy:not(.bench){scroll-behavior:smooth} }
 
   /* ---- S3 the real lesson, framed ---- */
   .lessonframe{flex:0 0 760px;background:#fffdf9;border:1px solid var(--line);border-radius:6px;overflow:hidden;
@@ -2402,7 +2402,7 @@ function fitScale(){
 fitScale(); addEventListener('resize',fitScale);
 /* page-by-page snapping only on the landing view (the wizard views scroll freely) */
 const finePointer=matchMedia('(hover:hover) and (pointer:fine)');
-function syncSnap(){ document.documentElement.classList.toggle('snappy', document.body.dataset.view==='landing' && !q.has('tune') && (finePointer.matches || (q.has('snap') && innerWidth>=900))); }   /* the tuning bench scrolls freely: no page-by-page settle, no 100vh sections */
+function syncSnap(){ document.documentElement.classList.toggle('snappy', document.body.dataset.view==='landing' && (finePointer.matches || (q.has('snap') && innerWidth>=900))); }
 finePointer.addEventListener && finePointer.addEventListener('change',syncSnap);
 syncSnap(); new MutationObserver(syncSnap).observe(document.body,{attributes:true,attributeFilter:['data-view']});
 /* ?at=N - verification hook: show page N (0 = fold) for headless captures. Headless
@@ -2645,6 +2645,7 @@ if(q.has('bench')){
      window is left alone; the last shelf top is the floor. */
   function settle(){
     if(!document.documentElement.classList.contains('snappy')) return;
+    if(document.documentElement.classList.contains('bench')) return;   /* the tuning bench keeps the layout but scrolls freely */
     const y=scrollY, T=tops().sort((a,b)=>a-b), vh=innerHeight;
     const maxY=document.documentElement.scrollHeight-vh;
     if(T.some(v=>Math.abs(v-y)<3)) return;   /* already on a shelf top (a programmatic jump): leave it */
