@@ -783,7 +783,8 @@ def stage_verify(cfg):
     st = drv.load_state(cfg)
     units = drv.supa(cfg, "GET", "/rest/v1/units?subject_id=eq.%s&select=id,slug,name,image_url,"
                      "lesson_count&order=sort_order" % st["subject_id"])
-    bad_text = re.compile(r"\[object Object\]|undefined|NaN|&mdash;|&amp;|&nbsp;")
+    bad_text = re.compile(r"\[object Object\]|undefined|NaN")
+    bad_entity = re.compile(r"&(?:[a-zA-Z]+|#\d+|#x[0-9a-fA-F]+);")
     issues, n = [], 0
     for u in units:
         if not (u.get("image_url") or "").strip():
@@ -817,12 +818,17 @@ def stage_verify(cfg):
                 issues.append("%s has no narration" % k)
             if l.get("status") != "pending_review":
                 issues.append("%s status is %s" % (k, l.get("status")))
-            visible = re.sub(r"<[^>]+>", " ", " ".join(
-                str(l.get(f) or "") for f in ("content_html", "exam_tip_html", "conclusion_html",
-                                              "description", "hero_image_caption")))
-            blob = visible + " " + json.dumps(
-                [l.get(f) for f in ("practice_questions", "knowledge_checks",
+            # `*_html` fields use named entities on purpose (they render as the
+            # character). Entities are a defect only in the PLAIN-TEXT fields, and
+            # a raw one reaching the page is caught by the browser pass instead.
+            plain = " ".join(str(l.get(f) or "") for f in ("description", "hero_image_caption")) \
+                + " " + json.dumps([l.get(f) for f in ("practice_questions", "knowledge_checks",
                                     "flashcard_questions", "glossary_terms")], ensure_ascii=False)
+            for m in set(bad_entity.findall(plain)):
+                issues.append("%s plain-text field contains the entity %r" % (k, m))
+            visible = re.sub(r"<[^>]+>", " ", " ".join(
+                str(l.get(f) or "") for f in ("content_html", "exam_tip_html", "conclusion_html")))
+            blob = visible + " " + plain
             for m in set(bad_text.findall(blob)):
                 issues.append("%s visible text contains %r" % (k, m))
             for m in set(BOARD_RE.findall(blob)):
