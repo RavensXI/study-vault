@@ -141,7 +141,19 @@ def parse_json_reply(text):
     end = t.rfind("}")
     if start == -1 or end == -1:
         raise ValueError("no JSON object in reply")
-    return json.loads(t[start:end + 1])
+    try:
+        return json.loads(t[start:end + 1])
+    except json.JSONDecodeError as e:
+        # Opus sometimes ends the turn one closer short: the findings array is
+        # complete ("...}]") but the outer object never closes. Four RS B checks
+        # were lost to that on 17 Sep 2026. Try the obvious closers before failing.
+        body = t[start:]
+        for tail in ("}", "]}", "}]}", '"}]}'):
+            try:
+                return json.loads(body.rstrip() + tail)
+            except json.JSONDecodeError:
+                pass
+        raise e
 
 
 def supa(cfg, method, path, body=None, prefer=None):
