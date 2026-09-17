@@ -303,7 +303,7 @@ async function launch(extraArgs = []) {
     die(`playwright is not installed in tools/node_modules (${e.message})`);
   }
   // StudyVault: the Playwright CDN times out here; use the installed Chrome (our standing rule anyway)
-  return chromium.launch({ channel: process.env.PW_CHANNEL || 'chrome', args: ['--allow-file-access-from-files', '--disable-background-timer-throttling', ...extraArgs] });
+  return chromium.launch({ channel: process.env.PW_CHANNEL || 'chrome', args: ['--allow-file-access-from-files', '--disable-background-timer-throttling', '--disable-gpu', '--disable-accelerated-2d-canvas', ...extraArgs] });
 }
 
 /**

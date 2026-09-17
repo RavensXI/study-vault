@@ -439,9 +439,28 @@
   FILM.TRANSITION_KINDS = Object.keys(KINDS);
 
   /** Draws global time T (seconds) to FILM.canvas. Returns the active shot entry. */
+  // Warm both plate caches once per page before any shot draws. The first offscreen canvas a
+  // page creates changes how Chromium rasterises the main canvas afterwards, so a shot that
+  // builds no offscreen canvas drew one way cold and another way warm and failed the
+  // determinism gate (found on the mitosis film, 18 Sep 2026). Warming here makes every
+  // frame a warm frame.
+  let platesWarm = false;
+  function warmPlates() {
+    if (platesWarm || !FILM.lib || typeof document === 'undefined') return;
+    platesWarm = true;
+    try {
+      const oc = document.createElement('canvas');
+      oc.width = Math.max(1, Math.round(FILM.W * FILM.S)); oc.height = Math.max(1, Math.round(FILM.H * FILM.S));
+      const c = oc.getContext('2d');
+      c.setTransform(FILM.S, 0, 0, FILM.S, 0, 0);
+      if (FILM.lib.paper) FILM.lib.paper(c, {});
+      if (FILM.lib.blueprint) FILM.lib.blueprint(c, {});
+    } catch (e) { /* a plate helper that throws here will throw again in the shot, where it is reported */ }
+  }
   FILM.renderFrame = function renderFrame(T) {
     const P = prepare();
     if (!FILM.ctx) throw new Error('FILM.renderFrame: call FILM.mount(canvas) first');
+    warmPlates();
     T = Number(T) || 0;
     if (T < 0) T = 0;
     if (P.duration > 0 && T > P.duration) T = P.duration;
