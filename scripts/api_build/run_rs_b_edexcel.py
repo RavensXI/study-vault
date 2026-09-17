@@ -572,6 +572,22 @@ def stage_factcheck(cfg):
     if cfg.get("factcheck_search_max", 0) != 0:
         raise SystemExit("REFUSING to fact-check: factcheck_search_max must be 0 for this build.")
     print("assessment rules: %s (%d chars)" % (os.path.basename(p), os.path.getsize(p)))
+    # `factcheck_only` re-checks a named subset (used when a reply was truncated
+    # mid-findings, so that lesson's check was partial).
+    only = cfg.get("factcheck_only")
+    if only:
+        st = drv.load_state(cfg)
+        keep = st["content_ok"]
+        st["content_ok"] = [c for c in keep if c in set(only)]
+        drv.save_state(cfg, st)
+        print("re-checking only:", st["content_ok"])
+        try:
+            drv.stage_factcheck(cfg)
+        finally:
+            st = drv.load_state(cfg)
+            st["content_ok"] = keep
+            drv.save_state(cfg, st)
+        return
     drv.stage_factcheck(cfg)
 
 
