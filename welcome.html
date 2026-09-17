@@ -2686,10 +2686,12 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
   html.bench .booktip{display:none!important}
   /* the goldfish: swims the bowl on its own, follows a finger or a pointer, darts on a tap */
   html.bigprops .prop-fishbowl{pointer-events:auto}
-  html.bigprops .prop-fishbowl .fish{position:absolute;left:0;bottom:26%;width:27%;height:auto;pointer-events:none;
-    transform:translateX(var(--fx,60%)) translateY(var(--fy,0px)) scaleX(var(--fd,1));opacity:.92;
-    filter:saturate(1.15) brightness(1.02);transition:transform .9s cubic-bezier(.3,.8,.3,1)}
-  html.bigprops .prop-fishbowl .fish.dart{transition:transform .28s cubic-bezier(.16,1,.3,1)}
+  html.bigprops .prop-fishbowl .fish{position:absolute;left:var(--fx,40%);bottom:26%;width:27%;height:auto;pointer-events:none;
+    transform:translateY(var(--fy,0px)) scaleX(var(--fd,1));opacity:.92;
+    filter:saturate(1.15) brightness(1.02);transition:left 1.6s cubic-bezier(.3,.8,.3,1),transform .9s cubic-bezier(.3,.8,.3,1)}
+  html.bigprops .prop-fishbowl .fish.flee{transition:left .55s cubic-bezier(.2,.9,.3,1),transform .4s ease}
+  html.bigprops .prop-fishbowl .fish.exit{transition:left 1.4s cubic-bezier(.4,0,.8,1),transform .3s ease}
+  html.bigprops .prop-fishbowl .fish.jump{transition:none}
   /* the bowl's size rule targets its img: the fish keeps its own proportions */
   html.bigprops .caserow.page .prop-fishbowl img.fish{height:auto;width:27%;margin:0}
   @media (prefers-reduced-motion:reduce){ html.bigprops .prop-fishbowl .fish{transition:none} }
@@ -2797,18 +2799,25 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
     document.querySelectorAll('#stage-landing .prop-fishbowl').forEach(bowl=>{
       if(bowl.querySelector('.fish')) return;
       const f=document.createElement('img'); f.className='fish'; f.src='assets/lw/shelf/prop_fish.webp'; f.alt=''; f.draggable=false; bowl.appendChild(f);
-      let x=60, dir=1, target=null, last=0;              /* x = % of the bowl width the fish's left edge sits at */
-      const set=(nx,ny)=>{ f.style.setProperty('--fx',nx+'%'); f.style.setProperty('--fy',(ny||0)+'px'); f.style.setProperty('--fd',dir); };
-      const lo=24, hi=50;                                /* the water: the fish stays off the glass */
+      /* x = the fish's left edge as a % of the bowl. It wanders on its own; it swims away from a
+         pointer that comes close (staying in the water); a tap sends it out of the frame to the
+         right, and it sneaks back in from the left a few seconds later. */
+      let x=40, dir=1, last=0, gone=false, busyUntil=0;
+      const lo=16, hi=58, W=27;                          /* the water, and the fish's width in bowl % */
+      const set=(nx,ny,cls)=>{ f.classList.remove('flee','exit','jump'); if(cls) f.classList.add(cls);
+        x=nx; f.style.setProperty('--fx',nx+'%'); f.style.setProperty('--fy',(ny||0)+'px'); f.style.setProperty('--fd',dir); };
       function tick(t){
-        if(target===null&&t-last>2600){ last=t; const nx=lo+Math.random()*(hi-lo); dir=nx>x?1:-1; x=nx; set(x,(Math.random()-.5)*14); }
+        if(!gone&&t>busyUntil&&t-last>2800){ last=t; const nx=lo+Math.random()*(hi-lo); dir=nx>x?1:-1; set(nx,(Math.random()-.5)*16); }
         requestAnimationFrame(tick);
       }
       requestAnimationFrame(tick);
-      bowl.addEventListener('pointermove',e=>{ if(H.classList.contains('bench')) return; const r=bowl.getBoundingClientRect(); const px=(e.clientX-r.left)/r.width*100-13;
-        const nx=Math.max(lo,Math.min(hi,px)); dir=nx>x?1:(nx<x?-1:dir); x=nx; target=1; set(x,((e.clientY-r.top)/r.height-.6)*40); last=performance.now(); });
-      bowl.addEventListener('pointerleave',()=>{ target=null; });
-      bowl.addEventListener('click',()=>{ if(H.classList.contains('bench')) return; f.classList.add('dart'); dir=-dir; x=dir>0?hi:lo; set(x,-18); setTimeout(()=>{ f.classList.remove('dart'); },400); last=performance.now(); });
+      bowl.addEventListener('pointermove',e=>{ if(gone||H.classList.contains('bench')) return;
+        const r=bowl.getBoundingClientRect(), px=(e.clientX-r.left)/r.width*100, centre=x+W/2;
+        if(Math.abs(px-centre)>26) return;               /* only a close pointer bothers it */
+        const nx=px<centre?hi:lo; dir=nx>x?1:-1; set(nx,(Math.random()-.5)*20,'flee'); last=performance.now(); busyUntil=last+900; });
+      bowl.addEventListener('click',()=>{ if(gone||H.classList.contains('bench')) return;
+        gone=true; dir=1; set(140,-10,'exit');
+        setTimeout(()=>{ set(-45,6,'jump'); void f.offsetWidth; setTimeout(()=>{ set(30,0); gone=false; last=performance.now(); },60); },5500); });
     });
   }
   mark(); globals(false); fishify();
