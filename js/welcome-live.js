@@ -200,7 +200,7 @@
     /* toy-scale props mode: the books are half as tall again, so three shelves instead of two */
     if(document.documentElement.classList.contains('bigprops')){
       var third=Math.ceil(fams.length/3); rowsOf=[fams.slice(0,third),fams.slice(third,2*third),fams.slice(2*third)];
-      PROPS=[['@bookstack',null],[null,'@owl'],[null,null]];
+      PROPS=[['@bookstack','@globe'],[null,'@owl'],['@openbook','@trophy']];   /* Tom's placements, bench 17 Sep 2026 */
     }
     rowsOf.forEach(function(list,ri){
       var row=document.createElement('div'); row.className='catrow';

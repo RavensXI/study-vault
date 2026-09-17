@@ -886,7 +886,7 @@
   html.bigprops .caserow.page.sec-inside .prop-globe{margin-left:-40px;z-index:1}
   html.bigprops .sec-schools{--ohl:-230px;--ohr:-150px}
   html.bigprops .caserow.page.sec-schools .prop-trophy{margin-left:-140px}
-  html.bigprops .caserow.page.sec-schools .prop-handbell{z-index:1}
+  html.bigprops .caserow.page.sec-schools .prop-handbell{z-index:1;margin-left:-150px}
   html.bigprops .caserow.page.sec-schools .prop-handbell img{height:calc(var(--bkh)*1.8)}
   /* hero rows: objects doubled, the lamp two and a half books tall */
   html.bigprops .caserow:not(.page) .prop{margin:0 -6px}
@@ -926,6 +926,12 @@
   html.bigprops .caserow.page.sec-library .prop{margin:0 2px}
   html.bigprops .caserow.page.sec-library .prop-bookstack img{height:calc(var(--bkh)*.42)}
   html.bigprops .caserow.page.sec-library .prop-owl img{height:calc(var(--bkh)*.8)}
+  /* Tom's placements (bench, 17 Sep): the globe at the right of the top catalogue shelf, the open
+     book and the trophy at either end of the bottom one, a touch smaller than he had them */
+  html.bigprops .caserow.page.sec-library .prop-globe img{height:calc(var(--bkh)*1.75)}
+  html.bigprops .caserow.page.sec-library .prop-openbook img{height:calc(var(--bkh)*1.2)}
+  html.bigprops .caserow.page.sec-library .prop-trophy img{height:calc(var(--bkh)*1.05)}
+  html.bigprops .caserow.page.sec-library .prop-globe,html.bigprops .caserow.page.sec-library .prop-openbook,html.bigprops .caserow.page.sec-library .prop-trophy{margin:0 10px}
   /* ============ ROUND 3 (Tom's feedback, 8 Sep 2026) ============ */
   /* props at the ends of every lower shelf, so the case reads as one piece */
   .caserow.page .wing.wl{justify-content:flex-start}
@@ -1473,8 +1479,8 @@ const BIGPROPS=(q=>q.get('props')==='big'||q.get('tune')==='1')(new URLSearchPar
 if(BIGPROPS){ document.documentElement.classList.add('bigprops');
   /* more objects on the lower shelves: the ones the scene already owns but never used */
   const extra={'sec-pick':['@pot_ivy','@fishbowl'],
-    'sec-inside':['@jotter,@globe','@openbook'],
-    'sec-schools':['@pot_fern','@handbell,@trophy']};
+    'sec-inside':['@jotter',''],
+    'sec-schools':['@pot_fern,@handbell','']};
   Object.keys(extra).forEach(id=>{ const sec=document.getElementById(id); if(!sec) return;
     const wl=sec.querySelector('.wing.wl .bks'), wr=sec.querySelector('.wing.wr .bks');
     if(wl) wl.dataset.books=extra[id][0]; if(wr) wr.dataset.books=extra[id][1]; });
@@ -2659,23 +2665,32 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
 </script>
 <script src="/js/welcome-fallback.js"></script>
 <script src="/js/welcome-live.js"></script>
-<!-- ============ THE TUNING BENCH (?tune=1): drag, resize and hide the objects on the case ============
-     Tom's tuning table for the toy-scale scene. Every prop, lamp, bookend and run of books can be
-     dragged; the selected one resizes with the mouse wheel or +/-; Delete hides it; R resets it.
-     Sliders set plank thickness, book size and a global prop multiplier. Positions persist in
-     localStorage (sv-bench) and Export copies them as JSON to paste back for baking into CSS. -->
+<!-- ============ THE TOY-SCALE LAYOUT + THE TUNING BENCH ============
+     Tom laid the scene out on the bench (17 Sep 2026) and exported it; BAKED below is that export,
+     applied as the default in the props mode. ?tune=1 opens the bench on top of it: every prop,
+     lamp, bookend, run of books, heading, card and device can be dragged; the selected one resizes
+     with the wheel or +/-; Delete hides it; R resets it to the baked value. Sliders set plank
+     thickness, book size and a global prop multiplier. Pink guides snap to the case centre, to
+     other objects and to the plank (Alt drags free). Bench edits persist in localStorage (sv-bench)
+     and Export copies the merged layout as JSON for baking. -->
 <style>
-  html.bench .benchable{transform:translate(var(--bx,0px),var(--by,0px)) scale(calc(var(--bs,1)*var(--gk,1)));transform-origin:50% 100%;cursor:grab}
-  html.bench .benchable.bookend.mirror{transform:translate(var(--bx,0px),var(--by,0px)) scale(calc(var(--bs,1)*var(--gk,1))) scaleX(-1)}
-  html.bench .benchable[data-hidden="1"]{display:none}
-  html.bench .benchable{pointer-events:auto!important}
+  html.bigprops .benchable{transform:translate(var(--bx,0px),var(--by,0px)) scale(calc(var(--bs,1)*var(--gk,1)));transform-origin:50% 100%}
+  html.bigprops .benchable.bookend.mirror{transform:translate(var(--bx,0px),var(--by,0px)) scale(calc(var(--bs,1)*var(--gk,1))) scaleX(-1)}
+  html.bigprops .benchable[data-hidden="1"]{display:none}
+  html.bench .benchable{pointer-events:auto!important;cursor:grab}
   html.bench .benchable img,html.bench .benchable .bk,html.bench .lampwrap *{pointer-events:none!important}
   html.bench .benchable iframe,html.bench .benchable button,html.bench .benchable input,html.bench .benchable a,html.bench .benchable label{pointer-events:none!important}
-  html.bench .benchable.seclead,html.bench .benchable.floorcta{cursor:grab}
   html.bench .benchable.sel{outline:2px dashed #c15a3a;outline-offset:4px}
   html.bench .benchable:hover{outline:2px dashed rgba(193,90,58,.5);outline-offset:4px}
   html.bench .bk{pointer-events:none!important}
   html.bench .booktip{display:none!important}
+  /* the goldfish: swims the bowl on its own, follows a finger or a pointer, darts on a tap */
+  html.bigprops .prop-fishbowl{pointer-events:auto}
+  html.bigprops .prop-fishbowl .fish{position:absolute;left:0;bottom:22%;width:34%;height:auto;pointer-events:none;
+    transform:translateX(var(--fx,60%)) translateY(var(--fy,0px)) scaleX(var(--fd,1));opacity:.92;
+    filter:saturate(1.15) brightness(1.02);transition:transform .9s cubic-bezier(.3,.8,.3,1)}
+  html.bigprops .prop-fishbowl .fish.dart{transition:transform .28s cubic-bezier(.16,1,.3,1)}
+  @media (prefers-reduced-motion:reduce){ html.bigprops .prop-fishbowl .fish{transition:none} }
   #bench{position:fixed;right:14px;bottom:14px;z-index:9999;background:#fffdf8;border:1px solid #d9d0c2;border-radius:4px;
     box-shadow:0 12px 30px -12px rgba(40,28,12,.5);font:13px/1.4 Inter,system-ui,sans-serif;color:#2d2a26;padding:10px 12px;width:290px;zoom:calc(1/var(--z,1))}
   #bench h4{margin:0 0 6px;font:600 13px/1.2 Inter,system-ui,sans-serif}
@@ -2683,11 +2698,10 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
   #bench input[type=range]{width:100%}
   #bench .row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
   #bench button{font:600 12px Inter,system-ui,sans-serif;padding:5px 9px;border:1px solid #c9bfae;background:#fff;border-radius:3px;cursor:pointer}
-  #bench button.on{background:#4a3d2c;color:#fff;border-color:#4a3d2c}
   #bench .sel{margin-top:6px;font-size:12px;color:#6b645c;min-height:16px}
   #bench textarea{width:100%;height:90px;margin-top:6px;font:11px/1.3 monospace;display:none}
   #bench .help{font-size:11px;color:#8a8279;margin-top:6px}
-  #guides{position:fixed;inset:0;pointer-events:none;z-index:9998;zoom:calc(1/var(--z,1))}   /* the page is zoomed to the window; the guides are drawn in screen pixels */
+  #guides{position:fixed;inset:0;pointer-events:none;z-index:9998;zoom:calc(1/var(--z,1))}
   #guides .g{position:absolute;background:#e0399a}
   #guides .g.v{width:1px}
   #guides .g.h{height:1px}
@@ -2708,21 +2722,42 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
     <button type="button" id="bench-export">Export</button>
   </div>
   <textarea id="bench-out" readonly></textarea>
-  <div class="help">Drag to move. Wheel or +/- on the selected object to resize. Delete hides, R resets. Arrows nudge. Text, cards and buttons move and scale too. Pink lines snap to the case centre, to other objects and to the plank; hold Alt to drag free.</div>
+  <div class="help">Drag to move. Wheel or +/- on the selected object to resize. Delete hides, R resets to the baked layout. Arrows nudge. Pink lines snap to the case centre, to other objects and to the plank; hold Alt to drag free.</div>
 </div>
 <script>
 (function(){
-  const q=new URLSearchParams(location.search); if(q.get('tune')!=='1') return;
-  const H=document.documentElement; H.classList.add('bench');
-  const KEY='sv-bench'; let S={}; try{ S=JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ S={}; }
-  S.items=S.items||{}; S.plank=S.plank||84; S.books=S.books||1.5; S.props=S.props||1;
+  const q=new URLSearchParams(location.search); const H=document.documentElement;
+  if(!H.classList.contains('bigprops')) return;
+  const TUNE=q.get('tune')==='1'; if(TUNE) H.classList.add('bench');
+  /* ---- Tom's layout, exported from the bench 17 Sep 2026. The globe, open book and trophy he
+     dragged onto the catalogue shelves, and the handbell he moved beside the fern, are placed in
+     those rows in the markup instead (they were rendering behind the shelves as transforms). ---- */
+  const BAKED={plank:80,books:1.45,props:1.2,items:{
+    "row1/wr/lamp":{x:-27,y:9},"row1/headline":{x:0,y:-71,s:1.277},"row1/wl/prop-bookstack":{x:25,y:18},
+    "row1/wl/books":{x:-20,y:1},"row1/wl/bookend":{x:-23,y:1},"row1/wr/prop-trophy":{x:-8,y:0},"row1/wr/books":{x:58,y:1},
+    "row2/door":{x:-89,y:-121},"row2/door/1":{x:95,y:-121},"row2/wl/prop-pot_ivy":{x:-30,y:6,s:1.158},"row2/wl/books":{x:-72,y:0},
+    "row2/wm/wordmark":{x:0,y:22,s:1.158},"row2/wm/prop-hourglass":{x:20,y:0},"row2/wr/prop-clock":{x:-25,y:6},"row2/wr/books":{x:45,y:2},
+    "row3/plaque":{x:-10,y:-30},"row3/wl/prop-globe":{x:26,y:6},
+    "sec-pick/heading":{x:0,y:10,s:1.798},"sec-pick/grid":{x:0,y:0,s:1.05},
+    "sec-inside/heading":{x:-513,y:22,s:1.798},"sec-inside/phone":{s:0.907,x:58,y:-53},"sec-inside/tablet":{s:1.277,x:209,y:-53},
+    "sec-inside/points":{x:164,y:9,s:1.277},"sec-inside/wl/prop-jotter":{s:1.158,x:135,y:0},"sec-inside/wl/books":{x:77,y:0},
+    "sec-library/heading":{s:1.798,x:-16,y:18},"sec-library/prop-owl":{s:1.216,x:11,y:0},
+    "sec-schools/heading":{s:1.798,x:-406,y:-78},"sec-schools/faqcard":{x:355,y:-473,s:1.277},"sec-schools/drawers":{x:849,y:46,s:1.408},
+    "sec-schools/wl/prop-pot_fern":{x:106,y:14,s:0.823},"sec-schools/notice":{x:-805,y:72,s:1.341},"sec-schools/wr/books":{x:5,y:0}
+  }};
+  const KEY='sv-bench'; let S={items:{}};
+  if(TUNE){ try{ S=JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ S={}; } S.items=S.items||{}; }
+  const merged=()=>({plank:S.plank||BAKED.plank,books:S.books||BAKED.books,props:S.props||BAKED.props,items:Object.assign({},BAKED.items,S.items)});
+  const itemOf=id=>Object.assign({},BAKED.items[id]||{},S.items[id]||{});
   const z=()=>window.__svz||1;
-  const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} };
+  const save=()=>{ if(!TUNE) return; try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} };
   const SEL='#stage-landing .prop, #stage-landing .lampwrap, #stage-landing .bookend, #stage-landing .bks, '
     +'#stage-landing .brandslot h1, #stage-landing .brandmid, #stage-landing .slot.door, #stage-landing .boardsplaque, '
     +'#stage-landing .seclead, #stage-landing .pickslot, #stage-landing .tablet, #stage-landing .lessonlist, '
     +'#stage-landing .catwrap, #stage-landing .faqslot, #stage-landing .noticeslot, #stage-landing .floorcta';
   const CONTENT_KIND={brandmid:'wordmark',door:'door',boardsplaque:'plaque',seclead:'heading',pickslot:'grid',tablet:'device',lessonlist:'points',catwrap:'drawers',faqslot:'faqcard',noticeslot:'notice',floorcta:'floorcta'};
+  function idKind(el){ if(el.classList.contains('prop')) return [...el.classList].find(c=>c.startsWith('prop-')); if(el.classList.contains('lampwrap')) return 'lamp'; if(el.classList.contains('bookend')) return 'bookend'; if(el.classList.contains('bks')) return 'books';
+    if(el.tagName==='H1') return 'headline'; for(const c of el.classList){ if(CONTENT_KIND[c]) return (c==='tablet'&&el.classList.contains('pad'))?'tablet':(c==='tablet'?'phone':CONTENT_KIND[c]); } return el.tagName.toLowerCase(); }
   /* a stable id: the section (or hero row number) / the wing / the kind / its index among that kind there */
   function idOf(el){
     const row=el.closest('.caserow'); let sec=row&&row.id?row.id:'';
@@ -2734,10 +2769,8 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
     let n=0; for(const x of same){ if(x.compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING) n++; }
     return [sec,w,kind,n].filter(Boolean).join('/');
   }
-  function idKind(el){ if(el.classList.contains('prop')) return [...el.classList].find(c=>c.startsWith('prop-')); if(el.classList.contains('lampwrap')) return 'lamp'; if(el.classList.contains('bookend')) return 'bookend'; if(el.classList.contains('bks')) return 'books';
-    if(el.tagName==='H1') return 'headline'; for(const c of el.classList){ if(CONTENT_KIND[c]) return (c==='tablet'&&el.classList.contains('pad'))?'tablet':(c==='tablet'?'phone':CONTENT_KIND[c]); } return el.tagName.toLowerCase(); }
   function apply(el){
-    const it=S.items[el.dataset.bench]||{};
+    const it=itemOf(el.dataset.bench);
     el.style.setProperty('--bx',(it.x||0)+'px'); el.style.setProperty('--by',(it.y||0)+'px'); el.style.setProperty('--bs',it.s||1);
     if(it.hidden) el.dataset.hidden='1'; else delete el.dataset.hidden;
   }
@@ -2747,33 +2780,55 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
       if(!el.classList.contains('benchable')){ el.classList.add('benchable'); el.dataset.bench=idOf(el); }
       apply(el);
     });
-    document.querySelectorAll('#stage-landing .prop').forEach(p=>p.style.setProperty('--gk',S.props));
+    const m=merged(); document.querySelectorAll('#stage-landing .prop').forEach(p=>p.style.setProperty('--gk',m.props));
   }
-  function globals(){
-    H.style.setProperty('--plank',S.plank+'px'); H.style.setProperty('--bookk',S.books);
-    document.querySelectorAll('#stage-landing .prop').forEach(p=>p.style.setProperty('--gk',S.props));
-    plank.value=S.plank; plankV.textContent=S.plank+'px'; books.value=S.books; booksV.textContent='×'+(+S.books).toFixed(2); props.value=S.props; propsV.textContent='×'+(+S.props).toFixed(2);
+  function globals(ui){
+    const m=merged(); H.style.setProperty('--plank',m.plank+'px'); H.style.setProperty('--bookk',m.books);
+    document.querySelectorAll('#stage-landing .prop').forEach(p=>p.style.setProperty('--gk',m.props));
+    if(!TUNE||!ui) return;   /* the sliders exist only once the bench is built below */
+    plank.value=m.plank; plankV.textContent=m.plank+'px'; books.value=m.books; booksV.textContent='×'+(+m.books).toFixed(2); props.value=m.props; propsV.textContent='×'+(+m.props).toFixed(2);
   }
+  /* ---- the goldfish ---- */
+  function fishify(){
+    document.querySelectorAll('#stage-landing .prop-fishbowl').forEach(bowl=>{
+      if(bowl.querySelector('.fish')) return;
+      const f=document.createElement('img'); f.className='fish'; f.src='assets/lw/shelf/prop_fish.webp'; f.alt=''; f.draggable=false; bowl.appendChild(f);
+      let x=60, dir=1, target=null, last=0;              /* x = % of the bowl width the fish's left edge sits at */
+      const set=(nx,ny)=>{ f.style.setProperty('--fx',nx+'%'); f.style.setProperty('--fy',(ny||0)+'px'); f.style.setProperty('--fd',dir); };
+      const lo=14, hi=52;                                /* the water: the fish stays off the glass */
+      function tick(t){
+        if(target===null&&t-last>2600){ last=t; const nx=lo+Math.random()*(hi-lo); dir=nx>x?1:-1; x=nx; set(x,(Math.random()-.5)*14); }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      bowl.addEventListener('pointermove',e=>{ if(H.classList.contains('bench')) return; const r=bowl.getBoundingClientRect(); const px=(e.clientX-r.left)/r.width*100-17;
+        const nx=Math.max(lo,Math.min(hi,px)); dir=nx>x?1:(nx<x?-1:dir); x=nx; target=1; set(x,((e.clientY-r.top)/r.height-.6)*40); last=performance.now(); });
+      bowl.addEventListener('pointerleave',()=>{ target=null; });
+      bowl.addEventListener('click',()=>{ if(H.classList.contains('bench')) return; f.classList.add('dart'); dir=-dir; x=dir>0?hi:lo; set(x,-18); setTimeout(()=>{ f.classList.remove('dart'); },400); last=performance.now(); });
+    });
+  }
+  mark(); globals(false); fishify();
+  const host=document.getElementById('catshelves'); if(host) new MutationObserver(()=>mark()).observe(host,{childList:true,subtree:true});
+  if(!TUNE) return;
+
+  /* ================= the bench proper ================= */
   const panel=document.getElementById('bench'), plank=document.getElementById('bench-plank'), plankV=document.getElementById('bench-plank-v'),
     books=document.getElementById('bench-books'), booksV=document.getElementById('bench-books-v'), props=document.getElementById('bench-props'), propsV=document.getElementById('bench-props-v'),
     selLine=document.getElementById('bench-sel'), out=document.getElementById('bench-out');
-  panel.hidden=false;
-  plank.oninput=()=>{ S.plank=+plank.value; globals(); save(); };
-  books.oninput=()=>{ S.books=+books.value; globals(); save(); };
-  props.oninput=()=>{ S.props=+props.value; globals(); save(); };
+  panel.hidden=false; globals(true);
+  plank.oninput=()=>{ S.plank=+plank.value; globals(true); save(); };
+  books.oninput=()=>{ S.books=+books.value; globals(true); save(); };
+  props.oninput=()=>{ S.props=+props.value; globals(true); save(); };
   let sel=null;
-  function select(el){ if(sel) sel.classList.remove('sel'); sel=el; if(sel){ sel.classList.add('sel'); const it=S.items[sel.dataset.bench]||{}; selLine.textContent=sel.dataset.bench+'  x'+(it.x||0)+' y'+(it.y||0)+' ×'+(+(it.s||1)).toFixed(2); } else selLine.textContent='Nothing selected'; }
-  function setItem(el,patch){ const id=el.dataset.bench; S.items[id]=Object.assign(S.items[id]||{},patch); apply(el); save(); select(el); }
-  /* drag */
+  function select(el){ if(sel) sel.classList.remove('sel'); sel=el; if(sel){ sel.classList.add('sel'); const it=itemOf(sel.dataset.bench); selLine.textContent=sel.dataset.bench+'  x'+(it.x||0)+' y'+(it.y||0)+' ×'+(+(it.s||1)).toFixed(2); } else selLine.textContent='Nothing selected'; }
+  function setItem(el,patch){ const id=el.dataset.bench; S.items[id]=Object.assign({},itemOf(id),patch); apply(el); save(); select(el); }
   let drag=null;
   document.addEventListener('pointerdown',e=>{
     const el=e.target.closest('.benchable'); if(!el||e.button!==0) return;
-    if(el.classList.contains('lampwrap')) e.preventDefault();
-    const it=S.items[el.dataset.bench]||{}; drag={el,sx:e.clientX,sy:e.clientY,x:it.x||0,y:it.y||0}; select(el); el.setPointerCapture&&el.setPointerCapture(e.pointerId); e.preventDefault();
+    const it=itemOf(el.dataset.bench); drag={el,sx:e.clientX,sy:e.clientY,x:it.x||0,y:it.y||0}; select(el); el.setPointerCapture&&el.setPointerCapture(e.pointerId); e.preventDefault();
   },true);
-  /* ---- smart guides (Canva-style): while dragging, the object snaps to the case centreline, to the
-     edges and centres of the other objects on its row, to the mirror of an object across the centre,
-     and its feet snap to the plank. Pink lines show what it locked to. Alt drags free. ---- */
+  /* smart guides: the case centreline, the edges and centres of the other objects on the row, the
+     mirror of an object across the centre, and the height the object stood at. Alt drags free. */
   const guides=document.getElementById('guides'), SNAP=8;
   const rectOf=el=>{const r=el.getBoundingClientRect(); return {l:r.left,r:r.right,t:r.top,b:r.bottom,cx:(r.left+r.right)/2,cy:(r.top+r.bottom)/2}};
   function line(kind,pos,from,to,cls){ const d=document.createElement('div'); d.className='g '+kind+(cls?' '+cls:'');
@@ -2790,29 +2845,24 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
     let bestX=null,bestY=null;
     const tryX=(mine,target,draw)=>{ const d=target-mine; if(Math.abs(d)<SNAP*k&&(!bestX||Math.abs(d)<Math.abs(bestX.d))) bestX={d,draw}; };
     const tryY=(mine,target,draw)=>{ const d=target-mine; if(Math.abs(d)<SNAP*k&&(!bestY||Math.abs(d)<Math.abs(bestY.d))) bestY={d,draw}; };
-    /* the case centreline */
     tryX(me.cx,midX,()=>{ line('v',midX,rowR.top,rowR.bottom,'mid'); label(midX,rowR.top+14,'centre'); });
     others.forEach(({r})=>{
-      /* edges and centres */
       [[me.l,r.l],[me.r,r.r],[me.cx,r.cx],[me.l,r.r],[me.r,r.l]].forEach(([a,b])=>tryX(a,b,()=>line('v',b,Math.min(me.t,r.t)-10,Math.max(me.b,r.b)+10)));
       [[me.t,r.t],[me.b,r.b],[me.cy,r.cy]].forEach(([a,b])=>tryY(a,b,()=>line('h',b,Math.min(me.l,r.l)-10,Math.max(me.r,r.r)+10)));
-      /* mirror across the centreline: the same distance from the middle as the other object */
       const mirror=2*midX-r.cx;
       tryX(me.cx,mirror,()=>{ line('v',mirror,Math.min(me.t,r.t)-10,Math.max(me.b,r.b)+10); line('v',r.cx,r.t-10,r.b+10);
         line('h',Math.min(me.t,r.t)-10,r.cx,mirror); label((r.cx+mirror)/2,Math.min(me.t,r.t)-10,'mirrored'); });
     });
-    /* feet on the plank: the height it stood at before it was moved (its rest is y=0) */
-    const it=S.items[el.dataset.bench]||{};
+    const it=itemOf(el.dataset.bench);
     const rest=me.b-(it.y||0)*k; tryY(me.b,rest,()=>line('h',rest,rowR.left,rowR.right));
     if(bestX||bestY){ setItem(el,{x:(it.x||0)+(bestX?Math.round(bestX.d/k):0),y:(it.y||0)+(bestY?Math.round(bestY.d/k):0)}); if(bestX) bestX.draw(); if(bestY) bestY.draw(); }
   }
   document.addEventListener('pointermove',e=>{ if(!drag) return; const k=z(); setItem(drag.el,{x:Math.round(drag.x+(e.clientX-drag.sx)/k),y:Math.round(drag.y+(e.clientY-drag.sy)/k)}); snapDrag(drag.el,e); },true);
   document.addEventListener('pointerup',()=>{ drag=null; setTimeout(()=>{ guides.innerHTML=''; },900); },true);
   document.addEventListener('click',e=>{ if(e.target.closest('.benchable')){ e.preventDefault(); e.stopPropagation(); } },true);
-  /* wheel on the selected object resizes it; anywhere else scrolls as normal */
   document.addEventListener('wheel',e=>{ const el=e.target.closest('.benchable'); if(!el||el!==sel) return; e.preventDefault();
-    const it=S.items[el.dataset.bench]||{}; setItem(el,{s:Math.max(.2,Math.min(6,+((it.s||1)*(e.deltaY<0?1.05:1/1.05)).toFixed(3)))}); },{passive:false,capture:true});
-  document.addEventListener('keydown',e=>{ if(!sel||e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return; const it=S.items[sel.dataset.bench]||{}; const st=e.shiftKey?10:1;
+    const it=itemOf(el.dataset.bench); setItem(el,{s:Math.max(.2,Math.min(6,+((it.s||1)*(e.deltaY<0?1.05:1/1.05)).toFixed(3)))}); },{passive:false,capture:true});
+  document.addEventListener('keydown',e=>{ if(!sel||e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return; const it=itemOf(sel.dataset.bench); const st=e.shiftKey?10:1;
     if(e.key==='+'||e.key==='=') setItem(sel,{s:+((it.s||1)*1.05).toFixed(3)}); else if(e.key==='-') setItem(sel,{s:+((it.s||1)/1.05).toFixed(3)});
     else if(e.key==='ArrowLeft') setItem(sel,{x:(it.x||0)-st}); else if(e.key==='ArrowRight') setItem(sel,{x:(it.x||0)+st});
     else if(e.key==='ArrowUp') setItem(sel,{y:(it.y||0)-st}); else if(e.key==='ArrowDown') setItem(sel,{y:(it.y||0)+st});
@@ -2820,11 +2870,8 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
     else return; e.preventDefault(); });
   document.getElementById('bench-reset-sel').onclick=()=>{ if(!sel) return; delete S.items[sel.dataset.bench]; apply(sel); save(); select(sel); };
   document.getElementById('bench-hide-sel').onclick=()=>{ if(sel) setItem(sel,{hidden:1}); };
-  document.getElementById('bench-reset-all').onclick=()=>{ S={items:{},plank:84,books:1.5,props:1}; save(); mark(); globals(); select(null); };
-  document.getElementById('bench-export').onclick=()=>{ const txt=JSON.stringify(S,null,1); out.style.display='block'; out.value=txt; out.select(); try{ navigator.clipboard.writeText(txt); }catch(e){} };
-  mark(); globals();
-  /* the catalogue shelves render after a fetch: mark them when they land */
-  const host=document.getElementById('catshelves'); if(host) new MutationObserver(()=>mark()).observe(host,{childList:true,subtree:true});
+  document.getElementById('bench-reset-all').onclick=()=>{ S={items:{}}; save(); mark(); globals(true); select(null); };
+  document.getElementById('bench-export').onclick=()=>{ const txt=JSON.stringify(merged(),null,1); out.style.display='block'; out.value=txt; out.select(); try{ navigator.clipboard.writeText(txt); }catch(e){} };
 })();
 </script>
 </body>
