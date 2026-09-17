@@ -1050,9 +1050,7 @@
 
       <!-- S2 · pick your subjects: the wizard's first step, right here on the shelf -->
       <div class="caserow rv page sec-pick" id="sec-pick">
-        <div class="seclead"><h2 class="sechead">Three minutes to set up</h2>
-          <p class="secsub">Start here. Maths, English and Science are already on your shelf &mdash; everyone sits those.
-            Add your options; most students pick four. You can change these any time.</p></div>
+        <div class="seclead"><h2 class="sechead">Three minutes to set up</h2></div>
         <div class="shelf">
           <span class="wing wl"><span class="bks" data-books="@pot_ivy,@bookstack"></span></span>
           <div class="slot pickslot">
@@ -1061,8 +1059,6 @@
               <span class="picker-count" id="pcount-home">No subjects yet</span>
               <button class="cta" id="pnext-home" disabled style="opacity:.45" onclick="go('year')">Continue &rarr;</button>
             </div>
-            <p class="planline embed">Next: your boards and your exam year. Put those in once and the planner fills your
-              run-in for you, in 25-minute sittings &mdash; free, no account needed.</p>
           </div>
           <span class="wing wr"><span class="bks" data-books="@pencilpot,@clock"></span></span>
         </div>
@@ -1071,8 +1067,7 @@
 
       <!-- S3 · inside every lesson: the real thing, on a tablet standing on the shelf. The frame follows the picker. -->
       <div class="caserow rv page sec-inside" id="sec-inside">
-        <div class="seclead"><h2 class="sechead">Inside every lesson</h2>
-          <p class="secsub">A real lesson, live from the library &mdash; <span id="lf-which">GCSE Geography, lesson one</span>. Tick a subject above and it becomes one of yours.</p></div>
+        <div class="seclead"><h2 class="sechead">Inside every lesson</h2></div>
         <div class="shelf">
           <span class="wing wl"><span class="bks" data-books="@globe"></span></span>
           <div class="slot lessonslot">
@@ -1117,7 +1112,6 @@
       <div class="caserow rv page sec-library" id="sec-library">
         <div class="seclead">
           <h2 class="sechead">Every subject, every board</h2>
-          <p class="secsub" id="catsub">Seventy-plus GCSE subjects across AQA, Pearson Edexcel, OCR, WJEC and Eduqas. Tap a book to see its boards and go straight in.</p>
         </div>
         <div class="slot catslot">
           <div class="catshelves" id="catshelves"></div>
@@ -1127,8 +1121,7 @@
 
       <!-- S6 · questions answered + with your school: one shelf, the drawers and two pinned papers -->
       <div class="caserow rv page sec-schools" id="sec-schools">
-        <div class="seclead"><h2 class="sechead">Questions, answered</h2>
-          <p class="secsub">The ones people actually ask &mdash; and a note for teachers.</p></div>
+        <div class="seclead"><h2 class="sechead">Questions, answered</h2></div>
         <div class="shelf">
           <span class="wing wl"><span class="bks" data-books="@pot_fern"></span></span>
           <div class="slot catwrap"><div class="catalogue" id="faqcat"><img class="catart" src="assets/lw/shelf/catalogue.webp" alt="" draggable="false"></div></div>
@@ -1211,7 +1204,6 @@
   <div class="view view-year">
     <div class="picker-head">
       <h1>Which year are you in?</h1>
-      <p>This sets your exam summer &mdash; the countdown and the planner are built from it.</p>
     </div>
     <div class="ylist" id="ylist"></div>
     <div class="picker-foot">
@@ -1223,7 +1215,6 @@
   <div class="view view-boards">
     <div class="picker-head">
       <h1>Which exam board?</h1>
-      <p>Tell us the board for each subject &mdash; that decides the exact spec you&rsquo;ll see.</p>
     </div>
 
     <div class="boardlist" id="blist"></div>
@@ -1239,8 +1230,6 @@
   <div class="view view-tier">
     <div class="picker-head">
       <h1>Higher or Foundation?</h1>
-      <p>Maths, the sciences and languages are sat at two tiers. Most students sit Higher &mdash;
-        ask your teacher if you&rsquo;re not sure. You can change it any time.</p>
     </div>
 
     <div class="boardlist tierlist" id="tlist"></div>
@@ -1256,8 +1245,6 @@
   <div class="view view-topics">
     <div class="picker-head">
       <h1>Choose your topics.</h1>
-      <p>Some subjects have options your school chose &mdash; History topics, set texts, religions.
-        One quick question at a time.</p>
     </div>
 
     <div class="stepcard" id="tcard"></div>
@@ -1272,7 +1259,6 @@
   <div class="view view-feel">
     <div class="picker-head">
       <h1 id="feelh"></h1>
-      <p>How are you doing with each topic? Tap a topic to see what&rsquo;s in it.</p>
     </div>
     <div class="stepcard feelcard" id="feelcard"></div>
     <div class="picker-foot">
@@ -1904,7 +1890,7 @@ function renderBoards(){
      the odd ones out. Only worth showing once there are enough rows to save taps. */
   if(picked.length>=3){
     const row=document.createElement('div'); row.className='brow allrow';
-    row.innerHTML='<span class="bn">Same board for all?<small>then fix the odd ones out</small></span><span class="chips"></span>';
+    row.innerHTML='<span class="bn">Same board for all?</span><span class="chips"></span>';
     const chips=row.querySelector('.chips');
     BOARDKEYS.forEach((k,i)=>{
       const ch=chipEl(CHIPLBL[k],()=>{
@@ -2026,7 +2012,7 @@ function syncTier(){
   const join=a=>a.length>1?a.slice(0,-1).join(', ')+' and '+a[a.length-1]:a[0];
   const left=need.filter(sl=>!tiers[sl]), un=need.filter(sl=>tiers[sl]==='unsure');
   const v=document.getElementById('tverdict');
-  let t=left.length?(left.length===need.length?'One answer per subject.':left.length+' still to answer.'):'<b>All set.</b>';
+  let t=left.length?(left.length===need.length?'':left.length+' still to answer.'):'<b>All set.</b>';
   if(un.length) t+=' <span class="note">Higher for now in '+join(un.map(nm))+' — most students sit it. Ask your teacher and change it any time.</span>';
   v.innerHTML=t;
   const nx=document.getElementById('tiernext'), ready=!left.length, needT=topicsNeeded().length>0;
