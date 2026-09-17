@@ -866,6 +866,8 @@
      and the outermost stand mostly off the edge of the screen; the planks are thicker; the
      lamp towers over the books. The page is a 1835px canvas zoomed to the window, so the case
      already fills the screen: an object pushed past the case edge is cut by the screen edge. */
+  /* the books grow with the scene: half as tall again on every shelf of the case */
+  html.bigprops #stage-landing .bk,html.bigprops #stage-landing .bk img{height:calc(var(--bkh,204px)*var(--vf,1)*1.5)}
   html.bigprops .caserow .ledgewrap{height:64px}
   html.bigprops .caserow .ledgewrap .ledge{height:64px}
   html.bigprops .caserow .bookend{height:calc(var(--bkh)*1.4)}
@@ -920,9 +922,9 @@
   html.bigprops .caserow.page .prop-cupboard img{height:calc(var(--bkh)*2.4)}
   html.bigprops .caserow.page .prop::before{height:34px;left:10%;right:10%;filter:blur(4px)}
   /* the library rows: props sit among the books, so they stay book-sized */
-  html.bigprops .sec-library .prop{margin:0 2px}
-  html.bigprops .sec-library .prop-bookstack img{height:calc(var(--bkh)*.36)}
-  html.bigprops .sec-library .prop-owl img{height:calc(var(--bkh)*.7)}
+  html.bigprops .caserow.page.sec-library .prop{margin:0 2px}
+  html.bigprops .caserow.page.sec-library .prop-bookstack img{height:calc(var(--bkh)*.42)}
+  html.bigprops .caserow.page.sec-library .prop-owl img{height:calc(var(--bkh)*.8)}
   /* ============ ROUND 3 (Tom's feedback, 8 Sep 2026) ============ */
   /* props at the ends of every lower shelf, so the case reads as one piece */
   .caserow.page .wing.wl{justify-content:flex-start}
@@ -1475,6 +1477,12 @@ if(BIGPROPS){ document.documentElement.classList.add('bigprops');
   Object.keys(extra).forEach(id=>{ const sec=document.getElementById(id); if(!sec) return;
     const wl=sec.querySelector('.wing.wl .bks'), wr=sec.querySelector('.wing.wr .bks');
     if(wl) wl.dataset.books=extra[id][0]; if(wr) wr.dataset.books=extra[id][1]; });
+  /* the hero shelves hold fewer, bigger books: at toy scale a shelf shows three or four spines */
+  const hero=[['maths,lang,lit,@bookstack','@trophy,history,geog,@inkwell'],
+    ['@pot_ivy,cs,business','@owl,psych,rs,econ,@hourglass','@clock,drama'],
+    ['@handbell,music,dt,@globe','@pot_fern,astro,geology,classics']];
+  [...document.querySelectorAll('#stage-landing > .caserow:not(.page):not(.mrow)')].slice(0,3).forEach((row,ri)=>{
+    row.querySelectorAll(':scope > .shelf > .wing > .bks').forEach((g,wi)=>{ if(hero[ri][wi]) g.dataset.books=hero[ri][wi]; }); });
 }
 function buildCase(){
   document.querySelectorAll('#stage-landing .bks').forEach(g=>{

@@ -197,6 +197,11 @@
     host.innerHTML=''; current=null; panel.hidden=true;
     var half=Math.ceil(fams.length/2), rowsOf=[fams.slice(0,half),fams.slice(half)];
     var PROPS=[['@bookstack',null],[null,'@owl']]; /* [leading, trailing] per row */
+    /* toy-scale props mode: the books are half as tall again, so three shelves instead of two */
+    if(document.documentElement.classList.contains('bigprops')){
+      var third=Math.ceil(fams.length/3); rowsOf=[fams.slice(0,third),fams.slice(third,2*third),fams.slice(2*third)];
+      PROPS=[['@bookstack',null],[null,'@owl'],[null,null]];
+    }
     rowsOf.forEach(function(list,ri){
       var row=document.createElement('div'); row.className='catrow';
       var shelf=document.createElement('div'); shelf.className='shelf';
