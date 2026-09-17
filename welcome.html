@@ -2686,7 +2686,7 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
   html.bench .booktip{display:none!important}
   /* the goldfish: swims the bowl on its own, follows a finger or a pointer, darts on a tap */
   html.bigprops .prop-fishbowl{pointer-events:auto}
-  html.bigprops .prop-fishbowl .fish{position:absolute;left:0;bottom:22%;width:34%;height:auto;pointer-events:none;
+  html.bigprops .prop-fishbowl .fish{position:absolute;left:0;bottom:26%;width:27%;height:auto;pointer-events:none;
     transform:translateX(var(--fx,60%)) translateY(var(--fy,0px)) scaleX(var(--fd,1));opacity:.92;
     filter:saturate(1.15) brightness(1.02);transition:transform .9s cubic-bezier(.3,.8,.3,1)}
   html.bigprops .prop-fishbowl .fish.dart{transition:transform .28s cubic-bezier(.16,1,.3,1)}
@@ -2795,13 +2795,13 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
       const f=document.createElement('img'); f.className='fish'; f.src='assets/lw/shelf/prop_fish.webp'; f.alt=''; f.draggable=false; bowl.appendChild(f);
       let x=60, dir=1, target=null, last=0;              /* x = % of the bowl width the fish's left edge sits at */
       const set=(nx,ny)=>{ f.style.setProperty('--fx',nx+'%'); f.style.setProperty('--fy',(ny||0)+'px'); f.style.setProperty('--fd',dir); };
-      const lo=14, hi=52;                                /* the water: the fish stays off the glass */
+      const lo=24, hi=50;                                /* the water: the fish stays off the glass */
       function tick(t){
         if(target===null&&t-last>2600){ last=t; const nx=lo+Math.random()*(hi-lo); dir=nx>x?1:-1; x=nx; set(x,(Math.random()-.5)*14); }
         requestAnimationFrame(tick);
       }
       requestAnimationFrame(tick);
-      bowl.addEventListener('pointermove',e=>{ if(H.classList.contains('bench')) return; const r=bowl.getBoundingClientRect(); const px=(e.clientX-r.left)/r.width*100-17;
+      bowl.addEventListener('pointermove',e=>{ if(H.classList.contains('bench')) return; const r=bowl.getBoundingClientRect(); const px=(e.clientX-r.left)/r.width*100-13;
         const nx=Math.max(lo,Math.min(hi,px)); dir=nx>x?1:(nx<x?-1:dir); x=nx; target=1; set(x,((e.clientY-r.top)/r.height-.6)*40); last=performance.now(); });
       bowl.addEventListener('pointerleave',()=>{ target=null; });
       bowl.addEventListener('click',()=>{ if(H.classList.contains('bench')) return; f.classList.add('dart'); dir=-dir; x=dir>0?hi:lo; set(x,-18); setTimeout(()=>{ f.classList.remove('dart'); },400); last=performance.now(); });
