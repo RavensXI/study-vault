@@ -861,56 +861,68 @@
     font-family:var(--hand);font-size:1.25rem;color:var(--mut);pointer-events:none;transition:opacity .3s}
 
 
-  /* ============ BIG PROPS (Tom, 17 Sep 2026: "cluttered and large, toy-scale") ============
-     ?props=big — the case runs the full width of the screen, the lower shelves carry
-     more objects at two to three times the size, overlapping, the outermost cut by the
-     screen edge. The hero rows keep their 1835px composition inside the wider wall. */
-  /* the page is a 1835px canvas zoomed to the window, so the case already fills the
-     screen: an object pushed past the case edge is cut by the screen edge */
+  /* ============ BIG PROPS (Tom, 17 Sep 2026: "imagine we're more miniature than we are") ============
+     ?props=big — the viewer is toy-sized. Shelf objects run to half a screen tall, overlap,
+     and the outermost stand mostly off the edge of the screen; the planks are thicker; the
+     lamp towers over the books. The page is a 1835px canvas zoomed to the window, so the case
+     already fills the screen: an object pushed past the case edge is cut by the screen edge. */
+  html.bigprops .caserow .ledgewrap{height:64px}
+  html.bigprops .caserow .ledgewrap .ledge{height:64px}
+  html.bigprops .caserow .bookend{height:calc(var(--bkh)*1.4)}
   html.bigprops .caserow.page .shelf{padding:0}
   html.bigprops .caserow.page .wing{min-width:0;overflow:visible;position:relative;z-index:0}
+  html.bigprops .bookcase.shelfstage{overflow-x:clip;overflow-y:visible}
   html.bigprops .caserow.page .bks{gap:0}
-  html.bigprops .caserow.page .prop{margin:0 -26px}
-  html.bigprops .caserow.page .prop:nth-child(even){z-index:1}
-  html.bigprops .caserow.page .wing.wl .prop:first-child{margin-left:-70px}
-  html.bigprops .caserow.page .wing.wr .prop:last-child{margin-right:-70px}
-  /* hero rows: props up by two thirds, the lamp taller than the books */
-  html.bigprops .caserow:not(.page) .prop-pot_ivy img{height:calc(var(--bkh)*1.0);margin-bottom:calc(var(--bkh)*-.2)}
-  html.bigprops .caserow:not(.page) .prop-pot_ivy::before{bottom:calc(var(--bkh)*.2 + 1px)}
-  html.bigprops .caserow:not(.page) .prop-pot_fern img{height:calc(var(--bkh)*.82)}
-  html.bigprops .caserow:not(.page) .prop-clock img{height:calc(var(--bkh)*.88)}
-  html.bigprops .caserow:not(.page) .prop-hourglass img{height:calc(var(--bkh)*.74)}
-  html.bigprops .caserow:not(.page) .prop-inkwell img{height:calc(var(--bkh)*.5)}
-  html.bigprops .caserow:not(.page) .prop-bookstack img{height:calc(var(--bkh)*.4)}
-  html.bigprops .caserow:not(.page) .prop-globe img{height:calc(var(--bkh)*.98)}
-  html.bigprops .caserow:not(.page) .prop-trophy img{height:calc(var(--bkh)*.84)}
-  html.bigprops .caserow:not(.page) .prop-pencilpot img{height:calc(var(--bkh)*.7)}
-  html.bigprops .caserow:not(.page) .prop-owl img{height:calc(var(--bkh)*.8)}
-  html.bigprops .caserow:not(.page) .prop-handbell img{height:calc(var(--bkh)*.74)}
-  html.bigprops .lampwrap .lamp{height:calc(var(--bkh)*1.9)}
-  /* lower shelves: toy scale */
-  html.bigprops .caserow.page .prop-pot_ivy img{height:calc(var(--bkh)*1.7);margin-bottom:calc(var(--bkh)*-.34)}
-  html.bigprops .caserow.page .prop-pot_ivy::before{bottom:calc(var(--bkh)*.34 + 1px)}
-  html.bigprops .caserow.page .prop-pot_fern img{height:calc(var(--bkh)*1.5)}
-  html.bigprops .caserow.page .prop-clock img{height:calc(var(--bkh)*1.35)}
-  html.bigprops .caserow.page .prop-hourglass img{height:calc(var(--bkh)*1.2)}
-  html.bigprops .caserow.page .prop-inkwell img{height:calc(var(--bkh)*.8)}
-  html.bigprops .caserow.page .prop-bookstack img{height:calc(var(--bkh)*.55)}
-  html.bigprops .caserow.page .prop-globe img{height:calc(var(--bkh)*1.6)}
-  html.bigprops .caserow.page .prop-trophy img{height:calc(var(--bkh)*1.35)}
-  html.bigprops .caserow.page .prop-pencilpot img{height:calc(var(--bkh)*1.15)}
-  html.bigprops .caserow.page .prop-owl img{height:calc(var(--bkh)*1.3)}
-  html.bigprops .caserow.page .prop-handbell img{height:calc(var(--bkh)*1.15)}
-  html.bigprops .caserow.page .prop-fishbowl img{height:calc(var(--bkh)*1.3)}
-  html.bigprops .caserow.page .prop-timer img{height:calc(var(--bkh)*1.2)}
-  html.bigprops .caserow.page .prop-jotter img{height:calc(var(--bkh)*1.3)}
-  html.bigprops .caserow.page .prop-openbook img{height:calc(var(--bkh)*1.0)}
-  html.bigprops .caserow.page .prop-cupboard img{height:calc(var(--bkh)*1.3)}
+  html.bigprops .caserow.page .prop{margin:0}
+  /* each wing: one big object standing partly off the screen, a small one at its foot.
+     Overhangs are per row: the wings are 200-350px wide before the content starts. */
+  html.bigprops .caserow.page .wing.wl .prop:first-child{margin-left:var(--ohl,-200px)}
+  html.bigprops .caserow.page .wing.wr .prop:last-child{margin-right:var(--ohr,-200px)}
+  html.bigprops .sec-pick{--ohl:-160px;--ohr:-190px}
+  html.bigprops .sec-inside{--ohl:-230px;--ohr:-230px}
+  html.bigprops .caserow.page.sec-inside .prop-globe{margin-left:-40px;z-index:1}
+  html.bigprops .sec-schools{--ohl:-230px;--ohr:-150px}
+  html.bigprops .caserow.page.sec-schools .prop-trophy{margin-left:-140px}
+  html.bigprops .caserow.page.sec-schools .prop-handbell{z-index:1}
+  html.bigprops .caserow.page.sec-schools .prop-handbell img{height:calc(var(--bkh)*1.8)}
+  /* hero rows: objects doubled, the lamp two and a half books tall */
+  html.bigprops .caserow:not(.page) .prop{margin:0 -6px}
+  html.bigprops .caserow:not(.page) .prop-pot_ivy img{height:calc(var(--bkh)*1.24);margin-bottom:calc(var(--bkh)*-.25)}
+  html.bigprops .caserow:not(.page) .prop-pot_ivy::before{bottom:calc(var(--bkh)*.25 + 1px)}
+  html.bigprops .caserow:not(.page) .prop-pot_fern img{height:calc(var(--bkh)*1.0)}
+  html.bigprops .caserow:not(.page) .prop-clock img{height:calc(var(--bkh)*1.08)}
+  html.bigprops .caserow:not(.page) .prop-hourglass img{height:calc(var(--bkh)*.92)}
+  html.bigprops .caserow:not(.page) .prop-inkwell img{height:calc(var(--bkh)*.72)}
+  html.bigprops .caserow:not(.page) .prop-bookstack img{height:calc(var(--bkh)*.54)}
+  html.bigprops .caserow:not(.page) .prop-globe img{height:calc(var(--bkh)*1.2)}
+  html.bigprops .caserow:not(.page) .prop-trophy img{height:calc(var(--bkh)*1.04)}
+  html.bigprops .caserow:not(.page) .prop-pencilpot img{height:calc(var(--bkh)*.88)}
+  html.bigprops .caserow:not(.page) .prop-owl img{height:calc(var(--bkh)*1.0)}
+  html.bigprops .caserow:not(.page) .prop-handbell img{height:calc(var(--bkh)*.92)}
+  html.bigprops .lampwrap .lamp{height:calc(var(--bkh)*2.4)}
+  /* lower shelves: toy scale, half a screen tall */
+  html.bigprops .caserow.page .prop-pot_ivy img{height:calc(var(--bkh)*3.2);margin-bottom:calc(var(--bkh)*-.64)}
+  html.bigprops .caserow.page .prop-pot_ivy::before{bottom:calc(var(--bkh)*.64 + 1px)}
+  html.bigprops .caserow.page .prop-pot_fern img{height:calc(var(--bkh)*3.0)}
+  html.bigprops .caserow.page .prop-clock img{height:calc(var(--bkh)*2.2)}
+  html.bigprops .caserow.page .prop-hourglass img{height:calc(var(--bkh)*2.2)}
+  html.bigprops .caserow.page .prop-inkwell img{height:calc(var(--bkh)*1.4)}
+  html.bigprops .caserow.page .prop-bookstack img{height:calc(var(--bkh)*.9)}
+  html.bigprops .caserow.page .prop-globe img{height:calc(var(--bkh)*2.8)}
+  html.bigprops .caserow.page .prop-trophy img{height:calc(var(--bkh)*2.6)}
+  html.bigprops .caserow.page .prop-pencilpot img{height:calc(var(--bkh)*2.0)}
+  html.bigprops .caserow.page .prop-owl img{height:calc(var(--bkh)*2.4)}
+  html.bigprops .caserow.page .prop-handbell img{height:calc(var(--bkh)*2.2)}
+  html.bigprops .caserow.page .prop-fishbowl img{height:calc(var(--bkh)*2.6)}
+  html.bigprops .caserow.page .prop-timer img{height:calc(var(--bkh)*2.2)}
+  html.bigprops .caserow.page .prop-jotter img{height:calc(var(--bkh)*2.4)}
+  html.bigprops .caserow.page .prop-openbook img{height:calc(var(--bkh)*2.0)}
+  html.bigprops .caserow.page .prop-cupboard img{height:calc(var(--bkh)*2.4)}
+  html.bigprops .caserow.page .prop::before{height:34px;left:10%;right:10%;filter:blur(4px)}
   /* the library rows: props sit among the books, so they stay book-sized */
   html.bigprops .sec-library .prop{margin:0 2px}
   html.bigprops .sec-library .prop-bookstack img{height:calc(var(--bkh)*.36)}
   html.bigprops .sec-library .prop-owl img{height:calc(var(--bkh)*.7)}
-  html.bigprops .caserow.page .prop::before{height:22px;left:8%;right:8%}
   /* ============ ROUND 3 (Tom's feedback, 8 Sep 2026) ============ */
   /* props at the ends of every lower shelf, so the case reads as one piece */
   .caserow.page .wing.wl{justify-content:flex-start}
@@ -1457,8 +1469,8 @@ function caseBook(s,i,n,flop){
 const BIGPROPS=new URLSearchParams(location.search).get('props')==='big';
 if(BIGPROPS){ document.documentElement.classList.add('bigprops');
   /* more objects on the lower shelves: the ones the scene already owns but never used */
-  const extra={'sec-pick':['@pot_ivy,@bookstack','@fishbowl,@clock'],
-    'sec-inside':['@jotter,@globe','@hourglass,@openbook'],
+  const extra={'sec-pick':['@pot_ivy','@fishbowl'],
+    'sec-inside':['@jotter,@globe','@openbook'],
     'sec-schools':['@pot_fern','@handbell,@trophy']};
   Object.keys(extra).forEach(id=>{ const sec=document.getElementById(id); if(!sec) return;
     const wl=sec.querySelector('.wing.wl .bks'), wr=sec.querySelector('.wing.wr .bks');
