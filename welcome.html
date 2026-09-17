@@ -2687,7 +2687,14 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
   #bench .sel{margin-top:6px;font-size:12px;color:#6b645c;min-height:16px}
   #bench textarea{width:100%;height:90px;margin-top:6px;font:11px/1.3 monospace;display:none}
   #bench .help{font-size:11px;color:#8a8279;margin-top:6px}
+  #guides{position:fixed;inset:0;pointer-events:none;z-index:9998}
+  #guides .g{position:absolute;background:#e0399a}
+  #guides .g.v{width:1px}
+  #guides .g.h{height:1px}
+  #guides .g.mid{background:none;border-left:1px dashed #e0399a}
+  #guides .lbl{position:absolute;background:#e0399a;color:#fff;font:600 10px/1 Inter,system-ui,sans-serif;padding:3px 5px;border-radius:2px;transform:translate(-50%,-50%);white-space:nowrap}
 </style>
+<div id="guides"></div>
 <div id="bench" hidden>
   <h4>Bench</h4>
   <label>Plank <input type="range" id="bench-plank" min="40" max="130" step="2"><span id="bench-plank-v"></span></label>
@@ -2701,7 +2708,7 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
     <button type="button" id="bench-export">Export</button>
   </div>
   <textarea id="bench-out" readonly></textarea>
-  <div class="help">Drag to move. Wheel or +/- on the selected object to resize. Delete hides, R resets. Arrows nudge. Text, cards and buttons move and scale too.</div>
+  <div class="help">Drag to move. Wheel or +/- on the selected object to resize. Delete hides, R resets. Arrows nudge. Text, cards and buttons move and scale too. Pink lines snap to the case centre, to other objects and to the plank; hold Alt to drag free.</div>
 </div>
 <script>
 (function(){
@@ -2764,8 +2771,43 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
     if(el.classList.contains('lampwrap')) e.preventDefault();
     const it=S.items[el.dataset.bench]||{}; drag={el,sx:e.clientX,sy:e.clientY,x:it.x||0,y:it.y||0}; select(el); el.setPointerCapture&&el.setPointerCapture(e.pointerId); e.preventDefault();
   },true);
-  document.addEventListener('pointermove',e=>{ if(!drag) return; const k=z(); setItem(drag.el,{x:Math.round(drag.x+(e.clientX-drag.sx)/k),y:Math.round(drag.y+(e.clientY-drag.sy)/k)}); },true);
-  document.addEventListener('pointerup',()=>{ drag=null; },true);
+  /* ---- smart guides (Canva-style): while dragging, the object snaps to the case centreline, to the
+     edges and centres of the other objects on its row, to the mirror of an object across the centre,
+     and its feet snap to the plank. Pink lines show what it locked to. Alt drags free. ---- */
+  const guides=document.getElementById('guides'), SNAP=8;
+  const rectOf=el=>{const r=el.getBoundingClientRect(); return {l:r.left,r:r.right,t:r.top,b:r.bottom,cx:(r.left+r.right)/2,cy:(r.top+r.bottom)/2}};
+  function line(kind,pos,from,to,cls){ const d=document.createElement('div'); d.className='g '+kind+(cls?' '+cls:'');
+    if(kind==='v'){ d.style.left=pos+'px'; d.style.top=Math.min(from,to)+'px'; d.style.height=Math.abs(to-from)+'px'; }
+    else { d.style.top=pos+'px'; d.style.left=Math.min(from,to)+'px'; d.style.width=Math.abs(to-from)+'px'; }
+    guides.appendChild(d); }
+  function label(x,y,txt){ const d=document.createElement('div'); d.className='lbl'; d.style.left=x+'px'; d.style.top=y+'px'; d.textContent=txt; guides.appendChild(d); }
+  function snapDrag(el,e){
+    guides.innerHTML=''; if(e.altKey) return;
+    const k=z(), me=rectOf(el), stage=document.getElementById('stage-landing').getBoundingClientRect();
+    const row=el.closest('.caserow')||document.getElementById('stage-landing');
+    const rowR=row.getBoundingClientRect(), midX=(stage.left+stage.right)/2;
+    const others=[...row.querySelectorAll('.benchable')].filter(o=>o!==el&&!o.contains(el)&&!el.contains(o)&&!o.dataset.hidden).map(o=>({el:o,r:rectOf(o)}));
+    let bestX=null,bestY=null;
+    const tryX=(mine,target,draw)=>{ const d=target-mine; if(Math.abs(d)<SNAP*k&&(!bestX||Math.abs(d)<Math.abs(bestX.d))) bestX={d,draw}; };
+    const tryY=(mine,target,draw)=>{ const d=target-mine; if(Math.abs(d)<SNAP*k&&(!bestY||Math.abs(d)<Math.abs(bestY.d))) bestY={d,draw}; };
+    /* the case centreline */
+    tryX(me.cx,midX,()=>{ line('v',midX,rowR.top,rowR.bottom,'mid'); label(midX,rowR.top+14,'centre'); });
+    others.forEach(({r})=>{
+      /* edges and centres */
+      [[me.l,r.l],[me.r,r.r],[me.cx,r.cx],[me.l,r.r],[me.r,r.l]].forEach(([a,b])=>tryX(a,b,()=>line('v',b,Math.min(me.t,r.t)-10,Math.max(me.b,r.b)+10)));
+      [[me.t,r.t],[me.b,r.b],[me.cy,r.cy]].forEach(([a,b])=>tryY(a,b,()=>line('h',b,Math.min(me.l,r.l)-10,Math.max(me.r,r.r)+10)));
+      /* mirror across the centreline: the same distance from the middle as the other object */
+      const mirror=2*midX-r.cx;
+      tryX(me.cx,mirror,()=>{ line('v',mirror,Math.min(me.t,r.t)-10,Math.max(me.b,r.b)+10); line('v',r.cx,r.t-10,r.b+10);
+        line('h',Math.min(me.t,r.t)-10,r.cx,mirror); label((r.cx+mirror)/2,Math.min(me.t,r.t)-10,'mirrored'); });
+    });
+    /* feet on the plank: the height it stood at before it was moved (its rest is y=0) */
+    const it=S.items[el.dataset.bench]||{};
+    const rest=me.b-(it.y||0)*k; tryY(me.b,rest,()=>line('h',rest,rowR.left,rowR.right));
+    if(bestX||bestY){ setItem(el,{x:(it.x||0)+(bestX?Math.round(bestX.d/k):0),y:(it.y||0)+(bestY?Math.round(bestY.d/k):0)}); if(bestX) bestX.draw(); if(bestY) bestY.draw(); }
+  }
+  document.addEventListener('pointermove',e=>{ if(!drag) return; const k=z(); setItem(drag.el,{x:Math.round(drag.x+(e.clientX-drag.sx)/k),y:Math.round(drag.y+(e.clientY-drag.sy)/k)}); snapDrag(drag.el,e); },true);
+  document.addEventListener('pointerup',()=>{ drag=null; setTimeout(()=>{ guides.innerHTML=''; },900); },true);
   document.addEventListener('click',e=>{ if(e.target.closest('.benchable')){ e.preventDefault(); e.stopPropagation(); } },true);
   /* wheel on the selected object resizes it; anywhere else scrolls as normal */
   document.addEventListener('wheel',e=>{ const el=e.target.closest('.benchable'); if(!el||el!==sel) return; e.preventDefault();
