@@ -2396,7 +2396,7 @@ function fitScale(){
 fitScale(); addEventListener('resize',fitScale);
 /* page-by-page snapping only on the landing view (the wizard views scroll freely) */
 const finePointer=matchMedia('(hover:hover) and (pointer:fine)');
-function syncSnap(){ document.documentElement.classList.toggle('snappy', document.body.dataset.view==='landing' && (finePointer.matches || (q.has('snap') && innerWidth>=900))); }
+function syncSnap(){ document.documentElement.classList.toggle('snappy', document.body.dataset.view==='landing' && !q.has('tune') && (finePointer.matches || (q.has('snap') && innerWidth>=900))); }   /* the tuning bench scrolls freely: no page-by-page settle, no 100vh sections */
 finePointer.addEventListener && finePointer.addEventListener('change',syncSnap);
 syncSnap(); new MutationObserver(syncSnap).observe(document.body,{attributes:true,attributeFilter:['data-view']});
 /* ?at=N - verification hook: show page N (0 = fold) for headless captures. Headless
