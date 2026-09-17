@@ -2670,6 +2670,8 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
   html.bench .benchable[data-hidden="1"]{display:none}
   html.bench .benchable{pointer-events:auto!important}
   html.bench .benchable img,html.bench .benchable .bk,html.bench .lampwrap *{pointer-events:none!important}
+  html.bench .benchable iframe,html.bench .benchable button,html.bench .benchable input,html.bench .benchable a,html.bench .benchable label{pointer-events:none!important}
+  html.bench .benchable.seclead,html.bench .benchable.floorcta{cursor:grab}
   html.bench .benchable.sel{outline:2px dashed #c15a3a;outline-offset:4px}
   html.bench .benchable:hover{outline:2px dashed rgba(193,90,58,.5);outline-offset:4px}
   html.bench .bk{pointer-events:none!important}
@@ -2699,7 +2701,7 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
     <button type="button" id="bench-export">Export</button>
   </div>
   <textarea id="bench-out" readonly></textarea>
-  <div class="help">Drag to move. Wheel or +/- on the selected object to resize. Delete hides, R resets. Arrows nudge.</div>
+  <div class="help">Drag to move. Wheel or +/- on the selected object to resize. Delete hides, R resets. Arrows nudge. Text, cards and buttons move and scale too.</div>
 </div>
 <script>
 (function(){
@@ -2709,19 +2711,24 @@ window.SV_LIB={SUBJECTS:SUBJECTS};
   S.items=S.items||{}; S.plank=S.plank||84; S.books=S.books||1.5; S.props=S.props||1;
   const z=()=>window.__svz||1;
   const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} };
-  const SEL='#stage-landing .prop, #stage-landing .lampwrap, #stage-landing .bookend, #stage-landing .bks';
+  const SEL='#stage-landing .prop, #stage-landing .lampwrap, #stage-landing .bookend, #stage-landing .bks, '
+    +'#stage-landing .brandslot h1, #stage-landing .brandmid, #stage-landing .slot.door, #stage-landing .boardsplaque, '
+    +'#stage-landing .seclead, #stage-landing .pickslot, #stage-landing .tablet, #stage-landing .lessonlist, '
+    +'#stage-landing .catwrap, #stage-landing .faqslot, #stage-landing .noticeslot, #stage-landing .floorcta';
+  const CONTENT_KIND={brandmid:'wordmark',door:'door',boardsplaque:'plaque',seclead:'heading',pickslot:'grid',tablet:'device',lessonlist:'points',catwrap:'drawers',faqslot:'faqcard',noticeslot:'notice',floorcta:'floorcta'};
   /* a stable id: the section (or hero row number) / the wing / the kind / its index among that kind there */
   function idOf(el){
     const row=el.closest('.caserow'); let sec=row&&row.id?row.id:'';
     if(!sec&&row){ const rows=[...document.querySelectorAll('#stage-landing > .caserow')]; sec='row'+(rows.indexOf(row)+1); }
     if(!sec) sec='cat';
     const wing=el.closest('.wing'); const w=wing?(wing.classList.contains('wl')?'wl':wing.classList.contains('wr')?'wr':'wm'):'';
-    const kind=el.classList.contains('prop')?[...el.classList].find(c=>c.startsWith('prop-')):el.classList.contains('lampwrap')?'lamp':el.classList.contains('bookend')?'bookend':'books';
+    const kind=idKind(el);
     const scope=wing||row||document; const same=[...scope.querySelectorAll(SEL)].filter(x=>x!==el&&idKind(x)===kind);
     let n=0; for(const x of same){ if(x.compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING) n++; }
     return [sec,w,kind,n].filter(Boolean).join('/');
   }
-  function idKind(el){ return el.classList.contains('prop')?[...el.classList].find(c=>c.startsWith('prop-')):el.classList.contains('lampwrap')?'lamp':el.classList.contains('bookend')?'bookend':'books'; }
+  function idKind(el){ if(el.classList.contains('prop')) return [...el.classList].find(c=>c.startsWith('prop-')); if(el.classList.contains('lampwrap')) return 'lamp'; if(el.classList.contains('bookend')) return 'bookend'; if(el.classList.contains('bks')) return 'books';
+    if(el.tagName==='H1') return 'headline'; for(const c of el.classList){ if(CONTENT_KIND[c]) return (c==='tablet'&&el.classList.contains('pad'))?'tablet':(c==='tablet'?'phone':CONTENT_KIND[c]); } return el.tagName.toLowerCase(); }
   function apply(el){
     const it=S.items[el.dataset.bench]||{};
     el.style.setProperty('--bx',(it.x||0)+'px'); el.style.setProperty('--by',(it.y||0)+'px'); el.style.setProperty('--bs',it.s||1);
