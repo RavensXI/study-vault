@@ -636,6 +636,9 @@
   .brow>img{grid-column:1}
   .brow .bn{grid-column:2}
   .brow:first-child{border-top:none}
+  .brow.course{border-top:none;padding-top:0;margin-top:-.15rem}
+  .brow.course[hidden]{display:none}
+  .brow.course .bn{font-weight:400;font-size:.86rem;color:var(--sec)}
   .brow img{height:38px;width:auto;flex:none;filter:saturate(1.4) brightness(1.1)}
   .brow .bn{font-family:var(--read);font-size:.94rem;font-weight:600;min-width:9.5rem}
   .chips{display:contents}
@@ -1339,10 +1342,10 @@ const SUBJECTS=[
  {slug:'maths',  name:'Mathematics',        c:'#4e5f66', cover:{aqa:1,edexcel:1,ocr:1,eduqas:1}},
  {slug:'lang',   name:'English Language',   c:'#5b7285', cover:{aqa:1,edexcel:1,ocr:1,eduqas:1}},
  {slug:'lit',    name:'English Literature', c:'#7d5a78', cover:{aqa:1,edexcel:1,ocr:1,eduqas:1}},
- {slug:'science',name:'Combined Science',   c:'#4e6e5d', cover:{aqa:1,edexcel:1,ocr:1}},
- {slug:'triple', name:'Triple Science',     c:'#3d5c50', cover:{aqa:1,edexcel:1,ocr:1}},
+ {slug:'science',name:'Combined Science',   c:'#4e6e5d', cover:{aqa:1,edexcel:1,ocr:1,'ocr b':1}},
+ {slug:'triple', name:'Triple Science',     c:'#3d5c50', cover:{aqa:1,edexcel:1,ocr:1,'ocr b':1}},
  {slug:'history',name:'History',            c:'#8a5a44', cover:{aqa:1,edexcel:1,ocr:1,eduqas:1}},
- {slug:'geog',   name:'Geography',          c:'#6d7a4e', cover:{aqa:1,edexcel:1,ocr:1,eduqas:1}},
+ {slug:'geog',   name:'Geography',          c:'#6d7a4e', cover:{aqa:1,edexcel:1,'edexcel b':1,ocr:1,eduqas:1}},
  {slug:'french', name:'French',             c:'#5c72a4', cover:{aqa:1,edexcel:1}},
  {slug:'spanish',name:'Spanish',            c:'#a2643f', cover:{aqa:1,edexcel:1}},
  {slug:'german', name:'German',             c:'#7c4a52', cover:{aqa:1,edexcel:1}},
@@ -1350,7 +1353,7 @@ const SUBJECTS=[
  {slug:'business',name:'Business',          c:'#3f5570', cover:{aqa:1,edexcel:1,ocr:1}},
  {slug:'pe',     name:'Physical Education', c:'#a34a3a', cover:{aqa:1,edexcel:1,ocr:1}},
  {slug:'psych',  name:'Psychology',         c:'#9c6b74', cover:{aqa:1,edexcel:1,ocr:1}},
- {slug:'rs',     name:'Religious Studies',  c:'#6f5b91', cover:{aqa:1,edexcel:1,ocr:1,eduqas:1}},
+ {slug:'rs',     name:'Religious Studies',  c:'#6f5b91', cover:{aqa:1,edexcel:1,'edexcel b':1,ocr:1,eduqas:1}},
  {slug:'socio',  name:'Sociology',          c:'#85688f', cover:{aqa:1,eduqas:1}},
  {slug:'econ',   name:'Economics',          c:'#35594e', cover:{aqa:1}},
  {slug:'stats',  name:'Statistics',         c:'#557a8a', cover:{aqa:1,edexcel:1}},
@@ -1571,7 +1574,16 @@ function renderPickerShelf(){ renderWizShelf(picked); }
 /* real free-tier coverage per family (from Supabase, 10 Jul 2026). 1 = built & live.
    Honest gaps today: Combined Science has no Eduqas/WJEC row; Spanish has no OCR. */
 const BOARDKEYS=['aqa','edexcel','ocr','eduqas'];
-const BOARDLBL={aqa:'AQA',edexcel:'Edexcel',ocr:'OCR',eduqas:'Eduqas / WJEC'};
+const BOARDLBL={aqa:'AQA',edexcel:'Edexcel',ocr:'OCR',eduqas:'Eduqas / WJEC','edexcel b':'Edexcel B','ocr b':'OCR B'};
+/* Some boards publish two GCSEs in one subject: Edexcel Geography A and B, OCR Science A (Gateway)
+   and B (Twenty First Century), Edexcel Religious Studies A and B. The board chip picks the board;
+   a second row under it asks which course. The second course is stored as 'edexcel b' / 'ocr b';
+   the plain key keeps meaning A, so every shelf saved before this row still works. */
+const SPLIT={geog:{edexcel:['Geographical Themes (A)','Investigating Issues (B)']},
+  science:{ocr:['Gateway (A)','Twenty First Century (B)']},
+  triple:{ocr:['Gateway (A)','Twenty First Century (B)']},
+  rs:{edexcel:['Religion and Ethics (A)','Beliefs in Action (B)']}};
+function baseBoard(k){ return (k||'').split(' ')[0]; }
 /* Which boards actually AWARD each subject — generated from specs/index.json
    unioned with what we have live, NOT the same question as `cover` (what we
    have built). Showing a board that does not award the qualification is
@@ -1664,6 +1676,10 @@ const TOPICS={
    ['Religions',2,[{s:'buddhism',n:'Buddhism'},{s:'catholic-christianity',n:'Catholic Christianity (Route B)'},{s:'christianity',n:'Christianity'},{s:'hinduism',n:'Hinduism'},{s:'islam',n:'Islam'},{s:'judaism',n:'Judaism'},{s:'sikhism',n:'Sikhism'}]],
    ['Themes',2,[{s:'theme-life-and-death',n:'Life and Death'},{s:'theme-good-and-evil',n:'Good and Evil'},{s:'theme-relationships',n:'Relationships'},{s:'theme-human-rights',n:'Human Rights'}]]
   ],
+  'edexcel b':[
+   ['Paper 1 — Religion and Ethics: your religion',1,[{s:'area1-christianity',n:'Christianity'},{s:'area1-catholic-christianity',n:'Catholic Christianity'}]],
+   ['Paper 2 — Religion, Peace and Conflict: your second religion',1,[{s:'area2-islam',n:'Islam'},{s:'area2-judaism',n:'Judaism'}]]
+  ],
   edexcel:[
    ['Paper 1 — religion in depth',1,[{s:'paper-1-catholic-christianity',n:'Catholic Christianity'},{s:'paper-1-christianity',n:'Christianity'},{s:'paper-1-islam',n:'Islam'}]],
    ['Paper 2 — second religion (must differ from Paper 1)',1,[{s:'paper-2-catholic-christianity',n:'Catholic Christianity'},{s:'paper-2-christianity',n:'Christianity'},{s:'paper-2-islam',n:'Islam'},{s:'paper-2-buddhism',n:'Buddhism'},{s:'paper-2-hinduism',n:'Hinduism'},{s:'paper-2-judaism',n:'Judaism'},{s:'paper-2-sikhism',n:'Sikhism'}]],
@@ -1713,8 +1729,8 @@ let guess={};    /* slug -> true when the board was our "most common" default, n
    (the key every lesson and practice page already reads) */
 const TIERED=['maths','science','triple','french','spanish','german'];
 const TIERSLUG={maths:{aqa:'maths-aqa',edexcel:'maths-edexcel',ocr:'maths-ocr',eduqas:'maths-eduqas'},
-  science:{aqa:'science-aqa',edexcel:'science-edexcel',ocr:'science-ocr'},
-  triple:{aqa:'separate-sciences',edexcel:'separate-sciences-edexcel',ocr:'separate-sciences-ocr'},
+  science:{aqa:'science-aqa',edexcel:'science-edexcel',ocr:'science-ocr','ocr b':'science-ocr-b'},
+  triple:{aqa:'separate-sciences',edexcel:'separate-sciences-edexcel',ocr:'separate-sciences-ocr','ocr b':'separate-sciences-ocr-b'},
   french:{aqa:'french-aqa',edexcel:'french-edexcel'},spanish:{aqa:'spanish-aqa',edexcel:'spanish-edexcel'},
   german:{aqa:'german-aqa',edexcel:'german-edexcel'}};
 /* "Not sure" picks the board most schools use for that subject (JCQ entries), so
@@ -1859,7 +1875,7 @@ function chipEl(label,onclick,cls){
   ch.setAttribute('aria-pressed','false'); ch.innerHTML=label; ch.onclick=onclick; return ch;
 }
 function pickBoard(slug,k,isGuess){
-  if(!isGuess&&boards[slug]===k){ delete boards[slug]; delete guess[slug]; }
+  if(!isGuess&&baseBoard(boards[slug])===k){ delete boards[slug]; delete guess[slug]; }
   else{ boards[slug]=k; if(isGuess) guess[slug]=true; else delete guess[slug]; }
   /* English Language and English Literature are sat with the same board
      in almost every school, so choosing one answers the other */
@@ -1870,6 +1886,8 @@ function pickBoard(slug,k,isGuess){
   }
   persist(); syncBoards();
 }
+/* the second row under a split board: A or B, one of the two is always pressed */
+function pickCourse(slug,k){ boards[slug]=k; delete guess[slug]; persist(); syncBoards(); }
 function yearWord(){ const y=examYear(); if(!y) return null; const d=y-examYearBase(); return d===0?'11':(d===1?'10':(d===2?'9':null)); }
 
 /* build once when the screen opens; every tap after that only flips states in place */
@@ -1917,19 +1935,32 @@ function renderBoards(){
       const ch=chipEl('Not sure',()=>pickBoard(slug,defaultBoard(slug),true)); ch.dataset.k='?'; ch.style.gridColumn='7'; chips.appendChild(ch);
     }
     bl.appendChild(row);
+    /* a board with two courses in this subject gets a second row, shown only while that board is pressed */
+    Object.keys(SPLIT[slug]||{}).forEach(b=>{
+      const sub=document.createElement('div'); sub.className='brow course'; sub.dataset.course=slug; sub.dataset.b=b; sub.hidden=true; sub.style.setProperty('--tc',su.c);
+      sub.innerHTML='<span class="bn">Which '+CHIPLBL[b]+' course?</span><span class="chips"></span>';
+      const cc=sub.querySelector('.chips');
+      [b,b+' b'].forEach((k,i)=>{ const have=su.cover&&su.cover[k];
+        const ch=chipEl(SPLIT[slug][b][i],()=>pickCourse(slug,k),have?'':'off'); ch.dataset.k=k; ch.style.gridColumn=(3+i*2)+' / span 2';
+        ch.title=have?'':'Not built yet — choose it and we will email you when it is ready'; cc.appendChild(ch); });
+      bl.appendChild(sub);
+    });
   });
   syncBoards();
 }
 function syncBoards(){
   const bl=document.getElementById('blist');
   bl.querySelectorAll('.allrow .chip').forEach(ch=>{ const k=ch.dataset.k;
-    const all=picked.every(sl=>!offers(sl,k)||boards[sl]===k)&&picked.some(sl=>offers(sl,k));
+    const all=picked.every(sl=>!offers(sl,k)||baseBoard(boards[sl])===k)&&picked.some(sl=>offers(sl,k));
     ch.setAttribute('aria-pressed',String(all)); });
   picked.forEach(slug=>{
     const su=SUBJECTS.find(x=>x.slug===slug);
     const row=bl.querySelector('.brow[data-slug="'+slug+'"]'); if(!row) return;
     row.querySelectorAll('.chip').forEach(ch=>{
-      ch.setAttribute('aria-pressed',String(ch.dataset.k==='?'?false:boards[slug]===ch.dataset.k)); });
+      ch.setAttribute('aria-pressed',String(ch.dataset.k==='?'?false:baseBoard(boards[slug])===ch.dataset.k)); });
+    bl.querySelectorAll('.brow.course[data-course="'+slug+'"]').forEach(sub=>{
+      sub.hidden=baseBoard(boards[slug])!==sub.dataset.b;
+      sub.querySelectorAll('.chip').forEach(ch=>ch.setAttribute('aria-pressed',String(boards[slug]===ch.dataset.k))); });
   });
   /* verdict: found vs requested, plus what "Not sure" did on the student's behalf */
   const chosen=picked.filter(sl=>boards[sl]);
@@ -2074,7 +2105,7 @@ function pickerBack(){ if(new URLSearchParams(location.search).get('view')==='pi
    not started yet / struggling / getting there / confident — and the subject's colour is the
    average of its topics. A topic opens to show what's in it (its lessons).
    Then one more step: minutes most days. Topics come from Supabase per subject. */
-const WSUB={maths:{aqa:'maths-aqa',edexcel:'maths-edexcel',ocr:'maths-ocr',eduqas:'maths-eduqas'},lang:{aqa:'english-language-aqa',edexcel:'english-language-edexcel',ocr:'english-language-ocr',eduqas:'english-language-eduqas'},lit:{aqa:'english-literature-aqa',edexcel:'english-literature-edexcel',ocr:'english-literature-ocr',eduqas:'english-literature-eduqas'},science:{aqa:'science-aqa',edexcel:'science-edexcel',ocr:'science-ocr'},triple:{aqa:'separate-sciences',edexcel:'separate-sciences-edexcel',ocr:'separate-sciences-ocr'},history:{aqa:'history-aqa',edexcel:'history-edexcel',ocr:'history-ocr',eduqas:'history-eduqas'},geog:{aqa:'geography-aqa',edexcel:'geography-edexcel-a',ocr:'geography-ocr',eduqas:'geography-eduqas'},french:{aqa:'french-aqa',edexcel:'french-edexcel'},spanish:{aqa:'spanish-aqa',edexcel:'spanish-edexcel'},german:{aqa:'german-aqa',edexcel:'german-edexcel'},cs:{aqa:'computer-science-aqa',edexcel:'computer-science-edexcel',ocr:'computer-science',eduqas:'computer-science-eduqas'},business:{aqa:'business-aqa',edexcel:'business-edexcel',ocr:'business-ocr'},pe:{aqa:'physical-education-aqa',edexcel:'physical-education-edexcel',ocr:'physical-education-ocr'},psych:{aqa:'psychology-aqa'},rs:{aqa:'religious-studies-aqa',edexcel:'religious-studies-edexcel',ocr:'religious-studies-ocr',eduqas:'religious-studies-eduqas'},socio:{aqa:'sociology-aqa',eduqas:'sociology-eduqas'},econ:{aqa:'economics-aqa'},stats:{aqa:'statistics-aqa',edexcel:'statistics-edexcel'},media:{aqa:'media-studies-aqa',eduqas:'media-studies-eduqas'},film:{eduqas:'film-studies-eduqas'},drama:{aqa:'drama-aqa'},music:{aqa:'music-aqa',edexcel:'music-edexcel',ocr:'music-ocr',eduqas:'music-eduqas'},mtech:{ncfe:'music-technology'},dt:{aqa:'design-technology',eduqas:'design-technology-eduqas'},eng:{aqa:'engineering-aqa',eduqas:'engineering-eduqas'},electronics:{eduqas:'electronics-eduqas'},it:{ocr:'it-ocr'},astro:{edexcel:'astronomy-edexcel'},geology:{eduqas:'geology-eduqas'},classics:{ocr:'classical-civilisation-ocr'},citizenship:{aqa:'citizenship-aqa'},food:{aqa:'food-preparation-and-nutrition-aqa',eduqas:'food-preparation-and-nutrition-eduqas'},hosp:{eduqas:'hospitality-catering'},hsc:{edexcel:'health-social-care-edexcel',ocr:'health-social-care-ocr',eduqas:'health-social-care-eduqas'}};
+const WSUB={maths:{aqa:'maths-aqa',edexcel:'maths-edexcel',ocr:'maths-ocr',eduqas:'maths-eduqas'},lang:{aqa:'english-language-aqa',edexcel:'english-language-edexcel',ocr:'english-language-ocr',eduqas:'english-language-eduqas'},lit:{aqa:'english-literature-aqa',edexcel:'english-literature-edexcel',ocr:'english-literature-ocr',eduqas:'english-literature-eduqas'},science:{aqa:'science-aqa',edexcel:'science-edexcel',ocr:'science-ocr','ocr b':'science-ocr-b'},triple:{aqa:'separate-sciences',edexcel:'separate-sciences-edexcel',ocr:'separate-sciences-ocr','ocr b':'separate-sciences-ocr-b'},history:{aqa:'history-aqa',edexcel:'history-edexcel',ocr:'history-ocr',eduqas:'history-eduqas'},geog:{aqa:'geography-aqa',edexcel:'geography-edexcel-a','edexcel b':'geography-edexcel-b',ocr:'geography-ocr',eduqas:'geography-eduqas'},french:{aqa:'french-aqa',edexcel:'french-edexcel'},spanish:{aqa:'spanish-aqa',edexcel:'spanish-edexcel'},german:{aqa:'german-aqa',edexcel:'german-edexcel'},cs:{aqa:'computer-science-aqa',edexcel:'computer-science-edexcel',ocr:'computer-science',eduqas:'computer-science-eduqas'},business:{aqa:'business-aqa',edexcel:'business-edexcel',ocr:'business-ocr'},pe:{aqa:'physical-education-aqa',edexcel:'physical-education-edexcel',ocr:'physical-education-ocr'},psych:{aqa:'psychology-aqa'},rs:{aqa:'religious-studies-aqa',edexcel:'religious-studies-edexcel','edexcel b':'religious-studies-b-edexcel',ocr:'religious-studies-ocr',eduqas:'religious-studies-eduqas'},socio:{aqa:'sociology-aqa',eduqas:'sociology-eduqas'},econ:{aqa:'economics-aqa'},stats:{aqa:'statistics-aqa',edexcel:'statistics-edexcel'},media:{aqa:'media-studies-aqa',eduqas:'media-studies-eduqas'},film:{eduqas:'film-studies-eduqas'},drama:{aqa:'drama-aqa'},music:{aqa:'music-aqa',edexcel:'music-edexcel',ocr:'music-ocr',eduqas:'music-eduqas'},mtech:{ncfe:'music-technology'},dt:{aqa:'design-technology',eduqas:'design-technology-eduqas'},eng:{aqa:'engineering-aqa',eduqas:'engineering-eduqas'},electronics:{eduqas:'electronics-eduqas'},it:{ocr:'it-ocr'},astro:{edexcel:'astronomy-edexcel'},geology:{eduqas:'geology-eduqas'},classics:{ocr:'classical-civilisation-ocr'},citizenship:{aqa:'citizenship-aqa'},food:{aqa:'food-preparation-and-nutrition-aqa',eduqas:'food-preparation-and-nutrition-eduqas'},hosp:{eduqas:'hospitality-catering'},hsc:{edexcel:'health-social-care-edexcel',ocr:'health-social-care-ocr',eduqas:'health-social-care-eduqas'}};
 const WUNITS={};   // sub slug -> [{name,slug,subtitle,lessons:[title]}]
 function wSub(sl){ const m=WSUB[sl]||{}; return m[boards[sl]]||Object.values(m)[0]||null; }
 function feelSubs(){ return picked.filter(sl=>!!wSub(sl)); }
@@ -2246,7 +2277,7 @@ if(q.get('picked')!==null){
 if(firstVisit && q.get('picked')===null)
   ['maths','lang','lit','science'].forEach(sl=>togglePick(sl));
 if(q.get('boards')){ boards={}; q.get('boards').split(',').forEach(pair=>{
-  const kv=pair.split(':'); if(SUBJECTS.some(x=>x.slug===kv[0])&&BOARDKEYS.includes(kv[1])) boards[kv[0]]=kv[1]; }); }
+  const kv=pair.split(':'); if(SUBJECTS.some(x=>x.slug===kv[0])&&(BOARDKEYS.includes(kv[1])||/^(edexcel|ocr) b$/.test(kv[1]))) boards[kv[0]]=kv[1]; }); }
 /* &tsel=history.0.america-opportunity-inequality,rs.0.christianity~islam —
    preset topic picks (slug.groupIndex.choice; '~' joins multi-picks, since
    '+' decodes to a space in query strings).

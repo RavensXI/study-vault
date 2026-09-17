@@ -62,7 +62,10 @@ var PL_ALIAS = { 'mathematics': 'maths', 'combined-science': 'science', 'science
   'religious-studies': 'religious-education', 'food-preparation-and-nutrition': 'food-technology', 'food': 'food-technology',
   'gcse-music': 'music', 'sport-science': 'cambridge-nationals-sport-science' };
 function plKeysOf(su) {
-  var keys = [], b = String(su.sub || '').replace(/-(aqa|edexcel|ocr|eduqas|wjec|ncfe)(-[a-z])?$/, '');
+  var sub = String(su.sub || ''), m = /-(aqa|edexcel|ocr|eduqas|wjec|ncfe)(-([a-z]))?$/.exec(sub);
+  var keys = [], b = m ? sub.slice(0, m.index) : sub;
+  /* Edexcel Geography B, OCR Science B: their papers differ from A, so the timetable keys them as <subject>-b */
+  if (m && m[3] === 'b') keys.push(b + '-b');
   if (b) { keys.push(PL_ALIAS[b] || b); if (PL_ALIAS[b]) keys.push(b); }
   if (PL_BASE[su.slug]) keys.push(PL_BASE[su.slug]);
   return keys;

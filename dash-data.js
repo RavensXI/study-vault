@@ -40,7 +40,7 @@ var NAMEC = { maths: ['Mathematics', '#4e5f66', 'Maths'], lang: ['English Langua
   geology: ['Geology', '#6e6459', 'Geology'], classics: ['Classical Civilisation', '#9a8a5a', 'Classics'],
   citizenship: ['Citizenship', '#5d5f8d', 'Citizen'], food: ['Food & Nutrition', '#a8842f', 'Food'],
   hosp: ['Hospitality & Catering', '#67424e', 'Hosp'], hsc: ['Health & Social Care', '#4e7d78', 'H&SC'] };
-var BOARDLBL = { aqa: 'AQA', edexcel: 'Edexcel', ocr: 'OCR', eduqas: 'Eduqas / WJEC', ncfe: 'NCFE' };
+var BOARDLBL = { aqa: 'AQA', edexcel: 'Edexcel', ocr: 'OCR', eduqas: 'Eduqas / WJEC', ncfe: 'NCFE', 'edexcel b': 'Edexcel B', 'ocr b': 'OCR B' };
 
 var SUPA = 'https://baipckgywpnwapobwtsy.supabase.co';
 var ANON = 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
@@ -50,10 +50,10 @@ var SUBSLUG = {
   maths: { aqa: 'maths-aqa', edexcel: 'maths-edexcel', ocr: 'maths-ocr', eduqas: 'maths-eduqas' },
   lang: { aqa: 'english-language-aqa', edexcel: 'english-language-edexcel', ocr: 'english-language-ocr', eduqas: 'english-language-eduqas' },
   lit: { aqa: 'english-literature-aqa', edexcel: 'english-literature-edexcel', ocr: 'english-literature-ocr', eduqas: 'english-literature-eduqas' },
-  science: { aqa: 'science-aqa', edexcel: 'science-edexcel', ocr: 'science-ocr' },
-  triple: { aqa: 'separate-sciences', edexcel: 'separate-sciences-edexcel', ocr: 'separate-sciences-ocr' },
+  science: { aqa: 'science-aqa', edexcel: 'science-edexcel', ocr: 'science-ocr', 'ocr b': 'science-ocr-b' },
+  triple: { aqa: 'separate-sciences', edexcel: 'separate-sciences-edexcel', ocr: 'separate-sciences-ocr', 'ocr b': 'separate-sciences-ocr-b' },
   history: { aqa: 'history-aqa', edexcel: 'history-edexcel', ocr: 'history-ocr', eduqas: 'history-eduqas' },
-  geog: { aqa: 'geography-aqa', edexcel: 'geography-edexcel-a', ocr: 'geography-ocr', eduqas: 'geography-eduqas' },
+  geog: { aqa: 'geography-aqa', edexcel: 'geography-edexcel-a', 'edexcel b': 'geography-edexcel-b', ocr: 'geography-ocr', eduqas: 'geography-eduqas' },
   french: { aqa: 'french-aqa', edexcel: 'french-edexcel' },
   spanish: { aqa: 'spanish-aqa', edexcel: 'spanish-edexcel' },
   german: { aqa: 'german-aqa', edexcel: 'german-edexcel' },
@@ -645,6 +645,7 @@ function svDashInit(SUBJECTS, opts) {
     if (sub) {
       if ((sl === 'history' || sl === 'lit' || sl === 'drama') && raw.length) first = raw[0];
       else if (sl === 'rs' && board === 'aqa' && raw.length) first = raw[0] + '-beliefs';
+      else if (sl === 'rs' && board === 'edexcel b' && raw.length) first = raw[0];   /* area1-<religion> is a unit slug */
       else first = FIRSTUNIT[sub] || null;
     }
     return { tab: NAMEC[sl][2], slug: sl, sub: sub, mode: PFAM.indexOf(sl) >= 0 ? 'p' : 'l',

@@ -42,7 +42,7 @@
     'english-language':    ['english-language-aqa', 'english-language-edexcel', 'english-language-ocr', 'english-language-eduqas'],
     'english-literature':  ['english-literature-aqa', 'english-literature-edexcel', 'english-literature-ocr', 'english-literature-eduqas'],
     'maths':               ['maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas'],
-    'science':             ['science-aqa', 'science-edexcel', 'science-ocr'],
+    'science':             ['science-aqa', 'science-edexcel', 'science-ocr', 'science-ocr-b'],
     'religious-education': ['religious-studies-aqa'],
     'geography':           ['geography-aqa', 'geography-edexcel-a', 'geography-edexcel-b', 'geography-ocr', 'geography-eduqas'],
     'health-social-care':  ['health-social-care-edexcel', 'health-social-care-ocr'],
@@ -118,7 +118,8 @@
     'science': [
       { board: 'AQA', slug: 'science-aqa' },
       { board: 'Edexcel', slug: 'science-edexcel' },
-      { board: 'OCR', slug: 'science-ocr' }
+      { board: 'OCR', slug: 'science-ocr', label: 'OCR A (Gateway)' },
+      { board: 'OCR B', slug: 'science-ocr-b', label: 'OCR B (Twenty First Century)' }
     ],
     'business': [
       { board: 'AQA', slug: 'business-aqa' },
@@ -155,8 +156,8 @@
     ],
     'geography': [
       { board: 'AQA', slug: 'geography-aqa' },
-      { board: 'Edexcel A', slug: 'geography-edexcel-a' },
-      { board: 'Edexcel B', slug: 'geography-edexcel-b' },
+      { board: 'Edexcel A', slug: 'geography-edexcel-a', label: 'Edexcel A (Geographical Themes)' },
+      { board: 'Edexcel B', slug: 'geography-edexcel-b', label: 'Edexcel B (Investigating Issues)' },
       { board: 'OCR', slug: 'geography-ocr' },
       { board: 'Eduqas', slug: 'geography-eduqas' }
     ],
