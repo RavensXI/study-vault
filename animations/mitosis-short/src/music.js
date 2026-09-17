@@ -34,10 +34,25 @@
     // Master tilt EQ in dB: a low shelf under the subs, presence and air for phone speakers.
     eq: { low: -4, presence: 5, air: 3 },
     comp: { threshold: -18, knee: 10, ratio: 2, attack: 0.006, release: 0.2 },
-    // Section fader rides in dB at global times, pre-compressor: quiet egg, hushed pupa, full drop,
-    // hushed winter, and an ending level that meets the opening level at the loop seam.
-    // Per film: section fader rides in dB at global times, pre-compressor (see reference/music.md).
-    ride: [[0, 0]],
+    // Section fader rides in dB at global times, pre-compressor: full at the hook, hushed under
+    // every blueprint drop, full again at the hinge (12.0) and the division (21.5), a soft settle
+    // after the gong, and an ending level that meets bar 1's opening level at the loop seam.
+    ride: [
+      [0, -1],
+      [1.97, -1], [2.0, -6],
+      [4.47, -6], [4.5, -2],
+      [6.97, -2], [7.0, -6.5],
+      [9.47, -6.5], [9.5, -1.5],
+      [11.97, -1.5], [12.0, 0],
+      [13.47, 0], [13.5, -6],
+      [15.97, -6], [16.0, -1],
+      [18.97, -1], [19.0, -6.5],
+      [21.47, -6.5], [21.5, 0],
+      [24.98, 0], [25.02, -1],
+      [25.47, -1], [25.5, -4],
+      [28.5, -4], [29.0, -2],
+      [29.97, -2], [30.0, -1],
+    ],
   };
 
   // ---------------------------------------------------------------- pitch
@@ -1314,29 +1329,205 @@
   // and the engine windows each call, so scheduling the whole piece here is correct. Everything
   // below derives from FILM.TIMELINE, so it runs at any bpm and duration.
   const CH = {
-    home: ['D3', 'A3', 'D4', 'F#4'],
-    away: ['G3', 'B3', 'D4', 'G4'],
+    Dm: ['D3', 'A3', 'E4', 'F4'], // i, D minor add9 (natural minor)
+    Dm5: ['D3', 'A3', 'D4'], // i, open 5th — ambiguous major/minor, used at the loop seam
+    F: ['F3', 'A3', 'C4', 'F4'], // III
+    Gm: ['G3', 'Bb3', 'D4', 'G4'], // iv
+    Av: ['A3', 'C#4', 'E4', 'A4'], // V, harmonic-minor dominant pulling into the hinge
+    D: ['D3', 'A3', 'D4', 'F#4'], // I, D major (after the hinge)
+    Dhi: ['D3', 'A3', 'D4', 'F#4', 'A4'],
+    Dthin: ['D3', 'A3'], // I, thinned voicing — the pad thins at 25.5
+    G: ['G3', 'B3', 'D4', 'G4'], // IV
+    Bm: ['B3', 'D4', 'F#4', 'B4'], // vi
+    Em: ['E3', 'G3', 'B3', 'E4'], // ii
   };
 
+  // The cell cycle and mitosis: 120 bpm, D minor for Act 1-2 (the cell, the copy) modulating to
+  // D major at the hinge (12.0, the membrane breaks), through mitosis (Act 3) into the two cells
+  // and the loop (Act 4). Every FILM.TIMELINE cue is implemented by hand at its exact time; hits
+  // land on cuts, and blueprint shots drop to a glassy sine ping (kick and bass silent, a hushed
+  // pad still glued underneath) until the paper shots bring the felt kick, pad and kalimba back.
   function score(E, I) {
-    const { kick, hat, kalimba, pad, sub } = I;
-    const bpm = (FILM.TIMELINE && FILM.TIMELINE.bpm) || 120;
-    const DUR = (FILM.TIMELINE && FILM.TIMELINE.duration) || 32;
-    const BAR = 240 / bpm;
-    const BEAT = 60 / bpm;
-    const motif = ['D5', 'F#5', 'A5', 'E5'];
-    for (let beat = 0; beat * BEAT < DUR - 1e-9; beat++) {
-      const t = Math.round(beat * BEAT * 1000) / 1000;
-      const down = beat % 4 === 0;
-      kick(t, down ? 0.8 : 0.5, down ? 'full' : 'felt');
-      hat(t + BEAT / 2, 0.1);
-      kalimba(t + BEAT / 2, hz(motif[beat % 4]), 0.2, { hall: 0.15, delay: 0.1, pan: beat % 2 ? 0.15 : -0.15 });
-      if (down) {
-        const home = beat % 8 === 0;
-        pad(t, Math.min(t + BAR, DUR), home ? CH.home : CH.away, 0.28, { att: 0.05, rel: 0.1, cut0: 900, cut1: 1400, hall: 0.15 });
-        sub(t, Math.min(t + BAR, DUR), home ? 'D2' : 'G1', 0.4, { att: 0.02, rel: 0.08 });
+    const ctx = E.ctx;
+    const { kick, brush, crash, tock, marimba, kalimba, glock, glass, gong, ting, pad, sub, subDrop, pluck, nz, play, chew, plip, glide, whump, revSwell } = I;
+    const range = (a, b, step) => {
+      const out = [];
+      for (let t = a; t < b - 1e-9; t += step) out.push(Math.round(t * 1000) / 1000);
+      return out;
+    };
+    // Stick-slip creak: a short buffer rendered once per scheduled voice (condense, tighten, furrow).
+    const creak = (t, len, key, r0, r1, formants, vel, o) =>
+      play(t, len, () => creakBuffer(ctx, key, len, r0, r1, formants), vel, Object.assign({ sustain: false, room: 0.2 }, o || {}));
+    // The four-note kalimba motif on a fixed step, gently falling velocity, alternating pan.
+    const motif = (t0, step, notes, vel, o) =>
+      notes.forEach((n, i) => kalimba(t0 + i * step, hz(n), vel - i * 0.02, Object.assign({ pan: i % 2 ? 0.18 : -0.18 }, o || {})));
+    const minorScale = ['D5', 'E5', 'F5', 'G5', 'A5', 'Bb5', 'C6', 'D6', 'E6', 'F6', 'G6', 'A6'];
+
+    // =========================================================== ACT 1 (D minor): the cell and what it holds
+    // ---- 01 hero-cell (0.0-2.0): the hook
+    kick(0, 0.78, 'felt');
+    pad(0.0, 1.5, CH.Dm, 0.42, { att: 0.004, rel: 0.06, cut0: 1100, cut1: 1500 });
+    sub(0.0, 1.5, 'D2', 0.5, { att: 0.004, rel: 0.06 });
+    motif(0.0, 0.25, ['D5', 'F5', 'A5', 'E5'], 0.42, { hall: 0.18, delay: 0.12 });
+    // 0.5 ring burst: an upward glass gliss and a soft crash
+    glide(0.5, hz('A4'), hz('A6'), 0.2, 0.24, { hall: 0.25, bus: 'bells' });
+    crash(0.5, 0.16, { hall: 0.2, dec: 0.9 });
+
+    // ---- 02 cell-blueprint (2.0-4.5): nucleus, 23 pairs, the cycle
+    glass(2.0, hz('D6'), 0.4, { dec: 2.4, cave: 0.5, hall: 0.2 });
+    pad(2.0, 4.5, CH.Dm, 0.2, { att: 0.6, rel: 0.1, cut0: 480, cut1: 850, cave: 0.15 });
+    ['D5', 'F5', 'A5', 'D6'].forEach((n, i) => glock(2.5 + i * 0.125, hz(n), 0.3 + i * 0.02, { dec: 1.1, pan: i % 2 ? 0.35 : -0.35, hall: 0.3, cave: 0.08 }));
+    range(3.0, 3.75, 0.0625).forEach((t, i) => {
+      const f = hz(minorScale[i]);
+      plip(t, f, f * 1.15, 0.52 - i * 0.022, { pan: -0.7 + (i / 11) * 1.4, room: 0.2, hall: 0.15 });
+    });
+    gong(4.0, hz('D3'), 0.32, { dec: 2.0, hall: 0.25 });
+    motif(4.0, 0.25, ['D5', 'F5', 'A5', 'E5'], 0.32, { hall: 0.18, delay: 0.1 });
+
+    // ---- 03 growth (4.5-7.0): the cell grows
+    range(4.5, 7.0, 0.25).forEach((t) => brush(t, 0.28, 0.12));
+    pad(4.5, 7.0, CH.F, 0.34, { att: 0.15, rel: 0.1, cut0: 1000, cut1: 1450 });
+    sub(4.5, 7.0, 'F1', 0.4, { att: 0.15 });
+    [5.0, 5.5, 6.0].forEach((t, i) => {
+      tock(t, 0.28, 1500 - i * 60, { pan: i % 2 ? 0.3 : -0.3 });
+      chew(t + 0.02, 0.2 - i * 0.02, i % 2 ? 0.4 : -0.4);
+      plip(t, hz('A5'), hz('A4'), 0.2, { room: 0.2 });
+    });
+    glass(6.5, hz('A5'), 0.3, { dec: 1.5, hall: 0.2 });
+
+    // ---- 04 dna-copy-blueprint (7.0-9.5): the DNA is copied
+    glass(7.0, hz('D6'), 0.36, { dec: 2.0, cave: 0.4, hall: 0.2 });
+    pad(7.0, 9.5, CH.Gm, 0.2, { att: 0.5, rel: 0.1, cut0: 420, cut1: 800, cave: 0.12 });
+    // 7.25 rising reverse swell under the push-in: a seed tick anchors the cue's onset over the
+    // still-ringing cave tail from the 7.0 sine ping
+    nz(7.25, 0.03, { type: 'highpass', q: 0.8, f: [[0, 7000]], amp: perc(0.32, 0.001, 0.02), key: 'swell-seed' });
+    revSwell(7.25, 0.5, 0.22, { fTop: 3200, hall: 0.3 });
+    nz(7.75, 0.18, { type: 'highpass', q: 0.7, f: [[0, 7200], [0.16, 550, 'exp']], amp: perc(0.36, 0.0008, 0.14), hall: 0.15, key: 'zip' });
+    ['D5', 'F5', 'A5', 'C6'].forEach((n, i) => glock(8.0 + i * 0.125, hz(n), 0.26 + i * 0.015, { dec: 0.9, pan: -0.4 + i * 0.27, hall: 0.2, delay: 0.1 }));
+    [['D5', 9.0], ['F5', 9.125], ['A5', 9.25], ['D6', 9.375]].forEach(([n, t], i) => ting(t, hz(n), 0.32 - i * 0.02, { pan: i % 2 ? 0.3 : -0.3, hall: 0.2 }));
+
+    // ---- 05 copies-joined (9.5-11.5): two identical copies, joined
+    kick(9.5, 0.7, 'felt');
+    pad(9.5, 11.0, CH.Dm, 0.34, { att: 0.05, rel: 0.1, cut0: 950, cut1: 1250 });
+    sub(9.5, 11.0, 'D2', 0.46);
+    motif(9.5, 0.25, ['D5', 'F5', 'A5', 'E5'], 0.32, { hall: 0.15, delay: 0.1 });
+    range(10.0, 10.25, 0.0625).forEach((t, i) => tock(t, 0.18 - i * 0.02, 2000, { pan: i % 2 ? 0.25 : -0.25, dec: 0.03 }));
+    glide(10.5, hz('D5'), hz('A5'), 0.3, 0.22, { hall: 0.2 });
+    kick(11.0, 0.62, 'thud');
+    tock(11.0, 0.16, 1100, { dec: 0.03 });
+    creak(11.0, 0.35, 'condense', 22, 38, [[380, 0.012, 0.5], [960, 0.006, 0.35], [2100, 0.003, 0.2]], 0.22);
+    pad(11.0, 12.0, CH.Av, 0.4, { att: 0.05, rel: 0.05, cut0: 1400, cut1: 2000 });
+    sub(11.0, 12.0, 'A1', 0.46);
+
+    // =========================================================== ACT 2 (the hinge)
+    // ---- 06 membrane-breaks (11.5-13.5): mitosis begins
+    // 12.0 THE HINGE: whump, sub drop, crash, everything ducked; the pad turns major
+    whump(12.0, 0.78);
+    subDrop(12.0, 130, 33, 0.55, 0.55);
+    crash(12.0, 0.28, { hall: 0.4, cave: 0.15, dec: 1.7 });
+    E.duck(12.0, 0.45);
+    pad(12.0, 13.5, CH.Dhi, 0.6, { att: 0.01, rel: 0.15, cut0: 2800, cut1: 1700, hall: 0.35 });
+    sub(12.0, 13.0, 'D2', 0.62);
+    tock(12.5, 0.22, 2200, { dec: 0.025 });
+    glide(13.0, hz('D5'), hz('A5'), 0.45, 0.24, { hall: 0.15 });
+
+    // =========================================================== ACT 3 (D major): mitosis
+    // ---- 07 spindle-blueprint (13.5-16.0): fibres line the chromosomes up
+    glass(13.5, hz('D6'), 0.36, { dec: 2.0, cave: 0.35, hall: 0.2 });
+    pad(13.5, 16.0, CH.Bm, 0.22, { att: 0.5, rel: 0.1, cut0: 480, cut1: 850 });
+    range(14.0, 14.5, 0.0625).forEach((t, i) =>
+      pluck(t, ['D4', 'E4', 'F#4', 'G4', 'A4', 'B4', 'C#5', 'D5'][i], 0.18 + i * 0.015, { dec: 0.16, bright: 6, pan: -0.5 + i * 0.14, hall: 0.12 })
+    );
+    range(14.5, 15.0, 0.0625).forEach((t, i) =>
+      pluck(t, ['D5', 'C#5', 'B4', 'A4', 'G4', 'F#4', 'E4', 'D4'][i], 0.24 - i * 0.015, { dec: 0.16, bright: 6, pan: -0.5 + i * 0.14, hall: 0.12 })
+    );
+    ting(15.0, hz('A5'), 0.4, { hall: 0.3, dec: 0.55 });
+    // 15.5 tremolo shimmer: a sine gated by a fast square LFO that accelerates
+    {
+      const V = E.voice(15.5, 0.48, false);
+      if (V) {
+        const s = E.osc('sine', hz('D6'));
+        const trem = E.gain(0.5);
+        const lfo = E.osc('square', 9);
+        V.env(lfo.frequency, [[0, 9], [0.44, 22, 'exp']]);
+        const lg = E.gain(0.5);
+        lfo.connect(lg);
+        lg.connect(trem.gain);
+        const g = E.gain(0);
+        V.env(g.gain, [[0, 0], [0.01, 0.14], [0.44, 0.05, 'lin'], [0.48, FLOOR, 'lin']]);
+        s.connect(trem);
+        trem.connect(g);
+        E.out(g, 'bells', { hall: 0.3, delay: 0.15 });
+        V.osc(s);
+        V.osc(lfo);
       }
     }
+
+    // ---- 08 pull-apart (16.0-19.0): the copies are pulled apart
+    kick(16.0, 0.75, 'full');
+    pad(16.0, 19.0, CH.G, 0.44, { att: 0.03, rel: 0.1, cut0: 1600, cut1: 1300, hall: 0.15 });
+    sub(16.0, 17.5, 'G1', 0.5);
+    sub(17.5, 19.0, 'G1', 0.46);
+    motif(16.0, 0.25, ['D5', 'F#5', 'A5', 'E5'], 0.4, { hall: 0.2, delay: 0.14 });
+    creak(16.5, 0.35, 'tighten', 25, 50, [[420, 0.012, 0.5], [1050, 0.006, 0.35], [2300, 0.003, 0.2]], 0.38);
+    nz(17.0, 0.35, { type: 'lowpass', q: 0.7, f: [[0, 4000], [0.3, 300, 'exp']], amp: perc(0.4, 0.004, 0.3), stereo: true, hall: 0.15, key: 'whoosh' });
+    nz(17.02, 0.02, { type: 'bandpass', q: 2, f: [[0, 2200]], amp: perc(0.45, 0.0006, 0.02), key: 'crack' });
+    range(17.0, 18.5, 0.125).forEach((t, i) => plip(t, 700 - i * 20, 320 - i * 10, 0.2 - (i % 4) * 0.02, { pan: i % 2 ? 0.4 : -0.4, room: 0.2 }));
+    glass(18.5, hz('A5'), 0.28, { dec: 1.2, pan: -0.3, hall: 0.2 });
+    glass(18.5625, hz('D6'), 0.24, { dec: 1.2, pan: 0.3, hall: 0.2 });
+
+    // ---- 09 two-nuclei-blueprint (19.0-21.5): two new nuclei, the cell pinches
+    glass(19.0, hz('D6'), 0.36, { dec: 2.0, cave: 0.35, hall: 0.2 });
+    pad(19.0, 21.5, CH.Em, 0.2, { att: 0.5, rel: 0.1, cut0: 450, cut1: 800 });
+    ['D5', 'F#5', 'A5'].forEach((n, i) => glock(19.5 + i * 0.0625, hz(n), 0.26 - i * 0.02, { dec: 0.8, pan: -0.3 + i * 0.3, hall: 0.25 }));
+    ['A4', 'D5', 'F#5'].forEach((n, i) => glock(19.75 + i * 0.0625, hz(n), 0.22 - i * 0.02, { dec: 0.8, pan: 0.3 - i * 0.3, hall: 0.25 }));
+    nz(20.0, 0.5, {
+      type: 'lowpass', q: 0.6, f: [[0, 1200], [0.45, 3000, 'exp']],
+      amp: [[0, 0], [0.008, 0.2], [0.45, 0.34, 'lin'], [0.5, FLOOR, 'exp']],
+      stereo: true, sustain: true, cave: 0.5, hall: 0.15, key: 'dissolve',
+    });
+    [20.5, 21.0].forEach((t, i) => {
+      kick(t, 0.34, 'thud');
+      creak(t, 0.3, 'furrow' + i, 22, 38, [[400, 0.01, 0.45], [1000, 0.005, 0.3], [2200, 0.003, 0.18]], 0.32);
+      tock(t, 0.18, 1200, { pan: i % 2 ? 0.3 : -0.3, dec: 0.04 });
+    });
+
+    // =========================================================== ACT 4: two cells, the tissue, the loop
+    // ---- 10 two-cells (21.5-25.5): the division hit and the swell to the gong
+    whump(21.5, 0.7);
+    crash(21.5, 0.24, { hall: 0.35, dec: 1.4 });
+    E.duck(21.5, 0.4);
+    kalimba(21.5, hz('D5'), 0.46, { hall: 0.2, delay: 0.15, pan: -0.15 });
+    kalimba(21.625, hz('A5'), 0.4, { hall: 0.2, delay: 0.15, pan: 0.15 });
+    pad(21.5, 22.3, CH.Dhi, 0.56, { att: 0.02, rel: 0.15, cut0: 2400, cut1: 1800, hall: 0.2 });
+    sub(21.5, 22.5, 'D2', 0.58);
+    glide(22.0, hz('D5'), hz('A5'), 0.25, 0.2, { hall: 0.15 });
+    plip(22.0, hz('D6'), hz('D5'), 0.28, { room: 0.2 });
+    {
+      const swell = ['D4', 'F#4', 'A4', 'D5', 'F#5', 'A5', 'D6'];
+      range(22.5, 25.0, 0.125).forEach((t, i) => {
+        marimba(t, hz(swell[i % swell.length]), 0.32 + i * 0.012, { pan: Math.sin(i * 1.7) * 0.6, hall: 0.2, delay: i > 10 ? 0.12 : 0 });
+        if (i % 2 === 0) plip(t + 0.02, 480 + i * 30, 260 + i * 16, 0.09 + i * 0.008, { pan: -0.85 + (i / 19) * 1.7, room: 0.2 });
+      });
+    }
+    pad(22.5, 25.0, CH.D, 0.3, { att: 0.6, rel: 0.1, cut0: 900, cut1: 2600, hall: 0.25 });
+    sub(22.5, 25.0, 'D1', 0.32, { att: 0.5, rel: 0.1 });
+    nz(25.0, 0.02, { type: 'bandpass', q: 3, f: [[0, 1900]], amp: perc(0.24, 0.0006, 0.012), hall: 0.2, key: 'gong-strike' });
+    gong(25.0, hz('D3'), 0.42, { dec: 2.4, hall: 0.3 });
+
+    // ---- 11 loop (25.5-30.0): the cycle loops
+    pad(25.0, 25.5, CH.G, 0.28, { att: 0.02, rel: 0.08, cut0: 1400 });
+    pad(25.5, 26.0, CH.Dthin, 0.22, { att: 0.02, rel: 0.06, cut0: 750 });
+    sub(25.5, 26.0, 'D2', 0.28, { rel: 0.06 });
+    motif(25.5, 0.5, ['D5', 'F#5', 'A5', 'E5'], 0.34, { hall: 0.25, delay: 0.18 });
+    [26.0, 26.5, 27.0, 27.5, 28.0, 28.5, 29.0].forEach((t, i) => kick(t, 0.28 + i * 0.085, 'heart'));
+    revSwell(26.0, 3.0, 0.36, { fTop: 4200, hall: 0.3 });
+    pad(26.0, 29.0, CH.D, 0.32, { att: 1.4, rel: 0.15, cut0: 500, cut1: 2400, hall: 0.25 });
+    sub(26.0, 29.0, 'D2', 0.42, { att: 1.2, rel: 0.1 });
+    // 29.5 glass ring carries across the loop seam; level and note match bar 1's D2/Dm5 tail
+    glass(29.5, hz('D6'), 0.42, { dec: 2.5, cave: 0.5, hall: 0.2 });
+    pad(29.5, 30.0, CH.Dm5, 0.42, { att: 0.02, rel: 0.05, cut0: 1300, cut1: 1100 });
+    sub(29.5, 30.0, 'D2', 0.5, { att: 0.01, rel: 0.05 });
   }
 
   FILM.audio = {
