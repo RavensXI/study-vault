@@ -1695,6 +1695,337 @@
       line: "A quarterly series is trend, season and noise stacked on top of each other — commit to where it is really heading before the graph gives it away.",
       after: "Seasonal and Cyclic Trends"
     },
+
+    /* ---- Unity College bespoke lessons (matched 18 Sep 2026 from the 91-widget fleet; entries with
+       school: "unity" sit on slugs that also exist on the free tier and only land in a Unity session) ---- */
+    "business/theme-1/11": {
+      file: "profit-vs-cash-not-interchangeable",
+      label: "Predict profit, then cash",
+      line: "One month of a small business — work out what it earned, and what is actually in the bank.",
+      after: "$end"
+    },
+    "business/theme-1/13": {
+      file: "limited-liability-protects-personal-assets-only",
+      label: "Where the loss stops",
+      line: "A failing business, two columns of assets, one line between them — mark what creditors can reach, then say what the owner loses.",
+      after: "Sole Traders"
+    },
+    "business/theme-1/10": {
+      file: "break-even-line-crossing",
+      label: "Find where the lines cross",
+      line: "Predict a small firm's break-even quantity, the profit or loss at a given output, and which way the crossing slides when a cost or the price changes.",
+      after: "$end"
+    },
+    "business/theme-1/14": {
+      file: "marketing-mix-interdependent",
+      label: "Test the mix",
+      line: "Change one P in a small business and predict which of the other three cannot stay as it was.",
+      after: "How the 4Ps Work Together"
+    },
+    "business/theme-2/7": {
+      file: "marketing-mix-interdependent",
+      label: "Test the mix",
+      line: "Change one P in a small business and predict which of the other three cannot stay as it was.",
+      after: "Advertising"
+    },
+    "business/theme-1/9": {
+      file: "break-even-line-crossing",
+      label: "Find where the lines cross",
+      line: "Predict a small firm's break-even quantity, the profit or loss at a given output, and which way the crossing slides when a cost or the price changes.",
+      after: "Fixed Costs"
+    },
+    "computer-science/computational-thinking/4": {
+      file: "binary-search-requires-sorted-data",
+      label: "Trace the binary search",
+      line: "Predict what the search checks, and whether it finds the target at all — on lists that are not always sorted.",
+      after: "Comparing the algorithms",
+      school: "unity"
+    },
+    "computer-science/computer-systems/2": {
+      file: "fetch-decode-simultaneous",
+      label: "Predict what each stage changes",
+      line: "Given a CPU part-way through a short program, predict what one named register holds once fetch, decode or execute has finished.",
+      after: "How the three work together",
+      school: "unity"
+    },
+    "design-technology/core-technical/5": {
+      file: "motion-types-distinction",
+      label: "Name the motion type",
+      line: "Watch a real machine part move, commit to rotary, linear, reciprocating or oscillating, then see the path it traced.",
+      after: "Levers",
+      school: "unity"
+    },
+    "design-technology/specialist-technical/5": {
+      file: "thermoforming-vs-thermosetting-polymers",
+      label: "Slide or hold?",
+      line: "Two polymers meet the same heat. Predict which one re-shapes and which one only chars — and say why.",
+      after: "Textile-Based Materials",
+      school: "unity"
+    },
+    "drama/blood-brothers/5": {
+      file: "theatre-configuration-impact",
+      label: "Place the audience",
+      line: "Six production briefs, one plan. Choose the configuration each one demands, then see the sightlines it creates.",
+      after: "Why Proscenium Arch Suits Blood Brothers"
+    },
+    "food-preparation-and-nutrition/nutrition-and-health/11": {
+      file: "gelatinisation-vs-dextrinisation",
+      label: "Predict the starch reaction",
+      line: "Read the conditions in a kitchen scenario, commit to gelatinisation, dextrinisation, both or neither, then watch the granules show what really happened.",
+      after: "Functional Properties of Fats and Oils"
+    },
+    "food-preparation-and-nutrition/nutrition-and-health/8": {
+      file: "spoilage-factors-interact",
+      label: "Try the storage test",
+      line: "Five conditions microorganisms need. Predict what a fridge, a jam jar or a vacuum pack really takes away — and whether it is enough.",
+      after: "Enzymic Browning"
+    },
+    "food-preparation-and-nutrition/nutrition-and-health/9": {
+      file: "spoilage-factors-interact",
+      label: "Try the storage test",
+      line: "Five conditions microorganisms need. Predict what a fridge, a jam jar or a vacuum pack really takes away — and whether it is enough.",
+      after: "Date Markings on Food"
+    },
+    "gcse-music/music-for-ensemble/1": {
+      file: "small-ensemble-full-sound",
+      label: "Fill the texture",
+      line: "Five players sound thin and top-heavy. Choose the one change that fills the texture — and find out whether more players would help.",
+      after: "Applying This to the Exam"
+    },
+    "gcse-music/music-for-ensemble/2": {
+      file: "small-ensemble-full-sound",
+      label: "Fill the texture",
+      line: "Five players sound thin and top-heavy. Choose the one change that fills the texture — and find out whether more players would help.",
+      after: "$end"
+    },
+    "gcse-music/popular-music/3": {
+      file: "adsr-simultaneous-shaping",
+      label: "Match sound to envelope",
+      line: "Attack, decay and release are times; sustain is the level a note holds while the key is down.",
+      after: "Samplers"
+    },
+    "gcse-music/musical-elements/5": {
+      file: "timbre-integral-to-composition",
+      label: "Same notes, different music",
+      line: "One phrase, three scorings — see where the identical notes fall inside each instrument’s range, and commit to which one the composer wants.",
+      after: "The Four Orchestral Instrument Families"
+    },
+    "gcse-music/musical-forms-and-devices/1": {
+      file: "sonata-form-key-relationships",
+      label: "Follow the key journey",
+      line: "Predict where the second subject goes in the exposition — and which key it comes back in.",
+      after: "Minuet and Trio"
+    },
+    "gcse-music/film-music/3": {
+      file: "timbre-integral-to-composition",
+      label: "Same notes, different music",
+      line: "One phrase, three scorings — see where the identical notes fall inside each instrument’s range, and commit to which one the composer wants.",
+      after: "Articulation Techniques in Film Scores"
+    },
+    "gcse-music/musical-forms-and-devices/4": {
+      file: "sonata-form-key-relationships",
+      label: "Follow the key journey",
+      line: "Predict where the second subject goes in the exposition — and which key it comes back in.",
+      after: "Melody: Motifs X and Y"
+    },
+    "geography/paper-1/14": {
+      file: "longshore-drift-zigzag",
+      label: "Predict the pebble's path",
+      line: "Choose how one pebble moves over eight waves, then watch the swash and backwash play it out.",
+      after: "Deposition"
+    },
+    "geography/paper-1/15": {
+      file: "longshore-drift-zigzag",
+      label: "Predict the pebble's path",
+      line: "Choose how one pebble moves over eight waves, then watch the swash and backwash play it out.",
+      after: "$end"
+    },
+    "geography/paper-1/1": {
+      file: "subduction-angle",
+      label: "Follow the slab down",
+      line: "Work out where the trench, the deepest earthquakes and the volcanoes end up when the plate dives at an angle.",
+      after: "Plate Tectonics Theory"
+    },
+    "geography/paper-1/2": {
+      file: "subduction-angle",
+      label: "Follow the slab down",
+      line: "Work out where the trench, the deepest earthquakes and the volcanoes end up when the plate dives at an angle.",
+      after: "Why Do People Live Near Tectonic Hazards?"
+    },
+    "geography/paper-1/9": {
+      file: "biomass-transfer-respiration",
+      label: "Account for every kilojoule",
+      line: "Split an animal's food intake between new biomass, respiration, egestion and excretion, and find out which loss is really the big one.",
+      after: "The Nutrient Cycle"
+    },
+    "geography/paper-1/8": {
+      file: "greenhouse-effect-reemission-not-blanket",
+      label: "Follow the infrared out",
+      line: "Step through what happens to twelve packets of infrared — and watch what more CO₂ changes.",
+      after: "Consequences of Climate Change"
+    },
+    "religious-studies/christianity-beliefs/1": {
+      file: "trinity-three-persons",
+      label: "Sort the Trinity claims",
+      line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
+      after: "$end"
+    },
+    "religious-studies/christianity-beliefs/2": {
+      file: "trinity-three-persons",
+      label: "Sort the Trinity claims",
+      line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
+      after: "Different Interpretations of Creation"
+    },
+    "science/chemistry-paper-1/2": {
+      file: "periodic-table-group-reactivity-trends",
+      label: "Predict the reactivity trend",
+      line: "Two elements and one prediction — work out why reactivity climbs down Group 1 but falls down Group 7.",
+      after: "Group 0 — The Noble Gases"
+    },
+    "science/chemistry-paper-1/1": {
+      file: "atom-mostly-empty-space",
+      label: "Fire the alpha beam",
+      line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
+      after: "Electronic Structure"
+    },
+    "science/physics-paper-1/4": {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "Resistance in Series Circuits"
+    },
+    "science/physics-paper-1/2": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "Calculating Efficiency"
+    },
+    "science/physics-paper-2/1": {
+      file: "resultant-force-vector-subtraction",
+      label: "Find the resultant force",
+      line: "Predict what two opposing forces add up to — and what it does to the object's motion.",
+      after: "Free Body Diagrams"
+    },
+    "science/physics-paper-1/7": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Specific Heat Capacity"
+    },
+    "science/chemistry-paper-2/3": {
+      file: "fractional-distillation-boiling-point",
+      label: "Send it up the column",
+      line: "Predict the height where a hydrocarbon condenses, from its boiling point and the column temperatures.",
+      after: "Combustion of Hydrocarbons"
+    },
+    "science/physics-paper-1/6": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Internal Energy"
+    },
+    "science/biology-paper-2/12": {
+      file: "biomass-transfer-respiration",
+      label: "Account for every kilojoule",
+      line: "Split an animal's food intake between new biomass, respiration, egestion and excretion, and find out which loss is really the big one.",
+      after: "Calculating Efficiency of Biomass Transfer"
+    },
+    "science/chemistry-paper-2/2": {
+      file: "equilibrium-not-static",
+      label: "Predict the next ten seconds",
+      line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
+      after: "Le Châtelier’s Principle"
+    },
+    "science/chemistry-paper-1/8": {
+      file: "ion-migration-electrolysis",
+      label: "Predict where the ions go",
+      line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
+      after: "Electrolysis of Molten Ionic Compounds"
+    },
+    "science/chemistry-paper-1/6": {
+      file: "reactivity-series-electron-transfer",
+      label: "Predict the displacement",
+      line: "Decide whether one metal will displace another from its solution, and which metal ends up as the ions.",
+      after: "Oxidation and Reduction in Terms of Electrons (Higher Tier)"
+    },
+    "science/biology-paper-2/5": {
+      file: "heterozygous-carrier-no-symptoms",
+      label: "Predict health from genotype",
+      line: "One working allele is enough — see why a carrier has no symptoms at all, yet can still pass the faulty allele on.",
+      after: "Polydactyly (Dominant Disorder)"
+    },
+    "science/biology-paper-1/6": {
+      file: "antibodies-dont-kill",
+      label: "Predict what happens next",
+      line: "Commit a prediction for each scene — bound antibodies, an antigen that does not fit, an antibiotic against a virus — then see what really happens.",
+      after: "$end"
+    },
+    "science/physics-paper-2/7": {
+      file: "em-spectrum-continuous",
+      label: "Slide across the spectrum",
+      line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
+      after: "Radio Waves and Microwaves"
+    },
+    "science/biology-paper-1/2": {
+      file: "sa-v-ratio-real-limit",
+      label: "Test which block copes",
+      line: "Two blocks of living tissue side by side — commit to which can supply every cell through its own surface, then watch the surface and volume counted.",
+      after: "Osmosis"
+    },
+    "science/biology-paper-1/7": {
+      file: "antibodies-dont-kill",
+      label: "Predict what happens next",
+      line: "Commit a prediction for each scene — bound antibodies, an antigen that does not fit, an antibiotic against a virus — then see what really happens.",
+      after: "Antibiotics and Painkillers"
+    },
+    "science/chemistry-paper-2/9": {
+      file: "polymer-double-bond-electron-rearrangement",
+      label: "Open the double bond",
+      line: "Predict the repeat unit, then watch the C=C open and its electrons become the links along the chain.",
+      after: "Condensation Polymerisation"
+    },
+    "science/biology-paper-1/4": {
+      file: "heart-simultaneous-double-circulation",
+      label: "Track one blood cell",
+      line: "See both sides of the heart squeeze on the same beat, and find out why blood passes through it twice on every lap of the body.",
+      after: "Structure of the Heart"
+    },
+    "science/physics-paper-2/13": {
+      file: "redshift-stretching-mechanism",
+      label: "Predict the spectral shift",
+      line: "Give a galaxy's speed and direction, then say where its hydrogen lines land in the light that reaches Earth.",
+      after: "The Big Bang Theory"
+    },
+    "science/biology-paper-2/3": {
+      file: "menstrual-cycle-hormone-feedback",
+      label: "Walk the hormone cycle",
+      line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
+      after: "Hormone Interactions — Negative Feedback"
+    },
+    "science/biology-paper-2/6": {
+      file: "natural-selection-not-directed",
+      label: "Predict what the population does",
+      line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
+      after: "Selective Breeding"
+    },
+    "science/biology-paper-2/1": {
+      file: "synapse-electrical-to-chemical",
+      label: "Find where the signal stops",
+      line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
+      after: "Reflex Actions"
+    },
+    "science/physics-paper-2/12": {
+      file: "transformer-voltage-current-tradeoff",
+      label: "Predict the secondary side",
+      line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
+      after: "Transformers in the National Grid"
+    },
+    "science/chemistry-paper-2/1": {
+      file: "collision-theory-energy-distribution",
+      label: "Predict the effect on collisions",
+      line: "Warm it, dilute it or add a catalyst, then predict both the number of collisions and the share of them with enough energy to react.",
+      after: "Factors Affecting Rate"
+    },
   };
 
   // Deployed copies live in /widgets/ - scripts/ is .vercelignore'd.
@@ -1799,9 +2130,20 @@
      lesson carry an interactive at all? A MAP lookup only — no widget
      file is fetched, so a lesson nobody opens still pays nothing. */
   window.SVWidgetMap = MAP;
+  /* An entry may name a school: it belongs to that school's bespoke lesson at this
+     path, so it only lands when the viewer's session has that subject as bespoke. */
+  function entriesFor(p) {
+    var cfg = p && MAP[p];
+    if (!cfg) return [];
+    var slug = p.split('/')[0];
+    var list = Array.isArray(cfg) ? cfg : [cfg];
+    return list.filter(function (c) {
+      if (!c.school) return true;
+      return typeof SchoolSession !== 'undefined' && !!SchoolSession.hasBespoke && SchoolSession.hasBespoke(slug);
+    });
+  }
   window.svLessonHasWidget = function () {
-    var p = lessonPath();
-    return !!(p && MAP[p]);
+    return entriesFor(lessonPath()).length > 0;
   };
   window.svLessonWidgetMastered = function () {
     var p = lessonPath();
@@ -1923,10 +2265,9 @@
 
   function inject() {
     var m = location.pathname.match(/\/lesson\/([^/]+)\/([^/]+)\/(\d+)/);
-    var cfg = m && MAP[m[1] + '/' + m[2] + '/' + m[3]];
-    if (!cfg || document.querySelector('.sv-embed-strip')) return;
+    var list = m ? entriesFor(m[1] + '/' + m[2] + '/' + m[3]) : [];
+    if (!list.length || document.querySelector('.sv-embed-strip')) return;
     /* a lesson can carry more than one interactive (different sections) */
-    var list = Array.isArray(cfg) ? cfg : [cfg];
     for (var wi = 0; wi < list.length; wi++) placeStrip(list[wi]);
   }
 
