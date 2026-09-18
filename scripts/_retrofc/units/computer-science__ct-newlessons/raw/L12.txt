@@ -1,0 +1,333 @@
+=== L12 SQL: Searching a Database ===
+id: cfdb875b-33f1-4241-b1ba-3cd4ff559b86
+slug: lesson-12
+status: pending_review tier:both updated:2026-09-18T20:49:09.895431+00:00
+narration_manifest: array len 0
+
+--- DESCRIPTION ---
+How records, fields and tables are searched with SELECT, FROM and WHERE, with worked queries.
+
+--- CONTENT_HTML ---
+<p data-narration-id="n1">A program that holds a few dozen values can search them with a loop. A program that holds millions &mdash; every borrower in a library, every pupil in a school, every product in a shop &mdash; needs something faster to run and shorter to write. That is the job of <dfn class="term" data-def="Structured Query Language, the standard language used to search for and manage data held in a database.">SQL</dfn>. One short instruction asks the database a question, and the database hands back only the data that answers it.</p>
+
+<h2 data-narration-id="n2">Records, fields and tables</h2>
+
+<p data-narration-id="n3">Data in a database is held in a <dfn class="term" data-def="A grid of stored data about one topic, with a column for each field and a row for each record.">table</dfn>. Picture the same grid you would build with a two-dimensional array. Each column is a <dfn class="term" data-def="A single named category of data in a table, such as title or year, holding one kind of value for every record.">field</dfn> &mdash; one named category of data, such as <em>title</em> or <em>year</em>. Each row is a <dfn class="term" data-def="One complete row of a table, holding every field that belongs to a single item or person.">record</dfn> &mdash; all the data about one item.</p>
+
+<p data-narration-id="n4">Every example below uses one small table called <strong>Books</strong>, taken from a school library system. It has six fields and five records.</p>
+
+<pre data-narration-id="n5"><code>Books
+book_id | title               | author   | genre     | year | copies
+1       | Noughts and Crosses | Blackman | Drama     | 2001 | 4
+2       | The Hunger Games    | Collins  | Sci-Fi    | 2008 | 6
+3       | Holes               | Sachar   | Adventure | 1998 | 3
+4       | Wonder              | Palacio  | Drama     | 2012 | 5
+5       | Skellig             | Almond   | Fantasy   | 1998 | 2</code></pre>
+
+<div class="key-fact" data-narration-id="n6" data-revision-tip="Cover this and write down how many fields and how many records the Books table holds, and what each of those two words means.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>A <strong>field</strong> is a column; a <strong>record</strong> is a row. The Books table has six fields and five records. Searching a database always comes down to two decisions: which fields to show, and which records to include.</p>
+</div>
+
+<h2 data-narration-id="n7">SELECT and FROM</h2>
+
+<p data-narration-id="n8">Every search begins with two keywords. <dfn class="term" data-def="The SQL keyword that lists which fields a query should display in its results.">SELECT</dfn> lists the fields you want to see, separated by commas. <dfn class="term" data-def="The SQL keyword that names the table a query should take its data from.">FROM</dfn> names the table those fields come from. A semicolon marks the end of the <dfn class="term" data-def="A single instruction written in SQL that asks a database for the data matching a stated set of conditions.">query</dfn>.</p>
+
+<pre data-narration-id="n9"><code>SELECT title, author
+FROM Books;</code></pre>
+
+<p data-narration-id="n10">That returns two columns but all five rows: it has chosen the fields and left every record in. To show every field instead of listing them, use a star. The star is a <dfn class="term" data-def="A symbol that stands in for a set of values; in a query the star stands for every field in the table.">wildcard</dfn>, and here it means &lsquo;all fields&rsquo;.</p>
+
+<pre data-narration-id="n11"><code>SELECT *
+FROM Books;</code></pre>
+
+<h2 data-narration-id="n12">WHERE: choosing the records</h2>
+
+<p data-narration-id="n13">Most searches want some rows, not all of them. <dfn class="term" data-def="The SQL keyword that filters a query, keeping only the records for which a stated condition is true.">WHERE</dfn> adds a condition. The database tests every record in turn and keeps only those for which the condition is true. The three keywords are always written in this order: SELECT, then FROM, then WHERE.</p>
+
+<p data-narration-id="n14">A condition compares a field with a value using one of six operators: equal to <code>=</code>, not equal to <code>&lt;&gt;</code>, less than <code>&lt;</code>, greater than <code>&gt;</code>, less than or equal to <code>&lt;=</code>, and greater than or equal to <code>&gt;=</code>. Text values sit inside single quotes; numbers do not.</p>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Worked queries on the Books table</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n15"><strong>1. Matching text exactly.</strong> Show the title of every drama.</p>
+    <pre data-narration-id="n16"><code>SELECT title
+FROM Books
+WHERE genre = 'Drama';</code></pre>
+    <p data-narration-id="n17">The database checks the genre field of each record. Records 1 and 4 match, so the result is <em>Noughts and Crosses</em> and <em>Wonder</em>. Note the single quotes: without them the database would look for a field called Drama and report an error.</p>
+    <p data-narration-id="n18"><strong>2. Comparing a number.</strong> Show the title and year of every book published before 2000.</p>
+    <pre data-narration-id="n19"><code>SELECT title, year
+FROM Books
+WHERE year &lt; 2000;</code></pre>
+    <p data-narration-id="n20">Only records 3 and 5 have a year below 2000, so the result is <em>Holes</em> (1998) and <em>Skellig</em> (1998). The number 2000 needs no quotes.</p>
+    <p data-narration-id="n21"><strong>3. Greater than or equal to.</strong> Show every field of any book the library holds five or more copies of.</p>
+    <pre data-narration-id="n22"><code>SELECT *
+FROM Books
+WHERE copies &gt;= 5;</code></pre>
+    <p data-narration-id="n23">Record 2 has six copies and record 4 has five, so both are returned in full. Swapping <code>&gt;=</code> for <code>&gt;</code> would quietly drop <em>Wonder</em>, because five is not greater than five.</p>
+    <p data-narration-id="n24"><strong>4. Not equal to.</strong> Show the title of every book that is not a drama.</p>
+    <pre data-narration-id="n25"><code>SELECT title
+FROM Books
+WHERE genre &lt;&gt; 'Drama';</code></pre>
+    <p data-narration-id="n26">Records 2, 3 and 5 are returned: <em>The Hunger Games</em>, <em>Holes</em> and <em>Skellig</em>.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n27">Two conditions at once</h2>
+
+<p data-narration-id="n28">A single WHERE clause can hold more than one condition, joined by <code>AND</code> or <code>OR</code>. <code>AND</code> keeps a record only when both conditions are true. <code>OR</code> keeps it when at least one is true, so <code>OR</code> always returns the same number of records or more.</p>
+
+<pre data-narration-id="n29"><code>SELECT title
+FROM Books
+WHERE genre = 'Drama' AND year &gt; 2005;</code></pre>
+
+<p data-narration-id="n30">Record 1 is a drama but was published in 2001, so it fails the second test and is dropped. Only <em>Wonder</em> is returned. Change <code>AND</code> to <code>OR</code> and the same query returns three titles instead: both dramas, plus <em>The Hunger Games</em> from 2008.</p>
+
+<div class="key-fact" data-narration-id="n31" data-revision-tip="Close this and write a query that shows the title and copies of every book published in 1998 that the library holds more than two copies of.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>The clause order never changes: <strong>SELECT</strong> (which fields) &rarr; <strong>FROM</strong> (which table) &rarr; <strong>WHERE</strong> (which records). SELECT and FROM are compulsory; WHERE is optional, and leaving it out returns every record.</p>
+</div>
+
+<div class="collapsible">
+  <button class="collapsible-toggle" aria-expanded="false">
+    <span>Beyond the three keywords: partial matches</span>
+    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="collapsible-content"><div class="collapsible-inner">
+    <p data-narration-id="n32">SQL can also search for part of a piece of text. <code>LIKE</code> compares a field against a pattern, and inside that pattern the per cent sign is a wildcard standing for any run of characters. <code>LIKE 'S%'</code> matches anything starting with S, <code>LIKE '%s'</code> matches anything ending in s, and <code>LIKE '%the%'</code> matches anything containing &lsquo;the&rsquo;.</p>
+    <pre data-narration-id="n33"><code>SELECT title
+FROM Books
+WHERE author LIKE 'S%';</code></pre>
+    <p data-narration-id="n34">Sachar is the only author beginning with S, so this returns <em>Holes</em>. Useful as this is, only SELECT, FROM and WHERE are named in the specification, so treat LIKE and the per cent wildcard as a helpful extra rather than something an exam question will require.</p>
+  </div></div>
+</div>
+
+<h2 data-narration-id="n35">Common mistakes</h2>
+
+<ul>
+  <li data-narration-id="n36">Forgetting the single quotes around a text value, so <code>WHERE genre = Drama</code> is read as a comparison between two fields.</li>
+  <li data-narration-id="n37">Putting quotes around a number, which can stop a comparison such as <code>year &lt; 2000</code> working as intended.</li>
+  <li data-narration-id="n38">Writing the clauses out of order, for example putting WHERE before FROM.</li>
+  <li data-narration-id="n39">Naming a field that does not exist in the table given in the question, or misspelling one. Always copy field names straight from the table you are shown.</li>
+  <li data-narration-id="n40">Using <code>&gt;</code> when the question says &lsquo;at least&rsquo; or &lsquo;five or more&rsquo;. Those phrases need <code>&gt;=</code>.</li>
+</ul>
+
+<div class="key-fact" data-narration-id="n41" data-revision-tip="Test yourself: name the three keywords a search needs, say what each one decides, and state which of the three is optional.">
+  <div class="key-fact-label">Key Fact</div>
+  <p>SELECT decides the columns, FROM decides the table, WHERE decides the rows. Get those three decisions right, in that order, and the query is right.</p>
+</div>
+
+--- CONCLUSION_HTML ---
+<h3 data-narration-id="n43">Key Takeaways</h3>
+<ul>
+<li data-narration-id="n44">A table stores data as fields (columns) and records (rows); searching it means choosing which fields to show and which records to include.</li>
+<li data-narration-id="n45">SELECT names the fields and a star means all of them, FROM names the table, and WHERE filters records with <code>=</code>, <code>&lt;&gt;</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code> or <code>&gt;=</code>, joined by AND or OR.</li>
+<li data-narration-id="n46">Text values need single quotes and numbers do not; the clause order SELECT, FROM, WHERE is fixed.</li>
+</ul>
+
+--- EXAM_TIP_HTML ---
+<p data-narration-id="n42">Paper 2 lasts 1 hour 30 minutes and carries 80 marks, and SQL questions on it are usually worth two to four marks, with one mark for each clause you get right. Build your answer one clause at a time and you bank those marks separately: fields after SELECT, table after FROM, condition after WHERE. Re-read the table printed in the question before you write anything, and copy the field names from it exactly &mdash; a query that invents a field name earns nothing, however neat the rest of it is. When a question asks what a query &lsquo;outputs&rsquo;, work down the table record by record and write out every row that passes the condition; the working shows the examiner you tested each one.</p>
+
+--- PRACTICE_QUESTIONS ---
+[
+ {
+  "text": "Which SQL keyword names the table that a query takes its data from? A) SELECT  B) FROM  C) WHERE  D) TABLE",
+  "type": "1 mark — Multiple Choice",
+  "marks": "One mark for B) FROM. SELECT names the fields to display, WHERE filters the records, and TABLE is not one of the three search keywords."
+ },
+ {
+  "text": "State the difference between a field and a record in a database table.",
+  "type": "2 marks — Define",
+  "marks": "One mark for stating that a field is a column, holding one named category of data for every entry. One mark for stating that a record is a row, holding all the data about one item or person."
+ },
+ {
+  "text": "A shop stores its stock in a table called Stock.\n\nitem_id | item_name  | category   | price | quantity\n1       | Pencil     | Stationery | 0.30  | 250\n2       | Ruler      | Stationery | 0.95  | 120\n3       | Calculator | Maths      | 8.50  | 40\n4       | Compass    | Maths      | 1.75  | 60\n5       | Notebook   | Stationery | 1.20  | 200\n\nWrite down the item_name of every record returned by this query:\n\nSELECT item_name, price FROM Stock WHERE price < 1.50;",
+  "type": "3 marks — Trace a Query",
+  "marks": "One mark each for Pencil, Ruler and Notebook. Their prices (0.30, 0.95 and 1.20) are all below 1.50. Deduct nothing for order, but Compass (1.75) and Calculator (8.50) must not appear; an answer listing either scores a maximum of two."
+ },
+ {
+  "text": "Using the same Stock table, write an SQL query that displays the item_name and quantity of every item in the Maths category that has a quantity of less than 50.",
+  "type": "4 marks — Write a Query",
+  "marks": "Model answer: SELECT item_name, quantity FROM Stock WHERE category = 'Maths' AND quantity < 50; One mark for SELECT naming both fields. One mark for FROM Stock. One mark for the condition category = 'Maths' with single quotes round the text value. One mark for joining a second condition quantity < 50 with AND. Accept minor spelling slips in field names."
+ },
+ {
+  "text": "A student writes this query to list the items costing more than one pound:\n\nSELECT item_name WHERE price > 1.00 FROM Stock;\n\nIdentify the error and write the corrected query. Explain why the order of the clauses matters.",
+  "type": "4 marks — Explain",
+  "marks": "Top band: identifies that WHERE has been written before FROM, gives the corrected query SELECT item_name FROM Stock WHERE price > 1.00; and explains that the database must be told which table to look in before it can test a condition on that table's fields, so the fixed order SELECT, FROM, WHERE is part of the language's syntax. Upper-mid band: identifies the misplaced clause and corrects the query, with a brief reason. Lower-mid band: spots that something is out of order or rewrites the query correctly, but gives no clear reason. Low band: says the query is wrong with no accurate correction."
+ },
+ {
+  "text": "A library wants a feature that lists the title and author of every book published before 2005 of which it holds fewer than three copies. Describe how SELECT, FROM and WHERE would be used to build this search, and explain why a database query is a better choice than writing a loop that checks every record in turn.",
+  "type": "6 marks — Extended Response",
+  "marks": "Top band: a sustained answer that puts title and author after SELECT, names the Books table after FROM, and builds a WHERE condition joining year < 2005 and copies < 3 with AND; then explains that the query states what is wanted rather than how to find it, is far shorter to write and to maintain, and that the database is optimised to search large tables quickly, so it will outperform a hand-written loop as the number of records grows. Upper-mid band: describes all three clauses correctly and gives at least one sound reason why a query is preferable. Lower-mid band: describes two of the three clauses, or all three loosely, with a weak comparison. Low band: names one or two keywords with little detail and no comparison."
+ }
+]
+
+--- KNOWLEDGE_CHECKS ---
+[
+ {
+  "q": "Which keyword decides which records a query returns?",
+  "type": "mcq",
+  "correct": 2,
+  "options": [
+   "SELECT",
+   "FROM",
+   "WHERE",
+   "TABLE"
+  ]
+ },
+ {
+  "q": "What does the star do in the query SELECT * FROM Books;?",
+  "type": "mcq",
+  "correct": 1,
+  "options": [
+   "It returns the first record only",
+   "It returns every field of every record",
+   "It sorts the records alphabetically",
+   "It counts how many records there are"
+  ]
+ },
+ {
+  "q": "A text value used in a WHERE condition must be enclosed in _____ quotes.",
+  "type": "fill",
+  "correct": 2,
+  "options": [
+   "double",
+   "curly",
+   "single",
+   "no"
+  ]
+ },
+ {
+  "q": "A column in a database table is called a _____.",
+  "type": "fill",
+  "correct": 1,
+  "options": [
+   "record",
+   "field",
+   "query",
+   "wildcard"
+  ]
+ },
+ {
+  "q": "Match each keyword to the decision it makes.",
+  "left": [
+   "SELECT",
+   "FROM",
+   "WHERE"
+  ],
+  "type": "match",
+  "order": [
+   2,
+   0,
+   1
+  ],
+  "right": [
+   "Which table the data comes from",
+   "Which records are kept",
+   "Which fields are displayed"
+  ]
+ }
+]
+
+--- FLASHCARD_QUESTIONS ---
+[
+ {
+  "a": "One record, holding every field for one item or person.",
+  "q": "In a database table, what is stored in a single row?"
+ },
+ {
+  "a": "A field.",
+  "q": "What name is given to a column in a database table?"
+ },
+ {
+  "a": "SELECT.",
+  "q": "Which keyword lists the fields a query should display?"
+ },
+ {
+  "a": "FROM.",
+  "q": "Which keyword names the table a query reads from?"
+ },
+ {
+  "a": "It keeps only the records for which its condition is true.",
+  "q": "What job does the WHERE clause do in a query?"
+ },
+ {
+  "a": "Every field in the table.",
+  "q": "What is returned by a SELECT clause that uses a star instead of field names?"
+ },
+ {
+  "a": "SELECT, then FROM, then WHERE.",
+  "q": "What is the fixed order of the three search keywords in a query?"
+ },
+ {
+  "a": "Every record except the ones matching the stated value.",
+  "q": "What does a 'not equal to' condition keep when a query runs?"
+ },
+ {
+  "a": "Inside single quotes.",
+  "q": "How is a text value written inside a WHERE condition?"
+ },
+ {
+  "a": "Plainly, with no quotes round it.",
+  "q": "How is a number written inside a WHERE condition?"
+ },
+ {
+  "a": "Only when both conditions are true.",
+  "q": "Two conditions are joined by AND. When is a record kept?"
+ },
+ {
+  "a": "When at least one of them is true.",
+  "q": "Two conditions are joined by OR. When is a record kept?"
+ },
+ {
+  "a": "It returns every record in the table.",
+  "q": "What happens to a query that has no WHERE clause at all?"
+ },
+ {
+  "a": "Greater than or equal to, not simply greater than.",
+  "q": "A question asks for books with 'five or more' copies. Which comparison is needed?"
+ }
+]
+
+--- GLOSSARY_TERMS ---
+[
+ {
+  "term": "SQL",
+  "definition": "Structured Query Language, the standard language used to search for and manage data held in a database."
+ },
+ {
+  "term": "table",
+  "definition": "A grid of stored data about one topic, with a column for each field and a row for each record."
+ },
+ {
+  "term": "field",
+  "definition": "A single named category of data in a table, such as title or year, holding one kind of value for every record."
+ },
+ {
+  "term": "record",
+  "definition": "One complete row of a table, holding every field that belongs to a single item or person."
+ },
+ {
+  "term": "SELECT",
+  "definition": "The SQL keyword that lists which fields a query should display in its results."
+ },
+ {
+  "term": "FROM",
+  "definition": "The SQL keyword that names the table a query should take its data from."
+ },
+ {
+  "term": "query",
+  "definition": "A single instruction written in SQL that asks a database for the data matching a stated set of conditions."
+ },
+ {
+  "term": "wildcard",
+  "definition": "A symbol that stands in for a set of values; in a query the star stands for every field in the table."
+ },
+ {
+  "term": "WHERE",
+  "definition": "The SQL keyword that filters a query, keeping only the records for which a stated condition is true."
+ }
+]
