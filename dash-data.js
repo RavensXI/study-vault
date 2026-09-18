@@ -97,6 +97,50 @@ if (_dq.get('picked')) {                    /* staging override for renders/QA *
     }
   });
 }
+/* A class on a free-tier subject is authoritative for that family's board: the teacher
+   chose "Maths (Edexcel)", so a student who ticked AQA Maths by mistake is moved to Edexcel
+   Maths, and the family is added if they never picked it. Completions carry across on the
+   same unit slug (the four Maths boards share units); board-specific option picks (History
+   topics, set texts) are cleared so the wizard asks again on the right board. */
+function svApplyClassSubjects(list) {
+  list = list || (function () { try { return JSON.parse(localStorage.getItem('sv-class-subjects') || '[]'); } catch (e) { return []; } })();
+  if (!Array.isArray(list) || !list.length || !WIZ) return false;
+  var g = function (k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
+  var put = function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  var changed = false;
+  WIZ.picked = Array.isArray(WIZ.picked) ? WIZ.picked : []; WIZ.boards = WIZ.boards || {}; WIZ.meta = WIZ.meta || {}; WIZ.topics = WIZ.topics || {};
+  /* a class on one of the school's bespoke subjects adds that family if it was never picked;
+     its board is the school's own, so nothing else changes */
+  list.filter(function (x) { return x && x.school; }).forEach(function (x) {
+    var fam = (typeof SchoolSession !== 'undefined' && SchoolSession.familyOf) ? SchoolSession.familyOf(x.slug) : null;
+    if (fam && NAMEC[fam] && WIZ.picked.indexOf(fam) < 0) { WIZ.picked.push(fam); changed = true; }
+  });
+  list.filter(function (x) { return x && x.slug && !x.school; }).map(function (x) { return x.slug; }).forEach(function (slug) {
+    var fam = null, board = null;
+    Object.keys(SUBSLUG).forEach(function (f) { Object.keys(SUBSLUG[f]).forEach(function (b) { if (SUBSLUG[f][b] === slug) { fam = f; board = b; } }); });
+    if (!fam || !NAMEC[fam]) return;
+    var oldBoard = WIZ.boards[fam] || null, oldSlug = oldBoard ? SUBSLUG[fam][oldBoard] : null;
+    if (WIZ.picked.indexOf(fam) < 0) { WIZ.picked.push(fam); changed = true; }
+    if (oldBoard === board) return;
+    WIZ.boards[fam] = board; changed = true;
+    WIZ.meta[fam] = WIZ.meta[fam] || {}; WIZ.meta[fam].board = BOARDLBL[board] || board; WIZ.meta[fam].topics = [];
+    delete WIZ.topics[fam];
+    if (oldSlug && oldSlug !== slug) {
+      var done = g('sv-lessons-done', {}), when = g('sv-lessons-when', {}), rag = WIZ.rag || {};
+      Object.keys(done).forEach(function (k) {
+        if (k.indexOf(oldSlug + '/') !== 0) return;
+        var nk = slug + k.slice(oldSlug.length); done[nk] = done[nk] || [];
+        (done[k] || []).forEach(function (n) { if (done[nk].indexOf(n) < 0) done[nk].push(n); if (!when[nk + '/' + n] && when[k + '/' + n]) when[nk + '/' + n] = when[k + '/' + n]; });
+      });
+      Object.keys(rag).forEach(function (k) { if (k === oldSlug || k.indexOf(oldSlug + '/') === 0) { var nk = slug + k.slice(oldSlug.length); if (!rag[nk]) rag[nk] = rag[k]; } });
+      put('sv-lessons-done', done); put('sv-lessons-when', when); WIZ.rag = rag;
+    }
+  });
+  if (changed) { put('sv-welcome', WIZ); if (window.svProgressPushSoon) { try { svProgressPushSoon(); } catch (e) {} } }
+  return changed;
+}
+window.svApplyClassSubjects = svApplyClassSubjects;
+try { if (!_dq.get('picked')) svApplyClassSubjects(); } catch (e) {}
 var DAYONE = !!(WIZ && Array.isArray(WIZ.picked) && WIZ.picked.length);
 var SVUSER = null;
 try { SVUSER = JSON.parse(localStorage.getItem('sv-user') || 'null'); } catch (e) {}

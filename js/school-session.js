@@ -10,6 +10,7 @@
      loaders read; this key seeds it on every page load. */
   var ACCOUNT_KEY = 'sv-school';
   var TOKEN_KEY = 'sb-baipckgywpnwapobwtsy-auth-token';
+  var CLASS_SUBJECTS_KEY = 'sv-class-subjects';   /* the subjects of the student's classes: [{slug, school?}] */
 
   /* bespoke slug -> wizard family, for the dashboard's subject-to-slug step */
   var FAMILY = { 'history': 'history', 'geography': 'geog', 'science': 'science', 'separate-sciences': 'triple',
@@ -106,11 +107,24 @@
           try {
             if (now) localStorage.setItem(ACCOUNT_KEY, JSON.stringify(now)); else localStorage.removeItem(ACCOUNT_KEY);
           } catch (e) {}
+          /* a class on a free-tier subject is authoritative for its board: "Maths (Edexcel)"
+             means the student sits Edexcel Maths whatever they picked in the wizard. The
+             dashboard applies it (it owns the family map); a changed list means a rebuild. */
+          var classSubs = []; var seen = {};
+          (d.classes || []).forEach(function (c) {
+            if (!c.subject_slug) return; var id = (c.subject_school_id || '') + ':' + c.subject_slug; if (seen[id]) return; seen[id] = true;
+            classSubs.push(c.subject_school_id ? { slug: c.subject_slug, school: c.subject_school_id } : { slug: c.subject_slug });
+          });
+          classSubs.sort(function (a, b) { return (a.school || '') + a.slug < (b.school || '') + b.slug ? -1 : 1; });
+          var hadSubs = null; try { hadSubs = localStorage.getItem(CLASS_SUBJECTS_KEY); } catch (e) {}
+          var subsChanged = JSON.stringify(classSubs) !== (hadSubs || '[]');
+          try { if (classSubs.length) localStorage.setItem(CLASS_SUBJECTS_KEY, JSON.stringify(classSubs)); else localStorage.removeItem(CLASS_SUBJECTS_KEY); } catch (e) {}
+          if (subsChanged && window.svApplyClassSubjects) { try { window.svApplyClassSubjects(classSubs); } catch (e) {} }
           if (now) { self.set(now); if (window.svCarrySchoolProgress) { try { window.svCarrySchoolProgress(now); } catch (e) {} } }
           else if (cur && cur.via === 'class') self.clear();
-          if (newKey && window.svProgressPushSoon) { try { svProgressPushSoon(); } catch (e) {} }
+          if ((newKey || subsChanged) && window.svProgressPushSoon) { try { svProgressPushSoon(); } catch (e) {} }
           /* reload when the page was built against a different answer than the one we now hold */
-          if (opts.reload !== false && ((now && now.school_id) || null) !== (self._booted || null)) location.reload();
+          if (opts.reload !== false && (subsChanged || ((now && now.school_id) || null) !== (self._booted || null))) location.reload();
           return now;
         })
         .catch(function () { return null; });

@@ -40,11 +40,11 @@ module.exports = async function handler(req, res) {
   const subjectIds = Array.from(new Set(list.map(function (c) { return c.subject_id; }).filter(Boolean)));
   const [{ data: teachers }, { data: subjects }] = await Promise.all([
     teacherIds.length ? supabase.from('profiles').select('id, full_name').in('id', teacherIds) : Promise.resolve({ data: [] }),
-    subjectIds.length ? supabase.from('subjects').select('id, name, slug').in('id', subjectIds) : Promise.resolve({ data: [] })
+    subjectIds.length ? supabase.from('subjects').select('id, name, slug, school_id').in('id', subjectIds) : Promise.resolve({ data: [] })
   ]);
   const tName = {}; (teachers || []).forEach(function (t) { tName[t.id] = t.full_name; });
-  const sName = {}; const sSlug = {};
-  (subjects || []).forEach(function (s) { sName[s.id] = s.name; sSlug[s.id] = s.slug; });
+  const sName = {}; const sSlug = {}; const sSchool = {};
+  (subjects || []).forEach(function (s) { sName[s.id] = s.name; sSlug[s.id] = s.slug; sSchool[s.id] = s.school_id || null; });
 
   /* The school a class belongs to routes the student to that school's bespoke
      lessons (Tom, 18 Sep 2026: the school tier is an all-school tier, so one class
@@ -76,6 +76,7 @@ module.exports = async function handler(req, res) {
         name: c.name,
         subject: sName[c.subject_id] || null,
         subject_slug: sSlug[c.subject_id] || null,
+        subject_school_id: sSchool[c.subject_id] || null,
         teacher: tName[c.teacher_id] || null,
         year_group: c.year_group || null
       };
