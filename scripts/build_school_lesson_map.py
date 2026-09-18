@@ -12,8 +12,8 @@ SCHOOLS = {'unity-college': {'id': 'a5414d1c-8841-4bc5-8573-a9756752361b', 'pair
     'music-eduqas': 'gcse-music', 'food-preparation-and-nutrition-aqa': 'food-preparation-and-nutrition',
     'french-aqa': 'french', 'spanish-aqa': 'spanish', 'german-aqa': 'german'}}}
 def norm(t): return re.sub(r'[^a-z0-9 ]', ' ', (t or '').lower()).replace(' and ', ' ').replace(' the ', ' ')
-GENERIC = re.compile(r'(beliefs?|practices?|teachings?|theme|paper|unit|study|studies|component|gcse)')
-def uname(t): return re.sub(r'\s+', ' ', GENERIC.sub(' ', norm(t))).strip()   # 'judaism beliefs' -> 'judaism', so religions never pair by their shared suffix
+GENERIC = {'beliefs','belief','practices','practice','teachings','teaching','theme','paper','unit','study','studies','component','gcse'}
+def uname(t): return ' '.join(w for w in norm(t).split() if w not in GENERIC)   # 'judaism beliefs' -> 'judaism', so religions never pair by their shared suffix
 def lessons(slug, school):
     subs = requests.get(U + '/rest/v1/subjects?slug=eq.%s&school_id=%s&select=id' % (slug, ('eq.' + school) if school else 'is.null'), headers=H).json()
     if not subs: return {}
