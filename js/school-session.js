@@ -4,6 +4,20 @@
  */
 (function () {
   var KEY = 'studyvault-school';
+  /* The account copy of a class-derived school session. It syncs with the account
+     (js/account-sync.js whitelist), so a student who joined a class on one device is
+     routed to the school's lessons on every device. Session storage is still what the
+     loaders read; this key seeds it on every page load. */
+  var ACCOUNT_KEY = 'sv-school';
+  var TOKEN_KEY = 'sb-baipckgywpnwapobwtsy-auth-token';
+
+  /* bespoke slug -> wizard family, for the dashboard's subject-to-slug step */
+  var FAMILY = { 'history': 'history', 'geography': 'geog', 'science': 'science', 'separate-sciences': 'triple',
+    'english-literature': 'lit', 'english-language': 'lang', 'religious-studies': 'rs', 'religious-education': 'rs',
+    'computer-science': 'cs', 'business': 'business', 'design-technology': 'dt', 'drama': 'drama',
+    'gcse-music': 'music', 'music': 'music', 'food-preparation-and-nutrition': 'food', 'food-technology': 'food',
+    'french': 'french', 'spanish': 'spanish', 'german': 'german', 'sport-science': 'pe', 'creative-imedia': 'it',
+    'maths': 'maths', 'science-severnvale': 'science' };
 
   window.SchoolSession = {
     get: function () {
@@ -30,6 +44,61 @@
     getSchoolId: function () {
       var s = this.get();
       return s ? s.school_id : null;
+    },
+
+    /** The school's bespoke slug for a wizard family ('history' -> 'history'), or null. */
+    bespokeFor: function (family) {
+      var s = this.get();
+      if (!s || !s.bespoke_subjects) return null;
+      for (var i = 0; i < s.bespoke_subjects.length; i++) {
+        if (FAMILY[s.bespoke_subjects[i]] === family) return s.bespoke_subjects[i];
+      }
+      return null;
+    },
+    familyOf: function (slug) { return FAMILY[slug] || null; },
+
+    /** Seed the tab's session from the account copy. Runs at script load, before any
+        loader, so the very first query on a new tab already targets the school. */
+    fromAccount: function () {
+      try {
+        if (this.isActive()) return;
+        var raw = localStorage.getItem(ACCOUNT_KEY);
+        if (raw) { var s = JSON.parse(raw); if (s && s.school_id) this.set(s); }
+      } catch (e) {}
+    },
+
+    /** Ask the server which classes the signed-in student is in and route them to
+        their school's lessons. Cheap (one call), so it runs on every page load in the
+        background; the page reloads only when the answer changes from nothing to a
+        school, or from one school to none. Class-derived sessions never override a
+        session set by a school sign-in (SSO), which carries no `via`. */
+    refreshFromClasses: function (opts) {
+      opts = opts || {};
+      var tok = null;
+      try { var raw = JSON.parse(localStorage.getItem(TOKEN_KEY) || 'null'); if (raw && raw.access_token) tok = raw.access_token; } catch (e) {}
+      if (!tok) return Promise.resolve(null);
+      var self = this;
+      return fetch('/api/class/mine', { headers: { 'Authorization': 'Bearer ' + tok } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d) return null;
+          var had = null; try { had = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || 'null'); } catch (e) {}
+          var now = d.school || null;
+          var cur = self.get();
+          if (cur && !cur.via) return now;            /* a real school sign-in wins */
+          var changed = (had && had.school_id) !== (now && now.school_id);
+          try {
+            if (now) localStorage.setItem(ACCOUNT_KEY, JSON.stringify(now)); else localStorage.removeItem(ACCOUNT_KEY);
+          } catch (e) {}
+          if (now) { self.set(now); if (changed && window.svCarrySchoolProgress) { try { window.svCarrySchoolProgress(now); } catch (e) {} } }
+          else if (cur && cur.via === 'class') self.clear();
+          if (changed) {
+            if (window.svProgressPushSoon) { try { svProgressPushSoon(); } catch (e) {} }
+            if (opts.reload !== false) location.reload();
+          }
+          return now;
+        })
+        .catch(function () { return null; });
     },
 
     /** Check if the school has bespoke content for a subject slug. */
@@ -108,6 +177,57 @@
       }
     }
   };
+
+  /* A student who revised on the free tier and then joined a class keeps what they did:
+     data/school-lesson-map.json pairs each free-tier lesson with the school lesson on the
+     same topic. Visited flags, completion dates and topic ratings carry across to the twin
+     (never overwriting school-side work); knowledge-check scores do not, because the
+     questions differ. Free-tier progress is left in place. */
+  window.svCarrySchoolProgress = function (school) {
+    if (!school || !school.school_slug) return;
+    var flagKey = 'sv-school-carried';
+    try { var f = JSON.parse(localStorage.getItem(flagKey) || 'null'); if (f && f.school === school.school_slug) return; } catch (e) {}
+    fetch('/data/school-lesson-map.json').then(function (r) { return r.ok ? r.json() : null; }).then(function (all) {
+      var map = all && all[school.school_slug]; if (!map) return;
+      var g = function (k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
+      var put = function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+      var done = g('sv-lessons-done', {}), when = g('sv-lessons-when', {}), visited = g('studyvault-visited', {}), w = g('sv-welcome', {});
+      var rag = (w && w.rag) || {}; var moved = 0;
+      Object.keys(map).forEach(function (freeSub) {
+        var m = map[freeSub]; var to = m.to; if (!to || !school.bespoke_subjects || school.bespoke_subjects.indexOf(to) < 0) return;
+        Object.keys(done).forEach(function (key) {
+          if (key.indexOf(freeSub + '/') !== 0) return;
+          var unit = key.slice(freeSub.length + 1);
+          (done[key] || []).forEach(function (n) {
+            var tgt = m.lessons[unit + '/' + n]; if (!tgt) return;
+            var tu = tgt.split('/')[0], tn = parseInt(tgt.split('/')[1], 10);
+            var tk = to + '/' + tu; done[tk] = done[tk] || [];
+            if (done[tk].indexOf(tn) < 0) { done[tk].push(tn); moved++; }
+            var wk = tk + '/' + tn; if (!when[wk] && when[key + '/' + n]) when[wk] = when[key + '/' + n];
+            var slug = 'lesson-' + (tn < 10 ? '0' + tn : tn);
+            visited[tu] = visited[tu] || []; if (visited[tu].indexOf(slug) < 0) visited[tu].push(slug);
+          });
+        });
+        if (rag[freeSub] && !rag[to]) rag[to] = rag[freeSub];
+        Object.keys(rag).forEach(function (k) {
+          if (k.indexOf(freeSub + '/') !== 0) return;
+          var tu = (m.units || {})[k.slice(freeSub.length + 1)]; if (tu && !rag[to + '/' + tu]) rag[to + '/' + tu] = rag[k];
+        });
+      });
+      put('sv-lessons-done', done); put('sv-lessons-when', when); put('studyvault-visited', visited);
+      w.rag = rag; put('sv-welcome', w);
+      put(flagKey, { school: school.school_slug, at: new Date().toISOString(), moved: moved });
+      if (window.svProgressPushSoon) { try { svProgressPushSoon(); } catch (e) {} }
+    }).catch(function () {});
+  };
+
+  /* seed from the account copy before any loader runs; refresh from the server after load */
+  SchoolSession.fromAccount();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(function () { SchoolSession.refreshFromClasses(); }, 800); });
+  } else {
+    setTimeout(function () { SchoolSession.refreshFromClasses(); }, 800);
+  }
 
   // Auto-inject logo on DOMContentLoaded
   if (document.readyState === 'loading') {

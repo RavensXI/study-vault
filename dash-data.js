@@ -118,6 +118,9 @@ if (_dq.get('done')) {                      /* staging: ?done=sub/unit:1.2,... *
   _dq.get('done').split(',').forEach(function (p) {
     var kv = p.split(':'); if (kv[1]) DONE[kv[0]] = kv[1].split('.').map(Number); });
 }
+/* the school filter for a subject's lesson queries: a bespoke subject's rows carry the
+   school id; a free-tier subject's carry null */
+function svSchoolQ(su) { return '&units.subjects.school_id=' + (su && su.school ? 'eq.' + encodeURIComponent(su.school) : 'is.null'); }
 function doneIn(sub, unit) { return DONE[sub + '/' + unit] || []; }
 
 /* the three areas of study a Music student chooses BETWEEN; AoS1 is
@@ -368,7 +371,7 @@ function svUnitMedia(SUBJECTS, cb) {
     var url = SUPA + '/rest/v1/lessons?select=lesson_number,title,flashcard_questions,related_media,units!inner(slug,subjects!inner(slug,school_id))'
       + '&units.slug=eq.' + encodeURIComponent(s.unit)
       + '&units.subjects.slug=eq.' + encodeURIComponent(s.su.sub)
-      + '&units.subjects.school_id=is.null&order=lesson_number';
+      + svSchoolQ(s.su) + '&order=lesson_number';
     return fetch(url, { headers: { apikey: ANON } })
       .then(function (r) { return r.json(); })
       .then(function (rows) {
@@ -481,15 +484,15 @@ function svFlashDeck(SUBJECTS, cb, opts) {
   var jobs = [];
   if (dueLids.length) {
     var idl = dueLids.map(function (x) { return '"' + x + '"'; }).join(',');
-    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,name,subjects!inner(slug,school_id))&id=in.(' + idl + ')&units.subjects.school_id=is.null', { headers: { apikey: ANON } })
+    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,name,subjects!inner(slug,school_id))&id=in.(' + idl + ')', { headers: { apikey: ANON } })
       .then(function (r) { return r.json(); }).then(function (rows) { return { kind: 'due', rows: rows }; }).catch(function () { return { kind: 'due', rows: [] }; }));
   }
   newSrcs.forEach(function (s) {
-    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,name,subjects!inner(slug,school_id))&units.slug=eq.' + encodeURIComponent(s.unit) + '&units.subjects.slug=eq.' + encodeURIComponent(s.su.sub) + '&units.subjects.school_id=is.null&lesson_number=lte.' + s.next, { headers: { apikey: ANON } })
+    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,name,subjects!inner(slug,school_id))&units.slug=eq.' + encodeURIComponent(s.unit) + '&units.subjects.slug=eq.' + encodeURIComponent(s.su.sub) + svSchoolQ(s.su) + '&lesson_number=lte.' + s.next, { headers: { apikey: ANON } })
       .then(function (r) { return r.json(); }).then(function (rows) { return { kind: 'new', su: s.su, rows: rows }; }).catch(function () { return { kind: 'new', su: s.su, rows: [] }; }));
   });
   Object.keys(weakSrcs).forEach(function (k) { var w = weakSrcs[k];
-    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,name,subjects!inner(slug,school_id))&units.slug=eq.' + encodeURIComponent(w.unit) + '&units.subjects.slug=eq.' + encodeURIComponent(w.su.sub) + '&units.subjects.school_id=is.null&lesson_number=in.(' + w.ns.join(',') + ')', { headers: { apikey: ANON } })
+    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,name,subjects!inner(slug,school_id))&units.slug=eq.' + encodeURIComponent(w.unit) + '&units.subjects.slug=eq.' + encodeURIComponent(w.su.sub) + svSchoolQ(w.su) + '&lesson_number=in.(' + w.ns.join(',') + ')', { headers: { apikey: ANON } })
       .then(function (r) { return r.json(); }).then(function (rows) { return { kind: 'weak', su: w.su, rows: rows }; }).catch(function () { return { kind: 'weak', su: w.su, rows: [] }; }));
   });
   if (!jobs.length) { cb([]); return; }
@@ -635,6 +638,11 @@ function svDashInit(SUBJECTS, opts) {
   SUBJECTS.splice(0, SUBJECTS.length, ...WIZ.picked.filter(function (sl) { return NAMEC[sl]; }).map(function (sl) {
     var board = (WIZ.boards || {})[sl] || '';
     var sub = (SUBSLUG[sl] || {})[board] || null;
+    /* a school student (class-derived or signed-in session) gets the school's bespoke row
+       for this family whatever board the wizard recorded; the row carries its own board */
+    var bes = (typeof SchoolSession !== 'undefined' && SchoolSession.bespokeFor) ? SchoolSession.bespokeFor(sl) : null;
+    var school = bes ? SchoolSession.getSchoolId() : null;
+    if (bes) sub = bes;
     var raw = [];
     var tsl = rawT[sl] || {};
     Object.keys(tsl).sort(function (a, b) { return a - b; }).forEach(function (k) {
@@ -648,7 +656,7 @@ function svDashInit(SUBJECTS, opts) {
       else if (sl === 'rs' && board === 'edexcel b' && raw.length) first = raw[0];   /* area1-<religion> is a unit slug */
       else first = FIRSTUNIT[sub] || null;
     }
-    return { tab: NAMEC[sl][2], slug: sl, sub: sub, mode: PFAM.indexOf(sl) >= 0 ? 'p' : 'l',
+    return { tab: NAMEC[sl][2], slug: sl, sub: sub, school: school, mode: PFAM.indexOf(sl) >= 0 ? 'p' : 'l',
       name: NAMEC[sl][0], c: NAMEC[sl][1], units: [],
       board: (WIZ.meta && WIZ.meta[sl] && WIZ.meta[sl].board) || BOARDLBL[board] || '',
       topics: (WIZ.meta && WIZ.meta[sl] && WIZ.meta[sl].topics) || [],
@@ -660,14 +668,19 @@ function svDashInit(SUBJECTS, opts) {
      panel shows units -> lessons like every other subject, instead of the
      "Full course" placeholder. showLessons() already routes practice units to
      /practice/ via svIsPracticeUnit. */
-  var subs = SUBJECTS.filter(function (su) { return su.sub; })
-    .map(function (su) { return su.sub; });
-  if (!subs.length) return;
+  var freeSubs = SUBJECTS.filter(function (su) { return su.sub && !su.school; }).map(function (su) { return su.sub; });
+  var schoolSubs = SUBJECTS.filter(function (su) { return su.sub && su.school; });
+  if (!freeSubs.length && !schoolSubs.length) return;
   var liveCounts = {};
-  fetch(SUPA + '/rest/v1/subjects?select=slug,settings,units(id,slug,name,lesson_count,sort_order)'
-      + '&school_id=is.null&slug=in.(' + subs.map(function (x) { return '"' + x + '"'; }).join(',') + ')',
-      { headers: { apikey: ANON } })
-    .then(function (r) { return r.json(); })
+  var fetches = [];
+  if (freeSubs.length) fetches.push(fetch(SUPA + '/rest/v1/subjects?select=slug,settings,school_id,units(id,slug,name,lesson_count,sort_order)'
+      + '&school_id=is.null&slug=in.(' + freeSubs.map(function (x) { return '"' + x + '"'; }).join(',') + ')',
+      { headers: { apikey: ANON } }).then(function (r) { return r.json(); }));
+  if (schoolSubs.length) fetches.push(fetch(SUPA + '/rest/v1/subjects?select=slug,settings,school_id,units(id,slug,name,lesson_count,sort_order)'
+      + '&school_id=eq.' + encodeURIComponent(schoolSubs[0].school) + '&slug=in.(' + schoolSubs.map(function (x) { return '"' + x.sub + '"'; }).join(',') + ')',
+      { headers: { apikey: ANON } }).then(function (r) { return r.json(); }));
+  Promise.all(fetches)
+    .then(function (parts) { var rows = []; parts.forEach(function (p) { if (Array.isArray(p)) rows = rows.concat(p); }); return rows; })
     .then(function (rows) {
       /* units.lesson_count is written at plan approval and not on review flips, so it goes
          stale (the three new Music boards sat at 0 for weeks). Count LIVE lessons instead,
@@ -682,7 +695,7 @@ function svDashInit(SUBJECTS, opts) {
     })
     .then(function (rows) {
       (rows || []).forEach(function (row) {
-        var su = SUBJECTS.find(function (x) { return x.sub === row.slug; });
+        var su = SUBJECTS.find(function (x) { return x.sub === row.slug && ((x.school || null) === (row.school_id || null)); });
         if (!su) return;
         // mixed-format subjects: which of these units are practice-first
         su.practiceUnits = (row.settings && row.settings.practice_units) || [];

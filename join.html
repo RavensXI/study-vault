@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700&family=Caveat:wght@400..700&family=Young+Serif&display=swap" rel="stylesheet">
   <script src="/js/account-sync.js"></script>
+  <script src="/js/school-session.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <link rel="stylesheet" href="/css/scrollbar.css">
   <style>
@@ -188,6 +189,9 @@
       });
       var d = await r.json();
       if (!r.ok) { errEl.textContent = d.error || 'Could not join. Try again.'; return; }
+      /* a class at a school with bespoke lessons routes the student there from now on;
+         resolve that here so the dashboard they land on is already the school's */
+      try { if (window.SchoolSession && SchoolSession.refreshFromClasses) await SchoolSession.refreshFromClasses({ reload: false }); } catch (e) {}
 
       try {
         localStorage.removeItem('sv-join-code');
