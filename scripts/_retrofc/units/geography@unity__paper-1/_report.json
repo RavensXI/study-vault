@@ -1,0 +1,502 @@
+{
+ "unit": "geography@unity/paper-1",
+ "checked_at": "2026-09-18",
+ "spec_used": "specs/aqa/geography-8035-8035.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Continental crust is 20–200 km thick",
+   "truth": "Continental crust is 25-70 km thick (average about 40 km); 200 km is lithosphere-scale, not crust",
+   "evidence": "Wikipedia, Continental crust: 'At 25 to 70 km in thickness'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 1,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard 4: answer 'Earths', question 'It makes up just 1% of the _____ volume'",
+   "truth": "The possessive apostrophe was stripped by the card generator and the cloze is a sentence fragment. Replaced with a proper question and the answer 'About 1%'",
+   "evidence": "raw/L01.txt flashcard_questions[3]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 2,
+   "field": "knowledge_checks",
+   "severity": "HIGH",
+   "claim": "'Which plate boundary does NOT produce volcanoes?' marks only 'Conservative' correct, but 'Collision' is also an option",
+   "truth": "The lesson itself states that collision boundaries have no volcanoes, so two options are true and a correct student answer is marked wrong. Question reworded to ask which boundary has plates sliding past each other",
+   "evidence": "raw/L02.txt content_html ('no volcanoes because no plate is being melted'); js/main.js marks MCQs by index",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 2,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard 4: answer 'Four', question runs a heading into the next paragraph",
+   "truth": "Generator artefact. Replaced with a question about the plates that formed the Himalayas",
+   "evidence": "raw/L02.txt flashcard_questions[3]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 3,
+   "field": "knowledge_checks",
+   "severity": "HIGH",
+   "claim": "Matching question 5 lists 'Haiti, 2010' twice in the right-hand options",
+   "truth": "The matching widget compares the selected option INDEX with the stored order, so a student who picks the other identical 'Haiti, 2010' entry is marked wrong. Third option changed to a distinct label",
+   "evidence": "js/main.js renderMatch: parseInt(sel.value) === q.order[i]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 3,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard 5: answer 'Case', question '_____ Study: Haiti Earthquake, 2010 (LIC) On 12 January 2010 , a magnitude 7'",
+   "truth": "Heading merged into the paragraph and the magnitude truncated mid-number. Replaced with a Christchurch death-toll question",
+   "evidence": "raw/L03.txt flashcard_questions[4]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "230,000 people killed in the 2010 Haiti earthquake",
+   "truth": "Published estimates run from about 100,000 to 316,000. 230,000 is the figure most GCSE courses teach and sits inside that range, so it is left as taught",
+   "evidence": "Wikipedia, 2010 Haiti earthquake",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F8",
+   "lesson": 5,
+   "field": "flashcard_questions",
+   "severity": "LOW",
+   "claim": "Flashcard 4: answer 'Areas', and the word 'areas' also appears in its own question",
+   "truth": "The card gives away its own answer. Replaced with a question about the 1000 mb pressure boundary",
+   "evidence": "raw/L05.txt flashcard_questions[3]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 5,
+   "field": "flashcard_questions",
+   "severity": "LOW",
+   "claim": "Flashcard 5: question 'This is called the _____ effect'",
+   "truth": "An orphan fragment with no context. Replaced with a Hadley Cell question",
+   "evidence": "raw/L05.txt flashcard_questions[4]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 5,
+   "field": "glossary_terms",
+   "severity": "LOW",
+   "claim": "'Coriolis effect' appears twice in the glossary with identical definitions",
+   "truth": "Duplicate entry, produced because the term is marked up twice in the body. It renders twice; removing an array element is not a surgical edit, so recorded only",
+   "evidence": "raw/L05.txt glossary_terms[2] and [5]",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F11",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Typhoon Haiyan destroyed '11 million tonnes of crops' (repeated in the mark scheme for question 4 and in flashcard 5)",
+   "truth": "Almost certainly a decimal slip for 1.1 million tonnes: the whole Philippines produces about 18 million tonnes of rice a year and the worst-hit region, Eastern Visayas, produces about 1 million tonnes, so 11 million tonnes is impossible. The FAO and ReliefWeb pages carrying the exact figure would not load, so no edit is written. Recommend changing all three places to 1.1 million tonnes once one FAO source is checked",
+   "evidence": "Wikipedia Typhoon Haiyan gives no crop tonnage; FAO pages returned 404 and ReliefWeb 403",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F12",
+   "lesson": 6,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard 4: answer 'Case', question '_____ Study: Typhoon Haiyan (2013) Typhoon Haiyan struck the Philippines in November 2013'",
+   "truth": "Heading merged into the paragraph, and the question already contains the date it is testing. Replaced with a date question",
+   "evidence": "raw/L06.txt flashcard_questions[3]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F13",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "'The UK sits near the boundary of the Hadley and Ferrel cells, where warm air rises creating low pressure.'",
+   "truth": "The UK lies near the Ferrel/Polar boundary at about 60 degrees north, where warm air meets cold polar air and rises. The Hadley/Ferrel boundary at 30 degrees is where air SINKS and makes high pressure, which is why the deserts sit there. Lesson 5 teaches this correctly, so the two lessons contradict each other",
+   "evidence": "spec 3.1.1.3 (general atmospheric circulation model: pressure belts and surface winds); raw/L05.txt",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F14",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Up to 314 mm of rain fell in just 24 hours on 18th November 2009'",
+   "truth": "The UK 24-hour record of 314.4 mm fell at Seathwaite Farm in Borrowdale over 19-20 November 2009; Cockermouth flooded on the night of 19-20 November",
+   "evidence": "Wikipedia, 2009 Great Britain and Ireland floods",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F15",
+   "lesson": 7,
+   "field": "knowledge_checks",
+   "severity": "MEDIUM",
+   "claim": "'How much rain fell in Cockermouth in 24 hours on 18th November 2009?'",
+   "truth": "Wrong date (19 November) and wrong place: the record total was measured at Seathwaite in the Cumbrian fells, not in Cockermouth itself",
+   "evidence": "Wikipedia, 2009 Great Britain and Ireland floods",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F16",
+   "lesson": 7,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard 5 answer '18th'",
+   "truth": "Should be 19th November 2009",
+   "evidence": "Wikipedia, 2009 Great Britain and Ireland floods",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17",
+   "lesson": 7,
+   "field": "flashcard_questions",
+   "severity": "LOW",
+   "claim": "Flashcard 4: answer 'Case', question merges the case-study heading with the opening sentence",
+   "truth": "Generator artefact. Replaced with a question about the number of homes flooded",
+   "evidence": "raw/L07.txt flashcard_questions[3]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'The total damage cost was 276.5 million pounds, broken down as: businesses and local economy (129.2m), property (98.3m), roads and bridges (34m), and health and welfare (12.9m). The government provided 100 million, with the rest covered by insurance.'",
+   "truth": "The four components add up to 274.4 million, not 276.5 million. The money also fails to reconcile with the Economic Effects list above it, which gives a 275 million insurance cost AND a separate 100 million cost to the local economy: 100 million of government money plus 275 million of insurance is far more than the stated total. Either the breakdown is missing a category of about 2.1 million or one component is wrong. No source found for the split, so no edit. Recommend re-sourcing the breakdown from the Environment Agency Cumbria 2009 report and making the two lists agree",
+   "evidence": "recomputation: 129.2 + 98.3 + 34 + 12.9 = 274.4",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F19",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'2005 Kyoto Protocol ... where 70 countries agreed to cut CO2 by 5.2% by 2012 (though the USA and Australia did not sign)'",
+   "truth": "84 countries signed in 1998-99 and 192 parties ratified in the end, so '70 countries' is wrong. Both the USA and Australia signed: the USA never ratified it, and Australia did ratify, in 2007. Reworded to name the industrialised countries and to say the USA never ratified",
+   "evidence": "Wikipedia, Kyoto Protocol",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F20",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'2015 Paris Agreement ... limit temperature rise to no more than 2 degrees, ... and spend US$10 billion on clean energy'",
+   "truth": "The Paris finance pledge is US$100 billion a YEAR by 2020 for developing countries, not a one-off US$10 billion; the temperature goal is 'well below 2 degrees' while pursuing 1.5",
+   "evidence": "Wikipedia, Paris Agreement",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F21",
+   "lesson": 10,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'found in a belt around the equator, between the Tropics of Cancer and Capricorn (roughly 5 degrees N to 5 degrees S)'",
+   "truth": "Self-contradictory: the Tropics of Cancer and Capricorn are at 23.5 degrees, not 5 degrees. Tropical rainforest lies mostly within about 10 degrees of the equator",
+   "evidence": "spec 3.1.2.2; internal contradiction inside the same sentence",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F22",
+   "lesson": 10,
+   "field": "flashcard_questions",
+   "severity": "LOW",
+   "claim": "Flashcard 5: answer 'Forest', question '_____ floor (0-5 m) - very little light reaches here (only about 2%)'",
+   "truth": "A list-item fragment with the heading word blanked. Replaced with a question about the light reaching the forest floor",
+   "evidence": "raw/L10.txt flashcard_questions[4]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F23",
+   "lesson": 11,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "Carbon dioxide written as CO with a SUPERSCRIPT two in three places (twice in the body, once in the conclusion)",
+   "truth": "The formula is CO with a subscript two. The practice questions in the same lesson already use the correct subscript, so the body contradicts them",
+   "evidence": "raw/L11.txt; house rule on chemical formulae",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F24",
+   "lesson": 11,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Oxygen production - rainforests produce about 20% of the world's oxygen, earning the nickname lungs of the world' (repeated in the conclusion, in flashcard 5 and in the 9-mark model answer)",
+   "truth": "This is a well-documented misconception: a mature rainforest consumes nearly all the oxygen it makes, so its NET contribution is close to zero. The 20% figure describes the share of oxygen produced by the world's LAND PLANTS. The accurate wording ('about 20% of the oxygen made by the world's land plants') would still earn the mark, but the claim runs through four fields and is the line the AQA textbooks use, so it is Tom's call. Recommend correcting all four together, or leaving all four",
+   "evidence": "spec 3.1.2.2 asks only for 'value of tropical rainforests'; no wording is prescribed",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F25",
+   "lesson": 11,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Flashcard 4 answer 'Global' (heading merged into the paragraph) and flashcard 5 answer 'Oxygen' (the word 'oxygen' also appears in its own question)",
+   "truth": "Both cards are generator artefacts; card 5 gives away its own answer. Replaced with a carbon-absorption question and a cattle-ranching question",
+   "evidence": "raw/L11.txt flashcard_questions[3] and [4]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F26",
+   "lesson": 12,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'and then descends as dry, cool air at around 30 degrees latitude'",
+   "truth": "Sinking air WARMS as it descends, which is why the subtropics are hot and dry. Lesson 5 states this correctly ('High pressure areas have sinking air, which warms as it descends'), so the two lessons contradict each other",
+   "evidence": "spec 3.1.1.3; raw/L05.txt",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F27",
+   "lesson": 13,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'phosphate' is defined as 'The removal of valuable minerals or other geological materials from the earth' in both the body glossary tag and the glossary list",
+   "truth": "That is the definition of mineral extraction, not of phosphate. Phosphate is a phosphorus-bearing mineral mined in Morocco and used to make fertilisers",
+   "evidence": "the sentence it sits in already says phosphate 'is used in fertilisers'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F28",
+   "lesson": 13,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'The Noor Power Plant in Morocco is the largest solar farm in the world' (and the matching knowledge check asks for 'the world's largest solar farm')",
+   "truth": "Noor Ouarzazate is the world's largest CONCENTRATED SOLAR POWER plant, about 510 MW. Larger photovoltaic farms exist, including Benban in Egypt at about 1.65 GW, which is offered as a distractor in that very question, so the key is arguably wrong as written",
+   "evidence": "Wikipedia, Ouarzazate Solar Power Station",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F29",
+   "lesson": 13,
+   "field": "flashcard_questions",
+   "severity": "LOW",
+   "claim": "Flashcard 4 answer 'Sahara' with 'Key Fact' left in the question; flashcard 5 answer '200000'",
+   "truth": "Heading text leaked into card 4; card 5 lost the thousands separator from 200,000",
+   "evidence": "raw/L13.txt flashcard_questions[3] and [4]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F30",
+   "lesson": 13,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'The Upesi stove ... Used in Burkina Faso and other Sahel countries'",
+   "truth": "The Upesi stove is a Practical Action design from western Kenya (upesi is Swahili), and Kenya is not in the Sahel. Practical Action's own pages would not load, so no edit is written. Worth checking before the next re-narration",
+   "evidence": "practicalaction.org returned 404 and a redirect",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F31",
+   "lesson": 13,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'In 2018, phosphate mining generated profits of 6 billion pounds and employed 23,000 people'",
+   "truth": "About 6 billion is OCP Group's REVENUE, not its profit, and it is usually quoted in US dollars. The employment figure is about right",
+   "evidence": "standard GCSE textbook line; no primary source fetched",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F32",
+   "lesson": 15,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Mark scheme for question 2: 'Do not accept headland itself or bay (depositional context).'",
+   "truth": "A bay is an EROSIONAL landform, soft rock eroded between two headlands, exactly as the lesson teaches. The reason to reject it is that the question asks for landforms on the headland, not that a bay is depositional",
+   "evidence": "spec 3.1.3.2 lists headlands and bays under 'landforms resulting from erosion'",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F33",
+   "lesson": 16,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Beach nourishment ... costs about 3,000 pounds per kilometre'",
+   "truth": "Per kilometre works out at 3 pounds a metre, which would make beach nourishment a hundred times cheaper than gabions (350 a metre) in the same lesson. The sibling figure for dune regeneration here is '2,000 per 100 metres', from the same cost table, so the unit is almost certainly per 100 metres. Could not fetch the table to confirm, so no edit. Recommend changing 'per kilometre' to 'per 100 metres'",
+   "evidence": "internal comparison with the other costs in raw/L16.txt; the internetgeography.net page carries no costs",
+   "verdict": "ADJUDICATE"
+  },
+  {
+   "id": "F34",
+   "lesson": 20,
+   "field": "flashcard_questions",
+   "severity": "LOW",
+   "claim": "Flashcard 4: answer 'Costs', question '_____ dams are very expensive (Cow Green Reservoir on the Tees cost 31 million pounds)'",
+   "truth": "A bold sub-heading leaked into the cloze. Replaced with a question about the cost of Cow Green Reservoir",
+   "evidence": "raw/L20.txt flashcard_questions[3]",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F35",
+   "lesson": 0,
+   "field": "description",
+   "severity": "LOW",
+   "claim": "All 20 lesson descriptions are 127-157 characters long",
+   "truth": "The validator limit is under 100 characters. Nothing in them is factually wrong, so no edit is written, but the unit will fail a description-length check if one is run. Worth a separate trimming pass across the unit",
+   "evidence": "measured on raw/L01.txt to raw/L20.txt",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F36",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'There are four types' of plate boundary, including collision",
+   "truth": "The spec names three margins: constructive, destructive and conservative. Collision is standard textbook enrichment and helps explain the Himalayas, so teaching it is not wrong; it only caused a problem in the knowledge check (F3)",
+   "evidence": "spec 3.1.1.2",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "F37",
+   "lesson": 14,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Solution is taught as a fourth process of COASTAL erosion",
+   "truth": "The spec lists coastal erosion as hydraulic power, abrasion and attrition only; solution appears in the river list. Examiners credit solution at the coast, so this is harmless enrichment and no edit is made",
+   "evidence": "spec 3.1.3.2 and 3.1.3.3",
+   "verdict": "NOTE"
+  }
+ ],
+ "lessons_clean": [
+  4,
+  9,
+  17,
+  18,
+  19
+ ],
+ "summary": "Two answer-key faults mark correct students wrong (L2 knowledge check with two true options, L3 matching question with duplicate options), and L7 states the UK sits on the Hadley/Ferrel boundary, contradicting L5. The rest are date, figure and definition errors: the Cumbria rainfall date, Kyoto and Paris facts, continental crust thickness, the phosphate definition, the Noor solar claim and superscript CO2. Thirteen flashcards across ten lessons are generator artefacts, with headings merged into clozes or the answer word sitting in its own question.",
+ "renarration": {
+  "run_at": "2026-09-18T09:23:39Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n12",
+    "key": "geography/paper-1/narration_lesson-01_n12.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-1/narration_lesson-01_n12.mp3",
+    "voice": "Ollie",
+    "duration": 30.14,
+    "bytes": 361728,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:22:41 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n6",
+    "key": "geography/paper-1/narration_lesson-06_n6.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-1/narration_lesson-06_n6.mp3",
+    "voice": "Ada",
+    "duration": 23.74,
+    "bytes": 284832,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:22:46 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n6",
+    "key": "geography/paper-1/narration_lesson-07_n6.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-1/narration_lesson-07_n6.mp3",
+    "voice": "Ollie",
+    "duration": 16.2,
+    "bytes": 194400,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:22:49 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n13",
+    "key": "geography/paper-1/narration_lesson-07_n13.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-1/narration_lesson-07_n13.mp3",
+    "voice": "Ollie",
+    "duration": 45.0,
+    "bytes": 540000,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:22:57 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n28",
+    "key": "geography/paper-1/narration_lesson-08_n28.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-1/narration_lesson-08_n28.mp3",
+    "voice": "Ada",
+    "duration": 83.09,
+    "bytes": 997056,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:23:11 GMT"
+   },
+   {
+    "lesson": 10,
+    "id": "n2",
+    "key": "geography/paper-1/narration_lesson-10_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-1/narration_lesson-10_n2.mp3",
+    "voice": "Ada",
+    "duration": 18.19,
+    "bytes": 218304,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:23:14 GMT"
+   },
+   {
+    "lesson": 11,
+    "id": "n13",
+    "key": "geography/paper-1/narration_lesson-11_n13.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-1/narration_lesson-11_n13.mp3",
+    "voice": "Ollie",
+    "duration": 49.85,
+    "bytes": 598176,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:23:23 GMT"
+   },
+   {
+    "lesson": 11,
+    "id": "n20",
+    "key": "geography/paper-1/narration_lesson-11_n20.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-1/narration_lesson-11_n20.mp3",
+    "voice": "Ollie",
+    "duration": 32.38,
+    "bytes": 388512,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:23:30 GMT"
+   },
+   {
+    "lesson": 12,
+    "id": "n4",
+    "key": "geography/paper-1/narration_lesson-12_n4.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-1/narration_lesson-12_n4.mp3",
+    "voice": "Ada",
+    "duration": 28.8,
+    "bytes": 345600,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:23:35 GMT"
+   },
+   {
+    "lesson": 13,
+    "id": "n8",
+    "key": "geography/paper-1/narration_lesson-13_n8.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-1/narration_lesson-13_n8.mp3",
+    "voice": "Ollie",
+    "duration": 18.86,
+    "bytes": 226368,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:23:38 GMT"
+   }
+  ],
+  "verified_ok": 10,
+  "total": 10
+ }
+}
