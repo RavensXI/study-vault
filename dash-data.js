@@ -140,6 +140,9 @@ window.svUnitForCohort = svUnitForCohort;
 /* which units belong to THIS student (their topic choices scope the course) */
 function keepUnit(su, uslug) {
   if (su.settings && !svUnitForCohort(su.settings, uslug)) return false;
+  /* a school's bespoke row IS the course its students sit: every unit on it belongs to
+     them, and the wizard's free-tier option picks (other slugs entirely) must not sculpt it */
+  if (su.school) return true;
   var raw = su.topicsRaw || [];
   var allRaw = (WIZ && WIZ.topics && WIZ.topics[su.slug])
     ? Object.values(WIZ.topics[su.slug]).flat() : [];
@@ -170,7 +173,7 @@ function keepUnit(su, uslug) {
    "choose your options" prompt instead of dumping the whole catalogue. */
 var OPTION_FAMILIES = ['history', 'lit', 'drama', 'rs'];
 function svNeedsOptionPick(su) {
-  if (!su || OPTION_FAMILIES.indexOf(su.slug) < 0) return false;
+  if (!su || su.school || OPTION_FAMILIES.indexOf(su.slug) < 0) return false;
   var picks = (WIZ && WIZ.topics && WIZ.topics[su.slug])
     ? Object.values(WIZ.topics[su.slug]).flat().filter(Boolean) : [];
   if (picks.length) return false;                 // options chosen -> sculpted, show units
@@ -644,7 +647,7 @@ function svDashInit(SUBJECTS, opts) {
     var school = bes ? SchoolSession.getSchoolId() : null;
     if (bes) sub = bes;
     var raw = [];
-    var tsl = rawT[sl] || {};
+    var tsl = bes ? {} : (rawT[sl] || {});     /* free-tier option picks never apply to a school row */
     Object.keys(tsl).sort(function (a, b) { return a - b; }).forEach(function (k) {
       var v = tsl[k];
       (Array.isArray(v) ? v : [v]).forEach(function (x) { raw.push(x); });
@@ -658,8 +661,8 @@ function svDashInit(SUBJECTS, opts) {
     }
     return { tab: NAMEC[sl][2], slug: sl, sub: sub, school: school, mode: PFAM.indexOf(sl) >= 0 ? 'p' : 'l',
       name: NAMEC[sl][0], c: NAMEC[sl][1], units: [],
-      board: (WIZ.meta && WIZ.meta[sl] && WIZ.meta[sl].board) || BOARDLBL[board] || '',
-      topics: (WIZ.meta && WIZ.meta[sl] && WIZ.meta[sl].topics) || [],
+      board: bes ? '' : ((WIZ.meta && WIZ.meta[sl] && WIZ.meta[sl].board) || BOARDLBL[board] || ''),
+      topics: bes ? [] : ((WIZ.meta && WIZ.meta[sl] && WIZ.meta[sl].topics) || []),
       topicsRaw: (sl === 'history' || sl === 'lit' || sl === 'drama') ? raw : [], first: first };
   }));
 
@@ -676,7 +679,7 @@ function svDashInit(SUBJECTS, opts) {
   if (freeSubs.length) fetches.push(fetch(SUPA + '/rest/v1/subjects?select=slug,settings,school_id,units(id,slug,name,lesson_count,sort_order)'
       + '&school_id=is.null&slug=in.(' + freeSubs.map(function (x) { return '"' + x + '"'; }).join(',') + ')',
       { headers: { apikey: ANON } }).then(function (r) { return r.json(); }));
-  if (schoolSubs.length) fetches.push(fetch(SUPA + '/rest/v1/subjects?select=slug,settings,school_id,units(id,slug,name,lesson_count,sort_order)'
+  if (schoolSubs.length) fetches.push(fetch(SUPA + '/rest/v1/subjects?select=slug,settings,school_id,exam_board,units(id,slug,name,lesson_count,sort_order)'
       + '&school_id=eq.' + encodeURIComponent(schoolSubs[0].school) + '&slug=in.(' + schoolSubs.map(function (x) { return '"' + x.sub + '"'; }).join(',') + ')',
       { headers: { apikey: ANON } }).then(function (r) { return r.json(); }));
   Promise.all(fetches)
@@ -708,6 +711,10 @@ function svDashInit(SUBJECTS, opts) {
           var dn = doneIn(su.sub, u.slug).filter(function (k) { return k >= 1 && k <= n; });
           return [u.name, n, dn.length, u.slug, dn];
         });
+        if (su.school) {                     /* the school row names its own board and its own first unit */
+          if (row.exam_board) su.board = BOARDLBL[String(row.exam_board).toLowerCase()] || row.exam_board;
+          if (!su.first || !us.some(function (u) { return u.slug === su.first; })) su.first = us[0].slug;
+        }
       });
       if (opts.onUnits) opts.onUnits();
     })

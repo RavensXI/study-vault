@@ -61,10 +61,26 @@
         loader, so the very first query on a new tab already targets the school. */
     fromAccount: function () {
       try {
-        if (this.isActive()) return;
-        var raw = localStorage.getItem(ACCOUNT_KEY);
-        if (raw) { var s = JSON.parse(raw); if (s && s.school_id) this.set(s); }
+        if (!this.isActive()) {
+          var raw = localStorage.getItem(ACCOUNT_KEY);
+          if (raw) { var s = JSON.parse(raw); if (s && s.school_id) this.set(s); }
+        }
       } catch (e) {}
+      /* what this page was built against; any later answer that differs means a reload */
+      var cur = this.get(); this._booted = cur ? cur.school_id : null;
+    },
+
+    /* the page built its lists against _booted; if the account copy now says something
+       else (account sync delivered the key after load, or a class was joined), rebuild */
+    rebootIfChanged: function () {
+      var acc = null; try { acc = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || 'null'); } catch (e) {}
+      var cur = this.get();
+      if (cur && !cur.via) return;                 /* a real school sign-in is never overridden */
+      var want = acc && acc.school_id ? acc.school_id : null;
+      if (want !== (this._booted || null)) {
+        if (acc && acc.school_id) this.set(acc); else if (cur && cur.via === 'class') this.clear();
+        location.reload();
+      }
     },
 
     /** Ask the server which classes the signed-in student is in and route them to
@@ -86,16 +102,15 @@
           var now = d.school || null;
           var cur = self.get();
           if (cur && !cur.via) return now;            /* a real school sign-in wins */
-          var changed = (had && had.school_id) !== (now && now.school_id);
+          var newKey = (had && had.school_id) !== (now && now.school_id);
           try {
             if (now) localStorage.setItem(ACCOUNT_KEY, JSON.stringify(now)); else localStorage.removeItem(ACCOUNT_KEY);
           } catch (e) {}
-          if (now) { self.set(now); if (changed && window.svCarrySchoolProgress) { try { window.svCarrySchoolProgress(now); } catch (e) {} } }
+          if (now) { self.set(now); if (window.svCarrySchoolProgress) { try { window.svCarrySchoolProgress(now); } catch (e) {} } }
           else if (cur && cur.via === 'class') self.clear();
-          if (changed) {
-            if (window.svProgressPushSoon) { try { svProgressPushSoon(); } catch (e) {} }
-            if (opts.reload !== false) location.reload();
-          }
+          if (newKey && window.svProgressPushSoon) { try { svProgressPushSoon(); } catch (e) {} }
+          /* reload when the page was built against a different answer than the one we now hold */
+          if (opts.reload !== false && ((now && now.school_id) || null) !== (self._booted || null)) location.reload();
           return now;
         })
         .catch(function () { return null; });
@@ -221,8 +236,10 @@
     }).catch(function () {});
   };
 
-  /* seed from the account copy before any loader runs; refresh from the server after load */
+  /* seed from the account copy before any loader runs; refresh from the server after load;
+     and when account sync lands the key after the page has built, rebuild once */
   SchoolSession.fromAccount();
+  document.addEventListener('sv-account-synced', function () { SchoolSession.rebootIfChanged(); });
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () { setTimeout(function () { SchoolSession.refreshFromClasses(); }, 800); });
   } else {
