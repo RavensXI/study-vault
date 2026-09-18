@@ -455,7 +455,14 @@ function initPracticeQuestions() {
     const lessonTitle = document.querySelector('.lesson-header h1');
     const board = window._examBoard || 'AQA';
     const subject = window._subjectName || 'the subject';
-    const marksMatch = (q.type.match(/\d+/) || ['4'])[0];
+    /* The mark total: an explicit "Award up to N marks" at the head of the scheme wins over the
+       badge number, because a badge that disagrees with its own scheme was the commonest fault
+       the retro fact-check found (18 Sep 2026). A band ladder is not used here: its top band can
+       be one strand of a larger total. */
+    const schemeText = String(q.marks || '');
+    const schemeMax = (schemeText.match(/(?:to a )?maximum(?: of)? (\d+) marks?/i) || [])[1]
+      || ((schemeText.match(/^\s*Award up to (\d+) marks?(?!\s*(?:per|for each|each))/i) || [])[1]);
+    const marksMatch = schemeMax || (q.type.match(/\d+/) || ['4'])[0];
 
     const systemPrompt =
       'You are a supportive GCSE ' + subject + ' tutor marking a ' + board + ' practice answer. ' +
