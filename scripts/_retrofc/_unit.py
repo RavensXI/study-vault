@@ -77,8 +77,16 @@ def save(p, obj):
         json.dump(obj, f, indent=1, ensure_ascii=False)
 
 
+def queue_item(subject, unit):
+    return next((i for i in load(QUEUE, {"items": []})["items"] if i["subject"] == subject and i["unit"] == unit), {})
+
+
 def unit_dir(subject, unit):
-    return os.path.join(HERE, "units", f"{subject}__{unit}")
+    # A school's bespoke subject can share its slug with a free-tier row (Unity computer-science,
+    # design-technology, separate-sciences): its unit dirs carry the school tag so nothing collides.
+    it = queue_item(subject, unit)
+    tag = ("@" + (it.get("school_tag") or "school")) if it.get("school_id") else ""
+    return os.path.join(HERE, "units", f"{subject}{tag}__{unit}")
 
 
 def run(cmd, check=True, cwd=ROOT):
@@ -88,7 +96,10 @@ def run(cmd, check=True, cwd=ROOT):
     return r
 
 
-def board_of(subject):
+def board_of(subject, unit=None):
+    it = queue_item(subject, unit) if unit else {}
+    if it.get("board"):
+        return it["board"]
     return subject.rsplit("-", 1)[-1]
 
 
@@ -186,18 +197,33 @@ def fetch_gutenberg(unit, d):
 def cmd_prep(subject, unit, pool="claude"):
     d = unit_dir(subject, unit)
     os.makedirs(d, exist_ok=True)
-    r = run(["node", os.path.join(HERE, "_fetch_unit.js"), subject, unit])
+    item = queue_item(subject, unit)
+    fetch = ["node", os.path.join(HERE, "_fetch_unit.js"), subject, unit]
+    if item.get("school_id"):
+        fetch += ["--school-id", item["school_id"]]
+    r = run(fetch)
+    plain = os.path.join(HERE, "units", f"{subject}__{unit}")
+    if plain != d and os.path.exists(os.path.join(plain, "_raw.json")):
+        import shutil
+        for name in os.listdir(plain):
+            src, dst = os.path.join(plain, name), os.path.join(d, name)
+            if os.path.isdir(src):
+                if os.path.exists(dst): shutil.rmtree(dst)
+                shutil.move(src, dst)
+            else:
+                shutil.move(src, dst)
+        os.rmdir(plain)
     raw = load(os.path.join(d, "_raw.json"))
-    item = next((i for i in load(QUEUE, {"items": []})["items"] if i["subject"] == subject and i["unit"] == unit), {})
     family = item.get("family", "english-literature")
-    spec = item.get("spec") or SPECS.get(board_of(subject))
+    spec = item.get("spec") or SPECS.get(board_of(subject, unit))
     if family == "english-literature":
         text_path, text_note = fetch_gutenberg(unit, d)
     else:
         text_path, text_note = None, "no primary text: the spec is the authority"
     brief = {
         "subject": subject, "unit": unit, "unit_name": raw["unit"]["name"], "dir": os.path.relpath(d, ROOT),
-        "spec": spec, "board": board_of(subject), "family": family, "qualification": item.get("qualification"),
+        "spec": spec, "board": board_of(subject, unit), "family": family, "qualification": item.get("qualification"),
+        "school_id": item.get("school_id"), "school_tag": item.get("school_tag"),
         "check_prompt": {"english-literature": "scripts/_retrofc/CHECK_PROMPT.md", "science": "scripts/_retrofc/CHECK_PROMPT_SCIENCE.md",
                          "history": "scripts/_retrofc/CHECK_PROMPT_HISTORY.md"}.get(family, "scripts/_retrofc/CHECK_PROMPT_GENERIC.md"),
         "primary_text": os.path.relpath(text_path, ROOT) if text_path else None, "primary_text_note": text_note,
@@ -245,6 +271,8 @@ def fetch_rows(unit_id):
 
 def cmd_finish(subject, unit, narrate=True, video=True):
     d = unit_dir(subject, unit)
+    if queue_item(subject, unit).get("school_id"):
+        video = False   # _video_check_unit.py resolves subjects by slug; a school's videos are not on that worklist
     raw = load(os.path.join(d, "_raw.json"))
     report = load(os.path.join(d, "_report.json"), {})
     edits = load(os.path.join(d, "_edits.json"), [])
@@ -298,7 +326,7 @@ def cmd_finish(subject, unit, narrate=True, video=True):
     save(QUEUE, q)
     summary["pool"] = pool
     st = load(STATE)
-    row = next((s for s in st["subjects"] if (s.get("slug") or s.get("subject")) == subject), None)
+    row = None if queue_item(subject, unit).get("school_id") else next((s for s in st["subjects"] if (s.get("slug") or s.get("subject")) == subject), None)
     if row is not None:
         row["findings"] = (row.get("findings") or 0) + len(findings)
         row["fixed"] = (row.get("fixed") or 0) + applied["applied"]

@@ -4,7 +4,10 @@
  */
 const fs = require('fs'), path = require('path');
 const SB = process.env.SUPABASE_URL, KEY = process.env.SUPABASE_SERVICE_KEY;
-const [subjectSlug, unitSlug] = process.argv.slice(2);
+const argv = process.argv.slice(2);
+const schoolIdx = argv.indexOf('--school-id');
+const schoolId = schoolIdx >= 0 ? argv[schoolIdx + 1] : null;   // Unity etc.: pick the school's row, never the free-tier one
+const [subjectSlug, unitSlug] = argv.filter((a, i) => i !== schoolIdx && i !== schoolIdx + 1);
 
 async function q(p) {
   const r = await fetch(`${SB}/rest/v1/${p}`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } });
@@ -13,7 +16,7 @@ async function q(p) {
 }
 
 (async () => {
-  const subs = await q(`subjects?slug=eq.${subjectSlug}&select=id,slug,name,school_id,status,exam_board,settings`);
+  const subs = await q(`subjects?slug=eq.${subjectSlug}&${schoolId ? 'school_id=eq.' + schoolId : 'school_id=is.null'}&select=id,slug,name,school_id,status,exam_board,settings`);
   console.log('SUBJECTS:', subs.map(s => `${s.id} school=${s.school_id} status=${s.status} board=${s.exam_board}`).join(' | '));
   let unit = null, subject = null;
   for (const s of subs) {
