@@ -139,6 +139,11 @@ def main():
         if not changed:
             L(f"  L{num:02d}: fields edited but no narrated text changed -> skip")
             continue
+        if not live.get("narration_manifest"):
+            # Never narrated (some Unity drama lessons): nothing on R2 to refresh. The narration
+            # build for such lessons is a separate job; the corrected text is what it will read.
+            L(f"  L{num:02d}: no narration exists for this lesson -> skip ({len(changed)} spans changed; build narration later)")
+            continue
 
         plan.append({"num": num, "id": lid, "title": live["title"],
                      "manifest": live.get("narration_manifest") or [],

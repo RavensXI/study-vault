@@ -269,7 +269,7 @@ def fetch_rows(unit_id):
     return json.loads(urllib.request.urlopen(req, timeout=120).read())
 
 
-def cmd_finish(subject, unit, narrate=True, video=True):
+def cmd_finish(subject, unit, narrate=True, video=True, resume=False):
     d = unit_dir(subject, unit)
     if queue_item(subject, unit).get("school_id"):
         video = False   # _video_check_unit.py resolves subjects by slug; a school's videos are not on that worklist
@@ -283,7 +283,12 @@ def cmd_finish(subject, unit, narrate=True, video=True):
     pre = {r["lesson_number"]: validator_violations(r) for r in fetch_rows(raw["unit"]["id"])} if edits else {}
 
     applied = {"applied": 0, "skipped": 0, "lessons_changed": 0}
-    if edits:
+    if edits and resume:
+        # --resume: the edits were applied by an earlier finish that died later (re-narration,
+        # commit); reuse that run's apply result and backup instead of re-applying.
+        applied = load(os.path.join(d, "_apply_result.json"), applied)
+        print("resume: edits already applied", json.dumps(applied)[:200])
+    elif edits:
         r = run(["node", os.path.join(HERE, "_apply_edits.js"), d], check=False)
         print(r.stdout[-3000:])
         if r.returncode not in (0, 3):
@@ -395,7 +400,7 @@ if __name__ == "__main__":
     elif a[0] == "prep":
         cmd_prep(a[1], a[2], pool)
     elif a[0] == "finish":
-        cmd_finish(a[1], a[2], narrate="--no-narrate" not in a, video="--no-video" not in a)
+        cmd_finish(a[1], a[2], narrate="--no-narrate" not in a, video="--no-video" not in a, resume="--resume" in a)
     elif a[0] == "restore":
         restore_from_backup(unit_dir(a[1], a[2]))
     else:
