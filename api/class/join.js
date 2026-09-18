@@ -80,10 +80,13 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  const [{ data: teacher }, { data: subject }] = await Promise.all([
+  const [{ data: teacher }, { data: subject }, { data: me }] = await Promise.all([
     supabase.from('profiles').select('full_name').eq('id', cls.teacher_id).maybeSingle(),
-    supabase.from('subjects').select('name').eq('id', cls.subject_id).maybeSingle()
+    supabase.from('subjects').select('name').eq('id', cls.subject_id).maybeSingle(),
+    supabase.from('profiles').select('full_name').eq('id', studentId).maybeSingle()
   ]);
+  /* the name is optional at sign-up; joining a class is the moment a teacher needs it */
+  const needsName = !(me && me.full_name && me.full_name.trim());
 
   const who = (teacher && teacher.full_name) || 'Your teacher';
   const what = (subject && subject.name) || 'this subject';
@@ -91,6 +94,7 @@ module.exports = async function handler(req, res) {
   return res.status(200).json({
     joined: true,
     alreadyIn: !!existing,
+    needsName: needsName,
     class: {
       id: cls.id,
       name: cls.name,

@@ -64,6 +64,10 @@
     .joined .what{font-family:var(--read);font-size:1.12rem;font-weight:600;margin:1rem 0 .15rem}
     .joined .teachername{font-family:var(--hand);font-size:1.35rem;color:#28553d;line-height:1.2}
     /* the trade, stated to the student in plain words — never buried in a policy */
+    .namebox{font-family:var(--read);font-size:1.05rem;color:var(--ink);background:#fff;border:1px solid #d5c9b3;border-radius:4px;
+             padding:.6rem .8rem;width:100%;max-width:300px;margin-top:.4rem}
+    .namebox:focus{outline:none;border-color:var(--anchor);box-shadow:0 0 0 3px rgba(91,70,50,.14)}
+    .nameask{font-family:var(--read);font-size:.98rem;color:var(--sec);margin:1.2rem 0 0}
     .visibility{font-family:var(--read);font-size:.9rem;color:#28553d;background:#f3f7f3;border:1px solid #c9d9cd;
                 border-radius:4px;padding:.9rem 1rem;margin-top:1.2rem;text-align:left;line-height:1.5}
 
@@ -209,11 +213,33 @@
           (d.class.subject ? ' · ' + esc(d.class.subject) : '') + '</p>' +
         (d.class.teacher ? '<p class="teachername">with ' + esc(d.class.teacher) + '</p>' : '') +
         '<div class="visibility">' + esc(d.visibility || '') + '</div>' +
-        '<a class="btn" id="dashBtn" href="' + dash + '">Continue to your revision</a>';
-      /* a room of thirty joins at once: carry them onward rather than leaving
-         thirty tabs parked on a confirmation. Long enough to read the
-         visibility statement; the button is there for anyone faster. */
-      setTimeout(function () { location.href = dash; }, d.alreadyIn ? 2500 : 8000);
+        (d.needsName
+          ? '<form id="nameForm"><p class="nameask">What should ' + esc(d.class.teacher || 'your teacher') + ' call you?</p>' +
+            '<input class="namebox" id="nameIn" maxlength="60" autocomplete="name" autocapitalize="words" aria-label="Your name" required>' +
+            '<button class="btn" id="nameBtn" type="submit">Continue to your revision</button><div class="err" id="nameErr"></div></form>'
+          : '<a class="btn" id="dashBtn" href="' + dash + '">Continue to your revision</a>');
+      if (d.needsName) {
+        /* no auto-forward: the name is the one thing the teacher cannot do without */
+        document.getElementById('nameIn').focus();
+        document.getElementById('nameForm').addEventListener('submit', async function (e2) {
+          e2.preventDefault();
+          var nm = document.getElementById('nameIn').value.trim(), nb = document.getElementById('nameBtn'), ne = document.getElementById('nameErr');
+          if (nm.length < 2) { ne.textContent = 'Type your name so your teacher knows who you are.'; return; }
+          nb.disabled = true;
+          try {
+            var r2 = await fetch('/api/class/my-name', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok }, body: JSON.stringify({ name: nm }) });
+            var d2 = await r2.json();
+            if (!r2.ok) { ne.textContent = d2.error || 'Could not save that. Try again.'; nb.disabled = false; return; }
+            try { var su = JSON.parse(localStorage.getItem('sv-user') || '{}'); su.name = nm; localStorage.setItem('sv-user', JSON.stringify(su)); } catch (e3) {}
+            location.href = dash;
+          } catch (e4) { ne.textContent = 'Could not reach StudyVault. Try again.'; nb.disabled = false; }
+        });
+      } else {
+        /* a room of thirty joins at once: carry them onward rather than leaving
+           thirty tabs parked on a confirmation. Long enough to read the
+           visibility statement; the button is there for anyone faster. */
+        setTimeout(function () { location.href = dash; }, d.alreadyIn ? 2500 : 8000);
+      }
     } catch (e) {
       errEl.textContent = 'Could not reach StudyVault. Check your connection and try again.';
     } finally {

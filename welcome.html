@@ -2503,7 +2503,7 @@ if(savebtn) savebtn.onclick=async()=>{
   try{
     let setup={}; try{ setup=JSON.parse(localStorage.getItem('sv-welcome')||'{}'); }catch(e){}
     const res=await SBC.auth.signUp({email:em,password:pw,
-      options:{data:{sv_welcome:setup,sv_name:nm||null},emailRedirectTo:location.origin+'/classic'}});
+      options:{data:{sv_welcome:setup,sv_name:nm||null,full_name:nm||null},emailRedirectTo:location.origin+'/classic'}});
     if(res.error) say(res.error.message);
     else{
       try{ localStorage.setItem('sv-user',JSON.stringify({email:em,name:nm||null})); }catch(e){}

@@ -62,8 +62,20 @@
         <span class="code" id="code">——————</span>
         <button class="copy" id="copyBtn" type="button">Copy</button>
         <button class="linkish" id="newClassBtn" type="button">New class</button>
+        <button class="linkish" id="deleteClassBtn" type="button">Delete class</button>
       </div>
     </div>
+
+    <section class="card panelform" id="deletePanel" hidden>
+      <h2>Delete <span id="delName"></span></h2>
+      <p class="thin" style="margin:0 0 12px">The class and its join code go. Your students keep all of their revision; you stop seeing it for this class. This cannot be undone.</p>
+      <div class="field" style="max-width:260px"><label for="delIn">Type delete to confirm</label><input id="delIn" autocomplete="off" autocapitalize="none" spellcheck="false"></div>
+      <div class="actions" style="margin-top:12px;display:flex;gap:10px;align-items:center">
+        <button class="copy" id="delGo" type="button" disabled>Delete this class</button>
+        <button class="linkish" id="delCancel" type="button">Keep it</button>
+        <span class="thin" id="delNote"></span>
+      </div>
+    </section>
 
     <div id="made"></div>
 
@@ -580,6 +592,28 @@
     } catch (e) { alert(e.message); }
   });
   document.getElementById('newClassBtn').addEventListener('click', function () { showCreate(true); });
+  (function () {
+    var panel = document.getElementById('deletePanel'), inp = document.getElementById('delIn'), go = document.getElementById('delGo'), note = document.getElementById('delNote');
+    function cur() { return CLASSES.find(function (x) { return x.id === selEl.value; }); }
+    document.getElementById('deleteClassBtn').addEventListener('click', function () {
+      var c = cur(); if (!c) return;
+      document.getElementById('delName').textContent = c.name; inp.value = ''; go.disabled = true; note.textContent = '';
+      panel.hidden = false; inp.focus();
+    });
+    document.getElementById('delCancel').addEventListener('click', function () { panel.hidden = true; });
+    inp.addEventListener('input', function () { go.disabled = this.value.trim().toLowerCase() !== 'delete'; });
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !go.disabled) go.click(); });
+    go.addEventListener('click', async function () {
+      var c = cur(); if (!c || inp.value.trim().toLowerCase() !== 'delete') return;
+      go.disabled = true; note.textContent = 'Deleting\u2026';
+      try {
+        if (!FIXTURE) await api('/api/teacher/delete-class', { class_id: c.id, confirm: 'delete' });
+        panel.hidden = true;
+        try { sessionStorage.removeItem('sv-teacher-class'); } catch (e) {}
+        await load();
+      } catch (e) { note.textContent = e.message; go.disabled = false; }
+    });
+  })();
   document.getElementById('cancelCreate').addEventListener('click', function () { if (!CLASSES.length) return; showCreate(false); selEl.value = sessionStorage.getItem('sv-teacher-class') || CLASSES[0].id; selectClass(selEl.value); });
   document.getElementById('make').addEventListener('click', async function () {
     var btn = this, note = document.getElementById('makenote');

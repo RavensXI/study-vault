@@ -24,6 +24,11 @@
   window.svTestoutShould = function () {
     var p = pathKey(); if (!p) return false;
     if (document.querySelector('.sv-listening')) return false;
+    /* a teacher or admin previewing a lesson is not revising it */
+    try {
+      var a = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
+      if (a && ['admin', 'platform_admin', 'teacher', 'school_admin'].indexOf(a.role) >= 0) return false;
+    } catch (e) {}
     try { if (sessionStorage.getItem(dismissedKey(p))) return false; } catch (e) {}
     var rag = (g('sv-welcome', {}).rag) || {};
     var r = rag[p.sub + '/' + p.unit];
