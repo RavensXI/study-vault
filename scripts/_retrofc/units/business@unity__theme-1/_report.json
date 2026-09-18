@@ -1,0 +1,696 @@
+{
+ "unit": "business/theme-1 (Unity College bespoke, school_id a5414d1c-8841-4bc5-8573-a9756752361b)",
+ "checked_at": "2026-09-18",
+ "spec_used": "specs/edexcel/business-1BS0.md",
+ "findings": [
+  {
+   "id": "F1",
+   "lesson": 10,
+   "field": "flashcard_questions",
+   "severity": "HIGH",
+   "claim": "Card 5 is a stub: q 'Name a key concept from Break-Even Analysis.' with answer 'break-even', the same answer text as card 1.",
+   "truth": "Two flashcards in one deck must not share an answer; the validator rejects the unit. Replaced with a contribution-per-unit card (GBP 450 - GBP 280 = GBP 170).",
+   "evidence": "validator rule (CHECK_PROMPT_GENERIC.md); recomputation of the lesson's own worked example",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F2",
+   "lesson": 11,
+   "field": "flashcard_questions",
+   "severity": "HIGH",
+   "claim": "Cards 4 and 5 are mangled formula cloze ('_____ = (GBP 10,800 - GBP 10,000) / GBP 10,000 x 100 = 8%') and both carry the answer 'Interest'.",
+   "truth": "Duplicate answers in one deck are rejected. Rebuilt as two distinct calculation cards; both answers recomputed (GBP 300 x 36 = GBP 10,800; (36,000 - 25,000) / 25,000 x 100 = 44%).",
+   "evidence": "validator rule; recomputation",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F3",
+   "lesson": 7,
+   "field": "exam_tip_html",
+   "severity": "HIGH",
+   "claim": "'generic answers without context will not reach Level 3'",
+   "truth": "Banned band descriptor (regex \\bLevel\\s+[1-9]\\b in scripts/_validate_content_json.py rejects the whole unit). Replaced with 'the top band'.",
+   "evidence": "scripts/_validate_content_json.py line 32; house band vocabulary",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F4",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Disposable income: the money a person has left to spend after all essential bills and taxes have been paid, also known as discretionary income.' Repeated in the key fact, the glossary, a flashcard and a knowledge-check stem.",
+   "truth": "Disposable income is income after direct taxes (income tax and National Insurance). Discretionary income is what is left after taxes AND essential bills; the two are not the same term.",
+   "evidence": "Wikipedia 'Disposable and discretionary income' - 'Disposable income is total personal income minus current taxes on income'; 'The term disposable income is often incorrectly used to denote discretionary income'; ONS household income definition",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F5",
+   "lesson": 15,
+   "field": "content_html",
+   "severity": "HIGH",
+   "claim": "'you need to know six key stakeholder groups' - customers, employees, shareholders, local community, government, suppliers.",
+   "truth": "Spec 1.5.1 names eight: shareholders (owners), employees, customers, managers, suppliers, local community, pressure groups, the government. Managers and pressure groups were missing from the lesson, the key fact and the takeaway.",
+   "evidence": "specs/edexcel/business-1BS0.md, Topic 1.5.1 Business stakeholders",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F6",
+   "lesson": 13,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Profits are distributed based on the percentage each partner has invested.'",
+   "truth": "Partnership Act 1890 s.24(1): 'All the partners are entitled to share equally in the capital and profits of the business', and this applies 'subject to any agreement express or implied between the partners'. Profit shares follow the agreement, not the capital put in.",
+   "evidence": "legislation.gov.uk, Partnership Act 1890 s.24(1)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F7",
+   "lesson": 13,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'A deed of partnership must be produced, which is expensive and adds to start-up costs.'",
+   "truth": "A written deed is not legally required. gov.uk 'Set up a business partnership' requires only a business name, a nominated partner and registration with HMRC; the 1890 Act works from an agreement 'express or implied'. Softened to 'should be drawn up'.",
+   "evidence": "gov.uk/set-up-business-partnership; Partnership Act 1890 s.24",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F8",
+   "lesson": 9,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Q4 'Calculate the profit. You are advised to show your workings.' is labelled '3 marks - Explain'.",
+   "truth": "The command word is Calculate ('use mathematical skills to reach the answer, based on given data'). Label corrected. The arithmetic itself is right: TC = 20,000 + 3,000 = 23,000; profit = 35,000 - 23,000 = 12,000.",
+   "evidence": "spec Appendix 1 command word taxonomy; recomputation",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F9",
+   "lesson": 11,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Q3 'Calculate the total interest Joneffry will pay as a percentage of the amount borrowed' is labelled '3 marks - Explain'.",
+   "truth": "Command word is Calculate. Label corrected. Arithmetic checks out: GBP 116 x 24 = GBP 2,784; (2,784 - 2,400) / 2,400 x 100 = 16%.",
+   "evidence": "spec Appendix 1 and Appendix 3 interest formula; recomputation",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F10",
+   "lesson": 15,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Q6 reads 'Evaluate the importance of producing a detailed business plan' but is labelled '9 marks - Justify'.",
+   "truth": "Justify means recommending one of two options; this question offers none. The stem and the mark scheme (top band 7-9) are Evaluate at 9 marks. Label corrected to match.",
+   "evidence": "spec Appendix 1 command word taxonomy",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11a",
+   "lesson": 2,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Q1 is labelled '1 mark - Define' but the mark scheme awards two: '...higher than its revenue/income (1), meaning the owner loses money (1).'",
+   "truth": "A Define question is worth the marks on its label. Second mark point merged into the single mark.",
+   "evidence": "internal consistency of the mark label and its own scheme",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11b",
+   "lesson": 10,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Q1 '1 mark - Define' but the scheme awards '...cover all of its total costs (1), making neither a profit nor a loss (1).'",
+   "truth": "Same defect; merged into one mark.",
+   "evidence": "internal consistency of the mark label and its own scheme",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F11c",
+   "lesson": 14,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "Q1 '1 mark - Define' but the scheme awards '...product, price, place, and promotion (1) - that a business uses to market its goods or services effectively (1).'",
+   "truth": "Same defect; merged into one mark.",
+   "evidence": "internal consistency of the mark label and its own scheme",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F13",
+   "lesson": 10,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Note that break-even is always expressed in units, not in pounds' (repeated in the exam tip and the takeaway: 'the answer is always in units').",
+   "truth": "Spec Appendix 3 lists 'Break even point in revenue = break even point in units x sales price', so break-even is examinable in pounds too. The break-even level of OUTPUT is in units; break-even revenue is in pounds. All three places corrected and the revenue formula added.",
+   "evidence": "specs/edexcel/business-1BS0.md Appendix 3: Formulae",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F14",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'The specification identifies five key responses' (brand, customer orientation, loyalty, differentiation, added value).",
+   "truth": "Spec 1.2.4 says only 'the impact of competition on business decision making'. It names no five responses. The five are useful teaching, but must not be presented as a specification list students can be examined on by name.",
+   "evidence": "specs/edexcel/business-1BS0.md Topic 1.2.4",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F15",
+   "lesson": 3,
+   "field": "practice_questions",
+   "severity": "MEDIUM",
+   "claim": "The 12-mark Meringue Bakery mark scheme rewards 'the queue issue' and switching 'to rivals like Pound Bakery'. Neither appears in the question stem.",
+   "truth": "An Evaluate question says 'use the information provided'; the scheme must only reward what is provided (freshly baked bread and pastries, high-quality ingredients, the contactless decision). Rewritten to the stem's own facts and a generic rival.",
+   "evidence": "the question's own stem",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F16a",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'Vinted now has more users than ASOS Marketplace.'",
+   "truth": "ASOS Marketplace has closed - marketplace.asos.com now returns a 301 to www.asos.com. The comparison no longer has a live referent; replaced with a claim about Vinted alone.",
+   "evidence": "marketplace.asos.com HTTP 301 to www.asos.com (fetched 18 Sep 2026)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F16b",
+   "lesson": 14,
+   "field": "content_html",
+   "severity": "MEDIUM",
+   "claim": "'Platforms like ASOS Marketplace allow independent sellers to reach niche audiences' - present tense.",
+   "truth": "ASOS Marketplace has closed. Replaced with Etsy and Depop, which still trade.",
+   "evidence": "marketplace.asos.com HTTP 301 to www.asos.com (fetched 18 Sep 2026)",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17a",
+   "lesson": 1,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Cards 4 and 5 are blank-first cloze stubs cut out of the prose; card 5 is truncated mid-word ('a service like Ne') and still carries the 'Key Fact' label.",
+   "truth": "Rewritten as proper What/Which questions; the existing one-word answers are kept and no longer appear in their own question.",
+   "evidence": "flashcard shape rules in CHECK_PROMPT_GENERIC.md",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17b",
+   "lesson": 2,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Cards 4 and 5 are cloze stubs; card 5's answer is the fragment 'Body' from 'The _____ Shop UK collapsed in February 2024'.",
+   "truth": "Rewritten as Which questions; answer corrected to 'The Body Shop'. Both retailer facts verified against the lesson's own dates (Wilko 2023, The Body Shop February 2024).",
+   "evidence": "flashcard shape rules",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F17c",
+   "lesson": 4,
+   "field": "flashcard_questions",
+   "severity": "MEDIUM",
+   "claim": "Card 4: '_____ Choice refers to the range of options customers can pick from' with answer 'Choice' - the answer word sits in its own question.",
+   "truth": "Rewritten as 'Which customer need means the range of options a business offers?'",
+   "evidence": "flashcard shape rules",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18a",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'The Edexcel specification identifies three main reasons...'",
+   "truth": "House rule: never name the exam board in student-facing text. Changed to 'The specification'.",
+   "evidence": "house style rule in the task brief",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18b",
+   "lesson": 2,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'The Edexcel specification groups the main risks...' and 'Working closely with customers - as the Edexcel exam question suggests -'.",
+   "truth": "Board named twice; the second also points at a past paper the student cannot see. Both removed.",
+   "evidence": "house style rule; copyright distancing",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18c",
+   "lesson": 3,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Board named three times (prose, key fact, revision tip).",
+   "truth": "Replaced with 'the specification' / 'your exam'.",
+   "evidence": "house style rule",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18d",
+   "lesson": 4,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Board named in the opening paragraph and in knowledge check 1 ('identified by Edexcel').",
+   "truth": "Both neutralised.",
+   "evidence": "house style rule",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18e",
+   "lesson": 5,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'The Edexcel spec identifies four key purposes...', 'Edexcel requires you to know four primary methods', 'Edexcel requires you to know three secondary methods'.",
+   "truth": "All three neutralised.",
+   "evidence": "house style rule",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18f",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Board named in the key fact and its revision tip.",
+   "truth": "Both neutralised.",
+   "evidence": "house style rule",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18g",
+   "lesson": 7,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Board named in the competitor-factors paragraph and in knowledge check 1.",
+   "truth": "Both neutralised.",
+   "evidence": "house style rule",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18h",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'The Edexcel specification identifies five key financial aims...'",
+   "truth": "Neutralised. The five aims themselves match spec 1.3.1.",
+   "evidence": "house style rule; spec 1.3.1",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18i",
+   "lesson": 11,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'In the Edexcel exam, you need to be able to calculate the interest rate on a loan.'",
+   "truth": "Neutralised. The formula matches spec Appendix 3.",
+   "evidence": "house style rule; spec Appendix 3",
+   "verdict": "FIX"
+  },
+  {
+   "id": "F18j",
+   "lesson": 15,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "Board named four times (intro, collapsible heading 'Edexcel Spec', external-influences key fact, knowledge check 1).",
+   "truth": "All four neutralised.",
+   "evidence": "house style rule",
+   "verdict": "FIX"
+  },
+  {
+   "id": "N1",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'87% of shoppers say they will pay more for greener packaging'; 'roughly one in three UK adults now use their phone to pay at least once a month'; 'over half of 18 to 24-year-olds have sold clothes online'.",
+   "truth": "None of the three carries a source and I could not verify any of them. The widely cited sustainable-packaging figure is lower (Trivium Buying Green, about 74%). Not corrected because I have no confirmed replacement value. Worth sourcing or dropping on the next content pass.",
+   "evidence": "no source found",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "N2",
+   "lesson": 1,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'Art Fry invented the Post-it Note by accident when he needed something to keep the page open in his hymn book.'",
+   "truth": "The accident was Spencer Silver's low-tack adhesive (3M, 1968); Art Fry supplied the bookmark application in 1974. The lesson's point (original ideas come from solving a problem) still stands, so no edit.",
+   "evidence": "standard 3M / Post-it history",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "N3",
+   "lesson": 6,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'Group A includes upper-class professionals such as lawyers and accountants.'",
+   "truth": "NRS grade A is higher managerial, administrative and professional - conventionally 'upper middle class', not upper class. Too small to be worth an edit.",
+   "evidence": "NRS social grade definitions",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "N4",
+   "lesson": 8,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'In 2019, ASDA attempted to merge with Sainsbury's to overtake Tesco...' (repeated in the 9-mark question stem).",
+   "truth": "Sainsbury's was the bidder: the deal was announced in April 2018 and blocked by the CMA in April 2019. The CMA's stated reason (less competition, higher prices) is right, and the knowledge check keyed on it is right, so no edit.",
+   "evidence": "CMA final report on Sainsbury's/Asda, April 2019",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "N5",
+   "lesson": 13,
+   "field": "content_html",
+   "severity": "LOW",
+   "claim": "'a Subway franchise in the UK costs around GBP 13,000 as an initial franchise fee, with a total investment starting at approximately GBP 150,000'.",
+   "truth": "The royalty figures check out arithmetically (8% + 4.5% = 12.5% of gross sales) and the fee is in the right range, but I could not verify the GBP 150,000 total investment. Re-source before it is quoted again.",
+   "evidence": "recomputation of the percentages; total investment unverified",
+   "verdict": "NOTE"
+  },
+  {
+   "id": "N6",
+   "lesson": 9,
+   "field": "practice_questions",
+   "severity": "LOW",
+   "claim": "Q6 is labelled Justify but offers a single course of action ('whether the business should go ahead with production'); the same pattern appears in L10 Q6 and L12 Q6 where two or more options ARE given.",
+   "truth": "Spec Appendix 1 defines Justify as recommending one of TWO options. A one-option Justify is off-pattern but the mark scheme still works and all its arithmetic is correct (VC/unit 25, TVC 18,750, TC 44,750, revenue 19,500, loss 25,250). Left for Tom - rewriting question stems is outside a fact-check.",
+   "evidence": "spec Appendix 1 command word taxonomy; recomputation",
+   "verdict": "ADJUDICATE"
+  }
+ ],
+ "lessons_clean": [
+  12
+ ],
+ "summary": "15 lessons checked against Edexcel 1BS0 Issue 2. Every calculation in L9-L11 and L13 recomputes correctly (revenue, total costs, profit and loss, break-even 25,000/170 = 148, margin of safety 425-250 = 175, Sandwell Sheds 25/20/17 sheds, interest 8%/44%/115.93%/16%/30%, Subway 8+4.5 = 12.5%) and every knowledge-check answer key is right. The substantive errors are: eight stakeholder groups taught as six (L15), 'break-even is always in units' against the spec's break-even revenue formula (L10), disposable income defined as discretionary income (L6), partnership profit sharing and a compulsory deed (L13), a banned Level 3 descriptor (L7), two decks with duplicate flashcard answers that would fail the validator (L10, L11), five mangled cloze flashcards, three 1-mark Define schemes awarding two marks, two Calculate questions labelled Explain, and 22 places naming the exam board in student-facing text. No lesson states a paper timing, so nothing needed correcting there - but note the spec is Issue 2 (July 2022): both papers are 1 hour 45 minutes, not the 1 hour 30 in the task brief.",
+ "renarration": {
+  "run_at": "2026-09-18T09:14:35Z",
+  "clips": [
+   {
+    "lesson": 1,
+    "id": "n2",
+    "key": "business/theme-1/narration_lesson-01_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-01_n2.mp3",
+    "voice": "Ollie",
+    "duration": 19.66,
+    "bytes": 235872,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:12:45 GMT"
+   },
+   {
+    "lesson": 1,
+    "id": "n11",
+    "key": "business/theme-1/narration_lesson-01_n11.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-01_n11.mp3",
+    "voice": "Ollie",
+    "duration": 37.13,
+    "bytes": 445536,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:12:53 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n2",
+    "key": "business/theme-1/narration_lesson-02_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-02_n2.mp3",
+    "voice": "Ada",
+    "duration": 22.7,
+    "bytes": 272448,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:12:58 GMT"
+   },
+   {
+    "lesson": 2,
+    "id": "n32",
+    "key": "business/theme-1/narration_lesson-02_n32.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-02_n32.mp3",
+    "voice": "Ada",
+    "duration": 24.98,
+    "bytes": 299808,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:03 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n2",
+    "key": "business/theme-1/narration_lesson-03_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-03_n2.mp3",
+    "voice": "Ollie",
+    "duration": 15.74,
+    "bytes": 188928,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:06 GMT"
+   },
+   {
+    "lesson": 3,
+    "id": "n3",
+    "key": "business/theme-1/narration_lesson-03_n3.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-03_n3.mp3",
+    "voice": "Ollie",
+    "duration": 13.06,
+    "bytes": 156672,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:09 GMT"
+   },
+   {
+    "lesson": 4,
+    "id": "n2",
+    "key": "business/theme-1/narration_lesson-04_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-04_n2.mp3",
+    "voice": "Ada",
+    "duration": 16.94,
+    "bytes": 203328,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:12 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n2",
+    "key": "business/theme-1/narration_lesson-05_n2.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-05_n2.mp3",
+    "voice": "Ollie",
+    "duration": 15.96,
+    "bytes": 191520,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:16 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n7",
+    "key": "business/theme-1/narration_lesson-05_n7.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-05_n7.mp3",
+    "voice": "Ollie",
+    "duration": 16.18,
+    "bytes": 194112,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:19 GMT"
+   },
+   {
+    "lesson": 5,
+    "id": "n12",
+    "key": "business/theme-1/narration_lesson-05_n12.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-05_n12.mp3",
+    "voice": "Ollie",
+    "duration": 14.81,
+    "bytes": 177696,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:22 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n4",
+    "key": "business/theme-1/narration_lesson-06_n4.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-06_n4.mp3",
+    "voice": "Ada",
+    "duration": 15.98,
+    "bytes": 191808,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:26 GMT"
+   },
+   {
+    "lesson": 6,
+    "id": "n20",
+    "key": "business/theme-1/narration_lesson-06_n20.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-06_n20.mp3",
+    "voice": "Ada",
+    "duration": 16.99,
+    "bytes": 203904,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:29 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n6",
+    "key": "business/theme-1/narration_lesson-07_n6.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-07_n6.mp3",
+    "voice": "Ollie",
+    "duration": 16.25,
+    "bytes": 194976,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:33 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n16",
+    "key": "business/theme-1/narration_lesson-07_n16.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-07_n16.mp3",
+    "voice": "Ollie",
+    "duration": 12.0,
+    "bytes": 144000,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:36 GMT"
+   },
+   {
+    "lesson": 7,
+    "id": "n28",
+    "key": "business/theme-1/narration_lesson-07_n28.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-07_n28.mp3",
+    "voice": "Ollie",
+    "duration": 28.13,
+    "bytes": 337536,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:41 GMT"
+   },
+   {
+    "lesson": 8,
+    "id": "n6",
+    "key": "business/theme-1/narration_lesson-08_n6.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-08_n6.mp3",
+    "voice": "Ada",
+    "duration": 14.98,
+    "bytes": 179712,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:44 GMT"
+   },
+   {
+    "lesson": 10,
+    "id": "n19",
+    "key": "business/theme-1/narration_lesson-10_n19.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-10_n19.mp3",
+    "voice": "Ada",
+    "duration": 13.13,
+    "bytes": 157536,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:47 GMT"
+   },
+   {
+    "lesson": 10,
+    "id": "n43",
+    "key": "business/theme-1/narration_lesson-10_n43.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-10_n43.mp3",
+    "voice": "Ada",
+    "duration": 32.14,
+    "bytes": 385632,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:53 GMT"
+   },
+   {
+    "lesson": 10,
+    "id": "n45",
+    "key": "business/theme-1/narration_lesson-10_n45.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-10_n45.mp3",
+    "voice": "Ada",
+    "duration": 14.52,
+    "bytes": 174240,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:56 GMT"
+   },
+   {
+    "lesson": 11,
+    "id": "n5",
+    "key": "business/theme-1/narration_lesson-11_n5.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-11_n5.mp3",
+    "voice": "Ollie",
+    "duration": 6.36,
+    "bytes": 76320,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:13:58 GMT"
+   },
+   {
+    "lesson": 13,
+    "id": "n13",
+    "key": "business/theme-1/narration_lesson-13_n13.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-13_n13.mp3",
+    "voice": "Ollie",
+    "duration": 21.38,
+    "bytes": 256608,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:14:02 GMT"
+   },
+   {
+    "lesson": 13,
+    "id": "n15",
+    "key": "business/theme-1/narration_lesson-13_n15.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-13_n15.mp3",
+    "voice": "Ollie",
+    "duration": 24.67,
+    "bytes": 296064,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:14:07 GMT"
+   },
+   {
+    "lesson": 14,
+    "id": "n38",
+    "key": "business/theme-1/narration_lesson-14_n38.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-14_n38.mp3",
+    "voice": "Ada",
+    "duration": 14.02,
+    "bytes": 168192,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:14:10 GMT"
+   },
+   {
+    "lesson": 15,
+    "id": "n3",
+    "key": "business/theme-1/narration_lesson-15_n3.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-15_n3.mp3",
+    "voice": "Ollie",
+    "duration": 12.48,
+    "bytes": 149760,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:14:13 GMT"
+   },
+   {
+    "lesson": 15,
+    "id": "n20",
+    "key": "business/theme-1/narration_lesson-15_n20.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-15_n20.mp3",
+    "voice": "Ollie",
+    "duration": 14.5,
+    "bytes": 173952,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:14:16 GMT"
+   },
+   {
+    "lesson": 15,
+    "id": "n21",
+    "key": "business/theme-1/narration_lesson-15_n21.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-15_n21.mp3",
+    "voice": "Ollie",
+    "duration": 34.13,
+    "bytes": 409536,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:14:23 GMT"
+   },
+   {
+    "lesson": 15,
+    "id": "n35",
+    "key": "business/theme-1/narration_lesson-15_n35.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-15_n35.mp3",
+    "voice": "Ollie",
+    "duration": 22.85,
+    "bytes": 274176,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:14:27 GMT"
+   },
+   {
+    "lesson": 15,
+    "id": "n39",
+    "key": "business/theme-1/narration_lesson-15_n39.mp3",
+    "url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/business/theme-1/narration_lesson-15_n39.mp3",
+    "voice": "Ollie",
+    "duration": 12.79,
+    "bytes": 153504,
+    "verify_status": 206,
+    "last_modified": "Fri, 18 Sep 2026 09:14:30 GMT"
+   }
+  ],
+  "verified_ok": 28,
+  "total": 28
+ }
+}
