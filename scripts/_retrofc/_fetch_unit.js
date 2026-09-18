@@ -9,7 +9,8 @@ const schoolIdx = argv.indexOf('--school-id');
 const schoolId = schoolIdx >= 0 ? argv[schoolIdx + 1] : null;   // Unity etc.: pick the school's row, never the free-tier one
 const outIdx = argv.indexOf('--out');
 const outDir = outIdx >= 0 ? argv[outIdx + 1] : null;               // a school's tagged unit dir; default keeps the free-tier path
-const [subjectSlug, unitSlug] = argv.filter((a, i) => ![schoolIdx, schoolIdx + 1, outIdx, outIdx + 1].includes(i));
+const skip = new Set([schoolIdx, outIdx].filter(i => i >= 0).flatMap(i => [i, i + 1]));
+const [subjectSlug, unitSlug] = argv.filter((a, i) => !skip.has(i));
 
 async function q(p) {
   const r = await fetch(`${SB}/rest/v1/${p}`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } });
