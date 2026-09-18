@@ -1,0 +1,211 @@
+{
+  "lesson_number": 13,
+  "slug": "lesson-13",
+  "title": "String Manipulation and Random Numbers",
+  "status": "live",
+  "tier": "both",
+  "description": "Length, substrings, case, joining, character codes and random numbers, with worked code.",
+  "content_html": "<p data-narration-id=\"n1\">Programs spend a great deal of their time handling text. A login screen checks how long a password is, a school system builds a username from a name, a game turns letters into numbers to scramble a message. All of that is <dfn class=\"term\" data-def=\"Examining or changing the characters inside a string, for example finding its length, taking part of it, changing its case or joining it to another string.\">string manipulation</dfn>. Add one more tool &mdash; a way of producing an unpredictable number &mdash; and you can also write dice games, shuffled quizzes and simulations.</p>\n\n<p data-narration-id=\"n2\">Unless a question says you may answer in a high-level language such as Python, write your code in the exam reference language. Every code block in this lesson is written in the exam reference language, except one clearly labelled Python comparison near the end.</p>\n\n<h2 data-narration-id=\"n3\">Length, and counting from zero</h2>\n\n<p data-narration-id=\"n4\">A <dfn class=\"term\" data-def=\"A data type that holds a sequence of characters, such as letters, digits, spaces and symbols.\">string</dfn> is a sequence of characters. Each character sits at a numbered position called an <dfn class=\"term\" data-def=\"The position number of a character in a string, counted from 0 for the first character.\">index</dfn>, and indexes start at 0, so the first character is at index 0 and the last is at index length minus one. To find how many characters a string holds, write the variable name followed by <code>.length</code>. There are no brackets after it.</p>\n\n<pre data-narration-id=\"n5\"><code>word = \"Programming\"\nprint(word.length)   // displays 11</code></pre>\n\n<div class=\"key-fact\" data-narration-id=\"n6\" data-revision-tip=\"Cover this and answer for the string Computing: what does it give for .length, and what is the index of the final character?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p><code>.length</code> counts characters starting at one, but indexes start at zero. For <code>\"Programming\"</code> the length is 11 while the last character sits at index 10. Mixing the two up is the single most common slip in string questions.</p>\n</div>\n\n<h2 data-narration-id=\"n7\">Substrings: taking part of a string</h2>\n\n<p data-narration-id=\"n8\">A <dfn class=\"term\" data-def=\"A section of a string taken from a chosen starting position for a chosen number of characters.\">substring</dfn> is a slice of a string. The main operation is <code>.substring(x, i)</code>, where <code>x</code> is the starting index and <code>i</code> is <em>how many characters to take</em>, not where to stop. Two shortcuts save you the arithmetic at the ends of a string: <code>.left(i)</code> takes the first <code>i</code> characters and <code>.right(i)</code> takes the last <code>i</code>.</p>\n\n<pre data-narration-id=\"n9\"><code>word = \"Programming\"\nprint(word.substring(0,7))   // displays Program\nprint(word.substring(3,4))   // displays gram\nprint(word.left(3))          // displays Pro\nprint(word.right(4))         // displays ming</code></pre>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Working a substring out character by character</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n10\">Write the string out with its indexes underneath before you answer. For <code>\"Programming\"</code>:</p>\n    <pre data-narration-id=\"n11\"><code>P  r  o  g  r  a  m  m  i  n  g\n0  1  2  3  4  5  6  7  8  9  10</code></pre>\n    <p data-narration-id=\"n12\"><code>word.substring(3,4)</code> starts at index 3, which holds <code>g</code>, and takes four characters: indexes 3, 4, 5 and 6. Those are <code>g</code>, <code>r</code>, <code>a</code> and <code>m</code>, so the answer is <code>gram</code>.</p>\n    <p data-narration-id=\"n13\">The trap is reading the 4 as &lsquo;stop at index 4&rsquo;, which would wrongly give <code>gr</code>. The second number is a count, so the last index used is always <code>x + i - 1</code> &mdash; here 3 + 4 &minus; 1, which is 6.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n14\">Changing case</h2>\n\n<p data-narration-id=\"n15\">Two more operations return a copy of a string with its letters changed: <code>.upper</code> gives every letter as a capital and <code>.lower</code> gives every letter in small letters. Like <code>.length</code>, neither takes brackets, and neither alters the original variable &mdash; you must store or print the result.</p>\n\n<pre data-narration-id=\"n16\"><code>word = \"Programming\"\nprint(word.upper)   // displays PROGRAMMING\nprint(word.lower)   // displays programming</code></pre>\n\n<p data-narration-id=\"n17\">The everyday use is comparing input fairly. A user who types <code>YES</code>, <code>Yes</code> or <code>yes</code> means the same thing, so convert before you compare and you only need to test one version.</p>\n\n<pre data-narration-id=\"n18\"><code>answer = input(\"Play again? \")\nreply = answer.lower\nif reply == \"yes\" then\n    print(\"Starting a new game\")\nendif</code></pre>\n\n<h2 data-narration-id=\"n19\">Concatenation</h2>\n\n<p data-narration-id=\"n20\"><dfn class=\"term\" data-def=\"Joining two or more strings end to end with the plus operator to make one longer string.\">Concatenation</dfn> joins strings together with <code>+</code>. The same symbol adds numbers, so watch which one you have: with two strings it sticks them together, and nothing is inserted between them unless you add it yourself.</p>\n\n<pre data-narration-id=\"n21\"><code>firstName = \"Priya\"\nsurname = \"Sharma\"\nprint(firstName + \" \" + surname)   // displays Priya Sharma</code></pre>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked example &mdash; building a school username</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n22\">A school builds each username from the first letter of the forename and the whole surname, all in small letters. That needs three of the operations above: take a substring, change the case, then concatenate.</p>\n    <pre data-narration-id=\"n23\"><code>firstName = input(\"Forename: \")\nsurname = input(\"Surname: \")\ninitial = firstName.left(1)\nusername = initial.lower + surname.lower\nprint(username)</code></pre>\n    <p data-narration-id=\"n24\">Given &lsquo;Priya&rsquo; and &lsquo;Sharma&rsquo;, <code>initial</code> holds <code>P</code>, <code>initial.lower</code> gives <code>p</code>, <code>surname.lower</code> gives <code>sharma</code>, and the two join to make <code>psharma</code>.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n25\">Character codes: ASC and CHR</h2>\n\n<p data-narration-id=\"n26\">Inside the computer every character is stored as a number from a character set such as <dfn class=\"term\" data-def=\"A character set that gives every letter, digit and common symbol its own number code.\">ASCII</dfn>. Two operations move between the two forms. <code>ASC(...)</code> takes a character and returns its code as a number. <code>CHR(...)</code> takes a code and returns the character. They are exact opposites of one another.</p>\n\n<pre data-narration-id=\"n27\"><code>print(ASC('A'))   // displays 65\nprint(CHR(97))    // displays a</code></pre>\n\n<p data-narration-id=\"n28\">Because the codes for the letters run in order, arithmetic on a code shifts a letter along the alphabet. That is the whole idea behind a simple substitution cipher.</p>\n\n<pre data-narration-id=\"n29\"><code>letter = 'a'\ncode = ASC(letter)\nshifted = CHR(code + 1)\nprint(shifted)    // displays b</code></pre>\n\n<h2 data-narration-id=\"n30\">Random numbers</h2>\n\n<p data-narration-id=\"n31\"><dfn class=\"term\" data-def=\"Producing an unpredictable number inside a stated range so that a program behaves differently each time it runs.\">Random number generation</dfn> is what makes a program unpredictable. The operation is <code>random(min, max)</code>, and it returns a value between the two arguments <strong>inclusive</strong> &mdash; both ends can come up. Give it two whole numbers and you get a whole number back; give it two decimals and you get a decimal back.</p>\n\n<pre data-narration-id=\"n32\"><code>diceRoll = random(1,6)\nprint(diceRoll)              // a whole number from 1 to 6\n\ntemperature = random(-1.0,10.0)\nprint(temperature)           // a decimal from -1.0 to 10.0</code></pre>\n\n<div class=\"key-fact\" data-narration-id=\"n33\" data-revision-tip=\"Close this and write the single line that stores a random whole number from 1 to 20 in a variable called target.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p><code>random(min, max)</code> includes both end values, so a six-sided dice is <code>random(1,6)</code>. Writing <code>random(1,7)</code> or <code>random(0,6)</code> gives seven possible outcomes instead of six, which quietly breaks the game rather than causing an error message.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Use case &mdash; picking a question at random</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n34\">A quiz holds its questions in an array and picks one at random. The array has five elements at indexes 0 to 4, so the range passed to <code>random</code> must be 0 to 4 &mdash; not 1 to 5, and not 0 to 5.</p>\n    <pre data-narration-id=\"n35\"><code>array questions[5]\nquestions[0] = \"What is a variable?\"\nquestions[1] = \"What is a constant?\"\nquestions[2] = \"What is an array?\"\nquestions[3] = \"What is a record?\"\nquestions[4] = \"What is a function?\"\n\npick = random(0,4)\nprint(questions[pick])</code></pre>\n    <p data-narration-id=\"n36\">Because the array is indexed from 0, the top argument is always the number of elements minus one. Get that wrong and the program either never asks the last question or crashes when it looks past the end of the array.</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>The same jobs in Python</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n37\">Where a question lets you answer in a high-level language, Python does the same jobs with different names. The code below is Python, not the exam reference language.</p>\n    <pre data-narration-id=\"n38\"><code>import random\n\nword = \"Programming\"\nprint(len(word))          # 11\nprint(word[3:7])          # gram\nprint(word.upper())       # PROGRAMMING\nprint(ord('A'))           # 65\nprint(chr(97))            # a\nprint(random.randint(1,6))</code></pre>\n    <p data-narration-id=\"n39\">Watch the one real difference in meaning. Python&rsquo;s slice <code>word[3:7]</code> runs from index 3 up to <em>but not including</em> index 7, while <code>word.substring(3,4)</code> starts at index 3 and takes four characters. Both give <code>gram</code> here, but the second number means something different in each language, so never carry one habit into the other.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n40\">How these appear in exam questions</h2>\n\n<ul>\n  <li data-narration-id=\"n41\">Short &lsquo;state the output&rsquo; questions give you a string and one operation. Write the string out with its indexes underneath and count on your fingers &mdash; guessing costs marks that careful counting does not.</li>\n  <li data-narration-id=\"n42\">Trace questions run three or four lines and ask what is displayed. Track every variable after every line, not just the last one.</li>\n  <li data-narration-id=\"n43\">Writing questions ask for one or two lines of code. Answers in natural English or bullet points earn nothing here, so always write real code.</li>\n  <li data-narration-id=\"n44\">Random number questions nearly always test the inclusive range. Read the scenario for the smallest and largest values wanted, then map them straight onto the two arguments.</li>\n</ul>\n\n<div class=\"key-fact\" data-narration-id=\"n45\" data-revision-tip=\"Test yourself: write from memory the operation for each of length, substring, capitals, joining two strings, character to code, code to character, and a random number.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Seven operations cover this whole topic: <code>.length</code>, <code>.substring(x, i)</code> with <code>.left(i)</code> and <code>.right(i)</code>, <code>.upper</code>, <code>.lower</code>, <code>+</code> for joining, <code>ASC(...)</code> and <code>CHR(...)</code> for character codes, and <code>random(min, max)</code>. Learn the exact spelling of each one.</p>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n46\">Paper 2 lasts 1 hour 30 minutes and carries 80 marks, and part of it asks you to design, write, test and refine programs. In that part an answer written as natural English or as bullet points scores nothing: it must be code, either in the exam reference language or in a high-level language you know. Your spelling of an operation will not be picked apart for a tiny slip, but the logic must be right, so the inclusive range in <code>random</code> and the character count in <code>.substring</code> are where the marks are really won. For any &lsquo;what is displayed&rsquo; question, write the index numbers under the string first &mdash; it takes ten seconds and turns a guess into a certainty.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n47\">Key Takeaways</h3>\n<ul>\n<li data-narration-id=\"n48\">Strings are indexed from 0, so <code>.length</code> is always one more than the index of the final character; <code>.substring(x, i)</code> starts at index <code>x</code> and takes <code>i</code> characters, with <code>.left(i)</code> and <code>.right(i)</code> as shortcuts.</li>\n<li data-narration-id=\"n49\"><code>.upper</code> and <code>.lower</code> return a changed copy and are used to compare input fairly; <code>+</code> joins strings; <code>ASC(...)</code> turns a character into its code and <code>CHR(...)</code> turns a code back into a character.</li>\n<li data-narration-id=\"n50\"><code>random(min, max)</code> includes both end values, so match the arguments to the smallest and largest values the scenario actually wants &mdash; for an array of n elements that is 0 to n minus one.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "A program stores the string word = \"Programming\". State the value given by word.length.",
+      "type": "1 mark — State",
+      "marks": "One mark for 11. Accept the figure alone. Do not accept 10, which is the index of the final character rather than the number of characters."
+    },
+    {
+      "text": "ASC('A') returns 65. State what CHR(66) returns, and explain the relationship between the two operations.",
+      "type": "2 marks — Explain",
+      "marks": "One mark for stating that CHR(66) returns the character B. One mark for explaining that the two operations are opposites: ASC converts a character into its numeric character-set code, and CHR converts a code back into the character it represents."
+    },
+    {
+      "text": "Trace this program and state exactly what is displayed.\n\nname = \"Isabella\"\ninitial = name.left(1)\nrest = name.substring(1,3)\nprint(initial.upper + rest.lower)",
+      "type": "3 marks — Trace the Program",
+      "marks": "One mark for initial holding I. One mark for rest holding sab, taken from index 1 for three characters. One mark for the displayed output Isab, formed by joining the capital I to the small letters sab. A final answer of Isab alone earns all three."
+    },
+    {
+      "text": "A guessing game needs a secret whole number from 1 to 20. Write the code that stores such a number in a variable called target and then displays it.",
+      "type": "3 marks — Complete the Program",
+      "marks": "One mark for using the random operation with two arguments. One mark for the correct inclusive range, giving target = random(1,20). One mark for displaying it, for example print(target). Do not credit random(1,21) or random(0,20), as both allow a value outside the stated range."
+    },
+    {
+      "text": "A student wants the first four characters of a string called surname. They write surname.substring(1,4). Explain why this does not do what they want, and give a line that does.",
+      "type": "4 marks — Explain",
+      "marks": "Top band: explains that indexes start at 0, so a starting index of 1 begins at the second character and misses the first; explains that the second argument is a count of characters rather than an end position, so the line returns four characters beginning at the second one; and gives a correct replacement such as surname.substring(0,4) or surname.left(4). Upper-mid band: identifies the zero-index error clearly and gives a correct replacement line. Lower-mid band: spots that the result is shifted along by one, or writes a correct line with no explanation. Low band: says the line is wrong with no accurate reason or correction."
+    },
+    {
+      "text": "A quiz program stores five questions in an array, picks one at random and accepts the typed answer whether or not the user uses capital letters. Discuss how random number generation and string manipulation would be used to build these two features, and identify the mistake most likely to break each one.",
+      "type": "6 marks — Extended Response",
+      "marks": "Top band: a sustained answer explaining that the array is indexed from 0 to 4, so the random operation is given the arguments 0 and 4 and its result is used as the index, with the likely mistake being an off-by-one range such as 1 to 5 that misses the first question or reads past the end of the array; and explaining that both the typed answer and the stored answer are converted with the lower operation before being compared, so that case no longer matters, with the likely mistake being converting only one side of the comparison or forgetting that the operation returns a copy rather than changing the variable. Upper-mid band: both features described correctly with at least one likely mistake identified. Lower-mid band: one feature described accurately, the other only sketched, or mistakes not identified. Low band: names the operations with little explanation of how they would be used."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "q": "For word = \"Data\", what is displayed by print(word.upper)?",
+      "type": "mcq",
+      "correct": 0,
+      "options": [
+        "DATA",
+        "data",
+        "Data",
+        "dATA"
+      ]
+    },
+    {
+      "q": "Which set of values can random(1,6) return?",
+      "type": "mcq",
+      "correct": 1,
+      "options": [
+        "1, 2, 3, 4 or 5",
+        "1, 2, 3, 4, 5 or 6",
+        "0, 1, 2, 3, 4, 5 or 6",
+        "2, 3, 4 or 5"
+      ]
+    },
+    {
+      "q": "The first character of a string sits at index _____.",
+      "type": "fill",
+      "correct": 1,
+      "options": [
+        "1",
+        "0",
+        "-1",
+        "the length"
+      ]
+    },
+    {
+      "q": "ASC('A') returns the value _____.",
+      "type": "fill",
+      "correct": 2,
+      "options": [
+        "26",
+        "48",
+        "65",
+        "97"
+      ]
+    },
+    {
+      "q": "For word = \"Binary\", match each operation to what it gives.",
+      "left": [
+        "word.length",
+        "word.left(3)",
+        "word.right(2)"
+      ],
+      "type": "match",
+      "order": [
+        1,
+        2,
+        0
+      ],
+      "right": [
+        "ry",
+        "6",
+        "Bin"
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What does the length operation give for a string?",
+      "a": "The number of characters it contains."
+    },
+    {
+      "q": "Which index holds the first character of a string?",
+      "a": "0"
+    },
+    {
+      "q": "Which index holds the last character of an 11-character string?",
+      "a": "10"
+    },
+    {
+      "q": "In substring(x, i), what does the second argument state?",
+      "a": "How many characters to take, counting from the starting index."
+    },
+    {
+      "q": "What does the left operation return from a string?",
+      "a": "The first few characters, as many as the number you pass it."
+    },
+    {
+      "q": "What does the right operation return from a string?",
+      "a": "The final few characters, as many as the number you pass it."
+    },
+    {
+      "q": "What does the upper operation return?",
+      "a": "A copy of the string with every letter as a capital."
+    },
+    {
+      "q": "Why is case conversion used before comparing typed input?",
+      "a": "So that a reply counts as correct however the user capitalised it."
+    },
+    {
+      "q": "Which symbol joins two strings end to end?",
+      "a": "+"
+    },
+    {
+      "q": "What does the ASC operation do to a character?",
+      "a": "It returns the number that stands for that character in the character set."
+    },
+    {
+      "q": "What does the CHR operation do to a number?",
+      "a": "It returns the character that this code represents."
+    },
+    {
+      "q": "What does ASC give for the capital letter A?",
+      "a": "65"
+    },
+    {
+      "q": "What does it mean that random(min, max) is inclusive?",
+      "a": "Both of the numbers you pass it can be produced."
+    },
+    {
+      "q": "What arguments pick a random index for an array of five elements?",
+      "a": "0 and 4, because the indexes run from zero to four."
+    },
+    {
+      "q": "Why does a written answer in bullet points score nothing on a programming question?",
+      "a": "The question needs real code, in the exam reference language or a high-level language."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "string manipulation",
+      "definition": "Examining or changing the characters inside a string, for example finding its length, taking part of it, changing its case or joining it to another string."
+    },
+    {
+      "term": "string",
+      "definition": "A data type that holds a sequence of characters, such as letters, digits, spaces and symbols."
+    },
+    {
+      "term": "index",
+      "definition": "The position number of a character in a string, counted from 0 for the first character."
+    },
+    {
+      "term": "substring",
+      "definition": "A section of a string taken from a chosen starting position for a chosen number of characters."
+    },
+    {
+      "term": "Concatenation",
+      "definition": "Joining two or more strings end to end with the plus operator to make one longer string."
+    },
+    {
+      "term": "ASCII",
+      "definition": "A character set that gives every letter, digit and common symbol its own number code."
+    },
+    {
+      "term": "Random number generation",
+      "definition": "Producing an unpredictable number inside a stated range so that a program behaves differently each time it runs."
+    }
+  ],
+  "hero_image_url": null,
+  "youtube_video_id": null,
+  "related_media": [],
+  "hero_keywords": [
+    "scrabble letter tiles",
+    "movable type letters",
+    "dice on a table",
+    "letterpress blocks",
+    "alphabet tiles close up"
+  ],
+  "hero_image_caption": "Letters and dice: a program manipulates text one character at a time, and rolls a number when it needs the unexpected."
+}
