@@ -44,8 +44,18 @@
     }
     return 'history-aqa';
   }
+  /* staff previews and review links name the exact row (?sid= or a staff session), so the
+     legacy free-tier redirect must leave the bare slug alone for them */
+  function svKeepBareSlug() {
+    try {
+      if (new URLSearchParams(window.location.search).get('sid')) return true;
+      var a = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
+      return !!(a && ['admin', 'platform_admin', 'teacher', 'school_admin'].indexOf(a.role) >= 0);
+    } catch (e) { return false; }
+  }
   function maybeRedirectOldHistorySlug(slug) {
     if (slug !== 'history') return false;
+    if (svKeepBareSlug()) return false;
     var isUnity = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive && SchoolSession.isActive());
     if (isUnity) return false;
     var target = chooseHistoryTargetSlug();
@@ -96,7 +106,7 @@
     var staffSchoolId = null;
     try {
       var _a = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
-      isStaff = _a && (_a.role === 'admin' || _a.role === 'teacher');
+      isStaff = !!(_a && ['admin', 'platform_admin', 'teacher', 'school_admin'].indexOf(_a.role) >= 0);
       if (isStaff && _a && _a.school_id) staffSchoolId = _a.school_id;
     } catch(e) {}
     var hasBespoke = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(params.subjectSlug));
@@ -331,13 +341,17 @@
   }
 
   // ---- Build lesson URL ----
+  /* a staff preview names the exact subject row (?sid=); every link on the page keeps it */
+  function sidSuffix() {
+    try { var s = new URLSearchParams(window.location.search).get('sid'); return s ? '?sid=' + encodeURIComponent(s) : ''; } catch (e) { return ''; }
+  }
   function lessonUrl(subjectSlug, unitSlug, lessonNumber) {
-    return '/lesson/' + subjectSlug + '/' + unitSlug + '/' + lessonNumber;
+    return '/lesson/' + subjectSlug + '/' + unitSlug + '/' + lessonNumber + sidSuffix();
   }
 
   function browseUrl(subjectSlug, unitSlug) {
-    if (unitSlug) return '/browse/' + subjectSlug + '/' + unitSlug;
-    return '/browse/' + subjectSlug;
+    if (unitSlug) return '/browse/' + subjectSlug + '/' + unitSlug + sidSuffix();
+    return '/browse/' + subjectSlug + sidSuffix();
   }
 
   // ---- Render lesson ----

@@ -69,8 +69,28 @@
     return candidates[0];
   }
 
+  /* staff previews and review links name the exact row (?sid= or a staff session), so the
+     legacy free-tier redirect must leave the bare slug alone for them */
+  function sidParam() { try { return new URLSearchParams(window.location.search).get('sid') || null; } catch (e) { return null; } }
+  function sidSuffix() { var s = sidParam(); return s ? '?sid=' + encodeURIComponent(s) : ''; }
+  /* staff previewing without ?sid=: their own school's row first (a teacher at Unity following
+     /browse/history means Unity's History), matching the lesson loader's school hint */
+  function staffSchoolHint() {
+    try {
+      var a = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
+      return (a && ['admin', 'platform_admin', 'teacher', 'school_admin'].indexOf(a.role) >= 0 && a.school_id) ? a.school_id : null;
+    } catch (e) { return null; }
+  }
+  function svKeepBareSlug() {
+    try {
+      if (new URLSearchParams(window.location.search).get('sid')) return true;
+      var a = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
+      return !!(a && ['admin', 'platform_admin', 'teacher', 'school_admin'].indexOf(a.role) >= 0);
+    } catch (e) { return false; }
+  }
   function maybeRedirectOldSlug(slug) {
     if (!OLD_TO_NEW_SLUGS[slug]) return false;
+    if (svKeepBareSlug()) return false;
     // Unity students keep using bare slugs for their bespoke content (matches
     // Supabase row scoped by school_id). Don't redirect them.
     var isUnity = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive && SchoolSession.isActive());
@@ -358,13 +378,22 @@
       .select('id, slug, name, exam_board, spec_code, color, image_url, settings')
       .eq('slug', subjectSlug);
 
-    if (hasBespoke) {
+    var sid = sidParam(), hint = (!hasBespoke && !sid) ? staffSchoolHint() : null;
+    if (sid) {
+      subjectQuery = subjectQuery.eq('id', sid);
+    } else if (hasBespoke) {
       subjectQuery = subjectQuery.eq('school_id', SchoolSession.getSchoolId());
+    } else if (hint) {
+      subjectQuery = subjectQuery.eq('school_id', hint);
     } else {
       subjectQuery = subjectQuery.is('school_id', null);
     }
 
     var subjectResult = await subjectQuery.maybeSingle();
+    if (hint && !subjectResult.data) {          /* the school has no row of its own: the generic one */
+      subjectResult = await sb.from('subjects').select('id, slug, name, exam_board, spec_code, color, image_url, settings')
+        .eq('slug', subjectSlug).is('school_id', null).maybeSingle();
+    }
 
     if (subjectResult.error || !subjectResult.data) {
       // Before showing 404 — is this a baseSlug we have multiple boards for?
@@ -618,7 +647,7 @@
       var unitLessonCount = unit._filteredCount != null ? unit._filteredCount : unit.lesson_count;
       // Skip units with no visible lessons (e.g. higher-only units for Foundation users)
       if (unitLessonCount === 0) return;
-      html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + '" class="unit-card" data-unit="' + esc(unit.slug) + '" data-total-lessons="' + unitLessonCount + '" style="--card-accent: ' + unit.accent + ';">';
+      html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + sidSuffix() + '" class="unit-card" data-unit="' + esc(unit.slug) + '" data-total-lessons="' + unitLessonCount + '" style="--card-accent: ' + unit.accent + ';">';
       html += '<div class="unit-card-image">';
       if (unit.image_url) {
         var imgStyle = imgPositions[unit.slug] ? ' style="object-position: ' + imgPositions[unit.slug] + '"' : '';
@@ -683,13 +712,23 @@
       .eq('slug', unitSlug)
       .eq('subjects.slug', subjectSlug);
 
-    if (hasBespoke) {
+    var sid = sidParam(), hint = (!hasBespoke && !sid) ? staffSchoolHint() : null;
+    if (sid) {
+      unitQuery = unitQuery.eq('subjects.id', sid);
+    } else if (hasBespoke) {
       unitQuery = unitQuery.eq('subjects.school_id', SchoolSession.getSchoolId());
+    } else if (hint) {
+      unitQuery = unitQuery.eq('subjects.school_id', hint);
     } else {
       unitQuery = unitQuery.is('subjects.school_id', null);
     }
 
     var unitResult = await unitQuery.maybeSingle();
+    if (hint && !unitResult.data) {             /* the school has no row of its own: the generic one */
+      unitResult = await sb.from('units')
+        .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, school_id, settings)')
+        .eq('slug', unitSlug).eq('subjects.slug', subjectSlug).is('subjects.school_id', null).maybeSingle();
+    }
 
     // Fallback: if viewing science and unit not found, try separate-sciences
     if (!unitResult.data && (subjectSlug === 'science' || subjectSlug.indexOf('science-') === 0)) {
@@ -807,7 +846,7 @@
       (subject.settings && subject.settings.practice_units && subject.settings.practice_units.indexOf(unitSlug) !== -1);
     var unitHasExamGuides = !!(subject.settings && subject.settings.has_exam_guides);
     var unitNavHtml = '<a href="/">Home</a>' +
-      '<a href="/browse/' + subjectSlug + '">Subject Home</a>';
+      '<a href="/browse/' + subjectSlug + sidSuffix() + '">Subject Home</a>';
     if (!isPracticeUnit) {
       if (unitHasExamGuides) {
         unitNavHtml += '<a href="/guide/' + subjectSlug + '/exam-technique">Exam Technique</a>';
@@ -850,7 +889,7 @@
     var lessonPrefix = isPractice ? '/practice/' : '/lesson/';
 
     lessons.forEach(function (lesson, idx) {
-      var url = lessonPrefix + subjectSlug + '/' + unitSlug + '/' + lesson.lesson_number;
+      var url = lessonPrefix + subjectSlug + '/' + unitSlug + '/' + lesson.lesson_number + sidSuffix();
       html += '<a href="' + url + '" class="lesson-card sv-reveal" data-lesson="' + esc(lesson.slug) + '">';
       html += '<span class="lesson-card-number">Lesson ' + (idx + 1) + '</span>';
       html += '<h3>' + esc(lesson.title) + '</h3>';
@@ -864,7 +903,7 @@
 
     // Back link — wrapped in container to match static page padding
     html += '<div style="max-width: var(--page-max); margin: 0 auto; padding: 0 1.5rem 3rem;">';
-    html += '<a href="/browse/' + subjectSlug + '" class="back-link">&larr; Back to ' + esc(subject.name) + '</a>';
+    html += '<a href="/browse/' + subjectSlug + sidSuffix() + '" class="back-link">&larr; Back to ' + esc(subject.name) + '</a>';
     html += '</div>';
 
     loadingEl.style.display = 'none';
