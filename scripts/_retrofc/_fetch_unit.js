@@ -7,7 +7,9 @@ const SB = process.env.SUPABASE_URL, KEY = process.env.SUPABASE_SERVICE_KEY;
 const argv = process.argv.slice(2);
 const schoolIdx = argv.indexOf('--school-id');
 const schoolId = schoolIdx >= 0 ? argv[schoolIdx + 1] : null;   // Unity etc.: pick the school's row, never the free-tier one
-const [subjectSlug, unitSlug] = argv.filter((a, i) => i !== schoolIdx && i !== schoolIdx + 1);
+const outIdx = argv.indexOf('--out');
+const outDir = outIdx >= 0 ? argv[outIdx + 1] : null;               // a school's tagged unit dir; default keeps the free-tier path
+const [subjectSlug, unitSlug] = argv.filter((a, i) => ![schoolIdx, schoolIdx + 1, outIdx, outIdx + 1].includes(i));
 
 async function q(p) {
   const r = await fetch(`${SB}/rest/v1/${p}`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } });
@@ -29,7 +31,7 @@ async function q(p) {
   const cols = 'id,lesson_number,slug,title,description,content_html,exam_tip_html,conclusion_html,practice_questions,knowledge_checks,flashcard_questions,glossary_terms,narration_manifest,status,tier,updated_at,hero_image_url';
   const rows = await q(`lessons?unit_id=eq.${unit.id}&select=${cols}&order=lesson_number`);
 
-  const base = path.join('scripts', '_retrofc', 'units', `${subjectSlug}__${unitSlug}`);
+  const base = outDir || path.join('scripts', '_retrofc', 'units', `${subjectSlug}__${unitSlug}`);
   const dir = path.join(base, 'raw');
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(base, '_raw.json'), JSON.stringify({ subject, unit, lessons: rows }, null, 1));

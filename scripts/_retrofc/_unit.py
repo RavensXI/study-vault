@@ -207,19 +207,9 @@ def cmd_prep(subject, unit, pool="claude"):
     item = queue_item(subject, unit)
     fetch = ["node", os.path.join(HERE, "_fetch_unit.js"), subject, unit]
     if item.get("school_id"):
-        fetch += ["--school-id", item["school_id"]]
+        # the fetch writes straight into the tagged dir; the free-tier twin's evidence dir is never touched
+        fetch += ["--school-id", item["school_id"], "--out", os.path.relpath(d, ROOT)]
     r = run(fetch)
-    plain = os.path.join(HERE, "units", f"{subject}__{unit}")
-    if plain != d and os.path.exists(os.path.join(plain, "_raw.json")):
-        import shutil
-        for name in os.listdir(plain):
-            src, dst = os.path.join(plain, name), os.path.join(d, name)
-            if os.path.isdir(src):
-                if os.path.exists(dst): shutil.rmtree(dst)
-                shutil.move(src, dst)
-            else:
-                shutil.move(src, dst)
-        os.rmdir(plain)
     raw = load(os.path.join(d, "_raw.json"))
     family = item.get("family", "english-literature")
     spec = item.get("spec") or SPECS.get(board_of(subject, unit))
