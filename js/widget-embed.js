@@ -1924,12 +1924,6 @@
       line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
       after: "Internal Energy"
     },
-    "science/biology-paper-2/12": {
-      file: "biomass-transfer-respiration",
-      label: "Account for every kilojoule",
-      line: "Split an animal's food intake between new biomass, respiration, egestion and excretion, and find out which loss is really the big one.",
-      after: "Calculating Efficiency of Biomass Transfer"
-    },
     "science/chemistry-paper-2/2": {
       file: "equilibrium-not-static",
       label: "Predict the next ten seconds",
@@ -1978,23 +1972,11 @@
       line: "Commit a prediction for each scene — bound antibodies, an antigen that does not fit, an antibiotic against a virus — then see what really happens.",
       after: "Antibiotics and Painkillers"
     },
-    "science/chemistry-paper-2/9": {
-      file: "polymer-double-bond-electron-rearrangement",
-      label: "Open the double bond",
-      line: "Predict the repeat unit, then watch the C=C open and its electrons become the links along the chain.",
-      after: "Condensation Polymerisation"
-    },
     "science/biology-paper-1/4": {
       file: "heart-simultaneous-double-circulation",
       label: "Track one blood cell",
       line: "See both sides of the heart squeeze on the same beat, and find out why blood passes through it twice on every lap of the body.",
       after: "Structure of the Heart"
-    },
-    "science/physics-paper-2/13": {
-      file: "redshift-stretching-mechanism",
-      label: "Predict the spectral shift",
-      line: "Give a galaxy's speed and direction, then say where its hydrogen lines land in the light that reaches Earth.",
-      after: "The Big Bang Theory"
     },
     "science/biology-paper-2/3": {
       file: "menstrual-cycle-hormone-feedback",
@@ -2014,17 +1996,188 @@
       line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
       after: "Reflex Actions"
     },
-    "science/physics-paper-2/12": {
-      file: "transformer-voltage-current-tradeoff",
-      label: "Predict the secondary side",
-      line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
-      after: "Transformers in the National Grid"
-    },
     "science/chemistry-paper-2/1": {
       file: "collision-theory-energy-distribution",
       label: "Predict the effect on collisions",
       line: "Warm it, dilute it or add a catalyst, then predict both the number of collisions and the share of them with enough energy to react.",
       after: "Factors Affecting Rate"
+    },
+
+    /* ---- Unity Separate Sciences (18 Sep 2026): the combined lessons copied into the triple subject carry the same interactives ---- */
+    "separate-sciences/chemistry-paper-1/2": {
+      file: "periodic-table-group-reactivity-trends",
+      label: "Predict the reactivity trend",
+      line: "Two elements and one prediction — work out why reactivity climbs down Group 1 but falls down Group 7.",
+      after: "Group 0 — The Noble Gases",
+      school: "unity"
+    },
+    "separate-sciences/chemistry-paper-1/1": {
+      file: "atom-mostly-empty-space",
+      label: "Fire the alpha beam",
+      line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
+      after: "Electronic Structure",
+      school: "unity"
+    },
+    "separate-sciences/physics-paper-1/4": {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "Resistance in Series Circuits",
+      school: "unity"
+    },
+    "separate-sciences/physics-paper-1/2": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "Calculating Efficiency",
+      school: "unity"
+    },
+    "separate-sciences/physics-paper-2/1": {
+      file: "resultant-force-vector-subtraction",
+      label: "Find the resultant force",
+      line: "Predict what two opposing forces add up to — and what it does to the object's motion.",
+      after: "Free Body Diagrams",
+      school: "unity"
+    },
+    "separate-sciences/physics-paper-1/7": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Specific Heat Capacity",
+      school: "unity"
+    },
+    "separate-sciences/chemistry-paper-2/3": {
+      file: "fractional-distillation-boiling-point",
+      label: "Send it up the column",
+      line: "Predict the height where a hydrocarbon condenses, from its boiling point and the column temperatures.",
+      after: "Combustion of Hydrocarbons",
+      school: "unity"
+    },
+    "separate-sciences/physics-paper-1/6": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Internal Energy",
+      school: "unity"
+    },
+    "separate-sciences/biology-paper-2/12": {
+      file: "biomass-transfer-respiration",
+      label: "Account for every kilojoule",
+      line: "Split an animal's food intake between new biomass, respiration, egestion and excretion, and find out which loss is really the big one.",
+      after: "Calculating Efficiency of Biomass Transfer",
+      school: "unity"
+    },
+    "separate-sciences/chemistry-paper-2/2": {
+      file: "equilibrium-not-static",
+      label: "Predict the next ten seconds",
+      line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
+      after: "Le Châtelier’s Principle",
+      school: "unity"
+    },
+    "separate-sciences/chemistry-paper-1/8": {
+      file: "ion-migration-electrolysis",
+      label: "Predict where the ions go",
+      line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
+      after: "Electrolysis of Molten Ionic Compounds",
+      school: "unity"
+    },
+    "separate-sciences/chemistry-paper-1/6": {
+      file: "reactivity-series-electron-transfer",
+      label: "Predict the displacement",
+      line: "Decide whether one metal will displace another from its solution, and which metal ends up as the ions.",
+      after: "Oxidation and Reduction in Terms of Electrons (Higher Tier)",
+      school: "unity"
+    },
+    "separate-sciences/biology-paper-2/5": {
+      file: "heterozygous-carrier-no-symptoms",
+      label: "Predict health from genotype",
+      line: "One working allele is enough — see why a carrier has no symptoms at all, yet can still pass the faulty allele on.",
+      after: "Polydactyly (Dominant Disorder)",
+      school: "unity"
+    },
+    "separate-sciences/biology-paper-1/6": {
+      file: "antibodies-dont-kill",
+      label: "Predict what happens next",
+      line: "Commit a prediction for each scene — bound antibodies, an antigen that does not fit, an antibiotic against a virus — then see what really happens.",
+      after: "$end",
+      school: "unity"
+    },
+    "separate-sciences/physics-paper-2/7": {
+      file: "em-spectrum-continuous",
+      label: "Slide across the spectrum",
+      line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
+      after: "Radio Waves and Microwaves",
+      school: "unity"
+    },
+    "separate-sciences/biology-paper-1/2": {
+      file: "sa-v-ratio-real-limit",
+      label: "Test which block copes",
+      line: "Two blocks of living tissue side by side — commit to which can supply every cell through its own surface, then watch the surface and volume counted.",
+      after: "Osmosis",
+      school: "unity"
+    },
+    "separate-sciences/biology-paper-1/7": {
+      file: "antibodies-dont-kill",
+      label: "Predict what happens next",
+      line: "Commit a prediction for each scene — bound antibodies, an antigen that does not fit, an antibiotic against a virus — then see what really happens.",
+      after: "Antibiotics and Painkillers",
+      school: "unity"
+    },
+    "separate-sciences/chemistry-paper-2/9": {
+      file: "polymer-double-bond-electron-rearrangement",
+      label: "Open the double bond",
+      line: "Predict the repeat unit, then watch the C=C open and its electrons become the links along the chain.",
+      after: "Condensation Polymerisation",
+      school: "unity"
+    },
+    "separate-sciences/biology-paper-1/4": {
+      file: "heart-simultaneous-double-circulation",
+      label: "Track one blood cell",
+      line: "See both sides of the heart squeeze on the same beat, and find out why blood passes through it twice on every lap of the body.",
+      after: "Structure of the Heart",
+      school: "unity"
+    },
+    "separate-sciences/physics-paper-2/13": {
+      file: "redshift-stretching-mechanism",
+      label: "Predict the spectral shift",
+      line: "Give a galaxy's speed and direction, then say where its hydrogen lines land in the light that reaches Earth.",
+      after: "The Big Bang Theory",
+      school: "unity"
+    },
+    "separate-sciences/biology-paper-2/3": {
+      file: "menstrual-cycle-hormone-feedback",
+      label: "Walk the hormone cycle",
+      line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
+      after: "Hormone Interactions — Negative Feedback",
+      school: "unity"
+    },
+    "separate-sciences/biology-paper-2/6": {
+      file: "natural-selection-not-directed",
+      label: "Predict what the population does",
+      line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
+      after: "Selective Breeding",
+      school: "unity"
+    },
+    "separate-sciences/biology-paper-2/1": {
+      file: "synapse-electrical-to-chemical",
+      label: "Find where the signal stops",
+      line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
+      after: "Reflex Actions",
+      school: "unity"
+    },
+    "separate-sciences/physics-paper-2/12": {
+      file: "transformer-voltage-current-tradeoff",
+      label: "Predict the secondary side",
+      line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
+      after: "Transformers in the National Grid",
+      school: "unity"
+    },
+    "separate-sciences/chemistry-paper-2/1": {
+      file: "collision-theory-energy-distribution",
+      label: "Predict the effect on collisions",
+      line: "Warm it, dilute it or add a catalyst, then predict both the number of collisions and the share of them with enough energy to react.",
+      after: "Factors Affecting Rate",
+      school: "unity"
     },
   };
 
