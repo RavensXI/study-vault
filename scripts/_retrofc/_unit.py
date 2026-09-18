@@ -77,8 +77,15 @@ def save(p, obj):
         json.dump(obj, f, indent=1, ensure_ascii=False)
 
 
-def queue_item(subject, unit):
-    return next((i for i in load(QUEUE, {"items": []})["items"] if i["subject"] == subject and i["unit"] == unit), {})
+def queue_item(subject, unit, items=None):
+    """The queue item for this subject/unit. A slug that exists on both tiers (design-technology,
+    computer-science, separate-sciences) has two items; the one still to do wins, so a finished
+    free-tier row never shadows the school's queued row."""
+    items = items if items is not None else load(QUEUE, {"items": []})["items"]
+    hits = [i for i in items if i["subject"] == subject and i["unit"] == unit]
+    if not hits:
+        return {}
+    return next((i for i in hits if i.get("status") != "done"), hits[0])
 
 
 def unit_dir(subject, unit):
@@ -324,10 +331,10 @@ def cmd_finish(subject, unit, narrate=True, video=True, resume=False):
     today = datetime.date.today().isoformat()
     q = load(QUEUE)
     pool = "claude"
-    for it in q["items"]:
-        if it["subject"] == subject and it["unit"] == unit:
-            pool = it.get("pool") or "claude"
-            it.update({"status": "done", "findings": len(findings), "fixed": applied["applied"], "checked_on": today, "pool": pool})
+    it = queue_item(subject, unit, q["items"])   # the same item prep chose (tier-aware)
+    if it:
+        pool = it.get("pool") or "claude"
+        it.update({"status": "done", "findings": len(findings), "fixed": applied["applied"], "checked_on": today, "pool": pool})
     save(QUEUE, q)
     summary["pool"] = pool
     st = load(STATE)
