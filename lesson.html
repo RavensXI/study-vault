@@ -66,7 +66,9 @@
   html.sv-embed::-webkit-scrollbar, html.sv-embed body::-webkit-scrollbar { display: none; }
   html.sv-embed #lesson-page { padding-top: 0 !important; }
   html.sv-embed .a11y-toolbar::before { display: none !important; }
-  html.sv-embed .a11y-toolbar { justify-content: flex-start !important; }
+  /* wide embeds keep the controls at the left; narrow ones use the reader skin's evenly
+     spaced compact row (css/reskin.css), which this override used to defeat on phones */
+  @media (min-width: 1101px) { html.sv-embed .a11y-toolbar { justify-content: flex-start !important; } }
   /* the sidebar sticks 80px down to clear the site header; the embed has no header, so that
      was a dead band at the top right and pushed the video off the glass */
   html.sv-embed .lesson-sidebar { top: 12px; }
