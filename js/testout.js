@@ -24,6 +24,8 @@
   window.svTestoutShould = function () {
     var p = pathKey(); if (!p) return false;
     if (document.querySelector('.sv-listening')) return false;
+    /* the welcome page's phone and tablet load the real lesson (?embed=1): a showcase, never a check */
+    try { if (new URLSearchParams(location.search).get('embed') || window.top !== window.self) return false; } catch (e) { return false; }
     /* a teacher or admin previewing a lesson is not revising it */
     try {
       var a = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
