@@ -26,17 +26,27 @@
 
   /* the words a student sees for each verdict; a full sentence, no jargon */
   var WORDS = {
-    right: { head: 'Right', line: 'That matches the answer.' },
-    partly: { head: 'Nearly there', line: 'Part of it, not all of it. Read the answer, then move on.' },
-    wrong: { head: 'Not this time', line: 'Read the answer and try it again later.' }
+    right: { head: 'Right', line: '' },
+    partly: { head: 'Nearly', line: '' },
+    wrong: { head: 'Not quite', line: '' }
   };
+  /* a student who thinks the judge was wrong says so: the box holds instead of resetting,
+     and the case is kept (account-synced) so the rule can be fixed where it trips */
+  function appeal(card, typed, verdict) {
+    try {
+      var lg = JSON.parse(localStorage.getItem('sv-recall-appeals') || '[]');
+      lg.unshift({ t: Date.now(), kind: card.kind || 'recall', front: String(card.front || '').slice(0, 160), answer: String(card.answer || '').slice(0, 160), typed: String(typed || '').slice(0, 200), verdict: verdict });
+      localStorage.setItem('sv-recall-appeals', JSON.stringify(lg.slice(0, 200)));
+      if (window.svProgressPushSoon) svProgressPushSoon();
+    } catch (e) {}
+  }
   function words(verdict) { return WORDS[verdict] || WORDS.wrong; }
 
   /* which of the four card kinds to say on the badge and in the prompt */
   var KIND_LABEL = { recall: 'Question', term: 'Who or what?', definition: 'Name it', cloze: 'Fill the gap', list: 'Name them all' };
   var KIND_PLACEHOLDER = { recall: 'Type what you remember…', term: 'Say who or what this is…', definition: 'Type the name or term…', cloze: 'Type the missing word or words…', list: 'Type them, one per line or comma-separated…' };
   /* when the judge cannot answer, the card says so rather than quietly turning back into the old flow */
-  var UNAVAILABLE = { head: 'Couldn’t check that one', line: 'Read the answer and rate yourself this time.' };
+  var UNAVAILABLE = { head: 'Couldn’t check that one', line: 'Rate yourself this time.' };
 
-  window.svRecall = { judge: judge, words: words, unavailable: UNAVAILABLE, kindLabel: function (k) { return KIND_LABEL[k] || 'Question'; }, placeholder: function (k) { return KIND_PLACEHOLDER[k] || KIND_PLACEHOLDER.recall; } };
+  window.svRecall = { judge: judge, words: words, appeal: appeal, unavailable: UNAVAILABLE, kindLabel: function (k) { return KIND_LABEL[k] || 'Question'; }, placeholder: function (k) { return KIND_PLACEHOLDER[k] || KIND_PLACEHOLDER.recall; } };
 })();

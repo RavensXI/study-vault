@@ -3126,6 +3126,7 @@ function openFlashcardModal() {
                   '</div>' +
                 '</form>' +
                 '<span class="fc-card-hint" id="fc-card-hint">Tap to reveal</span>' +
+                '<div class="fc-tick" id="fc-tick" hidden><span class="fc-tick-mark">\u2713</span><span class="fc-tick-answer" id="fc-tick-answer"></span></div>' +
               '</div>' +
               '<div class="fc-card-face fc-card-back">' +
                 '<span class="fc-card-badge" id="fc-badge-back"></span>' +
@@ -3135,12 +3136,14 @@ function openFlashcardModal() {
                 '<div class="fc-verdict" id="fc-verdict" hidden><strong id="fc-verdict-head"></strong><span id="fc-verdict-line"></span></div>' +
                 '<div class="fc-typed-echo" id="fc-typed-echo" hidden></div>' +
                 '<div class="fc-card-text" id="fc-back-text"></div>' +
+                '<button type="button" class="fc-appeal" id="fc-appeal" hidden>I think that was right</button>' +
               '</div>' +
             '</div>' +
           '</div>' +
           '<div class="fc-answer-buttons" id="fc-answer-buttons">' +
             '<button class="fc-answer-btn fc-answer-btn--wrong" id="fc-btn-wrong">Got it wrong</button>' +
             '<button class="fc-answer-btn fc-answer-btn--right" id="fc-btn-right">Got it right</button>' +
+            '<button class="fc-answer-btn fc-answer-btn--next" id="fc-btn-next" hidden>Next</button>' +
           '</div>' +
         '</div>' +
         /* End screen */
@@ -3193,6 +3196,11 @@ function openFlashcardModal() {
   var cardHint = overlay.querySelector('#fc-card-hint');
   var typedOn = !!(window.svRecall && window.fetch);   /* the judge is optional: without it the deck flips as before */
   var judged = null;                                   /* the verdict for the card on screen, or null when self-rated */
+  var btnNext = overlay.querySelector('#fc-btn-next');
+  var tickEl = overlay.querySelector('#fc-tick');
+  var appealBtn = overlay.querySelector('#fc-appeal');
+  var advanceTimer = null;
+  var lastTyped = '';
   var sessionEl = overlay.querySelector('#fc-session');
   var endEl = overlay.querySelector('#fc-end');
 
@@ -3222,11 +3230,14 @@ function openFlashcardModal() {
     answersEnabled = false;
     if (answerUnlockTimer) { clearTimeout(answerUnlockTimer); answerUnlockTimer = null; }
 
-    judged = null;
-    verdictEl.hidden = true; typedEcho.hidden = true;
+    judged = null; lastTyped = '';
+    if (advanceTimer) { clearTimeout(advanceTimer); advanceTimer = null; }
+    verdictEl.hidden = true; typedEcho.hidden = true; tickEl.hidden = true; appealBtn.hidden = true;
+    cardEl.classList.remove('ticked');
     verdictEl.className = 'fc-verdict';
+    btnWrong.hidden = false; btnRight.hidden = false; btnNext.hidden = true;
     btnWrong.textContent = 'Got it wrong'; btnRight.textContent = 'Got it right';
-    btnWrong.dataset.result = 'wrong'; btnRight.dataset.result = 'right';
+    btnWrong.dataset.result = 'wrong'; btnRight.dataset.result = 'right'; btnNext.dataset.result = 'wrong';
     typedForm.hidden = !typedOn; cardHint.hidden = typedOn;
     typedIn.value = ''; typedIn.disabled = false; checkBtn.disabled = false; checkBtn.textContent = 'Check';
     typedIn.placeholder = window.svRecall ? svRecall.placeholder(card.kind) : 'Type what you remember\u2026';
@@ -3252,21 +3263,32 @@ function openFlashcardModal() {
         typedEcho.textContent = 'You typed: ' + typed; typedEcho.hidden = false;
         flipCard(); setCardHeight(); return;
       }
-      judged = res.verdict;
+      judged = res.verdict; lastTyped = typed;
       var w = svRecall.words(res.verdict);
+      if (res.verdict === 'right') {
+        /* a tick on the card, the answer under it, and the next card deals itself: no buttons */
+        overlay.querySelector('#fc-tick-answer').textContent = card.back.replace(/<[^>]+>/g, '');
+        tickEl.hidden = false; cardEl.classList.add('ticked'); typedForm.hidden = true;
+        answersEnabled = false;
+        /* long enough to read the answer under the tick: words/4 seconds, 1.2 to 3.5 */
+        var hold = Math.max(1.2, Math.min(card.back.replace(/<[^>]+>/g, '').split(/\s+/).length / 4, 3.5));
+        advanceTimer = setTimeout(function () { advanceTimer = null; markCard('right'); }, hold * 1000);
+        return;
+      }
       verdictEl.className = 'fc-verdict fc-verdict--' + res.verdict;
       overlay.querySelector('#fc-verdict-head').textContent = w.head;
-      overlay.querySelector('#fc-verdict-line').textContent = ' ' + w.line;
+      overlay.querySelector('#fc-verdict-line').textContent = '';
       verdictEl.hidden = false;
       typedEcho.textContent = 'You typed: ' + typed; typedEcho.hidden = false;
-      /* the buttons carry the verdict: one moves on, the other overrides it */
-      if (res.verdict === 'right') { btnWrong.textContent = 'Actually, I got it wrong'; btnWrong.dataset.result = 'wrong'; btnRight.textContent = 'Next'; btnRight.dataset.result = 'right'; }
-      else if (res.verdict === 'partly') { btnWrong.textContent = 'Next'; btnWrong.dataset.result = 'partly'; btnRight.textContent = 'Count it as right'; btnRight.dataset.result = 'right'; }
-      else { btnWrong.textContent = 'Next'; btnWrong.dataset.result = 'wrong'; btnRight.textContent = 'Actually, I got it'; btnRight.dataset.result = 'right'; }
+      /* one button: Next. Nearly holds the box, not quite resets it. A wrong card can be appealed. */
+      btnWrong.hidden = true; btnRight.hidden = true; btnNext.hidden = false;
+      btnNext.dataset.result = res.verdict === 'partly' ? 'partly' : 'wrong';
+      appealBtn.hidden = res.verdict !== 'wrong';
       cardEl.classList.add('flipped');
       answerBtns.classList.add('visible', 'enabled');
       answersEnabled = true;
       setCardHeight();
+      setTimeout(function () { try { btnNext.focus(); } catch (e) {} }, 450);
     });
   }
   typedForm.addEventListener('submit', function (e) { e.preventDefault(); e.stopPropagation(); checkTyped(); });
@@ -3351,6 +3373,16 @@ function openFlashcardModal() {
 
   btnWrong.addEventListener('click', function () { if (answersEnabled) markCard(btnWrong.dataset.result || 'wrong'); });
   btnRight.addEventListener('click', function () { if (answersEnabled) markCard(btnRight.dataset.result || 'right'); });
+  btnNext.addEventListener('click', function () { if (answersEnabled) markCard(btnNext.dataset.result || 'wrong'); });
+  appealBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var card = sessionCards[currentIdx];
+    svRecall.appeal({ kind: card.kind, front: card.front.replace(/<[^>]+>/g, '____'), answer: card.back.replace(/<[^>]+>/g, '') }, lastTyped, judged);
+    appealBtn.textContent = 'Noted. It will come round again.'; appealBtn.disabled = true;
+    btnNext.dataset.result = 'partly';            /* the box holds instead of resetting */
+  });
+  /* a ticked card moves on at a tap as well as by itself */
+  tickEl.addEventListener('click', function (e) { e.stopPropagation(); if (advanceTimer) { clearTimeout(advanceTimer); advanceTimer = null; markCard('right'); } });
 
   // ---- Skip ----
   function skipCard() {
@@ -3429,13 +3461,15 @@ function openFlashcardModal() {
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
       e.stopImmediatePropagation();
+      if (judged && answersEnabled && cardEl.classList.contains('flipped')) { markCard(btnNext.dataset.result || 'wrong'); return; }
+      if (advanceTimer) { clearTimeout(advanceTimer); advanceTimer = null; markCard('right'); return; }
       flipCard();
     } else if (e.key === 'ArrowLeft' || e.key === '1') {
       e.stopImmediatePropagation();
-      if (cardEl.classList.contains('flipped') && answersEnabled) markCard(btnWrong.dataset.result || 'wrong');
+      if (cardEl.classList.contains('flipped') && answersEnabled) markCard(judged ? (btnNext.dataset.result || 'wrong') : (btnWrong.dataset.result || 'wrong'));
     } else if (e.key === 'ArrowRight' || e.key === '2') {
       e.stopImmediatePropagation();
-      if (cardEl.classList.contains('flipped') && answersEnabled) markCard(btnRight.dataset.result || 'right');
+      if (cardEl.classList.contains('flipped') && answersEnabled) markCard(judged ? (btnNext.dataset.result || 'wrong') : (btnRight.dataset.result || 'right'));
     } else if (e.key === 's' || e.key === 'S') {
       e.stopImmediatePropagation();
       skipCard();
@@ -3448,6 +3482,7 @@ function openFlashcardModal() {
   function closeModal() {
     cancelSpeech();
     if (answerUnlockTimer) clearTimeout(answerUnlockTimer);
+    if (advanceTimer) clearTimeout(advanceTimer);
     document.removeEventListener('keydown', handleKey);
     overlay.classList.remove('active');
     document.body.style.overflow = '';
@@ -3505,7 +3540,8 @@ function openFlashcardModal() {
         swipeTarget.style.transition = 'none';
         swipeTarget.style.transform = '';
         swipeTarget.style.opacity = '';
-        if (dx > 0) markCard(btnRight.dataset.result || 'right');
+        if (judged) markCard(btnNext.dataset.result || 'wrong');
+        else if (dx > 0) markCard(btnRight.dataset.result || 'right');
         else markCard(btnWrong.dataset.result || 'wrong');
       }, 250);
     } else {
@@ -3529,8 +3565,8 @@ function openFlashcardModal() {
         '<h3>How to use Flashcards</h3>' +
         '<ul>' +
           '<li>Type what you remember and press <kbd>Enter</kbd>: the card checks it against the answer</li>' +
+          '<li>Right gets a tick and moves on by itself; otherwise read the answer and press <kbd>Enter</kbd> for the next card</li>' +
           '<li>Not sure? Tap <b>Show me the answer</b> and rate yourself</li>' +
-          '<li>Swipe or use <kbd>&larr;</kbd> <kbd>&rarr;</kbd> to move on</li>' +
           '<li>Tap the speaker icon to hear it read aloud</li>' +
         '</ul>' +
         '<button class="fc-tutorial-btn">Got it</button>' +
