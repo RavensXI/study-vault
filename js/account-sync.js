@@ -148,25 +148,29 @@
     });
     return out;
   }
-  /* winner's leaves beat loser's on conflict; dicts merge, arrays union */
-  function deepMerge(loser, winner) {
-    if (Array.isArray(loser) && Array.isArray(winner)) return unionArr(loser, winner);
+  /* winner's leaves beat loser's on conflict; dicts merge, arrays union — except the
+     keys in REPLACE_ARRAYS, where an array is a choice (the subjects picked) and the
+     newer side's list stands as written, so a subject removed on one device stays removed */
+  var REPLACE_ARRAYS = { 'sv-welcome': 1, 'studyvault-subjects': 1, 'studyvault-free-prefs': 1 };
+  function deepMerge(loser, winner, replaceArrays) {
+    if (Array.isArray(loser) && Array.isArray(winner)) return replaceArrays ? winner : unionArr(loser, winner);
     if (isObj(loser) && isObj(winner)) {
       var out = {};
       Object.keys(loser).forEach(function (k) { out[k] = loser[k]; });
       Object.keys(winner).forEach(function (k) {
-        out[k] = (k in out) ? deepMerge(out[k], winner[k]) : winner[k];
+        out[k] = (k in out) ? deepMerge(out[k], winner[k], replaceArrays) : winner[k];
       });
       return out;
     }
     return winner === undefined ? loser : winner;
   }
-  function mergeValues(localRaw, serverRaw, localNewer) {
+  function mergeValues(localRaw, serverRaw, localNewer, key) {
     var l = parse(localRaw), s = parse(serverRaw);
     if (l === undefined) return serverRaw;
     if (s === undefined) return localRaw;
+    var ra = !!REPLACE_ARRAYS[key];
     if ((isObj(l) && isObj(s)) || (Array.isArray(l) && Array.isArray(s))) {
-      var merged = localNewer ? deepMerge(s, l) : deepMerge(l, s);
+      var merged = localNewer ? deepMerge(s, l, ra) : deepMerge(l, s, ra);
       return JSON.stringify(merged);
     }
     return localNewer ? localRaw : serverRaw;
@@ -204,7 +208,7 @@
           }
           var localTs = m[row.key] || 0;
           var serverTs = Date.parse(row.updated_at) || 0;
-          var mergedRaw = mergeValues(localStorage.getItem(row.key), serverRaw, localTs > serverTs);
+          var mergedRaw = mergeValues(localStorage.getItem(row.key), serverRaw, localTs > serverTs, row.key);
           applyLocal(row.key, mergedRaw);
           m[row.key] = Date.now();
           // if the merge produced something richer than the server copy, push it
@@ -236,15 +240,35 @@
   }
 
   // ---- session discovery (supabase-js session lives in localStorage) ----
+  var TOKEN_KEY = 'sb-baipckgywpnwapobwtsy-auth-token';
+  var refreshing = false;
   function readSession() {
     try {
-      var raw = localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token');
+      var raw = localStorage.getItem(TOKEN_KEY);
       if (!raw) return null;
       var tok = JSON.parse(raw);
       if (!tok || !tok.access_token || !tok.user) return null;
-      if (tok.expires_at && tok.expires_at * 1000 < Date.now() + 30000) return null;
+      if (tok.expires_at && tok.expires_at * 1000 < Date.now() + 30000) { refreshToken(tok); return null; }
       return tok;
     } catch (e) { return null; }
+  }
+  /* the dashboard pages have no supabase-js client to renew a sign-in that has run out
+     (a phone that sat for a day), so renew it here; the poll in boot() picks the new token up */
+  function refreshToken(tok) {
+    if (refreshing || !tok.refresh_token) return;
+    refreshing = true;
+    fetch(SB_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST', headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: tok.refresh_token })
+    }).then(function (r) { return r.ok ? r.json() : null; }).then(function (t) {
+      if (t && t.access_token && t.refresh_token) {
+        t.expires_at = t.expires_at || Math.floor(Date.now() / 1000) + (t.expires_in || 3600);
+        t.user = t.user || tok.user;
+        applying = true;
+        try { localStorage.setItem(TOKEN_KEY, JSON.stringify(t)); } catch (e) {}
+        applying = false;
+      }
+    }).catch(function () {}).then(function () { refreshing = false; });
   }
 
   function boot() {

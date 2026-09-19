@@ -2563,7 +2563,7 @@ if(sibtn) sibtn.onclick=async()=>{
             o[k]=bt.length>=at.length?b[k]:a[k];
           }); return o; };
         const merged={
-          picked:[...new Set([...(acct.picked||[]),...(loc.picked||[])])],
+          picked:(loc.picked&&loc.picked.length)?loc.picked.slice():(acct.picked||[]),   /* the synced list stands; the old account copy only fills an empty device */
           boards:Object.assign({},loc.boards||{},acct.boards||{}),
           topics:twoDeep(loc.topics,acct.topics),
           meta:richerMeta(loc.meta,acct.meta),
