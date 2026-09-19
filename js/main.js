@@ -2974,7 +2974,7 @@ function openFlashcardModal() {
      what a term means, name the term, fill the gap. Judged when the student types. */
   var recallCards = window._lessonRecallCards || [];
   recallCards.forEach(function (item, i) {
-    if (!item || !item.front || !item.answer) return;
+    if (!item || !item.front || !item.answer || item.off) return;     /* curation can switch a card off */
     allCards.push({
       lessonId: lessonId,
       index: 'r' + i,

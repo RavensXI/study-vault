@@ -562,7 +562,7 @@ function svFlashDeck(SUBJECTS, cb, opts) {
         var pools2 = [[row.flashcard_questions || [], null], [Array.isArray(row.recall_cards) ? row.recall_cards : [], 'r']];
         pools2.forEach(function (pair) {
           pair[0].forEach(function (f, i) {
-            if (!f) return;
+            if (!f || f.off) return;
             var kind = pair[1] ? (f.kind || 'recall') : null;
             if (!(f.q || f.question || f.front) || !(f.a || f.answer)) return;
             var key = row.id + ':' + (kind ? 'r' : 'q') + i; if (seen[key] || EX[key]) return;
