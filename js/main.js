@@ -3136,7 +3136,7 @@ function openFlashcardModal() {
                 '<div class="fc-verdict" id="fc-verdict" hidden><strong id="fc-verdict-head"></strong><span id="fc-verdict-line"></span></div>' +
                 '<div class="fc-typed-echo" id="fc-typed-echo" hidden></div>' +
                 '<div class="fc-card-text" id="fc-back-text"></div>' +
-                '<button type="button" class="fc-appeal" id="fc-appeal" hidden>I think that was right</button>' +
+                '<button type="button" class="fc-appeal" id="fc-appeal" hidden>I think I was right?</button>' +
               '</div>' +
             '</div>' +
           '</div>' +
