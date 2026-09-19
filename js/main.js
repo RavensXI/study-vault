@@ -604,6 +604,7 @@ function initSidebarPanel() {
   // Check if we are at mobile breakpoint
   var mql = window.matchMedia('(max-width: 768px)');
   var panelReady = false;
+  var panelObserver = null;      // the child-order watcher of the CURRENT panel; torn down with it
 
   function setupPanel() {
     if (panelReady) return;
@@ -672,12 +673,19 @@ function initSidebarPanel() {
     /* the reader harness re-parents the sidebar's children after this runs (and the
        tour opens the drawer without the burger): keep the close row first and the
        links last whenever the sidebar's children change */
+    /* One watcher per panel, disconnected in teardownPanel. Before 20 Sep 2026 the watcher
+       outlived its panel: rotate a phone to landscape (panel torn down) and back (a new panel,
+       a second watcher), and the two watchers fought over first and last child for ever,
+       which crashed the page. */
+    var refreshing = false;
     try {
-      new MutationObserver(function () {
+      panelObserver = new MutationObserver(function () {
+        if (refreshing || !panelReady || closeRow.parentNode !== sidebar && panelNav.parentNode !== sidebar) return;
         var misplaced = closeRow.parentNode !== sidebar || sidebar.firstChild !== closeRow ||
                         panelNav.parentNode !== sidebar || sidebar.lastChild !== panelNav;
-        if (misplaced && panelReady) refreshPanelNav();
-      }).observe(sidebar, { childList: true });
+        if (misplaced) { refreshing = true; try { refreshPanelNav(); } finally { refreshing = false; } }
+      });
+      panelObserver.observe(sidebar, { childList: true });
     } catch (e) {}
     // Insert nav after close button
     sidebar.insertBefore(panelNav, closeRow.nextSibling);
@@ -716,6 +724,8 @@ function initSidebarPanel() {
   function teardownPanel() {
     if (!panelReady) return;
     panelReady = false;
+    if (panelObserver) { try { panelObserver.disconnect(); } catch (e) {} panelObserver = null; }
+    sidebar._refreshPanelNav = null;
     document.body.classList.remove('sidebar-panel-mode', 'sidebar-open');
     var closeRow = sidebar.querySelector('.sidebar-panel-close');
     if (closeRow) closeRow.remove();
