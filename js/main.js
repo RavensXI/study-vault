@@ -1835,6 +1835,11 @@ function initKnowledgeCheck() {
   if (saved && scoreEl) scoreEl.textContent = saved;
 
   btn.addEventListener('click', () => openKnowledgeCheck(questions, storageKey, scoreEl));
+  /* ?open=quiz | ?open=cards — the dashboard finder sends a student straight into the
+     quick check or the flashcards of the lesson they searched for */
+  const OPEN = new URLSearchParams(location.search).get('open');
+  if (OPEN === 'quiz' && !QUIZ_FIRST) setTimeout(function () { btn.click(); }, 400);
+  if (OPEN === 'cards') setTimeout(function () { if (typeof openFlashcardModal === 'function') openFlashcardModal(); }, 400);
 }
 
 // Re-render KaTeX inside a container (for dynamically injected content)

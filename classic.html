@@ -633,7 +633,7 @@
   .finder .frow small{display:block;font-family:var(--head);font-size:.78rem;color:var(--mut);margin-top:.1rem}
   .finder .frow mark{background:#f3e7c4;color:inherit;border-radius:2px;padding:0 .05em}
   .finder .fstr{flex:none;font:600 .74rem var(--head);color:var(--sec);border:1px solid #e4dac6;border-radius:3px;padding:.15rem .4rem;white-space:nowrap}
-  .finder .fstr.s1{color:#8a5a2b;border-color:#e9d3b8}.finder .fstr.s3{color:#3f6b3f;border-color:#cfe0c8}
+  .finder .fstr.s0{color:var(--mut)}.finder .fstr.s1{color:#8a5a2b;border-color:#e9d3b8}.finder .fstr.s2{color:#7a6a2a;border-color:#e6dcb0}.finder .fstr.s3{color:#3f6b3f;border-color:#cfe0c8}
   .finder .facts{flex:none;display:flex;gap:.3rem}
   .finder .facts button{border:1px solid #d5c9b3;background:var(--card);border-radius:3px;font:600 .76rem var(--head);color:var(--sec);padding:.28rem .55rem;cursor:pointer}
   .finder .facts button:hover{border-color:var(--rust);color:var(--ink)}
@@ -1929,60 +1929,79 @@ if(/(?:^|[?&])tune(?:=|&|$)/.test(location.search)){(function(){
 /* the planner modal (planner.js): the exam card is its door */
 document.querySelector('.card.exam').onclick=()=>svPlannerOpen();
 
-/* Finder (UI mock, local only). A small index of the demo student's lessons stands in for the real
-   search; typing matches lesson titles, unit names and a few key words per lesson. Later, the row
-   at the bottom sends a free-text question to Jev to pick the lesson when the words do not match. */
+/* Finder: revise one specific thing. The index is the student's OWN subjects, units and lessons
+   (the same SUBJECTS the shelf shows), fetched once on first focus: lesson titles, unit names and
+   the glossary terms of every live lesson. Matching is local and instant. The "Ask" row at the
+   bottom is where a free-text question goes to the judge when the words match nothing. */
 (function(){
-  var IX=[
-    {s:'Combined Science',u:'Biology Paper 1',n:3,t:'Photosynthesis and the Rate of Reaction',k:'light chlorophyll glucose limiting factors',st:2,href:'/lesson/science-aqa/biology-paper-1/3'},
-    {s:'Combined Science',u:'Biology Paper 1',n:4,t:'The Heart, Blood and Circulatory Disease',k:'ventricle artery stent statins',st:1,href:'/lesson/science-aqa/biology-paper-1/4'},
-    {s:'Combined Science',u:'Biology Paper 2',n:2,t:'Hormones and the Menstrual Cycle',k:'oestrogen FSH LH progesterone',st:0,href:'/lesson/science-aqa/biology-paper-2/2'},
-    {s:'Combined Science',u:'Chemistry Paper 1',n:5,t:'Structure, Properties and Carbon Allotropes',k:'diamond graphite graphene fullerene',st:1,href:'/lesson/science-aqa/chemistry-paper-1/5'},
-    {s:'Combined Science',u:'Physics Paper 1',n:6,t:'Energy Resources and the National Grid',k:'renewable transformer wind nuclear',st:3,href:'/lesson/science-aqa/physics-paper-1/6'},
-    {s:'History',u:'Conflict and Tension: East and West',n:5,t:'The Berlin Blockade, Airlift and the Birth of NATO',k:'Stalin 1948 coal Truman',st:2,href:'/lesson/history-aqa/conflict-tension-east-west/5'},
-    {s:'History',u:'Conflict and Tension: East and West',n:11,t:'The Berlin Wall',k:'Khrushchev Kennedy 1961 refugees',st:0,href:'/lesson/history-aqa/conflict-tension-east-west/11'},
-    {s:'History',u:'Britain: Health and the People',n:8,t:'A Revolution in Surgery: Anaesthetics and Antiseptics',k:'Lister carbolic chloroform Simpson',st:1,href:'/lesson/history-aqa/britain-health-people/8'},
-    {s:'History',u:'Britain: Health and the People',n:12,t:'The NHS and Modern Medicine',k:'Bevan 1948 penicillin Fleming',st:3,href:'/lesson/history-aqa/britain-health-people/12'},
-    {s:'English Literature',u:'A Christmas Carol',n:1,t:'Stave 1: Marley’s Ghost',k:'Scrooge Marley chains counting house',st:3,href:'/lesson/english-literature-aqa/a-christmas-carol/1'},
-    {s:'English Literature',u:'A Christmas Carol',n:4,t:'Stave 3: Poverty and Generosity',k:'Cratchit Tiny Tim Ignorance Want',st:1,href:'/lesson/english-literature-aqa/a-christmas-carol/4'},
-    {s:'English Literature',u:'Macbeth',n:3,t:'Act 2: The Murder of Duncan',k:'dagger Lady Macbeth blood sleep',st:2,href:'/lesson/english-literature-aqa/macbeth/3'},
-    {s:'Geography',u:'Paper 1',n:21,t:'Cold Environments: Characteristics, Adaptations and Biodiversity',k:'tundra permafrost polar bear',st:2,href:'/lesson/geography-aqa/paper-1/21'},
-    {s:'Geography',u:'Paper 1',n:9,t:'Coastal Landforms of Erosion',k:'headland cave arch stack stump',st:3,href:'/lesson/geography-aqa/paper-1/9'},
-    {s:'Religious Studies',u:'Christianity: Practices',n:2,t:'Worship and Prayer',k:'liturgical informal Lord’s Prayer',st:2,href:'/lesson/religious-studies-aqa/christianity-practices/2'},
-    {s:'French',u:'Theme 1: Identity and Culture',n:4,t:'Family and Relationships',k:'ma mère mon frère s’entendre',st:1,href:'/practice/french-aqa/identity-culture/4'},
-    {s:'Maths',u:'Algebra',n:7,t:'Solving Quadratics by Factorising',k:'brackets roots expand',st:0,href:'/practice/maths-aqa/algebra/7'}
-  ];
-  var STR=['Not yet','Developing','Getting there','Strong'];
   var inp=document.getElementById('finderin'),res=document.getElementById('finderres'),clr=document.getElementById('finderclear');
   if(!inp)return;
-  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-  function hl(s,q){var i=s.toLowerCase().indexOf(q);return i<0?esc(s):esc(s.slice(0,i))+'<mark>'+esc(s.slice(i,i+q.length))+'</mark>'+esc(s.slice(i+q.length));}
-  function score(l,q){var t=l.t.toLowerCase(),u=l.u.toLowerCase(),k=l.k.toLowerCase();
-    if(t.indexOf(q)>=0)return 3;if(u.indexOf(q)>=0)return 2;if(k.indexOf(q)>=0)return 1;
-    var w=q.split(' ').filter(Boolean);return w.length>1&&w.every(function(x){return (t+' '+u+' '+k).indexOf(x)>=0})?1:0;}
+  var IX=null, LOADING=null;
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function fold(s){return String(s||'').toLowerCase().replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/&amp;/g,'&').replace(/\s+/g,' ').trim();}
+  function hl(s,q){var f=fold(s),i=f.indexOf(q);return i<0?esc(s):esc(s.slice(0,i))+'<mark>'+esc(s.slice(i,i+q.length))+'</mark>'+esc(s.slice(i+q.length));}
+  function load(){
+    if(IX||LOADING)return LOADING;
+    var subs=(typeof SUBJECTS!=='undefined'?SUBJECTS:[]).filter(function(s){return s.sub&&s.units&&s.units.length;});
+    LOADING=Promise.all(subs.map(function(s){
+      var url=SUPA+'/rest/v1/lessons?select=lesson_number,title,glossary_terms,units!inner(slug,name,subjects!inner(slug,school_id))'
+        +'&units.subjects.slug=eq.'+encodeURIComponent(s.sub)+(window.svSchoolQ?svSchoolQ(s):'&units.subjects.school_id=is.null')
+        +'&units.slug=in.('+s.units.map(function(u){return encodeURIComponent(u[3]);}).join(',')+')&status=eq.live&order=lesson_number';
+      return fetch(url,{headers:{apikey:ANON}}).then(function(r){return r.json();}).then(function(rows){
+        return (rows||[]).map(function(l){
+          var uslug=l.units.slug, u=s.units.find(function(x){return x[3]===uslug;});
+          var practice=!!(window.svIsPracticeUnit&&svIsPracticeUnit(s,uslug));
+          var terms=(l.glossary_terms||[]).map(function(g){return g&&(g.term||g.name)||'';}).filter(Boolean);
+          return {s:s,uslug:uslug,uname:(u&&u[0])||l.units.name||uslug,n:l.lesson_number,t:l.title||('Lesson '+l.lesson_number),
+                  terms:terms,k:fold(terms.join(' | ')),ft:fold(l.title),fu:fold((u&&u[0])||l.units.name||''),practice:practice,
+                  href:'/'+(practice?'practice':'lesson')+'/'+s.sub+'/'+uslug+'/'+l.lesson_number};
+        });
+      }).catch(function(){return [];});
+    })).then(function(parts){IX=[].concat.apply([],parts);return IX;});
+    return LOADING;
+  }
+  function strength(l){
+    if(!window.svStrength)return null;
+    var r=svStrength.lesson(l.s,l.uslug,l.n);
+    if(!r||(r.s===0&&!r.reps&&!r.prior))return {w:'Not started',c:'s0'};
+    var b=svStrength.band(r.s); return {w:b==='g'?'Secure':b==='a'?'Developing':'Emerging',c:b==='g'?'s3':b==='a'?'s2':'s1'};
+  }
+  function score(l,q){
+    if(l.ft.indexOf(q)>=0)return l.ft.indexOf(q)===0?4:3;
+    if(l.fu.indexOf(q)>=0)return 2;
+    if(l.k.indexOf(q)>=0)return 1.5;
+    var w=q.split(' ').filter(function(x){return x.length>1;});
+    if(w.length>1&&w.every(function(x){return (l.ft+' '+l.fu+' '+l.k).indexOf(x)>=0;}))return 1;
+    return 0;
+  }
+  function termHit(l,q){var t=l.terms.find(function(x){return fold(x).indexOf(q)>=0;});return t||null;}
   function render(q){
-    q=q.trim().toLowerCase();
-    clr.hidden=!q;
+    q=fold(q); clr.hidden=!q;
     if(q.length<2){res.hidden=true;res.innerHTML='';return;}
     res.hidden=false;
-    var hits=IX.map(function(l){return {l:l,sc:score(l,q)}}).filter(function(h){return h.sc>0}).sort(function(a,b){return b.sc-a.sc||a.l.st-b.l.st});
+    if(!IX){res.innerHTML='<div class="fnone">Looking through your subjects…</div>';load().then(function(){render(inp.value);});return;}
+    var hits=IX.map(function(l){return {l:l,sc:score(l,q)};}).filter(function(h){return h.sc>0;})
+      .sort(function(a,b){return b.sc-a.sc||a.l.s.name.localeCompare(b.l.s.name)||a.l.n-b.l.n;}).slice(0,12);
     var h='';
-    if(!hits.length){h='<div class="fnone">Nothing in your subjects is called that. Ask below and StudyVault will work out what you mean.</div>';}
+    if(!hits.length)h='<div class="fnone">Nothing in your subjects is called that. Ask below and StudyVault will work out what you mean.</div>';
     var groups={},order=[];
-    hits.forEach(function(x){if(!groups[x.l.s]){groups[x.l.s]=[];order.push(x.l.s)}groups[x.l.s].push(x.l)});
-    order.forEach(function(s){
-      h+='<div class="fgroup"><i></i>'+esc(s)+'</div>';
-      groups[s].forEach(function(l,i){
-        h+='<div class="frow'+(s===order[0]&&i===0?' hot':'')+'" data-href="'+esc(l.href)+'"><div class="ft"><b>'+hl(l.t,q)+'</b><small>'+hl(l.u,q)+' · Lesson '+l.n+'</small></div>'+
-           '<span class="fstr s'+l.st+'">'+STR[l.st]+'</span>'+
-           '<span class="facts"><button type="button" class="pri" data-go="'+esc(l.href)+'">Read</button><button type="button" data-go="'+esc(l.href)+'?cards=1">Cards</button><button type="button" data-go="'+esc(l.href)+'?check=1">Quick check</button></span></div>';
+    hits.forEach(function(x){var k=x.l.s.name||x.l.s.sub;if(!groups[k]){groups[k]=[];order.push([k,x.l.s.c]);}groups[k].push(x.l);});
+    order.forEach(function(g,gi){
+      h+='<div class="fgroup"><i style="background:'+esc(g[1]||'#b9a98c')+'"></i>'+esc(g[0])+'</div>';
+      groups[g[0]].forEach(function(l,i){
+        var st=strength(l), term=l.ft.indexOf(q)<0&&l.fu.indexOf(q)<0?termHit(l,q):null;
+        h+='<div class="frow'+(gi===0&&i===0?' hot':'')+'" data-href="'+esc(l.href)+'"><div class="ft"><b>'+hl(l.t,q)+'</b><small>'+hl(l.uname,q)+' · Lesson '+l.n+(term?' · covers <mark>'+esc(term)+'</mark>':'')+'</small></div>'
+          +(st?'<span class="fstr '+st.c+'">'+st.w+'</span>':'')
+          +'<span class="facts"><button type="button" class="pri" data-go="'+esc(l.href)+'">'+(l.practice?'Practise':'Read')+'</button>'
+          +(l.practice?'':'<button type="button" data-go="'+esc(l.href)+'?open=cards">Cards</button><button type="button" data-go="'+esc(l.href)+'?open=quiz">Quick check</button>')+'</span></div>';
       });
     });
     h+='<div class="fask"><span>Not what you meant? Say it your own way: “the bit where Scrooge sees his own grave”.</span><button type="button" id="finderask">Ask StudyVault</button></div>';
     res.innerHTML=h;
   }
-  inp.addEventListener('input',function(){render(inp.value)});
-  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){var hot=res.querySelector('.frow.hot');if(hot)nav(hot.getAttribute('data-href'));}if(e.key==='Escape'){inp.value='';render('');}});
+  inp.addEventListener('focus',function(){load();});
+  inp.addEventListener('input',function(){render(inp.value);});
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();var hot=res.querySelector('.frow.hot');if(hot)nav(hot.getAttribute('data-href'));}if(e.key==='Escape'){inp.value='';render('');}});
   clr.addEventListener('click',function(){inp.value='';render('');inp.focus();});
   res.addEventListener('click',function(e){var b=e.target.closest('[data-go]');if(b){e.stopPropagation();nav(b.getAttribute('data-go'));return;}
     if(e.target.id==='finderask'){e.target.textContent='Thinking…';e.target.disabled=true;return;}
