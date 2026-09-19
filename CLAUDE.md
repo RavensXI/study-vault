@@ -58,7 +58,7 @@ content never ports to free tier (same spec = fresh build).**
 ## What every subject has
 
 Content, practice questions (6/lesson), knowledge checks (5/lesson),
-flashcards (12–15 curated question cards + typed-recall cards a lesson, curated to a deck of ≤14 — see the typed-recall branch), TTS narration (Azure, MP3s on R2), hero images
+typed flashcards (a deck of ≤14 judged by Jev — live 19 Sep 2026; `api/flashcards/judge.js`, curation `scripts/flashcards/curate_recall_cards.py`), TTS narration (Azure, MP3s on R2), hero images
 (photographs — vision-gated pipeline), exam/revision technique guides,
 curated related media (URL-audited — see YouTube audit below).
 
