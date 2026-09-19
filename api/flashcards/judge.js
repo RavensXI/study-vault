@@ -14,8 +14,8 @@ const { ask, noul, score, configured } = require('../_lib/jev');
  *              which ones were hit
  *
  * POST { kind, front, answer, typed, items? }   ->  { verdict, p, completeness, items? }
- *   verdict: right | partly | wrong    (right >= 0.7 and completeness >= 1.5,
- *            partly when completeness >= 0.9 or 0.45 <= p < 0.7, else wrong)
+ *   verdict: right | partly | wrong    (right when p >= 0.85, or p >= 0.7 and completeness >= 1.5;
+ *            partly when p >= 0.45 or completeness >= 0.9; else wrong)
  */
 const RECENT = new Map();            // ip -> [timestamps] ; a soft per-IP cap, like ai-mark
 const WINDOW_MS = 60 * 1000, MAX_PER_WINDOW = 60;
@@ -74,7 +74,9 @@ module.exports = async function handler(req, res) {
               verdict: n === items.length ? 'right' : (n > 0 ? 'partly' : 'wrong') };
     } else {
       const p = a.correct ? a.correct.noul : 0, c = a.completeness ? a.completeness.score : 0;
-      const verdict = (p >= 0.7 && c >= 1.5) ? 'right' : ((c >= 0.9 || (p >= 0.45 && p < 0.7)) ? 'partly' : 'wrong');
+      // right when the judge is sure the key fact or link is there (a short answer in the
+      // student's own words is still right), or fairly sure and the answer is complete
+      const verdict = (p >= 0.85 || (p >= 0.7 && c >= 1.5)) ? 'right' : ((p >= 0.45 || c >= 0.9) ? 'partly' : 'wrong');
       out = { kind, p: p, completeness: c, verdict: verdict };
     }
     out.usage = r.usage ? r.usage.input_tokens : undefined;
