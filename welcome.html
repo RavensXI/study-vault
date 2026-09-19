@@ -2541,7 +2541,17 @@ if(sibtn) sibtn.onclick=async()=>{
          silently destroyed a shelf the student had just built — and rebuilding
          did not help, because the next sign-in wiped it again. Union the
          subjects; fill board and topic gaps from whichever side has them. */
-      const sv=u&&u.user_metadata&&u.user_metadata.sv_welcome;
+      /* the account's shelf is the SYNCED copy (user_state, what the other devices wrote),
+         not the profile snapshot, which is only an old fallback and once chopped a shelf
+         down to four subjects (19 Sep 2026) */
+      let sv=null;
+      try{
+        const tok=res.data&&res.data.session&&res.data.session.access_token;
+        const rr=await fetch('https://baipckgywpnwapobwtsy.supabase.co/rest/v1/user_state?select=value&key=eq.sv-welcome',{headers:{apikey:'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2',Authorization:'Bearer '+tok}});
+        const rows=await rr.json(); const raw=rows&&rows[0]&&rows[0].value&&rows[0].value.raw;
+        if(raw) sv=JSON.parse(raw);
+      }catch(e){}
+      if(!sv) sv=u&&u.user_metadata&&u.user_metadata.sv_welcome;
       try{
         let loc={}; try{ loc=JSON.parse(localStorage.getItem('sv-welcome')||'{}'); }catch(e){}
         const acct=(sv&&Array.isArray(sv.picked))?sv:{};
