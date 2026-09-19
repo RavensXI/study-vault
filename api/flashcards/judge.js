@@ -37,7 +37,7 @@ module.exports = async function handler(req, res) {
   if (limited(ip)) return res.status(429).json({ error: 'Slow down a little', fallback: true });
 
   const b = req.body || {};
-  const kind = ['recall', 'term', 'definition', 'cloze', 'list'].includes(b.kind) ? b.kind : 'recall';
+  const kind = ['recall', 'term', 'definition', 'cloze', 'list', 'explain'].includes(b.kind) ? b.kind : 'recall';
   const front = clean(b.front, 600), answer = clean(b.answer, 800), typed = clean(b.typed, 600);
   const items = Array.isArray(b.items) ? b.items.map(x => clean(x, 160)).filter(Boolean).slice(0, 10) : [];
   if (!front || !answer || !typed) return res.status(400).json({ error: 'front, answer and typed are required' });
@@ -54,7 +54,9 @@ module.exports = async function handler(req, res) {
         ? 'The student\'s recall gives the meaning of the term as the model answer does, in any wording; a vaguer but correct meaning still counts'
         : kind === 'cloze'
           ? 'The student\'s recall supplies the missing words of the sentence or an equivalent (a synonym, a different form of the number); a different fact does not'
-          : 'The student\'s typed recall gives the same fact as the model answer; different wording, spelling mistakes and missing minor words are fine';
+          : kind === 'explain'
+            ? 'The student\'s explanation gives the same cause or mechanism as the model answer, in their own words; a shorter explanation that names the key link still counts, a description without the why or how does not'
+            : 'The student\'s typed recall gives the same fact as the model answer; different wording, spelling mistakes and missing minor words are fine';
     questions.correct = noul(rule);
     questions.completeness = score('How much of the model answer the student\'s recall covers', ['none of it', 'part of it', 'all of it']);
   }
