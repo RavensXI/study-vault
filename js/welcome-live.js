@@ -64,14 +64,12 @@
   var currentKey=null, armed=false, lastToggled=null, ready=false;
   /* `picked` is a top-level const in the page script: global lexical scope, not a window property */
   function pickedKeys(){ try{ return (typeof picked!=='undefined' ? picked : []).slice(); }catch(e){ return []; } }
-  /* the subject the visitor touched LAST drives the tablet (ticked on = show it);
-     otherwise their latest non-core pick; the four pre-ticked cores never do
-     on their own, so the default stays until they choose. */
-  var CORE={maths:1,lang:1,lit:1,science:1};
+  /* the subject the visitor ticks in THIS visit drives the tablet; until then the default
+     stays, whatever picks their browser remembers (Tom, 19 Sep 2026: the resting state is
+     the point of the picture) */
   function lessonKey(){
     var ks=pickedKeys();
     if(lastToggled && ks.indexOf(lastToggled)>=0 && LESSONS[lastToggled]) return lastToggled;
-    for(var i=ks.length-1;i>=0;i--){ if(!CORE[ks[i]] && LESSONS[ks[i]]) return ks[i]; }
     return DEFAULT;
   }
   function ordinal(n){ return ['one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen'][n-1]||String(n); }
