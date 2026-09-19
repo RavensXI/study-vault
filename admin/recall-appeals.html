@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recall appeals - StudyVault Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/brand.css">
+  <script src="/js/auth-gate.js" data-role="admin"></script>
+  <style>
+    .sq-layout { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .sq-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
+    .sq-header h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; margin: 0; }
+    .sq-controls select { padding: 0.45rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.82rem; font-family: inherit; }
+    .sq-intro { color: var(--text-muted); font-size: 0.88rem; margin: 0 0 1.25rem; max-width: 760px; line-height: 1.5; }
+    .sq-counts { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .sq-count { background: #fff; border-radius: 10px; padding: 0.6rem 1rem; box-shadow: 0 1px 6px rgba(0,0,0,0.05); font-size: 0.8rem; color: var(--text-muted); }
+    .sq-count strong { display: block; font-size: 1.3rem; color: var(--text-primary); font-family: 'Source Serif 4', serif; line-height: 1.2; }
+    .sq-card { background: #fff; border-radius: 14px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); margin-bottom: 1rem; overflow: hidden; }
+    .sq-card-header { padding: 0.85rem 1.15rem; border-bottom: 1px solid #f0ede8; display: flex; align-items: baseline; gap: 0.85rem; flex-wrap: wrap; }
+    .sq-kind { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+    .sq-n { margin-left: auto; font-size: 0.8rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .sq-front { font-family: 'Source Serif 4', serif; font-size: 1.05rem; font-weight: 600; color: var(--text-primary); }
+    .sq-card-body { padding: 1rem 1.15rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 760px) { .sq-card-body { grid-template-columns: 1fr; } }
+    .sq-col h4 { margin: 0 0 0.4rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+    .sq-text { font-size: 0.92rem; line-height: 1.55; color: var(--text-primary); }
+    .sq-typed { margin: 0; padding-left: 1.1rem; font-size: 0.9rem; line-height: 1.5; color: var(--text-primary); }
+    .sq-typed li { margin: 0.15rem 0; }
+    .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+    .loading-msg { text-align: center; padding: 2rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">Study<b>Vault</b></span>
+        <span class="header-unit-label">Recall appeals</span>
+      </a>
+      <nav class="admin-nav" id="header-nav" role="navigation" aria-label="Admin">
+        <a href="/" class="admin-nav-home">Home</a>
+        <div class="admin-nav-group">
+          <button type="button" class="admin-nav-trigger" data-group="qa" aria-haspopup="menu" aria-expanded="false">QA &#9662;</button>
+          <div class="admin-nav-menu" role="menu">
+            <a href="/admin/review">Review</a>
+            <a href="/admin/practice-qa">Practice QA</a>
+            <a href="/admin/simplify-review">Simplify QA</a>
+            <a href="/admin/recall-appeals">Recall appeals</a>
+            <a href="/admin/images">Images</a>
+          </div>
+        </div>
+      </nav>
+      <script src="/js/admin-nav.js" defer></script>
+    </div>
+  </header>
+
+  <div class="sq-layout">
+    <div class="sq-header">
+      <h1>Recall appeals</h1>
+      <div class="sq-controls">
+        <select id="kind-filter" aria-label="Card kind">
+          <option value="all">All card kinds</option>
+          <option value="recall">Question</option>
+          <option value="term">Who or what</option>
+          <option value="definition">Name it</option>
+          <option value="cloze">Fill the gap</option>
+        </select>
+      </div>
+    </div>
+    <p class="sq-intro">When a student types an answer to a flashcard, the judge marks it right, nearly or not quite. A student who presses <b>I think I was right?</b> on a not-quite card lands here, with what they typed. Cards with the most appeals first. Nothing here says who appealed. If the typed answers look right, the judge's rule for that card kind needs loosening; if they look wrong, the card is doing its job.</p>
+    <div id="counts" class="sq-counts"></div>
+    <div id="content"><div class="loading-msg">Loading...</div></div>
+  </div>
+
+  <script>
+    var kindFilter = document.getElementById('kind-filter');
+    var contentEl = document.getElementById('content');
+    var countsEl = document.getElementById('counts');
+    function authHeaders() {
+      try {
+        var session = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth')) || {};
+        return { 'Content-Type': 'application/json', 'X-Admin-Password': session.pw || '' };
+      } catch (e) { return { 'Content-Type': 'application/json' }; }
+    }
+    function escHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+    var KIND = { recall: 'Question', term: 'Who or what', definition: 'Name it', cloze: 'Fill the gap', list: 'Name them all' };
+    function when(t) { if (!t) return ''; try { return new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); } catch (e) { return ''; } }
+
+    async function load() {
+      contentEl.innerHTML = '<div class="loading-msg">Loading...</div>';
+      try {
+        var resp = await fetch('/api/admin/recall-appeals?kind=' + encodeURIComponent(kindFilter.value), { headers: authHeaders() });
+        if (!resp.ok) { contentEl.innerHTML = '<div class="loading-msg">Failed to load (' + resp.status + ')</div>'; return; }
+        var json = await resp.json();
+        countsEl.innerHTML = '<div class="sq-count">Appeals<strong>' + (json.total || 0) + '</strong></div>'
+          + '<div class="sq-count">Cards appealed<strong>' + (json.cards || 0) + '</strong></div>'
+          + '<div class="sq-count">Students who appealed<strong>' + (json.students_with_appeals || 0) + '</strong></div>';
+        var groups = json.groups || [];
+        if (!groups.length) { contentEl.innerHTML = '<div class="empty-state">No appeals yet. That is either good news or nobody has typed an answer on this build.</div>'; return; }
+        contentEl.innerHTML = groups.map(function (g) {
+          var verdicts = Object.keys(g.verdicts || {}).map(function (k) { return k + ' ' + g.verdicts[k]; }).join(', ');
+          return '<div class="sq-card">'
+            + '<div class="sq-card-header"><span class="sq-kind">' + escHtml(KIND[g.kind] || g.kind) + '</span><span class="sq-front">' + escHtml(g.front) + '</span><span class="sq-n">' + g.n + (g.n === 1 ? ' appeal' : ' appeals') + (g.last ? ' &middot; last ' + when(g.last) : '') + '</span></div>'
+            + '<div class="sq-card-body">'
+            + '<div class="sq-col"><h4>The card\'s answer</h4><div class="sq-text">' + escHtml(g.answer) + '</div><h4 style="margin-top:0.8rem">Judge said</h4><div class="sq-text">' + escHtml(verdicts) + '</div></div>'
+            + '<div class="sq-col"><h4>What students typed</h4><ul class="sq-typed">' + (g.typed || []).map(function (t) { return '<li>' + escHtml(t) + '</li>'; }).join('') + '</ul></div>'
+            + '</div></div>';
+        }).join('');
+      } catch (e) { contentEl.innerHTML = '<div class="loading-msg">Network error</div>'; }
+    }
+    kindFilter.addEventListener('change', load);
+    load();
+  </script>
+</body>
+</html>

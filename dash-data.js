@@ -425,7 +425,7 @@ function svUnitMedia(SUBJECTS, cb) {
         var deck = [], pods = [];
         (rows || []).forEach(function (row) {
           if (row.lesson_number <= s.next) (row.flashcard_questions || []).forEach(function (f) {
-            if (f && f.q && f.a) deck.push({ slug: s.su.slug, name: s.su.name, q: f.q, a: f.a,
+            if (f && f.q && f.a && !f.off) deck.push({ slug: s.su.slug, name: s.su.name, q: f.q, a: f.a,
               sub: s.su.sub, unit: s.unit, n: row.lesson_number });
           });
           var pc = (row.related_media || []).find(function (m) { return m.category === 'Podcasts'; });
@@ -476,7 +476,8 @@ function svFlashMark(key, correct) {
   var today = new Date().toISOString().slice(0, 10);
   var cp = prog.cards[key] || (prog.cards[key] = { box: 1, nextReview: today, attempts: 0, correct: 0 });
   cp.attempts++;
-  if (correct) { cp.correct++; cp.box = Math.min(cp.box + 1, 5); } else { cp.box = 1; }
+  if (correct === 'partly') { /* the box holds: judged as part of the answer, seen again on its current interval */ }
+  else if (correct) { cp.correct++; cp.box = Math.min(cp.box + 1, 5); } else { cp.box = 1; }
   var d = new Date(); d.setDate(d.getDate() + FC_BOX_INTERVALS[cp.box]);
   cp.nextReview = d.toISOString().slice(0, 10);
   var yest = new Date(); yest.setDate(yest.getDate() - 1); yest = yest.toISOString().slice(0, 10);
@@ -531,23 +532,23 @@ function svFlashDeck(SUBJECTS, cb, opts) {
   var jobs = [];
   if (dueLids.length) {
     var idl = dueLids.map(function (x) { return '"' + x + '"'; }).join(',');
-    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,name,subjects!inner(slug,school_id))&id=in.(' + idl + ')', { headers: { apikey: ANON } })
+    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,recall_cards,units!inner(slug,name,subjects!inner(slug,school_id))&id=in.(' + idl + ')', { headers: { apikey: ANON } })
       .then(function (r) { return r.json(); }).then(function (rows) { return { kind: 'due', rows: rows }; }).catch(function () { return { kind: 'due', rows: [] }; }));
   }
   newSrcs.forEach(function (s) {
-    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,name,subjects!inner(slug,school_id))&units.slug=eq.' + encodeURIComponent(s.unit) + '&units.subjects.slug=eq.' + encodeURIComponent(s.su.sub) + svSchoolQ(s.su) + '&lesson_number=lte.' + s.next, { headers: { apikey: ANON } })
+    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,recall_cards,units!inner(slug,name,subjects!inner(slug,school_id))&units.slug=eq.' + encodeURIComponent(s.unit) + '&units.subjects.slug=eq.' + encodeURIComponent(s.su.sub) + svSchoolQ(s.su) + '&lesson_number=lte.' + s.next, { headers: { apikey: ANON } })
       .then(function (r) { return r.json(); }).then(function (rows) { return { kind: 'new', su: s.su, rows: rows }; }).catch(function () { return { kind: 'new', su: s.su, rows: [] }; }));
   });
   Object.keys(weakSrcs).forEach(function (k) { var w = weakSrcs[k];
-    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,name,subjects!inner(slug,school_id))&units.slug=eq.' + encodeURIComponent(w.unit) + '&units.subjects.slug=eq.' + encodeURIComponent(w.su.sub) + svSchoolQ(w.su) + '&lesson_number=in.(' + w.ns.join(',') + ')', { headers: { apikey: ANON } })
+    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,recall_cards,units!inner(slug,name,subjects!inner(slug,school_id))&units.slug=eq.' + encodeURIComponent(w.unit) + '&units.subjects.slug=eq.' + encodeURIComponent(w.su.sub) + svSchoolQ(w.su) + '&lesson_number=in.(' + w.ns.join(',') + ')', { headers: { apikey: ANON } })
       .then(function (r) { return r.json(); }).then(function (rows) { return { kind: 'weak', su: w.su, rows: rows }; }).catch(function () { return { kind: 'weak', su: w.su, rows: [] }; }));
   });
   if (!jobs.length) { cb([]); return; }
   Promise.all(jobs).then(function (results) {
     var dueCards = [], newCards = [], seen = {};
-    function mk(row, su, i, f) {
-      var key = row.id + ':q' + i;
-      return { key: key, q: f.q || f.question, a: f.a || f.answer, slug: su ? su.slug : null,
+    function mk(row, su, i, f, kind) {
+      var key = row.id + ':' + (kind ? 'r' : 'q') + i;
+      return { key: key, q: f.q || f.question || f.front, a: f.a || f.answer, kind: kind || 'recall', items: f.items || null, slug: su ? su.slug : null,
                name: su ? su.name : '', sub: su ? su.sub : null, unit: row.units ? row.units.slug : null,
                uname: row.units ? (row.units.name || '') : '',
                n: row.lesson_number, level: prog.cards[key] ? svFlashLevel(prog.cards[key].box) : 'Emerging' };
@@ -556,12 +557,19 @@ function svFlashDeck(SUBJECTS, cb, opts) {
       (res.rows || []).forEach(function (row) {
         var sub = (row.units && row.units.subjects) ? row.units.subjects.slug : (res.su ? res.su.sub : null);
         var su = bySub[sub] || res.su;
-        (row.flashcard_questions || []).forEach(function (f, i) {
-          if (!f || !(f.q || f.question) || !(f.a || f.answer)) return;
-          var key = row.id + ':q' + i; if (seen[key] || EX[key]) return;
-          if (res.kind === 'due') { if (prog.cards[key] && (prog.cards[key].nextReview || '9999') <= today) { seen[key] = 1; dueCards.push(mk(row, su, i, f)); } }
-          else if (res.kind === 'weak') { seen[key] = 1; newCards.push(mk(row, su, i, f)); }
-          else if (!prog.cards[key]) { seen[key] = 1; newCards.push(mk(row, su, i, f)); }
+        /* the curated question deck, then the typed-recall cards built from the lesson's own
+           glossary and sentences (term, definition, fill the gap) */
+        var pools2 = [[row.flashcard_questions || [], null], [Array.isArray(row.recall_cards) ? row.recall_cards : [], 'r']];
+        pools2.forEach(function (pair) {
+          pair[0].forEach(function (f, i) {
+            if (!f || f.off) return;
+            var kind = pair[1] ? (f.kind || 'recall') : null;
+            if (!(f.q || f.question || f.front) || !(f.a || f.answer)) return;
+            var key = row.id + ':' + (kind ? 'r' : 'q') + i; if (seen[key] || EX[key]) return;
+            if (res.kind === 'due') { if (prog.cards[key] && (prog.cards[key].nextReview || '9999') <= today) { seen[key] = 1; dueCards.push(mk(row, su, i, f, kind)); } }
+            else if (res.kind === 'weak') { seen[key] = 1; newCards.push(mk(row, su, i, f, kind)); }
+            else if (!prog.cards[key]) { seen[key] = 1; newCards.push(mk(row, su, i, f, kind)); }
+          });
         });
       });
     });

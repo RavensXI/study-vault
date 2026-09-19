@@ -3807,6 +3807,53 @@ body.dark-mode .sidebar-flashcard-link:hover {
   color: var(--text-muted, #a09a93);
 }
 
+/* Typed recall: the answer box on the front, the verdict on the back */
+.fc-card.typed .fc-card-front { justify-content: flex-start; padding-top: 3rem; cursor: default; }
+.fc-typed { width: 100%; max-width: 380px; margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.fc-typed[hidden] { display: none; }
+.fc-typed textarea {
+  width: 100%; resize: none; font-family: 'Inter', sans-serif; font-size: 0.95rem; line-height: 1.45;
+  padding: 0.6rem 0.75rem; border: 1px solid var(--border-light, #e6e0d8); border-radius: 8px;
+  background: var(--bg-body, #faf8f5); color: var(--text-primary, #2d2a26);
+}
+.fc-typed textarea:focus { outline: none; border-color: var(--accent, #2d2a26); }
+.fc-typed textarea:disabled { opacity: 0.6; }
+.fc-typed-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.fc-check-btn {
+  padding: 0.55rem 1.25rem; border: none; border-radius: 8px; background: var(--accent, #2d2a26); color: #fff;
+  font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 600; cursor: pointer;
+}
+.fc-check-btn:disabled { opacity: 0.55; cursor: wait; }
+.fc-showme { background: none; border: none; padding: 0.3em 0; font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600; color: var(--text-muted, #a09a93); cursor: pointer; }
+.fc-showme:hover { color: var(--text-primary, #2d2a26); }
+.fc-gap { display: inline-block; min-width: 3.2em; border-bottom: 2px solid var(--accent, #2d2a26); margin: 0 0.15em; }
+.fc-card.typed .fc-card-back { justify-content: flex-start; padding-top: 3rem; }
+.fc-verdict { width: 100%; max-width: 380px; text-align: left; font-family: 'Inter', sans-serif; font-size: 0.9rem; line-height: 1.45; padding: 0.6rem 0.8rem; border-radius: 8px; margin-bottom: 0.8rem; }
+.fc-verdict[hidden] { display: none; }
+.fc-verdict strong { font-weight: 700; }
+.fc-verdict--right { background: #f0fdf4; color: #166534; }
+.fc-verdict--partly { background: #fef9c3; color: #713f12; }
+.fc-verdict--wrong { background: #fef2f2; color: #991b1b; }
+.fc-verdict--off { background: var(--border-lighter, #f0ece6); color: var(--text-secondary, #6b6560); }
+/* a right answer: the tick lands on the front, the answer under it, then the deck moves on */
+.fc-tick { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; padding: 2rem 1.5rem; background: var(--bg-card, #fff); border-radius: var(--radius-sm, 8px); cursor: pointer; }
+.fc-tick[hidden] { display: none; }
+.fc-tick-mark { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: #16a34a; color: #fff; font-size: 1.8rem; font-weight: 700; animation: fc-tick-in 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+.fc-tick-answer { font-family: 'Source Serif 4', Georgia, serif; font-size: 1rem; color: var(--text-secondary, #6b6560); text-align: center; max-width: 380px; }
+@keyframes fc-tick-in { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .fc-tick-mark { animation: none; } }
+.fc-answer-btn--next { background: var(--accent, #2d2a26); color: #fff; border: 1px solid var(--accent, #2d2a26); }
+.fc-answer-btn[hidden] { display: none; }
+.fc-appeal { margin-top: 0.9rem; background: none; border: none; padding: 0.3em 0; font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; color: var(--text-muted, #a09a93); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.fc-appeal[hidden] { display: none; }
+.fc-appeal:disabled { text-decoration: none; cursor: default; }
+.fc-appeal:hover { color: var(--text-primary, #2d2a26); }
+.fc-typed-echo { width: 100%; max-width: 380px; text-align: left; font-family: 'Inter', sans-serif; font-size: 0.8rem; color: var(--text-muted, #a09a93); margin-bottom: 0.6rem; }
+.fc-typed-echo[hidden] { display: none; }
+body.dark-mode .fc-verdict--right { background: #163b26; color: #bbf7d0; }
+body.dark-mode .fc-verdict--partly { background: #3d3410; color: #fde68a; }
+body.dark-mode .fc-verdict--wrong { background: #3f1a1a; color: #fecaca; }
+
 /* Speaker button */
 .fc-modal-speak {
   position: absolute;

@@ -17,7 +17,7 @@ from typesafe_sdk import TypeSafeClient, Choice, Score, Noul, RetryPolicy  # noq
 HERE = os.path.dirname(os.path.abspath(__file__))
 LEDGER = os.path.join(HERE, "_ledger.jsonl")
 PRICE_PER_M = 0.042
-BUDGET_USD = 3.0
+BUDGET_USD = 12.0     # topped up 19 Sep 2026
 _lock = threading.Lock()
 
 def _key():

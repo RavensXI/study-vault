@@ -32,7 +32,7 @@
   var KEYS = [
     // identity of the student's course
     'studyvault-subjects', 'studyvault-free-prefs', 'sv-welcome',
-    'studyvault-exam-year', 'studyvault-tiers', 'sv-school', 'sv-school-carried', 'sv-class-subjects',   // class-derived school routing + progress carry-over (js/school-session.js)
+    'studyvault-exam-year', 'studyvault-tiers', 'sv-school', 'sv-school-carried', 'sv-class-subjects', 'sv-recall-appeals',   // class-derived school routing + progress carry-over (js/school-session.js)
     // progress and logs (dict-like: deep-merged)
     'studyvault-visited', 'sv-lessons-done', 'sv-lessons-when',
     'sv-kc-log', 'sv-practice-log', 'sv-flash-log', 'sv-flash-day',

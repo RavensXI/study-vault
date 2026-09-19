@@ -417,7 +417,7 @@
   @media (max-height:780px){ .signoff{display:none} }
 
   /* ---- flashcards modal (same deck as the desk) ---- */
-  .fcmodal{position:fixed;inset:0;background:rgba(38,30,18,.45);display:none;place-items:center;z-index:60}
+  .fcmodal{position:fixed;inset:0;background:rgba(38,30,18,.45);display:none;place-items:center;align-content:center;justify-items:center;gap:14px;z-index:60}
   body.fc-open .top,body.fc-open .wrap,body.fc-open .savebar{filter:blur(14px)}
   .bigcard .face.front::after{content:'⟳';position:absolute;right:.9rem;bottom:.7rem;font-size:1.1rem;color:#b9ad98;line-height:1}
   .fcmodal.open{display:grid}
@@ -447,6 +447,39 @@
   .bigcard .face.back .qq::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:0;
     background:var(--anchor);opacity:.35;border-radius:1px}
   .bigcard.showa .face.back .qq::after{width:100%;transition:width var(--read-duration,2s) linear}
+  /* typed recall: the answer box sits under the card; the verdict lives on the back face */
+  .fctyped{width:min(92vw,560px);margin-top:14px;display:flex;flex-direction:column;gap:8px}
+  .fctyped[hidden],.fcmodal.showa .fctyped{display:none}
+  .fctyped textarea{width:100%;resize:none;font-family:var(--head);font-size:1rem;line-height:1.45;padding:.65rem .8rem;border:1px solid #d5c9b3;border-radius:8px;background:#fffdf8;color:#26231e}
+  .fctyped textarea:focus{outline:none;border-color:var(--anchor)}
+  .fctyped textarea:disabled{opacity:.6}
+  .fctyped .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .fctyped .check{font-family:var(--head);font-weight:700;font-size:.92rem;color:#fff;background:var(--anchor);border:none;border-radius:8px;padding:.6rem 1.4rem;cursor:pointer}
+  .fctyped .check:disabled{opacity:.55;cursor:wait}
+  .fctyped .show{font-family:var(--head);font-weight:600;font-size:.85rem;color:#f1e8d8;background:none;border:none;cursor:pointer;padding:.3rem 0}
+  .fctyped .show:hover{text-decoration:underline}
+  .fctick{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:2rem;background:#fffdf8;border-radius:8px}
+  .fctick[hidden]{display:none}
+  .fctick .mark{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:#2f7d57;color:#fff;font-size:2rem;font-weight:700;animation:fctickin .35s var(--ease)}
+  .fctick .ans{font-family:var(--hand);font-size:clamp(1.2rem,3.4vw,1.8rem);color:#3e3a31;text-align:center;line-height:1.3;max-width:100%}
+  @keyframes fctickin{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+  .fcbtns .fb.next{background:var(--anchor);color:#fff;border-color:var(--anchor)}
+  .fcbtns .fb[hidden]{display:none}
+  .fcappeal{font-family:var(--head);font-size:.8rem;font-weight:600;color:var(--mut);text-decoration:underline;text-underline-offset:3px;cursor:pointer;margin-top:.4rem}
+  .fcappeal[hidden]{display:none}
+  .fcappeal.done{text-decoration:none;cursor:default}
+  .fcverdict{font-family:var(--head);font-size:.92rem;line-height:1.4;padding:.5rem .8rem;border-radius:8px;max-width:100%;text-align:left}
+  .fcverdict[hidden]{display:none}
+  .fcverdict b{font-weight:700}
+  .fcverdict.right{background:#edf6f0;color:#1e5b3e}.fcverdict.partly{background:#fbf3d6;color:#6b4e08}.fcverdict.wrong{background:#fbeee9;color:#9a3a25}.fcverdict.off{background:#efe9df;color:var(--sec)}
+  .fctypedecho{font-family:var(--head);font-size:.8rem;color:var(--mut);max-width:100%;text-align:left}
+  .fctypedecho[hidden]{display:none}
+  .bigcard .qq .gap{display:inline-block;min-width:2.6em;border-bottom:2px solid #3e3a31;margin:0 .1em}
+  /* a judged card carries the verdict, what was typed and the answer: taller, quieter type, buttons in view */
+  .bigcard.judged{aspect-ratio:8/6.2}
+  .bigcard.judged .face.back{justify-content:flex-start;gap:10px;padding-top:1.4rem}
+  .bigcard.judged .face.back .qq{font-size:clamp(1.15rem,3.4vw,1.8rem)!important;line-height:1.35}
+  .bigcard.judged .face.back .fcbtns{margin-top:auto}
   .fcmeta{position:fixed;left:0;right:0;bottom:26px;color:#f1e8d8;font-size:.85rem;
     display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 16px}
   .fcmeta .hint{opacity:.82;font-style:italic}
@@ -682,12 +715,17 @@
   <button class="x" id="closefc" aria-label="Close">×</button>
   <button class="bigcard" id="bigcard" aria-label="Flip the card">
     <span class="flip">
-      <span class="face front"><span class="fcmark" id="fcMarkF"></span><span class="tag" id="bqTag"></span><span class="utag" id="bqUnit"></span><span class="qq" id="bqQ"></span></span>
-      <span class="face back"><span class="fcmark" id="fcMarkB"></span><span class="tag" id="baTag"></span><span class="qq" id="baA"></span>
-        <span class="fcbtns"><span class="fb no" id="fbno" role="button" tabindex="0">✗ Not yet</span><span class="fb ok" id="fbok" role="button" tabindex="0">✓ Got it</span></span>
+      <span class="face front"><span class="fcmark" id="fcMarkF"></span><span class="tag" id="bqTag"></span><span class="utag" id="bqUnit"></span><span class="qq" id="bqQ"></span><span class="fctick" id="fctick" hidden><span class="mark">✓</span><span class="ans" id="fctickans"></span></span></span>
+      <span class="face back"><span class="fcmark" id="fcMarkB"></span><span class="tag" id="baTag"></span><span class="fcverdict" id="fcverdict" hidden></span><span class="fctypedecho" id="fctypedecho" hidden></span><span class="qq" id="baA"></span>
+        <span class="fcbtns"><span class="fb no" id="fbno" role="button" tabindex="0">✗ Not yet</span><span class="fb ok" id="fbok" role="button" tabindex="0">✓ Got it</span><span class="fb next" id="fbnext" role="button" tabindex="0" hidden>Next</span></span>
+        <span class="fcappeal" id="fcappeal" role="button" tabindex="0" hidden>I think I was right?</span>
       </span>
     </span>
   </button>
+  <form class="fctyped" id="fctyped" autocomplete="off">
+    <textarea id="fctypedin" rows="2" maxlength="600" aria-label="Your answer"></textarea>
+    <div class="row"><button type="submit" class="check" id="fbcheck">Check</button><button type="button" class="show" id="fbshow">Show me the answer</button></div>
+  </form>
   <div class="fcmeta"><span class="cnt" id="fcCnt"></span></div>
 </div>
 
@@ -705,6 +743,7 @@
 <script src="js/tour-player.js"></script>
 <script src="js/dash-tour.js"></script>
 <script src="js/demo-students.js"></script>
+<script src="js/recall.js"></script>
 <script src="dash-data.js"></script>
 <script src="sync.js"></script>
 <script src="warmup.js"></script>
@@ -1557,14 +1596,57 @@ function fcDeal(){
   document.getElementById('bqUnit').textContent=f.uname||'';
   const q=document.getElementById('bqQ'), a=document.getElementById('baA');
   q.textContent=f.q; a.textContent=f.a;
+  if(f.kind==='cloze'){ q.innerHTML=q.innerHTML.replace(/____/g,'<span class="gap">&nbsp;</span>'); }
+  fcJudged=null;
+  const _v=document.getElementById('fcverdict'), _e=document.getElementById('fctypedecho'); if(_v){ _v.hidden=true; _v.className='fcverdict'; } if(_e) _e.hidden=true;
+  const _in=document.getElementById('fctypedin'), _ck=document.getElementById('fbcheck'), _f=document.getElementById('fctyped');
+  if(_f){ _f.hidden=!window.svRecall; if(_in){ _in.value=''; _in.disabled=false; _in.placeholder=window.svRecall?svRecall.placeholder(f.kind):''; } if(_ck){ _ck.disabled=false; _ck.textContent='Check'; } }
+  document.getElementById('fbno').textContent='✗ Not yet'; document.getElementById('fbok').textContent='✓ Got it';
+  document.getElementById('fbno').dataset.result='wrong'; document.getElementById('fbok').dataset.result='right';
+  document.getElementById('fbno').hidden=false; document.getElementById('fbok').hidden=false; const _nx=document.getElementById('fbnext'); _nx.hidden=true; _nx.dataset.result='wrong';
+  const _tk=document.getElementById('fctick'); if(_tk) _tk.hidden=true; const _ap=document.getElementById('fcappeal'); if(_ap){ _ap.hidden=true; _ap.textContent='I think I was right?'; _ap.classList.remove('done'); }
+  clearTimeout(fcAdvanceT); fcAdvanceT=null; fcLastTyped='';
+  if(f.kind&&f.kind!=='recall'&&window.svRecall) document.getElementById('baTag').textContent='Answer';
   q.classList.toggle('long',f.q.length>70); a.classList.toggle('long',f.a.length>70);
   q.classList.toggle('xlong',f.q.length>150); a.classList.toggle('xlong',f.a.length>150);
   document.getElementById('baTag').textContent='Answer';
   const lvl=f.level||'Emerging', mkCls='fcmark m-'+lvl.toLowerCase();
   ['fcMarkF','fcMarkB'].forEach(id=>{ const e=document.getElementById(id); if(e){ e.textContent=lvl; e.className=mkCls; } });
   const _cn=document.getElementById('fcCnt'); if(_cn) _cn.textContent=(fci+1)+' / '+FC.length;
-  fcShowA=false; bigcard.classList.remove('showa');
+  fcShowA=false; bigcard.classList.remove('showa','judged'); fcmodal.classList.remove('showa');
 }
+/* typed recall on the dashboard deck: judge, flip with a verdict, buttons carry the result */
+let fcJudged=null, fcAdvanceT=null, fcLastTyped='';
+function fcCheckTyped(){
+  const f=FC[fci], _in=document.getElementById('fctypedin'), _ck=document.getElementById('fbcheck');
+  const typed=(_in.value||'').trim(); if(!typed||!f||!window.svRecall) return;
+  _ck.disabled=true; _ck.textContent='Checking…'; _in.disabled=true;
+  svRecall.judge({kind:f.kind||'recall',front:f.q,answer:f.a,items:f.items},typed).then(res=>{
+    if(!res){ _ck.disabled=false; _ck.textContent='Check'; _in.disabled=false;
+      const v0=document.getElementById('fcverdict'); v0.className='fcverdict off'; v0.innerHTML='<b></b> '; v0.querySelector('b').textContent=svRecall.unavailable.head; v0.appendChild(document.createTextNode(svRecall.unavailable.line)); v0.hidden=false;
+      const e0=document.getElementById('fctypedecho'); e0.textContent='You typed: '+typed; e0.hidden=false;
+      fcShowA=true; bigcard.classList.add('showa','judged'); fcmodal.classList.add('showa'); fcReadGate(); return; }
+    fcJudged=res.verdict; fcLastTyped=typed; const w=svRecall.words(res.verdict);
+    if(res.verdict==='right'){   /* a tick on the card and the deck moves on by itself */
+      const tk=document.getElementById('fctick'); document.getElementById('fctickans').textContent=f.a; tk.hidden=false;
+      fcShowA=true; fcmodal.classList.add('showa'); fcCanMark=true;
+      const hold=Math.max(1.2,Math.min((f.a||'').split(/\s+/).length/4,3.5));
+      fcAdvanceT=setTimeout(()=>{ fcAdvanceT=null; fcMark('right'); },hold*1000); return;
+    }
+    const v=document.getElementById('fcverdict'); v.className='fcverdict '+res.verdict; v.innerHTML='<b></b>'; v.querySelector('b').textContent=w.head; v.hidden=false;
+    const e=document.getElementById('fctypedecho'); e.textContent='You typed: '+typed; e.hidden=false;
+    const no=document.getElementById('fbno'), ok=document.getElementById('fbok'), nx=document.getElementById('fbnext');
+    no.hidden=true; ok.hidden=true; nx.hidden=false; nx.dataset.result=(res.verdict==='partly')?'partly':'wrong';
+    document.getElementById('fcappeal').hidden=(res.verdict!=='wrong');
+    fcShowA=true; bigcard.classList.add('showa','judged'); fcmodal.classList.add('showa');
+    fcCanMark=true; clearTimeout(fcUnlockT); document.querySelectorAll('.fcbtns .fb').forEach(b=>b.classList.remove('waiting'));
+  });
+}
+(function(){ const f=document.getElementById('fctyped'), _in=document.getElementById('fctypedin'); if(!f) return;
+  f.addEventListener('submit',e=>{ e.preventDefault(); fcCheckTyped(); });
+  _in.addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); fcCheckTyped(); } });
+  document.getElementById('fbshow').addEventListener('click',()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); fcmodal.classList.add('showa'); fcReadGate(); } });
+})();
 /* every card dealt this visit, so a second sitting never repeats the first */
 window.__svDealt=window.__svDealt||{};
 function noteDealt(){ FC.forEach(c=>{ if(c.key) __svDealt[c.key]=1; }); }
@@ -1602,7 +1684,7 @@ function wireCardsRow(){ const li=document.getElementById('planCards'); if(!li) 
   const sm=li.querySelector('small'); if(sm&&FC.length) sm.textContent=FC.length+' cards';
   li.classList.remove('inert'); li.style.cursor='pointer'; li.onclick=openCards; }
 wireCardsRow();
-bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } };
+bigcard.onclick=()=>{ if(fcShowA) return; const _in=document.getElementById('fctypedin'); if(_in&&(_in.value||'').trim()&&window.svRecall){ fcCheckTyped(); return; } fcShowA=true; bigcard.classList.add('showa'); fcmodal.classList.add('showa'); fcReadGate(); };
 
 /* no tap-to-skip: the only way to the next card is an honest Not yet / Got it */
 /* same read-gate as the in-lesson deck: marks unlock only after there's been
@@ -1621,18 +1703,26 @@ function fcReadGate(){
 function fcMark(ok){
   if(!fcCanMark) return;
   const f=FC[fci];
+  const result=(ok==='partly')?'partly':!!(ok===true||ok==='right');
   try{ const lg=JSON.parse(localStorage.getItem('sv-flash-log'))||[];
     lg.unshift({t:Date.now(),d:new Date().toISOString().slice(0,10),sub:f.sub||null,unit:f.unit||null,
-      n:f.n||null,ok:ok,q:(f.q||'').slice(0,120)});
+      n:f.n||null,ok:result===true,partly:result==='partly'||undefined,typed:fcJudged?1:undefined,kind:f.kind&&f.kind!=='recall'?f.kind:undefined,q:(f.q||'').slice(0,120)});
     localStorage.setItem('sv-flash-log',JSON.stringify(lg.slice(0,400))); }catch(e){}
   /* move the card through the spaced-repetition boxes (shared with lessons) */
-  if(window.svFlashMark && f.key) f.level=svFlashMark(f.key,ok);
+  if(window.svFlashMark && f.key) f.level=svFlashMark(f.key,result);
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(fci+1<FC.length){ fci++; fcDeal(); }
   else { fcmodal.classList.remove('open'); fcSittingDone=true; doorMore(); doorsCounted(); if(DAYONE) refreshDayOnePlan(); }   /* sitting done; the door offers more */
 }
-['ok','no'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
-  e.stopPropagation(); if(fcShowA) fcMark(k==='ok'); }); });
+['ok','no','next'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
+  e.stopPropagation(); if(fcShowA) fcMark(e.currentTarget.dataset.result||(k==='ok'?'right':'wrong')); }); });
+document.getElementById('fcappeal').addEventListener('click',e=>{ e.stopPropagation(); const f=FC[fci]; const a=e.currentTarget; if(a.classList.contains('done')) return;
+  svRecall.appeal({kind:f.kind||'recall',front:f.q,answer:f.a},fcLastTyped,fcJudged); a.textContent='Noted. It will come round again.'; a.classList.add('done');
+  document.getElementById('fbnext').dataset.result='partly'; });
+document.getElementById('fctick').addEventListener('click',e=>{ e.stopPropagation(); if(fcAdvanceT){ clearTimeout(fcAdvanceT); fcAdvanceT=null; fcMark('right'); } });
+document.addEventListener('keydown',e=>{ if(!fcmodal.classList.contains('open')||e.key!=='Enter'||document.activeElement===document.getElementById('fctypedin')) return;
+  if(fcAdvanceT){ clearTimeout(fcAdvanceT); fcAdvanceT=null; fcMark('right'); return; }
+  if(fcJudged&&fcShowA&&fcCanMark){ e.preventDefault(); fcMark(document.getElementById('fbnext').dataset.result||'wrong'); } });
 document.getElementById('closefc').onclick=()=>fcmodal.classList.remove('open');
 fcmodal.addEventListener('click',e=>{ if(e.target===fcmodal) fcmodal.classList.remove('open'); });
 if(_dq.get('fc')){ fcDeal(); fcmodal.classList.add('open');   /* staging: ?fc=1 open, ?fc=2 flipped */

@@ -500,6 +500,7 @@
     window.knowledgeCheck = lesson.knowledge_checks || [];
     window._lessonGlossary = lesson.glossary_terms || [];
     window._lessonFlashcardQuestions = lesson.flashcard_questions || [];
+    window._lessonRecallCards = Array.isArray(lesson.recall_cards) ? lesson.recall_cards : [];
     window._lessonId = lesson.id;
     window._lessonUnitId = unit.id;
     window._subjectSlug = params.subjectSlug;
