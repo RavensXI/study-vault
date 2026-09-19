@@ -425,7 +425,7 @@ function svUnitMedia(SUBJECTS, cb) {
         var deck = [], pods = [];
         (rows || []).forEach(function (row) {
           if (row.lesson_number <= s.next) (row.flashcard_questions || []).forEach(function (f) {
-            if (f && f.q && f.a) deck.push({ slug: s.su.slug, name: s.su.name, q: f.q, a: f.a,
+            if (f && f.q && f.a && !f.off) deck.push({ slug: s.su.slug, name: s.su.name, q: f.q, a: f.a,
               sub: s.su.sub, unit: s.unit, n: row.lesson_number });
           });
           var pc = (row.related_media || []).find(function (m) { return m.category === 'Podcasts'; });

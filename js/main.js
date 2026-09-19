@@ -2960,6 +2960,7 @@ function openFlashcardModal() {
 
   var fcQuestions = window._lessonFlashcardQuestions || [];
   fcQuestions.forEach(function (item, i) {
+    if (!item || item.off) return;     /* curation can switch a card off */
     allCards.push({
       lessonId: lessonId,
       index: 'q' + i,
