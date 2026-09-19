@@ -27,6 +27,13 @@ from jev import ask_many, answers, Score, Choice, Noul
 jev.BUDGET_USD = 12.0        # topped up 19 Sep; the fleet pass is about $2
 
 CAP = 14; KIND_MAX = 7; DUP_P = 0.6; SCOPE_P = 0.35; LIST_MAX = 6
+DATE_MAX = 2; COUNT_MAX = 1        # a deck is not a list of dates and figures
+DATE_RX = re.compile(r"^(on |in )?(\d{1,2} )?(january|february|march|april|may|june|july|august|september|october|november|december)? ?\d{4}( ?[-–] ?\d{2,4})?\.?$", re.I)
+def is_date_card(c):
+    a = c["answer"].strip().lower()
+    return bool(DATE_RX.match(a)) or (c["front"].lower().startswith(("when ", "in which year", "in what year", "what year")) and re.search(r"\d{4}", a) is not None and len(a) < 40)
+def is_count_card(c):
+    return c["front"].lower().startswith(("how many", "roughly how many", "about how many", "approximately how many", "what percentage", "what proportion"))
 NUM = {"three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12}
 def list_count(front):
     m = re.search(r"\b(three|four|five|six|seven|eight|nine|ten|eleven|twelve|\d+)\b", front.lower())
@@ -80,10 +87,15 @@ def choose(cards, sc):
         if t: c["why"] = "same as " + t["id"]; continue
         if c["central"] < 0.7: c["why"] = "side detail"; continue
         if len(keep) >= CAP: c["why"] = "deck full"; continue
+        if is_date_card(c) and per_kind["_date"] >= DATE_MAX: c["why"] = "enough date cards"; continue
+        if is_count_card(c) and per_kind["_count"] >= COUNT_MAX: c["why"] = "enough figure cards"; continue
         if per_kind[c["kind"]] >= KIND_MAX: later.append(c); continue
         keep.append(c); per_kind[c["kind"]] += 1
+        if is_date_card(c): per_kind["_date"] += 1
+        if is_count_card(c): per_kind["_count"] += 1
     for c in later:                                       # a kind past its share only fills a short deck
-        if len(keep) < CAP and not twin(c): keep.append(c)
+        if len(keep) < CAP and not twin(c) and not (is_date_card(c) and per_kind["_date"] >= DATE_MAX) and not (is_count_card(c) and per_kind["_count"] >= COUNT_MAX):
+            keep.append(c); per_kind["_date"] += is_date_card(c); per_kind["_count"] += is_count_card(c)
         else: c["why"] = "enough %s cards" % c["kind"]
     keep.sort(key=lambda c: (c["id"][0] != "q", int(c["id"][1:])))
     drop = [c for c in cards if c not in keep]
