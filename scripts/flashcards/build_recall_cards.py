@@ -15,6 +15,7 @@ is text the lesson already teaches, so the fact-check that cleaned the lesson co
   python scripts/flashcards/build_recall_cards.py --subject history-aqa [--school-id X] [--dry]
   python scripts/flashcards/build_recall_cards.py --all-free [--dry]
 """
+STATUS = "live"
 import io, json, os, re, sys, html, random, urllib.request, collections
 
 U, K = os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"]
@@ -93,6 +94,7 @@ def main():
     a = sys.argv[1:]
     dry = "--dry" in a
     school = a[a.index("--school-id") + 1] if "--school-id" in a else None
+    global STATUS; STATUS = a[a.index("--status") + 1] if "--status" in a else "live"
     subjects = []
     if "--all-free" in a:
         subjects = [s["slug"] for s in get("subjects?select=slug&school_id=is.null&status=eq.live&order=slug")]
@@ -104,7 +106,7 @@ def main():
     totals = collections.Counter()
     for slug in subjects:
         sch = ("eq." + school) if school else "is.null"
-        rows = get("lessons?select=id,title,lesson_number,content_html,glossary_terms,flashcard_questions,units!inner(slug,subjects!inner(slug,school_id))&units.subjects.slug=eq.%s&units.subjects.school_id=%s&status=eq.live&is_listening=eq.false&limit=2000" % (slug, sch))
+        rows = get("lessons?select=id,title,lesson_number,content_html,glossary_terms,flashcard_questions,units!inner(slug,subjects!inner(slug,school_id))&units.subjects.slug=eq.%s&units.subjects.school_id=%s&status=eq.%s&is_listening=eq.false&limit=2000" % (slug, sch, STATUS))
         n = 0
         for l in rows:
             if not l.get("content_html"): continue

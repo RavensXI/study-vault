@@ -2,7 +2,8 @@
 (Sonnet), then gate with Jev and load. Unity lessons never go through the API (subscription
 agents do those). Lessons that already carry authored cards (the canary units) are skipped.
 
-  python scripts/flashcards/author_recall_cards_batch.py submit     # builds + submits the batch
+  python scripts/flashcards/author_recall_cards_batch.py submit     # builds + submits the batch (whole free tier)
+  python scripts/flashcards/author_recall_cards_batch.py submit --subject latin-eduqas --status pending_review   # one new subject
   python scripts/flashcards/author_recall_cards_batch.py collect    # polls; writes _authored/fleet.json when ended
   python scripts/flashcards/gate_authored_cards.py scripts/flashcards/_authored/fleet.json
   python scripts/flashcards/author_recall_cards_batch.py load       # passing cards -> lessons.recall_cards
@@ -12,7 +13,14 @@ State in _authored/_fleet_state.json. Usage totted from the batch results.
 import io, json, os, re, sys, html, time, urllib.request
 import anthropic
 
-HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.path.join(HERE, "_authored"); STATE = os.path.join(OUT, "_fleet_state.json")
+HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.path.join(HERE, "_authored")
+# scope: the whole free tier (default, tag "fleet") or one subject (--subject S [--school-id X] [--status pending_review]); files are named by the tag
+A = sys.argv[2:]
+SUBJECT = A[A.index("--subject") + 1] if "--subject" in A else None
+SCHOOL = A[A.index("--school-id") + 1] if "--school-id" in A else None
+STATUS = A[A.index("--status") + 1] if "--status" in A else "live"
+TAG = (("unity__" if SCHOOL else "") + SUBJECT) if SUBJECT else "fleet"
+STATE = os.path.join(OUT, "_%s_state.json" % TAG)
 MODEL = "claude-sonnet-5"
 U, K = os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"]
 H = {"apikey": K, "Authorization": "Bearer " + K, "Content-Type": "application/json"}
@@ -58,7 +66,7 @@ def PARAMS(l):
 def resubmit():
     """the lessons whose first answer was cut off (stop_reason max_tokens): same prompt, thinking off"""
     cl = anthropic.Anthropic(); st = state()
-    ids = set(json.load(io.open(os.path.join(OUT, "_fleet_failed_ids.json"))))
+    ids = set(json.load(io.open(os.path.join(OUT, "_%s_failed_ids.json" % TAG))))
     todo = [l for l in lessons_to_do() if l["id"] in ids]
     print("resubmitting", len(todo))
     reqs = [{"custom_id": l["id"], "params": PARAMS(l)} for l in todo]
@@ -70,7 +78,7 @@ def lessons_to_do():
     rows = []
     off = 0
     while True:
-        page = get("lessons?select=id,title,lesson_number,content_html,glossary_terms,flashcard_questions,recall_cards,units!inner(slug,subjects!inner(slug,school_id))&status=eq.live&is_listening=eq.false&content_html=not.is.null&units.subjects.school_id=is.null&order=id&limit=500&offset=%d" % off)
+        page = get("lessons?select=id,title,lesson_number,content_html,glossary_terms,flashcard_questions,recall_cards,units!inner(slug,subjects!inner(slug,school_id))&status=eq.%s&is_listening=eq.false&content_html=not.is.null&units.subjects.school_id=%s%s&order=id&limit=500&offset=%d" % (STATUS, ("eq." + SCHOOL) if SCHOOL else "is.null", ("&units.subjects.slug=eq." + SUBJECT) if SUBJECT else "", off))
         rows += page
         if len(page) < 500: break
         off += 500
@@ -117,13 +125,13 @@ def collect():
             if c.get("tier") == "higher": card["tier"] = "higher"
             cards.append(card)
         out.append({"lesson_id": lid, "lesson_number": meta.get("lesson_number"), "title": meta.get("title"), "subject": meta.get("subject"), "unit": meta.get("unit"), "cards": cards})
-    io.open(os.path.join(OUT, "fleet.json"), "w", encoding="utf-8").write(json.dumps(out, indent=1, ensure_ascii=False))
+    io.open(os.path.join(OUT, TAG + ".json"), "w", encoding="utf-8").write(json.dumps(out, indent=1, ensure_ascii=False))
     cost = usage["in"] / 1e6 * 1.5 + usage["out"] / 1e6 * 7.5
     print("lessons", len(out), "cards", sum(len(x["cards"]) for x in out), "errors", errs, "| tokens in %d out %d | est. $%.2f (batch prices)" % (usage["in"], usage["out"], cost))
     st["usage"] = usage; st["est_usd"] = round(cost, 2); save(st)
 
 def load():
-    cards = json.load(io.open(os.path.join(OUT, "fleet.gated.json"), encoding="utf-8"))
+    cards = json.load(io.open(os.path.join(OUT, TAG + ".gated.json"), encoding="utf-8"))
     by = {}; held = 0
     for c in cards:
         if c.get("gate") != "pass": held += 1; continue

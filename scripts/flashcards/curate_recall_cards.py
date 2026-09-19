@@ -26,6 +26,7 @@ import jev
 from jev import ask_many, answers, Score, Choice, Noul
 jev.BUDGET_USD = 12.0        # topped up 19 Sep; the fleet pass is about $2
 
+STATUS = "live"
 CAP = 14; KIND_MAX = 7; DUP_P = 0.6; SCOPE_P = 1.0; LIST_MAX = 6      # scope: teacher rating 0 too hard .. 1 fair .. 2 core
 DATE_MAX = 2; COUNT_MAX = 1        # a deck is not a list of dates and figures
 DATE_RX = re.compile(r"^(on |in )?(\d{1,2} )?(january|february|march|april|may|june|july|august|september|october|november|december)? ?\d{4}( ?[-–] ?\d{2,4})?\.?$", re.I)
@@ -105,7 +106,7 @@ def choose(cards, sc):
 
 def run(slug, school, apply):
     sch = ("eq." + school) if school else "is.null"
-    rows = get("lessons?select=id,title,lesson_number,content_html,flashcard_questions,recall_cards,units!inner(slug,subjects!inner(slug,school_id))&units.subjects.slug=eq.%s&units.subjects.school_id=%s&status=eq.live&is_listening=eq.false&content_html=not.is.null&limit=2000" % (slug, sch))
+    rows = get("lessons?select=id,title,lesson_number,content_html,flashcard_questions,recall_cards,units!inner(slug,subjects!inner(slug,school_id))&units.subjects.slug=eq.%s&units.subjects.school_id=%s&status=eq.%s&is_listening=eq.false&content_html=not.is.null&limit=2000" % (slug, sch, STATUS))
     jobs = [{"lesson": l, "cards": deck_of(l)} for l in rows]          # every card, switched-off ones included: the pass is re-runnable
     jobs = [j for j in jobs if len(j["cards"]) > 0]
     res = ask_many(jobs, build, tag="curate", workers=6)
@@ -143,6 +144,7 @@ def run(slug, school, apply):
 def main():
     a = sys.argv[1:]; apply = "--apply" in a
     school = a[a.index("--school-id") + 1] if "--school-id" in a else None
+    global STATUS; STATUS = a[a.index("--status") + 1] if "--status" in a else "live"
     if "--subject" in a: subjects = [a[a.index("--subject") + 1]]
     elif "--all-free" in a: subjects = [s["slug"] for s in get("subjects?select=slug&school_id=is.null&status=eq.live&order=slug")]
     elif school: subjects = [s["slug"] for s in get("subjects?select=slug&school_id=eq.%s&status=eq.live&order=slug" % school)]

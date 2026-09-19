@@ -130,7 +130,7 @@ Agent output (JSON, written via Write tool — never bash heredocs):
 - `exam_tip_html`, `conclusion_html` — both with narration IDs
 - `practice_questions` — exactly 6, type strings matching registered names, marks as StudyVault rubric string
 - `knowledge_checks` — exactly 5 (2 MCQ + 2 fill + 1 match). **Per-subject `_AGENT_PROMPT.md` files MUST inline the canonical KC schema from `CONTENT_PROMPT.md` verbatim — do NOT paraphrase as `"knowledge_checks": [...]`. Sociology AQA shipped broken because the prep agent summarised this away and the content agent invented `answers: [...]` / `pairs: [...]` keys the player doesn't understand.**
-- `flashcard_questions` — exactly 5, distinct from KCs
+- `flashcard_questions` — 10–15 question cards per `FLASHCARD_RULES.md`, distinct from KCs. These are the plain question cards only; the typed-recall kinds (term, definition, fill-the-gap, list, explain) are built in Phase 4 step 3 and the whole deck is then curated to 14.
 - `glossary_terms` — one per `<dfn>` in content_html
 - `hero_keywords` — 3–4 Unsplash/Wikimedia search terms
 
@@ -166,9 +166,10 @@ Runs per lesson as its content lands, not batched. A stuck content agent blocks 
 
 1. **Heroes** (parallel, cheap, content-independent)
 2. **Fact-check** (`scripts/_fact_check_subject.py`) — applies corrections to `content_html` for fact-heavy subjects (see Phase 6 step 7 for the gate; the script runs the agent+apply loop)
-3. **Related media + revision guides** (can run in parallel with fact-check — they don't touch content_html)
-4. **Narration** (last among content-dependent steps — narrates the FINAL `content_html`, post-fact-check fixes)
-5. **Podcasts** (Tom-driven, NotebookLM is manual — runs after everything else)
+3. **Flashcard deck** (`python scripts/flashcards/build_deck.py --subject {slug} --status pending_review`) — after fact-check, because the cards are built from the FINAL text. Generates term / definition / fill-the-gap cards from the glossary and sentences, authors list / explain cards on the Batch API (Sonnet, thinking off), gates every authored card with Jev against its lesson, loads them into `recall_cards`, then judges the whole deck (question cards included) and trims it to 14 by a teacher rating: too hard / fair / core for a typical student, one of each kind, at most two date cards and one figure card, no list over six items. Dropped cards stay in the row under `off: true`. Every step is re-runnable; `curate_recall_cards.py --dry` shows what would go. Students type every answer and `api/flashcards/judge.js` marks it, so a card's `answer` must be the marker's model answer, not a paragraph.
+4. **Related media + revision guides** (can run in parallel with fact-check — they don't touch content_html)
+5. **Narration** (last among content-dependent steps — narrates the FINAL `content_html`, post-fact-check fixes)
+6. **Podcasts** (Tom-driven, NotebookLM is manual — runs after everything else)
 
 If you run narration before fact-check and then a fact-check fix lands, you'll need to clear `narration_manifest` on the affected lessons and re-narrate. The narrate script is idempotent (skips lessons with an existing manifest), so a `_renarrate_*_post_factcheck.py` script that nulls just the affected manifests followed by a re-run of the narrate script is the recovery path. See `memory/feedback_factcheck_before_narration.md`.
 
@@ -268,8 +269,9 @@ Whenever a new widget IS built, add its row to `scripts/widget_pipeline/widget_c
 5. Confirm `youtube_video_id` convention: Unity lessons have R2 URLs, free-tier article lessons are NULL, free-tier practice lessons are the sentinel `'practice-only'`.
 6. **Run `python scripts/_verify_subject_build.py {subject-slug}`.** Structural verifier — catches missing unit images, malformed quote ticker, missing revision-technique guides, lessons missing description / hero / related_media, related_media coverage gaps, dead YouTube refs (oembed-verified), Gemini diagrams sneaking into free-tier content, fieldwork lessons missing the school-specific notice. Zero issues required to ship.
 7. *(Already done in Phase 4)* — confirm fact-check report under `scripts/_fact_check/{slug}.json` has zero outstanding HIGH findings and that `{slug}_fixes_applied.md` exists showing the fixes were applied. If fact-check was skipped (practice subject) or the report is missing, run `python scripts/_fact_check_subject.py {subject-slug}` now AND clear+re-narrate any lessons it modifies before continuing. See `memory/feedback_fact_check_built_in.md` and `memory/feedback_factcheck_before_narration.md`.
-8. Visit `/admin/build-status` — live view of every subject in Supabase plus what's still to build from `specs/index.json`. The new subject should appear in the Built table; confirm asset coverage looks right.
-9. Commit + push. Tom reviews `status: pending_review` lessons via `/admin/review` and flips them to `live` once satisfied.
+8. Confirm every article lesson has a curated deck: `scripts/flashcards/_authored/curation_{slug}.json` exists and no active deck exceeds 14 (`curate_recall_cards.py --subject {slug} --status pending_review --dry` reports the sizes). A lesson with fewer than eight active cards is worth a look at its glossary.
+9. Visit `/admin/build-status` — live view of every subject in Supabase plus what's still to build from `specs/index.json`. The new subject should appear in the Built table; confirm asset coverage looks right.
+10. Commit + push. Tom reviews `status: pending_review` lessons via `/admin/review` and flips them to `live` once satisfied.
 
 **Why the fact-check pass exists.** Two separate audits (English Lit poetry/prose, May 2026; RE/RS scripture-citation deep dive, May 2026; random 60-lesson sanity check, May 2026) found that content agents fabricate at a meaningful rate — fabricated direct quotes, wrong scripture verses cited as canonical (e.g. Qur'an 6:2 used for ensoulment when it should be 32:9), wrong character actions, wrong named productions (Frantic Assembly's R&J doesn't exist), and wrong-tradition attributions. ~15% of randomly-sampled lessons had at least one mark-affecting factual error before this fact-check was added. Catching these pre-ship is far cheaper than the audit-and-regen cycle. See `memory/feedback_fact_check_built_in.md` for the design rationale.
 
