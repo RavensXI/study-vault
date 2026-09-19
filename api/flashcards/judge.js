@@ -27,6 +27,24 @@ function limited(ip) {
 }
 function clean(s, max) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim().slice(0, max); }
 
+function norm(s) {
+  return String(s || '').toLowerCase().replace(/&[a-z]+;/g, ' ').replace(/[^a-z0-9 ]+/g, ' ').replace(/\b(the|a|an|of|in|on|at|to|and)\b/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function plainMatch(kind, front, answer, typed) {
+  const a = norm(answer), t = norm(typed);
+  if (!t) return false;
+  if (a === t) return true;
+  const years = a.match(/\b(1[0-9]{3}|20[0-9]{2})\b/g) || [];
+  if (years.length === 1) {
+    const asksDay = /\b(month|day|date|exact|when exactly)\b/i.test(front);
+    if (!asksDay && t === years[0]) return true;                                 // the year alone
+    if (a.replace(/\b(1[0-9]{3}|20[0-9]{2})\b/g, ' ').replace(/\s+/g, ' ').trim() === t) return true;   // the answer without its year
+  }
+  const words = String(answer || '').trim().split(/\s+/);
+  if (words.length >= 2 && words.length <= 4 && words.every(w => /^[A-Z][a-zA-Z'\-]+$/.test(w)) && t === norm(words[words.length - 1])) return true;   // surname alone
+  return false;
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const origin = req.headers.origin || '';
@@ -42,6 +60,11 @@ module.exports = async function handler(req, res) {
   const items = Array.isArray(b.items) ? b.items.map(x => clean(x, 160)).filter(Boolean).slice(0, 10) : [];
   if (!front || !answer || !typed) return res.status(400).json({ error: 'front, answer and typed are required' });
 
+  // Plain matches never need the judge: the same words, the year alone for a date the question
+  // does not pin to a day or month, the surname alone for a person, the answer without its year.
+  if (kind !== 'list' && plainMatch(kind, front, answer, typed)) {
+    return res.status(200).json({ kind, p: 1, completeness: 2, verdict: 'right', plain: true });
+  }
   const state = { flashcard_kind: kind, flashcard_front: front, model_answer: answer, student_typed_recall: typed };
   const questions = {};
   if (kind === 'list' && items.length) {
@@ -53,10 +76,10 @@ module.exports = async function handler(req, res) {
       : kind === 'term'
         ? 'The student\'s recall gives the meaning of the term as the model answer does, in any wording; a vaguer but correct meaning still counts'
         : kind === 'cloze'
-          ? 'The student\'s recall supplies the missing words of the sentence or an equivalent (a synonym, a different form of the number); a different fact does not'
+          ? 'The student\'s recall supplies the missing words of the sentence or an equivalent (a synonym, a different form of the number). When the missing words are a date, the correct year on its own is a full match; when they are a person, the surname on its own is a full match. A different fact does not count'
           : kind === 'explain'
             ? 'The student\'s explanation gives the same cause or mechanism as the model answer, in their own words; a shorter explanation that names the key link still counts, a description without the why or how does not'
-            : 'The student\'s typed recall gives the same fact as the model answer; different wording, spelling mistakes and missing minor words are fine';
+            : 'The student\'s typed recall gives the same fact as the model answer; different wording, spelling mistakes and missing minor words are fine. For a date the correct year alone counts unless the question asks for the day or month; for a person the surname alone counts; a figure counts when it is the same to a sensible rounding';
     questions.correct = noul(rule);
     questions.completeness = score('How much of the model answer the student\'s recall covers', ['none of it', 'part of it', 'all of it']);
   }
