@@ -638,8 +638,6 @@
   .finder .facts button{border:1px solid #d5c9b3;background:var(--card);border-radius:3px;font:600 .76rem var(--head);color:var(--sec);padding:.28rem .55rem;cursor:pointer}
   .finder .facts button:hover{border-color:var(--rust);color:var(--ink)}
   .finder .facts button.pri{background:var(--rust);border-color:var(--rust);color:#fff}
-  .finder .fask{display:flex;align-items:center;gap:.6rem;padding:.6rem .85rem;border-top:1px solid #eee5d4;background:#fbf7ee;font-family:var(--read);font-size:.9rem;color:var(--sec)}
-  .finder .fask button{margin-left:auto;border:1px solid #d5c9b3;background:var(--card);border-radius:3px;font:600 .78rem var(--head);color:var(--ink);padding:.3rem .6rem;cursor:pointer;white-space:nowrap}
   .finder .fnone{padding:.9rem .85rem;font-family:var(--read);font-size:.92rem;color:var(--sec)}
   @media(max-width:640px){.finder .frow{flex-wrap:wrap}.finder .facts{width:100%;justify-content:flex-start;padding-left:0}.finder .fstr{order:-1;margin-left:auto}}
 </style>
@@ -1966,12 +1964,18 @@ document.querySelector('.card.exam').onclick=()=>svPlannerOpen();
     if(!r||(r.s===0&&!r.reps&&!r.prior))return {w:'Not started',c:'s0'};
     var b=svStrength.band(r.s); return {w:b==='g'?'Secure':b==='a'?'Developing':'Emerging',c:b==='g'?'s3':b==='a'?'s2':'s1'};
   }
+  var STOP={the:1,a:1,an:1,and:1,or:1,of:1,in:1,on:1,to:1,for:1,about:1,with:1,what:1,why:1,how:1,when:1,who:1,did:1,does:1,do:1,is:1,was:1,were:1,are:1,it:1,its:1,that:1,this:1,stuff:1,thing:1,things:1,bit:1,part:1,lesson:1,topic:1,revise:1,revision:1,my:1,me:1,i:1,we:1,you:1};
+  function words(q){return q.split(/[^a-z0-9']+/).filter(function(x){return x.length>2&&!STOP[x];});}
   function score(l,q){
     if(l.ft.indexOf(q)>=0)return l.ft.indexOf(q)===0?4:3;
     if(l.fu.indexOf(q)>=0)return 2;
     if(l.k.indexOf(q)>=0)return 1.5;
-    var w=q.split(' ').filter(function(x){return x.length>1;});
-    if(w.length>1&&w.every(function(x){return (l.ft+' '+l.fu+' '+l.k).indexOf(x)>=0;}))return 1;
+    /* a question or a phrase: the content words that land in the title count most, then the unit and the glossary */
+    var w=words(q); if(!w.length)return 0;
+    var hay=l.ft+' '+l.fu+' '+l.k, inTitle=0, any=0;
+    w.forEach(function(x){ if(l.ft.indexOf(x)>=0)inTitle++; if(hay.indexOf(x)>=0)any++; });
+    if(any===w.length)return 1+inTitle*0.1;
+    if(inTitle&&w.some(function(x){return x.length>=5&&l.ft.indexOf(x)>=0;}))return 0.5+inTitle*0.1;
     return 0;
   }
   function termHit(l,q){var t=l.terms.find(function(x){return fold(x).indexOf(q)>=0;});return t||null;}
@@ -1983,7 +1987,8 @@ document.querySelector('.card.exam').onclick=()=>svPlannerOpen();
     var hits=IX.map(function(l){return {l:l,sc:score(l,q)};}).filter(function(h){return h.sc>0;})
       .sort(function(a,b){return b.sc-a.sc||a.l.s.name.localeCompare(b.l.s.name)||a.l.n-b.l.n;}).slice(0,12);
     var h='';
-    if(!hits.length)h='<div class="fnone">Nothing in your subjects is called that. Ask below and StudyVault will work out what you mean.</div>';
+    if(!hits.length){ askJudge(q,null); return; }
+    var partial=hits[0].sc<1;                 /* only loose word hits: show them, and let the judge put its pick on top */
     var groups={},order=[];
     hits.forEach(function(x){var k=x.l.s.name||x.l.s.sub;if(!groups[k]){groups[k]=[];order.push([k,x.l.s.c]);}groups[k].push(x.l);});
     order.forEach(function(g,gi){
@@ -1996,15 +2001,38 @@ document.querySelector('.card.exam').onclick=()=>svPlannerOpen();
           +(l.practice?'':'<button type="button" data-go="'+esc(l.href)+'?open=cards">Cards</button><button type="button" data-go="'+esc(l.href)+'?open=quiz">Quick check</button>')+'</span></div>';
       });
     });
-    h+='<div class="fask"><span>Not what you meant? Say it your own way: “the bit where Scrooge sees his own grave”.</span><button type="button" id="finderask">Ask StudyVault</button></div>';
     res.innerHTML=h;
+    if(partial) askJudge(q,h);
+  }
+  /* no word matched: the judge picks the closest lesson from the student's own units, or says none */
+  var ASK={t:null,q:''};
+  function rowFor(l,q,hot){
+    var st=strength(l);
+    return '<div class="frow'+(hot?' hot':'')+'" data-href="'+esc(l.href)+'"><div class="ft"><b>'+esc(l.t)+'</b><small>'+esc(l.s.name||l.s.sub)+' · '+esc(l.uname)+' · Lesson '+l.n+'</small></div>'
+      +(st?'<span class="fstr '+st.c+'">'+st.w+'</span>':'')
+      +'<span class="facts"><button type="button" class="pri" data-go="'+esc(l.href)+'">'+(l.practice?'Practise':'Read')+'</button>'
+      +(l.practice?'':'<button type="button" data-go="'+esc(l.href)+'?open=cards">Cards</button><button type="button" data-go="'+esc(l.href)+'?open=quiz">Quick check</button>')+'</span></div>';
+  }
+  function askJudge(q,below){
+    if(!below) res.innerHTML='<div class="fnone">Looking for the closest lesson…</div>';
+    clearTimeout(ASK.t); ASK.q=q;
+    ASK.t=setTimeout(function(){
+      var byUnit={};
+      IX.forEach(function(l){var k=l.s.sub+'/'+l.uslug;(byUnit[k]=byUnit[k]||{k:k,s:l.s.name||l.s.sub,u:l.uname,lessons:[]}).lessons.push({n:l.n,t:l.t,g:l.terms.slice(0,6).join(', ')});});
+      fetch('/api/finder',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q:q,units:Object.values(byUnit)})})
+      .then(function(r){return r.json();}).then(function(d){
+        if(ASK.q!==q)return;
+        var l=d&&d.unit&&d.n?IX.find(function(x){return x.s.sub+'/'+x.uslug===d.unit&&x.n===d.n;}):null;
+        if(!l){ if(!below) res.innerHTML='<div class="fnone">Nothing in your subjects covers “'+esc(q)+'”.</div>'; return; }
+        res.innerHTML='<div class="fgroup"><i style="background:'+esc(l.s.c||'#b9a98c')+'"></i>Closest match</div>'+rowFor(l,q,true)+(below?below.replace(' hot',''):'');
+      }).catch(function(){ if(ASK.q===q&&!below) res.innerHTML='<div class="fnone">Nothing in your subjects is called “'+esc(q)+'”.</div>'; });
+    },500);
   }
   inp.addEventListener('focus',function(){load();});
   inp.addEventListener('input',function(){render(inp.value);});
   inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();var hot=res.querySelector('.frow.hot');if(hot)nav(hot.getAttribute('data-href'));}if(e.key==='Escape'){inp.value='';render('');}});
   clr.addEventListener('click',function(){inp.value='';render('');inp.focus();});
   res.addEventListener('click',function(e){var b=e.target.closest('[data-go]');if(b){e.stopPropagation();nav(b.getAttribute('data-go'));return;}
-    if(e.target.id==='finderask'){e.target.textContent='Thinking…';e.target.disabled=true;return;}
     var r=e.target.closest('.frow');if(r)nav(r.getAttribute('data-href'));});
 })();
 </script>
