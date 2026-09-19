@@ -4208,7 +4208,7 @@ function svFormatMarkScheme(raw) {
   /* "text (1)", "text (1 mark)", "text [2 marks]": the mark sits at the end of the line.
      A line with several "(1)" markers inside it keeps them where they are. */
   var TAIL = /^(.*?)\s*[\(\[](\d+)(?:\s*marks?)?[\)\]]\s*[.;,]?$/;
-  function marksInside(s) { return (s.match(/\(\d+\)/g) || []).length; }
+  function marksInside(s) { return (s.match(/[\(\[]\d+(?:\s*marks?)?[\)\]]/g) || []).length; }
   function inlineMarks(s) { return esc(s).replace(/\((\d+)\)/g, '<span class="ms-mark ms-mark--in">$1</span>'); }
   function pointItem(s) {
     var m = s.match(TAIL);
@@ -4219,9 +4219,35 @@ function svFormatMarkScheme(raw) {
     var m = s.match(/^([A-Z][^:]{1,40}):\s+(.+)$/);
     return m ? '<strong>' + esc(m[1]) + ':</strong> ' + inlineMarks(m[2]) : inlineMarks(s);
   }
+  /* prose with a mark after each creditable point ("a clear point (1 mark), a developed
+     explanation (1 mark), and an example (1 mark). A thin answer scores 2.") becomes a
+     list: the lead-in stays as a sentence, each point takes its mark, the tail stays. */
+  var MARKER = /[\(\[]\d+(?:\s*marks?)?[\)\]]/g;
+  function proseWithMarks(line) {
+    var ms = line.match(MARKER) || [];
+    if (ms.length < 2) return null;
+    /* only when every mark closes a clause; a mark mid-phrase ("an address (1) of the
+       memory location") means the sentence must stay whole with its marks inline */
+    var after = line.split(MARKER).slice(1);
+    for (var k = 0; k < after.length; k++) { if (!/^(?:\s*$|\s*[,.;:]|\s+(?:and|or))/.test(after[k])) return null; }
+    var out = '', body = line, lead = '';
+    var colon = line.indexOf(':'), firstMark = line.search(MARKER);
+    if (colon > 0 && colon < firstMark && colon < 120) { lead = line.slice(0, colon + 1); body = line.slice(colon + 1); }
+    var items = [], re = /[^\(\[]*?[\(\[]\d+(?:\s*marks?)?[\)\]]/g, mm, last = 0;
+    while ((mm = re.exec(body))) { items.push(mm[0]); last = re.lastIndex; }
+    var tail = body.slice(last).replace(/^[\s.;,]+/, '').trim();
+    if (lead) out += '<p class="ms-text">' + labelled(lead.replace(/:$/, '')) + '</p>';
+    out += '<ul class="ms-points">' + items.map(function (it) {
+      it = it.replace(/^[\s.;,]+/, '').replace(/^(?:and|or)\s+/i, '').trim();
+      return pointItem(it.charAt(0).toUpperCase() + it.slice(1));
+    }).join('') + '</ul>';
+    if (tail) out += '<p class="ms-text">' + labelled(tail) + '</p>';
+    return out;
+  }
   lines.forEach(function (line) {
     var m;
     if (/^[\[(]\d+\s*marks?[\])]$/i.test(line)) return;                 /* the question total: the badge has it */
+    if (!/^•/.test(line)) { var pw = proseWithMarks(line); if (pw) { closeList(); html += pw; return; } }
     if (!/\(\d+\)/.test(line)) line = line.replace(/\s*\[\d+\s*marks?\]\s*$/i, function (t) { return /^(?:\(?[a-z]\)|[A-D]\))/i.test(line) ? t : ''; }).trim() || line;
     if (/^Indicative content\s*:?/i.test(line)) {
       closeList();
@@ -4252,7 +4278,7 @@ function svFormatMarkScheme(raw) {
     }
     closeList();
     if (/^SPaG\b/i.test(line)) { html += '<p class="ms-note"><strong>SPaG:</strong> ' + esc(line.replace(/^SPaG\s*:?\s*/i, '')) + '</p>'; return; }
-    if (/^0\s+marks/i.test(line) || /^Plus up to \d+ marks?/i.test(line) || /^Up to \d+ marks?\b/i.test(line) || /^Award\b/i.test(line)) { html += '<p class="ms-note">' + inlineMarks(line) + '</p>'; return; }
+    if (/^0\s+marks/i.test(line) || /^Plus up to \d+ marks?/i.test(line)) { html += '<p class="ms-note">' + inlineMarks(line) + '</p>'; return; }
     html += '<p class="ms-text">' + labelled(line) + '</p>';
   });
   closeList();
