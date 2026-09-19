@@ -44,7 +44,8 @@ def term_pattern(term):
 
 def build_for(lesson, rnd):
     gl = [g for g in (lesson.get("glossary_terms") or []) if g.get("term") and g.get("definition") and 2 <= len(str(g["term"]).split()) <= 4 or (g.get("term") and g.get("definition") and len(str(g["term"])) >= 4)]
-    gl = [g for g in gl if 15 <= len(strip(g["definition"])) <= 220 and len(strip(g["term"])) <= 40]
+    gl = [g for g in gl if 15 <= len(strip(g["definition"])) <= 220 and len(strip(g["term"])) <= 40
+          and not re.search(r"\b(AQA|Edexcel|Pearson|OCR|Eduqas|WJEC|examiners?|mark scheme)\b", strip(g["term"]) + " " + strip(g["definition"]), re.I)]
     sents = sentences(lesson.get("content_html"))
     cards = []
     rnd.shuffle(gl)
