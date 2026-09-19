@@ -169,6 +169,10 @@
     injectLogo: function () {
       if (!this.isActive()) return;
       var session = this.get();
+      /* the school's badge belongs on the school's own lessons; a Unity student reading a
+         free-tier Astronomy lesson is not reading Unity content (Tom, 20 Sep 2026) */
+      var m = location.pathname.match(/^\/(lesson|practice)\/([^/]+)\//);
+      if (m && Array.isArray(session.bespoke_subjects) && session.bespoke_subjects.indexOf(m[2]) < 0) return;
       var headerInner = document.querySelector('.page-header-inner');
       if (!headerInner || headerInner.querySelector('.header-school-logo')) return;
 
