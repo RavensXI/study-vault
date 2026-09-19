@@ -623,7 +623,6 @@
   .finder input::placeholder{color:var(--mut)}
   .finder .fclear{border:0;background:transparent;color:var(--mut);font:600 .8rem var(--head);cursor:pointer;padding:.2rem .3rem}
   .finder .fclear:hover{color:var(--ink)}
-  .finder .fhint{margin:.4rem 0 0 .2rem;font-family:var(--hand);font-size:1.1rem;color:var(--mut)}
   .finder .fres{margin-top:.6rem;background:var(--card);border:1px solid #d5c9b3;border-radius:4px;overflow:hidden}
   .finder .fgroup{padding:.55rem .85rem .2rem;font:700 .72rem var(--head);letter-spacing:.06em;text-transform:uppercase;color:var(--mut);display:flex;align-items:center;gap:.5rem}
   .finder .fgroup i{width:9px;height:9px;border-radius:50%;background:var(--tc,#b9a98c);display:inline-block}
@@ -721,10 +720,9 @@
     <div class="finder" id="finder">
       <label class="fbar">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
-        <input type="search" id="finderin" placeholder="Revise one thing: a topic, a name, a word from class…" autocomplete="off" aria-label="Find something to revise">
+        <input type="search" id="finderin" placeholder="Revising something specific? Type it here, e.g. Berlin Blockade or photosynthesis" autocomplete="off" aria-label="Find something to revise">
         <button type="button" class="fclear" id="finderclear" hidden>Clear</button>
       </label>
-      <p class="fhint" id="finderhint">Try “photosynthesis”, “Berlin blockade” or “Scrooge and Marley”.</p>
       <div class="fres" id="finderres" hidden></div>
     </div>
     <div class="sechead"><h2>Your subjects</h2><span id="subcount"></span></div>
@@ -1955,7 +1953,7 @@ document.querySelector('.card.exam').onclick=()=>svPlannerOpen();
     {s:'Maths',u:'Algebra',n:7,t:'Solving Quadratics by Factorising',k:'brackets roots expand',st:0,href:'/practice/maths-aqa/algebra/7'}
   ];
   var STR=['Not yet','Developing','Getting there','Strong'];
-  var inp=document.getElementById('finderin'),res=document.getElementById('finderres'),hint=document.getElementById('finderhint'),clr=document.getElementById('finderclear');
+  var inp=document.getElementById('finderin'),res=document.getElementById('finderres'),clr=document.getElementById('finderclear');
   if(!inp)return;
   function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   function hl(s,q){var i=s.toLowerCase().indexOf(q);return i<0?esc(s):esc(s.slice(0,i))+'<mark>'+esc(s.slice(i,i+q.length))+'</mark>'+esc(s.slice(i+q.length));}
@@ -1965,8 +1963,8 @@ document.querySelector('.card.exam').onclick=()=>svPlannerOpen();
   function render(q){
     q=q.trim().toLowerCase();
     clr.hidden=!q;
-    if(q.length<2){res.hidden=true;hint.hidden=false;res.innerHTML='';return;}
-    hint.hidden=true;res.hidden=false;
+    if(q.length<2){res.hidden=true;res.innerHTML='';return;}
+    res.hidden=false;
     var hits=IX.map(function(l){return {l:l,sc:score(l,q)}}).filter(function(h){return h.sc>0}).sort(function(a,b){return b.sc-a.sc||a.l.st-b.l.st});
     var h='';
     if(!hits.length){h='<div class="fnone">Nothing in your subjects is called that. Ask below and StudyVault will work out what you mean.</div>';}
