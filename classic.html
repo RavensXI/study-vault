@@ -461,7 +461,7 @@
   .fcverdict{font-family:var(--head);font-size:.92rem;line-height:1.4;padding:.5rem .8rem;border-radius:8px;max-width:100%;text-align:left}
   .fcverdict[hidden]{display:none}
   .fcverdict b{font-weight:700}
-  .fcverdict.right{background:#edf6f0;color:#1e5b3e}.fcverdict.partly{background:#fbf3d6;color:#6b4e08}.fcverdict.wrong{background:#fbeee9;color:#9a3a25}
+  .fcverdict.right{background:#edf6f0;color:#1e5b3e}.fcverdict.partly{background:#fbf3d6;color:#6b4e08}.fcverdict.wrong{background:#fbeee9;color:#9a3a25}.fcverdict.off{background:#efe9df;color:var(--sec)}
   .fctypedecho{font-family:var(--head);font-size:.8rem;color:var(--mut);max-width:100%;text-align:left}
   .fctypedecho[hidden]{display:none}
   .bigcard .qq .gap{display:inline-block;min-width:2.6em;border-bottom:2px solid #3e3a31;margin:0 .1em}
@@ -1608,7 +1608,10 @@ function fcCheckTyped(){
   const typed=(_in.value||'').trim(); if(!typed||!f||!window.svRecall) return;
   _ck.disabled=true; _ck.textContent='Checking…'; _in.disabled=true;
   svRecall.judge({kind:f.kind||'recall',front:f.q,answer:f.a,items:f.items},typed).then(res=>{
-    if(!res){ _ck.disabled=false; _ck.textContent='Check'; _in.disabled=false; fcShowA=true; bigcard.classList.add('showa'); fcmodal.classList.add('showa'); fcReadGate(); return; }
+    if(!res){ _ck.disabled=false; _ck.textContent='Check'; _in.disabled=false;
+      const v0=document.getElementById('fcverdict'); v0.className='fcverdict off'; v0.innerHTML='<b></b> '; v0.querySelector('b').textContent=svRecall.unavailable.head; v0.appendChild(document.createTextNode(svRecall.unavailable.line)); v0.hidden=false;
+      const e0=document.getElementById('fctypedecho'); e0.textContent='You typed: '+typed; e0.hidden=false;
+      fcShowA=true; bigcard.classList.add('showa','judged'); fcmodal.classList.add('showa'); fcReadGate(); return; }
     fcJudged=res.verdict; const w=svRecall.words(res.verdict);
     const v=document.getElementById('fcverdict'); v.className='fcverdict '+res.verdict; v.innerHTML='<b></b> '; v.querySelector('b').textContent=w.head; v.appendChild(document.createTextNode(w.line)); v.hidden=false;
     const e=document.getElementById('fctypedecho'); e.textContent='You typed: '+typed; e.hidden=false;

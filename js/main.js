@@ -3243,9 +3243,14 @@ function openFlashcardModal() {
     if (!typed || !card) return;
     checkBtn.disabled = true; checkBtn.textContent = 'Checking\u2026'; typedIn.disabled = true;
     svRecall.judge({ kind: card.kind, front: card.front.replace(/<[^>]+>/g, '____'), answer: card.back.replace(/<[^>]+>/g, ''), items: card.items }, typed).then(function (res) {
-      if (!res) {                                     /* judge unavailable: the old flow */
+      if (!res) {                                     /* judge unavailable: say so, then the old flow */
         checkBtn.disabled = false; checkBtn.textContent = 'Check'; typedIn.disabled = false;
-        flipCard(); return;
+        verdictEl.className = 'fc-verdict fc-verdict--off';
+        overlay.querySelector('#fc-verdict-head').textContent = svRecall.unavailable.head;
+        overlay.querySelector('#fc-verdict-line').textContent = ' ' + svRecall.unavailable.line;
+        verdictEl.hidden = false;
+        typedEcho.textContent = 'You typed: ' + typed; typedEcho.hidden = false;
+        flipCard(); setCardHeight(); return;
       }
       judged = res.verdict;
       var w = svRecall.words(res.verdict);

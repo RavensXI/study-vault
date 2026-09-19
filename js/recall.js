@@ -33,8 +33,10 @@
   function words(verdict) { return WORDS[verdict] || WORDS.wrong; }
 
   /* which of the four card kinds to say on the badge and in the prompt */
-  var KIND_LABEL = { recall: 'Question', term: 'What does it mean?', definition: 'Name the term', cloze: 'Fill the gap', list: 'Name them all' };
-  var KIND_PLACEHOLDER = { recall: 'Type what you remember…', term: 'Type what it means…', definition: 'Type the term…', cloze: 'Type the missing word or words…', list: 'Type them, one per line or comma-separated…' };
+  var KIND_LABEL = { recall: 'Question', term: 'Who or what?', definition: 'Name it', cloze: 'Fill the gap', list: 'Name them all' };
+  var KIND_PLACEHOLDER = { recall: 'Type what you remember…', term: 'Say who or what this is…', definition: 'Type the name or term…', cloze: 'Type the missing word or words…', list: 'Type them, one per line or comma-separated…' };
+  /* when the judge cannot answer, the card says so rather than quietly turning back into the old flow */
+  var UNAVAILABLE = { head: 'Couldn’t check that one', line: 'Read the answer and rate yourself this time.' };
 
-  window.svRecall = { judge: judge, words: words, kindLabel: function (k) { return KIND_LABEL[k] || 'Question'; }, placeholder: function (k) { return KIND_PLACEHOLDER[k] || KIND_PLACEHOLDER.recall; } };
+  window.svRecall = { judge: judge, words: words, unavailable: UNAVAILABLE, kindLabel: function (k) { return KIND_LABEL[k] || 'Question'; }, placeholder: function (k) { return KIND_PLACEHOLDER[k] || KIND_PLACEHOLDER.recall; } };
 })();
