@@ -54,7 +54,9 @@
     spanish:   {s:'spanish-aqa',u:'people-and-lifestyle',n:1,name:'GCSE Spanish',practice:true},
     german:    {s:'german-aqa',u:'people-and-lifestyle',n:1,name:'GCSE German',practice:true}
   };
-  var DEFAULT='geog';
+  /* what the device shows before the visitor touches anything: Macbeth's witches (Tom, 19 Sep 2026) */
+  LESSONS.witches={s:'english-literature-aqa',u:'macbeth',n:7,name:'GCSE English Literature'};
+  var DEFAULT='witches';
   var frame=document.getElementById('lessoniframe'), note=document.getElementById('lf-note'),
       pad=document.getElementById('padiframe'), openPad=document.getElementById('lf-open-pad'),   /* the tablet: same lesson, tablet width */
       openLink=document.getElementById('lf-open'), which=document.getElementById('lf-which'),
@@ -72,7 +74,7 @@
     for(var i=ks.length-1;i>=0;i--){ if(!CORE[ks[i]] && LESSONS[ks[i]]) return ks[i]; }
     return DEFAULT;
   }
-  function ordinal(n){ return ['one','two','three','four','five','six'][n-1]||String(n); }
+  function ordinal(n){ return ['one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen'][n-1]||String(n); }
   function unitName(u){ return u.replace(/-/g,' ').replace(/\b(paper|aos)\s*(\d)/i,function(m,a,b){ return a[0].toUpperCase()+a.slice(1)+' '+b; }); }
   function setFrame(key){
     if(!frame||key===currentKey) return;

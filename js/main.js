@@ -304,76 +304,7 @@ function initPracticeQuestions() {
     answerEl.value = '';
   }
 
-  function formatMarkScheme(raw) {
-    // Escape HTML
-    const esc = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-    // Insert double newline before Level headings so they become separate blocks
-    let normalized = esc.replace(/\n(Level\s+\d)/gi, '\n\n$1');
-    // Band ladders (Mastering / Secure / Developing / Emerging) may arrive with a
-    // single newline or run inline ("... text. Secure: ..."); each band starts its own block.
-    normalized = normalized.replace(/(^|\n|[.!?;)]\s+)(?=(?:Mastering|Secure|Developing|Emerging):)/g, function(m, pre) {
-      return pre.replace(/\s+$/, '') + '\n\n';
-    });
-    const blocks = normalized.split(/\n\n+/);
-
-    let html = '';
-    blocks.forEach(block => {
-      block = block.trim();
-      if (!block) return;
-
-      // Level headings
-      if (/^Level\s+\d/i.test(block)) {
-        // Split into heading line and the rest
-        const lines = block.split('\n');
-        const heading = lines[0];
-        const rest = lines.slice(1).join('\n');
-
-        // Extract level number and marks
-        const match = heading.match(/^(Level\s+\d)\s*\(([^)]+)\):\s*(.*)/i);
-        if (match) {
-          html += '<div class="ms-level">';
-          html += '<div class="ms-level-header"><span class="ms-level-num">' + match[1] + '</span><span class="ms-level-marks">' + match[2] + '</span></div>';
-          html += '<p class="ms-level-desc">' + match[3] + '</p>';
-        } else {
-          html += '<div class="ms-level">';
-          html += '<p class="ms-level-desc">' + heading + '</p>';
-        }
-
-        // Handle example lines
-        if (rest) {
-          const examples = rest.split(/\n(?=Example)/);
-          examples.forEach(ex => {
-            ex = ex.trim();
-            if (ex.startsWith('Example')) {
-              const colonIdx = ex.indexOf(':');
-              if (colonIdx > -1) {
-                const label = ex.substring(0, colonIdx + 1);
-                const content = ex.substring(colonIdx + 1).trim();
-                html += '<div class="ms-example"><span class="ms-example-label">' + label + '</span> ' + content + '</div>';
-              } else {
-                html += '<div class="ms-example">' + ex + '</div>';
-              }
-            } else {
-              html += '<p class="ms-level-desc">' + ex + '</p>';
-            }
-          });
-        }
-
-        html += '</div>';
-      } else if (/^0\s+marks/i.test(block)) {
-        html += '<div class="ms-zero">' + block + '</div>';
-      } else if (/^SPaG/i.test(block)) {
-        html += '<div class="ms-spag"><strong>SPaG:</strong> ' + block.replace(/^SPaG:\s*/i, '') + '</div>';
-      } else if (/^All historically/i.test(block)) {
-        html += '<div class="ms-preamble">' + block + '</div>';
-      } else {
-        html += '<p>' + block + '</p>';
-      }
-    });
-
-    return html;
-  }
+  function formatMarkScheme(raw) { return svFormatMarkScheme(raw); }
 
   function showToast(message, duration) {
     toast.textContent = message;
@@ -4246,3 +4177,85 @@ allPins.forEach(function (p) {
     });
   });
 }
+
+/* --- Mark scheme display -------------------------------------------------------
+   Schemes are stored as plain text in five recurring shapes: a band ladder ("Top band:
+   ... Upper-mid band: ..."), point-marked answers ("... (1). ... (1)."), bullet lists
+   (often inline "•"), an "Indicative content" section, and plain sentences. Nothing is
+   changed in the data; this reads the shape at display time and lays it out so a
+   student can see the bands, the creditable points and the marks at a glance. */
+function svFormatMarkScheme(raw) {
+  var esc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+  var BAND = '(?:Top|Upper-mid|Upper mid|Upper|Middle|Mid|Lower-mid|Lower mid|Lower|Low|Bottom|High|Higher|Mastering|Secure|Developing|Emerging)';
+  var BAND_HEAD = new RegExp('^(' + BAND + '(?:\\s+band)?)\\s*(?:\\(([^)]*)\\))?\\s*:\\s*', 'i');
+  var LEVEL_HEAD = /^(Level\s+\d+)\s*(?:\(([^)]*)\))?\s*:?\s*/i;
+
+  var text = String(raw || '').replace(/\r/g, '').trim();
+  if (!text) return '';
+
+  /* one item per line: inline bullets, inline band heads, inline level heads, inline sub-headings */
+  text = text.replace(/\s*[•▪‣]\s*/g, '\n• ');
+  text = text.replace(new RegExp('(^|[.!?;)\\]]\\s+|\\n\\s*)(?=' + BAND + '(?:\\s+band)?\\s*(?:\\([^)]*\\))?\\s*:)', 'gi'), function (m, pre) { return pre.replace(/\s+$/, '') + '\n'; });
+  text = text.replace(/(^|[.!?;)\]]\s+|\n\s*)(?=Level\s+\d+\s*(?:\([^)]*\))?\s*:)/gi, function (m, pre) { return pre.replace(/\s+$/, '') + '\n'; });
+  text = text.replace(/(^|[.!?;)\]]\s+|\n\s*)(?=Indicative content\s*:?)/gi, function (m, pre) { return pre.replace(/\s+$/, '') + '\n'; });
+  text = text.replace(/([.!?;)\]])\s+(?=(?:Arguments?|Evaluation|Description|Analysis|Agree(?:ing)?|Disagree(?:ing)?|For|Against|Strengths?|Weaknesses?|Advantages?|Disadvantages?|Similarit(?:y|ies)|Differences?|AO\d)\b[^.:\n]{0,50}:)/g, '$1\n');
+  /* point-marked answers: each creditable point ends "(1)." or "(2);" - one per line */
+  text = text.replace(/\((\d+)\)\s*[.;,]?\s+(?=[A-Z•(])/g, '($1)\n');
+
+  var lines = text.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+  var html = '', list = null, listKind = '';
+  function closeList() { if (list) { html += '<ul class="ms-' + listKind + '">' + list.join('') + '</ul>'; list = null; listKind = ''; } }
+  /* "text (1)", "text (1 mark)", "text [2 marks]": the mark sits at the end of the line.
+     A line with several "(1)" markers inside it keeps them where they are. */
+  var TAIL = /^(.*?)\s*[\(\[](\d+)(?:\s*marks?)?[\)\]]\s*[.;,]?$/;
+  function marksInside(s) { return (s.match(/\(\d+\)/g) || []).length; }
+  function inlineMarks(s) { return esc(s).replace(/\((\d+)\)/g, '<span class="ms-mark ms-mark--in">$1</span>'); }
+  function pointItem(s) {
+    var m = s.match(TAIL);
+    if (!m || marksInside(s) > 1) return '<li><span class="ms-point">' + inlineMarks(s) + '</span></li>';
+    return '<li><span class="ms-point">' + esc(m[1]) + '</span><span class="ms-mark">' + m[2] + (m[2] === '1' ? ' mark' : ' marks') + '</span></li>';
+  }
+  function labelled(s) {   /* "Description (AO1): ..." keeps a short label bold */
+    var m = s.match(/^([A-Z][^:]{1,40}):\s+(.+)$/);
+    return m ? '<strong>' + esc(m[1]) + ':</strong> ' + inlineMarks(m[2]) : inlineMarks(s);
+  }
+  lines.forEach(function (line) {
+    var m;
+    if (/^[\[(]\d+\s*marks?[\])]$/i.test(line)) return;                 /* the question total: the badge has it */
+    if (!/\(\d+\)/.test(line)) line = line.replace(/\s*\[\d+\s*marks?\]\s*$/i, function (t) { return /^(?:\(?[a-z]\)|[A-D]\))/i.test(line) ? t : ''; }).trim() || line;
+    if (/^Indicative content\s*:?/i.test(line)) {
+      closeList();
+      html += '<h4 class="ms-head">Indicative content</h4>';
+      var rest = line.replace(/^Indicative content\s*:?\s*/i, '');
+      if (rest) { list = [pointItem(rest.replace(/^•\s*/, ''))]; listKind = 'bullets'; }
+      return;
+    }
+    if (/^[A-Z][^.:]{2,60}:$/.test(line)) { closeList(); html += '<h4 class="ms-sub">' + esc(line.replace(/:$/, '')) + '</h4>'; return; }
+    if ((m = line.match(BAND_HEAD)) || (m = line.match(LEVEL_HEAD))) {
+      closeList();
+      var name = m[1].replace(/\s+band$/i, ''), marks = m[2] || '', desc = line.slice(m[0].length);
+      if (!/^Level/i.test(name)) name += ' band';
+      html += '<div class="ms-band"><div class="ms-band-head"><span class="ms-band-name">' + esc(name) + '</span>' +
+        (marks ? '<span class="ms-band-marks">' + esc(marks.replace(/\s*marks?$/i, '')) + ' marks</span>' : '') + '</div>' +
+        (desc ? '<p class="ms-band-desc">' + esc(desc.replace(/\s*\[\d+\s*marks?\]\s*$/i, '')) + '</p>' : '') + '</div>';
+      return;
+    }
+    if (/^•\s*/.test(line)) {
+      if (listKind !== 'bullets') { closeList(); list = []; listKind = 'bullets'; }
+      list.push(pointItem(line.replace(/^•\s*/, '')));
+      return;
+    }
+    if (/[\(\[]\d+(?:\s*marks?)?[\)\]]\s*[.;,]?$/.test(line) && marksInside(line) <= 1) {
+      if (listKind !== 'points') { closeList(); list = []; listKind = 'points'; }
+      list.push(pointItem(line));
+      return;
+    }
+    closeList();
+    if (/^SPaG\b/i.test(line)) { html += '<p class="ms-note"><strong>SPaG:</strong> ' + esc(line.replace(/^SPaG\s*:?\s*/i, '')) + '</p>'; return; }
+    if (/^0\s+marks/i.test(line) || /^Plus up to \d+ marks?/i.test(line) || /^Up to \d+ marks?\b/i.test(line) || /^Award\b/i.test(line)) { html += '<p class="ms-note">' + inlineMarks(line) + '</p>'; return; }
+    html += '<p class="ms-text">' + labelled(line) + '</p>';
+  });
+  closeList();
+  return html;
+}
+window.svFormatMarkScheme = svFormatMarkScheme;
