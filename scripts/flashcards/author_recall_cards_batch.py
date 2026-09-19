@@ -51,6 +51,21 @@ def lesson_prompt(l):
     ex = "\n".join("- Q: %s | A: %s" % (strip(c.get("q") or c.get("question") or ""), strip(c.get("a") or c.get("answer") or "")) for c in (l.get("flashcard_questions") or []) if c)
     return "LESSON TITLE: %s\n\nLESSON TEXT:\n%s\n\nGLOSSARY:\n%s\n\nEXISTING FLASHCARDS (do not repeat these):\n%s\n\nWrite the cards now as JSON." % (l["title"], txt, gl or "(none)", ex or "(none)")
 
+def PARAMS(l):
+    # thinking off: with adaptive thinking on, Sonnet spends the output budget thinking and the JSON is cut short
+    return {"model": MODEL, "max_tokens": 2000, "thinking": {"type": "disabled"}, "system": SYSTEM, "messages": [{"role": "user", "content": lesson_prompt(l)}]}
+
+def resubmit():
+    """the lessons whose first answer was cut off (stop_reason max_tokens): same prompt, thinking off"""
+    cl = anthropic.Anthropic(); st = state()
+    ids = set(json.load(io.open(os.path.join(OUT, "_fleet_failed_ids.json"))))
+    todo = [l for l in lessons_to_do() if l["id"] in ids]
+    print("resubmitting", len(todo))
+    reqs = [{"custom_id": l["id"], "params": PARAMS(l)} for l in todo]
+    for k in range(0, len(reqs), 2000):
+        b = cl.messages.batches.create(requests=reqs[k:k + 2000]); st.setdefault("batches", []).append(b.id); print("submitted", b.id, len(reqs[k:k + 2000]))
+    save(st)
+
 def lessons_to_do():
     rows = []
     off = 0
@@ -66,7 +81,7 @@ def submit():
     cl = anthropic.Anthropic()
     todo = lessons_to_do()
     print("lessons to author:", len(todo))
-    reqs = [{"custom_id": l["id"], "params": {"model": MODEL, "max_tokens": 1400, "system": SYSTEM, "messages": [{"role": "user", "content": lesson_prompt(l)}]}} for l in todo]
+    reqs = [{"custom_id": l["id"], "params": PARAMS(l)} for l in todo]
     meta = {l["id"]: {"title": l["title"], "lesson_number": l["lesson_number"], "subject": l["units"]["subjects"]["slug"], "unit": l["units"]["slug"]} for l in todo}
     st = state(); st["batches"] = []; st["meta"] = meta
     for k in range(0, len(reqs), 2000):
@@ -87,7 +102,9 @@ def collect():
             text = "".join(blk.text for blk in m.content if blk.type == "text")
             mm = re.search(r"\{.*\}", text, re.S)
             try: allres[r.custom_id] = json.loads(mm.group(0)) if mm else {"cards": []}
-            except Exception: errs += 1; allres[r.custom_id] = {"cards": []}
+            except Exception:
+                errs += 1
+                if r.custom_id not in allres: allres[r.custom_id] = {"cards": []}     # a later (resubmitted) answer wins
     if pending: print("still running:", pending, "batch(es)"); return
     out = []
     for lid, res in allres.items():
@@ -121,4 +138,4 @@ def load():
     print("authored cards loaded:", added, "| held back:", held, "| lessons:", len(by))
 
 if __name__ == "__main__":
-    {"submit": submit, "collect": collect, "load": load}[sys.argv[1]]()
+    {"submit": submit, "resubmit": resubmit, "collect": collect, "load": load}[sys.argv[1]]()
