@@ -36,7 +36,7 @@ function plainMatch(kind, front, answer, typed) {
   if (a === t) return true;
   const years = a.match(/\b(1[0-9]{3}|20[0-9]{2})\b/g) || [];
   if (years.length === 1) {
-    const asksDay = /\b(month|day|date|exact|when exactly)\b/i.test(front);
+    const asksDay = /\b(which month|what month|which day|what day|exact date|exactly)\b/i.test(front);   // "on what date" still takes the year
     if (!asksDay && t === years[0]) return true;                                 // the year alone
     if (a.replace(/\b(1[0-9]{3}|20[0-9]{2})\b/g, ' ').replace(/\s+/g, ' ').trim() === t) return true;   // the answer without its year
   }
