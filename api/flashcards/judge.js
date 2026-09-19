@@ -79,7 +79,7 @@ module.exports = async function handler(req, res) {
           ? 'The student\'s recall supplies the missing words of the sentence or an equivalent (a synonym, a different form of the number). When the missing words are a date, the correct year on its own is a full match; when they are a person, the surname on its own is a full match. A different fact does not count'
           : kind === 'explain'
             ? 'The student\'s explanation gives the same cause or mechanism as the model answer, in their own words; a shorter explanation that names the key link still counts, a description without the why or how does not'
-            : 'The student\'s typed recall gives the same fact as the model answer; different wording, spelling mistakes and missing minor words are fine. For a date the correct year alone counts unless the question asks for the day or month; for a person the surname alone counts; a figure counts when it is the same to a sensible rounding';
+            : 'The student\'s typed recall gives the same fact as the model answer; different wording, spelling mistakes and missing minor words are fine. For a date the correct year alone counts unless the question asks for the day or month; for a person the surname alone counts; a figure counts when it is the same to a sensible rounding, and so does a figure that follows from the model answer (the fall from 46% to 15% is a cut of about 30 percentage points)';
     questions.correct = noul(rule);
     questions.completeness = score('How much of the model answer the student\'s recall covers', ['none of it', 'part of it', 'all of it']);
   }
@@ -99,7 +99,7 @@ module.exports = async function handler(req, res) {
       const p = a.correct ? a.correct.noul : 0, c = a.completeness ? a.completeness.score : 0;
       // right when the judge is sure the key fact or link is there (a short answer in the
       // student's own words is still right), or fairly sure and the answer is complete
-      const verdict = (p >= 0.85 || (p >= 0.7 && c >= 1.5)) ? 'right' : ((p >= 0.45 || c >= 0.9) ? 'partly' : 'wrong');
+      const verdict = (p >= 0.75 || (p >= 0.6 && c >= 1.5)) ? 'right' : ((p >= 0.45 || c >= 0.9) ? 'partly' : 'wrong');
       out = { kind, p: p, completeness: c, verdict: verdict };
     }
     out.usage = r.usage ? r.usage.input_tokens : undefined;

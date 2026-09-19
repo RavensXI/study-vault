@@ -3233,7 +3233,8 @@ function openFlashcardModal() {
 
     judged = null; lastTyped = '';
     if (advanceTimer) { clearTimeout(advanceTimer); advanceTimer = null; }
-    verdictEl.hidden = true; typedEcho.hidden = true; tickEl.hidden = true; appealBtn.hidden = true;
+    verdictEl.hidden = true; typedEcho.hidden = true; tickEl.hidden = true;
+    appealBtn.hidden = true; appealBtn.disabled = false; appealBtn.textContent = 'I think I was right?';   /* a fresh appeal for every card */
     cardEl.classList.remove('ticked');
     verdictEl.className = 'fc-verdict';
     btnWrong.hidden = false; btnRight.hidden = false; btnNext.hidden = true;
@@ -3284,7 +3285,7 @@ function openFlashcardModal() {
       /* one button: Next. Nearly holds the box, not quite resets it. A wrong card can be appealed. */
       btnWrong.hidden = true; btnRight.hidden = true; btnNext.hidden = false;
       btnNext.dataset.result = res.verdict === 'partly' ? 'partly' : 'wrong';
-      appealBtn.hidden = res.verdict !== 'wrong';
+      appealBtn.hidden = res.verdict === 'right';
       cardEl.classList.add('flipped');
       answerBtns.classList.add('visible', 'enabled');
       answersEnabled = true;
