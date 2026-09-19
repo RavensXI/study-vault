@@ -2966,7 +2966,24 @@ function openFlashcardModal() {
       front: item.q || item.question,
       back: item.a || item.answer,
       type: 'question',
+      kind: 'recall',
       badgeLabel: 'Question'
+    });
+  });
+  /* typed-recall cards built from the lesson's own glossary and sentences (recall_cards):
+     what a term means, name the term, fill the gap. Judged when the student types. */
+  var recallCards = window._lessonRecallCards || [];
+  recallCards.forEach(function (item, i) {
+    if (!item || !item.front || !item.answer) return;
+    allCards.push({
+      lessonId: lessonId,
+      index: 'r' + i,
+      front: esc(item.front).replace(/____/g, '<span class="fc-gap">\u00a0\u00a0\u00a0\u00a0</span>'),
+      back: esc(item.answer),
+      type: item.kind || 'recall',
+      kind: item.kind || 'recall',
+      items: item.items || null,
+      badgeLabel: (window.svRecall ? svRecall.kindLabel(item.kind) : 'Question')
     });
   });
 
@@ -3101,13 +3118,22 @@ function openFlashcardModal() {
                   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>' +
                 '</button>' +
                 '<div class="fc-card-text" id="fc-front-text"></div>' +
-                '<span class="fc-card-hint">Tap to reveal</span>' +
+                '<form class="fc-typed" id="fc-typed" autocomplete="off">' +
+                  '<textarea id="fc-typed-in" rows="2" maxlength="600" aria-label="Your answer"></textarea>' +
+                  '<div class="fc-typed-row">' +
+                    '<button type="submit" class="fc-check-btn" id="fc-check">Check</button>' +
+                    '<button type="button" class="fc-showme" id="fc-showme">Show me the answer</button>' +
+                  '</div>' +
+                '</form>' +
+                '<span class="fc-card-hint" id="fc-card-hint">Tap to reveal</span>' +
               '</div>' +
               '<div class="fc-card-face fc-card-back">' +
                 '<span class="fc-card-badge" id="fc-badge-back"></span>' +
                 '<button class="fc-modal-speak" id="fc-speak-back" aria-label="Read aloud" title="Read aloud">' +
                   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>' +
                 '</button>' +
+                '<div class="fc-verdict" id="fc-verdict" hidden><strong id="fc-verdict-head"></strong><span id="fc-verdict-line"></span></div>' +
+                '<div class="fc-typed-echo" id="fc-typed-echo" hidden></div>' +
                 '<div class="fc-card-text" id="fc-back-text"></div>' +
               '</div>' +
             '</div>' +
@@ -3157,6 +3183,16 @@ function openFlashcardModal() {
   var frontBadge = overlay.querySelector('#fc-badge-front');
   var backBadge = overlay.querySelector('#fc-badge-back');
   var answerBtns = overlay.querySelector('#fc-answer-buttons');
+  var btnWrong = overlay.querySelector('#fc-btn-wrong');
+  var btnRight = overlay.querySelector('#fc-btn-right');
+  var typedForm = overlay.querySelector('#fc-typed');
+  var typedIn = overlay.querySelector('#fc-typed-in');
+  var checkBtn = overlay.querySelector('#fc-check');
+  var verdictEl = overlay.querySelector('#fc-verdict');
+  var typedEcho = overlay.querySelector('#fc-typed-echo');
+  var cardHint = overlay.querySelector('#fc-card-hint');
+  var typedOn = !!(window.svRecall && window.fetch);   /* the judge is optional: without it the deck flips as before */
+  var judged = null;                                   /* the verdict for the card on screen, or null when self-rated */
   var sessionEl = overlay.querySelector('#fc-session');
   var endEl = overlay.querySelector('#fc-end');
 
@@ -3186,8 +3222,55 @@ function openFlashcardModal() {
     answersEnabled = false;
     if (answerUnlockTimer) { clearTimeout(answerUnlockTimer); answerUnlockTimer = null; }
 
+    judged = null;
+    verdictEl.hidden = true; typedEcho.hidden = true;
+    verdictEl.className = 'fc-verdict';
+    btnWrong.textContent = 'Got it wrong'; btnRight.textContent = 'Got it right';
+    btnWrong.dataset.result = 'wrong'; btnRight.dataset.result = 'right';
+    typedForm.hidden = !typedOn; cardHint.hidden = typedOn;
+    typedIn.value = ''; typedIn.disabled = false; checkBtn.disabled = false; checkBtn.textContent = 'Check';
+    typedIn.placeholder = window.svRecall ? svRecall.placeholder(card.kind) : 'Type what you remember\u2026';
+    cardEl.classList.toggle('typed', typedOn);
+
     setCardHeight();
+    if (typedOn && window.matchMedia && !window.matchMedia('(pointer: coarse)').matches) { setTimeout(function () { try { typedIn.focus(); } catch (e) {} }, 350); }
   }
+
+  /* ---- Typed recall: judge what they typed, then flip with a verdict ---- */
+  function checkTyped() {
+    var card = sessionCards[currentIdx];
+    var typed = (typedIn.value || '').trim();
+    if (!typed || !card) return;
+    checkBtn.disabled = true; checkBtn.textContent = 'Checking\u2026'; typedIn.disabled = true;
+    svRecall.judge({ kind: card.kind, front: card.front.replace(/<[^>]+>/g, '____'), answer: card.back.replace(/<[^>]+>/g, ''), items: card.items }, typed).then(function (res) {
+      if (!res) {                                     /* judge unavailable: the old flow */
+        checkBtn.disabled = false; checkBtn.textContent = 'Check'; typedIn.disabled = false;
+        flipCard(); return;
+      }
+      judged = res.verdict;
+      var w = svRecall.words(res.verdict);
+      verdictEl.className = 'fc-verdict fc-verdict--' + res.verdict;
+      overlay.querySelector('#fc-verdict-head').textContent = w.head;
+      overlay.querySelector('#fc-verdict-line').textContent = ' ' + w.line;
+      verdictEl.hidden = false;
+      typedEcho.textContent = 'You typed: ' + typed; typedEcho.hidden = false;
+      /* the buttons carry the verdict: one moves on, the other overrides it */
+      if (res.verdict === 'right') { btnWrong.textContent = 'Actually, I got it wrong'; btnWrong.dataset.result = 'wrong'; btnRight.textContent = 'Next'; btnRight.dataset.result = 'right'; }
+      else if (res.verdict === 'partly') { btnWrong.textContent = 'Next'; btnWrong.dataset.result = 'partly'; btnRight.textContent = 'Count it as right'; btnRight.dataset.result = 'right'; }
+      else { btnWrong.textContent = 'Next'; btnWrong.dataset.result = 'wrong'; btnRight.textContent = 'Actually, I got it'; btnRight.dataset.result = 'right'; }
+      cardEl.classList.add('flipped');
+      answerBtns.classList.add('visible', 'enabled');
+      answersEnabled = true;
+      setCardHeight();
+    });
+  }
+  typedForm.addEventListener('submit', function (e) { e.preventDefault(); e.stopPropagation(); checkTyped(); });
+  typedForm.addEventListener('click', function (e) { e.stopPropagation(); });
+  typedIn.addEventListener('keydown', function (e) {
+    e.stopPropagation();
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); checkTyped(); }
+  });
+  overlay.querySelector('#fc-showme').addEventListener('click', function (e) { e.stopPropagation(); flipCard(); });
 
   function setCardHeight() {
     var faces = cardEl.querySelectorAll('.fc-card-face');
@@ -3224,12 +3307,13 @@ function openFlashcardModal() {
   }
 
   cardEl.addEventListener('click', function (e) {
-    if (e.target.closest('.fc-modal-speak')) return;
+    if (e.target.closest('.fc-modal-speak') || e.target.closest('.fc-typed')) return;
+    if (typedOn && !cardEl.classList.contains('flipped') && (typedIn.value || '').trim()) { checkTyped(); return; }
     flipCard();
   });
 
   // ---- Mark card ----
-  function markCard(correct) {
+  function markCard(result) {
     var card = sessionCards[currentIdx];
     var key = getCardKey(card.lessonId, card.index);
     var prog = loadProgress();
@@ -3240,11 +3324,14 @@ function openFlashcardModal() {
 
     var cp = prog.cards[key];
     cp.attempts++;
+    if (judged) { cp.typed = (cp.typed || 0) + 1; cp.lastVerdict = judged; }
 
-    if (correct) {
+    if (result === true || result === 'right') {
       cp.correct++;
       cp.box = Math.min(cp.box + 1, 5);
       results.correct++;
+    } else if (result === 'partly') {
+      results.partly = (results.partly || 0) + 1;     /* the box holds: seen again on its current interval */
     } else {
       cp.box = 1;
       results.wrong++;
@@ -3257,8 +3344,8 @@ function openFlashcardModal() {
     showCard();
   }
 
-  overlay.querySelector('#fc-btn-wrong').addEventListener('click', function () { if (answersEnabled) markCard(false); });
-  overlay.querySelector('#fc-btn-right').addEventListener('click', function () { if (answersEnabled) markCard(true); });
+  btnWrong.addEventListener('click', function () { if (answersEnabled) markCard(btnWrong.dataset.result || 'wrong'); });
+  btnRight.addEventListener('click', function () { if (answersEnabled) markCard(btnRight.dataset.result || 'right'); });
 
   // ---- Skip ----
   function skipCard() {
@@ -3275,7 +3362,7 @@ function openFlashcardModal() {
     sessionEl.style.display = 'none';
 
     var streak = updateStreak();
-    var answered = results.correct + results.wrong;
+    var answered = results.correct + results.wrong + (results.partly || 0);
     var accuracy = answered > 0 ? Math.round((results.correct / answered) * 100) : 0;
 
     overlay.querySelector('#fc-end-accuracy').textContent = accuracy + '%';
@@ -3305,7 +3392,7 @@ function openFlashcardModal() {
   overlay.querySelector('#fc-end-again').addEventListener('click', function () {
     sessionCards = fisherYatesShuffle(allCards.slice());
     currentIdx = 0;
-    results = { correct: 0, wrong: 0, skipped: 0 };
+    results = { correct: 0, wrong: 0, skipped: 0, partly: 0 };
     endEl.style.display = 'none';
     sessionEl.style.display = '';
     cancelSpeech();
@@ -3330,6 +3417,7 @@ function openFlashcardModal() {
       closeModal();
       return;
     }
+    if (document.activeElement === typedIn) return;
     // Only handle keys when session is visible
     if (sessionEl.style.display === 'none') return;
 
@@ -3339,10 +3427,10 @@ function openFlashcardModal() {
       flipCard();
     } else if (e.key === 'ArrowLeft' || e.key === '1') {
       e.stopImmediatePropagation();
-      if (cardEl.classList.contains('flipped') && answersEnabled) markCard(false);
+      if (cardEl.classList.contains('flipped') && answersEnabled) markCard(btnWrong.dataset.result || 'wrong');
     } else if (e.key === 'ArrowRight' || e.key === '2') {
       e.stopImmediatePropagation();
-      if (cardEl.classList.contains('flipped') && answersEnabled) markCard(true);
+      if (cardEl.classList.contains('flipped') && answersEnabled) markCard(btnRight.dataset.result || 'right');
     } else if (e.key === 's' || e.key === 'S') {
       e.stopImmediatePropagation();
       skipCard();
@@ -3412,8 +3500,8 @@ function openFlashcardModal() {
         swipeTarget.style.transition = 'none';
         swipeTarget.style.transform = '';
         swipeTarget.style.opacity = '';
-        if (dx > 0) markCard(true);
-        else markCard(false);
+        if (dx > 0) markCard(btnRight.dataset.result || 'right');
+        else markCard(btnWrong.dataset.result || 'wrong');
       }, 250);
     } else {
       swipeTarget.style.transform = '';
@@ -3435,9 +3523,9 @@ function openFlashcardModal() {
       '<div class="fc-tutorial-card">' +
         '<h3>How to use Flashcards</h3>' +
         '<ul>' +
-          '<li>Tap the card or press <kbd>Enter</kbd> to flip it</li>' +
-          '<li>Swipe left or press <kbd>&larr;</kbd> if you got it wrong</li>' +
-          '<li>Swipe right or press <kbd>&rarr;</kbd> if you got it right</li>' +
+          '<li>Type what you remember and press <kbd>Enter</kbd>: the card checks it against the answer</li>' +
+          '<li>Not sure? Tap <b>Show me the answer</b> and rate yourself</li>' +
+          '<li>Swipe or use <kbd>&larr;</kbd> <kbd>&rarr;</kbd> to move on</li>' +
           '<li>Tap the speaker icon to hear it read aloud</li>' +
         '</ul>' +
         '<button class="fc-tutorial-btn">Got it</button>' +
