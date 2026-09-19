@@ -26,7 +26,7 @@ import jev
 from jev import ask_many, answers, Score, Choice, Noul
 jev.BUDGET_USD = 12.0        # topped up 19 Sep; the fleet pass is about $2
 
-CAP = 14; KIND_MAX = 7; DUP_P = 0.6; SCOPE_P = 0.35; LIST_MAX = 6
+CAP = 14; KIND_MAX = 7; DUP_P = 0.6; SCOPE_P = 1.0; LIST_MAX = 6      # scope: teacher rating 0 too hard .. 1 fair .. 2 core
 DATE_MAX = 2; COUNT_MAX = 1        # a deck is not a list of dates and figures
 DATE_RX = re.compile(r"^(on |in )?(\d{1,2} )?(january|february|march|april|may|june|july|august|september|october|november|december)? ?\d{4}( ?[-–] ?\d{2,4})?\.?$", re.I)
 def is_date_card(c):
@@ -61,7 +61,8 @@ def build(job):
     for c in cards:
         qs["c_" + c["id"]] = Score(instructions="How central to this lesson is what card %s tests: '%s' (answer: %s)" % (c["id"], c["front"][:200], c["answer"][:120]),
                                    criteria=["a side detail a student could skip", "worth knowing", "a central idea or fact the lesson exists to teach"])
-        qs["s_" + c["id"]] = Noul(instructions="A GCSE examiner would expect a student to recall what card %s asks from memory in the exam: '%s' (answer: %s). Not if it is context the lesson gives so the story makes sense: an exact day-and-month date, a minor name, a precise figure, or a list longer than a student would ever be asked." % (c["id"], c["front"][:200], c["answer"][:120]))
+        qs["s_" + c["id"]] = Score(instructions="How would a GCSE teacher of this subject rate card %s for a typical student revising the lesson: '%s' (answer: %s)" % (c["id"], c["front"][:200], c["answer"][:120]),
+                                   criteria=["too hard: a precise statistic, an exact date, a minor name or a detail only a specialist would hold", "fair: a supporting detail a good student might know", "core: a name, idea, cause or turning point every student must know"])
         crit = {"none": "no other card in the deck tests the same fact or idea"}
         for o in cards:
             if o["id"] != c["id"]: crit[o["id"]] = None
@@ -71,9 +72,10 @@ def build(job):
 
 def choose(cards, sc):
     for c in cards:
-        s = sc.get(c["id"], {}); c["central"] = s.get("central", 1.0); c["dup"] = s.get("dup"); c["dup_p"] = s.get("dup_p", 0.0); c["scope"] = s.get("scope", 1.0)
-    # best first: centrality, a typed kind ahead of a plain question at equal centrality, curated ahead of generated
-    order = sorted(cards, key=lambda c: (-(c["central"] + (0.3 if c["kind"] in TYPED else 0)), c["src"] != "curated"))
+        s = sc.get(c["id"], {}); c["central"] = s.get("central", 1.0); c["dup"] = s.get("dup"); c["dup_p"] = s.get("dup_p", 0.0); c["scope"] = s.get("scope", 1.5)
+
+    # best first: what a teacher would set a typical student, then centrality, a typed kind ahead of a plain question only at a tie
+    order = sorted(cards, key=lambda c: (-round(c["scope"], 1), is_date_card(c) or is_count_card(c), -(c["central"] + (0.1 if c["kind"] in TYPED else 0)), c["src"] != "curated"))   # at a tie the card that is not a date or a figure wins
     names = {c["id"]: (c["dup"] if c["dup_p"] >= DUP_P else None) for c in cards}
     keep, per_kind, later = [], collections.Counter(), []
     def twin(c):
@@ -82,7 +84,7 @@ def choose(cards, sc):
             if names[c["id"]] == k["id"] or names[k["id"]] == c["id"]: return k
     for c in order:
         if c["kind"] == "list" and (len(c["items"]) > LIST_MAX or list_count(c["front"]) > max(len(c["items"]), LIST_MAX)): c["why"] = "too long a list"; continue
-        if c["scope"] < SCOPE_P: c["why"] = "beyond what the exam asks"; continue
+        if c["scope"] < SCOPE_P: c["why"] = "too hard for a typical student"; continue
         t = twin(c)
         if t: c["why"] = "same as " + t["id"]; continue
         if c["central"] < 0.7: c["why"] = "side detail"; continue
@@ -114,7 +116,7 @@ def run(slug, school, apply):
         for k, v in a.items():
             cid = k[2:]; sc.setdefault(cid, {})
             if k.startswith("c_"): sc[cid]["central"] = v["score"]
-            elif k.startswith("s_"): sc[cid]["scope"] = v["noul"]
+            elif k.startswith("s_"): sc[cid]["scope"] = v["score"]
             else:
                 ch = v.get("choice"); sc[cid]["dup"] = None if ch == "none" else ch
                 sc[cid]["dup_p"] = (v.get("probabilities") or {}).get(ch, v.get("confidence", 0.0)) or 0.0
