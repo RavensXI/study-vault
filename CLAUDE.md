@@ -58,7 +58,7 @@ content never ports to free tier (same spec = fresh build).**
 ## What every subject has
 
 Content, practice questions (6/lesson), knowledge checks (5/lesson),
-flashcards (5/lesson), TTS narration (Azure, MP3s on R2), hero images
+flashcards (12–15 curated question cards + typed-recall cards a lesson, curated to a deck of ≤14 — see the typed-recall branch), TTS narration (Azure, MP3s on R2), hero images
 (photographs — vision-gated pipeline), exam/revision technique guides,
 curated related media (URL-audited — see YouTube audit below).
 
@@ -277,7 +277,7 @@ All in environment variables — never commit.
   `border-radius: 16px`, soft shadows. No coloured left-border stripes.
 - **Images:** heroes max 1200px (photographs, vision-gated), diagrams max
   1000px, JPEG q82.
-- **Content:** 6 practice + 5 KCs + 5 flashcards per lesson; GCSE age 15–16
+- **Content:** 6 practice + 5 KCs + a flashcard deck of ≤14 (12–15 curated cards plus typed-recall cards, judged down to 14) per lesson; GCSE age 15–16
   readability. `*_html` fields use entities; plain-text fields use unicode
   (validator enforces). Fact-check BEFORE narration.
 - **Narration:** Azure, Ollie (odd) / Ada (even lessons), MP3 96kbps 24kHz
