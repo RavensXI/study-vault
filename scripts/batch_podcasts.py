@@ -242,6 +242,19 @@ def get_pending_lessons(sb, limit, subject_filter=None, school_id=None,
                 break
         return all_pending[:limit]
 
+    # --school with no --subject: sweep every bespoke subject of that school. Without
+    # this branch a school fell through to the free-tier SUBJECT_ORDER loop and its own
+    # lessons were never swept at all (five Unity lessons found bare, Tom 20 Sep 2026).
+    if school_id and not subject_filter:
+        subj_rows = sb.from_('subjects').select(
+            'id, name, exam_board, slug, created_at'
+        ).eq('school_id', school_id).order('created_at', desc=True).execute().data or []
+        for subject in subj_rows:
+            _fetch_subject_lessons(sb, subject["slug"], subject, limit, all_pending)
+            if len(all_pending) >= limit:
+                break
+        return all_pending[:limit]
+
     # If a specific subject is requested that isn't in SUBJECT_ORDER, query directly
     if subject_filter and subject_filter not in SUBJECT_ORDER:
         query = sb.from_('subjects').select('id, name, exam_board').eq('slug', subject_filter)

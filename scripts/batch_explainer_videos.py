@@ -188,14 +188,17 @@ def _fetch_subject_lessons(sb, slug, subject, limit, all_pending):
             break
 
 
-def get_pending_lessons(sb, limit, subject_filter=None):
-    """Free-tier only (school_id IS NULL). Optional subject filter.
+def get_pending_lessons(sb, limit, subject_filter=None, school_id=None):
+    """Free tier by default; --school sweeps that school's bespoke subjects instead
+    (without it a school's new lessons were never swept at all — 5 Unity lessons sat
+    without a video or podcast for weeks, found 20 Sep 2026). Optional subject filter.
 
     Without --subject filter, iterates subjects in ascending-remaining-count order
     so smaller subjects ship complete before larger ones.
     """
     all_pending = []
-    query = sb.from_('subjects').select('id, name, slug, exam_board, settings').is_('school_id', 'null')
+    query = sb.from_('subjects').select('id, name, slug, exam_board, settings')
+    query = query.eq('school_id', school_id) if school_id else query.is_('school_id', 'null')
     if subject_filter:
         query = query.eq('slug', subject_filter)
     subjects = query.execute().data or []
@@ -228,7 +231,7 @@ def cmd_generate(args):
     # notebook, counted against the cap. Genuinely-cooking jobs are skipped.
     jobs_by_lesson = {j["lesson_id"]: j for j in state["jobs"] if j.get("status") == "in_progress"}
 
-    pending = get_pending_lessons(sb, args.limit, args.subject)
+    pending = get_pending_lessons(sb, args.limit, args.subject, getattr(args, 'school', None))
 
     if not pending:
         print("No lessons pending explainer video generation!")
@@ -606,7 +609,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--limit", type=int, default=200, help="Max lessons to queue (default 200)")
     parser.add_argument("--daily-cap", type=int, dest="daily_cap", help="Cap based on remaining 200/day quota — convenience alias for --limit")
-    parser.add_argument("--subject", help="Free-tier subject slug to target")
+    parser.add_argument("--subject", help="Subject slug to target")
+    parser.add_argument("--school", help="School ID (UUID): sweep that school's bespoke subjects instead of the free tier")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--status", action="store_true")
     parser.add_argument("--download", action="store_true")

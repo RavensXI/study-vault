@@ -50,14 +50,18 @@ def main():
     counts = {}
     off = 0
     while True:
-        page = sq("lessons?select=unit_id,status,related_media,content_html"
-                  f"&status=eq.live&order=id&limit=500&offset={off}")
+        page = sq("lessons?select=unit_id,status,related_media,content_html,is_listening"
+                  f"&status=eq.live&is_listening=eq.false&order=id&limit=500&offset={off}")
         for l in page:
             slug = usub.get(l["unit_id"])
             if not slug:
                 continue
             if len(l.get("content_html") or "") < MIN_CONTENT:
                 continue  # practice-format or stub — no podcast by design
+            # music set-work listening lessons carry no podcast by design; counting
+            # them made the wrapper report a permanent backlog of 28 (Tom, 20 Sep 2026)
+            if l.get("is_listening"):
+                continue
             if has_podcast(l.get("related_media")):
                 continue
             counts[slug] = counts.get(slug, 0) + 1

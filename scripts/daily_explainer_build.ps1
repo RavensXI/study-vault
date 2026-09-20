@@ -128,13 +128,18 @@ Write-Log ("Lock acquired. Launch timestamp written: {0}" -f (Get-Date -Format "
 
 try {
 
-# 11 Sep 2026: NLM compute-based limits landed. Re-fires paused until one run has shown
-# how a deferred (background-queued) generation reports; remove this line to resume.
-$env:SV_NLM_NO_REFIRE = "1"
+# 11 Sep 2026: NLM compute-based limits landed and re-fires were paused for one
+# observed run. 20 Sep 2026: RESUMED - the pause had been left on for nine days and
+# was only hiding whether the new quota works. Set SV_NLM_NO_REFIRE=1 by hand to pause.
 
 # Phase 1: launch up to 180 new generations
-Write-Log "Phase 1: launching..."
+Write-Log "Phase 1: launching (free tier)..."
 Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--daily-cap", "100") | Out-Null
+
+# Phase 1b: the schools. Without this pass a school's new lessons were never swept at
+# all - five Unity lessons sat with no video and no podcast (Tom, 20 Sep 2026).
+Write-Log "Phase 1b: launching (Unity College)..."
+Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--school", "a5414d1c-8841-4bc5-8573-a9756752361b", "--daily-cap", "20") | Out-Null
 
 # Phase 2: poll up to 4 hours, downloading completed jobs as they come in.
 # Smoke test showed ~20 min cook time for 10 lessons; 180 should land well under 1h.

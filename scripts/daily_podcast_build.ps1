@@ -141,8 +141,14 @@ Write-Log ("Lock acquired. Launch timestamp written: {0}" -f (Get-Date -Format "
 try {
 
 # Phase 1: launch up to $dailyCap generations (~1.5-2 min each)
-Write-Log "Phase 1: launching..."
+Write-Log "Phase 1: launching (free tier)..."
 Run-Py -PyArgs @("scripts\batch_podcasts.py", "--limit", "$dailyCap", "--live-only", "--unit-complete", "--all-subjects") -TimeoutMin 180 | Out-Null
+
+# Phase 1b: the schools. --all-subjects is free-tier only (school_id IS NULL), so without
+# this pass a school's new lessons were never swept - five Unity lessons sat with no
+# podcast and no video (Tom, 20 Sep 2026).
+Write-Log "Phase 1b: launching (Unity College)..."
+Run-Py -PyArgs @("scripts\batch_podcasts.py", "--limit", "20", "--live-only", "--unit-complete", "--school", "a5414d1c-8841-4bc5-8573-a9756752361b") -TimeoutMin 60 | Out-Null
 
 # Phase 2: poll up to 3 hours, downloading completed jobs as they come in.
 $maxLoops = 18
