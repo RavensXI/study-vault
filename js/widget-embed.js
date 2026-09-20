@@ -2179,6 +2179,806 @@
       after: "Factors Affecting Rate",
       school: "unity"
     },
+    "business/theme-2/9": {
+      file: "marketing-mix-interdependent",
+      label: "Test the mix",
+      line: "Change one P in a small business and predict which of the other three cannot stay as it was.",
+      after: "Using the Marketing Mix to Build Competitive Advantage",
+      school: "unity"
+    },
+    "business-aqa/business-real-world/2": {
+      file: "limited-liability-protects-personal-assets-only",
+      label: "Where the loss stops",
+      line: "A failing business, two columns of assets, one line between them — mark what creditors can reach, then say what the owner loses.",
+      after: "$end"
+    },
+    "business-aqa/finance/4": {
+      file: "break-even-line-crossing",
+      label: "Find where the lines cross",
+      line: "Predict a small firm's break-even quantity, the profit or loss at a given output, and which way the crossing slides when a cost or the price changes.",
+      after: "Worked Example — Oakleaf Coffee Again"
+    },
+    "business-aqa/marketing/1": {
+      file: "marketing-mix-interdependent",
+      label: "Test the mix",
+      line: "Change one P in a small business and predict which of the other three cannot stay as it was.",
+      after: "$end"
+    },
+    "business-aqa/marketing/6": {
+      file: "marketing-mix-interdependent",
+      label: "Test the mix",
+      line: "Change one P in a small business and predict which of the other three cannot stay as it was.",
+      after: "The Mix Evolves Over Time"
+    },
+    "business-edexcel/investigating-small-business/11": {
+      file: "marketing-mix-interdependent",
+      label: "Test the mix",
+      line: "Change one P in a small business and predict which of the other three cannot stay as it was.",
+      after: "$end"
+    },
+    "business-ocr/business-activity-marketing-people/13": {
+      file: "marketing-mix-interdependent",
+      label: "Test the mix",
+      line: "Change one P in a small business and predict which of the other three cannot stay as it was.",
+      after: "$end"
+    },
+    "business-ocr/business-activity-marketing-people/6": {
+      file: "vertical-vs-horizontal-integration",
+      label: "Judge Kestrel's next takeover",
+      line: "A media conglomerate proposes a run of acquisitions — decide which are vertical, which are horizontal, and what power each one buys.",
+      after: "Why Choose One Over the Other?"
+    },
+    "business-ocr/operations-finance-influences/11": {
+      file: "break-even-line-crossing",
+      label: "Find where the lines cross",
+      line: "Predict a small firm's break-even quantity, the profit or loss at a given output, and which way the crossing slides when a cost or the price changes.",
+      after: "Why Break-Even Matters for Decisions"
+    },
+    "business-ocr/operations-finance-influences/12": {
+      file: "profit-vs-cash-not-interchangeable",
+      label: "Predict profit, then cash",
+      line: "One month of a small business — work out what it earned, and what is actually in the bank.",
+      after: "Why Cash Provides Liquidity"
+    },
+    "cambridge-nationals-engineering-manufacture/principles-of-engineering-manufacture/3": {
+      file: "thermoforming-vs-thermosetting-polymers",
+      label: "Slide or hold?",
+      line: "Two polymers meet the same heat. Predict which one re-shapes and which one only chars — and say why.",
+      after: "Engineering Ceramics and Composites"
+    },
+    "cambridge-nationals-enterprise-and-marketing/enterprise-and-marketing-concepts/11": {
+      file: "limited-liability-protects-personal-assets-only",
+      label: "Where the loss stops",
+      line: "A failing business, two columns of assets, one line between them — mark what creditors can reach, then say what the owner loses.",
+      after: "Six Sources of Start-Up Capital"
+    },
+    "citizenship-aqa/politics-participation-active-citizenship/2": {
+      file: "devolution-vs-independence",
+      label: "Work out who decides",
+      line: "Predict whether a decision belongs to the Scottish Parliament, the Senedd, the Northern Ireland Assembly or Westminster — and see why the three lists are not the same.",
+      after: "$end"
+    },
+    "creative-imedia/distribution-and-media/3": {
+      file: "sampling-repeated-measurement",
+      label: "Predict what gets stored",
+      line: "See an ADC measure a sound wave at fixed instants, then work out how much of the wave survives — and how big the file becomes.",
+      after: "Sample Rate",
+      school: "unity"
+    },
+    "design-technology-edexcel/core-technical-principles/5": {
+      file: "motion-types-distinction",
+      label: "Name the motion type",
+      line: "Watch a real machine part move, commit to rotary, linear, reciprocating or oscillating, then see the path it traced.",
+      after: "Levers and Mechanical Advantage"
+    },
+    "design-technology-edexcel/core-technical-principles/7": {
+      file: "thermoforming-vs-thermosetting-polymers",
+      label: "Slide or hold?",
+      line: "Two polymers meet the same heat. Predict which one re-shapes and which one only chars — and say why.",
+      after: "Textiles: Fibres & Fabric Construction"
+    },
+    "design-technology-eduqas/polymers-in-depth/1": {
+      file: "thermoforming-vs-thermosetting-polymers",
+      label: "Slide or hold?",
+      line: "Two polymers meet the same heat. Predict which one re-shapes and which one only chars — and say why.",
+      after: "Ecological and Social Footprint"
+    },
+    "design-technology-eduqas/polymers-in-depth/2": {
+      file: "thermoforming-vs-thermosetting-polymers",
+      label: "Slide or hold?",
+      line: "Two polymers meet the same heat. Predict which one re-shapes and which one only chars — and say why.",
+      after: "Stock Forms of Polymers"
+    },
+    "design-technology-eduqas/polymers-in-depth/3": {
+      file: "thermoforming-vs-thermosetting-polymers",
+      label: "Slide or hold?",
+      line: "Two polymers meet the same heat. Predict which one re-shapes and which one only chars — and say why.",
+      after: "Vacuum Forming"
+    },
+    "design-technology-eduqas/polymers-in-depth/4": {
+      file: "thermoforming-vs-thermosetting-polymers",
+      label: "Slide or hold?",
+      line: "Two polymers meet the same heat. Predict which one re-shapes and which one only chars — and say why.",
+      after: "Solvent Cement and Tensol"
+    },
+    "design-technology-eduqas/polymers-in-depth/5": {
+      file: "thermoforming-vs-thermosetting-polymers",
+      label: "Slide or hold?",
+      line: "Two polymers meet the same heat. Predict which one re-shapes and which one only chars — and say why.",
+      after: "Marine Pollution and Microplastics"
+    },
+    "drama-aqa/a-taste-of-honey/7": {
+      file: "theatre-configuration-impact",
+      label: "Place the audience",
+      line: "Six production briefs, one plan. Choose the configuration each one demands, then see the sightlines it creates.",
+      after: "$end"
+    },
+    "drama-aqa/a-taste-of-honey/8": {
+      file: "theatre-configuration-impact",
+      label: "Place the audience",
+      line: "Six production briefs, one plan. Choose the configuration each one demands, then see the sightlines it creates.",
+      after: "The Extended Staging Response: Directing a Whole Extract"
+    },
+    "drama-aqa/the-empress/1": {
+      file: "cross-cutting-structural-device",
+      label: "Cut between the two scenes",
+      line: "Two scenes, one cut — predict what an audience experiences when a director intercuts them instead of playing one and then the other.",
+      after: "Designing Empire: Why Context Shapes the Stage"
+    },
+    "drama-aqa/the-empress/2": {
+      file: "cross-cutting-structural-device",
+      label: "Cut between the two scenes",
+      line: "Two scenes, one cut — predict what an audience experiences when a director intercuts them instead of playing one and then the other.",
+      after: "Scene Four: The Abandonment at Tilbury Docks"
+    },
+    "drama-aqa/the-empress/5": {
+      file: "cross-cutting-structural-device",
+      label: "Cut between the two scenes",
+      line: "Two scenes, one cut — predict what an audience experiences when a director intercuts them instead of playing one and then the other.",
+      after: "$end"
+    },
+    "drama-aqa/the-empress/6": {
+      file: "cross-cutting-structural-device",
+      label: "Cut between the two scenes",
+      line: "Two scenes, one cut — predict what an audience experiences when a director intercuts them instead of playing one and then the other.",
+      after: "$end"
+    },
+    "drama-aqa/the-empress/7": {
+      file: "cross-cutting-structural-device",
+      label: "Cut between the two scenes",
+      line: "Two scenes, one cut — predict what an audience experiences when a director intercuts them instead of playing one and then the other.",
+      after: "Sound and Song as a Staging Device"
+    },
+    "drama-aqa/the-empress/8": {
+      file: "theatre-configuration-impact",
+      label: "Place the audience",
+      line: "Six production briefs, one plan. Choose the configuration each one demands, then see the sightlines it creates.",
+      after: "The Extended Staging Response"
+    },
+    "drama-aqa/the-great-wave/1": {
+      file: "cross-cutting-structural-device",
+      label: "Cut between the two scenes",
+      line: "Two scenes, one cut — predict what an audience experiences when a director intercuts them instead of playing one and then the other.",
+      after: "Time Leaps and the Ageing Body"
+    },
+    "economics-aqa/production-costs-and-market-structures/5": {
+      file: "curve-movement-vs-shift",
+      label: "Movement or shift?",
+      line: "A price change slides the point along the curve; only a non-price factor moves the whole curve. Commit a prediction, then watch it.",
+      after: "How Wages Are Determined"
+    },
+    "engineering-aqa/engineering-materials/3": {
+      file: "thermoforming-vs-thermosetting-polymers",
+      label: "Slide or hold?",
+      line: "Two polymers meet the same heat. Predict which one re-shapes and which one only chars — and say why.",
+      after: "Named Thermoplastics and Their Uses"
+    },
+    "engineering-aqa/engineering-systems/2": {
+      file: "motion-types-distinction",
+      label: "Name the motion type",
+      line: "Watch a real machine part move, commit to rotary, linear, reciprocating or oscillating, then see the path it traced.",
+      after: "Linkages and Conversion of Motion"
+    },
+    "engineering-aqa/engineering-systems/7": {
+      file: "bending-tension-compression",
+      label: "Mark the two faces",
+      line: "One load, two opposite stresses. Mark which face is stretched and which is squashed — then watch it bend.",
+      after: "Pascal’s Law and Pressure Systems"
+    },
+    "english-literature-edexcel/refugee-boy/6": {
+      file: "cross-cutting-structural-device",
+      label: "Cut between the two scenes",
+      line: "Two scenes, one cut — predict what an audience experiences when a director intercuts them instead of playing one and then the other.",
+      after: "Direct Address"
+    },
+    "english-literature-edexcel/the-empress/6": {
+      file: "cross-cutting-structural-device",
+      label: "Cut between the two scenes",
+      line: "Two scenes, one cut — predict what an audience experiences when a director intercuts them instead of playing one and then the other.",
+      after: "Historical vs. Fictional Characters"
+    },
+    "film-studies-eduqas/global-and-uk-film/1": {
+      file: "plot-vs-story",
+      label: "Work out the cut",
+      line: "Three short stories, each re-arranged into a film — decide what the audience meets first, which events never reach the screen, and what that order creates.",
+      after: "Withholding and Releasing Information"
+    },
+    "film-studies-eduqas/global-and-uk-film/6": {
+      file: "plot-vs-story",
+      label: "Work out the cut",
+      line: "Three short stories, each re-arranged into a film — decide what the audience meets first, which events never reach the screen, and what that order creates.",
+      after: "Mumbai as Narrative Space"
+    },
+    "food-preparation-and-nutrition-eduqas/food-science-and-nutrition/2": {
+      file: "gelatinisation-vs-dextrinisation",
+      label: "Predict the starch reaction",
+      line: "Read the conditions in a kitchen scenario, commit to gelatinisation, dextrinisation, both or neither, then watch the granules show what really happened.",
+      after: "Fats: Shortening, Aeration, Plasticity and Emulsification"
+    },
+    "food-preparation-and-nutrition-eduqas/food-science-and-nutrition/9": {
+      file: "gelatinisation-vs-dextrinisation",
+      label: "Predict the starch reaction",
+      line: "Read the conditions in a kitchen scenario, commit to gelatinisation, dextrinisation, both or neither, then watch the granules show what really happened.",
+      after: "Fats and Oils: Shortening, Aeration, Plasticity and Emulsification"
+    },
+    "geology-eduqas/hazards-resources-and-investigative-geology/4": {
+      file: "porosity-vs-permeability",
+      label: "Test a rock with water",
+      line: "Read the grains, predict the porosity and the permeability, then watch whether the water soaks in and stops or streams straight through.",
+      after: "Extraction Methods and Fracking"
+    },
+    "health-social-care-eduqas/growth-development-lifespan/3": {
+      file: "piaget-qualitative-stages",
+      label: "Predict the child's answer",
+      line: "A classic Piagetian task and a named stage — predict how that child answers, then hear them say it.",
+      after: "Kohlberg’s Three Levels of Moral Development"
+    },
+    "history-edexcel/warfare-british-society/14": {
+      file: "media-construction-of-reality",
+      label: "Two bulletins, one afternoon",
+      line: "Two accurate news bulletins cover the same protest. Work out what makes their versions differ — and why neither simply shows what happened.",
+      after: "$end"
+    },
+    "history-ocr/power-monarchy-democracy-1000-2014/10": {
+      file: "devolution-vs-independence",
+      label: "Work out who decides",
+      line: "Predict whether a decision belongs to the Scottish Parliament, the Senedd, the Northern Ireland Assembly or Westminster — and see why the three lists are not the same.",
+      after: "The 2010 Coalition and Challenges of Coalition Government"
+    },
+    "media-studies-aqa/media-representations/1": {
+      file: "media-construction-of-reality",
+      label: "Two bulletins, one afternoon",
+      line: "Two accurate news bulletins cover the same protest. Work out what makes their versions differ — and why neither simply shows what happened.",
+      after: "Two Competing Views of Media and Reality"
+    },
+    "media-studies-aqa/media-representations/3": {
+      file: "media-construction-of-reality",
+      label: "Two bulletins, one afternoon",
+      line: "Two accurate news bulletins cover the same protest. Work out what makes their versions differ — and why neither simply shows what happened.",
+      after: "Techniques of Persuasive Communication"
+    },
+    "media-studies-aqa/media-representations/4": {
+      file: "media-construction-of-reality",
+      label: "Two bulletins, one afternoon",
+      line: "Two accurate news bulletins cover the same protest. Work out what makes their versions differ — and why neither simply shows what happened.",
+      after: "$end"
+    },
+    "media-studies-eduqas/set-products-language-representation/3": {
+      file: "media-construction-of-reality",
+      label: "Two bulletins, one afternoon",
+      line: "Two accurate news bulletins cover the same protest. Work out what makes their versions differ — and why neither simply shows what happened.",
+      after: "$end"
+    },
+    "media-studies-eduqas/set-products-language-representation/4": {
+      file: "media-construction-of-reality",
+      label: "Two bulletins, one afternoon",
+      line: "Two accurate news bulletins cover the same protest. Work out what makes their versions differ — and why neither simply shows what happened.",
+      after: "$end"
+    },
+    "media-studies-eduqas/theoretical-framework/3": {
+      file: "media-construction-of-reality",
+      label: "Two bulletins, one afternoon",
+      line: "Two accurate news bulletins cover the same protest. Work out what makes their versions differ — and why neither simply shows what happened.",
+      after: "Stereotypes: Uses and Problems"
+    },
+    "media-studies-eduqas/theoretical-framework/4": {
+      file: "vertical-vs-horizontal-integration",
+      label: "Judge Kestrel's next takeover",
+      line: "A media conglomerate proposes a run of acquisitions — decide which are vertical, which are horizontal, and what power each one buys.",
+      after: "Convergence Across Platforms and Borders"
+    },
+    "music-eduqas/aos3-film-music/2": {
+      file: "timbre-integral-to-composition",
+      label: "Same notes, different music",
+      line: "One phrase, three scorings — see where the identical notes fall inside each instrument’s range, and commit to which one the composer wants.",
+      after: "Scales, Modes and Harmony for Setting"
+    },
+    "music-ocr/aos4-film-music/2": {
+      file: "timbre-integral-to-composition",
+      label: "Same notes, different music",
+      line: "One phrase, three scorings — see where the identical notes fall inside each instrument’s range, and commit to which one the composer wants.",
+      after: "Scales, Modes and Harmony for Setting"
+    },
+    "psychology-aqa/research-methods/1": {
+      file: "stratification-not-a-sampling-method",
+      label: "Plan a stratified sample",
+      line: "Split a school into year groups, set each group’s share of the sample — then decide how the individuals are actually chosen.",
+      after: "$end"
+    },
+    "psychology-ocr/development/4": {
+      file: "piaget-qualitative-stages",
+      label: "Predict the child's answer",
+      line: "A classic Piagetian task and a named stage — predict how that child answers, then hear them say it.",
+      after: "Learning Theories: Growth Mindset and Teaching Through Meaning"
+    },
+    "religious-studies-b-edexcel/area1-catholic-christianity/1": {
+      file: "trinity-three-persons",
+      label: "Sort the Trinity claims",
+      line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
+      after: "The Nicene Creed"
+    },
+    "religious-studies-b-edexcel/area1-christianity/1": {
+      file: "trinity-three-persons",
+      label: "Sort the Trinity claims",
+      line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
+      after: "The Creation of the Universe and of Humanity"
+    },
+    "religious-studies-edexcel/paper-1-christianity/1": {
+      file: "trinity-three-persons",
+      label: "Sort the Trinity claims",
+      line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
+      after: "God the Father, Son and Holy Spirit"
+    },
+    "religious-studies-eduqas/catholic-foundational-good-and-evil/2": {
+      file: "trinity-three-persons",
+      label: "Sort the Trinity claims",
+      line: "Decide whether each claim keeps the doctrine of the Trinity, or slips into three gods or three masks.",
+      after: "Augustine on the Trinity: Lover, Beloved and Love"
+    },
+    "science/biology-paper-1/8": {
+      file: "photosynthesis-limiting-factor-plateau",
+      label: "Lift the plateau",
+      line: "The graph has levelled off — work out which single change raises the rate, and which does nothing at all.",
+      after: "Uses of Glucose",
+      school: "unity"
+    },
+    "science/chemistry-paper-1/9": {
+      file: "bond-energy-not-sequential",
+      label: "Balance the bond energies",
+      line: "Work out which way the energy goes at each side, then let the two totals decide whether the reaction is exothermic or endothermic.",
+      after: "$end",
+      school: "unity"
+    },
+    "science/physics-paper-1/1": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "Calculating Kinetic Energy",
+      school: "unity"
+    },
+    "science/physics-paper-1/5": {
+      file: "transformer-voltage-current-tradeoff",
+      label: "Predict the secondary side",
+      line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
+      after: "$end",
+      school: "unity"
+    },
+    "science/physics-paper-2/4": {
+      file: "resultant-force-vector-subtraction",
+      label: "Find the resultant force",
+      line: "Predict what two opposing forces add up to — and what it does to the object's motion.",
+      after: "Newton’s Second Law — Force, Mass and Acceleration",
+      school: "unity"
+    },
+    "science-aqa/biology-paper-1/6": {
+      file: "antibodies-dont-kill",
+      label: "Predict what happens next",
+      line: "Commit a prediction for each scene — bound antibodies, an antigen that does not fit, an antibiotic against a virus — then see what really happens.",
+      after: "Memory Cells and Immunity"
+    },
+    "science-aqa/biology-paper-2/6": {
+      file: "natural-selection-not-directed",
+      label: "Predict what the population does",
+      line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
+      after: "Selective Breeding and Extinction"
+    },
+    "science-aqa/chemistry-paper-1/1": {
+      file: "atom-mostly-empty-space",
+      label: "Fire the alpha beam",
+      line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
+      after: "Mass Number and Atomic Number"
+    },
+    "science-aqa/chemistry-paper-1/6": {
+      file: "reactivity-series-electron-transfer",
+      label: "Predict the displacement",
+      line: "Decide whether one metal will displace another from its solution, and which metal ends up as the ions.",
+      after: "Extraction of Metals"
+    },
+    "science-aqa/chemistry-paper-2/3": {
+      file: "fractional-distillation-boiling-point",
+      label: "Send it up the column",
+      line: "Predict the height where a hydrocarbon condenses, from its boiling point and the column temperatures.",
+      after: "Alkanes"
+    },
+    "science-aqa/physics-paper-1/5": {
+      file: "transformer-voltage-current-tradeoff",
+      label: "Predict the secondary side",
+      line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
+      after: "$end"
+    },
+    "science-aqa/physics-paper-2/13": {
+      file: "redshift-stretching-mechanism",
+      label: "Predict the spectral shift",
+      line: "Give a galaxy's speed and direction, then say where its hydrogen lines land in the light that reaches Earth.",
+      after: "Dark Matter and Dark Energy"
+    },
+    "science-aqa/physics-paper-2/7": {
+      file: "em-spectrum-continuous",
+      label: "Slide across the spectrum",
+      line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
+      after: "Uses and Dangers"
+    },
+    "science-edexcel/biology-paper-1/4": {
+      file: "synapse-electrical-to-chemical",
+      label: "Find where the signal stops",
+      line: "A signal reaches a synapse — predict the last thing that still happens, then watch the gap play it out.",
+      after: "The Reflex Arc"
+    },
+    "science-edexcel/biology-paper-1/6": {
+      file: "natural-selection-not-directed",
+      label: "Predict what the population does",
+      line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
+      after: "Evidence for Human Evolution — Fossils"
+    },
+    "science-edexcel/chemistry-paper-1/1": {
+      file: "atom-mostly-empty-space",
+      label: "Fire the alpha beam",
+      line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
+      after: "Subatomic Particles"
+    },
+    "science-edexcel/chemistry-paper-1/2": {
+      file: "periodic-table-group-reactivity-trends",
+      label: "Predict the reactivity trend",
+      line: "Two elements and one prediction — work out why reactivity climbs down Group 1 but falls down Group 7.",
+      after: "$end"
+    },
+    "science-edexcel/physics-paper-2/3": {
+      file: "em-spectrum-continuous",
+      label: "Slide across the spectrum",
+      line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
+      after: "Refraction of Waves"
+    },
+    "science-edexcel/physics-paper-2/7": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Reducing Unwanted Energy Transfer"
+    },
+    "science-ocr/biology-paper-1/7": {
+      file: "menstrual-cycle-hormone-feedback",
+      label: "Walk the hormone cycle",
+      line: "Step through one 28-day cycle on the four hormone curves, then work out what causes what.",
+      after: "$end"
+    },
+    "science-ocr/chemistry-paper-1/1": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Heating and Cooling Curves"
+    },
+    "science-ocr/chemistry-paper-2/2": {
+      file: "periodic-table-group-reactivity-trends",
+      label: "Predict the reactivity trend",
+      line: "Two elements and one prediction — work out why reactivity climbs down Group 1 but falls down Group 7.",
+      after: "Group 0 — The Noble Gases"
+    },
+    "science-ocr/chemistry-paper-2/4": {
+      file: "collision-theory-energy-distribution",
+      label: "Predict the effect on collisions",
+      line: "Warm it, dilute it or add a catalyst, then predict both the number of collisions and the share of them with enough energy to react.",
+      after: "Interpreting Rate of Reaction Graphs"
+    },
+    "science-ocr/physics-paper-1/1": {
+      file: "atom-mostly-empty-space",
+      label: "Fire the alpha beam",
+      line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
+      after: "Particle Arrangements in the Three States of Matter"
+    },
+    "science-ocr/physics-paper-1/4": {
+      file: "resultant-force-vector-subtraction",
+      label: "Find the resultant force",
+      line: "Predict what two opposing forces add up to — and what it does to the object's motion.",
+      after: "Newton’s Second Law: F = ma"
+    },
+    "science-ocr/physics-paper-1/7": {
+      file: "transformer-voltage-current-tradeoff",
+      label: "Predict the secondary side",
+      line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
+      after: "$end"
+    },
+    "science-ocr/physics-paper-2/3": {
+      file: "half-life-exponential-decay",
+      label: "Predict what is left",
+      line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
+      after: "$end"
+    },
+    "science-ocr/physics-paper-2/5": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "$end"
+    },
+    "science-ocr-b/biology-paper-1/2": {
+      file: "heterozygous-carrier-no-symptoms",
+      label: "Predict health from genotype",
+      line: "One working allele is enough — see why a carrier has no symptoms at all, yet can still pass the faulty allele on.",
+      after: "Genotype, Phenotype and the Environment"
+    },
+    "science-ocr-b/chemistry-paper-1/2": {
+      file: "bond-energy-not-sequential",
+      label: "Balance the bond energies",
+      line: "Work out which way the energy goes at each side, then let the two totals decide whether the reaction is exothermic or endothermic.",
+      after: "$end"
+    },
+    "science-ocr-b/chemistry-paper-1/6": {
+      file: "periodic-table-group-reactivity-trends",
+      label: "Predict the reactivity trend",
+      line: "Two elements and one prediction — work out why reactivity climbs down Group 1 but falls down Group 7.",
+      after: "$end"
+    },
+    "science-ocr-b/chemistry-paper-2/4": {
+      file: "fractional-distillation-boiling-point",
+      label: "Send it up the column",
+      line: "Predict the height where a hydrocarbon condenses, from its boiling point and the column temperatures.",
+      after: "Cracking"
+    },
+    "science-ocr-b/physics-paper-1/3": {
+      file: "em-spectrum-continuous",
+      label: "Slide across the spectrum",
+      line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
+      after: "$end"
+    },
+    "science-ocr-b/physics-paper-1/4": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "The National Grid"
+    },
+    "science-ocr-b/physics-paper-2/3": {
+      file: "resultant-force-vector-subtraction",
+      label: "Find the resultant force",
+      line: "Predict what two opposing forces add up to — and what it does to the object's motion.",
+      after: "Newton's Second Law: F = ma"
+    },
+    "separate-sciences/chemistry-paper-1/10": {
+      file: "nanoparticle-surface-area-threshold",
+      label: "Cut the cube smaller",
+      line: "Predict what happens to the total surface area as a block is cut into ever-smaller cubes, and why the same substance behaves differently at 10 nm.",
+      after: "Uses of Nanoparticles",
+      school: "unity"
+    },
+    "separate-sciences-edexcel/biology-paper-2/1": {
+      file: "photosynthesis-limiting-factor-plateau",
+      label: "Lift the plateau",
+      line: "The graph has levelled off — work out which single change raises the rate, and which does nothing at all.",
+      after: "The Inverse Square Law"
+    },
+    "separate-sciences-edexcel/chemistry-paper-1/9": {
+      file: "bond-energy-not-sequential",
+      label: "Balance the bond energies",
+      line: "Work out which way the energy goes at each side, then let the two totals decide whether the reaction is exothermic or endothermic.",
+      after: "Exothermic Reactions"
+    },
+    "separate-sciences-edexcel/chemistry-paper-2/2": {
+      file: "equilibrium-not-static",
+      label: "Predict the next ten seconds",
+      line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
+      after: "Le Chatelier’s Principle"
+    },
+    "separate-sciences-edexcel/higher-calculations/5": {
+      file: "half-life-exponential-decay",
+      label: "Predict what is left",
+      line: "Say how many undecayed nuclei survive several half-lives, then watch the whole decay reveal itself.",
+      after: "Common Mistakes with Half-Life"
+    },
+    "separate-sciences-edexcel/higher-calculations/6": {
+      file: "transformer-voltage-current-tradeoff",
+      label: "Predict the secondary side",
+      line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
+      after: "The National Grid and High-Voltage Transmission"
+    },
+    "separate-sciences-edexcel/physics-paper-1/3": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "Power"
+    },
+    "separate-sciences-edexcel/physics-paper-1/6": {
+      file: "em-spectrum-continuous",
+      label: "Slide across the spectrum",
+      line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
+      after: "Uses and Dangers of EM Waves"
+    },
+    "separate-sciences-edexcel/physics-paper-1/9": {
+      file: "redshift-stretching-mechanism",
+      label: "Predict the spectral shift",
+      line: "Give a galaxy's speed and direction, then say where its hydrogen lines land in the light that reaches Earth.",
+      after: "The Big Bang and the Steady State Theory"
+    },
+    "separate-sciences-edexcel/physics-paper-2/1": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "Power"
+    },
+    "separate-sciences-edexcel/physics-paper-2/2": {
+      file: "resultant-force-vector-subtraction",
+      label: "Find the resultant force",
+      line: "Predict what two opposing forces add up to — and what it does to the object's motion.",
+      after: "Turning Effect and Moments"
+    },
+    "separate-sciences-edexcel/physics-paper-2/3": {
+      file: "current-not-used-up",
+      label: "Predict all three ammeters",
+      line: "Three ammeters, one loop — commit to what each one reads before the circuit tells you.",
+      after: "$end"
+    },
+    "separate-sciences-edexcel/physics-paper-2/5": {
+      file: "field-lines-as-maps-not-paths",
+      label: "Read the field map",
+      line: "Predict which way a charge is pushed at a point between the lines, and where the field is strongest.",
+      after: "Earthing and Electrostatic Hazards"
+    },
+    "separate-sciences-edexcel/physics-paper-2/8": {
+      file: "state-change-energy-plateau",
+      label: "Predict the next two minutes",
+      line: "A heater is on and the substance sits at a known temperature — say what the thermometer does next, and where the energy is actually going.",
+      after: "Gas Pressure and the Kinetic Theory"
+    },
+    "separate-sciences-ocr/biology-paper-1/6": {
+      file: "sa-v-ratio-real-limit",
+      label: "Test which block copes",
+      line: "Two blocks of living tissue side by side — commit to which can supply every cell through its own surface, then watch the surface and volume counted.",
+      after: "Plant Transport — Xylem and Phloem"
+    },
+    "separate-sciences-ocr/biology-paper-2/6": {
+      file: "natural-selection-not-directed",
+      label: "Predict what the population does",
+      line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
+      after: "Evidence for Evolution"
+    },
+    "separate-sciences-ocr/chemistry-paper-1/3": {
+      file: "periodic-table-group-reactivity-trends",
+      label: "Predict the reactivity trend",
+      line: "Two elements and one prediction — work out why reactivity climbs down Group 1 but falls down Group 7.",
+      after: "Group 0 — The Noble Gases"
+    },
+    "separate-sciences-ocr/chemistry-paper-2/1": {
+      file: "reactivity-series-electron-transfer",
+      label: "Predict the displacement",
+      line: "Decide whether one metal will displace another from its solution, and which metal ends up as the ions.",
+      after: "Acids, Alkalis and the pH Scale"
+    },
+    "separate-sciences-ocr/physics-paper-2/6": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "$end"
+    },
+    "separate-sciences-ocr/physics-paper-2/7": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "$end"
+    },
+    "separate-sciences-ocr-b/biology-human-body/5": {
+      file: "negative-feedback-continuous-cycle",
+      label: "Predict what happens next",
+      line: "Join a control system mid-story and predict which response is acting, what the level does, and what happens once it crosses the set point.",
+      after: "$end"
+    },
+    "separate-sciences-ocr-b/biology-you-and-your-genes/3": {
+      file: "natural-selection-not-directed",
+      label: "Predict what the population does",
+      line: "Commit to one of four accounts of what happens over the generations, and find out whether selection had any variation to act on.",
+      after: "$end"
+    },
+    "separate-sciences-ocr-b/biology-you-and-your-genes/4": {
+      file: "heterozygous-carrier-no-symptoms",
+      label: "Predict health from genotype",
+      line: "One working allele is enough — see why a carrier has no symptoms at all, yet can still pass the faulty allele on.",
+      after: "How Genetic Engineering Works"
+    },
+    "separate-sciences-ocr-b/chemistry-analysis-useful-products/1": {
+      file: "fractional-distillation-boiling-point",
+      label: "Send it up the column",
+      line: "Predict the height where a hydrocarbon condenses, from its boiling point and the column temperatures.",
+      after: "Chromatography"
+    },
+    "separate-sciences-ocr-b/chemistry-analysis-useful-products/4": {
+      file: "equilibrium-not-static",
+      label: "Predict the next ten seconds",
+      line: "A sealed flask of A ⇌ B — commit to what the amounts and the two rates do next, then watch the particles.",
+      after: "Le Chatelier’s Principle"
+    },
+    "separate-sciences-ocr-b/chemistry-atoms-patterns-bonding/1": {
+      file: "atom-mostly-empty-space",
+      label: "Fire the alpha beam",
+      line: "Predict what a beam of alpha particles does to gold foil, then run it and see which picture of the atom survives.",
+      after: "Bohr’s Shell Model (1913)"
+    },
+    "separate-sciences-ocr-b/chemistry-earth-air-water/2": {
+      file: "bond-energy-not-sequential",
+      label: "Balance the bond energies",
+      line: "Work out which way the energy goes at each side, then let the two totals decide whether the reaction is exothermic or endothermic.",
+      after: "Measuring Energy Changes in the Laboratory"
+    },
+    "separate-sciences-ocr-b/chemistry-materials-reactions/2": {
+      file: "ion-migration-electrolysis",
+      label: "Predict where the ions go",
+      line: "Choose which rod each ion travels to and what forms there, then check it against the cell.",
+      after: "Electrolysis of Molten Ionic Compounds"
+    },
+    "separate-sciences-ocr-b/physics-energy-electricity/1": {
+      file: "conservation-of-energy-dispersal",
+      label: "Account for every joule",
+      line: "A kettle, a hoist and a braking bike hand you their energy budget — place every joule where it really ends up, then check the books.",
+      after: "Renewable and Non-Renewable Energy Sources"
+    },
+    "separate-sciences-ocr-b/physics-energy-electricity/4": {
+      file: "transformer-voltage-current-tradeoff",
+      label: "Predict the secondary side",
+      line: "Choose the voltage and the current a transformer delivers, then check your pair against the supply it was given.",
+      after: "$end"
+    },
+    "separate-sciences-ocr-b/physics-particle-models-universe/4": {
+      file: "redshift-stretching-mechanism",
+      label: "Predict the spectral shift",
+      line: "Give a galaxy's speed and direction, then say where its hydrogen lines land in the light that reaches Earth.",
+      after: "The Big Bang Model (IaS3 — Scientific Models)"
+    },
+    "separate-sciences-ocr-b/physics-radiation-waves/1": {
+      file: "em-spectrum-continuous",
+      label: "Slide across the spectrum",
+      line: "Seven names, one continuous slide of wavelength — and one speed that never changes.",
+      after: "Uses of Each EM Wave Type"
+    },
+    "sociology-aqa/crime-deviance/6": {
+      file: "media-construction-of-reality",
+      label: "Two bulletins, one afternoon",
+      line: "Two accurate news bulletins cover the same protest. Work out what makes their versions differ — and why neither simply shows what happened.",
+      after: "Moral Panics and Folk Devils"
+    },
+    "sociology-eduqas/crime-deviance/5": {
+      file: "labelling-theory-identity",
+      label: "Predict what the label does",
+      line: "Two people, one act, one label — find out whether the label changes anything.",
+      after: "Feminist Theories: Heidensohn and Carlen"
+    },
+    "sociology-eduqas/education/2": {
+      file: "labelling-theory-identity",
+      label: "Predict what the label does",
+      line: "Two people, one act, one label — find out whether the label changes anything.",
+      after: "$end"
+    },
+    "sociology-eduqas/social-differentiation-stratification/2": {
+      file: "weber-authority-source-of-legitimacy",
+      label: "Obeyed — on what grounds?",
+      line: "Nine people are obeyed with nothing to force anyone. Work out why the obedience holds — and whether it survives them.",
+      after: "Formal and Informal Sources of Power"
+    },
+    "statistics-edexcel/interpreting-results-sec/3": {
+      file: "time-series-trend-vs-noise",
+      label: "Separate the trend from noise",
+      line: "A quarterly series is trend, season and noise stacked on top of each other — commit to where it is really heading before the graph gives it away.",
+      after: "Index Numbers"
+    },
+    "statistics-edexcel/planning-designing-enquiry/4": {
+      file: "stratification-not-a-sampling-method",
+      label: "Plan a stratified sample",
+      line: "Split a school into year groups, set each group’s share of the sample — then decide how the individuals are actually chosen.",
+      after: "$end"
+    },
   };
 
   // Deployed copies live in /widgets/ - scripts/ is .vercelignore'd.
