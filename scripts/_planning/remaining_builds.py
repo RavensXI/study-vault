@@ -74,6 +74,12 @@ USD_GBP = 0.78
 API_PER_LESSON_GBP = round(((32.99 * USD_GBP) / 69 + 13.38 / 45) / 2, 3)   # ~0.335
 NARRATION_PER_LESSON_GBP = 0.11      # Azure: ~GBP 5 per 45 lessons
 FACTCHECK_PER_SUBJECT_GBP = 5.00     # fact-check pass, per memory note
+# Subjects whose stored spec_code is not the code specs/index.json uses. The Pearson
+# BTEC Tech Award in Health & Social Care is stored as the brand, not "BTEC-HSC-2022";
+# without this alias the ranking put a 36k-entry spec at the top of the to-build list
+# although it has been live since 22 Mar 2026 (Tom, 10 and 20 Sep 2026).
+SPEC_CODE_ALIASES = {"BTEC Tech Award": ("BTEC-HSC-2022",)}
+
 # A PORT reuses 60-80% of an existing build's material; an ALIAS is zero content.
 COST_FACTOR = {"build": 1.0, "port": 0.55, "alias": 0.0, "skip": 0.0,
                "general": 1.0, "": 1.0}
@@ -219,10 +225,21 @@ def main():
     for s in sb["subjects"]:
         if s.get("school_id") or not s.get("spec_code"):
             continue
-        for code in str(s["spec_code"]).split("/"):
-            code = code.strip()
-            if code:
-                built_by_code[code] = s
+        # register the WHOLE code first: an Ofqual number is itself full of slashes
+        # (NCFE Music Technology "603/7008/7" was split into 603 / 7008 / 7 and the
+        # built subject never matched its own spec, Tom 20 Sep 2026)
+        whole = str(s["spec_code"]).strip()
+        if whole:
+            built_by_code[whole] = s
+            for alias in SPEC_CODE_ALIASES.get(whole, ()):
+                built_by_code[alias] = s
+        # A bundle ("8461/8462/8463", "C200QS / 3200QS") splits into its member specs;
+        # an Ofqual number (603/7008/7) is one code and must never be split.
+        if "/" in whole and not re.fullmatch(r"\d{3}/\d{4}/\d", whole):
+            for code in whole.split("/"):
+                code = code.strip()
+                if code:
+                    built_by_code.setdefault(code, s)
 
     in_scope = [sp for sp in specs
                 if not EXCLUDED_FAMILIES.get(subject_family(sp["subject"]))]
@@ -548,7 +565,7 @@ def main():
                      if s.get("year") != 2025)
 
     result = {
-        "generated": "2026-09-06",
+        "generated": __import__("datetime").date.today().isoformat(),
         "share_year": 2025,
         "crosscheck": crosscheck,
         "crosscheck_summary": {
