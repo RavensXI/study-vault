@@ -47,6 +47,10 @@ def subject_family(name):
     n = re.sub(r":\s*(Trilogy|Synergy)\s*$", "", n, flags=re.I)
     n = re.sub(r"\s*\([^)]*\)\s*$", "", n)
     n = re.sub(r"\s+[AB]$", "", n)
+    # "English Language 2.0" is Pearson's second route through the SAME DfE subject;
+    # without this it became its own family with no entry data and scored zero reach
+    # although it is the larger of the two Pearson specs (Tom, 20 Sep 2026).
+    n = re.sub(r"\s+\d+(\.\d+)?$", "", n)
     if re.match(r"^food and nutrition$", n, flags=re.I):
         n = "Food Preparation and Nutrition"
     n = n.lower()
