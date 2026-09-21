@@ -309,7 +309,9 @@ def cmd_collect(stage):
         try: out[r.custom_id.replace("__", "/")] = json.loads(mm.group(0))
         except Exception: bad += 1
     io.open(os.path.join(OUT, stage + ".json"), "w", encoding="utf-8").write(json.dumps(out, indent=1, ensure_ascii=False))
-    # batch is half list price; Opus 4.6 lists at $15/M in, $75/M out (pipeline_api_generate.py)
+    # INDICATIVE ONLY - the Anthropic console is authoritative. The list prices in
+    # pipeline_api_generate.py are stale: this figure over-read the real spend 3x on the
+    # 1EN2 Opus run (Tom checked the balance, 21 Sep 2026).
     rin, rout = (7.5, 37.5) if "opus" in MODEL else (1.5, 7.5)
     cost = usage["in"] / 1e6 * rin + usage["out"] / 1e6 * rout
     st.setdefault("usage", {})[stage] = dict(usage, usd=round(cost, 2)); save_state(st)
