@@ -24,7 +24,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "_out")
 os.makedirs(OUT, exist_ok=True)
 STATE = os.path.join(OUT, "_state.json")
-MODEL = "claude-sonnet-5"
+# The house rule is the strongest model for anything a student reads: pipeline_api_generate.py
+# and pipeline_api_guides.py are both Opus, and Sonnet appears only on classification, media
+# matching and cleanup. The first run of this build used Sonnet by inheriting it from the
+# flashcard script; Tom caught it (21 Sep 2026) and the reading units were rebuilt on Opus.
+MODEL = "claude-opus-4-6"
 SLUG = "english-language-2-edexcel"
 SRC = "english-language-edexcel"
 
@@ -254,8 +258,16 @@ Write the harder two tiers.
 - "gold": FIVE problems on the gold extract ("passage_id":"gold"), the hardest, and at least two of them
   "input_type":"ai_mark" with "marks": 4-8, "instruction" and "mark_scheme_points":[3-5 short strings a
   marker would credit]. Reward insight, not format: naming a word without quotation marks is valid evidence.
-Non-ai_mark problems use the same types and fields as the bronze tier. Every quotation must appear verbatim
-in the matching extract.
+Non-ai_mark problems repeat the bronze field contract EXACTLY - never abbreviate it:
+  multiple_choice   "question", "options":[4 strings, no A./B. prefixes], "solutions":[index of the right one],
+                    "wrong":{"0":"why that one is wrong", ...}. The key is "solutions" and it is a LIST holding
+                    the INDEX. Never "answer", never "correct_answer", never the option's text.
+  traffic_light     "statements":[{"text","correct","explain"}]
+  highlight_evidence "instruction", "answers":[exact phrases], "explain"
+  connotation_picker "word", "options", "solutions":[index], "explain"
+  evidence_match    "pairs":[{"left","right","explain"}]
+  misleading_summary "summaries":[{"text","correct","explain"}]
+Every quotation must appear verbatim in the matching extract.
 JSON: {"silver":[...6...],"gold":[...5...]}"""
 
 MAXTOK = {"s1": 3000, "s2": 4000, "s3": 6000, "s4": 6000}
@@ -297,12 +309,104 @@ def cmd_collect(stage):
         try: out[r.custom_id.replace("__", "/")] = json.loads(mm.group(0))
         except Exception: bad += 1
     io.open(os.path.join(OUT, stage + ".json"), "w", encoding="utf-8").write(json.dumps(out, indent=1, ensure_ascii=False))
-    cost = usage["in"] / 1e6 * 1.5 + usage["out"] / 1e6 * 7.5
+    # batch is half list price; Opus 4.6 lists at $15/M in, $75/M out (pipeline_api_generate.py)
+    rin, rout = (7.5, 37.5) if "opus" in MODEL else (1.5, 7.5)
+    cost = usage["in"] / 1e6 * rin + usage["out"] / 1e6 * rout
     st.setdefault("usage", {})[stage] = dict(usage, usd=round(cost, 2)); save_state(st)
     print("%s: %d lessons, %d unusable | in %d out %d | $%.2f (batch)" % (stage, len(out), bad, usage["in"], usage["out"], cost))
     return True
 
 # --------------------------------------------------------------- assemble
+def normalise(q):
+    """Both models drift from the field contract in the same small ways: Opus writes "type"
+    for "input_type" and adds a "tier" key, Sonnet writes "answer"/"correct_answer" instead of
+    "solutions", and both attach their reasoning under steps/thinking. Map it all back rather
+    than re-running the batch (Tom, 21 Sep 2026)."""
+    if not q.get("input_type") and q.get("type"):
+        q["input_type"] = q.pop("type")
+    q.pop("type", None); q.pop("tier", None)
+    if not q.get("question"):
+        q["question"] = q.pop("instruction", None) or q.get("question") or "Answer using the extract."
+    if q.get("input_type") == "multiple_choice" and not isinstance(q.get("solutions"), list):
+        ans = q.pop("correct_answer", None) or q.pop("answer", None)
+        opts = q.get("options") or []
+        idx = ans if isinstance(ans, int) and 0 <= ans < len(opts) else None
+        if idx is None and isinstance(ans, str):
+            for i, o in enumerate(opts):
+                if str(o).strip().lower() == ans.strip().lower(): idx = i; break
+        if idx is not None: q["solutions"] = [idx]
+    q.pop("correct_answer", None); q.pop("answer", None)
+    for kk in ("steps", "thinking", "steps_of_thinking", "thinking_steps"):
+        if kk in q:
+            st = q.pop(kk)
+            if isinstance(st, list) and st and not q.get("explain"):
+                q["explain"] = " ".join(str(x) for x in st)
+    # Now the per-type contract the RENDERER actually reads (practice.html render*()).
+    # The pipeline doc lists the type names but not their fields, so both models invented
+    # plausible ones. These are taken from the live 1EN0 rows (Tom, 21 Sep 2026).
+    t = q.get("input_type")
+    if t == "highlight_evidence":
+        if q.get("answers") and not q.get("answer_text"):
+            a = q.pop("answers"); q["answer_text"] = a[0] if isinstance(a, list) and a else a
+        q.pop("answers", None)
+        if q.get("explain") and not q.get("explanation"): q["explanation"] = q.pop("explain")
+        q.pop("explain", None)
+    elif t == "misleading_summary":
+        if q.get("summaries") and not q.get("summaryParts"):
+            parts = []
+            for x in q.pop("summaries"):
+                part = {"text": x.get("text", ""), "wrong": not x.get("correct", False)}
+                if x.get("explain"): part["explain"] = x["explain"]
+                parts.append(part)
+            q["summaryParts"] = parts
+        q.pop("summaries", None)
+        # 1EN0 also has a second, older shape: statements[] with a "misleading" flag.
+        # renderMS() only reads summaryParts, so those rows render nothing (they are still
+        # like that on the live 1EN0 lessons - reported to Tom 21 Sep 2026).
+        if not q.get("summaryParts") and q.get("statements"):
+            parts = []
+            for x in q.pop("statements"):
+                part = {"text": x.get("text", ""), "wrong": bool(x.get("misleading") or x.get("wrong"))}
+                if x.get("explain"): part["explain"] = x["explain"]
+                parts.append(part)
+            q["summaryParts"] = parts
+        q.pop("statements", None) if q.get("summaryParts") else None
+    elif t == "traffic_light":
+        # renderTL() builds its legend from the statement categories and calls .charAt on them,
+        # so a boolean "correct" throws and the problem renders nothing.
+        for st in (q.get("statements") or []):
+            if isinstance(st.get("correct"), bool):
+                st["correct"] = "supported by the text" if st["correct"] else "not supported"
+            elif st.get("correct") is not None and not isinstance(st["correct"], str):
+                st["correct"] = str(st["correct"])
+    elif t == "connotation_picker":
+        if not q.get("chips"):
+            opts = q.pop("options", None) or []
+            sol = set(q.pop("solutions", None) or [])
+            if opts: q["chips"] = [{"text": o, "correct": i in sol} for i, o in enumerate(opts)]
+        q.pop("word", None); q.pop("options", None); q.pop("solutions", None)
+    elif t == "evidence_match":
+        if q.get("pairs") and not q.get("claims"):
+            pairs = q.pop("pairs")
+            claims, quotes = [], []
+            for pr in pairs:
+                left = pr.get("left") or pr.get("claim") or ""
+                if left not in claims: claims.append(left)
+                quotes.append({"text": pr.get("right") or pr.get("quote") or "", "correctClaim": claims.index(left)})
+            q["claims"] = claims; q["quotes"] = quotes
+        q.pop("pairs", None)
+    elif t == "multiple_choice":
+        if q.get("wrong") and not q.get("misconceptions"):
+            w = q.pop("wrong")
+            if isinstance(w, dict):
+                q["misconceptions"] = [{"id": "distractor-%s" % k, "expect": int(k), "message": v}
+                                       for k, v in w.items() if str(k).isdigit()]
+        q.pop("wrong", None)
+    elif t == "ai_mark":
+        q.pop("instruction", None)
+    return q
+
+
 def cmd_assemble():
     sid = state()["subject_id"]
     S = {s: json.load(io.open(os.path.join(OUT, s + ".json"), encoding="utf-8")) for s in ("s1", "s2", "s3", "s4")
@@ -317,7 +421,9 @@ def cmd_assemble():
               "method_card": S["s2"][k]["method_card"],
               "exam_context": S["s2"][k]["exam_context"],
               "worked_examples": S["s2"][k]["worked_examples"],
-              "problem_bank": {"bronze": S["s3"][k]["bronze"], "silver": S["s4"][k]["silver"], "gold": S["s4"][k]["gold"]},
+              "problem_bank": {"bronze": [normalise(x) for x in S["s3"][k]["bronze"]],
+                               "silver": [normalise(x) for x in S["s4"][k]["silver"]],
+                               "gold": [normalise(x) for x in S["s4"][k]["gold"]]},
               "topic_links": {"prerequisites": ([{"slug": "%s/%d" % (u["slug"], n - 1), "title": titles[n - 2]}] if n > 1 else []),
                               "next": ([{"slug": "%s/%d" % (u["slug"], n + 1), "title": titles[n]}] if n < len(titles) else [])}}
         # ai_mark problems point at a named prompt (the 1EN0 convention) and carry the
