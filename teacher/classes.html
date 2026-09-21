@@ -204,7 +204,15 @@
     var subj = d.class.subject || 'this subject', a = d.attainment || {}, lw = d.lastWeek, ps = [];
     var top = (d.missedItems || [])[0], cold = (d.goingCold || [])[0], words = d.haveAWord || [];
     if (top) {
-      ps.push('<p><b>Go over ' + esc(top.right || shortQ(top.question)) + ' again.</b> ' + top.commonWrongCount + (top.met ? ' of the ' + top.met + ' who answered' : ' of them') +
+      /* The answer only works as the subject of "Go over X again" when it is a
+         name or a short phrase. On a question whose answer is a whole clause
+         ("Sanctions excluded oil, coal and steel and the Suez Canal stayed
+         open") the sentence fell apart, so anything longer is quoted as the
+         question instead. */
+      var head = top.right && top.right.length <= 34
+        ? 'Go over ' + esc(top.right) + ' again.'
+        : 'Go over &ldquo;' + esc(shortQ(top.question)) + '&rdquo; again.';
+      ps.push('<p><b>' + head + '</b> ' + top.commonWrongCount + (top.met ? ' of the ' + top.met + ' who answered' : ' of them') +
         ' chose &ldquo;' + esc(top.commonWrongAnswer) + '&rdquo; on the ' + esc(top.unit) + ' quiz.</p>');
     } else if (!a.answered) {
       ps.push('<p><b>No quiz answers in ' + esc(subj) + ' yet.</b> Once the class has done a lesson or two, this line tells you what to go over again, what is being forgotten, and who to talk to.</p>');
