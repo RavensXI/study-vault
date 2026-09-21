@@ -92,7 +92,28 @@ Practice format uses input-type tags to determine how `practice-loader.js` rende
 See `memory/project_maths_practice_rebuild.md`. Types: `single_value`, `two_solutions`, `fraction`, `standard_form`, `multiple_choice`. Chart.js data visualisations in the `chart` field on the problem.
 
 ### English Language
-See `scripts/factory/FACTORY_RULES.md`. Types: `traffic_light`, `highlight_evidence`, `connotation_picker`, `multiple_choice`, `evidence_match`, `ai_mark`, `misleading_summary`, `ai_write`, `improve_sentence`, `spot_error`, `reorder`.
+Types: `traffic_light`, `highlight_evidence`, `connotation_picker`, `multiple_choice`,
+`evidence_match`, `ai_mark`, `ai_write`, `misleading_summary`, `improve_sentence`, `spot_error`, `reorder`.
+
+⚠ **The field names below are the contract `practice.html` actually reads. Name the type without
+its fields and a generator will invent plausible ones that render blank — that is exactly what
+happened on the 1EN2 build, 21 Sep 2026, on five of seven types.** Inline this table into any
+per-subject agent prompt; never paraphrase it.
+
+| Type | Required fields |
+|---|---|
+| `multiple_choice` | `options` (4 strings, no A./B. prefixes), `solutions: [index]`, `misconceptions: [{id, expect, message}]` |
+| `traffic_light` | `statements: [{text, correct, explain}]` — `correct` is a **category STRING**; a boolean throws inside `renderTL` |
+| `highlight_evidence` | `answer_text` (one verbatim span), `explanation` |
+| `connotation_picker` | `chips: [{text, correct}]` |
+| `evidence_match` | `claims: [string]`, `quotes: [{text, correctClaim: index}]` |
+| `misleading_summary` | `summaryParts: [{text, wrong, explain}]` — parts without a `wrong` key render as plain prose |
+| `ai_mark` / `ai_write` | `ai_prompt_key` (a key present in this lesson's `ai_marking_prompts`), `context`, `marks` |
+| `improve_sentence` | `original`, `improved`, `explanation` |
+| `spot_error` | `tokens: [{text, error}]` |
+| `reorder` | `items`, `correct_order` |
+
+Every problem also carries `question` and `passage_id`.
 
 ### Modern Foreign Languages
 See `scripts/language-practice/PRACTICE_DATA_SCHEMA.md`. Types: `vocab_match`, `gap_fill` (word bank and free-input), `translate` (bidirectional, AI-marked), `dictation` (Azure TTS audio), `sentence_builder`, `spot_correct`, `role_play`, `multiple_choice`, `reorder`, `ai_mark`, `ai_write`.
