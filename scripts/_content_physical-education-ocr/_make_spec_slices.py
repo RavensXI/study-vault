@@ -80,7 +80,10 @@ OCR-specific notes for content agents:
 
 
 def main():
-    lines = SPEC.read_text(encoding="utf-8").splitlines()
+    # newlines only: str.splitlines() also breaks on the 43 form feeds the PDF
+    # extraction leaves in the spec, which shifted both windows ~42 lines early
+    # and cut them mid-sentence at both ends (found 21 Sep 2026)
+    lines = SPEC.read_text(encoding="utf-8").split(chr(10))
 
     # Unit 1: lines 656..1599 (1-indexed) -> indexes 655..1598
     unit1 = "\n".join(lines[655:1599])

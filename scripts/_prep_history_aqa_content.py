@@ -23,7 +23,15 @@ out_dir.mkdir(exist_ok=True)
 
 master = json.loads((scripts / "_plan_history-aqa.json").read_text(encoding="utf-8"))
 spec_path = ROOT / "specs" / "aqa" / "history-8145-8145.md"
-spec_lines = spec_path.read_text(encoding="utf-8").splitlines()
+# split on newlines ONLY. The spec markdown carries 43 form feeds from the PDF
+# extraction, and str.splitlines() breaks on those too, so it sees 2,715 lines
+# where every tool that produced these line numbers (grep, sed, wc) sees 2,673.
+# Slicing with splitlines() shifted every window 14 to 31 lines early, so each
+# file held the tail of the previous option and missed the end of its own —
+# "Part three" for the period studies, the historic environment for the depth
+# studies. Found 21 Sep 2026; the lessons themselves were built from the plan
+# JSONs' spec_references and were never affected.
+spec_lines = spec_path.read_text(encoding="utf-8").split(chr(10))
 
 
 # ─────────────────────────────────────── reference lesson
