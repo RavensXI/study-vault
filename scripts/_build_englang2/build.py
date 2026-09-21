@@ -381,6 +381,25 @@ def normalise(q):
                 st["correct"] = "supported by the text" if st["correct"] else "not supported"
             elif st.get("correct") is not None and not isinstance(st["correct"], str):
                 st["correct"] = str(st["correct"])
+        # renderTL colours the legend by the ORDER a category first appears, against a fixed
+        # palette green, amber, red. A category literally named "red" therefore gets whatever
+        # colour its position earns - Tom found "red" showing an amber dot (21 Sep 2026).
+        # Give the categories their meaning as a name and put them in palette order.
+        NAME = {"green": "true", "amber": "partly true", "red": "false", "yellow": "partly true"}
+        sts = q.get("statements") or []
+        for x in sts:
+            lo = str(x.get("correct", "")).lower()
+            if lo in NAME: x["correct"] = NAME[lo]
+        def rank(cat):
+            """green for the affirmative category, amber for the hedged one, red for the negative."""
+            c = str(cat).lower()
+            if any(w in c for w in ("not ", "no ", "false", "unsupported", "stretch", "misleading", "wrong", "inaccurate")):
+                return 2
+            if any(w in c for w in ("part", "some", "partly", "partially", "arguable", "maybe", "depends")):
+                return 1
+            return 0
+        if sts:
+            q["statements"] = sorted(sts, key=lambda x: (rank(x.get("correct")), str(x.get("correct"))))
     elif t == "connotation_picker":
         if not q.get("chips"):
             opts = q.pop("options", None) or []
