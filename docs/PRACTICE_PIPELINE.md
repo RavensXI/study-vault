@@ -115,6 +115,16 @@ per-subject agent prompt; never paraphrase it.
 
 Every problem also carries `question` and `passage_id`.
 
+⚠ **`traffic_light` colours its key by the ORDER a category first appears**, against a fixed
+palette of green, amber, red — nothing keys the colour to the category's meaning. Put the
+affirmative category first, any hedged one second, the negative one last, and never name a
+category after a colour. **`reorder` takes `items` as plain STRINGS** plus `correct_order`
+as indices into them; objects render as `[object Object]`.
+
+**Run `python scripts/_qa_practice_render.py` after any practice build.** It checks every
+problem against these contracts and exits 1 on failure. The structural gate cannot see a
+blank-rendering question.
+
 ### Modern Foreign Languages
 See `scripts/language-practice/PRACTICE_DATA_SCHEMA.md`. Types: `vocab_match`, `gap_fill` (word bank and free-input), `translate` (bidirectional, AI-marked), `dictation` (Azure TTS audio), `sentence_builder`, `spot_correct`, `role_play`, `multiple_choice`, `reorder`, `ai_mark`, `ai_write`.
 
