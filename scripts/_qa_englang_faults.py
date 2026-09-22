@@ -36,6 +36,7 @@ H = {"apikey": K, "Authorization": "Bearer " + K}
 
 THREE_WAY = re.compile(r"\bpartly\b|\bamber\b|\bpartially\b|three (options|choices|categories)", re.I)
 REF = re.compile(r"\b(Model|Source|Extract|Text|Draft|Response)\s+([A-E])\b")
+NAMES = re.compile(r"\b(?:Model|Source|Extract|Text|Draft|Response)s?\s+([A-E](?:\s*(?:,|and|&|or)\s*[A-E])*)\b")
 PUNCT = re.compile(r"^[.,;:!?)\]’”]")
 
 
@@ -100,8 +101,14 @@ def scan(rows):
                     # dropdown since 22 Sep 2026, so this is informational, not a fault
                     if len(q.get("categories") or cats) > 3:
                         found["TL_NAMED"].append(dict(tag, cats=q.get("categories") or cats))
-                refs = [(k.lower(), L) for k, L in REF.findall(stem)]
-                named = sorted({L for _, L in refs})
+                # letters named, plural-aware: "Sources A and C" names two texts
+                named = []
+                for m in NAMES.finditer(stem):
+                    for L in re.findall(r"[A-E]", m.group(1)):
+                        if L not in named:
+                            named.append(L)
+                named = sorted(named)
+                paired = isinstance(q.get("passage_ids"), list) and len(q["passage_ids"]) > 1
                 own = passages.get(q.get("passage_id"))
                 own_l = passage_letter(own)[1] if passage_letter(own) else None
                 if len(named) >= 2:
@@ -114,7 +121,7 @@ def scan(rows):
                     L = named[0]
                     if L not in letters:
                         found["REF_ABSENT"].append(dict(tag, named=L, has=sorted(letters)))
-                    elif own_l != L:
+                    elif own_l != L and not paired:
                         found["REF_OTHER"].append(dict(tag, named=L, own=own_l, should=letters[L]))
                 if stem.strip() == "Answer using the extract.":
                     found["STEM_PLACEHOLDER"].append(tag)
@@ -135,7 +142,10 @@ def scan(rows):
                             found["HL_PARA"].append(tag)
                 if t == "spot_error":
                     s = rendered_tokens(q)
-                    if re.search(r"\s[.,;:!?]|\s{2,}", s):
+                    # line breaks are the text's own layout (letters, articles), kept by
+                    # .spot-text{white-space:pre-line}; only spaces before punctuation or
+                    # doubled spaces on one line show as gaps
+                    if re.search(r"[ \t][.,;:!?]|[ \t]{2,}", s):
                         found["SE_SPACING"].append(dict(tag, rendered=s[:110]))
     return found
 

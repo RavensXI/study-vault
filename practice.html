@@ -3254,6 +3254,9 @@
     .passage-body .passage-text{font-family:'Source Serif 4',serif;font-size:1rem;line-height:2;color:#3d3630;font-style:italic;transition:font-size 0.3s ease}
     .passage-body .passage-text p{margin:0 0 0.9em}.passage-body .passage-text p:last-child{margin-bottom:0}
     .learn-full-passage .rs-quote{white-space:pre-line}
+    /* two texts side by side: no drop capital, or it lands on the first label's "S" */
+    .passage-body .passage-text:has(> .passage-part)::first-letter{font-size:inherit;font-weight:inherit;color:inherit}
+    body.dark-mode .passage-body .passage-text:has(> .passage-part)::first-letter{color:inherit}
     .passage-part+.passage-part{margin-top:1.6em;padding-top:1.2em;border-top:1px solid rgba(61,54,48,0.14)}
     .passage-part-label{font-family:'Inter',sans-serif;font-style:normal;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;line-height:1.5;color:#8a8580;margin-bottom:0.5em}
     body.dark-mode .passage-part+.passage-part{border-top-color:rgba(224,216,208,0.16)}
@@ -3377,6 +3380,9 @@
     .improve-original{font-family:'Source Serif 4',serif;font-style:italic;padding:0.75rem 1rem;background:#fef2f2;border-left:3px solid var(--error);border-radius:0 8px 8px 0;margin-bottom:0.75rem;font-size:0.95rem}
     /* Spot Error */
     .spot-text{font-size:0.88rem;line-height:1.8;margin-top:0.5rem}
+    /* line breaks in the text are kept: a question about letter FORMAT ("Hi headteacher,"
+       on its own line) was printed as one run-on block, hiding the thing it tested */
+    .spot-text{white-space:pre-line}
     /* a dotted underline says "you can click these" on a phone, where there is no hover */
     .spot-token{cursor:pointer;padding:1px 0;border-radius:3px;transition:all 0.15s;text-decoration:underline dotted rgba(124,58,237,0.35);text-underline-offset:3px}
     .spot-token:hover{background:rgba(124,58,237,0.06)}
@@ -7137,26 +7143,42 @@
       if(paras.length<2) return t;
       return paras.map(function(x){return '<p>'+x.replace(/\n/g,'<br>')+'</p>';}).join('');
     }
+    // The texts a highlight question needs beside it: every passage it names except the
+    // one it highlights in, which it shows inline
+    function engHlContextIds(q){
+      if(!q||q.input_type!=='highlight_evidence'||!Array.isArray(q.passage_ids)) return [];
+      return q.passage_ids.filter(function(id){return id!==q.passage_id;});
+    }
     // What identifies "the text on screen" for a problem: one passage, or a pair
     function engPassageKey(q){
+      var hl=engHlContextIds(q);
+      if(hl.length) return 'ctx:'+hl.join('+');
       if(q&&Array.isArray(q.passage_ids)&&q.passage_ids.length>1) return q.passage_ids.join('+');
       return q?(q.passage_id||q.passage):null;
     }
     // Two passages for a comparison question, each under its own label
     function engPassagePair(q, passages){
-      if(!q||!Array.isArray(q.passage_ids)||q.passage_ids.length<2) return null;
+      var ids=engHlContextIds(q);
+      if(!ids.length){
+        if(!q||!Array.isArray(q.passage_ids)||q.passage_ids.length<2) return null;
+        ids=q.passage_ids;
+      }
       var as=Array.isArray(q.passage_as)?q.passage_as:[];
-      var parts=q.passage_ids.map(function(id,k){
+      var asFor=function(id){var k=(q.passage_ids||[]).indexOf(id);return k>=0?as[k]:undefined;};
+      var parts=ids.map(function(id){
         var p=(passages||[]).find(function(x){return x.id===id;});if(!p) return null;
-        var lab=p.label||'';
-        if(as[k]){
+        var lab=p.label||'',a=asFor(id);
+        if(a){
           var re=/^\s*(Source|Model|Extract|Text)\s+[A-E]\b/i;
-          lab=re.test(lab)?lab.replace(re,as[k]):(as[k]+(lab?' – '+lab:''));
+          lab=re.test(lab)?lab.replace(re,a):(a+(lab?' – '+lab:''));
         }
-        return {label:lab,text:p.text,short:(as[k]||lab.split(/\s[–—-]\s/)[0]).trim()};
+        return {label:lab,text:p.text,short:(a||lab.split(/\s[–—-]\s/)[0]).trim()};
       }).filter(Boolean);
-      if(parts.length<2) return null;
-      return {pair:true,label:parts.map(function(x){return x.short;}).join(' and '),
+      if(!parts.length) return null;
+      // one context text beside a highlight: shown as an ordinary single passage
+      if(parts.length===1) return {pair:true,label:parts[0].label,text:engPassageHtml(parts[0].text)};
+      var shorts=parts.map(function(x){return x.short;});
+      return {pair:true,label:shorts.slice(0,-1).join(', ')+' and '+shorts[shorts.length-1],
               text:parts.map(function(x){return '<div class="passage-part"><div class="passage-part-label">'+x.label+'</div>'+engPassageHtml(x.text)+'</div>';}).join('')};
     }
 
@@ -7839,7 +7861,11 @@
       // highlight_evidence renders passage inline; vocab_match never needs a
       // passage (pairs are self-contained — a stray passage_id is data noise,
       // and NOT reorder: EngLang reorders legitimately use their extract)
-      if (problem.input_type === 'highlight_evidence' ||
+      // A highlight question shows its own passage inline, so the panel stays empty —
+      // unless it needs a second text to answer ("the phrase in Source A that
+      // contradicts Source B"); then the panel carries the other text.
+      var _hlContext = problem.input_type === 'highlight_evidence' && engHlContextIds(problem).length > 0;
+      if ((problem.input_type === 'highlight_evidence' && !_hlContext) ||
           problem.input_type === 'vocab_match') hasPassage = false;
       var hasChart = !!problem.chart && !hasPassage;
       var hasImage = !!problem.image && !hasPassage && !hasChart;
