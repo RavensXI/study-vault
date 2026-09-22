@@ -3252,6 +3252,11 @@
     .passage-header-badge{font-size:0.62rem;font-weight:600;color:var(--accent);background:var(--accent-light,#f5f3ff);padding:0.15em 0.55em;border-radius:999px}
     .passage-body{padding:1.25rem 2rem 1.5rem;flex:1;overflow:hidden}
     .passage-body .passage-text{font-family:'Source Serif 4',serif;font-size:1rem;line-height:2;color:#3d3630;font-style:italic;transition:font-size 0.3s ease}
+    .passage-body .passage-text p{margin:0 0 0.9em}.passage-body .passage-text p:last-child{margin-bottom:0}
+    .learn-full-passage .rs-quote{white-space:pre-line}
+    .passage-part+.passage-part{margin-top:1.6em;padding-top:1.2em;border-top:1px solid rgba(61,54,48,0.14)}
+    .passage-part-label{font-family:'Inter',sans-serif;font-style:normal;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;line-height:1.5;color:#8a8580;margin-bottom:0.5em}
+    body.dark-mode .passage-part+.passage-part{border-top-color:rgba(224,216,208,0.16)}
     .passage-body .passage-text::first-letter{font-size:1.4em;font-weight:600;color:#5a5651}
     .passage-quote-highlight{background:rgba(124,58,237,0.18);border-bottom:2px solid var(--accent,#7c3aed);padding:1px 2px;border-radius:3px;box-shadow:0 0 0 2px rgba(124,58,237,0.1);box-decoration-break:clone;-webkit-box-decoration-break:clone}
     .passage-footer{padding:0.5rem 1.5rem 0.75rem;font-size:0.65rem;color:#a89e93;border-top:1px solid rgba(0,0,0,0.06);flex-shrink:0;text-align:right}
@@ -3297,6 +3302,16 @@
     .tl-legend span{display:flex;align-items:center;gap:0.3rem}
     .tl-legend .dot{width:12px;height:12px;border-radius:50%}
     .tl-legend .dot.g,.tl-legend .dot-green{background:var(--success)}.tl-legend .dot.a,.tl-legend .dot-amber{background:#f59e0b}.tl-legend .dot.r,.tl-legend .dot-red{background:var(--error)}
+    /* more than three categories: each row names its choice (22 Sep 2026) */
+    .tl-stmt--named{flex-wrap:wrap;row-gap:0.4rem}
+    .tl-stmt--named .stmt-text{flex:1 1 55%;min-width:12rem}
+    .tl-select{flex:1 1 13rem;max-width:100%;font:inherit;font-size:0.8rem;padding:0.35rem 0.5rem;border:2px solid #ddd;border-radius:8px;background:#fff;color:inherit;cursor:pointer}
+    .tl-select:focus-visible{outline:2px solid var(--accent,#7c3aed);outline-offset:1px}
+    .tl-select[data-c=green]{border-color:var(--success)}.tl-select[data-c=amber]{border-color:#f59e0b}.tl-select[data-c=red]{border-color:var(--error)}
+    .tl-select[data-c=blue]{border-color:#2563eb}.tl-select[data-c=purple]{border-color:#7c3aed}.tl-select[data-c=teal]{border-color:#0d9488}.tl-select[data-c=orange]{border-color:#ea580c}.tl-select[data-c=pink]{border-color:#db2777}
+    .tl-select:disabled{cursor:default;opacity:1}
+    body.dark-mode .tl-select{background:#2a2826;color:#e8e4df}
+    body.dark-mode .tl-select:not([data-c]){border-color:#3a3836}
     .tl-legend .dot-blue{background:#2563eb}.tl-legend .dot-purple{background:#7c3aed}.tl-legend .dot-teal{background:#0d9488}.tl-legend .dot-orange{background:#ea580c}.tl-legend .dot-pink{background:#db2777}
     .tl-btn.tl-c-green:hover,.tl-btn.tl-c-green.selected{background:var(--success);border-color:var(--success)}
     .tl-btn.tl-c-amber:hover,.tl-btn.tl-c-amber.selected{background:#f59e0b;border-color:#f59e0b}
@@ -3308,6 +3323,7 @@
     .tl-btn.tl-c-pink:hover,.tl-btn.tl-c-pink.selected{background:#db2777;border-color:#db2777}
     /* Highlight Evidence */
     .hl-passage{line-height:2;font-family:'Source Serif 4',serif;font-size:0.92rem;user-select:none;-webkit-user-select:none}
+    .hl-para{margin:0 0 0.75em}.hl-para:last-child{margin-bottom:0}
     .hw{cursor:pointer;padding:1px 0;border-radius:2px;transition:background 0.1s}
     .hw:hover{background:rgba(124,58,237,0.08)}
     .hw.selected{background:rgba(124,58,237,0.2);border-bottom:2px solid var(--accent,#7c3aed)}
@@ -3361,7 +3377,8 @@
     .improve-original{font-family:'Source Serif 4',serif;font-style:italic;padding:0.75rem 1rem;background:#fef2f2;border-left:3px solid var(--error);border-radius:0 8px 8px 0;margin-bottom:0.75rem;font-size:0.95rem}
     /* Spot Error */
     .spot-text{font-size:0.88rem;line-height:1.8;margin-top:0.5rem}
-    .spot-token{cursor:pointer;padding:1px 2px;border-radius:3px;transition:all 0.15s}
+    /* a dotted underline says "you can click these" on a phone, where there is no hover */
+    .spot-token{cursor:pointer;padding:1px 0;border-radius:3px;transition:all 0.15s;text-decoration:underline dotted rgba(124,58,237,0.35);text-underline-offset:3px}
     .spot-token:hover{background:rgba(124,58,237,0.06)}
     .spot-token.flagged{background:rgba(220,38,38,0.12);text-decoration:line-through;text-decoration-color:var(--error)}
     .spot-token.result-correct{background:rgba(22,163,74,0.15)}
@@ -7109,6 +7126,40 @@
     var _currentPassageId = null;
     var _passageTtsActive = false;
 
+    /* Passage text to HTML. English passages store paragraphs as blank lines,
+       which HTML folds into one run-on block: 226 live passages across five
+       English Language subjects printed that way (visual walk, 22 Sep 2026).
+       Text that already carries block markup (Music's <p>) passes through. */
+    function engPassageHtml(t){
+      t=String(t==null?'':t);
+      if(/<(p|div|br|ul|ol|table|h[1-6])\b/i.test(t)) return t;
+      var paras=t.split(/\n\s*\n/).map(function(x){return x.trim();}).filter(Boolean);
+      if(paras.length<2) return t;
+      return paras.map(function(x){return '<p>'+x.replace(/\n/g,'<br>')+'</p>';}).join('');
+    }
+    // What identifies "the text on screen" for a problem: one passage, or a pair
+    function engPassageKey(q){
+      if(q&&Array.isArray(q.passage_ids)&&q.passage_ids.length>1) return q.passage_ids.join('+');
+      return q?(q.passage_id||q.passage):null;
+    }
+    // Two passages for a comparison question, each under its own label
+    function engPassagePair(q, passages){
+      if(!q||!Array.isArray(q.passage_ids)||q.passage_ids.length<2) return null;
+      var as=Array.isArray(q.passage_as)?q.passage_as:[];
+      var parts=q.passage_ids.map(function(id,k){
+        var p=(passages||[]).find(function(x){return x.id===id;});if(!p) return null;
+        var lab=p.label||'';
+        if(as[k]){
+          var re=/^\s*(Source|Model|Extract|Text)\s+[A-E]\b/i;
+          lab=re.test(lab)?lab.replace(re,as[k]):(as[k]+(lab?' – '+lab:''));
+        }
+        return {label:lab,text:p.text,short:(as[k]||lab.split(/\s[–—-]\s/)[0]).trim()};
+      }).filter(Boolean);
+      if(parts.length<2) return null;
+      return {pair:true,label:parts.map(function(x){return x.short;}).join(' and '),
+              text:parts.map(function(x){return '<div class="passage-part"><div class="passage-part-label">'+x.label+'</div>'+engPassageHtml(x.text)+'</div>';}).join('')};
+    }
+
     // ---- Shuffle utility ----
     function engShuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
 
@@ -7796,7 +7847,7 @@
       // Stop any playing excerpt when the passage is changing or going away —
       // an <audio> detached by an innerHTML swap keeps playing invisibly
       // otherwise. Same-passage advances keep playing (multi-question excerpts).
-      var _incomingPid = hasPassage ? (problem.passage_id || problem.passage) : null;
+      var _incomingPid = hasPassage ? engPassageKey(problem) : null;
       if (_incomingPid !== _currentPassageId) {
         area.querySelectorAll('audio').forEach(function (aud) {
           try { aud.pause(); } catch (e) {}
@@ -7891,10 +7942,15 @@
         ? passages.find(function(p){return p.id===problem.passage_id;})
         : {text:problem.passage, label:'Source Text'};
       if (!passage) {area.style.display='none';return;}
+      // Comparison questions carry passage_ids: both texts, one under the other,
+      // each under its own label (optionally relettered by passage_as, because a
+      // lesson built one "Source A" per tier and the question calls one of them B).
+      var _pair = engPassagePair(problem, passages);
+      if (_pair) passage = _pair;
 
-      var _isNewPassage = _currentPassageId !== (problem.passage_id||problem.passage);
+      var _isNewPassage = _currentPassageId !== engPassageKey(problem);
       if (_isNewPassage) {
-        _currentPassageId = problem.passage_id||problem.passage;
+        _currentPassageId = engPassageKey(problem);
         if (_passageTtsActive) {speechSynthesis.cancel();_passageTtsActive=false;}
         area.innerHTML =
           '<div class="passage-a11y-bar passage-a11y-mobile">' +
@@ -7910,7 +7966,7 @@
           '<button class="passage-overlay-btn" data-overlay="aqua" onclick="engSetOverlay(this)" title="Aqua" style="background:#cffafe"></button>' +
           '</div></div>' +
           '<div class="passage-header"><span class="passage-header-label">' + (passage.label||'Source Extract') + '</span><span class="passage-header-badge" id="passage-q-badge"></span></div>' +
-          '<div class="passage-body"><div class="passage-text" id="passage-text">' + passage.text + '</div></div>' +
+          '<div class="passage-body"><div class="passage-text" id="passage-text">' + (passage.pair ? passage.text : engPassageHtml(passage.text)) + '</div></div>' +
           '<div class="passage-footer">Source Extract</div>';
         // Set audio URL for pre-recorded narration
         window._currentPassageAudioUrl = passage.audio_url || null;
@@ -7930,9 +7986,9 @@
         var bank = window._problemBank;
         var tier = practiceState.currentTier;
         var probs = bank[tier]||[];
-        var pid = problem.passage_id||problem.passage;
-        var total = probs.filter(function(q){return (q.passage_id||q.passage)===pid;}).length;
-        var sofar = probs.slice(0,practiceState.currentIndex+1).filter(function(q){return (q.passage_id||q.passage)===pid;}).length;
+        var pid = engPassageKey(problem);
+        var total = probs.filter(function(q){return engPassageKey(q)===pid;}).length;
+        var sofar = probs.slice(0,practiceState.currentIndex+1).filter(function(q){return engPassageKey(q)===pid;}).length;
         badge.textContent = 'Q '+sofar+' of '+total;
         badge.style.display = total > 1 ? '' : 'none';
       }
@@ -8196,34 +8252,79 @@
 
     // ---- Traffic Light ----
     var TL_COLORS=['green','amber','red','blue','purple','teal','orange','pink'];
+    /* Colour for each traffic-light category.
+       Truth judgements are coloured by meaning, not by position: "False" came out
+       amber whenever it was the second of two categories, which contradicted every
+       stem that says false is red (visual walk, 22 Sep 2026). Anything that is not
+       a truth scale — a five-way sort by technique, say — keeps the positional
+       palette. Order matters in the tests: "not supported" and "incorrect" contain
+       green words, so partly and negative are tested first. */
+    function tlTruth(c){
+      var s=String(c).toLowerCase();
+      if(/\b(partly|partially|somewhat|half)\b/.test(s))return 'amber';
+      if(/\b(not|false|incorrect|unsupported|inaccurate|wrong|untrue|disagree)\b/.test(s)||/^no\b/.test(s))return 'red';
+      if(/\b(true|correct|supported|accurate|fully|agree|yes|right)\b/.test(s))return 'green';
+      return null;
+    }
+    function tlColourMap(cats){
+      var m={},sem=cats.length<=3&&cats.every(function(c){return tlTruth(c);});
+      if(sem){
+        cats.forEach(function(c){m[c]=tlTruth(c);});
+        var seen={};sem=cats.every(function(c){if(seen[m[c]])return false;seen[m[c]]=1;return true;});
+      }
+      if(!sem){m={};cats.forEach(function(c,i){m[c]=TL_COLORS[i%TL_COLORS.length];});}
+      return m;
+    }
+    function tlLabel(c){c=String(c);return c.charAt(0).toUpperCase()+c.slice(1);}
     function renderTL(p){
       _engState.tl={};_engState.tlShuffled=engShuffle(p.statements);
-      // Extract unique categories from statements
+      // The choices on offer. An explicit list wins; otherwise the categories the
+      // answers use, which is all older problems have.
       var cats=[];
+      (Array.isArray(p.categories)&&p.categories.length?p.categories:[]).forEach(function(c){if(typeof c==='string'&&cats.indexOf(c)===-1)cats.push(c);});
       p.statements.forEach(function(s){if(cats.indexOf(s.correct)===-1)cats.push(s.correct);});
-      _engState.tlCats=cats;
+      var colour=tlColourMap(cats);
+      // a truth scale always reads true, partly, false — whatever order the answers came in
+      var RANK={green:0,amber:1,red:2};
+      if(cats.every(function(c){return RANK[colour[c]]!==undefined;}))cats.sort(function(a,b){return RANK[colour[a]]-RANK[colour[b]];});
+      _engState.tlCats=cats;_engState.tlColour=colour;
       var h='<div class="tl-legend">';
-      for(var c=0;c<cats.length;c++){
-        h+='<span><span class="dot dot-'+TL_COLORS[c%TL_COLORS.length]+'"></span> '+cats[c].charAt(0).toUpperCase()+cats[c].slice(1)+'</span>';
-      }
+      cats.forEach(function(c){h+='<span><span class="dot dot-'+colour[c]+'"></span> '+tlLabel(c)+'</span>';});
       h+='</div><div class="tl-statements">';
+      // Past three categories a row of blank circles cannot be read: which circle
+      // is "structural purpose — turning point"? The student gets the names.
+      var named=cats.length>3;
       _engState.tlShuffled.forEach(function(s,i){
-        h+='<div class="tl-stmt" data-idx="'+i+'"><span class="stmt-text">'+s.text+'</span><div class="tl-btns">';
-        for(var c=0;c<cats.length;c++){
-          h+='<button class="tl-btn tl-c-'+TL_COLORS[c%TL_COLORS.length]+'" title="'+cats[c].charAt(0).toUpperCase()+cats[c].slice(1)+'" onclick="engTlSel('+i+',\''+cats[c].replace(/'/g,"\\'")+'\')"></button>';
+        h+='<div class="tl-stmt'+(named?' tl-stmt--named':'')+'" data-idx="'+i+'"><span class="stmt-text">'+s.text+'</span>';
+        if(named){
+          h+='<select class="tl-select" aria-label="Category for statement '+(i+1)+'" onchange="engTlPick('+i+',this)"><option value="">Choose…</option>';
+          cats.forEach(function(c,ci){h+='<option value="'+ci+'">'+tlLabel(c)+'</option>';});
+          h+='</select>';
+        }else{
+          h+='<div class="tl-btns">';
+          cats.forEach(function(c,ci){h+='<button class="tl-btn tl-c-'+colour[c]+'" title="'+tlLabel(c)+'" aria-label="'+tlLabel(c)+'" onclick="engTlSel('+i+','+ci+')"></button>';});
+          h+='</div>';
         }
-        h+='</div></div>';
+        h+='</div>';
       });
       return h+'</div>';
     }
-    window.engTlSel = function(i,cat){
+    // takes the category's position; older callers passed the category itself
+    window.engTlSel = function(i,ci){
       if(practiceState.answered)return;
+      var cats=_engState.tlCats||[],colour=_engState.tlColour||{};
+      var cat=(typeof ci==='number')?cats[ci]:ci;
       _engState.tl[i]=cat;
-      var cats=_engState.tlCats||[];
-      var m={};cats.forEach(function(c,idx){m[c]=TL_COLORS[idx%TL_COLORS.length];});
       document.querySelectorAll('.tl-stmt[data-idx="'+i+'"] .tl-btn').forEach(function(b){b.classList.remove('selected');});
-      var sel=document.querySelector('.tl-stmt[data-idx="'+i+'"] .tl-btn.tl-c-'+m[cat]);
+      var sel=document.querySelector('.tl-stmt[data-idx="'+i+'"] .tl-btn.tl-c-'+colour[cat]);
       if(sel)sel.classList.add('selected');
+    };
+    window.engTlPick = function(i,el){
+      if(practiceState.answered)return;
+      var cats=_engState.tlCats||[],colour=_engState.tlColour||{};
+      var cat=el.value===''?undefined:cats[+el.value];
+      if(cat===undefined){delete _engState.tl[i];el.removeAttribute('data-c');}
+      else{_engState.tl[i]=cat;el.setAttribute('data-c',colour[cat]);}
     };
 
     // ---- Highlight Evidence ----
@@ -8231,6 +8332,7 @@
       var passages=window._practicePassages||[];
       var passage=p.passage_id?passages.find(function(x){return x.id===p.passage_id;}):null;
       var text=passage?passage.text:(p.passage||'');
+      _engState.hlRaw=text;   // initHL keeps its paragraphs; textContent would not
       var hlHint = window.innerWidth <= 900
         ? 'Hold a word to start, then drag or tap another word to highlight the phrase.'
         : 'Click or drag to highlight the relevant words.';
@@ -8238,8 +8340,15 @@
     }
     function initHL(p,container){
       var el=container.querySelector('#hl-passage-area');if(!el)return;
-      var rawText=el.textContent;
-      var words=rawText.split(/(\s+)/);
+      /* Paragraphs survive. Passages store them as blank lines, which HTML folds
+         into a space, so a question about "the second paragraph" pointed at a
+         passage printed as one block (visual walk, 22 Sep 2026). */
+      var _raw=(_engState.hlRaw!=null)?String(_engState.hlRaw):el.innerHTML;
+      _engState.hlRaw=null;
+      var _tmp=document.createElement('div');
+      _tmp.innerHTML=_raw.replace(/<\/p>\s*<p[^>]*>/gi,'\n\n').replace(/(<br\s*\/?>\s*){2,}/gi,'\n\n');
+      var _paras=_tmp.textContent.split(/\n\s*\n/).map(function(x){return x.trim();}).filter(Boolean);
+      if(!_paras.length)_paras=[_tmp.textContent];
       el.innerHTML='';_engState.hlDragging=false;_engState.hlStart=-1;
       var _hlLongPressTimer=null;
       var _hlTouchActive=false;
@@ -8255,8 +8364,12 @@
         });
       }
 
-      words.forEach(function(w){
-        if(/^\s+$/.test(w)){el.appendChild(document.createTextNode(w));return;}
+      var host=el;
+      _paras.forEach(function(para){
+        if(_paras.length>1){host=document.createElement('p');host.className='hl-para';el.appendChild(host);}
+        para.split(/(\s+)/).forEach(function(w){
+        if(!w)return;
+        if(/^\s+$/.test(w)){host.appendChild(document.createTextNode(w));return;}
         var s=document.createElement('span');s.className='hw';s.dataset.idx=wi++;s.textContent=w;
         // Desktop: mousedown starts immediately
         s.addEventListener('mousedown',function(e){e.preventDefault();if(!practiceState.answered){_engState.hlDragging=true;_engState.hlStart=parseInt(s.dataset.idx);el.querySelectorAll('.hw.selected').forEach(function(x){x.classList.remove('selected');});s.classList.add('selected');}});
@@ -8282,7 +8395,8 @@
             if(navigator.vibrate)navigator.vibrate(30);
           },250);
         },{passive:false});
-        el.appendChild(s);
+        host.appendChild(s);
+        });
       });
       // Mobile: drag to extend selection, prevent scroll when selecting
       el.addEventListener('touchmove',function(e){
@@ -8406,7 +8520,10 @@
           var cur=(t.text||'');
           if(!/^[.,;:!?\)\]\}’”—]/.test(cur)) h+=' ';
         }
-        h+='<span class="spot-token" data-idx="'+i+'" onclick="engSpotTog(this)">'+t.text+'</span>';
+        // Whitespace a token carries sits OUTSIDE its span: inside, the span's
+        // padding doubled it, so "media companys." read "media  companys ."
+        var parts=/^(\s*)([\s\S]*?)(\s*)$/.exec(t.text||'');
+        h+=parts[1]+'<span class="spot-token" data-idx="'+i+'" onclick="engSpotTog(this)">'+parts[2]+'</span>'+parts[3];
       });
       return h+'</div>';
     }
@@ -8945,6 +9062,7 @@
           if(_engState.tl[i]===s.correct){right++;el.classList.add('result-correct');}
           else el.classList.add('result-incorrect');
         });
+        document.querySelectorAll('.tl-select').forEach(function(x){x.disabled=true;});
         isCorrect=right>=tot-1;
         feedHtml='<div style="font-size:0.82rem;line-height:1.5">';
         _engState.tlShuffled.forEach(function(s,i){
@@ -8984,14 +9102,19 @@
       }
       else if(type==='evidence_match'){
         var r=0;feedHtml='<div style="font-size:0.82rem">';
+        // A claim with no quote marked as its answer used to throw on correctQuote.text,
+        // so Check Answer silently did nothing (two live problems, 22 Sep 2026). Such a
+        // claim is left out of the marking rather than taking the whole question down.
+        var gradable=problem.claims.filter(function(c,ci){return problem.quotes.some(function(q){return q.correctClaim===ci;});}).length;
         problem.claims.forEach(function(c,ci){
           var qi=_engState.em.pairs[ci];var ce=document.querySelector('.em-claim[data-idx="'+ci+'"]');
           var correctShuffledIdx=_engState.emShuffled.findIndex(function(sq){return sq.quote.correctClaim===ci;});
           var correctQuote=problem.quotes.find(function(q){return q.correctClaim===ci;});
+          if(!correctQuote) return;
           if(qi===correctShuffledIdx){r++;if(ce)ce.classList.add('result-correct');feedHtml+='<p>\u2714 <strong>'+c+'</strong> \u2192 '+correctQuote.text+'</p>';}
           else{if(ce)ce.classList.add('result-incorrect');var yours=(qi!==undefined&&_engState.emShuffled[qi])?_engState.emShuffled[qi].quote.text:'not matched';feedHtml+='<p>\u2718 <strong>'+c+'</strong> \u2014 you chose: '+yours+'<br><span style="color:var(--success)">\u2192 Correct: '+correctQuote.text+'</span></p>';}
         });
-        feedHtml+='</div>';isCorrect=r>=problem.claims.length-1;
+        feedHtml+='</div>';isCorrect=r>=gradable-1;
       }
       else if(type==='ai_mark'||type==='ai_write'||type==='improve_sentence'){
         engCheckAI(problem,type,tier,idx);return;
