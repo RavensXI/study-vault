@@ -16,12 +16,13 @@ async def main():
         await b.close()
     # narration: each line at its start time
     ids = list(TL['lines'].keys())
-    inputs = sum([['-i', f'voice/{k}_t.wav'] for k in ids], [])
+    VD = os.environ.get('VOICE_DIR', 'voice'); OUTF = os.environ.get('OUT', 'mitosis-explainer.mp4')
+    inputs = sum([['-i', f'{VD}/{k}_t.wav'] for k in ids], [])
     delays = ''.join(f"[{i}:a]adelay={int(TL['lines'][k]['start'] * 1000)}|{int(TL['lines'][k]['start'] * 1000)}[a{i}];" for i, k in enumerate(ids))
     mix = delays + ''.join(f'[a{i}]' for i in range(len(ids))) + f'amix=inputs={len(ids)}:normalize=0,apad,atrim=0:{TL["total"]}[out]'
-    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', *inputs, '-filter_complex', mix, '-map', '[out]', '-ar', '48000', 'voice/narration.wav'], check=True)
-    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', 'frames/%05d.jpg', '-i', 'voice/narration.wav',
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', *inputs, '-filter_complex', mix, '-map', '[out]', '-ar', '48000', f'{VD}/narration.wav'], check=True)
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', 'frames/%05d.jpg', '-i', f'{VD}/narration.wav',
                     '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '20', '-preset', 'medium', '-c:a', 'aac', '-b:a', '160k', '-shortest',
-                    '-movflags', '+faststart', 'mitosis-explainer.mp4'], check=True)
-    print('done', os.path.getsize('mitosis-explainer.mp4') // 1024, 'KB')
+                    '-movflags', '+faststart', OUTF], check=True)
+    print('done', os.path.getsize(OUTF) // 1024, 'KB')
 asyncio.run(main())
