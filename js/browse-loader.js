@@ -337,13 +337,9 @@
 
   // ---- Render subject landing page (unit cards) ----
   async function renderSubjectLanding(subjectSlug) {
-    // A school's Triple Science merges into its Combined Science course. Free-tier AQA Triple
-    // (the one board whose slug is the bare 'separate-sciences') keeps its own course page, as
-    // the other boards' Triple Science does; sending it to Combined showed Combined lessons.
-    if (subjectSlug === 'separate-sciences' && typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke('separate-sciences')) {
-      window.location.replace('/browse/science');
-      return;
-    }
+    // Triple Science has its own course page, for free-tier and school students alike. (It
+    // used to redirect to /browse/science, where Combined's units share Triple's slugs, so a
+    // Triple student who opened the course page was sent to Combined lessons.)
 
     // Determine content source: bespoke (school-specific) or generic (school_id NULL)
     var hasBespoke = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(subjectSlug));
