@@ -1,0 +1,321 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<title>Mitosis explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#222}canvas{display:block;width:540px;height:960px}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="timeline.js"></script>
+<script>
+/* A cut-paper explainer (StudyVault house style, first try, 23 Sep 2026).
+   Everything is card and paper on a desk, animated on "twos" like stop-motion:
+   torn edges that boil a little, soft shadows under every layer, a few pieces with
+   faces, and a teacher's handwriting drawing labels in as the voice says them.
+   render(t) draws the frame at time t (seconds). Deterministic: same t, same frame. */
+const C = document.getElementById('c'), X = C.getContext('2d'), W = 1080, H = 1920;
+const TL = window.TL, L = TL.lines;
+const FPS_ANIM = 12;                       // stop-motion: the drawing changes 12 times a second
+const INK = '#2b2622', PAPER = '#f3ead8', HAND = "'Gochi Hand', cursive", ROUND = "'Fredoka', sans-serif";
+const COL = { cell: '#9ed8c7', cellEdge: '#5aa894', nuc: '#f6d98b', nucEdge: '#d9a93c', a: '#e8604c', b: '#4f7fd6', c2: '#f2a93b', d: '#8b62c9',
+  card: '#fffaf0', teal: '#2f8f83', rust: '#c06325', shadow: 'rgba(60,40,20,0.22)' };
+
+// ---- helpers ------------------------------------------------------------------------------
+function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const ease = t => 1 - Math.pow(1 - clamp(t), 3);
+const easeIO = t => { t = clamp(t); return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+const back = t => { t = clamp(t); const c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+const lerp = (a, b, t) => a + (b - a) * t;
+function stepT(t) { return Math.floor(t * FPS_ANIM) / FPS_ANIM; }          // animate on twos
+function boil(t) { return Math.floor(t * FPS_ANIM / 2); }                    // edges re-cut 6x a second
+function cue(id, word, off = 0) {                                             // the moment a word is spoken (approx.)
+  const l = L[id]; const i = l.text.toLowerCase().indexOf(word.toLowerCase());
+  return l.start + l.dur * (i < 0 ? 0 : i / l.text.length) + off;
+}
+function inSpan(t, a, b) { return t >= a && t < b; }
+
+// paper grain, made once
+const grain = document.createElement('canvas'); grain.width = grain.height = 256;
+(() => { const g = grain.getContext('2d'), r = rng(7), im = g.createImageData(256, 256);
+  for (let i = 0; i < im.data.length; i += 4) { const v = 200 + r() * 55; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 26; }
+  g.putImageData(im, 0, 0); })();
+const grainPat = X.createPattern(grain, 'repeat');
+
+// a cut-paper blob: an ellipse (or circle) with a hand-cut, slightly boiling edge
+function paperEllipse(cx, cy, rx, ry, fill, seed, t, opts = {}) {
+  const r = rng(seed * 131 + boil(t) * 7), n = 44, pts = [];
+  for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2, j = 1 + (r() - .5) * (opts.rough || 0.035);
+    pts.push([cx + Math.cos(a) * rx * j, cy + Math.sin(a) * ry * j]); }
+  paperPath(pts, fill, opts);
+}
+function paperRect(x, y, w, h, fill, seed, t, opts = {}) {
+  const r = rng(seed * 97 + boil(t) * 5), pts = [], k = 10, jit = opts.rough ?? 3;
+  const edge = (x0, y0, x1, y1) => { for (let i = 0; i < k; i++) { const u = i / k; pts.push([lerp(x0, x1, u) + (r() - .5) * jit, lerp(y0, y1, u) + (r() - .5) * jit]); } };
+  edge(x, y, x + w, y); edge(x + w, y, x + w, y + h); edge(x + w, y + h, x, y + h); edge(x, y + h, x, y);
+  paperPath(pts, fill, opts);
+}
+function paperPath(pts, fill, opts) {
+  X.save();
+  X.beginPath(); pts.forEach((p, i) => i ? X.lineTo(p[0], p[1]) : X.moveTo(p[0], p[1])); X.closePath();
+  if (opts.shadow !== false) { X.shadowColor = COL.shadow; X.shadowBlur = opts.lift || 18; X.shadowOffsetY = (opts.lift || 18) * .45; }
+  X.fillStyle = fill; X.fill();
+  X.shadowColor = 'transparent'; X.fillStyle = grainPat; X.globalCompositeOperation = 'multiply'; X.fill();
+  X.globalCompositeOperation = 'source-over';
+  if (opts.edge) { X.strokeStyle = opts.edge; X.lineWidth = opts.edgeW || 5; X.stroke(); }
+  X.restore();
+}
+// a face: eyes that blink, a mouth with a mood
+function face(cx, cy, s, t, mood = 'happy', seed = 1, look = [0, 0]) {
+  const blinkPeriod = 3.1 + (seed % 5) * .37, bt = (t + seed * .7) % blinkPeriod, shut = bt < .12;
+  X.save(); X.fillStyle = INK; X.strokeStyle = INK; X.lineCap = 'round';
+  for (const sx of [-1, 1]) {
+    const ex = cx + sx * s * .32, ey = cy - s * .08;
+    if (shut) { X.lineWidth = s * .06; X.beginPath(); X.moveTo(ex - s * .1, ey); X.lineTo(ex + s * .1, ey); X.stroke(); }
+    else { X.fillStyle = '#fff'; X.beginPath(); X.ellipse(ex, ey, s * .13, s * (mood === 'wow' ? .17 : .15), 0, 0, 7); X.fill();
+      X.fillStyle = INK; X.beginPath(); X.arc(ex + look[0] * s * .05, ey + look[1] * s * .05, s * .07, 0, 7); X.fill(); }
+  }
+  X.lineWidth = s * .06; X.beginPath();
+  if (mood === 'wow') { X.ellipse(cx, cy + s * .26, s * .08, s * .1, 0, 0, 7); X.fillStyle = '#7a2d22'; X.fill(); }
+  else if (mood === 'worried') { X.moveTo(cx - s * .15, cy + s * .3); X.quadraticCurveTo(cx, cy + s * .2, cx + s * .15, cy + s * .3); X.stroke(); }
+  else { X.moveTo(cx - s * .18, cy + s * .2); X.quadraticCurveTo(cx, cy + s * .36, cx + s * .18, cy + s * .2); X.stroke(); }
+  // cheeks
+  X.fillStyle = 'rgba(232,96,76,.35)'; for (const sx of [-1, 1]) { X.beginPath(); X.ellipse(cx + sx * s * .5, cy + s * .14, s * .1, s * .06, 0, 0, 7); X.fill(); }
+  X.restore();
+}
+// handwriting that writes itself in, left to right
+function hand(text, x, y, size, p, color = INK, align = 'center', rot = 0) {
+  if (p <= 0) return; X.save(); X.translate(x, y); X.rotate(rot); X.font = `${size}px ${HAND}`; X.textAlign = align; X.textBaseline = 'middle';
+  const w = X.measureText(text).width, x0 = align === 'center' ? -w / 2 : align === 'right' ? -w : 0;
+  X.beginPath(); X.rect(x0 - 10, -size, (w + 20) * clamp(p), size * 2); X.clip();
+  X.fillStyle = color; X.fillText(text, 0, 0); X.restore();
+}
+// a drawn arrow with a wobble, growing from a to b
+function arrow(ax, ay, bx, by, p, color = INK, seed = 3, bend = 40) {
+  if (p <= 0) return; const r = rng(seed); const mx = (ax + bx) / 2 + (r() - .5) * bend, my = (ay + by) / 2 + (r() - .5) * bend;
+  X.save(); X.strokeStyle = color; X.lineWidth = 7; X.lineCap = 'round'; X.lineJoin = 'round';
+  const N = 30, k = Math.max(2, Math.floor(N * clamp(p))); let px, py;
+  X.beginPath();
+  for (let i = 0; i <= k; i++) { const u = i / N; const x = (1 - u) * (1 - u) * ax + 2 * (1 - u) * u * mx + u * u * bx, y = (1 - u) * (1 - u) * ay + 2 * (1 - u) * u * my + u * u * by;
+    i ? X.lineTo(x, y) : X.moveTo(x, y); px = x; py = y; }
+  X.stroke();
+  if (p >= 1) { const a = Math.atan2(by - my, bx - mx); X.beginPath(); X.moveTo(bx, by); X.lineTo(bx - 34 * Math.cos(a - .45), by - 34 * Math.sin(a - .45));
+    X.moveTo(bx, by); X.lineTo(bx - 34 * Math.cos(a + .45), by - 34 * Math.sin(a + .45)); X.stroke(); }
+  X.restore();
+}
+// a hand-drawn loop around something
+function circleMark(cx, cy, rx, ry, p, color = COL.rust, seed = 5) {
+  if (p <= 0) return; const r = rng(seed); X.save(); X.strokeStyle = color; X.lineWidth = 8; X.lineCap = 'round'; X.beginPath();
+  const turns = 1.08 * clamp(p); for (let i = 0; i <= 60 * turns; i++) { const a = -1.9 + i / 60 * Math.PI * 2, j = 1 + Math.sin(i * .7 + r() * 3) * .03;
+    const x = cx + Math.cos(a) * rx * j, y = cy + Math.sin(a) * ry * j; i ? X.lineTo(x, y) : X.moveTo(x, y); }
+  X.stroke(); X.restore();
+}
+// a chromosome: one stick (single) or an X of two sister copies joined at a paper-fastener centromere
+function chromosome(x, y, len, color, t, seed, opts = {}) {
+  const split = opts.split || 0, copies = opts.copies ?? 1, ang = opts.ang || 0;
+  X.save(); X.translate(x, y); X.rotate(ang);
+  const arm = (dx, sgn, s2) => { X.save(); X.translate(dx, 0); X.rotate(sgn * (0.16 + (opts.wobble ? Math.sin(t * 5 + seed) * .04 : 0)));
+    paperRect(-13, -len / 2, 26, len, color, seed + s2, t, { rough: 2.5, lift: 10 }); X.restore(); };
+  if (copies < 1) { arm(0, 0, 1); }
+  else { const gap = 22 * (1 - split) + split * 0; const sep = split * (opts.pull || 0);
+    X.save(); X.translate(0, -sep); arm(-gap / 2, 1, 1); X.restore(); X.save(); X.translate(0, sep); arm(gap / 2, -1, 2); X.restore();
+    if (split < .3) { X.fillStyle = '#d9d2c4'; X.beginPath(); X.arc(0, 0, 11, 0, 7); X.fill(); X.fillStyle = '#a89f8e'; X.beginPath(); X.arc(0, 0, 4, 0, 7); X.fill(); } }
+  X.restore();
+}
+
+// ---- the desk ------------------------------------------------------------------------------
+function desk(t) {
+  X.fillStyle = '#e9dcc3'; X.fillRect(0, 0, W, H);
+  X.fillStyle = grainPat; X.globalCompositeOperation = 'multiply'; X.fillRect(0, 0, W, H); X.globalCompositeOperation = 'source-over';
+  paperRect(60, 150, W - 120, H - 430, PAPER, 11, 0, { rough: 5, lift: 26 });                 // the big sheet the film happens on
+  const g = X.createRadialGradient(W / 2, H / 2, 300, W / 2, H / 2, 1300); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(60,40,20,.28)');
+  X.fillStyle = g; X.fillRect(0, 0, W, H);
+  // the subject tab and the running title
+  paperRect(80, 70, 300, 90, COL.teal, 12, t, { rough: 3, lift: 10 });
+  X.fillStyle = '#fff'; X.font = `700 44px ${ROUND}`; X.textAlign = 'center'; X.textBaseline = 'middle'; X.fillText('Biology', 230, 117);
+  X.fillStyle = INK; X.font = `500 40px ${ROUND}`; X.textAlign = 'right'; X.fillText('StudyVault', W - 90, 117);
+}
+// captions: the spoken sentence, on a paper strip at the foot
+function caption(t) {
+  const cur = Object.values(L).find(l => t >= l.start - .1 && t < l.start + l.dur + .35); if (!cur) return;
+  const words = cur.text.split(' '), p = clamp((t - cur.start) / cur.dur);
+  X.save(); X.font = `500 40px ${ROUND}`;
+  const maxW = W - 220, rows = [[]]; for (const w of words) { const row = rows[rows.length - 1]; if (X.measureText([...row, w].join(' ')).width > maxW) rows.push([w]); else row.push(w); }
+  const hgt = rows.length * 54 + 44, y0 = H - 250 - hgt / 2;
+  paperRect(80, y0, W - 160, hgt, '#fffdf6', 33, t, { rough: 3, lift: 12 });
+  let k = 0; const said = Math.floor(p * words.length * 1.02);
+  rows.forEach((row, ri) => { const line = row.join(' '); let x = W / 2 - X.measureText(line).width / 2;
+    row.forEach(w => { X.fillStyle = k < said ? INK : 'rgba(43,38,34,.38)'; X.textAlign = 'left'; X.textBaseline = 'middle'; X.fillText(w, x, y0 + 44 + ri * 54); x += X.measureText(w + ' ').width; k++; }); });
+  X.restore();
+}
+
+// ---- the scenes ------------------------------------------------------------------------------
+const CX = W / 2, CY = 820;   // the cell's home on the sheet
+
+function title(t) {
+  const d = [['M', COL.a], ['I', COL.b], ['T', COL.c2], ['O', COL.teal], ['S', COL.d], ['I', COL.a], ['S', COL.b]];
+  d.forEach(([ch, col], i) => { const p = back((t - .15 - i * .09) / .45); if (p <= 0) return;
+    const x = 200 + i * 113, y = 640 - (1 - p) * 180, rot = (i % 2 ? .06 : -.05);
+    X.save(); X.translate(x, y); X.rotate(rot); paperRect(-50, -70, 100, 140, col, 50 + i, t, { rough: 4, lift: 14 });
+    X.fillStyle = '#fff'; X.font = `700 96px ${ROUND}`; X.textAlign = 'center'; X.textBaseline = 'middle'; X.fillText(ch, 0, 6); X.restore(); });
+  hand('how one cell becomes two', CX, 830, 62, (t - 1.1) / .9, INK, 'center', -.03);
+  const pc = back((t - 1.6) / .5); if (pc > 0) { paperEllipse(CX, 1130, 150 * pc, 135 * pc, COL.cell, 70, t, { edge: COL.cellEdge }); if (pc > .8) face(CX, 1130, 150, t, 'happy', 2); }
+}
+
+// s1: cells multiplying (grow) and a plaster over a graze (repair)
+function sGrow(t) {
+  const l = L.s1, lt = t - l.start;
+  const gen = Math.min(3, Math.floor(clamp(lt / (l.dur * .55)) * 4));           // 1, 2, 4, 8 cells
+  const n = [1, 2, 4, 8][gen]; const cols = n === 8 ? 4 : n === 4 ? 2 : n;
+  for (let i = 0; i < n; i++) { const cx = 300 + (i % 4) * 160 + (cols < 4 ? (4 - cols) * 80 : 0), cy = 560 + Math.floor(i / 4) * 170;
+    const pop = back((lt - gen * l.dur * .55 / 4) / .35); const s = i >= n / 2 && gen > 0 ? pop : 1;
+    paperEllipse(cx, cy, 70 * s, 64 * s, COL.cell, 100 + i, t, { edge: COL.cellEdge, edgeW: 4, lift: 10 }); if (s > .8) face(cx, cy, 64, t, 'happy', i + 3); }
+  hand('grow!', 250, 440, 70, (t - cue('s1', 'grow')) / .5, COL.teal, 'center', -.08);
+  // repair: a graze on a knee (a pink paper patch) and a plaster sticking on
+  const rp = t - cue('s1', 'repair');
+  if (rp > -1.2) { paperEllipse(CX, 1080, 230, 120, '#f1c4a6', 120, t, { lift: 16 });
+    for (let k = 0; k < 5; k++) paperRect(CX - 110 + k * 45, 1060 + (k % 2) * 16, 30, 8, '#d9534f', 130 + k, t, { rough: 2, shadow: false });
+    const sp = back(rp / .45); if (sp > 0) { X.save(); X.translate(CX, 1075); X.rotate(-.12); X.scale(sp, sp); paperRect(-170, -48, 340, 96, '#e7b98f', 140, t, { rough: 2, lift: 12 });
+      paperRect(-60, -34, 120, 68, '#f3d9b7', 141, t, { rough: 2, shadow: false }); X.restore(); }
+    hand('repair!', 820, 1210, 70, rp / .5, COL.rust, 'center', .06); }
+}
+// s2: one cell → two identical cells (the promise of the film)
+function sPromise(t) {
+  const l = L.s2, lt = t - l.start;
+  const sp = easeIO((t - cue('s2', 'one cell')) / 1.6);
+  const dx = 190 * sp;
+  if (sp < .98) { const pinch = Math.sin(sp * Math.PI) * 60; paperEllipse(CX - dx * .5, CY, 200 - pinch * .3, 185, COL.cell, 200, t, { edge: COL.cellEdge });
+    paperEllipse(CX + dx * .5, CY, 200 - pinch * .3, 185, COL.cell, 201, t, { edge: COL.cellEdge, shadow: false }); face(CX, CY, 150, t, sp > .2 ? 'wow' : 'happy', 5); }
+  else { for (const s of [-1, 1]) { paperEllipse(CX + s * 220, CY, 185, 175, COL.cell, 210 + s, t, { edge: COL.cellEdge }); face(CX + s * 220, CY, 135, t, 'happy', 6 + s); } }
+  hand('mitosis', CX, 470, 104, (t - cue('s2', 'mitosis')) / .6, COL.rust, 'center', -.03);
+  hand('1 cell  →  2 identical cells', CX, 1130, 66, (t - cue('s2', 'identical')) / .8, INK);
+  if (sp >= .98) circleMark(CX + 220, CY, 215, 205, (t - cue('s2', 'identical') - .4) / .6, COL.teal, 9);
+}
+// the cell with its nucleus and chromosomes, used from s3 to s7
+const CHR = [[COL.a, -90, -40, .3], [COL.b, 60, -70, -.4], [COL.c2, -40, 70, .9], [COL.d, 90, 50, -1.1]];
+function bigCell(t, opts) {
+  const pinch = opts.pinch || 0, sq = opts.squash || 0;
+  if (pinch < .02) { paperEllipse(CX, CY, 330 + sq * 30, 300 - sq * 20, COL.cell, 300, t, { edge: COL.cellEdge, edgeW: 6, lift: 24 }); }
+  else { const gap = pinch * 150; for (const s of [-1, 1]) paperEllipse(CX + s * (170 + gap * .4), CY, 200 + (1 - pinch) * 60, 290 - pinch * 40, COL.cell, 305 + s, t, { edge: COL.cellEdge, edgeW: 6, lift: 24, shadow: s < 0 }); }
+  if (opts.nucleus > 0) { X.save(); X.globalAlpha = opts.nucleus; paperEllipse(CX, CY, 190, 170, COL.nuc, 310, t, { edge: COL.nucEdge, edgeW: 5, lift: 8 }); X.restore(); }
+  if (opts.face) { const fp = opts.facePos || [CX + 200, CY - 150]; face(fp[0], fp[1], 90, t, opts.mood || 'happy', 11, opts.look || [0, 0]); }
+}
+// s3: the misconception, on a sticky note
+function sMistake(t) {
+  bigCell(t, { nucleus: 1, face: true, mood: 'worried', look: [-1, .5] });
+  CHR.forEach(([c, x, y, a], i) => chromosome(CX + x, CY + y, 120, c, t, 400 + i * 3, { copies: 0, ang: a }));
+  const sp = back((t - cue('s3', 'wrong') + .4) / .5);
+  if (sp > 0) { X.save(); X.translate(290, 360); X.rotate(-.06); X.scale(sp, sp); paperRect(-200, -110, 400, 220, '#ffe37a', 450, t, { rough: 3, lift: 18 });
+    hand('Common mistake!', 0, -40, 56, 1, COL.rust); hand('DNA is copied', 0, 20, 50, (t - cue('s3', 'copies')) / .6, INK); hand('BEFORE mitosis', 0, 72, 56, (t - cue('s3', 'before')) / .6, COL.rust); X.restore(); }
+  circleMark(CX, CY, 250, 230, (t - cue('s3', 'before')) / .7, COL.rust, 12);
+}
+// s4: each chromosome becomes two identical copies, joined in the middle
+function sCopy(t) {
+  const cp = easeIO((t - cue('s4', 'becomes')) / 1.4);
+  bigCell(t, { nucleus: 1, face: true, mood: cp > .5 ? 'wow' : 'happy', look: [-1, .6] });
+  CHR.forEach(([c, x, y, a], i) => { const k = clamp(cp * 1.4 - i * .12); chromosome(CX + x, CY + y, 120, c, t, 400 + i * 3, { copies: k > .05 ? 1 : 0, split: 1 - k, pull: 30, ang: a, wobble: true }); });
+  hand('two identical copies', 780, 470, 58, (t - cue('s4', 'identical')) / .7, COL.teal, 'center', .04);
+  arrow(700, 510, CX + 60 + 8, CY - 70 - 30, (t - cue('s4', 'identical') - .3) / .5, COL.teal, 21);
+  hand('joined in the middle', 330, 1150, 58, (t - cue('s4', 'joined')) / .7, COL.rust, 'center', -.04);
+  arrow(360, 1110, CX - 40 - 10, CY + 70 + 12, (t - cue('s4', 'joined') - .3) / .5, COL.rust, 22);
+}
+// s5: the nucleus melts away and the chromosomes line up across the middle
+function sLineUp(t) {
+  const nu = 1 - clamp((t - cue('s5', 'begins')) / .8), lp = easeIO((t - cue('s5', 'line up')) / 1.6);
+  bigCell(t, { nucleus: nu, face: true, mood: 'happy', facePos: [CX + 230, CY - 180], look: [-1, .8] });
+  const eq = CHR.map((_, i) => [CX, CY - 195 + i * 130]);
+  CHR.forEach(([c, x, y, a], i) => chromosome(lerp(CX + x, eq[i][0], lp), lerp(CY + y, eq[i][1], lp), 120, c, t, 400 + i * 3, { copies: 1, ang: lerp(a, Math.PI / 2, lp), wobble: true }));
+  if (lp > .6) { X.save(); X.setLineDash([18, 14]); X.strokeStyle = 'rgba(43,38,34,.55)'; X.lineWidth = 5; X.beginPath(); X.moveTo(CX, CY - 290); X.lineTo(CX, CY + 290); X.stroke(); X.restore(); }
+  hand('the middle', 280, 470, 62, (t - cue('s5', 'middle')) / .6, COL.rust, 'center', -.05);
+  arrow(300, 510, CX - 30, CY - 250, (t - cue('s5', 'middle') - .25) / .5, COL.rust, 31);
+}
+// s6: fibres reel the copies to each end; two nuclei form
+function sPull(t) {
+  const fp = clamp((t - cue('s6', 'fibres')) / .7), pp = easeIO((t - cue('s6', 'pull')) / 1.5), np = clamp((t - cue('s6', 'nucleus')) / .7);
+  bigCell(t, { nucleus: 0, face: true, mood: pp > .1 && pp < .9 ? 'wow' : 'happy', facePos: [CX + 230, CY - 180], squash: pp * .6 });
+  const poles = [[CX - 290, CY], [CX + 290, CY]];
+  CHR.forEach(([c], i) => { const y = CY - 195 + i * 130;
+    for (const s of [-1, 1]) { const sx = lerp(CX + s * 18, poles[s < 0 ? 0 : 1][0] + s * -40, pp), sy = lerp(y, CY + (i - 1.5) * 42, pp);
+      if (fp > 0) { X.save(); X.strokeStyle = 'rgba(43,38,34,.5)'; X.lineWidth = 3; X.beginPath(); const px = poles[s < 0 ? 0 : 1][0], py = poles[0][1];
+        X.moveTo(px, py); X.lineTo(lerp(px, sx, fp), lerp(py, sy, fp)); X.stroke(); X.restore(); }
+      X.save(); X.translate(sx, sy); X.rotate(Math.PI / 2 + s * .15 * (1 - pp)); paperRect(-13, -60, 26, 120, c, 500 + i * 7 + (s > 0 ? 1 : 0), t, { rough: 2.5, lift: 10 }); X.restore(); } });
+  for (const [px, py] of poles) paperEllipse(px, py, 16, 16, INK, 520, t, { shadow: false });
+  if (np > 0) for (const [px, py] of poles) { X.save(); X.globalAlpha = np * .55; paperEllipse(px + (px < CX ? 40 : -40), py, 110, 150, COL.nuc, 530, t, { edge: COL.nucEdge, shadow: false }); X.restore(); }
+  hand('fibres pull', CX, 420, 64, (t - cue('s6', 'fibres')) / .6, COL.teal);
+  hand('the nucleus divides', CX, 1200, 60, (t - cue('s6', 'nucleus')) / .7, COL.rust);
+}
+// s7: the cell pinches in two; both new cells get a face and the same chromosomes
+function sSplit(t) {
+  const pp = easeIO((t - cue('s7', 'split')) / 1.6);
+  const off = pp * 90;
+  for (const s of [-1, 1]) {
+    const cx = CX + s * (230 + off), sx = 1 - pp * .15;
+    if (pp < .02) break;
+    paperEllipse(cx, CY, 220 * sx + (1 - pp) * 40, 270 - pp * 40, COL.cell, 600 + s, t, { edge: COL.cellEdge, edgeW: 6, lift: 22 });
+    paperEllipse(cx, CY + 20, 120, 130, COL.nuc, 610 + s, t, { edge: COL.nucEdge, shadow: false });
+    CHR.forEach(([c], i) => { X.save(); X.translate(cx - 45 + i * 30, CY + 20); X.rotate(.2 * (i - 1.5)); paperRect(-11, -50, 22, 100, c, 620 + i + s * 10, t, { rough: 2, lift: 6 }); X.restore(); });
+    if (pp > .7) face(cx, CY - 170, 80, t, 'happy', 20 + s);
+  }
+  if (pp < .02) sPull(L.s6.start + L.s6.dur + 2);          // hold the last pose until the split starts
+  hand('cytoplasm and membrane split', CX, 420, 58, (t - cue('s7', 'cytoplasm')) / .9, COL.teal);
+  const same = t - cue('s7', 'exactly');
+  hand('identical!', CX, 1190, 76, same / .5, COL.rust, 'center', -.04);
+  if (same > .5) { circleMark(CX - 320, CY, 205, 240, (same - .5) / .6, COL.rust, 41); circleMark(CX + 320, CY, 205, 240, (same - .8) / .6, COL.rust, 42); }
+}
+// q + a: the question card, a thinking pause, then the answer
+function sQuestion(t) {
+  const qp = back((t - L.q.start + .2) / .5);
+  X.save(); X.translate(CX, 640); X.scale(qp, qp); X.rotate(-.02);
+  paperRect(-420, -230, 840, 460, COL.card, 700, t, { rough: 4, lift: 22 });
+  X.fillStyle = COL.teal; X.font = `700 60px ${ROUND}`; X.textAlign = 'center'; X.fillText('Quick check', 0, -140);
+  hand('Does the cell copy its DNA', 0, -40, 60, (t - L.q.start) / 1.2); hand('before mitosis, or during it?', 0, 40, 60, (t - L.q.start - .8) / 1.2); X.restore();
+  const tags = [['before', -200, COL.b], ['during', 200, COL.a]];
+  const ans = t - L.a.start;
+  tags.forEach(([w, dx, col], i) => { const p = back((t - cue('q', w)) / .4); if (p <= 0) return;
+    X.save(); X.translate(CX + dx, 1040); X.rotate(i ? .05 : -.05); X.scale(p, p); const dim = ans > 0 && w === 'during';
+    X.globalAlpha = dim ? .4 : 1; paperRect(-150, -70, 300, 140, col, 710 + i, t, { rough: 3, lift: 14 });
+    X.fillStyle = '#fff'; X.font = `700 58px ${ROUND}`; X.textAlign = 'center'; X.textBaseline = 'middle'; X.fillText(w.toUpperCase(), 0, 4); X.restore(); });
+  // thinking time: three paper dots
+  const think = t - (L.q.start + L.q.dur); if (think > 0 && ans < 0) for (let k = 0; k < 3; k++) { const on = think > k * .75; paperEllipse(CX - 70 + k * 70, 1230, 22, 22, on ? COL.rust : '#d8ccb5', 720 + k, t, { lift: 6 }); }
+  if (ans > 0) { circleMark(CX - 200, 1040, 190, 110, ans / .5, COL.teal, 51);
+    X.save(); X.strokeStyle = COL.teal; X.lineWidth = 14; X.lineCap = 'round'; const tp = clamp((ans - .3) / .4); X.beginPath(); X.moveTo(CX - 330, 930); X.lineTo(CX - 330 + 40 * Math.min(1, tp * 2), 930 + 40 * Math.min(1, tp * 2));
+    if (tp > .5) X.lineTo(CX - 290 + 90 * (tp - .5) * 2, 970 - 110 * (tp - .5) * 2); X.stroke(); X.restore();
+    hand('copy  →  line up  →  pull apart  →  split', CX, 1230, 50, (ans - 1.4) / 1.2, INK); }
+}
+function endCard(t) {
+  const p = back((t - TL.end[0]) / .5);
+  X.save(); X.translate(CX, 800); X.scale(p, p); paperRect(-360, -200, 720, 400, COL.card, 800, t, { rough: 4, lift: 22 });
+  X.fillStyle = INK; X.font = `700 84px ${ROUND}`; X.textAlign = 'center'; X.textBaseline = 'middle'; X.fillText('StudyVault', 0, -40);
+  hand('everything you need, nothing you don\'t', 0, 60, 38, (t - TL.end[0] - .4) / 1, COL.teal); X.restore();
+  const pc = back((t - TL.end[0] - .6) / .5); if (pc > 0) { for (const s of [-1, 1]) { paperEllipse(CX + s * 150, 1180, 110 * pc, 100 * pc, COL.cell, 810 + s, t, { edge: COL.cellEdge });
+    if (pc > .8) face(CX + s * 150, 1180, 80, t, 'happy', 30 + s, [-s * .6, 0]); } }
+}
+
+// ---- the film ------------------------------------------------------------------------------
+function render(tReal) {
+  const t = stepT(tReal);
+  desk(t);
+  const seg = (id, pad = 0) => t >= L[id].start - pad && t < (next(id) ?? TL.end[0]);
+  const ids = Object.keys(L); function next(id) { const i = ids.indexOf(id); return i < ids.length - 1 ? L[ids[i + 1]].start : null; }
+  if (t < L.s1.start) title(t);
+  else if (seg('s1')) sGrow(t);
+  else if (seg('s2')) sPromise(t);
+  else if (seg('s3')) sMistake(t);
+  else if (seg('s4')) sCopy(t);
+  else if (seg('s5')) sLineUp(t);
+  else if (seg('s6')) sPull(t);
+  else if (seg('s7')) sSplit(t);
+  else if (t < TL.end[0]) sQuestion(t);
+  else endCard(t);
+  caption(t);
+  // a page-turn flash of paper between scenes: a quick wipe of the sheet
+  const starts = [L.s1.start, ...ids.slice(1, 7).map(id => L[id].start), L.q.start, TL.end[0]];
+  for (const s of starts) { const d = t - s; if (d >= 0 && d < .17) { X.fillStyle = `rgba(243,234,216,${.85 * (1 - d / .17)})`; X.fillRect(60, 150, W - 120, H - 430); } }
+}
+window.render = render; window.TOTAL = TL.total;
+document.fonts.ready.then(() => { window.READY = true; render(0); });
+// preview: ?t=12.5 shows one frame; ?play plays in real time
+const q = new URLSearchParams(location.search);
+if (q.has('t')) document.fonts.ready.then(() => render(+q.get('t')));
+if (q.has('play')) document.fonts.ready.then(() => { const t0 = performance.now(); (function f() { const t = (performance.now() - t0) / 1000; render(t % TL.total); requestAnimationFrame(f); })(); });
+</script>
+</body></html>
