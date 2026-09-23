@@ -9403,7 +9403,10 @@
       if(problem.question)userPrompt+='Task: '+_plain(problem.question)+'\n\n';
       if(problem.original)userPrompt+='Sentence the student was given to improve: '+_plain(problem.original)+'\n\n';
       var _models=[problem.improved].concat(problem.alternative_improved||[]).filter(Boolean);
-      if(_models.length)userPrompt+='Model answer'+(_models.length>1?'s (any is fine)':'')+': '+_models.map(_plain).join(' / ')+'\n\n';
+      // Not sent when an extract is on screen (24 Sep 2026, re-walk): the marker told a student
+      // they had copied "coaxing it" from the extract when the phrase was only in the model
+      // answer, even with the model answer labelled as hidden.
+      if(_models.length&&!engOnScreenText(problem))userPrompt+='Model answer'+(_models.length>1?'s (any is fine)':'')+' (NOT shown to the student; a guide to quality only, never evidence of copying): '+_models.map(_plain).join(' / ')+'\n\n';
       if(problem.marking_prompt)userPrompt+='Marking guidance for this question: '+problem.marking_prompt+'\n\n';
       // Standard fields
       if(problem.quote)userPrompt+='Quote: '+problem.quote+'\n\n';
@@ -9416,7 +9419,7 @@
       if(onScreen){
         userPrompt+='Text shown beside the question (the student can see it):\n'+onScreen+'\n\n';
         userPrompt+='Marking rules: judge the answer only against what the task asks, and do not mark it down for not doing something the task did not ask for. Before saying a quotation is inaccurate, check it against the text above.';
-        if(type==='improve_sentence'||type==='ai_write')userPrompt+=' The task asks for the student\'s own writing: if the answer copies or closely reworks sentences from the text above (other than a sentence the task gives them to improve), it is not their own work; say so in the feedback and give no higher than needs_work.';
+        if(type==='improve_sentence'||type==='ai_write')userPrompt+=' The task asks for the student\'s own writing: if the answer copies or closely reworks sentences from the text above (other than a sentence the task gives them to improve), it is not their own work; say so in the feedback and give no higher than needs_work. Only the text above counts as copying: a word or phrase that matches the model answer but is not in the text above is the student\'s own, so never call it copied. Before you say any phrase is borrowed, find the same words in the text above; if they are not there, do not mention it.';
         userPrompt+='\n\n';
       }
       userPrompt+='Student answer: '+input.value.trim();
