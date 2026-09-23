@@ -15,12 +15,18 @@
     if (card.items && card.items.length) body.items = card.items;
     var ctrl = ('AbortController' in window) ? new AbortController() : null;
     var t = ctrl ? setTimeout(function () { ctrl.abort(); }, 9000) : null;
-    return fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctrl ? ctrl.signal : undefined })
+    body.page = location.pathname;
+    var headers = window.svAuthHeaders ? svAuthHeaders({ 'Content-Type': 'application/json' }) : { 'Content-Type': 'application/json' };
+    return fetch(ENDPOINT, { method: 'POST', headers: headers, body: JSON.stringify(body), signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) {
         if (r.status === 503 || r.status === 429) disabledUntil = Date.now() + 60000;
         return r.ok ? r.json() : null;
       })
-      .then(function (d) { if (t) clearTimeout(t); return (d && d.verdict) ? d : null; })
+      .then(function (d) {
+        if (t) clearTimeout(t);
+        if (d && d.support && window.svShowSupport) svShowSupport(null, d);   /* the safeguarding support panel */
+        return (d && d.verdict) ? d : null;
+      })
       .catch(function () { if (t) clearTimeout(t); return null; });
   }
 

@@ -778,6 +778,7 @@
 <script src="js/tour-player.js"></script>
 <script src="js/dash-tour.js"></script>
 <script src="js/demo-students.js"></script>
+<script src="js/safeguard-support.js"></script>
 <script src="js/recall.js"></script>
 <script src="dash-data.js"></script>
 <script src="sync.js"></script>
@@ -2008,8 +2009,9 @@ document.querySelector('.card.exam').onclick=()=>svPlannerOpen();
     ASK.t=setTimeout(function(){
       var byUnit={};
       IX.forEach(function(l){var k=l.s.sub+'/'+l.uslug;(byUnit[k]=byUnit[k]||{k:k,s:l.s.name||l.s.sub,u:l.uname,lessons:[]}).lessons.push({n:l.n,t:l.t,g:l.terms.slice(0,6).join(', ')});});
-      fetch('/api/finder',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q:q,units:Object.values(byUnit)})})
+      fetch('/api/finder',{method:'POST',headers:window.svAuthHeaders?svAuthHeaders({'Content-Type':'application/json'}):{'Content-Type':'application/json'},body:JSON.stringify({q:q,units:Object.values(byUnit),page:location.pathname})})
       .then(function(r){return r.json();}).then(function(d){
+        if(d&&d.support&&window.svShowSupport)svShowSupport(null,d);   /* the safeguarding support panel */
         if(ASK.q!==q)return;
         var l=d&&d.unit&&d.n?IX.find(function(x){return x.s.sub+'/'+x.uslug===d.unit&&x.n===d.n;}):null;
         if(!l){ if(!below) res.innerHTML='<div class="fnone">Nothing in your subjects covers “'+esc(q)+'”.</div>'; return; }

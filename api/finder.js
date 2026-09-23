@@ -1,4 +1,5 @@
 const { ask, choice, configured } = require('./_lib/jev');
+const safeguard = require('./_lib/safeguard');
 
 /**
  * Dashboard finder, the judged fallback: the student typed something the local index could
@@ -37,6 +38,10 @@ module.exports = async function handler(req, res) {
   })).filter(u => u.k && u.lessons.length);
   if (!q || !units.length) return res.status(400).json({ error: 'q and units are required' });
 
+  // A search with a worrying word in it goes to the safeguarding check (api/_lib/safeguard.js).
+  const sgCheck = safeguard.screen(req, { text: q, context: 'The pupil typed this into the search box on their revision dashboard.', source: 'search', page: b.page, prefilter: true });
+  const withSupport = async function (out) { const sg = await safeguard.settle(sgCheck, 3000); if (sg.support) { out.support = true; out.school_name = sg.school_name; } return out; };
+
   try {
     // 1. the unit
     const ucrit = { none: 'the words do not belong to any of these units' };
@@ -47,17 +52,17 @@ module.exports = async function handler(req, res) {
     // the likeliest units (up to three) go forward together, so a near miss on the unit does not lose the lesson
     const cands = units.filter(u => (probs[u.k] || (a1.choice === u.k ? a1.confidence : 0) || 0) >= 0.12)
                        .sort((x, y) => (probs[y.k] || 0) - (probs[x.k] || 0)).slice(0, 3);
-    if (!cands.length || (a1.choice === 'none' && (probs.none || 0) >= 0.6)) return res.status(200).json({ unit: null, n: null, p: probs.none || 0 });
+    if (!cands.length || (a1.choice === 'none' && (probs.none || 0) >= 0.6)) return res.status(200).json(await withSupport({ unit: null, n: null, p: probs.none || 0 }));
     // 2. the lesson among those units' lessons
     const lcrit = { none: 'no lesson here covers it' };
     cands.forEach(u => u.lessons.forEach(l => { lcrit[u.k + '#' + l.n] = u.s + ' — ' + u.u + ' — ' + l.t + (l.g ? ' (covers: ' + l.g + ')' : ''); }));
     const r2 = await ask({ state: { student_typed: q, note: 'Pick the one lesson whose content answers or contains what the student typed.' },
                           questions: { lesson: choice('Which lesson covers what the student typed?', lcrit) } });
     const a2 = (r2.answers || {}).lesson || {}; const lk = a2.choice; const p2 = (a2.probabilities || {})[lk] || a2.confidence || 0;
-    if (!lk || lk === 'none' || p2 < 0.3) return res.status(200).json({ unit: null, n: null, p: p2 });
+    if (!lk || lk === 'none' || p2 < 0.3) return res.status(200).json(await withSupport({ unit: null, n: null, p: p2 }));
     const hash = lk.lastIndexOf('#');
-    return res.status(200).json({ unit: lk.slice(0, hash), n: +lk.slice(hash + 1), p: p2 });
+    return res.status(200).json(await withSupport({ unit: lk.slice(0, hash), n: +lk.slice(hash + 1), p: p2 }));
   } catch (e) {
-    return res.status(502).json({ error: 'Could not look that up', fallback: true, detail: String(e.message || e).slice(0, 200) });
+    return res.status(502).json(await withSupport({ error: 'Could not look that up', fallback: true, detail: String(e.message || e).slice(0, 200) }));
   }
 };

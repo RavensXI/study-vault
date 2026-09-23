@@ -374,13 +374,14 @@
       });
       var resp = await fetch('/api/tutor', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lessonTitle: ctx.title, lessonText: ctx.text, unitLessons: unitLessons, messages: conversation }),
+        headers: window.svAuthHeaders ? svAuthHeaders({ 'Content-Type': 'application/json' }) : { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lessonTitle: ctx.title, lessonText: ctx.text, unitLessons: unitLessons, messages: conversation, page: location.pathname }),
       });
       hideTyping();
       var data = await resp.json().catch(function () { return {}; });
       if (!resp.ok) {
         addBubble('bot', data.error || 'Sorry, I had trouble responding. Try again in a moment.');
+        if (window.svShowSupport) svShowSupport(els.log.lastElementChild, data);
       } else {
         var reply = (data.reply || '').trim() || 'Sorry, I didn’t catch that — could you rephrase?';
         conversation.push({ role: 'assistant', content: reply });
@@ -389,6 +390,7 @@
         bubble.className = 'tutor-msg bot';
         els.log.appendChild(bubble);
         await typeOut(bubble, reply);   // reveal it word by word (input stays locked until done)
+        if (window.svShowSupport) { svShowSupport(bubble, data); if (data.support) els.log.scrollTop = els.log.scrollHeight; }
       }
     } catch (err) {
       hideTyping();

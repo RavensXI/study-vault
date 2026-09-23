@@ -22,6 +22,7 @@
  */
 
 const { callClaude } = require('./_lib/claude');
+const safeguard = require('./_lib/safeguard');
 
 const MODEL = 'claude-haiku-4-5-20251001';
 const MAX_LESSON_CHARS = 9000;   // cap grounding context (~2.2k tokens)
@@ -54,7 +55,7 @@ STYLE:
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -71,7 +72,7 @@ module.exports = async function handler(req, res) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
-  const { lessonTitle, lessonText, unitLessons, messages } = req.body || {};
+  const { lessonTitle, lessonText, unitLessons, messages, page } = req.body || {};
 
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Missing messages' });
@@ -110,6 +111,15 @@ module.exports = async function handler(req, res) {
     lessonContext += '\n\nOTHER LESSONS IN THIS UNIT (titles only — for signposting). You may point the student to one of these by name if their question clearly belongs there, but you do NOT have their content, so never describe or guess what they contain:\n' + list;
   }
 
+  // The pupil's newest message goes to the safeguarding check (api/_lib/safeguard.js),
+  // with the tutor's previous reply as context; it runs beside the tutor call.
+  const lastTutor = cleanMessages.slice(0, -1).filter(m => m.role === 'assistant').slice(-1)[0];
+  const sgCheck = safeguard.screen(req, {
+    text: cleanMessages[cleanMessages.length - 1].content,
+    context: 'Lesson: ' + (lessonTitle || '') + (lastTutor ? '. The tutor had just said: ' + lastTutor.content.slice(0, 600) : ''),
+    source: 'tutor', page
+  });
+
   try {
     const data = await callClaude({
       model: MODEL,
@@ -127,9 +137,13 @@ module.exports = async function handler(req, res) {
     });
 
     const reply = (data.content || []).map(b => b.text || '').join('').trim();
-    return res.status(200).json({ reply, model: MODEL });
+    const sg = await safeguard.settle(sgCheck, 3000);
+    // As in ai-mark: when the check flags, the tutor's own reply gives way to a fixed line
+    // that points to the support panel, so no model-written helpline number reaches a pupil.
+    return res.status(200).json({ reply: sg.support ? safeguard.TUTOR_HOLDING : reply, model: MODEL, support: sg.support || undefined, school_name: sg.school_name });
   } catch (err) {
     console.error('Tutor error:', err.message);
-    return res.status(502).json({ error: 'Tutor failed', detail: err.message });
+    const sg = await safeguard.settle(sgCheck, 3000);
+    return res.status(502).json({ error: 'Tutor failed', detail: err.message, support: sg.support || undefined, school_name: sg.school_name });
   }
 };

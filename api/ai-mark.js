@@ -25,6 +25,7 @@
  */
 
 const { callClaudeDetailed } = require('./_lib/claude');
+const safeguard = require('./_lib/safeguard');
 
 // Extended responses (>8 marks) need judgement, not fact-spotting, and Haiku
 // is measurably too generous there — in the bake-off it gave 5/6 to invented
@@ -40,7 +41,7 @@ module.exports = async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   // Only serve calls from our own site (same pattern as api/tutor.js) — a
@@ -54,7 +55,7 @@ module.exports = async function handler(req, res) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
-  const { tier: requestedTier, marks, system, prompt, free_tier } = req.body || {};
+  const { tier: requestedTier, marks, system, prompt, free_tier, student_text, question_text, page } = req.body || {};
 
   if (!prompt) {
     return res.status(400).json({ error: 'Missing prompt' });
@@ -105,6 +106,12 @@ module.exports = async function handler(req, res) {
   }
   rates[ip][tier].push(now);
 
+  // The safeguarding check reads the pupil's own words beside the marking
+  // (api/_lib/safeguard.js). It starts now so it has usually finished by the
+  // time the marking has; it never stops the marking coming back.
+  const sgText = typeof student_text === 'string' && student_text.trim() ? student_text : safeguard.answerFromPrompt(prompt);
+  const sgCheck = safeguard.screen(req, { text: sgText, context: question_text, source: 'exam_answer', page });
+
   try {
     let result;
     let model;
@@ -146,10 +153,15 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    return res.status(200).json({ result, model, tier, servedBy: served });
+    const sg = await safeguard.settle(sgCheck, 3000);
+    // A flagged answer is not marked: the marker's own crisis advice cannot be trusted
+    // (it gave a wrong Childline number in testing); the support panel carries the real ones.
+    if (sg.support) result = safeguard.holdingResult(system);
+    return res.status(200).json({ result, model, tier, servedBy: served, support: sg.support || undefined, school_name: sg.school_name });
   } catch (err) {
     console.error('AI marking error:', err.message);
-    return res.status(502).json({ error: 'AI marking failed', detail: err.message });
+    const sg = await safeguard.settle(sgCheck, 3000);
+    return res.status(502).json({ error: 'AI marking failed', detail: err.message, support: sg.support || undefined, school_name: sg.school_name });
   }
 };
 

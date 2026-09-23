@@ -160,6 +160,12 @@ R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), video on R2
   `servedBy` on `/api/ai-mark`. Marking is marks-routed (Haiku ≤8, Sonnet >8;
   essays 2000 tokens). ⚠ open: US fallback must fail closed before any DPA
   claim.
+- **Safeguarding route (23 Sep 2026):** exam answers, tutor messages, flashcard
+  answers and searches get a London-hosted check beside the marking; a flag shows
+  the pupil a support panel and, for a signed-in pupil in a class at a school with
+  `schools.settings.safeguarding` set, stores the concern and emails the lead (no
+  names or words in the email). Lead reviews at `/teacher/safeguarding`. Unity's
+  lead: Bev Worthington. Details: `docs/SAFEGUARDING_ROUTE.md`.
 - **Admin pages:** `/admin/pipeline`, `/admin/review`, `/admin/images`,
   `/admin/editor`, `/admin/editor-guide` (Tom-only, never redesigned — leave).
 - **Teacher pages:** `/teacher/login`, `/teacher/signup`, `/teacher/classes`

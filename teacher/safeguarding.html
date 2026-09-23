@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Safeguarding concerns — StudyVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Young+Serif&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/teacher.css">
+  <link rel="stylesheet" href="/css/scrollbar.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/js/auth-gate.js" data-role="admin,teacher" data-auth="teacher"></script>
+  <style>
+    .topnav a.auth-logout-btn{color:var(--anchor)!important;font-weight:600}
+    .record{font-family:var(--read);font-size:.95rem;color:var(--sec);margin:-.4rem 0 1.4rem;max-width:68ch}
+    .filters{display:flex;gap:18px;margin:0 0 14px;font-size:.88rem}
+    .filters button{background:none;border:0;border-bottom:1.5px solid transparent;padding:2px 0;font:inherit;font-weight:600;color:var(--sec);cursor:pointer}
+    .filters button[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--rust)}
+    .alert{padding:18px 20px;margin:0 0 14px}
+    .alert header{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin-bottom:10px}
+    .alert .pupil{font-weight:800;font-size:1.02rem}
+    .alert .meta{font-size:.84rem;color:var(--sec)}
+    .alert .state{margin-left:auto;font-size:.8rem;font-weight:700;color:var(--bad)}
+    .alert .state.done{color:var(--good)}
+    .alert dl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:8px 16px;margin:0}
+    .alert dt{font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);padding-top:3px}
+    .alert dd{margin:0;font-family:var(--read);font-size:.95rem;line-height:1.6;color:var(--ink);overflow-wrap:anywhere}
+    .alert dd.words{background:var(--inset);border:1px solid var(--line);border-radius:4px;padding:10px 12px;white-space:pre-wrap}
+    .review{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:14px;padding-top:14px;border-top:1px solid var(--linel)}
+    .review label{display:block;font-size:.8rem;font-weight:700;color:var(--sec);margin-bottom:4px}
+    .review .note{flex:1 1 320px}
+    .review textarea{width:100%;min-height:44px;font:inherit;font-family:var(--read);font-size:.92rem;padding:8px 10px;border:1px solid var(--edge);border-radius:4px;background:#fff;resize:vertical}
+    .review textarea:focus-visible,.btn:focus-visible,.filters button:focus-visible{outline:2px solid var(--rust);outline-offset:2px}
+    .done-line{margin-top:12px;font-size:.86rem;color:var(--sec)}
+    .empty{padding:26px 22px;font-family:var(--read);color:var(--sec)}
+    .err{padding:18px 20px;color:var(--bad)}
+    @media (max-width:640px){.alert dl{grid-template-columns:1fr;gap:2px 0}.alert dt{padding-top:10px}.alert .state{margin-left:0}}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="top-in">
+      <a class="brand" href="/teacher/classes">StudyVault<img class="brandlock" src="/assets/studyvault-lock-rust.svg" alt=""></a>
+      <span class="sp"></span>
+      <nav class="topnav admin-nav"><a href="/teacher/classes">Your classes</a></nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="h1row"><h1>Safeguarding concerns</h1><span class="h1note" id="school"></span></div>
+    <p class="record">Record each concern in your school’s own safeguarding system, such as CPOMS or MyConcern. StudyVault is not the record: a concern is deleted 90 days after you mark it reviewed.</p>
+    <div class="filters" role="group" aria-label="Show">
+      <button type="button" id="f-new" aria-pressed="true">To review</button>
+      <button type="button" id="f-all" aria-pressed="false">All</button>
+    </div>
+    <div id="list"><div class="card empty">Loading…</div></div>
+  </main>
+
+<script>
+(function () {
+  var SUPA = 'https://baipckgywpnwapobwtsy.supabase.co';
+  var ANON = 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
+  var token = null, data = null, show = 'new';
+  var SOURCE = { exam_answer: 'an exam answer', tutor: 'a message to the lesson tutor', flashcard: 'a flashcard answer', search: 'the search box' };
+  var CATEGORY = { suicide_or_self_harm: 'Suicide or self-harm', abuse_or_neglect: 'Abuse or neglect', sexual_exploitation: 'Sexual exploitation or grooming',
+    unsafe_at_home_or_school: 'Unsafe at home or school', eating_disorder: 'Eating disorder', bullying_or_violence: 'Bullying or violence',
+    substances_or_criminal_exploitation: 'Substances or criminal exploitation', other: 'Other', none: 'Not clear' };
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function when(iso) { try { return new Date(iso).toLocaleString('en-GB', { timeZone: 'Europe/London', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return iso; } }
+
+  async function credentials() {
+    try { var sb = window.supabase.createClient(SUPA, ANON); var s = await sb.auth.getSession(); if (s && s.data && s.data.session) token = s.data.session.access_token; } catch (e) {}
+    if (!token) { try { var raw = localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token'); if (raw) token = JSON.parse(raw).access_token || null; } catch (e) {} }
+    return !!token;
+  }
+  async function api(body) {
+    var opts = { headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token } };
+    if (body) { opts.method = 'POST'; opts.body = JSON.stringify(body); }
+    var r = await fetch('/api/teacher/safeguarding', opts);
+    var d = await r.json().catch(function () { return {}; });
+    if (r.status === 401) { window.location.replace('/teacher/login'); throw new Error('Sign in first.'); }
+    if (!r.ok) throw new Error(d.error || 'Something went wrong.');
+    return d;
+  }
+
+  function card(a) {
+    var done = a.status === 'reviewed';
+    return '<article class="card alert" data-id="' + esc(a.id) + '">' +
+      '<header><span class="pupil">' + esc(a.pupil) + '</span>' +
+      '<span class="meta">' + esc(a.classes.length ? a.classes.join(', ') : 'No class') + ' · ' + esc(when(a.created_at)) + ' · in ' + esc(SOURCE[a.source] || a.source) + '</span>' +
+      '<span class="state' + (done ? ' done' : '') + '">' + (done ? 'Reviewed' : 'To review') + '</span></header>' +
+      '<dl>' +
+        '<dt>What they wrote</dt><dd class="words">' + esc(a.body) + '</dd>' +
+        (a.context ? '<dt>Answering</dt><dd>' + esc(a.context) + '</dd>' : '') +
+        '<dt>Why it was flagged</dt><dd>' + esc(CATEGORY[a.category] || 'Not clear') + (a.decision === 'unsure' ? ' (the check was unsure)' : '') + '. ' + esc(a.reason || '') + '</dd>' +
+      '</dl>' +
+      (done
+        ? '<div class="done-line">Reviewed ' + esc(when(a.reviewed_at)) + (a.reviewed_by ? ' by ' + esc(a.reviewed_by) : '') + (a.review_note ? ': ' + esc(a.review_note) : '') + '</div>'
+        : '<div class="review"><div class="note"><label for="note-' + esc(a.id) + '">Note (optional)</label><textarea id="note-' + esc(a.id) + '" maxlength="1000"></textarea></div>' +
+          '<button type="button" class="btn" data-review="' + esc(a.id) + '">Mark as reviewed</button></div>') +
+      '</article>';
+  }
+
+  function render() {
+    var list = document.getElementById('list');
+    var rows = (data.alerts || []).filter(function (a) { return show === 'all' || a.status === 'new'; });
+    list.innerHTML = rows.length ? rows.map(card).join('')
+      : '<div class="card empty">' + (show === 'new' ? 'Nothing to review.' : 'No concerns have been flagged.') + '</div>';
+  }
+
+  document.getElementById('f-new').addEventListener('click', function () { show = 'new'; this.setAttribute('aria-pressed', 'true'); document.getElementById('f-all').setAttribute('aria-pressed', 'false'); render(); });
+  document.getElementById('f-all').addEventListener('click', function () { show = 'all'; this.setAttribute('aria-pressed', 'true'); document.getElementById('f-new').setAttribute('aria-pressed', 'false'); render(); });
+  document.getElementById('list').addEventListener('click', async function (e) {
+    var b = e.target.closest('[data-review]'); if (!b) return;
+    var id = b.getAttribute('data-review'); var note = (document.getElementById('note-' + id) || {}).value || '';
+    b.disabled = true; b.textContent = 'Saving…';
+    try { await api({ id: id, note: note }); data = await api(); render(); }
+    catch (err) { b.disabled = false; b.textContent = 'Mark as reviewed'; alert(err.message); }
+  });
+
+  (async function () {
+    var list = document.getElementById('list');
+    if (!(await credentials())) { window.location.replace('/teacher/login'); return; }
+    try {
+      data = await api();
+      document.getElementById('school').textContent = (data.schools || []).map(function (s) { return s.name; }).join(', ');
+      render();
+    } catch (err) { list.innerHTML = '<div class="card err">' + esc(err.message) + '</div>'; }
+  })();
+})();
+</script>
+</body>
+</html>

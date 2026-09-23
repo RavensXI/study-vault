@@ -70,6 +70,14 @@ module.exports = async (req, res) => {
   const a = authorize(req);
   if (!a.ok) return res.status(401).json({ error: 'Unauthorised' });
 
+  // Daily housekeeping, before the Monday-only gate: safeguarding concerns are
+  // deleted 90 days after the school's lead marks them reviewed (delete_after is
+  // set then). Unreviewed concerns are never deleted. See api/_lib/safeguard.js.
+  try {
+    const { error: sgErr } = await supabase.from('safeguarding_alerts').delete().lt('delete_after', new Date().toISOString());
+    if (sgErr) console.error('[weekly-digest] safeguarding retention failed:', sgErr.message);
+  } catch (e) { console.error('[weekly-digest] safeguarding retention failed:', e.message); }
+
   // Weekly cadence: only send on Mondays unless manually triggered.
   const isMonday = new Date().getUTCDay() === 1;
   if (!a.manual && !isMonday) return res.status(200).json({ skipped: 'not Monday' });

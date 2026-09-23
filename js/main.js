@@ -420,7 +420,8 @@ function initPracticeQuestions() {
     try {
       const resp = await fetch('/api/ai-mark', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        // the pupil's sign-in, when there is one, lets the safeguarding check reach their school's lead
+        headers: window.svAuthHeaders ? svAuthHeaders({ 'Content-Type': 'application/json' }) : { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           // No `tier` here on purpose. Hardcoding 'quick' sent 30-mark English
           // Literature essays to the short-answer model with 400 tokens of
@@ -431,6 +432,9 @@ function initPracticeQuestions() {
           system: systemPrompt,
           prompt: userPrompt,
           free_tier: aiFreeTier,
+          student_text: answer,
+          question_text: q.text,
+          page: location.pathname,
         }),
       });
 
@@ -446,11 +450,13 @@ function initPracticeQuestions() {
         const err = await resp.json().catch(() => ({}));
         aiFeedbackBody.innerHTML = '<p>Something went wrong — ' +
           (err.detail || err.error || 'please try again') + '.</p>';
+        if (window.svShowSupport) svShowSupport(aiFeedback, err);
         return;
       }
 
       const data = await resp.json();
       aiFeedbackBody.innerHTML = formatAiResponse(data.result || '(no response)');
+      if (window.svShowSupport) svShowSupport(aiFeedback, data);
       /* the AI's mark out of the question's marks: half or better is what
          counts, for the completion tick and for the test-out (Tom, 12 Sep 2026) */
       var mm = String(data.result || '').match(/(\d+)\s*(?:\/|out of)\s*(\d+)/i);

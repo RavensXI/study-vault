@@ -1,4 +1,5 @@
 const { ask, noul, score, configured } = require('../_lib/jev');
+const safeguard = require('../_lib/safeguard');
 
 /**
  * Typed-recall flashcards: the student types what they remember and Jev judges it
@@ -60,10 +61,15 @@ module.exports = async function handler(req, res) {
   const items = Array.isArray(b.items) ? b.items.map(x => clean(x, 160)).filter(Boolean).slice(0, 10) : [];
   if (!front || !answer || !typed) return res.status(400).json({ error: 'front, answer and typed are required' });
 
+  // Flashcard answers are short: only those with a worrying word reach the safeguarding
+  // check (api/_lib/safeguard.js), and it runs beside the judge.
+  const sgCheck = safeguard.screen(req, { text: typed, context: 'Flashcard: ' + front, source: 'flashcard', page: b.page, prefilter: true });
+  const withSupport = async function (out) { const sg = await safeguard.settle(sgCheck, 3000); if (sg.support) { out.support = true; out.school_name = sg.school_name; } return out; };
+
   // Plain matches never need the judge: the same words, the year alone for a date the question
   // does not pin to a day or month, the surname alone for a person, the answer without its year.
   if (kind !== 'list' && plainMatch(kind, front, answer, typed)) {
-    return res.status(200).json({ kind, p: 1, completeness: 2, verdict: 'right', plain: true });
+    return res.status(200).json(await withSupport({ kind, p: 1, completeness: 2, verdict: 'right', plain: true }));
   }
   const state = { flashcard_kind: kind, flashcard_front: front, model_answer: answer, student_typed_recall: typed };
   const questions = {};
@@ -105,8 +111,8 @@ module.exports = async function handler(req, res) {
       out = { kind, p: p, completeness: c, parts: m, verdict: verdict };
     }
     out.usage = r.usage ? r.usage.input_tokens : undefined;
-    return res.status(200).json(out);
+    return res.status(200).json(await withSupport(out));
   } catch (e) {
-    return res.status(502).json({ error: 'Could not judge that one', fallback: true, detail: String(e.message || e).slice(0, 200) });
+    return res.status(502).json(await withSupport({ error: 'Could not judge that one', fallback: true, detail: String(e.message || e).slice(0, 200) }));
   }
 };

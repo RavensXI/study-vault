@@ -4682,6 +4682,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
   <script src="/js/timer.js"></script>
+  <script src="/js/safeguard-support.js"></script>
   <script src="/js/practice-loader.js"></script>
   <script src="/js/exam-countdown.js"></script>
   <script src="/js/score-player.js"></script>
@@ -9053,8 +9054,9 @@
       var systemPrompt = problem.ai_system_prompt || 'You are a GCSE Modern Foreign Languages examiner. Mark each bullet for communication and accuracy. Respond in JSON: {"quality":"excellent|good|needs_work|not_valid","feedback":"2-3 sentences per bullet","improvement":"optional overall suggestion"}';
       try {
         var _isFree = typeof SchoolSession === 'undefined' || !SchoolSession.isActive();
-        var resp = await fetch('/api/ai-mark', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ marks: marks, system: systemPrompt, prompt: userPrompt, free_tier: _isFree }) });
+        var resp = await fetch('/api/ai-mark', { method: 'POST', headers: window.svAuthHeaders ? svAuthHeaders({ 'Content-Type': 'application/json' }) : { 'Content-Type': 'application/json' }, body: JSON.stringify({ marks: marks, system: systemPrompt, prompt: userPrompt, free_tier: _isFree, question_text: problem.question || problem.scenario || '', page: location.pathname }) });
         var data = await resp.json();
+        _svSupport = data;
         if (!resp.ok) throw new Error(data.error || 'Marking failed');
         var content = data.result;
         var cleaned = content.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
@@ -9420,8 +9422,9 @@
       userPrompt+='Student answer: '+input.value.trim();
       try{
         var _isFree2=typeof SchoolSession==='undefined'||!SchoolSession.isActive();
-        var resp=await fetch('/api/ai-mark',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({marks:marks,system:systemPrompt,prompt:userPrompt,free_tier:_isFree2})});
+        var resp=await fetch('/api/ai-mark',{method:'POST',headers:window.svAuthHeaders?svAuthHeaders({'Content-Type':'application/json'}):{'Content-Type':'application/json'},body:JSON.stringify({marks:marks,system:systemPrompt,prompt:userPrompt,free_tier:_isFree2,student_text:input.value.trim(),question_text:problem.question||'',page:location.pathname})});
         var data=await resp.json();
+        _svSupport=data;
         if(!resp.ok)throw new Error(data.error||'Marking failed');
         var content=data.result;
         // Strip markdown code fences if present
@@ -9440,6 +9443,21 @@
         checkBtn.textContent='Check Answer';checkBtn.disabled=false;
         alert('AI marking failed: '+e.message);
       }
+    }
+
+    // The last AI-marking reply; its support flag shows the safeguarding support panel
+    // under the feedback (js/safeguard-support.js), right or wrong, marked or failed.
+    var _svSupport=null;
+    function svSupportAfterFeedback(){
+      var d=_svSupport; _svSupport=null;
+      if(!(d&&d.support&&window.svShowSupport))return;
+      // a pupil who may have just disclosed something is not told "Not quite right" in red
+      var box=document.querySelector('#problem-feedback-content .feedback-box');
+      if(box){box.classList.remove('feedback-incorrect');box.style.background='var(--bg-card,#fff)';box.style.borderColor='var(--border-light,#e4dfd2)';
+        var ttl=box.querySelector('.feedback-title');if(ttl){ttl.textContent='Not marked';ttl.style.color='inherit';}
+        var ic=box.querySelector('.feedback-icon');if(ic)ic.style.display='none';}
+      var card=document.getElementById('current-problem-card');if(card)card.classList.remove('card-incorrect');
+      svShowSupport(document.getElementById('problem-feedback-area'),d);
     }
 
     // ---- Finish English Answer (shared) ----
@@ -9468,6 +9486,7 @@
           '</div>' +
         '</div>';
       feedArea.className = 'problem-feedback-area shown';
+      svSupportAfterFeedback();
 
       // Disable check, show next
       document.getElementById('problem-check-btn').style.display='none';
