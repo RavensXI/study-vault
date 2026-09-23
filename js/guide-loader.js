@@ -104,7 +104,7 @@
     var hasBespoke = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(subjectSlug));
     var subjectQuery = sb
       .from('subjects')
-      .select('id, name')
+      .select('id, name, exam_board')
       .eq('slug', subjectSlug);
     if (hasBespoke) {
       subjectQuery = subjectQuery.eq('school_id', SchoolSession.getSchoolId());
@@ -139,7 +139,7 @@
     var otherType = isExam ? 'revision-technique' : 'exam-technique';
     var otherLabel = isExam ? 'Revision Techniques' : 'Exam Technique';
 
-    document.title = label + ' - ' + subject.name + ' - StudyVault';
+    document.title = (isExam ? label : 'Revision techniques') + ' - ' + 'GCSE ' + subject.name + (subject.exam_board ? ' ' + subject.exam_board : '') + ' - StudyVault';   // matches api/seo.js
     document.body.classList.add(bodyClass);
     document.body.dataset.unit = guideType;
     document.getElementById('header-unit-label').textContent = label;
@@ -193,7 +193,7 @@
     var hasBespoke2 = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(subjectSlug));
     var subjectQuery2 = sb
       .from('subjects')
-      .select('id, name')
+      .select('id, name, exam_board')
       .eq('slug', subjectSlug);
     if (hasBespoke2) {
       subjectQuery2 = subjectQuery2.eq('school_id', SchoolSession.getSchoolId());
@@ -229,7 +229,7 @@
     var otherType = isExam ? 'revision-technique' : 'exam-technique';
     var otherLabel = isExam ? 'Revision Techniques' : 'Exam Technique';
 
-    document.title = guide.title + ' - ' + label + ' - StudyVault';
+    document.title = guide.title + ' - ' + 'GCSE ' + subject.name + (subject.exam_board ? ' ' + subject.exam_board : '') + ' - StudyVault';   // matches api/seo.js
     document.body.classList.add(bodyClass);
     document.getElementById('header-unit-label').textContent = label;
 

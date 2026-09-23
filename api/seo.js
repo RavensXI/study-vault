@@ -50,6 +50,16 @@ async function subjects() {
   return subs.filter(s => withLessons.has(s.id));
 }
 
+// A subject's revision-technique guides (the hub first). Exam-technique guides were retired.
+async function guides(subject) {
+  const rows = await all(() => supabase.from('guide_pages').select('slug, title, sort_order')
+    .eq('subject_id', subject.id).eq('guide_type', 'revision-technique').order('sort_order').order('slug'));
+  if (!rows.some(r => r.slug === 'index')) return [];
+  const hub = `/guide/${subject.slug}/revision-technique`;
+  return [{ path: hub, title: 'Revision techniques' }]
+    .concat(rows.filter(r => r.slug !== 'index').map(r => ({ path: hub + '/' + r.slug, title: r.title })));
+}
+
 // One subject's units, each with its live lessons in order. Units with none are dropped.
 async function outline(subject) {
   const units = await all(() => supabase.from('units').select('id, slug, name, subtitle, sort_order')
@@ -132,7 +142,7 @@ ${items}
   });
 }
 
-function directorySubject(subject, units) {
+function directorySubject(subject, units, guideList) {
   const label = subjectLabel(subject);
   const count = units.reduce((n, u) => n + u.lessons.length, 0);
   const body = units.map(u => `    <h2><a href="${esc(u.path)}">${esc(u.name)}</a></h2>
@@ -146,7 +156,11 @@ ${u.lessons.map(l => `      <li><a href="${esc(l.path)}">${esc(l.title)}</a></li
     body: `    <h1>GCSE ${esc(label)}</h1>
     <p class="lede">${count} free revision lessons in ${units.length} units. <a href="/browse/${esc(subject.slug)}">Open the course</a> or go straight to a lesson.</p>
 ${body}
-    <p><a href="/subjects">All subjects</a></p>`
+${(guideList || []).length ? `    <h2><a href="${esc(guideList[0].path)}">How to revise ${esc(subject.name)}</a></h2>
+    <ul>
+${guideList.slice(1).map(g => `      <li><a href="${esc(g.path)}">${esc(g.title)}</a></li>`).join('\n')}
+    </ul>
+` : ''}    <p><a href="/subjects">All subjects</a></p>`
   });
 }
 
@@ -174,17 +188,22 @@ async function headFor(t, q) {
   if (t === 'lesson' || t === 'practice') {
     if (!s || !u || !n) return null;
     const { data } = await supabase.from('lessons')
-      .select(`title, description, hero_image_url, status, units!inner(slug, name, subjects!inner(${SUBJECT_COLS}))`)
+      .select(`title, description, hero_image_url, status, is_listening, ${t === 'lesson' ? 'content_html, ' : ''}units!inner(slug, name, subjects!inner(${SUBJECT_COLS}))`)
       .eq('lesson_number', n).eq('status', 'live').eq('units.slug', u)
       .eq('units.subjects.slug', s).is('units.subjects.school_id', null).eq('units.subjects.status', 'live')
       .limit(1);
     const l = data && data[0];
     if (!l) return null;
     const sub = l.units.subjects;
+    const path = `/${t}/${s}/${u}/${n}`;
+    const description = l.description || `${l.title}: a free ${course(sub)} revision ${t === 'practice' ? 'practice set' : 'lesson'} on ${l.units.name}.`;
     return {
-      title: `${l.title} - ${course(sub)} - StudyVault`,
-      description: l.description || `${l.title}: a free ${course(sub)} revision ${t === 'practice' ? 'practice set' : 'lesson'} on ${l.units.name}.`,
-      image: l.hero_image_url, path: `/${t}/${s}/${u}/${n}`
+      title: `${l.title} - ${course(sub)} - StudyVault`, description, image: l.hero_image_url, path,
+      ld: [learningResource(l.title, description, sub, path, l.hero_image_url),
+           breadcrumbs([[course(sub), `/subjects/${s}`], [l.units.name, `/browse/${s}/${u}`], [l.title, path]])],
+      // the lesson's own text, for crawlers and link previews that run no JavaScript. Listening
+      // lessons are a player and a card deck, not prose, so they carry none.
+      body: (t === 'lesson' && !l.is_listening && l.content_html) ? `<h1>${esc(l.title)}</h1>\n${l.content_html}` : null
     };
   }
   if (t === 'browse') {
@@ -196,7 +215,8 @@ async function headFor(t, q) {
     if (!u) return {
       title: `${course(sub)} revision - StudyVault`,
       description: `Free ${course(sub)} revision: every unit and lesson, written to the exam board specification.`,
-      path: `/browse/${s}`
+      path: `/browse/${s}`,
+      ld: [breadcrumbs([[course(sub), `/browse/${s}`]])]
     };
     const { data: units } = await supabase.from('units').select('name, subtitle, image_url')
       .eq('subject_id', sub.id).eq('slug', u).limit(1);
@@ -205,11 +225,78 @@ async function headFor(t, q) {
     return {
       title: `${unit.name} - ${course(sub)} - StudyVault`,
       description: unit.subtitle || `${unit.name}: free ${course(sub)} revision lessons.`,
-      image: unit.image_url, path: `/browse/${s}/${u}`
+      image: unit.image_url, path: `/browse/${s}/${u}`,
+      ld: [breadcrumbs([[course(sub), `/browse/${s}`], [unit.name, `/browse/${s}/${u}`]])]
+    };
+  }
+  if (t === 'guide') {
+    const type = String(q.type || ''), slug = String(q.slug || '') || 'index';
+    if (!s || type !== 'revision-technique') return null;           // exam-technique guides were retired
+    const { data: subs } = await supabase.from('subjects').select(`id, ${SUBJECT_COLS}`)
+      .eq('slug', s).is('school_id', null).eq('status', 'live').limit(1);
+    const sub = subs && subs[0];
+    if (!sub) return null;
+    const { data: pages } = await supabase.from('guide_pages').select('title, content_html')
+      .eq('subject_id', sub.id).eq('guide_type', type).eq('slug', slug).limit(1);
+    const g = pages && pages[0];
+    if (!g) return null;
+    const hubPath = `/guide/${s}/${type}`;
+    const path = slug === 'index' ? hubPath : `${hubPath}/${slug}`;
+    const name = slug === 'index' ? 'Revision techniques' : g.title;
+    const firstPara = (String(g.content_html || '').match(/<p[^>]*>([\s\S]*?)<\/p>/i) || [])[1] || '';
+    const plain = firstPara.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&[a-z]+;/g, ' ').replace(/\s+/g, ' ').trim();
+    const description = (plain.length > 40 ? plain : `${name}: how to revise ${course(sub)} using methods the research supports.`).slice(0, 200);
+    const crumbs = [[course(sub), `/subjects/${s}`], ['Revision techniques', hubPath]];
+    if (slug !== 'index') crumbs.push([g.title, path]);
+    return {
+      title: `${name} - ${course(sub)} - StudyVault`, description, path,
+      ld: [learningResource(name, description, sub, path, null), breadcrumbs(crumbs)],
+      body: `<h1>${esc(name)}</h1>\n${guideLinks(g.content_html || '', s)}`
     };
   }
   return null;
 }
+
+/* Guide pages link to each other as "retrieval-practice.html" or "../revision-technique/x.html"
+   (the loader rewrites them in the browser); the server copy gets the real addresses. Links to
+   the retired exam-technique guides lose their link and keep their words. */
+function guideLinks(html, s) {
+  return String(html).replace(/<a\b([^>]*?)href="([^"]+)"([^>]*)>([\s\S]*?)<\/a>/gi, (m, pre, href, post, inner) => {
+    if (/^(https?:|\/|#|mailto:)/i.test(href) || !/\.html$/i.test(href)) return m;
+    if (/exam-technique\//.test(href)) return inner;
+    const slug = href.replace(/^.*\//, '').replace(/\.html$/i, '');
+    const to = `/guide/${s}/revision-technique` + (slug === 'index' ? '' : '/' + slug);
+    return `<a${pre}href="${to}"${post}>${inner}</a>`;
+  });
+}
+
+/* Structured data (schema.org): what the page is, and where it sits. */
+function learningResource(name, description, sub, path, image) {
+  const o = {
+    '@context': 'https://schema.org', '@type': 'LearningResource', name, description,
+    url: SITE + path, inLanguage: 'en-GB', isAccessibleForFree: true,
+    educationalLevel: 'GCSE', learningResourceType: 'revision notes',
+    about: { '@type': 'Thing', name: 'GCSE ' + sub.name },
+    audience: { '@type': 'EducationalAudience', educationalRole: 'student' },
+    provider: { '@type': 'Organization', name: 'StudyVault', url: SITE }
+  };
+  if (sub.exam_board) o.educationalAlignment = { '@type': 'AlignmentObject', alignmentType: 'educationalSubject', targetName: course(sub) };
+  if (image) o.image = image;
+  return o;
+}
+function breadcrumbs(items) {
+  return { '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: items.map(([name, path], i) => ({ '@type': 'ListItem', position: i + 1, name, item: SITE + path })) };
+}
+function jsonLd(o) { return JSON.stringify(o).replace(/</g, '\\u003c'); }
+
+/* A school pupil and a free-tier pupil can share an address (Unity's Triple Science and the
+   free AQA Triple Science are both /lesson/separate-sciences/...). The server cannot tell which
+   is visiting, so the text written into the page is the free-tier lesson; this runs before
+   anything is drawn and hides it for a school session (or a staff preview, ?sid=), so a school
+   pupil never glimpses the wrong lesson. The loader then fills the page as it always has. */
+const SSR_GUARD = `<style>.sv-ssr-hide .sv-ssr{display:none!important}.sv-ssr-hide #guide-loading{display:block!important}</style>
+  <script>try{if(sessionStorage.getItem('studyvault-school')||localStorage.getItem('sv-school')||/[?&]sid=/.test(location.search))document.documentElement.classList.add('sv-ssr-hide')}catch(e){}</script>`;
 
 function withHead(html, h) {
   if (!h) return html;
@@ -222,20 +309,34 @@ function withHead(html, h) {
   <meta property="og:description" content="${esc(h.description)}">
   <meta property="og:url" content="${esc(SITE + h.path)}">${h.image ? `
   <meta property="og:image" content="${esc(h.image)}">
-  <meta name="twitter:card" content="summary_large_image">` : ''}`;
-  return html.replace(/<title>[^<]*<\/title>/, () => tags);
+  <meta name="twitter:card" content="summary_large_image">` : ''}${(h.ld || []).map(o => `
+  <script type="application/ld+json">${jsonLd(o)}</script>`).join('')}${h.body ? '\n  ' + SSR_GUARD : ''}`;
+  let out = html.replace(/<title>[^<]*<\/title>/, () => tags);
+  if (h.body) {
+    // lesson: into the notes container, which the loader overwrites with the same lesson
+    out = out.replace('<article class="study-notes" id="study-notes"></article>',
+      () => `<article class="study-notes" id="study-notes"><div class="sv-ssr">${h.body}</div></article>`);
+    // guide: into the guide container, shown straight away in place of the spinner
+    out = out.replace('<div id="guide-content" style="display: none;"></div>',
+      () => `<div id="guide-content"><div class="sv-ssr">${h.body}</div></div>`);
+    if (out.indexOf('<div id="guide-content"><div class="sv-ssr">') >= 0)
+      out = out.replace('<div id="guide-loading">', '<div id="guide-loading" style="display:none">');
+  }
+  return out;
 }
 
-const SHELL_FILE = { lesson: 'lesson.html', practice: 'practice.html', browse: 'browse.html' };
+const SHELL_FILE = { lesson: 'lesson.html', practice: 'practice.html', browse: 'browse.html', guide: 'guide.html' };
 
 async function servePage(req, res) {
   const t = String(req.query.t || '');
   const html = await shell(SHELL_FILE[t], req);
   let h = null;
   try { h = await headFor(t, req.query); } catch (e) { h = null; }   // a lookup failure never blocks the page
+  let out = html;
+  try { out = withHead(html, h); } catch (e) { out = html; }          // nor does a fault in writing it in
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
-  return res.status(200).send(withHead(html, h));
+  return res.status(200).send(out);
 }
 
 module.exports = async function handler(req, res) {
@@ -268,6 +369,7 @@ module.exports = async function handler(req, res) {
           entries.push({ path: u.path, lastmod: newest(u.lessons.map(l => l.lastmod)) });
           u.lessons.forEach(l => entries.push({ path: l.path, lastmod: l.lastmod }));
         });
+        (await guides(bySlug.get(name))).forEach(g => entries.push({ path: g.path }));
       } else {
         return res.status(404).send('Not found');
       }
@@ -281,7 +383,7 @@ module.exports = async function handler(req, res) {
       if (!bySlug.has(name)) return res.status(404).send(page({ title: 'Subject not found - StudyVault', description: 'This subject is not on StudyVault.', path: '/subjects',
         body: '    <h1>Subject not found</h1>\n    <p class="lede">That subject is not here. <a href="/subjects">See every subject</a>.</p>' }));
       const subject = bySlug.get(name);
-      return res.status(200).send(directorySubject(subject, await outline(subject)));
+      return res.status(200).send(directorySubject(subject, await outline(subject), await guides(subject)));
     }
 
     return res.status(400).send('Unknown kind');
