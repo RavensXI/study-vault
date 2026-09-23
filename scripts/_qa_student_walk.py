@@ -194,7 +194,8 @@ def cmd_attempt(args):
     import anthropic
     views = load("views", {})
     done = load("attempts", {})
-    todo = [k for k in views if k not in done]
+    # anything never attempted, or attempted but unparseable, goes (again)
+    todo = [k for k in views if k not in done or "answer" not in done[k]]
     if "--limit" in args: todo = todo[:int(args[args.index("--limit") + 1])]
     ids = {}
     reqs = []
@@ -215,7 +216,9 @@ def cmd_attempt(args):
 def parse_json(text):
     m = re.search(r"\{.*\}", text or "", re.S)
     if not m: return None
-    try: return json.loads(m.group(0))
+    # strict=False: long written answers carry real line breaks inside the JSON string,
+    # which strict parsing rejects (25 essays were lost that way on the first run)
+    try: return json.loads(m.group(0), strict=False)
     except Exception: return None
 
 
