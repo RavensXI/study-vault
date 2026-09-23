@@ -361,7 +361,7 @@
     var subject = data.subject || {};
 
     // Set page title
-    document.title = 'Lesson ' + lesson.lesson_number + ': ' + lesson.title + ' - StudyVault';
+    document.title = lesson.title + (subject.name ? ' - GCSE ' + subject.name + (subject.exam_board ? ' ' + subject.exam_board : '') : '') + ' - StudyVault';   // matches api/seo.js
 
     // Set body class for unit theming (preserve existing classes like a11y)
     if (unit.body_class) document.body.classList.add(unit.body_class);

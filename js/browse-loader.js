@@ -337,8 +337,10 @@
 
   // ---- Render subject landing page (unit cards) ----
   async function renderSubjectLanding(subjectSlug) {
-    // Redirect /browse/separate-sciences → /browse/science (units merge into science)
-    if (subjectSlug === 'separate-sciences') {
+    // A school's Triple Science merges into its Combined Science course. Free-tier AQA Triple
+    // (the one board whose slug is the bare 'separate-sciences') keeps its own course page, as
+    // the other boards' Triple Science does; sending it to Combined showed Combined lessons.
+    if (subjectSlug === 'separate-sciences' && typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke('separate-sciences')) {
       window.location.replace('/browse/science');
       return;
     }
@@ -576,7 +578,7 @@
       }
     }
 
-    document.title = subject.name + ' - StudyVault';
+    document.title = 'GCSE ' + subject.name + (subject.exam_board ? ' ' + subject.exam_board : '') + ' revision - StudyVault';   // matches api/seo.js
     document.getElementById('header-unit-label').textContent = subject.name;
 
     // Add nav links
@@ -708,7 +710,7 @@
 
     var unitQuery = sb
       .from('units')
-      .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, school_id, settings)')
+      .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id, settings)')
       .eq('slug', unitSlug)
       .eq('subjects.slug', subjectSlug);
 
@@ -726,14 +728,14 @@
     var unitResult = await unitQuery.maybeSingle();
     if (hint && !unitResult.data) {             /* the school has no row of its own: the generic one */
       unitResult = await sb.from('units')
-        .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, school_id, settings)')
+        .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id, settings)')
         .eq('slug', unitSlug).eq('subjects.slug', subjectSlug).is('subjects.school_id', null).maybeSingle();
     }
 
     // Fallback: if viewing science and unit not found, try separate-sciences
     if (!unitResult.data && (subjectSlug === 'science' || subjectSlug.indexOf('science-') === 0)) {
       var sepQuery = sb.from('units')
-        .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, school_id, settings)')
+        .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id, settings)')
         .eq('slug', unitSlug)
         .eq('subjects.slug', 'separate-sciences');
       if (hasBespoke) {
@@ -832,7 +834,8 @@
       }
     }
 
-    document.title = unit.name + ' - StudyVault';
+    var titleSubj = unit.subjects || {};
+    document.title = unit.name + (titleSubj.name ? ' - GCSE ' + titleSubj.name + (titleSubj.exam_board ? ' ' + titleSubj.exam_board : '') : '') + ' - StudyVault';   // matches api/seo.js
     if (unit.body_class) document.body.classList.add(unit.body_class);
     if (unit.accent) document.documentElement.style.setProperty('--accent', unit.accent);
     if (unit.accent_light) document.documentElement.style.setProperty('--accent-light', unit.accent_light);
