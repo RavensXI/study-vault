@@ -29,12 +29,15 @@ The visual walk (scripts/_qa_visual_walk.py) photographs questions. This one doe
   SV_QA_BASE=http://127.0.0.1:8910 python scripts/_qa_student_walk.py mark
   python scripts/_qa_student_walk.py adjudicate      (then collect-adjudication)
   python scripts/_qa_student_walk.py report
+
+A re-walk of chosen questions only: SV_WALK_DIR=scripts/_studentwalk_rewalk and
+  extract --keys FILE   (a JSON list of walk keys, e.g. the findings from the last walk)
 """
 import io, json, os, re, sys, time, urllib.request
 from collections import Counter, deque
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "_studentwalk")
+OUT = os.path.abspath(os.environ.get("SV_WALK_DIR") or os.path.join(HERE, "_studentwalk"))
 os.makedirs(OUT, exist_ok=True)
 F = {k: os.path.join(OUT, k + ".json") for k in ("views", "attempts", "marks", "adjudications", "state")}
 BASE = os.environ.get("SV_QA_BASE", "http://127.0.0.1:8910")
@@ -156,7 +159,14 @@ def view_prompt(v):
 # ----------------------------------------------------------------------------- extract
 def cmd_extract(args):
     from playwright.sync_api import sync_playwright
-    rows = vw.lessons_for(args)
+    only = None
+    if "--keys" in args:
+        only = set(json.load(io.open(args[args.index("--keys") + 1], encoding="utf-8")))
+        lks = {k.rsplit("/", 2)[0] for k in only}
+        subs = sorted({k.split("/")[0] for k in only})
+        rows = [L for s in subs for L in vw.lessons_for(["--subject", s]) if "%s/%s/%d" % (L["subject"], L["unit"], L["n"]) in lks]
+    else:
+        rows = vw.lessons_for(args)
     views = load("views", {})
     with sync_playwright() as p:
         br = p.chromium.launch()
@@ -175,6 +185,7 @@ def cmd_extract(args):
             for tier in ("bronze", "silver", "gold"):
                 used = set()
                 for i, q in enumerate(bank.get(tier) or []):
+                    if only is not None and "%s/%s/%d/%s/%d" % (L["subject"], L["unit"], L["n"], tier, i) not in only: continue
                     d = next((k for k, s in enumerate(shown.get(tier, [])) if k not in used and s == vw.signature(q)), None)
                     if d is None: continue
                     used.add(d)

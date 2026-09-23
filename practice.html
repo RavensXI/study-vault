@@ -9104,11 +9104,17 @@
            whole passage passed) or if the answer contained it (so highlighting "the"
            passed), and only the first of several good quotations was stored, so a
            student who chose the second was marked wrong. Now the selection must cover
-           most of one acceptable answer without taking in far more than it. */
+           most of one acceptable answer without taking in far more than it.
+           23 Sep 2026 (student walk): punctuation of every kind is ignored, a lone dash
+           no longer throws the word count out, and a precise selection of three or more
+           words wholly inside an acceptable answer counts ("like a held breath" inside a
+           longer stored sentence), because stored answers often run long. */
         var hwAll=[].slice.call(document.querySelectorAll('.hw'));
-        var hwClean=function(s){return String(s||'').toLowerCase().replace(/[.,;:!?"'‘’“”—\-()]/g,'');};
-        var hwWords=hwAll.map(function(el){return hwClean(el.textContent);});
-        var selIdx=[];hwAll.forEach(function(el,i){if(el.classList.contains('selected'))selIdx.push(i);});
+        var hwClean=function(s){return String(s||'').toLowerCase().replace(/[^0-9a-z\u00c0-\u024f\s]/g,'');};
+        // punctuation-only tokens (a spaced dash) are dropped, so answers match word for word
+        var hwIdx=[];hwAll.forEach(function(el,i){if(hwClean(el.textContent))hwIdx.push(i);});
+        var hwWords=hwIdx.map(function(i){return hwClean(hwAll[i].textContent);});
+        var selIdx=[];hwIdx.forEach(function(i,w){if(hwAll[i].classList.contains('selected'))selIdx.push(w);});
         var answers=(Array.isArray(problem.answer_texts)&&problem.answer_texts.length?problem.answer_texts:[problem.answer_text||problem.answerText||'']).filter(Boolean);
         var spanOf=function(ans){
           var aw=String(ans).split(/\s+/).map(hwClean).filter(Boolean);
@@ -9125,17 +9131,20 @@
           if(hit>=0||!selIdx.length)return;
           if(sp){
             var inside=selIdx.filter(function(i){return sp.indexOf(i)>=0;}).length;
+            var contiguous=selIdx[selIdx.length-1]-selIdx[0]===selIdx.length-1;
             if(inside>=Math.ceil(sp.length*0.6)&&selIdx.length<=sp.length*3+6)hit=ai;
+            else if(inside===selIdx.length&&contiguous&&inside>=Math.min(3,sp.length))hit=ai;
           }else{
             // the stored answer is not verbatim in the passage: containment, both ways, never one stray word
             var selT=selIdx.map(function(i){return hwWords[i];}).join(' '),ansT=String(answers[ai]).split(/\s+/).map(hwClean).filter(Boolean).join(' ');
-            if(ansT&&selT&&(selT.indexOf(ansT)>=0||(ansT.indexOf(selT)>=0&&selT.split(' ').length>=Math.ceil(ansT.split(' ').length*0.6))))hit=ai;
+            var selN=selT.split(' ').length,ansN=ansT.split(' ').length;
+            if(ansT&&selT&&(selT.indexOf(ansT)>=0||(ansT.indexOf(selT)>=0&&selN>=Math.min(3,Math.ceil(ansN*0.6)))))hit=ai;
           }
         });
         isCorrect=hit>=0;
         document.querySelectorAll('.hw.selected').forEach(function(el){el.classList.add(isCorrect?'correct':'incorrect');});
         // Show the acceptable answers as dashed underlines
-        if(!isCorrect)spans.forEach(function(sp){(sp||[]).forEach(function(i){hwAll[i].classList.add('was-answer');});});
+        if(!isCorrect)spans.forEach(function(sp){(sp||[]).forEach(function(w){hwAll[hwIdx[w]].classList.add('was-answer');});});
         var shownAns=isCorrect?[answers[hit]]:answers;
         feedHtml='<div style="font-size:0.82rem"><p><strong>'+(shownAns.length>1?'Any of these would do:':'Correct answer:')+'</strong> '+
           shownAns.map(function(a){return '“'+a+'”';}).join(' &middot; ')+'</p><p>'+(problem.explanation||'')+'</p></div>';
@@ -9353,6 +9362,19 @@
     }
 
     // ---- AI Check (async) ----
+    // The passage(s) on screen beside a problem, as plain text for the AI marker
+    function engOnScreenText(problem){
+      var passages=window._practicePassages||[];
+      var html=null;
+      var pair=engPassagePair(problem,passages);
+      if(pair)html=pair.text;
+      else if(problem.passage_id){var p=passages.find(function(x){return x.id===problem.passage_id;});if(p)html=p.text;}
+      else if(problem.passage)html=problem.passage;
+      if(!html)return '';
+      var d=document.createElement('div');d.innerHTML=String(html).replace(/<\/(p|div)>/gi,'\n\n').replace(/<br\s*\/?>/gi,'\n');
+      return d.textContent.replace(/\n{3,}/g,'\n\n').trim().slice(0,14000);
+    }
+
     async function engCheckAI(problem, type, tier, idx) {
       var input=document.getElementById('eng-ai-input');
       if(!input||!input.value.trim()){alert('Write your answer first.');return;}
@@ -9376,6 +9398,16 @@
       if(problem.quote)userPrompt+='Quote: '+problem.quote+'\n\n';
       if(problem.brief)userPrompt+='Brief: '+problem.brief+'\n\n';
       if(problem.context||problem.aiContext)userPrompt+='Context: '+(problem.context||problem.aiContext)+'\n\n';
+      // The text shown beside the question (23 Sep 2026, student walk): without it the marker
+      // praised answers copied from the model beside the question as "original", and told a
+      // student a quotation was wrong when it was exact.
+      var onScreen=engOnScreenText(problem);
+      if(onScreen){
+        userPrompt+='Text shown beside the question (the student can see it):\n'+onScreen+'\n\n';
+        userPrompt+='Marking rules: judge the answer only against what the task asks, and do not mark it down for not doing something the task did not ask for. Before saying a quotation is inaccurate, check it against the text above.';
+        if(type==='improve_sentence'||type==='ai_write')userPrompt+=' The task asks for the student\'s own writing: if the answer copies or closely reworks sentences from the text above (other than a sentence the task gives them to improve), it is not their own work; say so in the feedback and give no higher than needs_work.';
+        userPrompt+='\n\n';
+      }
       userPrompt+='Student answer: '+input.value.trim();
       try{
         var _isFree2=typeof SchoolSession==='undefined'||!SchoolSession.isActive();
