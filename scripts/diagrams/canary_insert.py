@@ -62,7 +62,7 @@ def main():
         if 'class="diagram"' in (row["content_html"] or ""):
             log.append(f"{key}: already has a diagram, skipped"); continue
         r2_key = f"diagrams/{subj}/{unit_slug}/{key}.jpg"
-        url = f"https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/{r2_key}"
+        url = f"https://images.studyvault-media.co.uk/{r2_key}"
         alt = b["alt"].replace('"', "&quot;"); cap = b["caption"]
         figure = (f'<figure class="diagram">\n  <img src="{url}" alt="{alt}" loading="lazy">\n'
                   f'  <figcaption>{cap}</figcaption>\n</figure>')

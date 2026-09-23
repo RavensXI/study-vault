@@ -246,7 +246,7 @@ def _upload_to_r2(tmp_src, subject_slug, unit_slug, lesson_number):
             ContentType="image/jpeg",
         )
     os.unlink(tmp_dest)
-    return f"https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/{r2_key}"
+    return f"https://images.studyvault-media.co.uk/{r2_key}"
 
 
 def find_hero_image(keywords, subject_slug, unit_slug, lesson_number, dry_run=False):

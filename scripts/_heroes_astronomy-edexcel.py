@@ -43,7 +43,7 @@ from lib.r2 import get_r2_client, IMAGES_BUCKET
 SUBJECT_SLUG = "astronomy-edexcel"
 CONTENT_DIR = Path(SCRIPT_DIR) / f"_content_{SUBJECT_SLUG}"
 LESSONS_DIR = CONTENT_DIR / "lessons"
-R2_PUBLIC = "https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev"
+R2_PUBLIC = "https://images.studyvault-media.co.uk"
 HERO_REUSE_MIN_SCORE = 4
 
 

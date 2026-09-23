@@ -34,8 +34,8 @@ SRC = re.compile(r'src="([^"]+)"')
 # the worked answer ("perfect"). Reused deliberately: hearing a perfect cadence
 # in the demo and again in a question is reinforcement, not a leak of an answer
 # the student has not been taught.
-BROKEN = "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/music-aqa/listening-skills/ex015_cadence.mp3"
-REPLACEMENT = "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/music-aqa/listening-skills/exC_perfect.mp3"
+BROKEN = "https://audio.studyvault-media.co.uk/music-aqa/listening-skills/ex015_cadence.mp3"
+REPLACEMENT = "https://audio.studyvault-media.co.uk/music-aqa/listening-skills/exC_perfect.mp3"
 
 
 def fmt(t):

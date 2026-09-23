@@ -100,7 +100,7 @@ NotebookLM auth cookies expire frequently mid-batch. The script handles this aut
 
 Videos are uploaded to the dedicated `studyvault-video` R2 bucket (not `studyvault-images`):
 - **Bucket:** `studyvault-video`
-- **Public URL:** `https://pub-157a3979382e4f98b51f7f868078e5a3.r2.dev`
+- **Public URL:** `https://video.studyvault-media.co.uk`
 - **Path pattern:** `{subject}/{unit}/cinematic_l{nn}.mp4`
 - **Podcasts** go to `studyvault-audio` at `{subject}/{unit}/podcast_l{nn}.mp3`
 

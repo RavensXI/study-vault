@@ -38,7 +38,7 @@ SUBJECT_NAME = "Psychology (OCR)"
 CONTENT_DIR = os.path.join(
     r"C:\Users\tshau\AppData\Local\Temp\claude\C--Users-tshau-Documents-Study-Vault",
     r"b7ce0950-5850-4b5c-8f69-ce16ff3c08b6\scratchpad\_psych_build\run_ocr\lessons")
-R2_PUBLIC = "https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev"
+R2_PUBLIC = "https://images.studyvault-media.co.uk"
 HERO_REUSE_MIN_SCORE = 4
 
 LESSON_FILE_PATTERN = re.compile(r"^(?P<unit>[a-z0-9-]+)-L(?P<n>\d{2})\.json$")

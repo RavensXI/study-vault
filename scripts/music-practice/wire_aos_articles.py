@@ -26,7 +26,7 @@ from lib.supabase_client import get_client
 
 BUILD = r"C:\Users\tshau\.claude\jobs\4059242c\tmp\build"
 DRY = "--dry-run" in sys.argv
-AUDIO_BASE = "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/"
+AUDIO_BASE = "https://audio.studyvault-media.co.uk/"
 
 # every extract a lesson is allowed to embed
 ALLOWED = {AUDIO_BASE + "music-aqa/western-classical-1650-1910/" + f for f in

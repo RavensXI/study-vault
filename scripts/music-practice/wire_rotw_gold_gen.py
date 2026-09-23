@@ -29,7 +29,7 @@ from build_rotw_drills import player_html, mc
 
 APPLY = "--apply" in sys.argv
 BACKUP = os.path.join(HERE, "_backup_rotw_gold_gen_2026-08-16.json")
-R2 = "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/music-ocr/aos3-rhythms-listening/"
+R2 = "https://audio.studyvault-media.co.uk/music-ocr/aos3-rhythms-listening/"
 GEN_NOTE = ("AI-generated demonstration in the style of the tradition "
             "&middot; studio-built for this drill")
 

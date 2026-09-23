@@ -178,9 +178,9 @@ R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), video on R2
   knowledge_check_scores, user_state, content_pipeline_logs, upload_jobs,
   pipeline_steps, classes, class_members, teacher_invitations,
   teacher_subjects, notifications
-- **R2 buckets:** `studyvault-audio` (pub-f7b76d81365b4b2f954567763694a24e.r2.dev),
-  `studyvault-images` (pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev),
-  `studyvault-video` (pub-157a3979382e4f98b51f7f868078e5a3.r2.dev)
+- **R2 buckets:** `studyvault-audio` (audio.studyvault-media.co.uk),
+  `studyvault-images` (images.studyvault-media.co.uk),
+  `studyvault-video` (video.studyvault-media.co.uk)
 - **Cookie consent:** `js/cookie-consent.js`; privacy at `/privacy.html`.
 - **Business email:** studyvault.info@gmail.com
 

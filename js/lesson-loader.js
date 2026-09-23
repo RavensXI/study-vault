@@ -537,7 +537,7 @@
       var iframe = document.getElementById('sidebar-video-iframe');
       var videoId = lesson.youtube_video_id;
       var isGDrive = videoId.indexOf('drive.google.com') !== -1;
-      var isDirectVideo = /\.(mp4|webm)(\?|$)/i.test(videoId) || videoId.indexOf('r2.dev/') !== -1;
+      var isDirectVideo = /\.(mp4|webm)(\?|$)/i.test(videoId) || videoId.indexOf('r2.dev/') !== -1 || videoId.indexOf('studyvault-media.co.uk/') !== -1;
       var embedSrc = videoId.startsWith('http')
         ? videoId
         : 'https://www.youtube.com/embed/' + videoId;

@@ -32,7 +32,7 @@ LESSON_MEDIA = {
     # L1: Viking raids on Anglo-Saxon England 790-1066
     "c58c5812-7ced-4c9e-9c2f-8b83bb14059f": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/war-british-society-790-2010/podcast_l01.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/war-british-society-790-2010/podcast_l01.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://shows.acast.com/gone-medieval/episodes/vikings", "title": "Gone Medieval — Vikings", "description": "Matt Lewis examines what the Vikings actually wanted when they raided England, and why Lindisfarne 793 marked a new era."},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — The Hundred Years War", "description": "Background on the Anglo-Saxon military tradition that the Vikings first disrupted — useful thematic context."}
         ]},
@@ -53,7 +53,7 @@ LESSON_MEDIA = {
     # L2: Norman conquest and feudal warfare 1066-1215
     "3f913622-3e17-4e60-8e4f-5fefac8ab5a1": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/war-british-society-790-2010/podcast_l02.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/war-british-society-790-2010/podcast_l02.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://podcasts.apple.com/us/podcast/the-battle-of-cr%C3%A9cy/id1564113746?i=1000703456065", "title": "Gone Medieval — The Battle of Crécy", "description": "History Hit on how the longbow and the lessons of Hastings shaped English warfare."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -73,7 +73,7 @@ LESSON_MEDIA = {
     # L3: Late medieval warfare c.1290-c.1450
     "dda04649-069d-44ad-aeff-938de3400f24": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/war-british-society-790-2010/podcast_l03.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/war-british-society-790-2010/podcast_l03.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://podcasts.apple.com/us/podcast/the-battle-of-cr%C3%A9cy/id1564113746?i=1000703456065", "title": "Gone Medieval — The Battle of Crécy", "description": "Matt Lewis on how the English longbow dismantled French cavalry at Crécy 1346 — the central technological shift of late medieval warfare."},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — The Hundred Years War", "description": "Overview of the long English-French conflict that drove tactical evolution from Crécy to Agincourt."}
         ]},
@@ -93,7 +93,7 @@ LESSON_MEDIA = {
     # L4: Elizabeth, Spain and the new world
     "fe00a85c-69cf-44bc-81f5-962e49ccc73d": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/war-british-society-790-2010/podcast_l04.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/war-british-society-790-2010/podcast_l04.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://shows.acast.com/not-just-the-tudors/episodes/elizabethiandmary-queenofscots-rivalqueens", "title": "Not Just the Tudors — Elizabeth I and Mary, Queen of Scots", "description": "Suzannah Lipscomb on Elizabeth’s legitimacy crisis and the threat from Catholic Europe — the background to the Armada."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -113,7 +113,7 @@ LESSON_MEDIA = {
     # L5: Border warfare c.1500-c.1600
     "e1b1b5f2-517b-4301-8e5c-1bcd39f256ad": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/war-british-society-790-2010/podcast_l05.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/war-british-society-790-2010/podcast_l05.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://shows.acast.com/not-just-the-tudors/episodes/elizabethiandmary-queenofscots-rivalqueens", "title": "Not Just the Tudors — Elizabeth I and Mary, Queen of Scots", "description": "The political context for border warfare — the Anglo-Scottish relationship and the threat from the north."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -135,7 +135,7 @@ LESSON_MEDIA = {
     # L6: Civil Wars in England, Scotland and Ireland 1642-1651
     "52b1dc4f-b65f-4e97-aced-459e91874060": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/war-british-society-790-2010/podcast_l06.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/war-british-society-790-2010/podcast_l06.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — The Hundred Years War", "description": "Background on the evolving British military tradition — context for the constitutional issues that the Civil Wars brought to a head."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -155,7 +155,7 @@ LESSON_MEDIA = {
     # L7: Jacobite rebellions and imperial wars
     "282c10a7-f009-4845-8867-92e721e064c4": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/war-british-society-790-2010/podcast_l07.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/war-british-society-790-2010/podcast_l07.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/5aQZaxPyCitvCUBt6kIaLa", "title": "In Our Time — The Hanseatic League (BBC Radio 4)", "description": "Melvyn Bragg on the European trading networks that Britain’s imperial expansion would eventually displace."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -177,7 +177,7 @@ LESSON_MEDIA = {
     # L8: Napoleonic wars and Victorian imperial conflicts
     "5bc26dab-49bf-43c0-8926-53f91367c94d": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/war-british-society-790-2010/podcast_l08.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/war-british-society-790-2010/podcast_l08.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — The Hundred Years War", "description": "Background on the long Anglo-French military rivalry that culminated in the Napoleonic Wars."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -197,7 +197,7 @@ LESSON_MEDIA = {
     # L9: Two world wars and total war 1914-1945
     "f443b254-6011-4104-b7f9-9cddc79f6ac0": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/war-british-society-790-2010/podcast_l09.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/war-british-society-790-2010/podcast_l09.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — The Hundred Years War", "description": "Historical context on how British military culture evolved through centuries of conflict to produce the total war approach of 1914–18."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -218,7 +218,7 @@ LESSON_MEDIA = {
     # L10: Cold War, IRA and the wars on terror
     "3f5441a0-78c6-4108-b18f-0ce28c722d72": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/war-british-society-790-2010/podcast_l10.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/war-british-society-790-2010/podcast_l10.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — Cold War Conflicts", "description": "Overview of Britain’s Cold War military commitments and how they changed public attitudes to defence."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -242,7 +242,7 @@ LESSON_MEDIA = {
     # L1: Glorious Revolution and the Hanoverian succession
     "740148c1-e8ce-4c49-8136-9b3181383c52": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/impact-empire-britain-1688-1730/podcast_l01.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/impact-empire-britain-1688-1730/podcast_l01.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/5aQZaxPyCitvCUBt6kIaLa", "title": "In Our Time — The Hanseatic League (BBC Radio 4)", "description": "Melvyn Bragg and historians on European commerce — the trading world that Britain’s Glorious Revolution aimed to protect."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -261,7 +261,7 @@ LESSON_MEDIA = {
     # L2: Ireland 1688-1691 and the Jacobite threat
     "268da837-59c8-4f99-86cd-ef00246419cc": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/impact-empire-britain-1688-1730/podcast_l02.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/impact-empire-britain-1688-1730/podcast_l02.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/5aQZaxPyCitvCUBt6kIaLa", "title": "In Our Time — The Battle of the Boyne (BBC Radio 4)", "description": "Melvyn Bragg on the 1690 battle that confirmed William III’s Irish victory and shaped Protestant/Catholic relations for centuries."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -281,7 +281,7 @@ LESSON_MEDIA = {
     # L3: Scotland 1688-1715: Glencoe to Union
     "ca76a5bf-fc9d-4372-b5d6-71c4351884d6": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/impact-empire-britain-1688-1730/podcast_l03.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/impact-empire-britain-1688-1730/podcast_l03.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/5aQZaxPyCitvCUBt6kIaLa", "title": "In Our Time — The Act of Union 1707 (BBC Radio 4)", "description": "Melvyn Bragg and historians on why Scotland joined Great Britain in 1707 — economics, religion and the Jacobite threat."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -300,7 +300,7 @@ LESSON_MEDIA = {
     # L4: Emigration from the British Isles
     "adbeeb0c-5ed6-4e80-b168-e09049753912": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/impact-empire-britain-1688-1730/podcast_l04.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/impact-empire-britain-1688-1730/podcast_l04.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/5aQZaxPyCitvCUBt6kIaLa", "title": "In Our Time — The British Empire (BBC Radio 4)", "description": "How emigration shaped the empire — population movement from Scotland, Ireland and England to the Atlantic colonies."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -319,7 +319,7 @@ LESSON_MEDIA = {
     # L5: Bank of England, East India Company and the trade revolution
     "20153642-74c8-4e7d-809b-c0c40f2e169c": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/impact-empire-britain-1688-1730/podcast_l05.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/impact-empire-britain-1688-1730/podcast_l05.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/5aQZaxPyCitvCUBt6kIaLa", "title": "In Our Time — The East India Company (BBC Radio 4)", "description": "Melvyn Bragg and historians on how the East India Company became the world’s most powerful commercial enterprise."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -338,7 +338,7 @@ LESSON_MEDIA = {
     # L6: Royal African Company and the slave economy
     "eda60c41-4419-4315-ba75-da24cc6d9249": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/impact-empire-britain-1688-1730/podcast_l06.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/impact-empire-britain-1688-1730/podcast_l06.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/5aQZaxPyCitvCUBt6kIaLa", "title": "In Our Time — The Slave Trade (BBC Radio 4)", "description": "Melvyn Bragg and leading historians on the transatlantic slave trade and its centrality to British commercial expansion 1688-1730."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -358,7 +358,7 @@ LESSON_MEDIA = {
     # L7: Consumerism, coffee houses and political activism
     "faf18d68-38d2-48e4-b99e-5f48f0aa8f26": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/impact-empire-britain-1688-1730/podcast_l07.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/impact-empire-britain-1688-1730/podcast_l07.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/5aQZaxPyCitvCUBt6kIaLa", "title": "In Our Time — The Coffee House (BBC Radio 4)", "description": "Melvyn Bragg on how 17th- and 18th-century coffee houses became engines of news, finance and political debate — the direct subject of this lesson."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -377,7 +377,7 @@ LESSON_MEDIA = {
     # L8: Spitalfields: site introduction and Huguenot weavers
     "7b8d94b0-b2aa-4dfd-a4f5-bdaf78ba03d4": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/impact-empire-britain-1688-1730/podcast_l08.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/impact-empire-britain-1688-1730/podcast_l08.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://shows.acast.com/gone-medieval/episodes/jews-medieval-england", "title": "Gone Medieval — Jews in Medieval England", "description": "Useful context on earlier waves of migrants to London’s East End before the Huguenots — helps trace Spitalfields’s layered migration history."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -396,7 +396,7 @@ LESSON_MEDIA = {
     # L9: Spitalfields: Irish, Jewish and Bangladeshi communities
     "d4789cef-b75b-48a6-8955-a7ad0817e81e": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/impact-empire-britain-1688-1730/podcast_l09.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/impact-empire-britain-1688-1730/podcast_l09.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://shows.acast.com/gone-medieval/episodes/jews-medieval-england", "title": "Gone Medieval — Jews in Medieval England", "description": "Background on Jewish communities in England before their 1290 expulsion — the context for the Jewish re-settlement in Spitalfields from the 1650s."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -415,7 +415,7 @@ LESSON_MEDIA = {
     # L10: Source skills for Spitalfields and Empire
     "af5160c4-ceea-4341-ac75-1eac629ba6d1": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/impact-empire-britain-1688-1730/podcast_l10.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/impact-empire-britain-1688-1730/podcast_l10.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://shows.acast.com/gone-medieval/episodes/jews-medieval-england", "title": "Gone Medieval — Working with Historical Evidence", "description": "History Hit on evaluating primary sources — the same source-skills approach the OCR SHP exam requires."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -438,7 +438,7 @@ LESSON_MEDIA = {
     # L1: The pre-Reformation English Church c.1520
     "86b66689-7d8e-47f9-b143-a181d3106e7e": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/english-reformation-1520-1550/podcast_l01.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/english-reformation-1520-1550/podcast_l01.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://www.englandcast.com/thomas-wolsey-and-thomas-more/", "title": "Episode 9: A Tale of Two Thomases — Renaissance English History Podcast", "description": "Heather Teysko sets up the Wolsey/More double-act — useful background on the church before the break."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -457,7 +457,7 @@ LESSON_MEDIA = {
     # L2: Lollards, Luther and English criticism of the church
     "7b9fe5e8-2441-4573-9856-8b197e812369": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/english-reformation-1520-1550/podcast_l02.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/english-reformation-1520-1550/podcast_l02.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://www.englandcast.com/thomas-wolsey-and-thomas-more/", "title": "Renaissance English History Podcast — Wolsey, Luther and Reform", "description": "Heather Teysko on how Luther’s ideas reached England via Cambridge scholars in the early 1520s."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -476,7 +476,7 @@ LESSON_MEDIA = {
     # L3: The King's Great Matter and the Reformation Parliament
     "4112bb3b-0687-4fca-855f-49b49b786008": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/english-reformation-1520-1550/podcast_l03.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/english-reformation-1520-1550/podcast_l03.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/5UVvpuruWMTPdBh2OwTMeV", "title": "Cardinal Wolsey: His Rise and Fall — Not Just the Tudors", "description": "Suzannah Lipscomb on Wolsey’s failure to secure the annulment — the event that triggered the King’s Great Matter and his fall."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -496,7 +496,7 @@ LESSON_MEDIA = {
     # L4: Valor Ecclesiasticus and Visitation of the Monasteries
     "c0302a44-efcc-49b7-a7b4-aec21ba40f29": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/english-reformation-1520-1550/podcast_l04.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/english-reformation-1520-1550/podcast_l04.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://www.englandcast.com/thomas-wolsey-and-thomas-more/", "title": "Renaissance English History Podcast — Cromwell and the Monasteries", "description": "Heather Teysko on how Thomas Cromwell built the administrative machinery that made the Dissolution possible."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -515,7 +515,7 @@ LESSON_MEDIA = {
     # L5: Dissolution: process, impact and resistance
     "1d202846-e8bd-4ffe-b2e6-c76ba88e4dc0": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/english-reformation-1520-1550/podcast_l05.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/english-reformation-1520-1550/podcast_l05.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://www.englandcast.com/thomas-wolsey-and-thomas-more/", "title": "Renaissance English History Podcast — The Pilgrimage of Grace", "description": "Heather Teysko on the northern rising against the Dissolution — the largest popular rebellion of the Tudor period."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -535,7 +535,7 @@ LESSON_MEDIA = {
     # L6: Religious worship under Henry and Edward
     "c08dd5c4-ce62-461a-b30f-61c7d978c785": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/english-reformation-1520-1550/podcast_l06.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/english-reformation-1520-1550/podcast_l06.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://shows.acast.com/not-just-the-tudors/episodes/elizabethiandmary-queenofscots-rivalqueens", "title": "Not Just the Tudors — Religious Change Under the Tudors", "description": "Suzannah Lipscomb on how the experience of worship changed for ordinary English people between 1530 and 1560."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -554,7 +554,7 @@ LESSON_MEDIA = {
     # L7: Parish reaction and the Prayer Book Rebellion
     "0359cbd7-48f0-4348-8c79-789f43372a10": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/english-reformation-1520-1550/podcast_l07.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/english-reformation-1520-1550/podcast_l07.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://shows.acast.com/not-just-the-tudors/episodes/elizabethiandmary-queenofscots-rivalqueens", "title": "Not Just the Tudors — Popular Religion and Rebellion", "description": "How ordinary people responded to the religious changes imposed from above — the Prayer Book Rebellion as a case study."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -573,7 +573,7 @@ LESSON_MEDIA = {
     # L8: Kenilworth Castle: location and physical fabric
     "ade240b6-103e-4b31-8671-0f7100d0f715": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/english-reformation-1520-1550/podcast_l08.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/english-reformation-1520-1550/podcast_l08.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://shows.acast.com/not-just-the-tudors/episodes/elizabethiandmary-queenofscots-rivalqueens", "title": "Not Just the Tudors — Tudor Castles and Palaces", "description": "Suzannah Lipscomb on how Tudor monarchs used royal buildings as instruments of power — the context for reading Kenilworth as a site."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -594,7 +594,7 @@ LESSON_MEDIA = {
     # L9: Kenilworth's functions: defence, residence, administration
     "db2bd630-c89e-4505-b9bb-8809b5cb21f8": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/english-reformation-1520-1550/podcast_l09.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/english-reformation-1520-1550/podcast_l09.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://shows.acast.com/not-just-the-tudors/episodes/elizabethiandmary-queenofscots-rivalqueens", "title": "Not Just the Tudors — Tudor Patronage and Power", "description": "How Tudor magnates used their residences as political tools — a model for reading Leicester’s investments at Kenilworth."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -615,7 +615,7 @@ LESSON_MEDIA = {
     # L10: Source skills for Kenilworth and the Reformation
     "0384caf3-baa4-470c-899b-bdfb427f8fb9": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/english-reformation-1520-1550/podcast_l10.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/english-reformation-1520-1550/podcast_l10.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://shows.acast.com/not-just-the-tudors/episodes/elizabethiandmary-queenofscots-rivalqueens", "title": "Not Just the Tudors — How Historians Read the Past", "description": "Suzannah Lipscomb on evaluating sources for the Elizabethan period — models the critical approach required by OCR source-skills questions."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -640,7 +640,7 @@ LESSON_MEDIA = {
     # L1: Charles I's Personal Rule 1629-1640
     "b83a41e7-248d-4bb9-9dca-7ac6a9754e8c": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/personal-rule-restoration-1629-1660/podcast_l01.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/personal-rule-restoration-1629-1660/podcast_l01.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — Charles I and the Personal Rule", "description": "Overview of the 1629-1640 period — the constitutional, financial and religious crises Charles created by ruling without Parliament."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -659,7 +659,7 @@ LESSON_MEDIA = {
     # L2: Slide to civil war 1640-1642
     "4bdf9afa-5d3d-41e1-87bc-97c86a089b6f": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/personal-rule-restoration-1629-1660/podcast_l02.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/personal-rule-restoration-1629-1660/podcast_l02.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — The Road to Civil War", "description": "How the Short and Long Parliaments, the Grand Remonstrance and the Five Members crisis made war inevitable by 1642."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -678,7 +678,7 @@ LESSON_MEDIA = {
     # L3: First Civil War 1642-1646
     "9802b81b-9f91-4a3a-895f-1b9ba7f60f97": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/personal-rule-restoration-1629-1660/podcast_l03.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/personal-rule-restoration-1629-1660/podcast_l03.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — The First Civil War 1642-1646", "description": "Key battles, turning points — Edgehill, Marston Moor, Naseby — and how the war changed British society."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -697,7 +697,7 @@ LESSON_MEDIA = {
     # L4: Levellers, Diggers and radical religion
     "e220b05d-84fb-480b-b269-e0ebc13eca5d": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/personal-rule-restoration-1629-1660/podcast_l04.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/personal-rule-restoration-1629-1660/podcast_l04.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — Radicals of the English Revolution", "description": "Overview of the Levellers, Diggers and Fifth Monarchists — the radical movements the Civil War unleashed."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -716,7 +716,7 @@ LESSON_MEDIA = {
     # L5: Second Civil War, Pride's Purge and regicide
     "0a2efafc-3f21-4433-8599-5d96ee5d871c": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/personal-rule-restoration-1629-1660/podcast_l05.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/personal-rule-restoration-1629-1660/podcast_l05.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — The Trial and Execution of Charles I", "description": "The regicide of 1649 — the legal innovation, the political stakes and why only a small minority of MPs went through with it."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -735,7 +735,7 @@ LESSON_MEDIA = {
     # L6: Rump Parliament and the rise of Cromwell 1649-1653
     "5a7dcace-9d8b-41a2-b846-c016993eb2c8": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/personal-rule-restoration-1629-1660/podcast_l06.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/personal-rule-restoration-1629-1660/podcast_l06.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — The Commonwealth and Cromwell’s Rise", "description": "How Cromwell went from MP to military commander to the man who dissolved the Rump Parliament in 1653."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -754,7 +754,7 @@ LESSON_MEDIA = {
     # L7: Protectorate 1653-1658
     "ae1234a4-5146-4e8f-82d8-9cbe2f85a374": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/personal-rule-restoration-1629-1660/podcast_l07.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/personal-rule-restoration-1629-1660/podcast_l07.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — The Cromwellian Protectorate", "description": "How Cromwell governed as Lord Protector — his constitutional experiments, religious policies and military campaigns."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -773,7 +773,7 @@ LESSON_MEDIA = {
     # L8: Restoration 1658-1660
     "c151b298-62f4-4019-b7e3-a1532693b898": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/personal-rule-restoration-1629-1660/podcast_l08.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/personal-rule-restoration-1629-1660/podcast_l08.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — The Restoration of Charles II", "description": "Why the Protectorate collapsed so quickly after Cromwell’s death and how Charles II returned in triumph."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -794,7 +794,7 @@ LESSON_MEDIA = {
     # L9: Kenilworth Castle in the Civil War
     "f2037a2d-53e2-421b-962e-6a7b83b8b5ca": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/personal-rule-restoration-1629-1660/podcast_l09.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/personal-rule-restoration-1629-1660/podcast_l09.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — Siege Warfare in the English Civil War", "description": "Overview of Civil War siege warfare — the context for Kenilworth’s use as a garrison and its subsequent slighting."}
         ]},
         {"category": "Videos & Channels", "items": [
@@ -813,7 +813,7 @@ LESSON_MEDIA = {
     # L10: Source skills for Kenilworth and Personal Rule
     "e8191897-450f-4eaf-ae7b-d279b2312566": [
         {"category": "Podcasts", "items": [
-            {"url": "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-ocr/personal-rule-restoration-1629-1660/podcast_l10.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
+            {"url": "https://audio.studyvault-media.co.uk/history-ocr/personal-rule-restoration-1629-1660/podcast_l10.mp3", "title": "Lesson Podcast", "description": "AI-generated audio overview of this lesson"},
             {"url": "https://open.spotify.com/episode/4KSTAv1Or2ASHKquJnLRCN", "title": "Dan Snow’s History Hit — Using Primary Sources for the Civil War", "description": "How historians use letters, newsbooks and physical evidence from the Civil War period — models the source-skills approach required by OCR."}
         ]},
         {"category": "Videos & Channels", "items": [

@@ -29,7 +29,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 
 BUCKET_NAME = "studyvault-audio"
-R2_PUBLIC_URL = "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev"
+R2_PUBLIC_URL = "https://audio.studyvault-media.co.uk"
 
 # Directories containing narration MP3s — key is the R2 prefix
 UNIT_DIRS = {

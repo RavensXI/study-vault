@@ -40,7 +40,7 @@ SUBJECT_SLUG = "it-ocr"
 UNIT_SLUG = "it-in-the-digital-world"
 UNIT_ID = "02eab1c9-4b5e-4a09-8676-b29473580806"
 CONTENT_DIR = os.path.join(SCRIPT_DIR, "_content_it-ocr", UNIT_SLUG)
-R2_PUBLIC = "https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev"
+R2_PUBLIC = "https://images.studyvault-media.co.uk"
 HERO_REUSE_MIN_SCORE = 4
 
 LESSONS = [

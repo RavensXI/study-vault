@@ -12,13 +12,13 @@ from PIL import Image
 # ── Bucket constants ────────────────────────────────────────────────────
 
 AUDIO_BUCKET = "studyvault-audio"
-AUDIO_PUBLIC_URL = "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev"
+AUDIO_PUBLIC_URL = "https://audio.studyvault-media.co.uk"
 
 IMAGES_BUCKET = "studyvault-images"
-IMAGES_PUBLIC_URL = "https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev"
+IMAGES_PUBLIC_URL = "https://images.studyvault-media.co.uk"
 
 VIDEO_BUCKET = "studyvault-video"
-VIDEO_PUBLIC_URL = "https://pub-157a3979382e4f98b51f7f868078e5a3.r2.dev"
+VIDEO_PUBLIC_URL = "https://video.studyvault-media.co.uk"
 
 
 # ── Client ──────────────────────────────────────────────────────────────

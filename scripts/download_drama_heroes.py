@@ -34,7 +34,7 @@ from PIL import Image
 # ─── Config ──────────────────────────────────────────────────────────────────
 
 BUCKET_NAME = "studyvault-images"
-R2_PUBLIC_URL = "https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev"
+R2_PUBLIC_URL = "https://images.studyvault-media.co.uk"
 
 WIKIMEDIA_API = "https://commons.wikimedia.org/w/api.php"
 USER_AGENT = "StudyVault/1.0 (educational; contact: t.shaun@unity.lancs.sch.uk)"

@@ -36,7 +36,7 @@ from lib.r2 import get_r2_client, IMAGES_BUCKET
 
 SUBJECT_SLUG = "geography-aqa"
 R2_PREFIX = "geography"  # existing geography heroes live under geography/ on R2
-R2_PUBLIC = "https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev"
+R2_PUBLIC = "https://images.studyvault-media.co.uk"
 HERO_REUSE_MIN_SCORE = 4
 SIDECAR = Path(SCRIPT_DIR) / "_content_geography-aqa" / "_hero_keywords.json"
 

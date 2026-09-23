@@ -5,7 +5,7 @@ import subprocess, sys, os, tempfile, urllib.request
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 import numpy as np
 
-R2 = "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/music-aqa/western-classical-1650-1910/"
+R2 = "https://audio.studyvault-media.co.uk/music-aqa/western-classical-1650-1910/"
 JOBS = [
     ("Haydn 94 mvt 2 — 'surprise' chord", "lesson-04.mp3", 20, 55, "claimed 0:27"),
     ("Handel Zadok — choir entry", "lesson-05.mp3", 80, 110, "claimed 1:30"),

@@ -52,7 +52,7 @@ VOICE_ODD = "en-GB-OllieMultilingualNeural"   # Odd lessons
 VOICE_EVEN = "en-GB-BellaNeural"               # Even lessons
 
 R2_BUCKET = "studyvault-audio"
-R2_PUBLIC_URL = "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev"
+R2_PUBLIC_URL = "https://audio.studyvault-media.co.uk"
 
 SUBJECT_SLUG = "drama"
 

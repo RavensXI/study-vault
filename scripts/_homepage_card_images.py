@@ -23,7 +23,7 @@ from lib.r2 import get_r2_client, IMAGES_BUCKET
 from lib.wikimedia import resize_and_compress, MIN_FILE_SIZE
 from lib.unsplash import trigger_unsplash_download
 
-R2_PUBLIC = "https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev"
+R2_PUBLIC = "https://images.studyvault-media.co.uk"
 
 # (slug, unsplash photo id, download_location for tracking ping)
 IMAGES = [

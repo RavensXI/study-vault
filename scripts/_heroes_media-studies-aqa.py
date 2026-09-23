@@ -48,7 +48,7 @@ SUBJECT_ID = "538bc758-a36f-442a-9d68-d58e664f5649"
 SUBJECT_SLUG = "media-studies-aqa"
 SUBJECT_NAME = "Media Studies (AQA)"
 CONTENT_DIR = os.path.join(SCRIPT_DIR, "_content_media-studies-aqa")
-R2_PUBLIC = "https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev"
+R2_PUBLIC = "https://images.studyvault-media.co.uk"
 HERO_REUSE_MIN_SCORE = 4
 
 

@@ -134,7 +134,7 @@ def main():
                         with open(tmp_dest, "rb") as f:
                             r2.put_object(Bucket=IMAGES_BUCKET, Key=r2_key, Body=f.read(), ContentType="image/jpeg")
                         os.unlink(tmp_src); os.unlink(tmp_dest)
-                        r2_url = f"https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/{r2_key}"
+                        r2_url = f"https://images.studyvault-media.co.uk/{r2_key}"
                         photographer = top.get("photographer") or ""
                         unsplash_caption = f"Photo: {photographer} / Unsplash" if photographer else "Photo via Unsplash"
                         alt = top.get("title") or q

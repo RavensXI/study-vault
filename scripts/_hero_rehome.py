@@ -39,7 +39,7 @@ from lib.supabase_client import get_client
 from lib.wikimedia import resize_and_compress
 from lib.r2 import get_r2_client, IMAGES_BUCKET
 
-R2_HOST = "pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev"
+R2_HOST = "images.studyvault-media.co.uk"
 R2_PUBLIC = f"https://{R2_HOST}"
 UA = "StudyVaultHeroBot/1.0 (https://www.studyvault.co.uk; studyvault.info@gmail.com)"
 SCRATCH = os.path.join(

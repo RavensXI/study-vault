@@ -42,7 +42,7 @@ from lib.r2 import get_r2_client, IMAGES_BUCKET
 SUBJECT_ID = "ccb8b884-4c48-41cc-a356-fe95e60b396d"
 SUBJECT_SLUG = "it-ocr"
 CONTENT_DIR = os.path.join(SCRIPT_DIR, "_content_it-ocr")
-R2_PUBLIC = "https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev"
+R2_PUBLIC = "https://images.studyvault-media.co.uk"
 HERO_REUSE_MIN_SCORE = 4
 
 

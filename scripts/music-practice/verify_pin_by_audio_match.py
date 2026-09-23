@@ -14,7 +14,7 @@ import subprocess, sys, os, tempfile, urllib.request
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 import numpy as np
 
-URL = ("https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/"
+URL = ("https://audio.studyvault-media.co.uk/"
        "music-aqa/western-classical-1650-1910/lesson-01.mp3")
 SR, N, HOP = 22050, 2048, 512
 REF_START, REF_LEN = 107.0, 10.0       # first subject, per the lesson's own pin c2 (data-t=107)

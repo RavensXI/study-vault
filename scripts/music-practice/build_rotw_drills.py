@@ -52,7 +52,7 @@ def player_html(url, entry):
     ) % (url, _fmt(entry["duration"]), payload)
 
 APPLY = "--apply" in sys.argv
-R2 = "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/music-ocr/aos3-rhythms-listening/"
+R2 = "https://audio.studyvault-media.co.uk/music-ocr/aos3-rhythms-listening/"
 
 
 def passage(pid, heading, filename, local_folder):

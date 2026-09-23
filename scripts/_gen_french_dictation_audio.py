@@ -12,7 +12,7 @@ VOICES = {"odd": "fr-FR-HenriNeural", "even": "fr-FR-DeniseNeural"}
 LANG_CODE = "fr-FR"
 
 R2_BUCKET = "studyvault-audio"
-R2_PUBLIC_URL = "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev"
+R2_PUBLIC_URL = "https://audio.studyvault-media.co.uk"
 
 
 def get_r2():

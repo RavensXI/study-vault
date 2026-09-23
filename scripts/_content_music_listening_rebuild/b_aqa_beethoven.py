@@ -44,7 +44,7 @@ d.pins = [   # (track, cid, seconds, title, tip) -- times unchanged from the liv
     ("t1", "c7", 520,   "Coda",                      "Coda &mdash; the closing passage: emphatic cadences hammering the ending home."),
 ]
 
-PORTRAIT = ('<figure class="sv-card-img"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/'
+PORTRAIT = ('<figure class="sv-card-img"><img src="https://images.studyvault-media.co.uk/'
             'music-aqa/cards/beethoven-1803-horneman.jpg" alt="Portrait miniature of Ludwig van Beethoven by '
             'Christian Horneman"><figcaption>Beethoven around the time of this symphony. Christian Horneman. '
             'Public domain.</figcaption></figure>')

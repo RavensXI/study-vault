@@ -112,8 +112,8 @@ Requires env vars: `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ACCOUNT_ID`. 
 All narration MP3s are hosted on **Cloudflare R2** (S3-compatible object storage, zero egress fees).
 
 - **Bucket**: `studyvault-audio`
-- **Public URL**: `https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev`
-- **Example**: `https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history/conflict-tension/narration_lesson-01_n1.mp3`
+- **Public URL**: `https://audio.studyvault-media.co.uk`
+- **Example**: `https://audio.studyvault-media.co.uk/history/conflict-tension/narration_lesson-01_n1.mp3`
 - **Total size**: ~834 MB across ~5,000 files
 - **Free tier**: 10 GB storage, 10M reads/month, zero egress — well within limits
 
@@ -127,7 +127,7 @@ sport-science/r180/narration_lesson-01_n1.mp3
 
 Each lesson's `window.narrationManifest` contains entries like:
 ```js
-{ id: "n1", src: "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history/conflict-tension/narration_lesson-01_n1.mp3", duration: 12.34 },
+{ id: "n1", src: "https://audio.studyvault-media.co.uk/history/conflict-tension/narration_lesson-01_n1.mp3", duration: 12.34 },
 ```
 
 ### Adding narration for new lessons

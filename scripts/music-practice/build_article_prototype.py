@@ -26,7 +26,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from lib.supabase_client import get_client
 
 DRY = "--dry-run" in sys.argv
-R2 = "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/music-aqa/aos-listening"
+R2 = "https://audio.studyvault-media.co.uk/music-aqa/aos-listening"
 UNIT_SLUG = "aos3-traditional-music"
 
 

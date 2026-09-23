@@ -154,7 +154,7 @@ def save_state(state):
 def has_explainer_video(lesson):
     """A lesson already has an explainer video if youtube_video_id points to studyvault-video R2."""
     url = lesson.get("youtube_video_id") or ""
-    return "studyvault-video" in url or "pub-157a3979382e4f98b51f7f868078e5a3.r2.dev" in url
+    return "studyvault-video" in url or "video.studyvault-media.co.uk" in url
 
 
 def _fetch_subject_lessons(sb, slug, subject, limit, all_pending):

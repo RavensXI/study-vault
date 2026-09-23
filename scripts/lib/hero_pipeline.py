@@ -42,7 +42,7 @@ from lib.pixabay import search_pixabay
 from lib.wikimedia import search_wikimedia, resize_and_compress, MIN_FILE_SIZE
 from lib.r2 import get_r2_client, IMAGES_BUCKET
 
-R2_PUBLIC = "https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev"
+R2_PUBLIC = "https://images.studyvault-media.co.uk"
 VISION_MODEL = "claude-haiku-4-5-20251001"
 MAX_VISION_CHECKS_PER_LESSON = 8
 

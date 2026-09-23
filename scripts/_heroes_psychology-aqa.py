@@ -37,7 +37,7 @@ SUBJECT_ID = "fd19191e-255b-448e-82f1-b0cb15d80561"
 SUBJECT_SLUG = "psychology-aqa"
 SUBJECT_NAME = "Psychology (AQA)"
 CONTENT_DIR = os.path.join(SCRIPT_DIR, "_content_psychology-aqa")
-R2_PUBLIC = "https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev"
+R2_PUBLIC = "https://images.studyvault-media.co.uk"
 HERO_REUSE_MIN_SCORE = 4
 
 LESSON_FILE_PATTERN = re.compile(r"^(?P<unit>[a-z0-9-]+)_L(?P<n>\d{2})\.json$")

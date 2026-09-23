@@ -25,7 +25,7 @@ Everything is styled in the **reader skin**: warm ground `#f2efe9`, framed portr
 ### (a) Video generation — the batch
 - **`scripts/batch_short_videos.py`** — hardened, self-contained daily batch: generate → poll → download → upload to R2 → delete notebook. Single-instance lock, orphan-notebook sweep on startup (`NB_PREFIX="SVSHORT"`), date-stamped 180/day quota (`scripts/_shorts_daily.json`), **fail-safe auth** (raises `AuthExpired` and exits code 2 — never tries interactive login mid-run).
 - Uses the **`nlm` CLI** (`notebooklm-mcp-cli`, currently v0.8.1). `video create --format short --focus "<section>" --confirm`. Auth via cookies in `~/.notebooklm-mcp-cli/profiles/default`.
-- **R2 key:** `shorts/{subject}/{unit}/L{NN}_{idx}.mp4` (bucket `studyvault-video`, public host `pub-157a3979382e4f98b51f7f868078e5a3.r2.dev`).
+- **R2 key:** `shorts/{subject}/{unit}/L{NN}_{idx}.mp4` (bucket `studyvault-video`, public host `video.studyvault-media.co.uk`).
 - **Source of truth:** `scripts/_shorts_manifest.json` (append-only). Fields per short: `lesson_id, subject, unit, lesson_number, title, topic, topic_index, url, created_at`. `topic` = an `<h2>` section heading; `topic_index` = its index in the lesson's section list.
 - Scheduled task **"StudyVaultShorts"** runs `scripts/run_shorts.cmd` every 25h (but it also hits the auth wall — needs fresh cookies at run time).
 - **Key gotcha (already handled):** NotebookLM **re-IDs artifacts** between pending→done, so never pre-capture artifact ids — download `completed` items by their *current* id and label them via the `custom_instructions` field (`topic_from_instructions()`).

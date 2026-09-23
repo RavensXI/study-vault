@@ -33,7 +33,7 @@ import driver as D  # noqa: E402
 CFG_PATH = os.path.join(HERE, "config_latin-eduqas.json")
 SLUG = "latin-eduqas"
 BASE_SLUG = "latin"
-CARD_IMAGE = ("https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/"
+CARD_IMAGE = ("https://images.studyvault-media.co.uk/"
               "homepage-cards/latin-eduqas.jpg")
 CARD_ACCENT = "#9b2226"
 

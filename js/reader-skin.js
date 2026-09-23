@@ -1027,7 +1027,7 @@
     c.from('lessons').select('youtube_video_id').eq('id', window._lessonId).then(function (r) {
       var url = r && r.data && r.data[0] && r.data[0].youtube_video_id;
       if (!url) return;
-      var isDirect = /\.(mp4|webm)(\?|$)/i.test(url) || url.indexOf('r2.dev/') !== -1;
+      var isDirect = /\.(mp4|webm)(\?|$)/i.test(url) || url.indexOf('r2.dev/') !== -1 || url.indexOf('studyvault-media.co.uk/') !== -1;
       if (!isDirect) return;                      // embeds can't be probed
       var probe = document.createElement('video');
       probe.preload = 'metadata'; probe.muted = true; probe.src = url;
