@@ -512,14 +512,28 @@
 
   function init() {
     injectStyles();
-    var tries = 0;
-    var timer = setInterval(function () {
-      tries++;
+    var tries = 0, watch = null;
+    function attempt() {
       var notes = document.getElementById('study-notes');
       var ready = notes && notes.textContent.trim().length > 0;
-      if (ready && insertLauncher()) { clearInterval(timer); }
-      else if (tries > 40) { clearInterval(timer); }
+      if (ready && insertLauncher()) {
+        clearInterval(timer);
+        if (watch) watch.disconnect();
+        return true;
+      }
+      return false;
+    }
+    var timer = setInterval(function () {
+      tries++;
+      if (!attempt() && tries > 40) { clearInterval(timer); if (watch) watch.disconnect(); }
     }, 500);
+    // Also add the dock the moment the lesson text lands (24 Sep 2026): the reader skin
+    // builds its side-panel tiles from the dock, and waiting for the half-second poll left
+    // the panel unstyled on screen for a moment.
+    if (!attempt() && window.MutationObserver && document.body) {
+      watch = new MutationObserver(attempt);
+      watch.observe(document.body, { childList: true, subtree: true });
+    }
   }
 
   // Public hook so other features (e.g. the chunk menu in simplify.js) can open

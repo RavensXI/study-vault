@@ -2723,8 +2723,12 @@ function initLessonProgress() {
   section.innerHTML = html;
   section.dataset.svPct = pct;   // weighted % — reader-skin adapter reads this
 
-  var firstSection = sidebar.querySelector('.sidebar-section');
-  sidebar.insertBefore(section, firstSection);
+  // The reader skin may already have wrapped the sidebar's sections in .sv-panel; the
+  // progress box then goes at the top of the panel. (24 Sep 2026: inserting before a
+  // section that had moved into the panel threw, and the box went missing.)
+  var host = sidebar.querySelector(':scope > .sv-panel') || sidebar;
+  var firstSection = host.querySelector(':scope > .sidebar-section');
+  host.insertBefore(section, firstSection);
 
   // ---- Build gutter version (fixed left rail on wide desktops) ----
   var gutter = document.createElement('div');

@@ -1673,6 +1673,26 @@
     set(reqSkin !== null ? reqSkin : 'reader');  // reader is the shippable skin
     applySubjectAccent();
     watchOldOnboarding();     // kill the first-visit onboarding flash from the start
+    // Restyle the panel the moment main.js builds its progress box (Tom, 24 Sep 2026: for a
+    // second or two a first open showed the old "0 of 7 complete" box and a lone wide Quick
+    // Quiz tile, because tidy() only ran on the timers below). Observer callbacks run before
+    // the next paint, so the unstyled panel is never drawn; the timers stay as a safety net.
+    // Two things must exist: the progress box (the count) and the tutor dock (the tool tiles
+    // and the panel wait for it). Nothing runs until the progress box exists: on the live
+    // site the lesson text is server-rendered, so the dock can arrive first, and wrapping the
+    // panel before main.js has placed the progress box lost the box (reverted 24 Sep 2026).
+    // tidy() runs when the progress box appears and again when the dock follows; then stop.
+    var ranWithDock = false, ranWithProgress = false;
+    var early = new MutationObserver(function () {
+      if (!document.querySelector('.sidebar-progress-section')) return;
+      var dock = !!document.querySelector('.tutor-dock');
+      if (ranWithProgress && (!dock || ranWithDock)) return;
+      ranWithProgress = true;
+      if (dock) { ranWithDock = true; early.disconnect(); }
+      tidy();
+    });
+    early.observe(document.body, { childList: true, subtree: true });
+    setTimeout(function () { early.disconnect(); }, 8000);
     setTimeout(tidy, 1200);
     setTimeout(tidy, 2600);
     setTimeout(tidy, 4200);   // safety: catch a slow async video-card render
