@@ -1,0 +1,155 @@
+[
+ {
+  "table": "guide_pages",
+  "name": "Anyone can read guide pages of live subjects",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "SELECT",
+  "qual": "(subject_id IN ( SELECT subjects.id\n   FROM subjects\n  WHERE (subjects.status = 'live'::content_status)))",
+  "with_check": null
+ },
+ {
+  "table": "guide_pages",
+  "name": "Platform admin full access on guide_pages",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "ALL",
+  "qual": "is_platform_admin()",
+  "with_check": "is_platform_admin()"
+ },
+ {
+  "table": "guide_pages",
+  "name": "School users can read their guide pages",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "SELECT",
+  "qual": "(subject_id IN ( SELECT subjects.id\n   FROM subjects\n  WHERE (subjects.school_id = current_user_school_id())))",
+  "with_check": null
+ },
+ {
+  "table": "guide_pages",
+  "name": "Teachers can update guide pages for their subjects",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "UPDATE",
+  "qual": "((current_user_role() = ANY (ARRAY['teacher'::user_role, 'school_admin'::user_role])) AND (subject_id IN ( SELECT s.id\n   FROM subjects s\n  WHERE ((s.school_id = current_user_school_id()) AND ((current_user_role() = 'school_admin'::user_role) OR (s.id IN ( SELECT teacher_subjects.subject_id\n           FROM teacher_subjects\n          WHERE ((teacher_subjects.teacher_id = auth.uid()) AND (teacher_subjects.can_edit = true)))))))))",
+  "with_check": "((current_user_role() = ANY (ARRAY['teacher'::user_role, 'school_admin'::user_role])) AND (subject_id IN ( SELECT s.id\n   FROM subjects s\n  WHERE ((s.school_id = current_user_school_id()) AND ((current_user_role() = 'school_admin'::user_role) OR (s.id IN ( SELECT teacher_subjects.subject_id\n           FROM teacher_subjects\n          WHERE ((teacher_subjects.teacher_id = auth.uid()) AND (teacher_subjects.can_edit = true)))))))))"
+ },
+ {
+  "table": "lesson_overrides",
+  "name": "lesson_overrides_read",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "SELECT",
+  "qual": "true",
+  "with_check": null
+ },
+ {
+  "table": "lessons",
+  "name": "Anyone can read live lessons",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "SELECT",
+  "qual": "(status = 'live'::content_status)",
+  "with_check": null
+ },
+ {
+  "table": "lessons",
+  "name": "Platform admin full access on lessons",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "ALL",
+  "qual": "is_platform_admin()",
+  "with_check": "is_platform_admin()"
+ },
+ {
+  "table": "lessons",
+  "name": "Public read access on lessons",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "SELECT",
+  "qual": "true",
+  "with_check": null
+ },
+ {
+  "table": "lessons",
+  "name": "Students can read live lessons from their school",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "SELECT",
+  "qual": "((status = 'live'::content_status) AND (unit_id IN ( SELECT u.id\n   FROM (units u\n     JOIN subjects s ON ((u.subject_id = s.id)))\n  WHERE (s.school_id = current_user_school_id()))))",
+  "with_check": null
+ },
+ {
+  "table": "lessons",
+  "name": "Teachers can read all lessons from their school",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "SELECT",
+  "qual": "((current_user_role() = ANY (ARRAY['teacher'::user_role, 'school_admin'::user_role])) AND (unit_id IN ( SELECT u.id\n   FROM (units u\n     JOIN subjects s ON ((u.subject_id = s.id)))\n  WHERE (s.school_id = current_user_school_id()))))",
+  "with_check": null
+ },
+ {
+  "table": "lessons",
+  "name": "Teachers can update lessons for their subjects",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "UPDATE",
+  "qual": "((current_user_role() = ANY (ARRAY['teacher'::user_role, 'school_admin'::user_role])) AND (unit_id IN ( SELECT u.id\n   FROM (units u\n     JOIN subjects s ON ((u.subject_id = s.id)))\n  WHERE ((s.school_id = current_user_school_id()) AND ((current_user_role() = 'school_admin'::user_role) OR (s.id IN ( SELECT teacher_subjects.subject_id\n           FROM teacher_subjects\n          WHERE ((teacher_subjects.teacher_id = auth.uid()) AND (teacher_subjects.can_edit = true)))))))))",
+  "with_check": "((current_user_role() = ANY (ARRAY['teacher'::user_role, 'school_admin'::user_role])) AND (unit_id IN ( SELECT u.id\n   FROM (units u\n     JOIN subjects s ON ((u.subject_id = s.id)))\n  WHERE ((s.school_id = current_user_school_id()) AND ((current_user_role() = 'school_admin'::user_role) OR (s.id IN ( SELECT teacher_subjects.subject_id\n           FROM teacher_subjects\n          WHERE ((teacher_subjects.teacher_id = auth.uid()) AND (teacher_subjects.can_edit = true)))))))))"
+ },
+ {
+  "table": "subjects",
+  "name": "Anyone can read live subjects",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "SELECT",
+  "qual": "(status = 'live'::content_status)",
+  "with_check": null
+ },
+ {
+  "table": "subjects",
+  "name": "Platform admin full access on subjects",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "ALL",
+  "qual": "is_platform_admin()",
+  "with_check": "is_platform_admin()"
+ },
+ {
+  "table": "subjects",
+  "name": "School users can read their subjects",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "SELECT",
+  "qual": "(school_id = current_user_school_id())",
+  "with_check": null
+ },
+ {
+  "table": "units",
+  "name": "Anyone can read units of live subjects",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "SELECT",
+  "qual": "(subject_id IN ( SELECT subjects.id\n   FROM subjects\n  WHERE (subjects.status = 'live'::content_status)))",
+  "with_check": null
+ },
+ {
+  "table": "units",
+  "name": "Platform admin full access on units",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "ALL",
+  "qual": "is_platform_admin()",
+  "with_check": "is_platform_admin()"
+ },
+ {
+  "table": "units",
+  "name": "School users can read their units",
+  "permissive": "PERMISSIVE",
+  "roles": "{public}",
+  "cmd": "SELECT",
+  "qual": "(subject_id IN ( SELECT subjects.id\n   FROM subjects\n  WHERE (subjects.school_id = current_user_school_id())))",
+  "with_check": null
+ }
+]

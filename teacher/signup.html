@@ -12,6 +12,7 @@
        skin and it breaks form layouts. -->
   <link rel="stylesheet" href="/css/teacher.css">
   <link rel="stylesheet" href="/css/scrollbar.css">
+  <script src="/js/content-reads.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
   <link rel="apple-touch-icon" href="/images/icon-192.png">
@@ -241,10 +242,13 @@
     async function loadSubjects(schoolId, assigned) {
       lockedSubjectIds = assigned.slice();
       try {
-        var q = sb.from('subjects').select('id, name, slug, school_id, exam_board')
-          .eq('status', 'live').order('name');
-        q = schoolId ? q.or('school_id.is.null,school_id.eq.' + schoolId) : q.is('school_id', null);
-        var resp = await q;
+        // A school's subjects are private to the school (24 Sep 2026), and the teacher has no
+        // account yet, so the invitation token unlocks them: free-tier subjects plus the
+        // inviting school's, or free-tier only if the token is not a live invitation.
+        var resp = schoolId
+          ? await sb.rpc('get_invitation_subjects', { p_token: token })
+          : await sb.from('subjects').select('id, name, slug, school_id, exam_board')
+              .eq('status', 'live').is('school_id', null).order('name');
         if (resp.error) throw resp.error;
         paintSubjects(resp.data || []);
       } catch (err) {
