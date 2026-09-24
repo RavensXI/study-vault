@@ -160,6 +160,13 @@ R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), video on R2
   `servedBy` on `/api/ai-mark`. Marking is marks-routed (Haiku ≤8, Sonnet >8;
   essays 2000 tokens). ⚠ open: US fallback must fail closed before any DPA
   claim.
+- **School content is private (24 Sep 2026):** RLS lets visitors read live free-tier
+  content only; a school's subjects/units/lessons/guides are readable only by its users
+  (profile school OR class membership, `user_school_ids()`), its teachers, and admins.
+  Unpublished lessons are staff-only. The password-gated admin pages read content through
+  `/api/staff/rest`; `js/content-reads.js` (loaded before supabase-js) routes admin reads there
+  and signs plain content fetches for signed-in users. Never offer `?sid=` links to pupils.
+  Tests: `scripts/security/` (dry run, browser, live). Rollback in `supabase/migrations/`.
 - **Safeguarding route (23 Sep 2026):** exam answers, tutor messages, flashcard
   answers and searches get a London-hosted check beside the marking; a flag shows
   the pupil a support panel and, for a signed-in pupil in a class at a school with
