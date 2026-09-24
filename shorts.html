@@ -208,7 +208,8 @@ function accent(slug){
 }
 function titleCase(s){ return s.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
 // poster frame mirrors the R2 video key under shorts/posters/ on R2, .mp4 -> .webp
-function posterFor(url){ const m=url.split('.r2.dev/'); if(m.length<2) return ''; return 'https://images.studyvault-media.co.uk/shorts/posters/'+m[1].replace(/^shorts\//,'').replace(/\.mp4$/,'.webp'); }
+// either host: r2.dev until 23 Sep 2026, then video.studyvault-media.co.uk (the poster had gone blank for every short)
+function posterFor(url){ const m=url.split(/\.r2\.dev\/|studyvault-media\.co\.uk\//); if(m.length<2) return ''; return 'https://images.studyvault-media.co.uk/shorts/posters/'+m[1].replace(/^shorts\//,'').replace(/\.mp4$/,'.webp'); }
 
 // today's playlist: least-recently-watched first within each subject (never-watched
 // leads), round-robined across subjects, starting subject rotated daily

@@ -3,6 +3,7 @@ every banked short with its poster path, playable R2 url, lesson/unit/topic,
 and the recall question it maps to (if any). Rerun after each batch/post-pass.
 """
 import json, os, io
+import urllib.parse
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MAN = os.path.join(ROOT, "scripts", "_shorts_manifest.json")
@@ -11,7 +12,7 @@ OUT = os.path.join(ROOT, "design-lab", "_shorts_review.json")
 
 
 def poster_rel(url):
-    key = url.split(".r2.dev/", 1)[1]
+    key = urllib.parse.urlparse(url).path.lstrip("/")   # the R2 key, whatever the host (r2.dev until 23 Sep 2026, then studyvault-media.co.uk)
     return "_posters/" + os.path.splitext(key)[0] + ".jpg"
 
 

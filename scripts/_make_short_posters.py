@@ -4,6 +4,7 @@ the path deterministically:  .../shorts/<key>.mp4  ->  _posters/shorts/<key>.jpg
 Downloads with a browser UA (r2.dev 403s bot UAs) then runs ffmpeg locally.
 """
 import json, os, subprocess, tempfile, urllib.request
+import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -13,7 +14,7 @@ UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like 
 
 def poster_rel(url):
     # everything from 'shorts/' onward, .mp4 -> .jpg
-    key = url.split(".r2.dev/", 1)[1]
+    key = urllib.parse.urlparse(url).path.lstrip("/")   # the R2 key, whatever the host (r2.dev until 23 Sep 2026, then studyvault-media.co.uk)
     return os.path.splitext(key)[0] + ".jpg"
 
 def one(e):

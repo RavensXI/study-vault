@@ -15,6 +15,7 @@ Usage:
   python scripts/_shorts_trim_endcards.py --all --limit 50
 """
 import argparse
+import urllib.parse
 import json
 import os
 import sys
@@ -50,7 +51,7 @@ def save_state(st):
 
 
 def r2_key(url):
-    return url.split(".r2.dev/")[1]
+    return urllib.parse.urlparse(url).path.lstrip("/")   # the R2 key, whatever the host (r2.dev until 23 Sep 2026, then studyvault-media.co.uk)
 
 
 def fetch(url, dest):
