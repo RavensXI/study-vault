@@ -710,7 +710,7 @@ let TODAY_L=`
     <li tabindex="0" onclick="nav('/lesson/computer-science/computer-systems/3')"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — 3 weeks stale</small></div><span class="mins">8 min</span></li>
   </ol>
   <p class="momentum"><span class="hl">4-day streak · 23 topics this week — your best yet.</span></p>
-  <div class="startrow"><button class="start" onclick="nav('/lesson/english-literature-aqa/a-christmas-carol/4')"><svg class="ring" viewBox="0 0 260 96" preserveAspectRatio="none"><path d="M18 52 C14 22, 74 8, 132 10 C 196 12, 250 22, 246 50 C 242 80, 180 90, 118 88 C 58 86, 20 76, 22 46"/></svg>Start · 25 min</button></div>`;
+  <div class="startrow"><button class="start" onclick="startWithWarmup('/lesson/english-literature-aqa/a-christmas-carol/4','Stave 3: Poverty &amp; Generosity')"><svg class="ring" viewBox="0 0 260 96" preserveAspectRatio="none"><path d="M18 52 C14 22, 74 8, 132 10 C 196 12, 250 22, 246 50 C 242 80, 180 90, 118 88 C 58 86, 20 76, 22 46"/></svg>Start · 25 min</button></div>`;
 let TODAY_R=`
   <h3>This week</h3>
   <div class="noteline">Best subject: <b>Geography</b> — 9 topics</div>
@@ -769,12 +769,12 @@ function revisitRow(url,w,ps){
 }
 function openRevisit(url){ if(!window.svWarmup||!window.svStrength) return; const rv=svStrength.revisit(SUBJECTS); if(rv.today.length) svWarmup.open({lessons:rv.today,target:url||null,nav}); }
 /* Start begins a plan run (js/plan-flow.js): the steps then hand on with a 'what's next' screen */
-function beginRun(url){ if(!window.svFlow) return; const t=svPlanLead(SUBJECTS), ps=svPlanState();
-  const title=t&&t.url===url?(t.title||t.unitName):(t&&t.title)||'Today\u2019s lesson';
+function beginRun(url,title0){ if(!window.svFlow) return; const t=svPlanLead(SUBJECTS), ps=svPlanState();
+  const title=title0||(t&&t.url===url?(t.title||t.unitName):(t&&t.title)||'Today\u2019s lesson');
   svFlow.begin({first:svDoneStats().total?'Revisit':'Warm-up',lesson:{url,title},home:'/desk'});
   const r=svFlow.run(); if(r&&ps.warm){ r.done.first=true; sessionStorage.setItem('sv-run',JSON.stringify(r)); } }
-function startWithWarmup(url){
-  beginRun(url);
+function startWithWarmup(url,title){
+  beginRun(url,title);
   if(!window.svWarmup){ nav(url); return; }
   if(svDoneStats().total&&window.svStrength&&svStrength.revisit){
     const rv=svStrength.revisit(SUBJECTS);
