@@ -832,8 +832,22 @@
   .stepcard{max-width:780px;margin:1.7rem auto 0;text-align:center}
   /* the feel screen: one row per subject, three ink dots; a budget row */
   .feelcard{text-align:left}
-  .feelunit{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.2rem 1rem;padding:.6rem 0;border-top:1px solid var(--linel)}
-  .feelunit:first-of-type{border-top:0}
+  /* the rating grid: every topic row and the header share one set of columns, so each label and
+     its "All" sit exactly over the buttons they belong to */
+  .feelcard{--fcol:78px}
+  .feelunit,.feelhead{display:grid;grid-template-columns:1fr repeat(4,var(--fcol));align-items:center;column-gap:6px}
+  .feelunit{row-gap:.2rem;padding:.55rem 0;border-top:1px solid var(--linel)}
+  .feelhead{padding:0 0 .55rem;border-bottom:1px solid var(--line);align-items:end}
+  .feelhead .fh-t{font:600 .78rem var(--head);color:var(--mut);letter-spacing:.06em;text-transform:uppercase;align-self:end;padding-bottom:4px}
+  .feelhead .fh{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
+  .feelhead .fh span{font:700 .74rem/1.15 var(--head);color:color-mix(in srgb,var(--c) 80%,#2b2721);min-height:2.3em;display:flex;align-items:flex-end;justify-content:center}
+  .feelhead .fh button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:3px 10px;font:600 .72rem var(--head);color:var(--sec);cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+  .feelhead .fh button:hover{border-color:var(--c);color:var(--ink)}
+  .feelhead .fh button[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff}
+  .feelhead .fh.n button[aria-pressed="true"]{background:#6f685c;border-color:#6f685c}
+  .feelunit .dots{display:contents}
+  .feelunit .fu-inc{grid-column:1/-1}
+  .feelcount{font-size:.82rem;color:var(--mut);text-align:right;padding:.6rem 0 0;border-top:1px solid var(--line)}
   .fu-name{border:0;background:none;padding:0;text-align:left;font:600 1rem var(--read);color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:.4rem}
   .fu-name svg{width:12px;height:12px;flex:none;opacity:.55;transition:transform .2s}
   .fu-name[aria-expanded="true"] svg{transform:rotate(90deg)}
@@ -843,24 +857,31 @@
   .fu-inc li{break-inside:avoid;padding:.08rem 0}
   .feelcard .wait{font-size:.86rem;color:var(--mut);padding:.6rem 0;text-align:center}
   .feelsub{display:block;font-family:var(--head);font-weight:400;font-size:.9rem;color:var(--mut);margin-top:.2rem}
-  .dots{display:flex;gap:.45rem}
-  .dot{width:38px;height:38px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;position:relative;padding:0}
-  .dot::after{content:'';position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;opacity:.35}
-  .dot.r::after{background:#b5442f}.dot.a::after{background:#d19a2f}.dot.g::after{background:#4e7a4a}
-  .dot.n::after{background:none;box-shadow:inset 0 0 0 2px #8f877a}
-  .dot[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
-  .dot[aria-pressed="true"]::after{opacity:1;width:18px;height:18px;margin:-9px 0 0 -9px}
-  .dotkey{display:flex;justify-content:flex-end;gap:1.2rem;font-size:.74rem;color:var(--mut);margin:0 0 .3rem}
-  .dotkey span::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:.35rem;vertical-align:middle}
-  .dotkey .kr::before{background:#b5442f}.dotkey .ka::before{background:#d19a2f}.dotkey .kg::before{background:#4e7a4a}
-  .dotkey .kn::before{box-shadow:inset 0 0 0 1.5px #8f877a}
+  /* a rating button: a clear ring of its colour; chosen, it fills with a soft wash of that colour and
+     a solid dot, so a finished subject reads at a glance down its column */
+  .dot{justify-self:center;width:42px;height:38px;border-radius:9px;border:1.5px solid color-mix(in srgb,var(--c) 38%,var(--line));background:var(--card);
+    cursor:pointer;position:relative;padding:0;transition:background .15s,border-color .15s,transform .12s}
+  .dot::after{content:'';position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;
+    background:transparent;box-shadow:inset 0 0 0 2px var(--c);transition:all .15s}
+  .dot:hover{border-color:var(--c)}
+  .dot:active{transform:scale(.94)}
+  .dot:focus-visible{outline:3px solid var(--anchor);outline-offset:2px}
+  .dot[aria-pressed="true"]{background:color-mix(in srgb,var(--c) 16%,var(--card));border-color:var(--c)}
+  .dot[aria-pressed="true"]::after{width:16px;height:16px;margin:-8px 0 0 -8px;background:var(--c);box-shadow:none}
+  .dot.n,.fh.n{--c:#8f877a}.dot.r,.fh.r{--c:#b5442f}.dot.a,.fh.a{--c:#c98f22}.dot.g,.fh.g{--c:#4e7a4a}
+  .dot.n[aria-pressed="true"]::after{background:transparent;box-shadow:inset 0 0 0 3px var(--c)}
   .budget .bopts{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:center}
   .budget .bopts button{border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:1rem 1.6rem;font:600 1.05rem var(--head);color:var(--ink);cursor:pointer;min-width:120px}
   .budget .bopts button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
   .budget p{display:none}
   html.mob .fu-name{font-size:.95rem}
   html.mob .fu-inc ol{columns:1}
-  html.mob .feelunit .dots .dot{width:34px;height:34px}
+  html.mob .feelcard{--fcol:54px}
+  html.mob .feelunit,html.mob .feelhead{column-gap:4px}
+  html.mob .dot{width:44px;height:38px}
+  html.mob .feelhead .fh span{font-size:.64rem;letter-spacing:-.01em}
+  html.mob .fu-name{font-size:.9rem}
+  html.mob .feelhead .fh button{padding:3px 7px}
   .tprog{font-size:.76rem;font-weight:600;color:var(--mut);letter-spacing:.14em;text-transform:uppercase}
   .tsubj{display:flex;align-items:center;justify-content:center;gap:10px;margin:.7rem 0 .1rem}
   .tsubj img{height:34px;width:auto;filter:saturate(1.4) brightness(1.1)}
@@ -2529,20 +2550,29 @@ function renderFeel(){
   const sl=subs[fstep], su=SUBJECTS.find(x=>x.slug===sl), sub=wSub(sl);
   document.getElementById('feelh').innerHTML=su.name+'<span class="feelsub">'+(BOARDLBL[boards[sl]]||'')+' &middot; '+(fstep+1)+' of '+subs.length+'</span>';
   const fc=document.getElementById('feelcard'), nx=document.getElementById('feelnext');
-  const key='<div class="dotkey"><span class="kn">not started yet</span><span class="kr">struggling</span><span class="ka">getting there</span><span class="kg">confident</span></div>';
+  const LBL={n:'Not started',r:'Struggling',a:'Getting there',g:'Confident'};
+  const key='<div class="feelhead"><span class="fh-t">Topic</span>'+['n','r','a','g'].map(v=>'<div class="fh '+v+'"><span>'+LBL[v]+'</span><button type="button" data-all="'+v+'" aria-pressed="false" aria-label="Mark every topic '+LBL[v].toLowerCase()+'">All</button></div>').join('')+'</div>';
   fc.innerHTML=key+'<div class="wait">loading the topics&hellip;</div>';
   const dots=(k,cur)=>['n','r','a','g'].map(v=>'<button type="button" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'" aria-label="'+({n:'not started yet',r:'struggling',a:'getting there',g:'confident'})[v]+'"></button>').join('');
   const chev='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2l4 4-4 4"/></svg>';
-  const sync=()=>{ const units=feelUnits(sl); const done=units.every(u=>RAG[sub+'/'+u.slug]);
-    nx.disabled=!done; nx.style.opacity=done?'':'.45'; };
+  const sync=()=>{ const units=feelUnits(sl), n=units.filter(u=>RAG[sub+'/'+u.slug]).length, done=n===units.length;
+    nx.disabled=!done; nx.style.opacity=done?'':'.45';
+    /* each column's All lights up when every topic sits in that column */
+    fc.querySelectorAll('[data-all]').forEach(b=>b.setAttribute('aria-pressed',String(!!units.length&&units.every(u=>RAG[sub+'/'+u.slug]===b.dataset.all))));
+    const c=fc.querySelector('.feelcount'); if(c) c.textContent=done?'All '+units.length+' rated':n+' of '+units.length+' rated'; };
   loadUnits(sub,()=>{
     if(feelSubs()[fstep]!==sl) return;
     const units=feelUnits(sl);
     fc.innerHTML=key+(units.length?units.map(u=>{ const k=sub+'/'+u.slug;
         return '<div class="feelunit" data-k="'+k+'"><button type="button" class="fu-name" aria-expanded="false">'+u.name+chev+'</button>'+
           '<span class="dots">'+dots(k,RAG[k])+'</span>'+
-          '<div class="fu-inc" hidden>'+(u.subtitle?'<p>'+u.subtitle+'</p>':'')+'<ol>'+u.lessons.map(t=>'<li>'+t+'</li>').join('')+'</ol></div></div>'; }).join('')
+          '<div class="fu-inc" hidden>'+(u.subtitle?'<p>'+u.subtitle+'</p>':'')+'<ol>'+u.lessons.map(t=>'<li>'+t+'</li>').join('')+'</ol></div></div>'; }).join('')+'<div class="feelcount"></div>'
       :'<div class="wait">no topics listed yet</div>');
+    const setAll=v=>{ const us=feelUnits(sl), all=us.every(u=>RAG[sub+'/'+u.slug]===v);
+      us.forEach(u=>{ const k=sub+'/'+u.slug; if(all) delete RAG[k]; else RAG[k]=v; });   /* pressed again: clears them */
+      fc.querySelectorAll('.feelunit').forEach(r=>r.querySelectorAll('.dot').forEach(x=>x.setAttribute('aria-pressed',String(RAG[r.dataset.k]===x.dataset.v))));
+      const roll=ragRoll(sl); if(roll) RAG[sl]=roll; else delete RAG[sl]; persist(); sync(); };
+    fc.querySelectorAll('[data-all]').forEach(b=>b.onclick=()=>setAll(b.dataset.all));
     fc.querySelectorAll('.dot').forEach(b=>b.onclick=()=>{ const k=b.dataset.k, v=b.dataset.v;
       if(RAG[k]===v) delete RAG[k]; else RAG[k]=v;
       b.parentElement.querySelectorAll('.dot').forEach(x=>x.setAttribute('aria-pressed',String(RAG[k]===x.dataset.v)));
