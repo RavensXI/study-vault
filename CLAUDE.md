@@ -216,8 +216,6 @@ batch logs.
   (Eduqas 32 / OCR 37 / Edexcel 31, built 16 Aug) + music listening feature.
 - **Completion-credit denominator**: in-denominator (current) vs bonus —
   explained to Tom 30 Aug, awaiting his call (see js/main.js weighted()).
-- **Teacher pages redesign direction** (3 customer-facing pages, before
-  Sept) — pick the direction; Claude builds it.
 - **Microsoft SSO**: chase Entra admin consent — the blocker for all
   per-pupil data.
 - **Vercel env check**: confirm `ALLOW_US_FALLBACK` is NOT set (the AI
@@ -237,8 +235,6 @@ batch logs.
   de-dup + Eduqas self-naming sweep + platform duration re-measure.
 - **3-lesson widget band** (48 clusters) — APPROVED, gated on the retro
   fact-check programme completing first (Tom's ruling 30 Aug).
-- **Teacher login/signup redesign** in the /teacher/classes house style —
-  approved 30 Aug, build without further taste questions.
 - **NLM re-calibration** on 2–3 Sep after the compute-limit change (plan
   saved in memory; read real throughput from batch logs, re-size caps).
 - **English Literature debt**: audit + worklist for AQA regex-generated
