@@ -46,6 +46,8 @@ const P={
   bounce:.26, bounceR:340,        /* warm fill bouncing off the lit shelf */
   wrap:.2, round:7, bumpShape:3.2, bumpPaint:1.4,
   haze:.035, bloom:.45,
+  dusk:.17, duskTint:[1,1.01,.93],      /* the rest of the page dims this much while the lamp is on */
+  duskRx:760, duskRy:430, duskShift:200, duskDrop:120,   /* the lamp's own pool is left alone */
   shelfDepth:240,                /* the wall to the plank's front edge */
   faceFrac:0.315,                /* the plank's top face, as a share of the ledge strip */
   depth:{book:72, bookstack:112, trophy:80, inkwell:118, bookend:60, lamp:150, def:80},
@@ -240,9 +242,9 @@ async function render(stage,gen){
   let Dmax=0;
   for(const img of imgs){
     const M=img===lampImg?LM:affine(img); if(!M) continue;
-    const kind=kindOf(img); objs.push({img,M,kind});
+    const kind=kindOf(img), ob={img,M,kind,D:(P.depth[kind]||P.depth.def)*S}; objs.push(ob);
     if(kind==='lamp') continue;                     /* the lamp holds the light; it shades nothing it lights */
-    const D=(P.depth[kind]||P.depth.def)*S; Dmax=Math.max(Dmax,D);
+    let D=ob.D;
     const cs=[mapPt(M,0,0),mapPt(M,M.W,0),mapPt(M,0,M.H),mapPt(M,M.W,M.H)];
     const bx0=clamp(Math.floor((Math.min(...cs.map(p=>p[0]))-X0)/cell)-1,0,gw), bx1=clamp(Math.ceil((Math.max(...cs.map(p=>p[0]))-X0)/cell)+1,0,gw);
     const by0=clamp(Math.floor((Math.min(...cs.map(p=>p[1]))-Y0)/cell)-1,0,gh), by1=clamp(Math.ceil((Math.max(...cs.map(p=>p[1]))-Y0)/cell)+1,0,gh);
@@ -251,6 +253,14 @@ async function render(stage,gen){
     rx.setTransform(M.ux/cell,M.uy/cell,M.vx/cell,M.vy/cell,(M.ox-X0)/cell,(M.oy-Y0)/cell);
     rx.drawImage(img,0,0,M.W,M.H);
     const a=rx.getImageData(bx0,by0,bx1-bx0,by1-by0).data, bw_=bx1-bx0;
+    /* the painting says who stands in front: images come in paint order, so anything drawn over
+       an earlier object must be at least a little nearer than it (else the trophy's handle,
+       tucked behind the History book, would throw its shadow onto the book's spine) */
+    for(let y=by0;y<by1;y++) for(let x=bx0;x<bx1;x++){
+      const i=y*gw+x;
+      if(a[((y-by0)*bw_+(x-bx0))*4+3]>128&&cov[i]>.5&&depth[i]+4*S>D) D=depth[i]+4*S;
+    }
+    ob.D=D; Dmax=Math.max(Dmax,D);
     for(let y=by0;y<by1;y++) for(let x=bx0;x<bx1;x++){
       const al=a[((y-by0)*bw_+(x-bx0))*4+3]/255; if(al<.04) continue;
       const i=y*gw+x; if(al>cov[i]) cov[i]=al; if(al>.5&&D>depth[i]) depth[i]=D;
@@ -349,7 +359,7 @@ async function render(stage,gen){
   const ell=(sx,sy)=>{ const dx=sx-ms[0], dy=sy-ms[1], u=dx*cr-dy*sn, v=dx*sn+dy*cr; return Math.sqrt((u/rA)**2+(v/rB)**2); };
   const objLayers=[];
   for(const o of objs){
-    const {img,M,kind}=o;
+    const {img,M,kind,D}=o;
     const su=Math.hypot(M.ux,M.uy), sv=Math.hypot(M.vx,M.vy);
     const bw=Math.round(M.W*su*dpr), bh=Math.round(M.H*sv*dpr); if(bw<2||bh<2) continue;
     const src=pixelsOf(img,bw,bh), d=src.data, n=bw*bh;
@@ -362,7 +372,6 @@ async function render(stage,gen){
       shape=blur(alpha,bw,bh,Math.max(2,Math.round(P.round*S*su/k*dpr))); paint=blur(lum,bw,bh,Math.max(1,Math.round(dpr)));
     }
     const Ux=M.ux/su, Uy=M.uy/su, Vx=M.vx/sv, Vy=M.vy/sv;          /* image axes on screen */
-    const D=(P.depth[kind]||P.depth.def)*S;
     /* this object's own shadow map, traced from its own face (the wall's map is a different
        plane: borrowing it smudged the wall's shadows onto the objects' edges) */
     let ov=null, oX=0, oY=0, ow=0, oh=0; const oc=P.cell;
@@ -466,6 +475,28 @@ async function render(stage,gen){
   [put('mul',plMul,pw,ph),put('add',plAdd,pw,ph)].forEach(cv=>{ const st=cv.style;
     st.left=(px0-lw.left)/kl+'px'; st.top='0'; st.zIndex=2; st.width=pw*pc/kl+'px'; st.height=ph*pc/kl+'px'; ledgeWrap.appendChild(cv); });
   for(const [img,cv] of objLayers) img.after(cv);
+  /* the rest of the room settles into evening while the lamp is on: the whole page dims a
+     little (a touch cool, against the lamp's warmth), except round the lamp, where its light is */
+  const dusk=document.createElement('div'); dusk.className='ll-cv dusk'; dusk.setAttribute('aria-hidden','true');
+  const dm=[(Math.min(ms[0],pool[0])+Math.max(ms[0],pool[0]))/2-P.duskShift*S, ms[1]+P.duskDrop*S];
+  const dc=P.duskTint.map(t=>Math.round(255*(1-P.dusk*t)));
+  dusk.style.cssText='left:0;top:'+(-170)+'px;width:100%;height:calc(100% + 170px);z-index:3;'
+    +'background:radial-gradient('+(P.duskRx*S/k)+'px '+(P.duskRy*S/k)+'px at '+((dm[0]-sr.left)/k)+'px '+((dm[1]-sr.top)/k+170)+'px,'
+    +'#fff 0%,#fff 28%,rgb('+dc.join(',')+') 100%)';
+  /* ...but the two doors stay bright: they are the page's controls, not part of the room */
+  const drs=[...stage.querySelectorAll('.slot.door')].filter(d=>d.offsetWidth&&d.getClientRects().length);
+  if(drs.length){
+    const top=sr.top-170*k, imgs_=['linear-gradient(#000,#000)'], sz=['100% 100%'], pos=['0 0'];
+    for(const d of drs){ const r=d.getBoundingClientRect(), w=r.width/k, h=r.height/k, rad=parseFloat(getComputedStyle(d).borderTopLeftRadius)||0;
+      imgs_.push('url("data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'"><rect width="'+w+'" height="'+h+'" rx="'+rad+'"/></svg>')+'")');
+      sz.push(w+'px '+h+'px'); pos.push(((r.left-sr.left)/k)+'px '+((r.top-top)/k)+'px'); }
+    const st=dusk.style;
+    st.webkitMaskImage=st.maskImage=imgs_.join(',');
+    st.webkitMaskSize=st.maskSize=sz.join(','); st.webkitMaskPosition=st.maskPosition=pos.join(',');
+    st.webkitMaskRepeat=st.maskRepeat='no-repeat';
+    st.webkitMaskComposite='xor'; st.maskComposite='exclude';
+  }
+  stage.insertBefore(dusk,stage.querySelector('.booktip'));
   toStage(put('scr',glow,hw,hh),hx0,hy0,hw*hc,hh*hc,3);
   if(SETTLED) stage.querySelectorAll('.ll-cv').forEach(c=>c.classList.add('settled'));
   stage.classList.add('relit');
