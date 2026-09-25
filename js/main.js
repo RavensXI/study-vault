@@ -2549,8 +2549,13 @@ function initLessonProgress() {
       var newlyDone = complete && ix < 0;
       /* on a plan run (js/plan-flow.js) the lesson's progress drives the bar at the foot of the page */
       if (window.svFlow) try {
-        var left = tasks.filter(function (t) { return !s[t.id]; }).sort(function (a, b) { return (TASK_WEIGHTS[b.id] || 0) - (TASK_WEIGHTS[a.id] || 0); });
-        svFlow.lessonProgress({ pct: wres.pct, complete: complete, next: left[0] ? { id: left[0].id, label: left[0].label } : null });
+        /* the suggestion: the lightest single activity that would finish the lesson; if none alone
+           would, the heaviest one left (it gets closest) */
+        var avail = 0, got = 0; tasks.forEach(function (t) { var w = TASK_WEIGHTS[t.id] || 0; avail += w; if (s[t.id]) got += w; });
+        var need = avail * 0.5 - got, left = tasks.filter(function (t) { return !s[t.id] && TASK_WEIGHTS[t.id]; });
+        var fin = left.filter(function (t) { return TASK_WEIGHTS[t.id] >= need; }).sort(function (a, b) { return TASK_WEIGHTS[a.id] - TASK_WEIGHTS[b.id]; });
+        var pick = fin[0] || left.sort(function (a, b) { return TASK_WEIGHTS[b.id] - TASK_WEIGHTS[a.id]; })[0];
+        svFlow.lessonProgress({ pct: wres.pct, complete: complete, next: pick ? { id: pick.id, finishes: !!fin[0] } : null });
       } catch (eF) {}
       if (newlyDone) { try { localStorage.setItem('sv-cards-nudge', '1'); } catch (e0) {} }
       if (complete && ix < 0) arr.push(num);

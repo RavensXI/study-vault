@@ -36,21 +36,21 @@
     '.svf .svf-bar b{display:block;height:100%;width:0;background:#2d2a26;transition:width linear}' +
     'body.dark-mode .svf{background:rgba(24,22,20,.94);color:#ece9e4}body.dark-mode .svf h2,body.dark-mode .svf-steps li.done,body.dark-mode .svf-steps li.next{color:#ece9e4}' +
     'body.dark-mode .svf p{color:#b3aea6}body.dark-mode .svf button{background:#ece9e4;color:#181614}body.dark-mode .svf .svf-bar b{background:#ece9e4}' +
-    '.svf-lessonbar{position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);z-index:9999;display:flex;align-items:center;gap:14px;opacity:0;' +
-    'background:#2d2a26;color:#fff;border-radius:12px;padding:.7rem .8rem .7rem 1.2rem;box-shadow:0 10px 30px rgba(0,0,0,.25);font:500 .95rem Inter,system-ui,sans-serif;transition:opacity .3s,transform .3s}' +
+    '.svf-lessonbar{position:fixed;left:50%;bottom:18px;transform:translate(-50%,20px);z-index:9999;display:flex;align-items:center;gap:14px;opacity:0;' +
+    'background:var(--bg-card,#fffdf8);color:var(--text-primary,#2d2a26);border:1px solid var(--border-light,#e4dfd2);border-radius:var(--radius,8px);padding:.6rem .7rem .6rem 1rem;' +
+    'box-shadow:0 8px 28px rgba(40,28,12,.14);font:500 .9rem var(--font-ui,Inter,system-ui,sans-serif);transition:opacity .3s,transform .3s}' +
+    'body[data-skin="reader"] .svf-lessonbar{border-radius:4px}' +
     '.svf-lessonbar.on{opacity:1;transform:translate(-50%,0)}' +
-    '.svf-lessonbar button{border:0;border-radius:8px;padding:.55rem 1rem;background:#fff;color:#2d2a26;font:600 .92rem Inter,system-ui,sans-serif;cursor:pointer}' +
-    '.svf-lessonbar button.ghost{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5)}' +
-    '.svf-lessonbar.done{background:#2d5a3d}.svf-lessonbar.done button{color:#2d5a3d}' +
+    '.svf-lessonbar.done{border-color:#3e7d58}.svf-lessonbar.done>span{color:#2c5940;font-weight:600}' +
     '.svf-lessonbar.pulse{animation:svf-pulse 1.1s ease 2}' +
-    '@keyframes svf-pulse{0%,100%{box-shadow:0 10px 30px rgba(0,0,0,.25),0 0 0 0 rgba(78,122,74,.55)}50%{box-shadow:0 10px 30px rgba(0,0,0,.25),0 0 0 12px rgba(78,122,74,0)}}' +
-    '.svf-meter{width:90px;height:6px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden;flex:none}' +
-    '.svf-meter b{display:block;height:100%;background:#9fd3a6;border-radius:3px;transition:width .5s ease}' +
-    '.svf-two{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.svf .ghost{background:transparent;color:#2d2a26;box-shadow:inset 0 0 0 1.5px #cfc8bb}' +
-    'body.dark-mode .svf .ghost{color:#ece9e4;box-shadow:inset 0 0 0 1.5px #5a5448}' +
-    '.svf-flash{animation:svf-flash 1.4s ease}@keyframes svf-flash{0%,100%{background:transparent}30%{background:rgba(233,196,106,.45)}}' +
+    '@keyframes svf-pulse{0%,100%{box-shadow:0 8px 28px rgba(40,28,12,.14),0 0 0 0 rgba(62,125,88,.45)}50%{box-shadow:0 8px 28px rgba(40,28,12,.14),0 0 0 10px rgba(62,125,88,0)}}' +
+    '.svf-meter{width:84px;height:5px;border-radius:3px;background:var(--border-lighter,#efeadf);overflow:hidden;flex:none}' +
+    '.svf-meter b{display:block;height:100%;background:var(--accent,#2d2a26);border-radius:3px;transition:width .5s ease}' +
+    '.svf-nudge .kc-modal{max-width:400px}.svf-nbody{padding:1.1rem 1.25rem .4rem;font:1rem/1.5 var(--font-read,Georgia,serif);color:var(--text-primary,#2d2a26)}' +
+    '.svf-nacts{display:flex;justify-content:flex-end;gap:.5rem;padding:1rem 1.25rem 1.15rem}' +
+    '.svf-flash{animation:svf-flash 1.4s ease}@keyframes svf-flash{0%,100%{background:transparent}30%{background:color-mix(in srgb,var(--accent,#e9c46a) 18%,transparent)}}' +
     'html.svf-barred body{padding-bottom:90px}' +
-    '@media (max-width:600px){.svf-lessonbar{left:12px;right:12px;transform:translateY(20px);bottom:12px;font-size:.88rem}.svf-lessonbar.on{transform:none}.svf-meter{width:60px}}';
+    '@media (max-width:600px){.svf-lessonbar{left:12px;right:12px;transform:translateY(20px);bottom:12px;font-size:.85rem}.svf-lessonbar.on{transform:none}.svf-lessonbar>span:nth-child(2){flex:1}.svf-meter{width:48px}}';
   function style() { if (document.getElementById('svf-css')) return; var s = document.createElement('style'); s.id = 'svf-css'; s.textContent = css; document.head.appendChild(s); }
   function esc(t) { var d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
 
@@ -93,6 +93,12 @@
   /* ---- on a lesson page, the run's lesson: a bar at the foot shows how far through it is and one
      thing that would finish it; past the line it turns into "Lesson done · Next: flashcards" (with a
      pulse, so it's noticed). Clicking away before the line asks once, gently. ---- */
+  /* how each activity reads: imperative for the bar, -ing for the prompt */
+  var DO = { 'practice-question': ['Answer an exam question', 'Answering an exam question'], 'flashcards': ['Revise with the flashcards', 'Revising with the flashcards'],
+    'revision-task': ['Do a revision task', 'Doing a revision task'], 'knowledge-check': ['Take the quick quiz', 'Taking the quick quiz'],
+    'video': ['Watch the video', 'Watching the video'], 'podcast': ['Listen to the podcast', 'Listening to the podcast'],
+    'interactive': ['Master the interactive', 'Mastering the interactive'], 'listen': ['Listen to the whole piece', 'Listening to the whole piece'] };
+  var doing = function (n, i) { return (DO[n.id] || ['Keep going', 'A little more'])[i]; };
   var path = function (u) { try { return new URL(u, location.origin).pathname.replace(/\/$/, ''); } catch (e) { return u; } };
   function onRunLesson() { var r = get(); return !!(r && r.lesson && path(r.lesson.url) === path(location.pathname)); }
   var bar = null, state = null, guarded = false;
@@ -116,14 +122,14 @@
     var wasDone = bar.classList.contains('done');
     if (p.complete) {
       bar.classList.add('done');
-      bar.innerHTML = '<span>Lesson done ✓</span><button type="button">Next: flashcards →</button>';
+      bar.innerHTML = '<span>Lesson done \u2713</span><button type="button" class="kc-btn kc-btn-primary">Next: flashcards \u2192</button>';
       bar.querySelector('button').onclick = toCards;
       if (!wasDone && bar.dataset.seen) { bar.classList.remove('pulse'); void bar.offsetWidth; bar.classList.add('pulse'); }
     } else {
       bar.classList.remove('done');
       var pct = Math.min(100, Math.round(p.pct / 50 * 100));   /* the bar fills to the finishing line, not to 100% of everything */
-      bar.innerHTML = '<span class="svf-meter"><b style="width:' + pct + '%"></b></span><span>' + (p.next ? 'Next: ' + esc(p.next.label) : 'Keep going') + '</span>' +
-        (p.next ? '<button type="button" class="ghost">Show me</button>' : '');
+      bar.innerHTML = '<span class="svf-meter"><b style="width:' + pct + '%"></b></span><span>' + (p.next ? esc(doing(p.next, 0)) + (p.next.finishes ? ' to finish' : ' next') : 'Keep going') + '</span>' +
+        (p.next ? '<button type="button" class="kc-btn kc-btn-secondary">Show me</button>' : '');
       var sb = bar.querySelector('button'); if (sb) sb.onclick = function () { showTask(p.next.id); };
     }
     bar.dataset.seen = '1';
@@ -143,12 +149,15 @@
   }
   function nudge(leave) {
     style();
-    var el = document.createElement('div'); el.className = 'svf'; el.setAttribute('role', 'dialog');
-    el.innerHTML = '<div class="svf-box"><h2>Nearly there</h2><p>' + (state.next ? esc(state.next.label) + ' would finish this lesson.' : 'A little more finishes this lesson.') +
-      '</p><div class="svf-two"><button type="button" class="svf-stay">Keep going</button><button type="button" class="ghost svf-leave">Leave anyway</button></div></div>';
-    document.body.appendChild(el); requestAnimationFrame(function () { el.classList.add('on'); });
-    var close = function () { el.classList.remove('on'); setTimeout(function () { el.remove(); }, 300); };
-    el.querySelector('.svf-stay').onclick = function () { close(); if (state.next) setTimeout(function () { showTask(state.next.id); }, 250); };
+    /* the lesson page's own modal (the quick quiz's), so it looks like part of the lesson */
+    var el = document.createElement('div'); el.className = 'kc-overlay svf-nudge'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
+    var n = state.next;
+    el.innerHTML = '<div class="kc-modal"><div class="kc-header"><span class="kc-title">Nearly there</span></div>' +
+      '<div class="svf-nbody">' + (n ? esc(doing(n, 1)) + (n.finishes ? ' would finish this lesson.' : ' gets you closest to finishing it.') : 'A little more finishes this lesson.') + '</div>' +
+      '<div class="svf-nacts"><button type="button" class="kc-btn kc-btn-secondary svf-leave">Leave anyway</button><button type="button" class="kc-btn kc-btn-primary svf-stay">Keep going</button></div></div>';
+    document.body.appendChild(el);
+    var close = function () { el.remove(); };
+    el.querySelector('.svf-stay').onclick = function () { close(); if (n) setTimeout(function () { showTask(n.id); }, 250); };
     el.querySelector('.svf-leave').onclick = function () { close(); leave(); };
     el.querySelector('.svf-stay').focus({ preventScroll: true });
     el.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
