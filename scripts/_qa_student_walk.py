@@ -46,7 +46,13 @@ U, K = os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"]
 H = {"apikey": K, "Authorization": "Bearer " + K}
 STUDENT_MODEL = "claude-sonnet-5"     # Tom's standing preference for checking work
 JUDGE_MODEL = "claude-opus-5"
-AI_TYPES = ("ai_mark", "ai_write", "improve_sentence")
+AI_TYPES = ("ai_mark", "ai_write", "improve_sentence",
+            # not walked (25 Sep 2026): translate and role_play are AI-marked; dictation needs audio
+            "translate", "role_play", "dictation")
+# One subject row per walk: several slugs exist twice (a school copy and the free tier), so a walk of
+# either sets SV_WALK_SID and every lesson read and page URL is pinned to that subject row.
+SID = os.environ.get("SV_WALK_SID") or ""
+SHOTS = os.path.join(OUT, "shots")
 
 sys.path.insert(0, HERE)
 import importlib.util
@@ -66,10 +72,47 @@ def get(path):
     return json.loads(urllib.request.urlopen(urllib.request.Request(U + "/rest/v1/" + path, headers=H), timeout=180).read())
 
 
+SIG_JS = """() => Object.fromEntries(['bronze','silver','gold'].map(t => [t,
+  (window._problemBank[t] || []).map(q => (q.input_type || '') + '|' + (q.question || '') + '|' + (q.display || '') + '|' +
+     JSON.stringify(q.statements || q.chips || q.tokens || q.options || q.summaryParts || q.claims || q.original ||
+                    q.pairs || q.gaps || q.correct_order || q.sentence || q.solutions || '').slice(0, 160))]))"""
+
+
+def signature(q):
+    body = (q.get("statements") or q.get("chips") or q.get("tokens") or q.get("options") or q.get("summaryParts") or
+            q.get("claims") or q.get("original") or q.get("pairs") or q.get("gaps") or q.get("correct_order") or
+            q.get("sentence") or q.get("solutions") or "")
+    return ((q.get("input_type") or "") + "|" + (q.get("question") or "") + "|" + (q.get("display") or "") + "|" +
+            json.dumps(body, ensure_ascii=False, separators=(",", ":"))[:160])
+
+
+def lesson_q(sub, unit, n, select="practice_data"):
+    q = ("lessons?select=id,%s,units!inner(slug,subject_id,subjects!inner(slug))&units.subjects.slug=eq.%s"
+         "&units.slug=eq.%s&lesson_number=eq.%s" % (select, sub, unit, n))
+    return q + ("&units.subject_id=eq." + SID if SID else "")
+
+
+def page_url(sub, unit, n):
+    return "%s/practice/%s/%s/%s?prob=bronze:0%s" % (BASE, sub, unit, n, ("&sid=" + SID) if SID else "")
+
+
+def walk_lessons(args):
+    if not SID: return vw.lessons_for(args)
+    rows = get("lessons?select=title,lesson_number,units!inner(slug,subject_id,subjects!inner(slug))"
+               "&practice_data=not.is.null&units.subject_id=eq.%s&order=id&limit=3000" % SID)
+    rows = [{"subject": r["units"]["subjects"]["slug"], "unit": r["units"]["slug"], "n": r["lesson_number"], "title": r["title"]} for r in rows]
+    if "--lesson" in args:   # canary: one lesson, given as unit/number
+        want = args[args.index("--lesson") + 1]
+        rows = [r for r in rows if "%s/%s" % (r["unit"], r["n"]) == want]
+    if "--limit" in args: rows = rows[:int(args[args.index("--limit") + 1])]
+    return rows
+
+
 INIT = ("try{localStorage.setItem('studyvault-auth',JSON.stringify({role:'admin',pw:'local-walk'}));"
         "sessionStorage.setItem('studyvault-auth',JSON.stringify({role:'admin',pw:'local-walk'}));"
         "['sv-lesson-tour-v2','sv-lesson-tutorial-done','sv-reader-tour-v1','sv-highlight-tutorial-done']"
-        ".forEach(function(k){localStorage.setItem(k,'1')});}catch(e){}")
+        ".forEach(function(k){localStorage.setItem(k,'1')});}catch(e){}"
+        "window.alert=function(){};window.confirm=function(){return true;};")
 
 RENDER_JS = """([t, d]) => { practiceState.currentTier = t; practiceState.currentIndex = d; practiceState.answered = false;
   document.getElementById('current-problem-card').classList.remove('card-correct', 'card-incorrect');
@@ -81,6 +124,15 @@ VIEW_JS = r"""() => {
   const card = document.getElementById('current-problem-card');
   const p = window._problemBank[practiceState.currentTier][practiceState.currentIndex];
   const t = p.input_type || 'single_value';
+  // KaTeX draws each formula twice (MathML for readers, HTML for eyes), so innerText doubles it.
+  // For the view each formula is swapped for its TeX source, then put back.
+  const swaps = [];
+  document.querySelectorAll('#current-problem-card .katex, #practice-passage-area .katex').forEach(k => {
+    const a = k.querySelector('annotation[encoding="application/x-tex"]');
+    if (!a) return;
+    const s = document.createElement('span'); s.className = 'walk-tex'; s.textContent = ' \\(' + a.textContent.trim() + '\\) ';
+    k.parentNode.insertBefore(s, k); k.style.display = 'none'; swaps.push([k, s]);
+  });
   const txt = e => (e ? e.innerText : '').replace(/\s+\n/g, '\n').trim();
   const area = document.getElementById('practice-passage-area');
   const panelOn = area && getComputedStyle(area).display !== 'none';
@@ -99,6 +151,29 @@ VIEW_JS = r"""() => {
   if (t === 'reorder') v.items = [...card.querySelectorAll('.reorder-item')].map(e => txt(e));
   if (t === 'improve_sentence') v.original = txt(card.querySelector('.improve-original'));
   if (['ai_mark', 'ai_write', 'improve_sentence'].includes(t)) v.marks = p.marks || null;
+  // numeric answer boxes, exactly as labelled on screen
+  const ia = document.getElementById('problem-inputs-area');
+  if (['single_value', 'two_solutions', 'xy_pair', 'fraction', 'standard_form'].includes(t)) {
+    v.boxes = txt(ia); const u = ia && ia.querySelector('.problem-answer-unit'); v.answer_unit = u ? txt(u) : '';
+  }
+  if (t === 'vocab_match') { v.left = [...card.querySelectorAll('.vm-left')].map(txt); v.right = [...card.querySelectorAll('.vm-right')].map(txt); }
+  if (t === 'gap_fill') {
+    const sent = card.querySelector('.gf-sentence'); let s = '', g = 0;
+    if (sent) sent.childNodes.forEach(n => { if (n.classList && (n.classList.contains('gf-gap') || n.classList.contains('gf-input'))) s += ' [GAP ' + (++g) + '] '; else s += n.textContent; });
+    v.sentence = s.replace(/\s+/g, ' ').trim(); v.english = txt(card.querySelector('.gf-english'));
+    v.bank = [...card.querySelectorAll('.gf-chip')].map(txt);
+  }
+  if (t === 'sentence_builder') { v.english = txt(card.querySelector('.sb-english')); v.tiles = [...card.querySelectorAll('.sb-tile')].map(txt); }
+  if (t === 'spot_correct') v.sentence = txt(card.querySelector('.sc-sentence'));
+  // what the helper link opens (bronze and silver only, like the page)
+  if (p.equation_hint && practiceState.currentTier !== 'gold') {
+    const d = document.createElement('div'); d.innerHTML = p.equation_hint; v.equation_hint = d.textContent.trim(); }
+  if (p.chart) v.chart = JSON.stringify({ type: p.chart.type, labels: (p.chart.data || {}).labels,
+    datasets: ((p.chart.data || {}).datasets || []).map(d => ({ label: d.label, data: d.data })) }).slice(0, 3000);
+  const figs = [...card.querySelectorAll('img, canvas, svg')].concat(area && getComputedStyle(area).display !== 'none' ? [...area.querySelectorAll('img, canvas, svg')] : [])
+    .filter(e => { const r = e.getBoundingClientRect(); return r.width > 60 && r.height > 40; });
+  v.visual = !!(p.image || p.chart || figs.length);
+  swaps.forEach(([k, s]) => { k.style.display = ''; s.remove(); });
   return v;
 }"""
 
@@ -129,7 +204,42 @@ FORMATS = {
     "ai_mark": 'your written answer, as you would type it in the box. Write the length and depth the marks deserve.',
     "ai_write": 'your written answer, as you would type it in the box. Write the length and depth the marks deserve.',
     "improve_sentence": 'your improved version, as you would type it in the box',
+    "single_value": 'the number you type in the box: digits only (a decimal point or minus sign if needed), no units, no working',
+    "two_solutions": 'a list of the two numbers you type in the two boxes, e.g. [3, -2]',
+    "xy_pair": '{"x": <number>, "y": <number>}',
+    "fraction": '{"numerator": <whole number>, "denominator": <whole number>}',
+    "standard_form": '{"a": <number>, "n": <whole number>} for a × 10^n',
+    "vocab_match": 'a list with one entry per pair you match: [{"left": "<exact text from the left column>", "right": "<exact text from the right column>"}]',
+    "gap_fill": 'a list of what goes in each gap, in order: [gap 1, gap 2, ...] (from the WORD BANK if there is one)',
+    "sentence_builder": 'the list of tiles in the order you place them, each copied exactly; leave out tiles that do not belong',
+    "spot_correct": '{"wrong_word": "<the one word in the sentence that is wrong, copied exactly>", "correction": "<what it should be>"}',
 }
+
+SUBJECT_NAMES = [("english-language", "English Language"), ("maths", "Maths"), ("statistics", "Statistics"),
+                 ("separate-sciences", "Separate Sciences (Biology, Chemistry, Physics)"), ("science", "Combined Science"),
+                 ("geography", "Geography"), ("music", "Music"), ("latin", "Latin"), ("spanish", "Spanish"),
+                 ("french", "French"), ("german", "German")]
+
+
+def subject_name(slug):
+    return next((n for p, n in SUBJECT_NAMES if slug.startswith(p)), slug.replace("-", " ").title())
+
+
+def student_prompt(slug):
+    """The English Language prompt is kept word for word; other subjects get their own name and
+    subject-specific habits."""
+    if slug.startswith("english-language"): return STUDENT
+    s = STUDENT.replace("GCSE English Language", "GCSE " + subject_name(slug))
+    s = s.replace("read the question and the extract properly", "read the question (and any extract, table or chart) properly")
+    extra = ["If a SCREENSHOT path is given, open it with the Read tool before answering: it shows exactly what is on",
+             "your screen, including any map, chart, graph, diagram or score. Rely on it for anything visual."]
+    if slug.startswith(("maths", "statistics", "science", "separate-sciences", "geography")):
+        extra += ["Work it out in your head as you would on paper, then give only the final answer in the format asked.",
+                  "Round only as the question tells you; if it does not say, give the exact value or at least 3 significant",
+                  "figures. Type units only if the answer box shows none."]
+    if slug.startswith(("spanish", "french", "german", "latin")):
+        extra += ["You have studied this language for GCSE. Spell and accent words carefully, exactly as you would type them."]
+    return s.replace("\n\nReply with ONE JSON object", "\n\n" + "\n".join(extra) + "\n\nReply with ONE JSON object")
 
 
 def view_prompt(v):
@@ -152,6 +262,21 @@ def view_prompt(v):
         lines += ["", "TOKENS you can click:"] + ["[%d] %s" % (p["n"], p["text"]) for p in v["tokens"]]
     if v.get("items"): lines += ["", "ITEMS to put in order:"] + ["- " + i for i in v["items"]]
     if v.get("marks"): lines += ["", "This question is worth %s marks." % v["marks"]]
+    if v.get("boxes"): lines += ["", "ANSWER BOX(ES) ON SCREEN: " + v["boxes"].replace("\n", " ")]
+    if v.get("answer_unit"): lines += ["(The unit printed beside the box is: %s)" % v["answer_unit"]]
+    if v.get("equation_hint"): lines += ["", "HELP YOU CAN OPEN ('Show equation'): " + v["equation_hint"]]
+    if v.get("chart"): lines += ["", "CHART ON SCREEN (its data): " + v["chart"]]
+    if t == "vocab_match":
+        lines += ["", "LEFT COLUMN:"] + ["- " + x for x in v.get("left") or []] + ["", "RIGHT COLUMN:"] + ["- " + x for x in v.get("right") or []]
+    if t == "gap_fill":
+        if v.get("english"): lines += ["", "ENGLISH: " + v["english"]]
+        lines += ["", "SENTENCE: " + (v.get("sentence") or "")]
+        lines += (["", "WORD BANK (tap a word to put it in the next gap):"] + ["- " + x for x in v["bank"]]) if v.get("bank") else ["", "(No word bank: you type each gap.)"]
+    if t == "sentence_builder":
+        if v.get("english"): lines += ["", "ENGLISH: " + v["english"]]
+        lines += ["", "TILES:"] + ["- " + x for x in v.get("tiles") or []]
+    if t == "spot_correct": lines += ["", "SENTENCE: " + (v.get("sentence") or ""), "(Tap the wrong word, then type the correction.)"]
+    if v.get("shot"): lines += ["", "SCREENSHOT OF YOUR SCREEN: " + v["shot"] + "  (open it with the Read tool)"]
     lines += ["", "ANSWER FORMAT: " + FORMATS.get(t, "your answer")]
     return "\n".join(lines)
 
@@ -164,25 +289,24 @@ def cmd_extract(args):
         only = set(json.load(io.open(args[args.index("--keys") + 1], encoding="utf-8")))
         lks = {k.rsplit("/", 2)[0] for k in only}
         subs = sorted({k.split("/")[0] for k in only})
-        rows = [L for s in subs for L in vw.lessons_for(["--subject", s]) if "%s/%s/%d" % (L["subject"], L["unit"], L["n"]) in lks]
+        rows = [L for s in subs for L in walk_lessons(["--subject", s]) if "%s/%s/%d" % (L["subject"], L["unit"], L["n"]) in lks]
     else:
-        rows = vw.lessons_for(args)
+        rows = walk_lessons(args)
     views = load("views", {})
     with sync_playwright() as p:
         br = p.chromium.launch()
         ctx = br.new_context(viewport={"width": 1440, "height": 1500}); ctx.add_init_script(INIT)
         pg = ctx.new_page()
         for L in rows:
-            lesson = get("lessons?select=practice_data,units!inner(slug,subjects!inner(slug))&units.subjects.slug=eq.%s"
-                         "&units.slug=eq.%s&lesson_number=eq.%d" % (L["subject"], L["unit"], L["n"]))
+            lesson = get(lesson_q(L["subject"], L["unit"], L["n"]))
             if not lesson: continue
             bank = (lesson[0]["practice_data"] or {}).get("problem_bank") or {}
             shown = None
             for wait in (6, 12, 20):   # a slow first load (school rows come through the staff route) is retried
                 try:
-                    pg.goto("%s/practice/%s/%s/%d?prob=bronze:0" % (BASE, L["subject"], L["unit"], L["n"]), wait_until="commit", timeout=30000)
+                    pg.goto(page_url(L["subject"], L["unit"], L["n"]), wait_until="commit", timeout=30000)
                     time.sleep(wait); pg.evaluate(vw.DISMISS_JS)
-                    shown = pg.evaluate(vw.SIG_JS)
+                    shown = pg.evaluate(SIG_JS)
                     break
                 except Exception as ex:
                     print("  %s/%s/%d: page not ready (%s), retrying" % (L["subject"], L["unit"], L["n"], str(ex)[:60]), flush=True)
@@ -193,13 +317,29 @@ def cmd_extract(args):
                 used = set()
                 for i, q in enumerate(bank.get(tier) or []):
                     if only is not None and "%s/%s/%d/%s/%d" % (L["subject"], L["unit"], L["n"], tier, i) not in only: continue
-                    d = next((k for k, s in enumerate(shown.get(tier, [])) if k not in used and s == vw.signature(q)), None)
+                    d = next((k for k, s in enumerate(shown.get(tier, [])) if k not in used and s == signature(q)), None)
                     if d is None: continue
                     used.add(d)
                     pg.evaluate(RENDER_JS, [tier, d]); time.sleep(0.8); pg.evaluate(vw.DISMISS_JS)
                     key = "%s/%s/%d/%s/%d" % (L["subject"], L["unit"], L["n"], tier, i)
                     v = pg.evaluate(VIEW_JS)
-                    v.update({"key": key, "subject": L["subject"], "unit": L["unit"], "n": L["n"], "tier": tier, "i": i, "title": L["title"]})
+                    v.update({"key": key, "subject": L["subject"], "unit": L["unit"], "n": L["n"], "tier": tier, "i": i, "title": L["title"],
+                              "lesson_id": lesson[0]["id"], "sid": SID})
+                    if v.get("visual") and v["type"] not in AI_TYPES:
+                        # the student is shown what a pupil sees: the card, and the extract/map/chart panel if open
+                        os.makedirs(SHOTS, exist_ok=True)
+                        shot = os.path.join(SHOTS, re.sub(r"[^A-Za-z0-9]+", "_", key) + ".png")
+                        try:
+                            pg.evaluate("() => window.scrollTo(0, 0)")
+                            box = pg.evaluate("""() => { const r = [document.getElementById('current-problem-card'), document.getElementById('practice-passage-area')]
+                              .filter(e => e && getComputedStyle(e).display !== 'none' && e.offsetHeight > 0).map(e => e.getBoundingClientRect());
+                              const x = Math.min(...r.map(b => b.left)), y = Math.min(...r.map(b => b.top + window.scrollY));
+                              return { x: Math.max(0, x - 8), y: Math.max(0, y - 8), width: Math.max(...r.map(b => b.right)) - x + 16,
+                                       height: Math.max(...r.map(b => b.bottom + window.scrollY)) - y + 16 }; }""")
+                            pg.screenshot(path=shot, clip=box, full_page=True)
+                            v["shot"] = shot
+                        except Exception as ex:
+                            print("  screenshot failed %s: %s" % (key, str(ex)[:80]), flush=True)
                     views[key] = v; n += 1
             save("views", views)
             print("  %-62s %d problems" % ("%s/%s/%d" % (L["subject"], L["unit"], L["n"]), n), flush=True)
@@ -265,11 +405,13 @@ def via_subscription(kind, system, items, model, chunk):
                   "\n\n".join("### ITEM %s\n%s" % (i, body) for i, (_, body) in zip(ids, call)) +
                   "\n\nReply with ONLY one JSON object mapping each item id (%s) to the ONE JSON object the "
                   "instructions ask for. No other text." % ", ".join(ids))
+        shots = "SCREENSHOT OF YOUR SCREEN:" in prompt
+        tools = (["--tools", "Read", "--allowedTools", "Read", "--add-dir", HERE] if shots else ["--tools", ""])
         try:
             # the system prompt goes by FILE: claude.cmd drops every argument after a multi-line one;
             # no setting sources, so none of Tom's instructions or memory reach the student
             r = subprocess.run(["claude.cmd" if os.name == "nt" else "claude", "-p", "--model", model,
-                                "--output-format", "json", "--tools", "", "--strict-mcp-config",
+                                "--output-format", "json"] + tools + ["--strict-mcp-config",
                                 "--setting-sources", "", "--system-prompt-file", sysfile],
                                input=prompt, capture_output=True, text=True, encoding="utf-8", timeout=1800, env=env)
             d = json.loads(r.stdout)
@@ -284,7 +426,7 @@ def via_subscription(kind, system, items, model, chunk):
         m = re.search(r"\{.*\}", txt, re.S)
         try: got = json.loads(m.group(0), strict=False) if m else {}
         except Exception: got = {}
-        return {ids[i]: v for i, v in got.items() if i in ids and isinstance(v, dict)}
+        return {ids[i]: v for i, v in got.items() if i in ids}   # callers check the shape
 
     out = {}
     with ThreadPoolExecutor(3) as ex:
@@ -300,8 +442,13 @@ def cmd_attempt_sub(args):
     if "--no-ai" in args: todo = [k for k in todo if views[k]["type"] not in AI_TYPES]   # Tom 25 Sep: written answers proven
     print("attempting %d questions through the subscription" % len(todo), flush=True)
     try:
-        for res in via_subscription("attempt", STUDENT, [(k, view_prompt(views[k])) for k in todo], "sonnet", int(os.environ.get("SV_WALK_CHUNK", "8"))):
-            done.update(res); save("attempts", done)
+        slug = views[todo[0]]["subject"] if todo else "english-language"
+        for res in via_subscription("attempt", student_prompt(slug), [(k, view_prompt(views[k])) for k in todo], "sonnet", int(os.environ.get("SV_WALK_CHUNK", "8"))):
+            for k, x in res.items():
+                # with several items in one call the model sometimes gives the bare answer, not the object
+                if not (isinstance(x, dict) and "answer" in x): x = {"answer": x, "confidence": None, "unsure_because": "", "cannot_answer": ""}
+                done[k] = x
+            save("attempts", done)
     finally:
         print("attempts on file: %d" % sum(1 for v in done.values() if "answer" in v), flush=True)
 
@@ -342,12 +489,54 @@ def norm(s):
 
 APPLY_JS = r"""([t, a]) => {
   // wrapping quote marks are ignored: a student types the words, the tile shows them in quotes
-  const N = s => String(s || '').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/\s+/g, ' ').trim().replace(/^["']+|["'.,]+$/g, '').trim().toLowerCase();
+  const N = s => String(s || '').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—‐−]/g, '-').replace(/\s+/g, ' ').trim().replace(/^["']+|["'.,]+$/g, '').trim().toLowerCase();
   const card = document.getElementById('current-problem-card');
   const miss = [];
+  // option text as the view gave it: KaTeX as its TeX source
+  const T = e => { const c = e.cloneNode(true); c.querySelectorAll('.katex').forEach(k => { const a = k.querySelector('annotation[encoding="application/x-tex"]');
+    k.replaceWith(document.createTextNode(a ? ' \\(' + a.textContent.trim() + '\\) ' : k.textContent)); }); return c.textContent; };
+  const Z = s => N(s).replace(/[\s$\\(){}]/g, '');
+  const setv = (id, val) => { const e = document.getElementById(id); if (!e) { miss.push('no box ' + id); return; }
+    e.value = String(val == null ? '' : val); e.dispatchEvent(new Event('input')); };
   if (t === 'multiple_choice') {
-    const b = [...card.querySelectorAll('.mc-option')].find(e => N(e.querySelector('.mc-text').innerText) === N(a));
+    const opts = [...card.querySelectorAll('.mc-option')];
+    const b = opts.find(e => N(T(e.querySelector('.mc-text'))) === N(a)) || opts.find(e => Z(T(e.querySelector('.mc-text'))) === Z(a));
     if (b) b.click(); else miss.push('option: ' + a);
+  } else if (t === 'single_value') {
+    setv('problem-input-a', typeof a === 'object' && a !== null ? (a.value ?? a.answer ?? JSON.stringify(a)) : a);
+  } else if (t === 'two_solutions') {
+    const x = Array.isArray(a) ? a : [a && a[0], a && a[1]]; setv('problem-input-a', x[0]); setv('problem-input-b', x[1]);
+  } else if (t === 'xy_pair') {
+    setv('problem-input-a', a && (a.x ?? a[0])); setv('problem-input-b', a && (a.y ?? a[1]));
+  } else if (t === 'fraction') {
+    setv('problem-input-num', a && (a.numerator ?? a[0])); setv('problem-input-den', a && (a.denominator ?? a[1]));
+  } else if (t === 'standard_form') {
+    setv('problem-input-sf-a', a && (a.a ?? a[0])); setv('problem-input-sf-n', a && (a.n ?? a[1]));
+  } else if (t === 'vocab_match') {
+    (a || []).forEach(x => {
+      const l = [...card.querySelectorAll('.vm-left:not(.vm-matched):not(.vm-correct)')].find(e => N(e.innerText) === N(x.left));
+      const r = [...card.querySelectorAll('.vm-right:not(.vm-matched):not(.vm-correct)')].find(e => N(e.innerText) === N(x.right));
+      if (!l || !r) { miss.push('pair: ' + x.left + ' / ' + x.right); return; }
+      vmItemClick(l); vmItemClick(r);
+    });
+  } else if (t === 'gap_fill') {
+    const bank = card.querySelectorAll('.gf-chip').length > 0;
+    (a || []).forEach((w, i) => {
+      if (bank) {
+        if (!document.getElementById('gf-gap-' + i)) { miss.push('gap ' + (i + 1)); return; }
+        gfGapClick(i);
+        const c = [...card.querySelectorAll('.gf-chip:not(.gf-used)')].find(e => N(e.dataset.word) === N(w));
+        if (c) gfChipClick(c); else miss.push('bank word: ' + w);
+      } else setv('gf-input-' + i, w);
+    });
+  } else if (t === 'sentence_builder') {
+    (a || []).forEach(w => { const tile = [...card.querySelectorAll('.sb-tile:not(.sb-used)')].find(e => N(e.innerText) === N(w));
+      if (tile) sbTileClick(+tile.dataset.tileIdx); else miss.push('tile: ' + w); });
+  } else if (t === 'spot_correct') {
+    const W = s => N(s).replace(/[.,!?;:'"¿¡]/g, '');
+    const w = [...card.querySelectorAll('.sc-word')].find(e => W(e.textContent) === W(a && a.wrong_word));
+    if (w) scWordClick(w, +w.dataset.idx); else miss.push('word: ' + (a && a.wrong_word));
+    setv('sc-correction-input', a && a.correction);
   } else if (t === 'traffic_light') {
     const cats = window._engState.tlCats || [];
     (a || []).forEach(x => {
@@ -442,15 +631,14 @@ def cmd_mark(args):
             ctx.route("**/api/ai-mark", to_live_marker)
             pg = ctx.new_page()
             sub, unit, n = lesson_key.split("/")
-            lesson = get("lessons?select=practice_data,units!inner(slug,subjects!inner(slug))&units.subjects.slug=eq.%s"
-                         "&units.slug=eq.%s&lesson_number=eq.%s" % (sub, unit, n))
+            lesson = get(lesson_q(sub, unit, n))
             bank = (lesson[0]["practice_data"] or {}).get("problem_bank") or {}
             shown = None
             for _ in range(3):   # a page that fails to load (server restart) is retried, never fatal
                 try:
-                    pg.goto("%s/practice/%s/%s/%s?prob=bronze:0" % (BASE, sub, unit, n), wait_until="commit", timeout=30000)
+                    pg.goto(page_url(sub, unit, n), wait_until="commit", timeout=30000)
                     time.sleep(6); pg.evaluate(vw.DISMISS_JS)
-                    shown = pg.evaluate(vw.SIG_JS)
+                    shown = pg.evaluate(SIG_JS)
                     break
                 except Exception as ex:
                     print("  %s: page not ready (%s), retrying" % (lesson_key, str(ex)[:80]), flush=True)
@@ -458,16 +646,24 @@ def cmd_mark(args):
             if shown is None:
                 print("  %s: skipped, left for the next mark pass" % lesson_key, flush=True)
                 ctx.close(); continue
-            for key in keys:
+            used = {}
+            for key in sorted(keys, key=lambda k: (k.rsplit("/", 2)[1], int(k.rsplit("/", 1)[1]))):
                 v, a = views[key], attempts[key]["answer"]
                 q = bank[v["tier"]][v["i"]]
-                d = next((k for k, s in enumerate(shown.get(v["tier"], [])) if s == vw.signature(q)), None)
+                u = used.setdefault(v["tier"], set())
+                d = next((k for k, s in enumerate(shown.get(v["tier"], [])) if k not in u and s == signature(q)), None)
+                if d is not None: u.add(d)
                 if d is None: marks[key] = {"error": "not found on page"}; continue
                 pg.evaluate(RENDER_JS, [v["tier"], d]); time.sleep(0.8); pg.evaluate(vw.DISMISS_JS)
                 miss = pg.evaluate(APPLY_JS, [v["type"], a])
                 if v["type"] in AI_TYPES:
                     pacer.wait("exam" if (q.get("marks") or 4) > 8 else "quick")
-                pg.evaluate("() => { const b = document.getElementById('problem-check-btn'); if (b) b.click(); }")
+                if v["type"] == "vocab_match":
+                    time.sleep(1.2)   # all pairs matched -> the page finishes on its own after 0.5 s
+                    if not pg.evaluate(RESULT_JS)["correct"]:
+                        pg.evaluate("() => { const b = document.getElementById('problem-check-btn'); if (b) b.click(); }")
+                else:
+                    pg.evaluate("() => { const b = document.getElementById('problem-check-btn'); if (b) b.click(); }")
                 res = None
                 for _ in range(90 if v["type"] in AI_TYPES else 6):
                     time.sleep(1)
@@ -510,6 +706,19 @@ Reply with ONE JSON object and nothing else:
  "confidence": 0.0-1.0}"""
 
 
+def judge_prompt(slug):
+    """English Language keeps its judge word for word; other subjects get a subject examiner who knows
+    the student saw a screenshot of anything visual and that some formats mark on the page itself."""
+    if slug.startswith("english-language"): return JUDGE
+    j = JUDGE.replace("a senior GCSE English Language examiner and head of department",
+                      "a senior GCSE %s examiner and head of department" % subject_name(slug))
+    return j.replace("\n\nDecide where the truth lies.",
+                     "\nIf a SCREENSHOT path is given, open it with the Read tool: it is exactly what the student saw (maps, charts,"
+                     "\ndiagrams). For number answers the site compares the typed value with the stored solution within a small"
+                     "\ntolerance (0.01 unless the question sets its own); an answer rounded differently from the key, when the"
+                     "\nquestion did not say how to round, is \"ambiguous\", not \"student_wrong\".\n\nDecide where the truth lies.")
+
+
 def cmd_adjudicate(args):
     import anthropic
     views, attempts, marks = load("views", {}), load("attempts", {}), load("marks", {})
@@ -528,8 +737,7 @@ def cmd_adjudicate(args):
         lk = k.rsplit("/", 2)[0]
         if lk not in lessons:
             sub, unit, ln = lk.split("/")
-            lessons[lk] = get("lessons?select=practice_data,units!inner(slug,subjects!inner(slug))&units.subjects.slug=eq.%s"
-                              "&units.slug=eq.%s&lesson_number=eq.%s" % (sub, unit, ln))[0]["practice_data"]
+            lessons[lk] = get(lesson_q(sub, unit, ln))[0]["practice_data"]
         pd = lessons[lk]
         q = dict(pd["problem_bank"][v["tier"]][v["i"]])
         scheme = q.pop("ai_system_prompt", None) or (pd.get("ai_marking_prompts") or {}).get(q.get("ai_prompt_key") or "")
@@ -549,8 +757,8 @@ def cmd_adjudicate(args):
         items = [(ids[r["custom_id"]], r["params"]["messages"][0]["content"]) for r in reqs]
         print("adjudicating %d through the subscription" % len(items), flush=True)
         try:
-            for res in via_subscription("adjudicate", JUDGE, items, "opus", 4):
-                adj.update(res); save("adjudications", adj)
+            for res in via_subscription("adjudicate", judge_prompt(views[todo[0]]["subject"]), items, "opus", 4):
+                adj.update({k: x for k, x in res.items() if isinstance(x, dict)}); save("adjudications", adj)
         finally:
             print("adjudications on file: %d" % len(adj), flush=True)
         return
