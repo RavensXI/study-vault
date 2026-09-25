@@ -209,41 +209,35 @@ void that day — but as of 3 Sep the change has NOT reached us (Google:
 usage bar appearing, or a mid-batch cap in the logs; then re-size from the
 batch logs.
 
-## Active TODO (pruned 29 Aug 2026 — split by who can move it)
+## Active TODO (checked against git + memory 25 Sep 2026 — split by who can move it)
 
 ### Tom's tasks (decisions, reviews, external actions)
-- **Review flips**: 92 `pending_review` lessons — the three Music boards
-  (Eduqas 32 / OCR 37 / Edexcel 31, built 16 Aug) + music listening feature.
-- **Completion-credit denominator**: in-denominator (current) vs bonus —
-  explained to Tom 30 Aug, awaiting his call (see js/main.js weighted()).
 - **Microsoft SSO**: chase Entra admin consent — the blocker for all
   per-pupil data.
 - **Vercel env check**: confirm `ALLOW_US_FALLBACK` is NOT set (the AI
-  routes fail closed as of 4307ac6d, deployed 29 Aug — that env var is the
-  only override).
+  routes fail closed as of 4307ac6d — that env var is the only override).
 - **Per-school term dates** for planner holiday awareness (needs school
   calendars only Tom can obtain).
+- **Geography Skills L13/L14**: review pass with Claude (built 21 Jul; L11/12 done).
 - *(long-term)* **GPT-image-2 diagrams** (~£400–700) — revisit when school
   revenue lands (Tom, 30 Aug). **Mobile app (Capacitor)** — after launch
   settles (Tom, 30 Aug).
-- **Geography Skills L13/L14**: review pass with Claude (L11/12 done).
 
 ### Claude's tasks (delegable — runnable any time)
-- **Retro fact-check programme** (task #78, tracker artifact 10dfeef7) —
-  queue in scripts/_retrofc/_queue.json; Thursday opener: 190 question-type
-  relabels + 178 band ladders + PD extract authoring + science takeaway
-  de-dup + Eduqas self-naming sweep + platform duration re-measure.
-- **3-lesson widget band** (48 clusters) — APPROVED, gated on the retro
-  fact-check programme completing first (Tom's ruling 30 Aug).
-- **NLM re-calibration** on 2–3 Sep after the compute-limit change (plan
-  saved in memory; read real throughput from batch logs, re-size caps).
-- **English Literature debt**: audit + worklist for AQA regex-generated
-  flashcards and placeholder `content_html`; then fixes on approval.
-- **Parents' evening print view**.
-- **Exam dates 2027 edition** of `data/exam-dates-2026.json` once boards
-  publish timetables.
-- **Prescribed-works register**: fill Music AQA + Media AQA once the 2027
-  CSP list is published (blocked on external publication, then Claude's).
+- **Retro fact-check follow-ups** (checking phase COMPLETE 6 Sep): question-type
+  relabel partly applied (ec56802d; review lists from 15874811); science Key
+  Takeaways de-dup (8 lessons); Eduqas self-naming sweep (47 lessons,
+  `scripts/_englit_debt_worklist.md`); PD extract authoring (scope unclear);
+  platform duration re-measure (nice-to-have).
+- **3-lesson widget band** (48 clusters) — APPROVED and now unblocked (its
+  retro fact-check gate was met 6 Sep).
+- **NLM shared budget**: sandbox shorts job runs on the shared allowance
+  (`scripts/lib/nlm_pool.py`, 24 Sep); the explainer wrapper on platform still
+  uses its own `--daily-cap 100` — bring it onto the same ledger.
+- **English Literature debt**: 3 duplicate-content clusters left (flashcards
+  regenerated and placeholders closed 30 Aug).
+- **Prescribed-works register**: Media AQA CSPs — blocked on the 2027 booklet
+  (AQA teacher-login portal). Music AQA is filled (f2b2d505).
 
 ### Recently shipped (Aug 2026)
 - Widget fleet built + field-reviewed (equity band: every qualifying subject
@@ -328,7 +322,7 @@ All in environment variables — never commit.
 | `scripts/science-practice/SCIENCE_PRACTICE_SCHEMA.md` | science practice data |
 | `scripts/language-practice/PRACTICE_DATA_SCHEMA.md` | language practice data |
 | `scripts/factory/FACTORY_RULES.md` | EngLang factory |
-| `data/exam-dates-2026.json` | exam dates (needs annual refresh) |
+| `data/exam-dates-2027.json` | exam dates (2027 edition; refresh each year) |
 | `{subject}/BUILD_PLAN.md` | per-subject breakdown |
 
 Commercial/privacy docs live OUTSIDE this repo in
