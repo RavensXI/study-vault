@@ -643,6 +643,7 @@ if(Math.min(screen.width,innerWidth)<700&&!/[?&]force=1/.test(location.search)) 
 <script src="js/demo-students.js"></script>
   <script src="dash-data.js"></script>
 <script src="sync.js"></script>
+<script src="js/plan-flow.js"></script>
 <script src="warmup.js"></script>
 <script src="js/strength.js"></script>
 <script src="js/progress.js"></script>
@@ -767,7 +768,13 @@ function revisitRow(url,w,ps){
   return `<li tabindex="0" class="${done?'done':''}" ${live?`onclick="openRevisit('${url||''}')"`:''}><span class="n">${done?'✓':'1'}</span><div><b>Revisit</b><small>${small}</small></div><span class="mins">${rv.today.length?rv.mins:2} min</span></li>`;
 }
 function openRevisit(url){ if(!window.svWarmup||!window.svStrength) return; const rv=svStrength.revisit(SUBJECTS); if(rv.today.length) svWarmup.open({lessons:rv.today,target:url||null,nav}); }
+/* Start begins a plan run (js/plan-flow.js): the steps then hand on with a 'what's next' screen */
+function beginRun(url){ if(!window.svFlow) return; const t=svPlanLead(SUBJECTS), ps=svPlanState();
+  const title=t&&t.url===url?(t.title||t.unitName):(t&&t.title)||'Today\u2019s lesson';
+  svFlow.begin({first:svDoneStats().total?'Revisit':'Warm-up',lesson:{url,title},home:'/desk'});
+  const r=svFlow.run(); if(r&&ps.warm){ r.done.first=true; sessionStorage.setItem('sv-run',JSON.stringify(r)); } }
 function startWithWarmup(url){
+  beginRun(url);
   if(!window.svWarmup){ nav(url); return; }
   if(svDoneStats().total&&window.svStrength&&svStrength.revisit){
     const rv=svStrength.revisit(SUBJECTS);
@@ -1245,6 +1252,7 @@ function openCards(){
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } }
 cardsEl.onclick=()=>{ if(dragBlockClick) return; openCards(); };
+if(new URLSearchParams(location.search).get('cards')&&window.svFlow&&svFlow.run()){ history.replaceState(null,'',location.pathname); setTimeout(()=>{ if(!fcmodal.classList.contains('open')) openCards(); },600); }
 const _cardsOnclickOld=()=>{ if(dragBlockClick) return; if(fci>=FC.length) fci=0; fcDeal(); fcmodal.classList.add('open');
   try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
   if(window.svProgressPushSoon) svProgressPushSoon();
@@ -1275,7 +1283,8 @@ function fcMark(ok){
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(fci+1<FC.length){ fci++; fcDeal(); }
   else { fci++; fcSittingDone=true; fcmodal.classList.remove('open'); fcPreview();   /* whole sitting done: the pile offers more */
-    if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } }
+    if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); }
+    if(window.svFlow&&svFlow.run()) svFlow.bridge('cards',null,null); }
 }
 ['ok','no'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
   e.stopPropagation(); if(fcShowA) fcMark(k==='ok'); }); });

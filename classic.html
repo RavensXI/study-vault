@@ -812,6 +812,7 @@
 <script src="js/recall.js"></script>
 <script src="dash-data.js"></script>
 <script src="sync.js"></script>
+<script src="js/plan-flow.js"></script>
 <script src="warmup.js"></script>
 <script src="js/strength.js"></script>
 <script src="js/progress.js"></script>
@@ -910,7 +911,13 @@ function refreshDayOnePlan(){
   if(_dq.get('warmup')&&!window._wuOpened&&target){ window._wuOpened=1; svWarmup.open({subjects:SUBJECTS,target,nav}); }
 }
 /* Start = warm-up first (once a day), then straight into the lesson */
+/* Start begins a plan run (js/plan-flow.js): the steps then hand on with a 'what's next' screen */
+function beginRun(url){ if(!window.svFlow) return; const t=svPlanLead(SUBJECTS), ps=svPlanState();
+  const title=t&&t.url===url?(t.title||t.unitName):(t&&t.title)||'Today\u2019s lesson';
+  svFlow.begin({first:svDoneStats().total?'Revisit':'Warm-up',lesson:{url,title},home:'/classic'});
+  const r=svFlow.run(); if(r&&ps.warm){ r.done.first=true; sessionStorage.setItem('sv-run',JSON.stringify(r)); } }
 function startWithWarmup(url){
+  beginRun(url);
   if(!window.svWarmup){ nav(url); return; }
   if(svDoneStats().total&&window.svStrength&&svStrength.revisit){   /* after day one the first slot is the revisit */
     const rv=svStrength.revisit(SUBJECTS);
@@ -1750,6 +1757,8 @@ function openCards(){
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE) refreshDayOnePlan(); }
 document.getElementById('fcdoor').onclick=openCards;
+/* arriving from a lesson on a plan run: straight into the cards */
+if(_dq.get('cards')&&window.svFlow&&svFlow.run()){ history.replaceState(null,'',location.pathname); setTimeout(()=>{ if(!fcmodal.classList.contains('open')) openCards(); },400); }
 /* frost the page whenever the card modal is open, whichever path opened it */
 new MutationObserver(()=>document.body.classList.toggle('fc-open',fcmodal.classList.contains('open'))).observe(fcmodal,{attributes:true,attributeFilter:['class']});
 /* the week chip: one figure closed, the lines open, on tap */
@@ -1788,7 +1797,8 @@ function fcMark(ok){
   if(window.svFlashMark && f.key) f.level=svFlashMark(f.key,result);
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(fci+1<FC.length){ fci++; fcDeal(); }
-  else { fcmodal.classList.remove('open'); fcSittingDone=true; doorMore(); if(DAYONE) refreshDayOnePlan(); }   /* sitting done; the door offers more */
+  else { fcmodal.classList.remove('open'); fcSittingDone=true; doorMore(); if(DAYONE) refreshDayOnePlan();
+    if(window.svFlow&&svFlow.run()) svFlow.bridge('cards',null,null); }   /* sitting done; the door offers more */
 }
 ['ok','no','next'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
   e.stopPropagation(); if(fcShowA) fcMark(e.currentTarget.dataset.result||(k==='ok'?'right':'wrong')); }); });

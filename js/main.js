@@ -2605,7 +2605,8 @@ function initLessonProgress() {
       // observable, so nobody has to guess whether the rule fired
       console.log('[sv-progress]', key, num, complete ? 'COMPLETE' : 'not complete',
         '- weighted ' + wres.pct + '% (threshold 50%)');
-      if (newlyDone) {
+      if (newlyDone && window.svFlow && svFlow.lessonDone()) { /* on a plan run: the 'Next: flashcards' bar instead */ }
+      else if (newlyDone) {
         var t = document.createElement('div');
         t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#2d5a3d;color:#fff;font-family:Inter,sans-serif;font-size:0.85rem;padding:0.65rem 1.3rem;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.2);z-index:9999;opacity:0;transition:opacity 0.3s ease;pointer-events:none;';
         t.textContent = 'Lesson complete ✓ — it’ll show on your dashboard';
