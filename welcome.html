@@ -195,6 +195,57 @@
   /* cord anchor: Tom-tuned on the bench, 12 Jul 2026 (corrected values) */
   .lampwrap .pullcord{left:31.7%;top:29.2%;height:27%}
   .lampwrap:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:8px}
+  /* ---- the landing lamp's light. It can't live inside .lampwrap: the bench's saved offset gives
+     the button a transform, which isolates its children — their blend modes never reach the wall
+     and z-index:-1 can't get behind the books (that was the flat disc). So the light is two sheets
+     on the bookcase itself, placed by JS from where the lamp actually renders: --mx/--my = the
+     shade's mouth, --s = lamp scale (1 = a 330px-tall lamp), --by = the plank under the lamp.
+     BACK sheet (under the shelves): the wall warming round the lamp, the cone on the wallpaper.
+     FRONT sheet (over the shelves): the cone catching the books, the pool on the plank, the lit
+     shade. Clicking on: the bulb stutters, catches, then the room warms up. ---- */
+  .lampwrap::after,.lampwrap .bulb{display:none}
+  .bookcase.shelfstage>.lamplight{position:absolute;left:0;top:-170px;width:100%;height:calc(100% + 180px);z-index:0;   /* same reach as the wall (::before) */
+    pointer-events:none;opacity:0;transition:opacity .35s ease}
+  .bookcase.shelfstage>.lamplight.front{z-index:3}
+  .lamplight:not(.placed){display:none}
+  .shelfstage.lit>.lamplight{opacity:1;animation:lamp-catch 1.1s linear}
+  @keyframes lamp-catch{0%{opacity:0}5%{opacity:.75}9%{opacity:.1}15%{opacity:.9}19%{opacity:.35}
+    27%{opacity:1}100%{opacity:1}}
+  .lamplight>*{position:absolute;pointer-events:none}
+  /* warm the whole wall around the lamp, fading out across the room */
+  .ll-room{left:calc(var(--mx) - 900px*var(--s));top:calc(var(--my) - 640px*var(--s));
+    width:calc(1800px*var(--s));height:calc(1500px*var(--s));
+    background:radial-gradient(closest-side,rgba(255,178,84,.46),rgba(255,178,84,.2) 36%,rgba(255,178,84,.06) 66%,transparent);
+    mix-blend-mode:soft-light}
+  /* the cone: drawn pointing straight down from a virtual apex above the element, then turned
+     to follow the shade (whose mouth faces 27deg left of straight down). The conic gives soft
+     sides, the mask fades it out along its length. */
+  .ll-beam{left:calc(var(--mx) - 220px*var(--s));top:var(--my);width:calc(440px*var(--s));height:var(--bl);
+    transform-origin:50% 0;transform:rotate(27deg);
+    background:conic-gradient(from 157deg at 50% calc(-190px*var(--s)),
+      transparent 0deg,var(--bc) 13deg,var(--bc) 33deg,transparent 46deg);
+    -webkit-mask:linear-gradient(#000 0%,rgba(0,0,0,.85) 45%,rgba(0,0,0,.35) 82%,transparent);
+    mask:linear-gradient(#000 0%,rgba(0,0,0,.85) 45%,rgba(0,0,0,.35) 82%,transparent);
+    filter:blur(calc(4px*var(--s)))}
+  .lamplight:not(.front) .ll-beam{--bc:rgba(255,236,196,.95);mix-blend-mode:screen}
+  .lamplight.front .ll-beam{--bc:rgba(255,176,80,.7);mix-blend-mode:soft-light}
+  /* where the beam lands: a warm oval on the plank's top face */
+  .ll-pool{left:calc(var(--px) - 230px*var(--s));top:calc(var(--by) - 34px*var(--s));
+    width:calc(460px*var(--s));height:calc(92px*var(--s));border-radius:50%;
+    background:radial-gradient(closest-side,rgba(255,214,150,.75),rgba(255,190,110,.35) 55%,transparent);
+    mix-blend-mode:screen}
+  /* the lit shade: the dark inside of the mouth goes to a hot gold, and a halo blooms round it */
+  .ll-mouth{left:calc(var(--mx) - 52px*var(--s));top:calc(var(--my) - 21px*var(--s));
+    width:calc(104px*var(--s));height:calc(42px*var(--s));border-radius:50%;transform:rotate(27deg);
+    background:radial-gradient(closest-side,#fffbe8 0%,#ffe6a8 40%,rgba(255,196,110,.9) 70%,rgba(255,176,86,0));
+    filter:blur(calc(2px*var(--s)))}
+  .ll-bloom{left:calc(var(--mx) - 110px*var(--s));top:calc(var(--my) - 90px*var(--s));
+    width:calc(220px*var(--s));height:calc(200px*var(--s));border-radius:50%;
+    background:radial-gradient(closest-side,rgba(255,236,190,.8),rgba(255,206,130,.3) 45%,transparent);
+    mix-blend-mode:screen}
+  /* the brass catches its own light */
+  .shelfstage.lit .lampwrap .lamp{filter:drop-shadow(-8px 6px 6px rgba(40,28,12,.22)) sepia(.12) brightness(1.04)}
+  @media (prefers-reduced-motion:reduce){ .shelfstage.lit>.lamplight{animation:none} }
   /* landing books are scenery with a hover tip — no pull-out theatre here */
   .caserow .bk{cursor:default;pointer-events:auto}
   .bookend.mirror{transform:scaleX(-1);margin-right:0;margin-left:-6px}
@@ -1278,6 +1329,9 @@
         </div>
       </div>
 
+      <!-- the lamp's light (placed by placeLampLight); kept after the rows: the rows are addressed by nth-child -->
+      <div class="lamplight" aria-hidden="true"><div class="ll-room"></div><div class="ll-beam"></div></div>
+      <div class="lamplight front" aria-hidden="true"><div class="ll-beam"></div><div class="ll-pool"></div><div class="ll-bloom"></div><div class="ll-mouth"></div></div>
       <div class="booktip" id="booktip"></div>
     </div>
 
@@ -1580,6 +1634,26 @@ document.querySelectorAll('.mland .lampwrap').forEach(b=>b.addEventListener('cli
   const c=b.querySelector('.pullcord'); c.classList.add('tug'); setTimeout(()=>c.classList.remove('tug'),500);
   setTimeout(()=>stageL.classList.toggle('lit'),140);
 }));
+/* the lamp's light sheets follow wherever the lamp is drawn (desktop case, phone case, bench offsets):
+   measure the visible lamp and hand its mouth, scale and plank line to the sheets as CSS vars */
+function placeLampLight(){
+  const lamp=[...stageL.querySelectorAll('.lampwrap .lamp')].find(l=>l.offsetWidth);
+  const sheets=stageL.querySelectorAll(':scope > .lamplight'); if(!lamp||!sheets.length) return;
+  sheets[0].classList.add('placed');                   /* measurable (both sheets share one box) */
+  const sr=sheets[0].getBoundingClientRect(), k=(sr.width/sheets[0].offsetWidth)||1, r=lamp.getBoundingClientRect();
+  const x=(r.left-sr.left)/k, y=(r.top-sr.top)/k, w=r.width/k, h=r.height/k, s=h/330;
+  const mx=x+w*.25, my=y+h*.31, by=y+h*.985;          /* mouth of the shade; foot of the lamp = plank */
+  const bl=(by-my)/Math.cos(27*Math.PI/180);          /* beam runs along the shade's axis to the plank */
+  const px=mx-(by-my)*Math.tan(27*Math.PI/180);
+  sheets.forEach(el=>{ const st=el.style;
+    st.setProperty('--mx',mx+'px'); st.setProperty('--my',my+'px'); st.setProperty('--by',by+'px');
+    st.setProperty('--px',px+'px'); st.setProperty('--bl',bl*1.08+'px'); st.setProperty('--s',s.toFixed(3));
+    el.classList.add('placed'); });
+}
+placeLampLight();
+addEventListener('load',placeLampLight); addEventListener('resize',placeLampLight);
+if(window.ResizeObserver) new ResizeObserver(placeLampLight).observe(stageL);
+stageL.querySelectorAll('.lampwrap .lamp').forEach(l=>{ if(!l.complete) l.addEventListener('load',placeLampLight); });
 (function(){ const md=document.querySelector('.mdoors'); if(!md) return;
   document.querySelectorAll('#stage-landing > .caserow:nth-child(2) .slot.door').forEach(d=>md.appendChild(d.cloneNode(true))); })();
 
