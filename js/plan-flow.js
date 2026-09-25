@@ -137,12 +137,12 @@
     closeCard(true); style();
     var c = card = document.createElement('div'); c.className = 'svf-card'; c.setAttribute('role', 'status');
     var n = p.next;
-    c.innerHTML = '<div class="svf-card-top"><span class="svf-card-h">' + (p.complete ? 'Lesson done ✓' : 'Lesson progress') + '</span>' +
+    c.innerHTML = '<div class="svf-card-top"><span class="svf-card-h">' + (p.complete ? 'Lesson done \u2713' : n && n.finishes ? 'One more to finish' : 'Lesson progress') + '</span>' +
       '<button type="button" class="svf-card-x" aria-label="Close">×</button></div>' +
       '<div class="lesson-progress-bar"><div class="lesson-progress-bar-fill" style="width:' + from + '%"></div></div>' +
       '<div class="svf-card-act">' + (p.complete
-        ? '<button type="button" class="kc-btn kc-btn-primary svf-go">Next: flashcards →</button>'
-        : n ? '<button type="button" class="kc-btn kc-btn-secondary svf-go">' + esc(doing(n, 0)) + (n.finishes ? ' to finish' : ' next') + ' →</button>' : '') + '</div>';
+        ? '<button type="button" class="kc-btn kc-btn-primary svf-go">Next: flashcards \u2192</button>'
+        : n ? '<button type="button" class="kc-btn kc-btn-secondary svf-go">' + esc(doing(n, 0)) + ' \u2192</button>' : '') + '</div>';
     document.body.appendChild(c);
     c.querySelector('.svf-card-x').onclick = function () { closeCard(); };
     var go = c.querySelector('.svf-go'); if (go) go.onclick = p.complete ? toCards : function () { goTo(n.id); };
