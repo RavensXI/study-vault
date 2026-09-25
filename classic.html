@@ -597,10 +597,20 @@
   body.dark-mode .shelfstage .lampglow,body.dark-mode .shelfstage .bulb{opacity:1}   /* evening: the lamp is on */
   body.dark-mode .lampglow{background:linear-gradient(to bottom, rgba(255,190,110,.55) 22%, rgba(255,170,90,.42) 40%, rgba(252,150,70,.22) 66%, rgba(252,146,64,.08) 86%, transparent 97%)}
   /* evening: the beam softened, and the inside of the shade lit (placed from the lamp by script) */
-  body.dark-mode .shelfstage .lampglow{display:block;clip-path:none;filter:none;opacity:1;
-    background:conic-gradient(from 186deg at var(--lx,600px) var(--ly,60px),transparent 0deg,rgba(255,196,120,.46) 11deg,rgba(255,186,105,.4) 30deg,transparent 42deg,transparent 360deg);
-    -webkit-mask:radial-gradient(calc(var(--lh,250px)*1.25) calc(var(--lh,250px)*1.1) at var(--lx,600px) var(--ly,60px),#000 0%,rgba(0,0,0,.7) 45%,transparent 100%);
-    mask:radial-gradient(calc(var(--lh,250px)*1.25) calc(var(--lh,250px)*1.1) at var(--lx,600px) var(--ly,60px),#000 0%,rgba(0,0,0,.7) 45%,transparent 100%)}
+  /* the cone leaves the whole width of the shade's opening (drawn from a virtual apex up inside the
+     shade, --ax/--ay) and runs down the shade's axis onto the shelf, fading as it goes; where it
+     lands, a warm pool on the wood (--px/--py). Both placed from the lamp by script. */
+  body.dark-mode .shelfstage .lampglow{display:block;clip-path:none!important;filter:none;opacity:1;   /* (placeLampBits sets a clip-path inline) */
+    background:
+      radial-gradient(calc(var(--lh,250px)*.55) calc(var(--lh,250px)*.62) at calc((var(--lx,600px) + var(--px,500px))/2) calc((var(--ly,60px) + var(--py,200px))/2 + var(--lh,250px)*.08),rgba(255,196,124,.26),rgba(255,186,110,.1) 55%,transparent 100%),
+      conic-gradient(from 160deg at var(--ax,640px) var(--ay,20px),transparent 0deg,rgba(255,200,128,.22) 26deg,rgba(255,196,120,.22) 64deg,transparent 92deg,transparent 360deg);
+    -webkit-mask:radial-gradient(calc(var(--lh,250px)*1.15) calc(var(--lh,250px)*1.0) at var(--lx,600px) var(--ly,60px),#000 0%,rgba(0,0,0,.75) 35%,rgba(0,0,0,.25) 72%,transparent 100%);
+    mask:radial-gradient(calc(var(--lh,250px)*1.15) calc(var(--lh,250px)*1.0) at var(--lx,600px) var(--ly,60px),#000 0%,rgba(0,0,0,.75) 35%,rgba(0,0,0,.25) 72%,transparent 100%)}
+  .lamppool{position:absolute;z-index:4;pointer-events:none;opacity:0;transition:opacity .5s ease;border-radius:50%;mix-blend-mode:screen;
+    left:calc(var(--px,500px) - var(--lh,250px)*.62);top:calc(var(--py,200px) - var(--lh,250px)*.07);
+    width:calc(var(--lh,250px)*1.24);height:calc(var(--lh,250px)*.16);
+    background:radial-gradient(closest-side,rgba(255,214,150,.85),rgba(255,184,104,.4) 55%,transparent)}
+  body.dark-mode .shelfstage.lit .lamppool{opacity:1}
   body.dark-mode .shelfstage .bulb{display:none}
   .lampmouth{position:absolute;z-index:6;pointer-events:none;opacity:0;transition:opacity .5s ease;border-radius:50%;transform:rotate(28deg);
     left:calc(var(--lx,600px) - var(--lh,250px)*.175);top:calc(var(--ly,60px) - var(--lh,250px)*.064);
@@ -748,6 +758,7 @@
       <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
       <div class="bulb"></div>
       <div class="lampmouth" aria-hidden="true"></div>
+      <div class="lamppool" aria-hidden="true"></div>
       <button class="lampbtn" type="button"></button>
       <div class="pullcord"></div>
     </div>
@@ -1500,7 +1511,13 @@ fetch('_lesson_titles.json').then(r=>r.json()).then(j=>{ LESSON_TITLES=j||{}; _a
   const place=()=>{ if(!mouth||!lamp.offsetWidth) return;
     stage.style.setProperty('--lx',(lamp.offsetLeft+lamp.offsetWidth*.232)+'px');
     stage.style.setProperty('--ly',(lamp.offsetTop+lamp.offsetHeight*.31)+'px');
-    stage.style.setProperty('--lh',lamp.offsetHeight+'px'); };
+    stage.style.setProperty('--lh',lamp.offsetHeight+'px');
+    /* the shade points down and to the left, about 25 degrees off vertical */
+    const lx=lamp.offsetLeft+lamp.offsetWidth*.232, ly=lamp.offsetTop+lamp.offsetHeight*.31, h=lamp.offsetHeight;
+    const ux=-Math.sin(25*Math.PI/180), uy=Math.cos(25*Math.PI/180), back=h*.3;
+    stage.style.setProperty('--ax',(lx-ux*back)+'px'); stage.style.setProperty('--ay',(ly-uy*back)+'px');
+    const ledge=stage.querySelector('.ledge'), top=ledge?ledge.offsetTop+ledge.offsetHeight*.28:ly+h*.6;
+    stage.style.setProperty('--px',(lx+ux*(top-ly)/uy)+'px'); stage.style.setProperty('--py',top+'px'); };
   place(); if(!lamp.complete) lamp.addEventListener('load',place);
   if(window.ResizeObserver){ const ro=new ResizeObserver(place); ro.observe(lamp); ro.observe(stage); }   /* the stage grows as the books arrive */
   btn.addEventListener('click',()=>{
