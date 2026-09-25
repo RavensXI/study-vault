@@ -227,7 +227,7 @@ def cmd_redraft():
     by_key = {f["key"]: f for f in findings()}
     items = []
     for k, d in drafts.items():
-        if status(d) not in ("failed shape check", "failed second check") or d.get("round2"): continue
+        if status(d) not in ("failed shape check", "failed second check") or (d.get("round2") and not os.environ.get("SV_FIX_ROUND3")) or d.get("round3"): continue
         f = by_key[k]
         why = "; ".join(d.get("mech") or []) or (d.get("check") or {}).get("why", "")
         body = "\n\n".join([
@@ -244,7 +244,7 @@ def cmd_redraft():
         for res in walk.via_subscription("fixredraft", DRAFT_SYS, items, "opus", 3):
             for k, dr in res.items():
                 drafts[k]["round1"] = {"draft": drafts[k]["draft"], "mech": drafts[k].get("mech"), "check": drafts[k].get("check")}
-                drafts[k]["draft"] = dr; drafts[k]["round2"] = True
+                drafts[k]["draft"] = dr; drafts[k]["round3" if drafts[k].get("round2") else "round2"] = True
                 drafts[k].pop("check", None); drafts[k].pop("mech", None)
             io.open(DRAFTS, "w", encoding="utf-8").write(json.dumps(drafts, ensure_ascii=False, indent=1))
     finally:
