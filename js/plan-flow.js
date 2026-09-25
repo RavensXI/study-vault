@@ -36,21 +36,24 @@
     '.svf .svf-bar b{display:block;height:100%;width:0;background:#2d2a26;transition:width linear}' +
     'body.dark-mode .svf{background:rgba(24,22,20,.94);color:#ece9e4}body.dark-mode .svf h2,body.dark-mode .svf-steps li.done,body.dark-mode .svf-steps li.next{color:#ece9e4}' +
     'body.dark-mode .svf p{color:#b3aea6}body.dark-mode .svf button{background:#ece9e4;color:#181614}body.dark-mode .svf .svf-bar b{background:#ece9e4}' +
-    '.svf-lessonbar{position:fixed;left:50%;bottom:18px;transform:translate(-50%,20px);z-index:9999;display:flex;align-items:center;gap:14px;opacity:0;' +
-    'background:var(--bg-card,#fffdf8);color:var(--text-primary,#2d2a26);border:1px solid var(--border-light,#e4dfd2);border-radius:var(--radius,8px);padding:.6rem .7rem .6rem 1rem;' +
-    'box-shadow:0 8px 28px rgba(40,28,12,.14);font:500 .9rem var(--font-ui,Inter,system-ui,sans-serif);transition:opacity .3s,transform .3s}' +
-    'body[data-skin="reader"] .svf-lessonbar{border-radius:4px}' +
-    '.svf-lessonbar.on{opacity:1;transform:translate(-50%,0)}' +
-    '.svf-lessonbar.done{border-color:#3e7d58}.svf-lessonbar.done>span{color:#2c5940;font-weight:600}' +
-    '.svf-lessonbar.pulse{animation:svf-pulse 1.1s ease 2}' +
-    '@keyframes svf-pulse{0%,100%{box-shadow:0 8px 28px rgba(40,28,12,.14),0 0 0 0 rgba(62,125,88,.45)}50%{box-shadow:0 8px 28px rgba(40,28,12,.14),0 0 0 10px rgba(62,125,88,0)}}' +
+    '.svf-card{position:fixed;right:20px;bottom:20px;z-index:9999;width:min(340px,calc(100vw - 24px));background:var(--bg-card,#fffdf8);color:var(--text-primary,#2d2a26);' +
+    'border:1px solid var(--border-light,#e4dfd2);border-radius:var(--radius,8px);padding:.85rem 1rem 1rem;box-shadow:0 12px 34px rgba(40,28,12,.16);' +
+    'font:500 .9rem var(--font-ui,Inter,system-ui,sans-serif);opacity:0;transform:translateY(24px);transition:opacity .3s,transform .35s cubic-bezier(.16,1,.3,1)}' +
+    'body[data-skin="reader"] .svf-card{border-radius:4px}' +
+    '.svf-card.on{opacity:1;transform:none}' +
+    '.svf-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem}' +
+    '.svf-card-h{font:600 .78rem var(--font-ui,Inter,system-ui,sans-serif);letter-spacing:.09em;text-transform:uppercase;color:var(--text-muted,#84806f)}' +
+    '.svf-card-x{border:0;background:none;font-size:1.25rem;line-height:1;color:var(--text-muted,#84806f);cursor:pointer;padding:0 2px}' +
+    '.svf-card .lesson-progress-bar{margin:0 0 .95rem}' +
+    '.svf-card-act:empty{display:none}.svf-card-act .kc-btn{width:100%;text-align:center}' +
+    '.svf-card.pulse{animation:svf-pulse 1.1s ease 2}' +
+    '@keyframes svf-pulse{0%,100%{box-shadow:0 12px 34px rgba(40,28,12,.16),0 0 0 0 rgba(62,125,88,.45)}50%{box-shadow:0 12px 34px rgba(40,28,12,.16),0 0 0 10px rgba(62,125,88,0)}}' +
     '.svf-meter{width:84px;height:5px;border-radius:3px;background:var(--border-lighter,#efeadf);overflow:hidden;flex:none}' +
     '.svf-meter b{display:block;height:100%;background:var(--accent,#2d2a26);border-radius:3px;transition:width .5s ease}' +
     '.svf-nudge .kc-modal{max-width:400px}.svf-nbody{padding:1.1rem 1.25rem .4rem;font:1rem/1.5 var(--font-read,Georgia,serif);color:var(--text-primary,#2d2a26)}' +
     '.svf-nacts{display:flex;justify-content:flex-end;gap:.5rem;padding:1rem 1.25rem 1.15rem}' +
     '.svf-flash{animation:svf-flash 1.4s ease}@keyframes svf-flash{0%,100%{background:transparent}30%{background:color-mix(in srgb,var(--accent,#e9c46a) 18%,transparent)}}' +
-    'html.svf-barred body{padding-bottom:90px}' +
-    '@media (max-width:600px){.svf-lessonbar{left:12px;right:12px;transform:translateY(20px);bottom:12px;font-size:.85rem}.svf-lessonbar.on{transform:none}.svf-lessonbar>span:nth-child(2){flex:1}.svf-meter{width:48px}}';
+    '@media (max-width:600px){.svf-card{left:12px;right:12px;bottom:12px;width:auto}}';
   function style() { if (document.getElementById('svf-css')) return; var s = document.createElement('style'); s.id = 'svf-css'; s.textContent = css; document.head.appendChild(s); }
   function esc(t) { var d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
 
@@ -90,10 +93,10 @@
     }
   }
 
-  /* ---- on a lesson page, the run's lesson: a bar at the foot shows how far through it is and one
-     thing that would finish it; past the line it turns into "Lesson done · Next: flashcards" (with a
-     pulse, so it's noticed). Clicking away before the line asks once, gently. ---- */
-  /* how each activity reads: imperative for the bar, -ing for the prompt */
+  /* ---- on a lesson page, the run's lesson: when something gets done, the lesson's progress bar pops up
+     from the bottom, fills to where it now is and offers the next thing (taking them to it); past the
+     line it offers the flashcards. Clicking away before the line asks once, gently. ---- */
+  /* how each activity reads: imperative for the card, -ing for the prompt */
   var DO = { 'practice-question': ['Answer an exam question', 'Answering an exam question'], 'flashcards': ['Revise with the flashcards', 'Revising with the flashcards'],
     'revision-task': ['Do a revision task', 'Doing a revision task'], 'knowledge-check': ['Take the quick quiz', 'Taking the quick quiz'],
     'video': ['Watch the video', 'Watching the video'], 'podcast': ['Listen to the podcast', 'Listening to the podcast'],
@@ -101,39 +104,61 @@
   var doing = function (n, i) { return (DO[n.id] || ['Keep going', 'A little more'])[i]; };
   var path = function (u) { try { return new URL(u, location.origin).pathname.replace(/\/$/, ''); } catch (e) { return u; } };
   function onRunLesson() { var r = get(); return !!(r && r.lesson && path(r.lesson.url) === path(location.pathname)); }
-  var bar = null, state = null, guarded = false;
+  var card = null, state = null, guarded = false, hideT = 0, lastPct = null;
   function toCards() {
-    var r = get(); if (!r) return; if (bar) { bar.remove(); bar = null; document.documentElement.classList.remove('svf-barred'); }
+    var r = get(); if (!r) return; closeCard(true);
     bridge('lesson', 'cards', function () { location.href = (r.home || '/classic') + '?cards=1'; });
   }
-  function showTask(id) {
-    var el = [].slice.call(document.querySelectorAll('.lesson-progress-item[data-task="' + id + '"],.gutter-progress-item[data-task="' + id + '"]'))
-      .filter(function (x) { return x.getClientRects().length; })[0];
-    if (!el) return;
-    el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' });
-    el.classList.remove('svf-flash'); void el.offsetWidth; el.classList.add('svf-flash');
+  /* where each activity lives on the lesson page: open it, or scroll to it */
+  function goTo(id) {
+    closeCard(true);
+    var q = function (sel) { return document.querySelector(sel); };
+    var scroll = function (el, then) { if (!el) return false; el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' });
+      el.classList.remove('svf-flash'); void el.offsetWidth; el.classList.add('svf-flash'); if (then) setTimeout(then, reduced() ? 0 : 550); return true; };
+    var click = function (sel) { var b = q(sel); if (b) { b.click(); return true; } return false; };
+    var ok =
+      id === 'practice-question' ? scroll(q('#practice'), function () { var t = q('#practice-answer'); if (t) t.focus({ preventScroll: true }); }) :
+      id === 'knowledge-check' ? click('#knowledge-check-btn') :
+      id === 'flashcards' ? click('#sidebar-flashcard-btn') :
+      id === 'podcast' ? (click('.audio-tab[data-mode="podcast"]'), scroll(q('.audio-tab[data-mode="podcast"]'))) :
+      id === 'video' ? scroll(q('#sidebar-video-section')) :
+      id === 'revision-task' ? scroll(q('.revision-tip-btn')) :
+      id === 'interactive' ? scroll(q('.sv-embed-strip')) :
+      id === 'listen' ? scroll(q('.sv-listening')) : false;
+    if (!ok) scroll([].slice.call(document.querySelectorAll('.lesson-progress-item[data-task="' + id + '"],.gutter-progress-item[data-task="' + id + '"]')).filter(function (x) { return x.getClientRects().length; })[0]);
+  }
+  function closeCard(now) {
+    clearTimeout(hideT); if (!card) return; var c = card; card = null;
+    c.classList.remove('on'); setTimeout(function () { c.remove(); }, now ? 0 : 320);
+  }
+  /* the lesson's own progress bar, popped up from the bottom when something is done: it fills from
+     where it was to where it is now, then offers the next thing (or, past the line, the flashcards) */
+  function popCard(from, p) {
+    closeCard(true); style();
+    var c = card = document.createElement('div'); c.className = 'svf-card'; c.setAttribute('role', 'status');
+    var n = p.next;
+    c.innerHTML = '<div class="svf-card-top"><span class="svf-card-h">' + (p.complete ? 'Lesson done ✓' : 'Lesson progress') + '</span>' +
+      '<button type="button" class="svf-card-x" aria-label="Close">×</button></div>' +
+      '<div class="lesson-progress-bar"><div class="lesson-progress-bar-fill" style="width:' + from + '%"></div></div>' +
+      '<div class="svf-card-act">' + (p.complete
+        ? '<button type="button" class="kc-btn kc-btn-primary svf-go">Next: flashcards →</button>'
+        : n ? '<button type="button" class="kc-btn kc-btn-secondary svf-go">' + esc(doing(n, 0)) + (n.finishes ? ' to finish' : ' next') + ' →</button>' : '') + '</div>';
+    document.body.appendChild(c);
+    c.querySelector('.svf-card-x').onclick = function () { closeCard(); };
+    var go = c.querySelector('.svf-go'); if (go) go.onclick = p.complete ? toCards : function () { goTo(n.id); };
+    requestAnimationFrame(function () { c.classList.add('on');
+      setTimeout(function () { var f = c.querySelector('.lesson-progress-bar-fill'); f.style.transition = 'width 1s cubic-bezier(.16,1,.3,1)'; f.style.width = p.pct + '%'; }, reduced() ? 0 : 380);
+      if (p.complete) setTimeout(function () { if (c === card) c.classList.add('pulse'); }, 1300); });
+    /* it goes by itself, unless it's carrying them on to the flashcards (then it waits) */
+    var arm = function () { clearTimeout(hideT); if (!p.complete) hideT = setTimeout(function () { if (c === card) closeCard(); }, 7000); };
+    c.addEventListener('mouseenter', function () { clearTimeout(hideT); }); c.addEventListener('mouseleave', arm); c.addEventListener('focusin', function () { clearTimeout(hideT); });
+    arm();
   }
   function lessonProgress(p) {
     if (!onRunLesson()) return;
-    style(); state = p;
-    if (!bar) { bar = document.createElement('div'); bar.className = 'svf-lessonbar'; bar.setAttribute('role', 'status'); document.body.appendChild(bar);
-      document.documentElement.classList.add('svf-barred');   /* room under the page so the bar never covers its last links */
-      requestAnimationFrame(function () { bar.classList.add('on'); }); }
-    var wasDone = bar.classList.contains('done');
-    if (p.complete) {
-      bar.classList.add('done');
-      bar.innerHTML = '<span>Lesson done \u2713</span><button type="button" class="kc-btn kc-btn-primary">Next: flashcards \u2192</button>';
-      bar.querySelector('button').onclick = toCards;
-      if (!wasDone && bar.dataset.seen) { bar.classList.remove('pulse'); void bar.offsetWidth; bar.classList.add('pulse'); }
-    } else {
-      bar.classList.remove('done');
-      var pct = Math.min(100, Math.round(p.pct / 50 * 100));   /* the bar fills to the finishing line, not to 100% of everything */
-      bar.innerHTML = '<span class="svf-meter"><b style="width:' + pct + '%"></b></span><span>' + (p.next ? esc(doing(p.next, 0)) + (p.next.finishes ? ' to finish' : ' next') : 'Keep going') + '</span>' +
-        (p.next ? '<button type="button" class="kc-btn kc-btn-secondary">Show me</button>' : '');
-      var sb = bar.querySelector('button'); if (sb) sb.onclick = function () { showTask(p.next.id); };
-    }
-    bar.dataset.seen = '1';
-    guard();
+    var prev = lastPct; lastPct = p.pct; state = p; guard();
+    if (prev === null) { if (p.complete) popCard(p.pct, p); return; }     /* on arrival: only if it's already done */
+    if (p.pct > prev || (p.complete && !(card && card.querySelector('.svf-go.kc-btn-primary')))) popCard(prev, p);
   }
   /* leaving before the line: one gentle prompt, not a wall */
   function guard() {
@@ -157,7 +182,7 @@
       '<div class="svf-nacts"><button type="button" class="kc-btn kc-btn-secondary svf-leave">Leave anyway</button><button type="button" class="kc-btn kc-btn-primary svf-stay">Keep going</button></div></div>';
     document.body.appendChild(el);
     var close = function () { el.remove(); };
-    el.querySelector('.svf-stay').onclick = function () { close(); if (n) setTimeout(function () { showTask(n.id); }, 250); };
+    el.querySelector('.svf-stay').onclick = function () { close(); if (n) setTimeout(function () { goTo(n.id); }, 250); };
     el.querySelector('.svf-leave').onclick = function () { close(); leave(); };
     el.querySelector('.svf-stay').focus({ preventScroll: true });
     el.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
