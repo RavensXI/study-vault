@@ -2547,6 +2547,11 @@ function initLessonProgress() {
       var arr = roll[key] || [];
       var ix = arr.indexOf(num);
       var newlyDone = complete && ix < 0;
+      /* on a plan run (js/plan-flow.js) the lesson's progress drives the bar at the foot of the page */
+      if (window.svFlow) try {
+        var left = tasks.filter(function (t) { return !s[t.id]; }).sort(function (a, b) { return (TASK_WEIGHTS[b.id] || 0) - (TASK_WEIGHTS[a.id] || 0); });
+        svFlow.lessonProgress({ pct: wres.pct, complete: complete, next: left[0] ? { id: left[0].id, label: left[0].label } : null });
+      } catch (eF) {}
       if (newlyDone) { try { localStorage.setItem('sv-cards-nudge', '1'); } catch (e0) {} }
       if (complete && ix < 0) arr.push(num);
       if (!complete && ix >= 0) arr.splice(ix, 1);
@@ -2605,7 +2610,7 @@ function initLessonProgress() {
       // observable, so nobody has to guess whether the rule fired
       console.log('[sv-progress]', key, num, complete ? 'COMPLETE' : 'not complete',
         '- weighted ' + wres.pct + '% (threshold 50%)');
-      if (newlyDone && window.svFlow && svFlow.lessonDone()) { /* on a plan run: the 'Next: flashcards' bar instead */ }
+      if (newlyDone && window.svFlow && svFlow.onRunLesson()) { /* on a plan run the bar says it instead */ }
       else if (newlyDone) {
         var t = document.createElement('div');
         t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#2d5a3d;color:#fff;font-family:Inter,sans-serif;font-size:0.85rem;padding:0.65rem 1.3rem;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.2);z-index:9999;opacity:0;transition:opacity 0.3s ease;pointer-events:none;';

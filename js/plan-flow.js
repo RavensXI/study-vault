@@ -5,7 +5,7 @@
      svFlow.begin({first:'Revisit'|'Warm-up', lesson:{url,title}, home})   on Start
      svFlow.run()                                                          the run, or null
      svFlow.bridge(doneStep, next, go)   doneStep 'first'|'lesson'|'cards'; next 'lesson'|'cards'|null
-     svFlow.lessonDone()                 on a lesson page when the run's lesson completes */
+     svFlow.lessonProgress({pct,complete,next})   from the lesson page (js/main.js) on load and every change */
 (function () {
   'use strict';
   var KEY = 'sv-run';
@@ -39,7 +39,18 @@
     '.svf-lessonbar{position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);z-index:9999;display:flex;align-items:center;gap:14px;opacity:0;' +
     'background:#2d2a26;color:#fff;border-radius:12px;padding:.7rem .8rem .7rem 1.2rem;box-shadow:0 10px 30px rgba(0,0,0,.25);font:500 .95rem Inter,system-ui,sans-serif;transition:opacity .3s,transform .3s}' +
     '.svf-lessonbar.on{opacity:1;transform:translate(-50%,0)}' +
-    '.svf-lessonbar button{border:0;border-radius:8px;padding:.55rem 1rem;background:#fff;color:#2d2a26;font:600 .92rem Inter,system-ui,sans-serif;cursor:pointer}';
+    '.svf-lessonbar button{border:0;border-radius:8px;padding:.55rem 1rem;background:#fff;color:#2d2a26;font:600 .92rem Inter,system-ui,sans-serif;cursor:pointer}' +
+    '.svf-lessonbar button.ghost{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5)}' +
+    '.svf-lessonbar.done{background:#2d5a3d}.svf-lessonbar.done button{color:#2d5a3d}' +
+    '.svf-lessonbar.pulse{animation:svf-pulse 1.1s ease 2}' +
+    '@keyframes svf-pulse{0%,100%{box-shadow:0 10px 30px rgba(0,0,0,.25),0 0 0 0 rgba(78,122,74,.55)}50%{box-shadow:0 10px 30px rgba(0,0,0,.25),0 0 0 12px rgba(78,122,74,0)}}' +
+    '.svf-meter{width:90px;height:6px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden;flex:none}' +
+    '.svf-meter b{display:block;height:100%;background:#9fd3a6;border-radius:3px;transition:width .5s ease}' +
+    '.svf-two{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.svf .ghost{background:transparent;color:#2d2a26;box-shadow:inset 0 0 0 1.5px #cfc8bb}' +
+    'body.dark-mode .svf .ghost{color:#ece9e4;box-shadow:inset 0 0 0 1.5px #5a5448}' +
+    '.svf-flash{animation:svf-flash 1.4s ease}@keyframes svf-flash{0%,100%{background:transparent}30%{background:rgba(233,196,106,.45)}}' +
+    'html.svf-barred body{padding-bottom:90px}' +
+    '@media (max-width:600px){.svf-lessonbar{left:12px;right:12px;transform:translateY(20px);bottom:12px;font-size:.88rem}.svf-lessonbar.on{transform:none}.svf-meter{width:60px}}';
   function style() { if (document.getElementById('svf-css')) return; var s = document.createElement('style'); s.id = 'svf-css'; s.textContent = css; document.head.appendChild(s); }
   function esc(t) { var d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
 
@@ -79,22 +90,69 @@
     }
   }
 
-  /* on a lesson page: when the run's lesson completes, offer the next step (never interrupt reading) */
-  function lessonDone() {
-    var r = get(); if (!r || !r.lesson || r.done.lesson) return false;
-    var path = function (u) { try { return new URL(u, location.origin).pathname.replace(/\/$/, ''); } catch (e) { return u; } };
-    if (path(r.lesson.url) !== path(location.pathname)) return false;
-    r.done.lesson = true; put(r); style();
-    var bar = document.createElement('div'); bar.className = 'svf-lessonbar';
-    bar.innerHTML = '<span>Lesson done ✓</span><button type="button">Next: flashcards →</button>';
-    document.body.appendChild(bar);
-    requestAnimationFrame(function () { bar.classList.add('on'); });
-    bar.querySelector('button').onclick = function () {
-      bar.remove(); r.done.lesson = false; put(r);   /* bridge ticks it on screen */
-      bridge('lesson', 'cards', function () { location.href = (r.home || '/classic') + '?cards=1'; });
-    };
-    return true;
+  /* ---- on a lesson page, the run's lesson: a bar at the foot shows how far through it is and one
+     thing that would finish it; past the line it turns into "Lesson done · Next: flashcards" (with a
+     pulse, so it's noticed). Clicking away before the line asks once, gently. ---- */
+  var path = function (u) { try { return new URL(u, location.origin).pathname.replace(/\/$/, ''); } catch (e) { return u; } };
+  function onRunLesson() { var r = get(); return !!(r && r.lesson && path(r.lesson.url) === path(location.pathname)); }
+  var bar = null, state = null, guarded = false;
+  function toCards() {
+    var r = get(); if (!r) return; if (bar) { bar.remove(); bar = null; document.documentElement.classList.remove('svf-barred'); }
+    bridge('lesson', 'cards', function () { location.href = (r.home || '/classic') + '?cards=1'; });
+  }
+  function showTask(id) {
+    var el = [].slice.call(document.querySelectorAll('.lesson-progress-item[data-task="' + id + '"],.gutter-progress-item[data-task="' + id + '"]'))
+      .filter(function (x) { return x.getClientRects().length; })[0];
+    if (!el) return;
+    el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' });
+    el.classList.remove('svf-flash'); void el.offsetWidth; el.classList.add('svf-flash');
+  }
+  function lessonProgress(p) {
+    if (!onRunLesson()) return;
+    style(); state = p;
+    if (!bar) { bar = document.createElement('div'); bar.className = 'svf-lessonbar'; bar.setAttribute('role', 'status'); document.body.appendChild(bar);
+      document.documentElement.classList.add('svf-barred');   /* room under the page so the bar never covers its last links */
+      requestAnimationFrame(function () { bar.classList.add('on'); }); }
+    var wasDone = bar.classList.contains('done');
+    if (p.complete) {
+      bar.classList.add('done');
+      bar.innerHTML = '<span>Lesson done ✓</span><button type="button">Next: flashcards →</button>';
+      bar.querySelector('button').onclick = toCards;
+      if (!wasDone && bar.dataset.seen) { bar.classList.remove('pulse'); void bar.offsetWidth; bar.classList.add('pulse'); }
+    } else {
+      bar.classList.remove('done');
+      var pct = Math.min(100, Math.round(p.pct / 50 * 100));   /* the bar fills to the finishing line, not to 100% of everything */
+      bar.innerHTML = '<span class="svf-meter"><b style="width:' + pct + '%"></b></span><span>' + (p.next ? 'Next: ' + esc(p.next.label) : 'Keep going') + '</span>' +
+        (p.next ? '<button type="button" class="ghost">Show me</button>' : '');
+      var sb = bar.querySelector('button'); if (sb) sb.onclick = function () { showTask(p.next.id); };
+    }
+    bar.dataset.seen = '1';
+    guard();
+  }
+  /* leaving before the line: one gentle prompt, not a wall */
+  function guard() {
+    if (guarded) return; guarded = true;
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (!a || !state || state.complete || !onRunLesson() || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || a.target === '_blank') return;
+      var u; try { u = new URL(a.href, location.href); } catch (x) { return; }
+      if (u.origin !== location.origin || (u.pathname === location.pathname)) return;
+      e.preventDefault(); e.stopPropagation();
+      nudge(function () { location.href = u.href; });
+    }, true);
+  }
+  function nudge(leave) {
+    style();
+    var el = document.createElement('div'); el.className = 'svf'; el.setAttribute('role', 'dialog');
+    el.innerHTML = '<div class="svf-box"><h2>Nearly there</h2><p>' + (state.next ? esc(state.next.label) + ' would finish this lesson.' : 'A little more finishes this lesson.') +
+      '</p><div class="svf-two"><button type="button" class="svf-stay">Keep going</button><button type="button" class="ghost svf-leave">Leave anyway</button></div></div>';
+    document.body.appendChild(el); requestAnimationFrame(function () { el.classList.add('on'); });
+    var close = function () { el.classList.remove('on'); setTimeout(function () { el.remove(); }, 300); };
+    el.querySelector('.svf-stay').onclick = function () { close(); if (state.next) setTimeout(function () { showTask(state.next.id); }, 250); };
+    el.querySelector('.svf-leave').onclick = function () { close(); leave(); };
+    el.querySelector('.svf-stay').focus({ preventScroll: true });
+    el.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
   }
 
-  window.svFlow = { begin: begin, run: get, bridge: bridge, lessonDone: lessonDone, end: end };
+  window.svFlow = { begin: begin, run: get, bridge: bridge, lessonProgress: lessonProgress, onRunLesson: onRunLesson, end: end };
 })();
