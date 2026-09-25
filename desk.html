@@ -107,8 +107,8 @@
   .start .ring{position:absolute;inset:-6px -10px;width:calc(100% + 20px);height:calc(100% + 12px);
     fill:none;stroke:#8a4f42;stroke-width:5;stroke-linecap:round;opacity:.85}
   .pg4 h3{font-family:var(--hand);font-weight:600;font-size:56px;color:var(--sec);margin:0 0 16px}
-  .noteline{font-family:var(--hand);font-size:44px;color:var(--sec);line-height:1.75;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* a line that won't fit wraps (hanging indent) rather than losing its end to an ellipsis */
+  .noteline{font-family:var(--hand);font-size:44px;color:var(--sec);line-height:1.2;padding:.275em 0 .275em 1em;text-indent:-1em}
   .noteline b{color:var(--ink);font-weight:600}
   .pg4 .doable{margin-top:auto;font-family:var(--hand);font-size:41px;color:var(--mut);text-align:right}
   .subjpg .unit{display:grid;grid-template-columns:1fr 90px;gap:10px;padding:9px 6px;cursor:pointer;
@@ -152,7 +152,8 @@
   .knob4.k2{left:1666px;top:744px;width:210px;height:210px}
   /* the radio's label lives on a sticky note at the set's base — not the
      drag/edit .sticky class, purely decorative. Bottom corner carries THE S. */
-  .rnote{position:absolute;left:44px;top:596px;width:316px;padding:22px 24px 24px;color:#4d4425;
+  /* left:215px keeps the whole (tilted) note on screen at 16:10, where the cover fit trims 147 stage units a side */
+  .rnote{position:absolute;left:215px;top:596px;width:300px;padding:22px 24px 24px;color:#4d4425;
     background:linear-gradient(168deg,#f9edb4 0%,#f4e49c 70%,#eeda8d 100%);
     font-family:var(--hand);box-shadow:9px 16px 28px -9px rgba(56,40,18,.38);
     transform:rotate(-3.5deg);cursor:pointer}
@@ -397,12 +398,18 @@
      the paper sheets go dark, the lamp on the desk does the lighting ---- */
   body.dark-mode{background:#100e0c}          /* the painted sheets keep their own ink: only the scene dims */
   /* the whole desk dims as one: the wood, every painted object, and the pale wash each object was cut
-     out with (dimming only the wood left those washes glowing as halos). Night is a single multiply
-     layer over the stage: a warm pool of lamplight on the notebook, falling to a cool dark at the
-     edges. Popups ride above it. */
-  #stage>.nightlayer{position:absolute;inset:0;z-index:5;pointer-events:none;mix-blend-mode:multiply;opacity:0;transition:opacity .9s ease;
-    background:radial-gradient(1450px 1000px at 1380px 860px,#fff6e6 0%,#f1dcc0 24%,#8a7b7a 58%,#4a4454 82%,#3a3644 100%)}
-  body.dark-mode #stage>.nightlayer{opacity:1}
+     out with (dimming only the wood left those washes glowing as halos). Night is a desk lamp off the
+     top right shining down: one multiply layer gives a defined pool of light on the notebook, its
+     edge where the shade cuts it off, and the room beyond in a cool dark; a screen layer adds the
+     hot spot on the lamp's side; the notebook throws its shadow down and away. Popups ride above. */
+  #stage>.nightlayer,#stage>.nightglow{position:absolute;inset:0;z-index:5;pointer-events:none;opacity:0;transition:opacity .9s ease}
+  #stage>.nightlayer{mix-blend-mode:multiply;
+    background:radial-gradient(1320px 900px at 1360px 880px,#fffaf0 0%,#fbf0dc 40%,#f0dfc4 50%,#a39386 60%,#6a6070 72%,#48424f 86%,#37333f 100%)}
+  #stage>.nightglow{mix-blend-mode:screen;
+    background:radial-gradient(760px 560px at 1580px 690px,rgba(255,232,190,.34) 0%,rgba(255,220,170,.14) 50%,transparent 100%)}
+  body.dark-mode #stage>.nightlayer,body.dark-mode #stage>.nightglow{opacity:1}
+  #book{transition:filter .9s ease}
+  body.dark-mode #book{filter:drop-shadow(-28px 34px 30px rgba(20,14,10,.42))}
   body.dark-mode .wpop{z-index:8}
   ::view-transition-old(root),::view-transition-new(root){animation-duration:1.1s;animation-timing-function:cubic-bezier(.4,0,.2,1)}
   body.dark-mode .brand{color:#f1ede6}
@@ -428,7 +435,7 @@
   <img class="bg" id="bgclean" data-src="assets/lw/desk4-scene-clean.webp" alt="">
   <img class="bg mess" id="bgmess" src="assets/lw/desk4-scene-a.webp" alt="">
   <div class="shine" id="shine"></div>
-  <div class="nightlayer" aria-hidden="true"></div>
+  <div class="nightlayer" aria-hidden="true"></div><div class="nightglow" aria-hidden="true"></div>
   <div id="sparks">
     <span class="spark k1"><svg viewBox="0 0 100 100"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z"/></svg></span>
     <span class="spark k2"><svg viewBox="0 0 100 100"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z"/></svg></span>
@@ -618,7 +625,7 @@ let TODAY_R=`
   <div class="noteline">Best subject: <b>Geography</b> — 9 topics</div>
   <div class="noteline">Needs a look: <b>Macbeth</b> — 3 wks ago</div>
   <div class="noteline">Warm-up accuracy: <b>78%</b> and climbing</div>
-  <div class="noteline">Shorts watched: <b>41</b> · checks passed: <b>7/8</b></div>
+  <div class="noteline">Shorts: <b>41</b> watched · <b>7/8</b> checks passed</div>
   <div class="noteline">Radio: <b>3 episodes</b> on the bus</div>
   <div class="noteline">Next mock: <b>none booked</b></div>`;
 
