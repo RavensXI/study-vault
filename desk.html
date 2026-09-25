@@ -396,7 +396,15 @@
   /* ---- dark mode (js/dash-a11y.js): the desk after dark — the scene dims, the top bar and
      the paper sheets go dark, the lamp on the desk does the lighting ---- */
   body.dark-mode{background:#100e0c}          /* the painted sheets keep their own ink: only the scene dims */
-  body.dark-mode #stage>.bg{filter:brightness(.62) saturate(.85)}
+  /* the whole desk dims as one: the wood, every painted object, and the pale wash each object was cut
+     out with (dimming only the wood left those washes glowing as halos). Night is a single multiply
+     layer over the stage: a warm pool of lamplight on the notebook, falling to a cool dark at the
+     edges. Popups ride above it. */
+  #stage>.nightlayer{position:absolute;inset:0;z-index:5;pointer-events:none;mix-blend-mode:multiply;opacity:0;transition:opacity .9s ease;
+    background:radial-gradient(1450px 1000px at 1380px 860px,#fff6e6 0%,#f1dcc0 24%,#8a7b7a 58%,#4a4454 82%,#3a3644 100%)}
+  body.dark-mode #stage>.nightlayer{opacity:1}
+  body.dark-mode .wpop{z-index:8}
+  ::view-transition-old(root),::view-transition-new(root){animation-duration:1.1s;animation-timing-function:cubic-bezier(.4,0,.2,1)}
   body.dark-mode .brand{color:#f1ede6}
   body.dark-mode .tidy{color:#c9c2b4}
   body.dark-mode .avatar{background:#ece9e4;color:#181614}
@@ -420,6 +428,7 @@
   <img class="bg" id="bgclean" data-src="assets/lw/desk4-scene-clean.webp" alt="">
   <img class="bg mess" id="bgmess" src="assets/lw/desk4-scene-a.webp" alt="">
   <div class="shine" id="shine"></div>
+  <div class="nightlayer" aria-hidden="true"></div>
   <div id="sparks">
     <span class="spark k1"><svg viewBox="0 0 100 100"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z"/></svg></span>
     <span class="spark k2"><svg viewBox="0 0 100 100"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z"/></svg></span>
@@ -529,6 +538,8 @@
 if(Math.min(screen.width,innerWidth)<700&&!/[?&]force=1/.test(location.search)) location.replace('/classic'+location.search);</script>
 <script src="/js/account-sync.js"></script>
 <script src="js/school-session.js"></script>
+<script src="/js/daynight.js"></script>
+<script>window.svNightDefault=window.SVDayNight?SVDayNight.isNight():false;</script>
 <script src="js/dash-a11y.js"></script>
 <script src="js/tour-player.js"></script>
 <script src="js/dash-tour.js"></script>

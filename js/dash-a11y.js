@@ -130,7 +130,12 @@
       chips.forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.ov === o ? 'true' : 'false'); });
       range.hidden = !o; range.value = typeof p.overlayIntensity === 'number' ? p.overlayIntensity : 45;
     }
-    sw.addEventListener('click', function () { var on = sw.getAttribute('aria-checked') !== 'true'; scene = null; applyDark(on); save({ darkMode: on }); sync(); });
+    sw.addEventListener('click', function () {
+      var on = sw.getAttribute('aria-checked') !== 'true'; scene = null;
+      /* the page fades between day and evening rather than snapping (the dashboards set the timing) */
+      var flip = function () { applyDark(on); };
+      if (document.startViewTransition && !matchMedia('(prefers-reduced-motion:reduce)').matches) document.startViewTransition(flip); else flip();
+      save({ darkMode: on }); sync(); });
     sizes.forEach(function (x) { x.addEventListener('click', function () { var s = applySize(x.dataset.size); save({ fontSize: s }); sync(); }); });
     fonts.forEach(function (x) { x.addEventListener('click', function () { var k = applyFont(x.dataset.font); save({ readingFont: k }); sync(); }); });
     chips.forEach(function (x) { x.addEventListener('click', function () { var p = prefs(); applyOverlay(x.dataset.ov, p.overlayIntensity); save({ overlay: x.dataset.ov }); sync(); }); });
