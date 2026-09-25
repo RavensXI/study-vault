@@ -596,6 +596,18 @@
   body.dark-mode .lightwash{background:linear-gradient(to right, rgba(0,0,0,.55), rgba(0,0,0,.25) 34%, transparent 58%);opacity:1}
   body.dark-mode .shelfstage .lampglow,body.dark-mode .shelfstage .bulb{opacity:1}   /* evening: the lamp is on */
   body.dark-mode .lampglow{background:linear-gradient(to bottom, rgba(255,190,110,.55) 22%, rgba(255,170,90,.42) 40%, rgba(252,150,70,.22) 66%, rgba(252,146,64,.08) 86%, transparent 97%)}
+  /* evening: the beam softened, and the inside of the shade lit (placed from the lamp by script) */
+  body.dark-mode .shelfstage .lampglow{display:block;clip-path:none;filter:none;opacity:1;
+    background:conic-gradient(from 186deg at var(--lx,600px) var(--ly,60px),transparent 0deg,rgba(255,196,120,.46) 11deg,rgba(255,186,105,.4) 30deg,transparent 42deg,transparent 360deg);
+    -webkit-mask:radial-gradient(calc(var(--lh,250px)*1.25) calc(var(--lh,250px)*1.1) at var(--lx,600px) var(--ly,60px),#000 0%,rgba(0,0,0,.7) 45%,transparent 100%);
+    mask:radial-gradient(calc(var(--lh,250px)*1.25) calc(var(--lh,250px)*1.1) at var(--lx,600px) var(--ly,60px),#000 0%,rgba(0,0,0,.7) 45%,transparent 100%)}
+  body.dark-mode .shelfstage .bulb{display:none}
+  .lampmouth{position:absolute;z-index:6;pointer-events:none;opacity:0;transition:opacity .5s ease;border-radius:50%;transform:rotate(28deg);
+    left:calc(var(--lx,600px) - var(--lh,250px)*.175);top:calc(var(--ly,60px) - var(--lh,250px)*.064);
+    width:calc(var(--lh,250px)*.35);height:calc(var(--lh,250px)*.128);
+    background:radial-gradient(closest-side,#fffbe8 0%,#ffe6a8 40%,rgba(255,196,110,.9) 70%,rgba(255,176,86,0));filter:blur(1.5px);
+    box-shadow:0 0 calc(var(--lh,250px)*.14) calc(var(--lh,250px)*.04) rgba(255,200,120,.35)}
+  .shelfstage.lit .lampmouth{opacity:1}
   body.dark-mode .selprompt{color:var(--mut)}
   body.dark-mode .fcmodal{background:rgba(0,0,0,.6)}
   body.dark-mode .fcmodal .x,body.dark-mode .phonemodal .x{background:#ece9e4;color:#181614}
@@ -735,6 +747,7 @@
       <div class="lampglow"></div>
       <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
       <div class="bulb"></div>
+      <div class="lampmouth" aria-hidden="true"></div>
       <button class="lampbtn" type="button"></button>
       <div class="pullcord"></div>
     </div>
@@ -775,6 +788,8 @@
 <script src="/js/content-reads.js"></script>
 <script src="js/account-sync.js"></script>
 <script src="js/school-session.js"></script>
+<script src="/js/daynight.js"></script>
+<script>window.svNightDefault=window.SVDayNight?SVDayNight.isNight():false;</script>
 <script src="js/dash-a11y.js"></script>
 <script src="js/tour-player.js"></script>
 <script src="js/dash-tour.js"></script>
@@ -1467,22 +1482,30 @@ renderSubjects(); _applyOpen();
 fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{ LADDERS=j||{}; renderSubjects(); _applyOpen(); }).catch(()=>{});
 fetch('_lesson_titles.json').then(r=>r.json()).then(j=>{ LESSON_TITLES=j||{}; _applyOpen(); }).catch(()=>{});
 
-/* the reading lamp: click it to turn the light on/off (off by default) */
+/* the reading lamp is day and night: on is evening (the dashboard's dark mode), off is day. It
+   opens at whichever it is outside (js/daynight.js) unless the student has chosen dark mode on or
+   off in Reading settings; pulling the cord switches for this visit only (js/dash-a11y.js). */
 (function(){
   const stage=document.querySelector('.shelfstage'), lamp=document.querySelector('.lamp'),
         btn=document.querySelector('.lampbtn'), cord=document.querySelector('.pullcord');
   if(!stage||!lamp||!btn) return;
-  const KEY='sv-lamp-on';
-  let on=false; try{ on=localStorage.getItem(KEY)==='1'; }catch(e){}
+  const A=()=>window.svDashA11y;
   const q=new URLSearchParams(location.search).get('lamp');   // ?lamp=on|off overrides
-  if(q==='on') on=true; else if(q==='off') on=false;
-  const apply=()=>{ stage.classList.toggle('lit',on);
+  if(A()&&(q==='on'||q==='off')) A().setScene(q==='on');
+  const sync=()=>{ const on=document.body.classList.contains('dark-mode'); stage.classList.toggle('lit',on);
     btn.setAttribute('aria-pressed',String(on));
-    btn.setAttribute('aria-label', on?'Reading lamp — on. Click to turn off':'Reading lamp — off. Click to turn on'); };
-  apply();
-  const toggle=()=>{ on=!on; apply(); try{ localStorage.setItem(KEY, on?'1':'0'); }catch(e){}
-    if(cord){ cord.classList.remove('tug'); void cord.offsetWidth; cord.classList.add('tug'); } };  // tug the cord
-  btn.addEventListener('click',toggle);
+    btn.setAttribute('aria-label', on?'Reading lamp \u2014 on (evening). Click for day':'Reading lamp \u2014 off (day). Click for evening'); };
+  sync(); new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']});
+  const mouth=stage.querySelector('.lampmouth');
+  const place=()=>{ if(!mouth||!lamp.offsetWidth) return;
+    stage.style.setProperty('--lx',(lamp.offsetLeft+lamp.offsetWidth*.232)+'px');
+    stage.style.setProperty('--ly',(lamp.offsetTop+lamp.offsetHeight*.31)+'px');
+    stage.style.setProperty('--lh',lamp.offsetHeight+'px'); };
+  place(); if(!lamp.complete) lamp.addEventListener('load',place);
+  if(window.ResizeObserver){ const ro=new ResizeObserver(place); ro.observe(lamp); ro.observe(stage); }   /* the stage grows as the books arrive */
+  btn.addEventListener('click',()=>{
+    if(cord){ cord.classList.remove('tug'); void cord.offsetWidth; cord.classList.add('tug'); }
+    setTimeout(()=>{ if(A()) A().setScene(!document.body.classList.contains('dark-mode')); },140); });
   btn.addEventListener('mouseenter',()=>lamp.classList.add('hot'));
   btn.addEventListener('mouseleave',()=>lamp.classList.remove('hot'));
 })();
