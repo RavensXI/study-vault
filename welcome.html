@@ -727,6 +727,10 @@
   .wizstage .bk:hover,.wizstage .bk.focus,.wizstage .bk:focus-visible{transform:translateX(var(--shift,0px)) rotate(var(--lean,0deg)) translateY(-7px)}
   .wizstage .bk:focus-visible img{outline:3px solid var(--anchor);outline-offset:3px;border-radius:4px}
   .wizstage .bk.dim{opacity:.5}
+  .wizstage .bk::after{content:'';position:absolute;left:50%;top:-4px;width:26px;height:26px;margin-left:-13px;border-radius:50%;
+    background:#4e7a4a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat;
+    box-shadow:0 2px 5px rgba(0,0,0,.3);opacity:0;transform:scale(.4);transition:opacity .25s,transform .3s cubic-bezier(.3,1.4,.5,1);pointer-events:none;z-index:3}
+  .wizstage .bk.rated::after{opacity:1;transform:scale(1)}
   .wizstage .bk.out{animation:book-out .34s ease-in both;pointer-events:none}
   @keyframes book-out{to{transform:translateX(var(--shift,0px)) translateY(36px) rotate(var(--lean,0deg));opacity:0}}
   .wizstage .lamp.hot{filter:drop-shadow(-10px 8px 8px rgba(40,28,12,.22)) brightness(1.06)}
@@ -2165,7 +2169,7 @@ function renderWizShelf(slugs,o){
     const ref=live[i+1]; if(ref!==b) el.insertBefore(b,ref||null);
   });
   const en=document.getElementById('emptynote'); if(en) en.style.opacity=(n===0&&document.body.dataset.view==='picker')?'1':'0';
-  fitWizShelf();
+  fitWizShelf(); markRated();
 }
 function wireWizBook(b,s){
   b.tabIndex=0; b.setAttribute('role','button'); b.setAttribute('aria-label',s.name);
@@ -2543,6 +2547,11 @@ function feelUnits(sl){ return (WUNITS[wSub(sl)]||[]).filter(u=>feelKeep(sl,u.sl
 function ragRoll(sl){ const sub=wSub(sl), us=feelUnits(sl); const v={n:0,r:0,a:1,g:2}; let n=0,t=0;
   us.forEach(u=>{ const x=RAG[sub+'/'+u.slug]; if(x in v){ n++; t+=v[x]; } });
   if(!n) return null; const m=t/n; return m<0.67?'r':m<1.34?'a':'g'; }
+/* a tick on each book on the builder's shelf once its topics are rated and the student has moved on */
+function feelDone(sl){ const sub=wSub(sl); if(!sub||!WUNITS[sub]) return false; const us=feelUnits(sl); return us.length>0&&us.every(u=>RAG[sub+'/'+u.slug]); }
+function markRated(){ const on=document.body.dataset.view==='feel'||document.body.dataset.view==='budget', subs=on?feelSubs():[];
+  const upto=document.body.dataset.view==='budget'?subs.length:fstep;   /* finished = rated and moved past */
+  shelfW.querySelectorAll('.bk[data-slug]').forEach(b=>{ const i=subs.indexOf(b.dataset.slug); b.classList.toggle('rated',i>=0&&i<upto&&feelDone(b.dataset.slug)); }); }
 function renderFeel(){
   renderWizShelf(picked);
   const subs=feelSubs(); if(!subs.length){ go('budget'); return; }
@@ -2556,6 +2565,7 @@ function renderFeel(){
   const dots=(k,cur)=>['n','r','a','g'].map(v=>'<button type="button" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'" aria-label="'+({n:'not started yet',r:'struggling',a:'getting there',g:'confident'})[v]+'"></button>').join('');
   const chev='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2l4 4-4 4"/></svg>';
   const sync=()=>{ const units=feelUnits(sl), n=units.filter(u=>RAG[sub+'/'+u.slug]).length, done=n===units.length;
+    markRated();
     nx.disabled=!done; nx.style.opacity=done?'':'.45';
     /* each column's All lights up when every topic sits in that column */
     fc.querySelectorAll('[data-all]').forEach(b=>b.setAttribute('aria-pressed',String(!!units.length&&units.every(u=>RAG[sub+'/'+u.slug]===b.dataset.all))));
@@ -2563,6 +2573,11 @@ function renderFeel(){
   loadUnits(sub,()=>{
     if(feelSubs()[fstep]!==sl) return;
     const units=feelUnits(sl);
+    /* early in the course most topics are untouched: Year 9, and Year 10 before January, start with every
+       unrated topic on "Not started", so they only change the few they've done */
+    const yrs=examYear()-examYearBase(), mo=new Date().getMonth();
+    if(yrs>=2||(yrs===1&&mo>=8)){ let ch=0; units.forEach(u=>{ const k=sub+'/'+u.slug; if(!RAG[k]){ RAG[k]='n'; ch++; } });
+      if(ch){ const roll=ragRoll(sl); if(roll) RAG[sl]=roll; persist(); } }
     fc.innerHTML=key+(units.length?units.map(u=>{ const k=sub+'/'+u.slug;
         return '<div class="feelunit" data-k="'+k+'"><button type="button" class="fu-name" aria-expanded="false">'+u.name+chev+'</button>'+
           '<span class="dots">'+dots(k,RAG[k])+'</span>'+
