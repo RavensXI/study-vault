@@ -57,8 +57,8 @@ const P={
   /* the window, in the left-hand wall off the page: how far out (x), its top and bottom above the
      shelf, how far it reaches out into the room (z0..z1), and the bar across it */
   win:{x:60, top:430, bottom:175, z0:160, z1:560, bar:22},
-  sun:{dir:[.62,.40,-.68], I:.95, k:.8, expo:.55, tint:[1,.92,.74], kShadow:.4, shadowReach:1.4, soft:.012, spread:.35, samples:5},
-  moon:{dir:[.60,.34,-.72], I:.5, k:.9, expo:0, tint:[.72,.84,1.08], kShadow:.3, shadowReach:1.4, soft:.02, spread:.5, samples:5},
+  sun:{dir:[.62,.40,-.68], I:.95, k:.8, expo:.55, tint:[1,.92,.74], kShadow:.4, shadowReach:1.4, soft:.012, spread:.35, samples:12, pen:.045, penMax:22},
+  moon:{dir:[.60,.34,-.72], I:.5, k:.9, expo:0, tint:[.72,.84,1.08], kShadow:.3, shadowReach:1.4, soft:.02, spread:.5, samples:12, pen:.075, penMax:30},
   shelfDepth:240,                /* the wall to the plank's front edge */
   faceFrac:0.315,                /* the plank's top face, as a share of the ledge strip */
   depth:{book:72, bookstack:112, trophy:80, inkwell:118, bookend:60, lamp:150, def:80},
@@ -331,16 +331,39 @@ async function render(stage,gen){
     return lit/NS;
   }
   /* the same for the window: a few directions across the sun's (or moon's) disc and sky */
+  /* ...and how far along the light the thing in the way stands (WT: 0 when nothing is): a
+     window's shadow is crisp at an object's foot and softens the further it falls, so that
+     distance sets how much each shadow is blurred afterwards (softShadow) */
+  let WT=0;
   function winVis(Wn,px,py,pz){
-    if(pz>=Dmax) return 1;
-    let lit=0; const st=8;
-    for(const L of Wn.dirs){
-      const sMax=(Dmax-pz)/L[2]; let blocked=false;
-      for(let s=0;s<st;s++){ const t=(s+.55)/st*sMax, z=pz+L[2]*t;
-        if(blockedAt(px+L[0]*t, py+L[1]*t+c*z, z)){ blocked=true; break; } }
-      if(!blocked) lit++;
+    WT=0; if(pz>=Dmax) return 1;
+    let lit=0, tSum=0, nB=0; const st=14;
+    const j0=((Math.sin(px*12.9898+py*78.233)*43758.5453)%1+1)%1;   /* per-point jitter: no banding */
+    for(let di=0;di<Wn.dirs.length;di++){ const L=Wn.dirs[di];
+      const sMax=(Dmax-pz)/L[2], jj=(j0+di*.618)%1; let hit=-1;
+      for(let s=0;s<st;s++){ const t=(s+jj)/st*sMax, z=pz+L[2]*t;
+        if(blockedAt(px+L[0]*t, py+L[1]*t+c*z, z)){ hit=t; break; } }
+      if(hit<0) lit++; else { tSum+=hit; nB++; }
     }
+    if(nB) WT=tSum/nB;
     return lit/Wn.dirs.length;
+  }
+  /* blur a shadow map by how far each shadow has fallen from what cast it */
+  function softShadow(vis,tm,bl,w,h,cellPx,Wn){
+    const tN=new Float32Array(w*h); for(let i=0;i<w*h;i++) tN[i]=tm[i]*bl[i];
+    const R=Math.max(2,Math.round(Wn.penMax*S/cellPx));
+    const tb=blur(tN,w,h,R), bb=blur(bl,w,h,R);
+    const radii=[0,1,2,4,7,11].filter(r=>r<=Math.max(1,Math.ceil(Wn.penMax*S/cellPx)));
+    const levels=radii.map(r=>r?blur(vis,w,h,r):vis);
+    const out=new Float32Array(w*h);
+    for(let i=0;i<w*h;i++){
+      const t=bb[i]>.02?tb[i]/bb[i]:0, rr=(1.2*S+t*Wn.pen)/cellPx/2;   /* blur radius in cells */
+      let k=0; while(k<radii.length-1&&radii[k+1]<rr) k++;
+      if(k>=radii.length-1){ out[i]=levels[k][i]; continue; }
+      const f=clamp((rr-radii[k])/(radii[k+1]-radii[k]),0,1);
+      out[i]=levels[k][i]*(1-f)+levels[k+1][i]*f;
+    }
+    return out;
   }
   /* one surface's gain under one light. The light adds where it lands; where it should land
      but is blocked (a cast shadow) or the surface turns away it takes a little away: that local
@@ -359,6 +382,8 @@ async function render(stage,gen){
   const img2=()=>new ImageData(gw,gh);
   const wLm=img2(), wLa=img2(), wSm=img2(), wSa=img2(), wMm=img2(), wMa=img2(), wR=img2();
   const G=[0,0,0], one=[1,1,1];
+  const wmap=(Wn,dm,da)=>({Wn,dm,da,E:new Float32Array(gw*gh),v:new Float32Array(gw*gh).fill(1),t:new Float32Array(gw*gh),b:new Float32Array(gw*gh)});
+  const WMAPS=[wmap(SUN,wSm,wSa),wmap(MOON,wMm,wMa)];
   for(let y=0;y<gh;y++){ const sy=Y0+(y+.5)*cell;
     if(!await breathe()) return false;
     for(let x=0;x<gw;x++){
@@ -371,19 +396,26 @@ async function render(stage,gen){
         if(R){ E0=R.E*Math.max(0,R.lz); lit=E0*visibility(sx,sy,0); }
         const bo=bounceAt(sx,sy)*Math.min(1,(shelfLine-sy)/(40*S)+.2);
         if(E0>0||bo>.002){ gain(G,E0,lit,bo,P.kWall,LAMP); gL=G.map(v=>1+(v-1)*ey); }
-        for(const [Wn,which] of [[SUN,'s'],[MOON,'m']]){
-          const ap=winAp(Wn,sx,sy,0); if(ap<=0) continue;
-          const E=Wn.I*ap*Wn.L[2], v=winVis(Wn,sx,sy,0);
-          gain(G,E,E*v,0,Wn.k,Wn); const g=G.map(q=>1+(q-1)*ey);
-          if(which==='s') gS=g; else gM=g;
+        for(const Wm of WMAPS){
+          const ap=winAp(Wm.Wn,sx,sy,0); if(ap<=0) continue;
+          Wm.E[i]=Wm.Wn.I*ap*Wm.Wn.L[2]; Wm.v[i]=winVis(Wm.Wn,sx,sy,0); Wm.t[i]=WT; Wm.b[i]=WT>0?1:0;
         }
       }
-      put4(wLm.data,wLa.data,o,gL); put4(wSm.data,wSa.data,o,gS); put4(wMm.data,wMa.data,o,gM);
+      put4(wLm.data,wLa.data,o,gL);
       /* the lamp's own pool keeps its daytime level at night: a lift of 1/night round it */
       const h=holeAt(sx,sy);
       for(let ch=0;ch<3;ch++){ const g=(NW[ch]+(1-NW[ch])*h)/NW[ch]; wR.data[o+ch]=(1-1/g)*255; }
       wR.data[o+3]=255;
     }
+  }
+  /* the window's shadows, softened by distance, then turned into light */
+  for(const Wm of WMAPS){
+    if(!await breathe()) return false;
+    const v=softShadow(Wm.v,Wm.t,Wm.b,gw,gh,cell,Wm.Wn);
+    for(let y=0;y<gh;y++){ const ey=Math.min(1,y/(30/cell));
+      for(let x=0;x<gw;x++){ const i=y*gw+x, o=i*4, E=Wm.E[i];
+        if(E>0){ gain(G,E,E*v[i],0,Wm.Wn.k,Wm.Wn); for(let ch=0;ch<3;ch++) G[ch]=1+(G[ch]-1)*ey; put4(Wm.dm.data,Wm.da.data,o,G); }
+        else put4(Wm.dm.data,Wm.da.data,o,one); } }
   }
   tm.wall=performance.now()-T0;
   await pause(); if(!alive()) return false;
@@ -392,12 +424,14 @@ async function render(stage,gen){
   const pc=P.cell, px0=lw.left;
   const pw=Math.ceil(lw.width/pc), ph=Math.ceil(lw.height/pc);
   const pNm=new ImageData(pw,ph), pNa=new ImageData(pw,ph), pDm=new ImageData(pw,ph), pDa=new ImageData(pw,ph);
-  const GL=[0,0,0], GM=[0,0,0], GS=[0,0,0], GN=[0,0,0];
+  const GL=[0,0,0], GM=[0,0,0], GS=[0,0,0], GN=[0,0,0], np=pw*ph;
+  const pmap=Wn=>({Wn,E:new Float32Array(np),v:new Float32Array(np).fill(1),t:new Float32Array(np),b:new Float32Array(np)});
+  const PS=pmap(SUN), PM=pmap(MOON), lampG=new Float32Array(np*3);
   for(let y=0;y<ph;y++){ const sy=lw.top+(y+.5)*pc, f=(sy-yBack)/faceH;
     if(!await breathe()) return false;
     for(let x=0;x<pw;x++){
-      const sx=px0+(x+.5)*pc, o=(y*pw+x)*4;
-      let E0=0, lit=0; GM[0]=GM[1]=GM[2]=1; GS[0]=GS[1]=GS[2]=1;
+      const sx=px0+(x+.5)*pc, i=y*pw+x;
+      let E0=0, lit=0;
       if(f>=-.05&&f<=1.05){
         const pz=clamp((sy-yBack)/c,0,shelfD), R=reach(sx,yBack,pz), roll=1-sstep(.86,1.05,f);
         if(R){ const top=R.E*Math.max(0,-R.ly);
@@ -405,17 +439,24 @@ async function render(stage,gen){
           E0=top*roll;
           const lipHi=P.plankLip*top*Math.exp(-(((f-.9)/.045)**2));
           if(E0+lipHi>.002) lit=(E0+lipHi)*visibility(sx,yBack,pz); }
-        for(const [Wn,Gx] of [[SUN,GS],[MOON,GM]]){
-          const ap=winAp(Wn,sx,yBack,pz)*roll; if(ap<=0) continue;
-          const E=Wn.I*ap*(-Wn.L[1]); if(E<=0) continue;
-          gain(Gx,E,E*winVis(Wn,sx,yBack,pz),0,Wn.k*.9,Wn);
+        for(const Pm of [PS,PM]){
+          const ap=winAp(Pm.Wn,sx,yBack,pz)*roll; if(ap<=0) continue;
+          const E=Pm.Wn.I*ap*(-Pm.Wn.L[1]); if(E<=0) continue;
+          Pm.E[i]=E; Pm.v[i]=winVis(Pm.Wn,sx,yBack,pz); Pm.t[i]=WT; Pm.b[i]=WT>0?1:0;
         }
       }
       gain(GL,E0,lit,f<1?bounceAt(sx,yBack)*.5:0,P.kPlank,LAMP);
-      const n=nObj(sx,sy);
-      for(let ch=0;ch<3;ch++) GN[ch]=n*GL[ch]*GM[ch];
-      put4(pNm.data,pNa.data,o,GN); put4(pDm.data,pDa.data,o,GS);
+      const n=nObj(sx,sy); for(let ch=0;ch<3;ch++) lampG[i*3+ch]=n*GL[ch];
     }
+  }
+  if(!await breathe()) return false;
+  const vS=softShadow(PS.v,PS.t,PS.b,pw,ph,pc,SUN), vM=softShadow(PM.v,PM.t,PM.b,pw,ph,pc,MOON);
+  for(let i=0;i<np;i++){ const o=i*4;
+    GM[0]=GM[1]=GM[2]=1; GS[0]=GS[1]=GS[2]=1;
+    if(PM.E[i]>0) gain(GM,PM.E[i],PM.E[i]*vM[i],0,MOON.k*.9,MOON);
+    if(PS.E[i]>0) gain(GS,PS.E[i],PS.E[i]*vS[i],0,SUN.k*.9,SUN);
+    for(let ch=0;ch<3;ch++) GN[ch]=lampG[i*3+ch]*GM[ch];
+    put4(pNm.data,pNa.data,o,GN); put4(pDm.data,pDa.data,o,GS);
   }
   tm.plank=performance.now()-T0;
   await pause(); if(!alive()) return false;
