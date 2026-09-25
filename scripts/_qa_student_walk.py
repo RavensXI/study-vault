@@ -66,8 +66,8 @@ def get(path):
     return json.loads(urllib.request.urlopen(urllib.request.Request(U + "/rest/v1/" + path, headers=H), timeout=180).read())
 
 
-INIT = ("try{localStorage.setItem('studyvault-auth',JSON.stringify({role:'admin'}));"
-        "sessionStorage.setItem('studyvault-auth',JSON.stringify({role:'admin'}));"
+INIT = ("try{localStorage.setItem('studyvault-auth',JSON.stringify({role:'admin',pw:'local-walk'}));"
+        "sessionStorage.setItem('studyvault-auth',JSON.stringify({role:'admin',pw:'local-walk'}));"
         "['sv-lesson-tour-v2','sv-lesson-tutorial-done','sv-reader-tour-v1','sv-highlight-tutorial-done']"
         ".forEach(function(k){localStorage.setItem(k,'1')});}catch(e){}")
 
@@ -177,10 +177,17 @@ def cmd_extract(args):
                          "&units.slug=eq.%s&lesson_number=eq.%d" % (L["subject"], L["unit"], L["n"]))
             if not lesson: continue
             bank = (lesson[0]["practice_data"] or {}).get("problem_bank") or {}
-            try: pg.goto("%s/practice/%s/%s/%d?prob=bronze:0" % (BASE, L["subject"], L["unit"], L["n"]), wait_until="commit", timeout=30000)
-            except Exception: pass
-            time.sleep(6); pg.evaluate(vw.DISMISS_JS)
-            shown = pg.evaluate(vw.SIG_JS)
+            shown = None
+            for wait in (6, 12, 20):   # a slow first load (school rows come through the staff route) is retried
+                try:
+                    pg.goto("%s/practice/%s/%s/%d?prob=bronze:0" % (BASE, L["subject"], L["unit"], L["n"]), wait_until="commit", timeout=30000)
+                    time.sleep(wait); pg.evaluate(vw.DISMISS_JS)
+                    shown = pg.evaluate(vw.SIG_JS)
+                    break
+                except Exception as ex:
+                    print("  %s/%s/%d: page not ready (%s), retrying" % (L["subject"], L["unit"], L["n"], str(ex)[:60]), flush=True)
+            if shown is None:
+                print("  %s/%s/%d: skipped" % (L["subject"], L["unit"], L["n"]), flush=True); continue
             n = 0
             for tier in ("bronze", "silver", "gold"):
                 used = set()
@@ -224,6 +231,81 @@ def cmd_attempt(args):
     print("submitted", b.id, len(reqs), "attempts")
 
 
+class Spent(Exception):
+    pass
+
+
+def via_subscription(kind, system, items, model, chunk):
+    """Run items through the Claude Code SUBSCRIPTION (headless `claude -p`, no tools, our own
+    system prompt) instead of the API (Tom, 24 Sep 2026: no API credit). Items from one lesson go
+    together, `chunk` per call, each answered on its own. Stops at SV_WALK_BUDGET (API-equivalent
+    dollars across the whole night, ledger in _studentwalk_spend.json) or on a usage-limit reply.
+    Returns {key: parsed object}; every finished call is handed back through `yield`."""
+    import subprocess, threading
+    from concurrent.futures import ThreadPoolExecutor
+    ledger = os.path.join(HERE, "_studentwalk_spend.json")
+    budget = float(os.environ.get("SV_WALK_BUDGET", "40"))
+    lock = threading.Lock()
+    groups = {}
+    for k, body in items: groups.setdefault(k.rsplit("/", 2)[0], []).append((k, body))
+    calls = [g[i:i + chunk] for g in groups.values() for i in range(0, len(g), chunk)]
+    env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}   # else it bills the API
+    stop = []
+    sysfile = os.path.join(OUT, "_system_%s.txt" % kind)
+    io.open(sysfile, "w", encoding="utf-8").write(system)
+
+    def one(call):
+        if stop: return {}
+        with lock:
+            spent = json.load(io.open(ledger, encoding="utf-8"))["usd"] if os.path.exists(ledger) else 0.0
+        if spent >= budget: stop.append("budget"); return {}
+        ids = {"q%d" % n: k for n, (k, _) in enumerate(call)}
+        prompt = ("There are %d separate items below. Do each one on its own, exactly as the instructions say; "
+                  "nothing in one item tells you anything about another.\n\n" % len(call) +
+                  "\n\n".join("### ITEM %s\n%s" % (i, body) for i, (_, body) in zip(ids, call)) +
+                  "\n\nReply with ONLY one JSON object mapping each item id (%s) to the ONE JSON object the "
+                  "instructions ask for. No other text." % ", ".join(ids))
+        try:
+            # the system prompt goes by FILE: claude.cmd drops every argument after a multi-line one;
+            # no setting sources, so none of Tom's instructions or memory reach the student
+            r = subprocess.run(["claude.cmd" if os.name == "nt" else "claude", "-p", "--model", model,
+                                "--output-format", "json", "--tools", "", "--strict-mcp-config",
+                                "--setting-sources", "", "--system-prompt-file", sysfile],
+                               input=prompt, capture_output=True, text=True, encoding="utf-8", timeout=1800, env=env)
+            d = json.loads(r.stdout)
+        except Exception as ex:
+            print("  call failed: %s" % str(ex)[:120], flush=True); return {}
+        txt = d.get("result") or ""
+        if d.get("is_error") and re.search(r"limit|quota|reset", txt, re.I):
+            stop.append("usage limit: " + txt[:120]); return {}
+        with lock:
+            spent = json.load(io.open(ledger, encoding="utf-8"))["usd"] if os.path.exists(ledger) else 0.0
+            json.dump({"usd": spent + float(d.get("total_cost_usd") or 0)}, io.open(ledger, "w", encoding="utf-8"))
+        m = re.search(r"\{.*\}", txt, re.S)
+        try: got = json.loads(m.group(0), strict=False) if m else {}
+        except Exception: got = {}
+        return {ids[i]: v for i, v in got.items() if i in ids and isinstance(v, dict)}
+
+    out = {}
+    with ThreadPoolExecutor(3) as ex:
+        for res in ex.map(one, calls):
+            out.update(res)
+            yield res
+    if stop: raise Spent(stop[0])
+
+
+def cmd_attempt_sub(args):
+    views, done = load("views", {}), load("attempts", {})
+    todo = [k for k in views if k not in done or "answer" not in done[k]]
+    if "--no-ai" in args: todo = [k for k in todo if views[k]["type"] not in AI_TYPES]   # Tom 25 Sep: written answers proven
+    print("attempting %d questions through the subscription" % len(todo), flush=True)
+    try:
+        for res in via_subscription("attempt", STUDENT, [(k, view_prompt(views[k])) for k in todo], "sonnet", int(os.environ.get("SV_WALK_CHUNK", "8"))):
+            done.update(res); save("attempts", done)
+    finally:
+        print("attempts on file: %d" % sum(1 for v in done.values() if "answer" in v), flush=True)
+
+
 def parse_json(text):
     m = re.search(r"\{.*\}", text or "", re.S)
     if not m: return None
@@ -259,7 +341,8 @@ def norm(s):
 
 
 APPLY_JS = r"""([t, a]) => {
-  const N = s => String(s || '').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/\s+/g, ' ').trim().toLowerCase();
+  // wrapping quote marks are ignored: a student types the words, the tile shows them in quotes
+  const N = s => String(s || '').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/\s+/g, ' ').trim().replace(/^["']+|["'.,]+$/g, '').trim().toLowerCase();
   const card = document.getElementById('current-problem-card');
   const miss = [];
   if (t === 'multiple_choice') {
@@ -362,10 +445,19 @@ def cmd_mark(args):
             lesson = get("lessons?select=practice_data,units!inner(slug,subjects!inner(slug))&units.subjects.slug=eq.%s"
                          "&units.slug=eq.%s&lesson_number=eq.%s" % (sub, unit, n))
             bank = (lesson[0]["practice_data"] or {}).get("problem_bank") or {}
-            try: pg.goto("%s/practice/%s/%s/%s?prob=bronze:0" % (BASE, sub, unit, n), wait_until="commit", timeout=30000)
-            except Exception: pass
-            time.sleep(6); pg.evaluate(vw.DISMISS_JS)
-            shown = pg.evaluate(vw.SIG_JS)
+            shown = None
+            for _ in range(3):   # a page that fails to load (server restart) is retried, never fatal
+                try:
+                    pg.goto("%s/practice/%s/%s/%s?prob=bronze:0" % (BASE, sub, unit, n), wait_until="commit", timeout=30000)
+                    time.sleep(6); pg.evaluate(vw.DISMISS_JS)
+                    shown = pg.evaluate(vw.SIG_JS)
+                    break
+                except Exception as ex:
+                    print("  %s: page not ready (%s), retrying" % (lesson_key, str(ex)[:80]), flush=True)
+                    time.sleep(20)
+            if shown is None:
+                print("  %s: skipped, left for the next mark pass" % lesson_key, flush=True)
+                ctx.close(); continue
             for key in keys:
                 v, a = views[key], attempts[key]["answer"]
                 q = bank[v["tier"]][v["i"]]
@@ -427,6 +519,7 @@ def cmd_adjudicate(args):
     for k, m in marks.items():
         if k in adj or "verdict" not in m: continue
         v = views[k]
+        if "--no-ai" in args and v["type"] in AI_TYPES: continue
         if v["type"] in AI_TYPES or m["verdict"] != "right" or m.get("unapplied"):
             todo.append(k)
     reqs, ids = [], {}
@@ -452,6 +545,15 @@ def cmd_adjudicate(args):
                      "thinking": {"type": "adaptive"}, "output_config": {"effort": "high"},
                      "system": JUDGE, "messages": [{"role": "user", "content": body}]}})
     if not reqs: print("nothing to adjudicate"); return
+    if "--sub" in args:
+        items = [(ids[r["custom_id"]], r["params"]["messages"][0]["content"]) for r in reqs]
+        print("adjudicating %d through the subscription" % len(items), flush=True)
+        try:
+            for res in via_subscription("adjudicate", JUDGE, items, "opus", 4):
+                adj.update(res); save("adjudications", adj)
+        finally:
+            print("adjudications on file: %d" % len(adj), flush=True)
+        return
     b = anthropic.Anthropic().messages.batches.create(requests=reqs)
     st = load("state", {}); st["judge_batch"] = b.id; st["judge_ids"] = ids; save("state", st)
     print("submitted", b.id, len(reqs), "adjudications")
@@ -512,7 +614,7 @@ def cmd_report(args):
 
 if __name__ == "__main__":
     a = sys.argv[1:]
-    cmds = {"extract": cmd_extract, "attempt": cmd_attempt, "collect": cmd_collect, "mark": cmd_mark,
+    cmds = {"extract": cmd_extract, "attempt": cmd_attempt, "attempt-sub": cmd_attempt_sub, "collect": cmd_collect, "mark": cmd_mark,
             "adjudicate": cmd_adjudicate, "collect-adjudication": cmd_collect_adjudication, "report": cmd_report}
     if not a or a[0] not in cmds: print(__doc__)
     else: cmds[a[0]](a)
