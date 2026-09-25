@@ -13,15 +13,21 @@
    - every object is shaded by its own shape (normals estimated from its silhouette and paint),
      with a brass sheen on the trophy and a glassy glint on the inkwell;
    - the inside of the shade glows, the bulb blooms, a faint haze hangs in the beam;
+   - a window in the left-hand wall (off the page) lets in the sun by day and the moon by night:
+     parallel light, so a slanted patch with the window's bars lands on the wall and plank, and
+     the shelf's objects throw crisp shadows into it;
+   - lamp on is night: the room dims (welcome.html's CSS), and round the lamp the render lifts
+     it back to its daytime level, so its light is the brightest thing on the page;
    - and, as in a photograph, the eye's reference moves: under the light the camera pulls its
      exposure down a touch (which is what turns a pale wall warm rather than just white), and a
      patch the lamp should reach but can't (a cast shadow, a side turned away) reads darker.
      Nothing the lamp can't reach changes at all.
 
-   Output is a handful of canvases: two over the wallpaper and two over the plank (multiply for
-   the darkening, colour-dodge for the light: together exactly surface x gain), one relit copy of
-   each object laid over its own image, and one glow sheet in front. welcome.html's CSS fades
-   them in and out with the lamp's .lit class. If anything here fails (a canvas that can't be
+   Output is a handful of canvases in three sets: n (the lamp and the night it brings, shown with
+   .lit), m (moonlight, with .night) and d (daylight, without .night). Over the wallpaper and the
+   plank they come in pairs (multiply for the darkening, colour-dodge for the light: together
+   exactly surface x gain); each object gets a relit copy laid over its own image; one glow
+   sheet sits in front. welcome.html's CSS fades each set in and out. If anything here fails (a canvas that can't be
    read, say, on file://) the page keeps its simpler CSS light. The work is sliced into ~12ms
    pieces so the page never stalls while it draws; window.__lampLight.P holds every dial. */
 (function(){
@@ -46,8 +52,13 @@ const P={
   bounce:.26, bounceR:340,        /* warm fill bouncing off the lit shelf */
   wrap:.2, round:7, bumpShape:3.2, bumpPaint:1.4,
   haze:.035, bloom:.45,
-  dusk:.17, duskTint:[1,1.01,.93],      /* the rest of the page dims this much while the lamp is on */
-  duskRx:760, duskRy:430, duskShift:200, duskDrop:120,   /* the lamp's own pool is left alone */
+  night:{obj:.52, wall:[.5,.52,.6]},  /* how dark the room goes at night: objects, and the wall (a touch blue) */
+  hole:{rx:470, ry:400, shift:90, drop:110},  /* round the lamp, while it's on, the room keeps its level */
+  /* the window, in the left-hand wall off the page: how far out (x), its top and bottom above the
+     shelf, how far it reaches out into the room (z0..z1), and the bar across it */
+  win:{x:60, top:430, bottom:175, z0:160, z1:560, bar:22},
+  sun:{dir:[.62,.40,-.68], I:.95, k:.8, expo:.55, tint:[1,.92,.74], kShadow:.4, shadowReach:1.4, soft:.012, spread:.35, samples:5},
+  moon:{dir:[.60,.34,-.72], I:.5, k:.9, expo:0, tint:[.72,.84,1.08], kShadow:.3, shadowReach:1.4, soft:.02, spread:.5, samples:5},
   shelfDepth:240,                /* the wall to the plank's front edge */
   faceFrac:0.315,                /* the plank's top face, as a share of the ledge strip */
   depth:{book:72, bookstack:112, trophy:80, inkwell:118, bookend:60, lamp:150, def:80},
@@ -175,6 +186,7 @@ function kindOf(img){
 let SETTLED=false, GEN=0;
 function layer(cls,w,h){ const c=document.createElement('canvas'); c.className='ll-cv '+cls; c.width=Math.max(1,w); c.height=Math.max(1,h);
   c.setAttribute('aria-hidden','true'); return c; }
+const ZERO=[0,0];
 
 async function render(stage,gen){
   const alive=()=>gen===GEN;
@@ -192,11 +204,12 @@ async function render(stage,gen){
   const dpr=Math.min(2,window.devicePixelRatio||1);
   const LM=affine(lampImg); if(!LM) return false;
   const S=Math.hypot(LM.vx,LM.vy)*LM.H/330;                 /* screen px per lamp px */
-  const lr=ledge.getBoundingClientRect(), lw=ledgeWrap.getBoundingClientRect();
+  const lr=ledge.getBoundingClientRect(), lw=ledgeWrap.getBoundingClientRect(), rowR=row.getBoundingClientRect();
   const yBack=lr.top, faceH=lr.height*P.faceFrac;
   const shelfD=P.shelfDepth*S, c=faceH/shelfD;              /* oblique: screen y = world y + c*z */
+  const shelfLine=yBack+faceH*.3;                           /* below this the wall is behind the plank */
 
-  /* ---- the light: a spotlight at the shade's mouth, an emitter the size of the mouth ---- */
+  /* ---- the lamp: a spotlight at the shade's mouth, an emitter the size of the mouth ---- */
   const ms=mapPt(LM,P.mouth[0]*LM.W,P.mouth[1]*LM.H), bs=mapPt(LM,P.bulb[0]*LM.W,P.bulb[1]*LM.H);
   const zL=P.zL*S, Lc=[ms[0], ms[1]-c*zL, zL];
   const A=norm(P.axis), cosI=Math.cos(P.inner*D2R), cosO=Math.cos(P.outer*D2R), cosS=Math.cos(P.spillTo*D2R);
@@ -214,7 +227,7 @@ async function render(stage,gen){
     const lip=P.lip*Math.exp(-(((ct-lipC)/.03)**2));
     return core*(hot+lip)+P.spill*sstep(cosS,cosO,ct);
   }
-  /* unshadowed light arriving at a point, per unit of facing (the caller applies n.l) */
+  /* unshadowed lamplight arriving at a point, per unit of facing (the caller applies n.l) */
   function reach(px,py,pz){
     const dx=px-Lc[0], dy=py-Lc[1], dz=pz-Lc[2], r2=dx*dx+dy*dy+dz*dz, r=Math.sqrt(r2);
     const sp=spot((dx*A[0]+dy*A[1]+dz*A[2])/r); if(sp<=0) return null;
@@ -225,14 +238,44 @@ async function render(stage,gen){
   const bR2=(P.bounceR*S)**2;
   const bounceAt=(x,y)=>P.bounce*Math.exp(-((x-pool[0])**2+((y-pool[1])*1.25)**2)/bR2);
 
-  /* ---- the working area: the wall the lamp can reach, from above the case to the shelf ---- */
+  /* ---- the window: an opening in the left-hand wall (off the page), sun through it by day and
+     moon by night. Parallel light, so a patch the shape of the window (two bars across it)
+     lands slanted on the wall, and everything on the shelf throws a crisp shadow into it ---- */
+  const W=P.win, xW=rowR.left-W.x*S;
+  const wy0=yBack-W.top*S, wy1=yBack-W.bottom*S, wz0=W.z0*S, wz1=W.z1*S, wbar=W.bar*S;
+  const wym=(wy0+wy1)/2, wzm=(wz0+wz1)/2;
+  const sbox=(v,a,b,s)=>sstep(a-s,a+s,v)*(1-sstep(b-s,b+s,v));
+  function mkWin(o){
+    const D=norm(o.dir), L=[-D[0],-D[1],-D[2]];
+    const u1=norm([-L[1],L[0],0]), u2=norm([L[1]*u1[2]-L[2]*u1[1], L[2]*u1[0]-L[0]*u1[2], L[0]*u1[1]-L[1]*u1[0]]);
+    const dirs=[]; for(let j=0;j<o.samples;j++){ const th=j*2.39996323, rr=Math.sqrt((j+.5)/o.samples)*Math.tan(o.spread*D2R);
+      dirs.push(norm([L[0]+rr*(Math.cos(th)*u1[0]+Math.sin(th)*u2[0]), L[1]+rr*(Math.cos(th)*u1[1]+Math.sin(th)*u2[1]), L[2]+rr*(Math.cos(th)*u1[2]+Math.sin(th)*u2[2])])); }
+    return {...o, L, dirs};
+  }
+  const SUN=mkWin(P.sun), MOON=mkWin(P.moon);
+  /* how much of the window a point sees along the light (soft with distance, like a real patch) */
+  function winAp(Wn,px,py,pz){
+    const L=Wn.L; const t=(xW-px)/L[0]; if(!(t>0)) return 0;
+    const qy=py+L[1]*t, qz=pz+L[2]*t, s=Math.max(1.5*S,t*Wn.soft);
+    const a=sbox(qy,wy0,wy1,s)*sbox(qz,wz0,wz1,s);
+    if(a<=0.001) return 0;
+    return a*(1-sbox(qz,wzm-wbar/2,wzm+wbar/2,s*.7))*(1-sbox(qy,wym-wbar/2,wym+wbar/2,s*.7));
+  }
+
+  /* ---- night: the room dims, save round the lamp while it's on ---- */
+  const NK=P.night.obj, NW=P.night.wall;
+  const hx=(ms[0]+pool[0])/2-P.hole.shift*S, hy=ms[1]+P.hole.drop*S, hrx=P.hole.rx*S, hry=P.hole.ry*S;
+  const holeAt=(x,y)=>{ const e=Math.sqrt(((x-hx)/hrx)**2+((y-hy)/hry)**2);
+    return (1-clamp((e-.28)/.72,0,1))*(1-sstep(lw.bottom-8*S,lw.bottom,y)); };
+  const nObj=(x,y)=>NK+(1-NK)*holeAt(x,y);
+
+  /* ---- the working area: this shelf's whole width, from above the case down to the plank ---- */
   const cell=P.cell;
-  const X0=Math.max(sr.left,ms[0]-P.reachL*S), X1=Math.min(sr.right,ms[0]+P.reachR*S);
-  const Y0=Math.max(sr.top-170*k,ms[1]-P.reachU*S), Y1=lw.bottom;
+  const X0=sr.left, X1=sr.right;
+  const Y0=Math.max(sr.top-170*k,Math.min(ms[1]-P.reachU*S,wy0)), Y1=lw.bottom;
   const gw=Math.ceil((X1-X0)/cell), gh=Math.ceil((Y1-Y0)/cell);
-  const inBox=(r)=>r.right>X0&&r.left<X1&&r.bottom>Y0&&r.top<Y1;
   const imgs=[...row.querySelectorAll('.bk img, .prop img, img.bookend, .lampwrap .lamp')]
-    .filter(i=>i.offsetWidth&&i.getClientRects().length&&i.complete&&i.naturalWidth&&inBox(i.getBoundingClientRect()));
+    .filter(i=>i.offsetWidth&&i.getClientRects().length&&i.complete&&i.naturalWidth);
 
   /* depth map: which cut-out covers each cell, and how far out from the wall its front is */
   const depth=new Float32Array(gw*gh).fill(-1), cov=new Float32Array(gw*gh);
@@ -268,8 +311,10 @@ async function render(stage,gen){
   }
   tm.depth=performance.now()-T0;
   await pause(); if(!alive()) return false;
-  /* how much of the mouth a world point can see: march each ray back through the cut-outs
-     (only the stretch of it that is still close enough to the wall to hit one) */
+  const blockedAt=(sx,sy,z)=>{ const gx=((sx-X0)/cell)|0, gy=((sy-Y0)/cell)|0;
+    if(gx<0||gy<0||gx>=gw||gy>=gh) return false; const i=gy*gw+gx; return cov[i]>.35&&depth[i]>=z; };
+  /* how much of the lamp's mouth a world point can see: march each ray back through the
+     cut-outs (only the stretch of it still close enough to the wall to hit one) */
   function visibility(px,py,pz){
     let lit=0; const st=P.steps;
     for(let j=0;j<NS;j++){
@@ -279,82 +324,104 @@ async function render(stage,gen){
       let blocked=false;
       for(let s=0;s<st;s++){
         const t=(s+.55)/st*tMax, z=pz+dz*t;
-        const gx=((px+dx*t-X0)/cell)|0, gy=((py+dy*t+c*z-Y0)/cell)|0;
-        if(gx<0||gy<0||gx>=gw||gy>=gh) continue;
-        const i=gy*gw+gx;
-        if(cov[i]>.35&&depth[i]>=z){ blocked=true; break; }
+        if(blockedAt(px+dx*t, py+dy*t+c*z, z)){ blocked=true; break; }
       }
       if(!blocked) lit++;
     }
     return lit/NS;
   }
-  /* one surface's gain. The lamp adds warm light where it lands; where it should land but is
-     blocked (a cast shadow) or the surface turns away (a form shadow) it takes a little away:
-     that local contrast is what makes a lamp read as light rather than a tint */
-  const T=P.tint;
-  function gain(out,o,E0,lit,bo,k){
-    const miss=Math.min(1,E0*P.shadowReach)*(1-lit/Math.max(E0,1e-6))*P.kShadow;
-    /* a camera looking at a lamplit patch pulls its exposure down a little there: on a pale wall
-       that is what turns 'brighter' into 'warmer' (blue sinks as red climbs) */
-    const L=k*(lit+bo), ex=1+L*P.expo;
-    for(let ch=0;ch<3;ch++) out[o+ch]=(1+L*T[ch])/ex-miss*(ch===2?.9:1);
+  /* the same for the window: a few directions across the sun's (or moon's) disc and sky */
+  function winVis(Wn,px,py,pz){
+    if(pz>=Dmax) return 1;
+    let lit=0; const st=8;
+    for(const L of Wn.dirs){
+      const sMax=(Dmax-pz)/L[2]; let blocked=false;
+      for(let s=0;s<st;s++){ const t=(s+.55)/st*sMax, z=pz+L[2]*t;
+        if(blockedAt(px+L[0]*t, py+L[1]*t+c*z, z)){ blocked=true; break; } }
+      if(!blocked) lit++;
+    }
+    return lit/Wn.dirs.length;
   }
+  /* one surface's gain under one light. The light adds where it lands; where it should land
+     but is blocked (a cast shadow) or the surface turns away it takes a little away: that local
+     contrast is what makes it read as light rather than a tint. Under strong light the camera
+     pulls its exposure down a touch, which turns a pale wall warm rather than just white. */
+  function gain(out,E0,lit,bo,k,Lt){
+    const miss=Math.min(1,E0*Lt.shadowReach)*(1-lit/Math.max(E0,1e-6))*Lt.kShadow;
+    const L=k*(lit+bo), ex=1+L*Lt.expo;
+    for(let ch=0;ch<3;ch++) out[ch]=(1+L*Lt.tint[ch])/ex-miss*(ch===2?.9:1);
+  }
+  const LAMP={tint:P.tint, expo:P.expo, kShadow:P.kShadow, shadowReach:P.shadowReach};
+  const put4=(dm,da,o,g)=>{ for(let ch=0;ch<3;ch++){ const v=g[ch];
+      dm[o+ch]=clamp(v,0,1)*255; da[o+ch]=v>1?(1-1/v)*255:0; } dm[o+3]=255; da[o+3]=255; };
 
-  /* ---- wall ---- */
-  const wallMul=new ImageData(gw,gh), wallAdd=new ImageData(gw,gh), G=new Float32Array(3);
-  const shelfLine=yBack+faceH*.3;                   /* below this the wall is behind the plank */
+  /* ---- wall: lamp, window and the night's lifting round the lamp, each its own pair ---- */
+  const img2=()=>new ImageData(gw,gh);
+  const wLm=img2(), wLa=img2(), wSm=img2(), wSa=img2(), wMm=img2(), wMa=img2(), wR=img2();
+  const G=[0,0,0], one=[1,1,1];
   for(let y=0;y<gh;y++){ const sy=Y0+(y+.5)*cell;
     if(!await breathe()) return false;
     for(let x=0;x<gw;x++){
-      const i=y*gw+x, sx=X0+(x+.5)*cell;
-      const pz=0, py=sy;                          /* the wall itself; objects are relit on their own */
-      let E0=0, lit=0, bo=0;
+      const i=y*gw+x, sx=X0+(x+.5)*cell, o=i*4;
+      const ey=Math.min(1,y/(30/cell));               /* soften into the top edge so it never shows */
+      let gL=one, gS=one, gM=one;
       if(sy<shelfLine&&!(cov[i]>.97)){
-        const R=reach(sx,py,pz);
-        if(R){ const v=visibility(sx,py,pz); E0=R.E*Math.max(0,R.lz); lit=E0*v; }
-        bo=bounceAt(sx,sy)*Math.min(1,(shelfLine-sy)/(40*S)+.2);
+        const R=reach(sx,sy,0);
+        let E0=0, lit=0;
+        if(R){ E0=R.E*Math.max(0,R.lz); lit=E0*visibility(sx,sy,0); }
+        const bo=bounceAt(sx,sy)*Math.min(1,(shelfLine-sy)/(40*S)+.2);
+        if(E0>0||bo>.002){ gain(G,E0,lit,bo,P.kWall,LAMP); gL=G.map(v=>1+(v-1)*ey); }
+        for(const [Wn,which] of [[SUN,'s'],[MOON,'m']]){
+          const ap=winAp(Wn,sx,sy,0); if(ap<=0) continue;
+          const E=Wn.I*ap*Wn.L[2], v=winVis(Wn,sx,sy,0);
+          gain(G,E,E*v,0,Wn.k,Wn); const g=G.map(q=>1+(q-1)*ey);
+          if(which==='s') gS=g; else gM=g;
+        }
       }
-      gain(G,0,E0,lit,bo,P.kWall);
-      /* soften into the edges of the working area so it never shows */
-      const ex=Math.min(x,gw-1-x)/(30/cell), ey=Math.min(y,gh)/(30/cell), fe=Math.min(1,ex,ey);
-      const o=i*4;
-      for(let ch=0;ch<3;ch++){ const g=1+(G[ch]-1)*fe;
-        wallMul.data[o+ch]=clamp(g,0,1)*255; wallAdd.data[o+ch]=g>1?(1-1/g)*255:0; }
-      wallMul.data[o+3]=255; wallAdd.data[o+3]=255;
+      put4(wLm.data,wLa.data,o,gL); put4(wSm.data,wSa.data,o,gS); put4(wMm.data,wMa.data,o,gM);
+      /* the lamp's own pool keeps its daytime level at night: a lift of 1/night round it */
+      const h=holeAt(sx,sy);
+      for(let ch=0;ch<3;ch++){ const g=(NW[ch]+(1-NW[ch])*h)/NW[ch]; wR.data[o+ch]=(1-1/g)*255; }
+      wR.data[o+3]=255;
     }
   }
   tm.wall=performance.now()-T0;
   await pause(); if(!alive()) return false;
 
-  /* ---- plank: its top face takes the pool of light and the objects' shadows ---- */
-  const pc=P.cell, px0=Math.max(lw.left,X0), px1=Math.min(lw.right,X1);
-  const pw=Math.ceil((px1-px0)/pc), ph=Math.ceil(lw.height/pc);
-  const plMul=new ImageData(pw,ph), plAdd=new ImageData(pw,ph);
+  /* ---- plank: its top face takes the pool of light, the window patch and the shadows ---- */
+  const pc=P.cell, px0=lw.left;
+  const pw=Math.ceil(lw.width/pc), ph=Math.ceil(lw.height/pc);
+  const pNm=new ImageData(pw,ph), pNa=new ImageData(pw,ph), pDm=new ImageData(pw,ph), pDa=new ImageData(pw,ph);
+  const GL=[0,0,0], GM=[0,0,0], GS=[0,0,0], GN=[0,0,0];
   for(let y=0;y<ph;y++){ const sy=lw.top+(y+.5)*pc, f=(sy-yBack)/faceH;
     if(!await breathe()) return false;
     for(let x=0;x<pw;x++){
       const sx=px0+(x+.5)*pc, o=(y*pw+x)*4;
-      let E0=0, lit=0;
+      let E0=0, lit=0; GM[0]=GM[1]=GM[2]=1; GS[0]=GS[1]=GS[2]=1;
       if(f>=-.05&&f<=1.05){
-        const pz=clamp((sy-yBack)/c,0,shelfD), R=reach(sx,yBack,pz);
+        const pz=clamp((sy-yBack)/c,0,shelfD), R=reach(sx,yBack,pz), roll=1-sstep(.86,1.05,f);
         if(R){ const top=R.E*Math.max(0,-R.ly);
           /* the top face, rolling over at the front edge, where the rounded lip catches a thin line of light */
-          E0=top*(1-sstep(.86,1.05,f));
+          E0=top*roll;
           const lipHi=P.plankLip*top*Math.exp(-(((f-.9)/.045)**2));
           if(E0+lipHi>.002) lit=(E0+lipHi)*visibility(sx,yBack,pz); }
+        for(const [Wn,Gx] of [[SUN,GS],[MOON,GM]]){
+          const ap=winAp(Wn,sx,yBack,pz)*roll; if(ap<=0) continue;
+          const E=Wn.I*ap*(-Wn.L[1]); if(E<=0) continue;
+          gain(Gx,E,E*winVis(Wn,sx,yBack,pz),0,Wn.k*.9,Wn);
+        }
       }
-      const bo=f<1?bounceAt(sx,yBack)*.5:0;
-      gain(G,0,E0,lit,bo,P.kPlank);
-      const ex=Math.min(x,pw-1-x)/(30/pc), fe=Math.min(1,ex);
-      for(let ch=0;ch<3;ch++){ const g=1+(G[ch]-1)*fe;
-        plMul.data[o+ch]=clamp(g,0,1)*255; plAdd.data[o+ch]=g>1?(1-1/g)*255:0; }
-      plMul.data[o+3]=255; plAdd.data[o+3]=255;
+      gain(GL,E0,lit,f<1?bounceAt(sx,yBack)*.5:0,P.kPlank,LAMP);
+      const n=nObj(sx,sy);
+      for(let ch=0;ch<3;ch++) GN[ch]=n*GL[ch]*GM[ch];
+      put4(pNm.data,pNa.data,o,GN); put4(pDm.data,pDa.data,o,GS);
     }
   }
   tm.plank=performance.now()-T0;
   await pause(); if(!alive()) return false;
 
-  /* ---- each object, relit from its own pixels ---- */
+  /* ---- each object, relit from its own pixels: a night copy (lamp, moon, the room's dimming)
+     and, where the sun reaches it, a day copy ---- */
   const cr=Math.cos(-P.rimRot*D2R), sn=Math.sin(-P.rimRot*D2R), rA=P.rimA*S, rB=P.rimB*S;
   const ell=(sx,sy)=>{ const dx=sx-ms[0], dy=sy-ms[1], u=dx*cr-dy*sn, v=dx*sn+dy*cr; return Math.sqrt((u/rA)**2+(v/rB)**2); };
   const objLayers=[];
@@ -363,74 +430,89 @@ async function render(stage,gen){
     const su=Math.hypot(M.ux,M.uy), sv=Math.hypot(M.vx,M.vy);
     const bw=Math.round(M.W*su*dpr), bh=Math.round(M.H*sv*dpr); if(bw<2||bh<2) continue;
     const src=pixelsOf(img,bw,bh), d=src.data, n=bw*bh;
-    const out=new ImageData(bw,bh), od=out.data;
+    const outN=new ImageData(bw,bh), oN=outN.data, outD=new ImageData(bw,bh), oD=outD.data;
+    let sunTouched=false;
     const mat=MAT[kind]||MAT.def;
-    let shape=null, paint=null;
-    {
-      const alpha=new Float32Array(n), lum=new Float32Array(n);
-      for(let i=0;i<n;i++){ alpha[i]=d[i*4+3]/255; lum[i]=(.3*d[i*4]+.59*d[i*4+1]+.11*d[i*4+2])/255; }
-      shape=blur(alpha,bw,bh,Math.max(2,Math.round(P.round*S*su/k*dpr))); paint=blur(lum,bw,bh,Math.max(1,Math.round(dpr)));
-    }
+    const alpha=new Float32Array(n), lum=new Float32Array(n);
+    for(let i=0;i<n;i++){ alpha[i]=d[i*4+3]/255; lum[i]=(.3*d[i*4]+.59*d[i*4+1]+.11*d[i*4+2])/255; }
+    const shape=blur(alpha,bw,bh,Math.max(2,Math.round(P.round*S*su/k*dpr))), paint=blur(lum,bw,bh,Math.max(1,Math.round(dpr)));
     const Ux=M.ux/su, Uy=M.uy/su, Vx=M.vx/sv, Vy=M.vy/sv;          /* image axes on screen */
-    /* this object's own shadow map, traced from its own face (the wall's map is a different
-       plane: borrowing it smudged the wall's shadows onto the objects' edges) */
-    let ov=null, oX=0, oY=0, ow=0, oh=0; const oc=P.cell;
-    {
-      const cs=[mapPt(M,0,0),mapPt(M,M.W,0),mapPt(M,0,M.H),mapPt(M,M.W,M.H)];
-      oX=Math.min(...cs.map(p=>p[0]))-oc; oY=Math.min(...cs.map(p=>p[1]))-oc;
-      ow=Math.ceil((Math.max(...cs.map(p=>p[0]))+oc-oX)/oc)+1; oh=Math.ceil((Math.max(...cs.map(p=>p[1]))+oc-oY)/oc)+1;
-      ov=new Float32Array(ow*oh);
-      for(let y=0;y<oh;y++){ if(!await breathe()) return false; for(let x=0;x<ow;x++){
-        const sx=oX+(x+.5)*oc, sy=oY+(y+.5)*oc, py=sy-c*D;
-        ov[y*ow+x]=reach(sx,py,D)?visibility(sx,py,D):1; } }
-    }
-    const ovAt=(sx,sy)=>{ const gx=clamp((sx-oX)/oc-.5,0,ow-1.001), gy=clamp((sy-oY)/oc-.5,0,oh-1.001);
+    /* this object's own shadow maps, traced from its own face (the wall's maps are a different
+       plane: borrowing them smudged the wall's shadows onto the objects' edges) */
+    const oc=P.cell, cs=[mapPt(M,0,0),mapPt(M,M.W,0),mapPt(M,0,M.H),mapPt(M,M.W,M.H)];
+    const oX=Math.min(...cs.map(p=>p[0]))-oc, oY=Math.min(...cs.map(p=>p[1]))-oc;
+    const ow=Math.ceil((Math.max(...cs.map(p=>p[0]))+oc-oX)/oc)+1, oh=Math.ceil((Math.max(...cs.map(p=>p[1]))+oc-oY)/oc)+1;
+    const ovL=new Float32Array(ow*oh), ovS=new Float32Array(ow*oh), ovM=new Float32Array(ow*oh);
+    for(let y=0;y<oh;y++){ if(!await breathe()) return false; for(let x=0;x<ow;x++){
+      const sx=oX+(x+.5)*oc, sy=oY+(y+.5)*oc, py=sy-c*D, i=y*ow+x;
+      ovL[i]=reach(sx,py,D)?visibility(sx,py,D):1;
+      ovS[i]=winAp(SUN,sx,py,D)>0?winVis(SUN,sx,py,D):1;
+      ovM[i]=winAp(MOON,sx,py,D)>0?winVis(MOON,sx,py,D):1; } }
+    const gAt=(g,sx,sy)=>{ const gx=clamp((sx-oX)/oc-.5,0,ow-1.001), gy=clamp((sy-oY)/oc-.5,0,oh-1.001);
       const x=gx|0, y=gy|0, fx=gx-x, fy=gy-y, i=y*ow+x;
-      return (ov[i]*(1-fx)+ov[i+1]*fx)*(1-fy)+(ov[i+ow]*(1-fx)+ov[i+ow+1]*fx)*fy; };
+      return (g[i]*(1-fx)+g[i+1]*fx)*(1-fy)+(g[i+ow]*(1-fx)+g[i+ow+1]*fx)*fy; };
     const bumpS=P.bumpShape*mat.bump*S*dpr, bumpP=P.bumpPaint*mat.bump*dpr;
-    const du=M.W/bw, dv=M.H/bh;
+    const du=M.W/bw, dv=M.H/bh, kd=P.kObj*mat.kd;
+    const specCol=(r,g,b)=>mat.metal?[r*1.5+40,(g*1.45+30)*.92,(b*1.3+10)*.8]:[255,236*.92,205*.8];
     for(let y=0;y<bh;y++){ if(!await breathe()) return false; for(let x=0;x<bw;x++){
       const i=y*bw+x, q=i*4, a=d[q+3]; if(!a) continue;
       const u=(x+.5)*du, v=(y+.5)*dv, sx=M.ox+u*M.ux+v*M.vx, sy=M.oy+u*M.uy+v*M.vy;
-      let r=d[q], g=d[q+1], b=d[q+2];
+      const r0=d[q], g0=d[q+1], b0=d[q+2];
+      const nt=nObj(sx,sy);
+      let rN, gN, bN;
       if(kind==='lamp'&&u<M.W*.62&&v<M.H*.5){
         /* the shade stands behind its own beam: only its opening changes */
+        rN=r0*nt; gN=g0*nt; bN=b0*nt;
         const e=ell(sx,sy);
         if(e<1.14){
-          const lum=(.3*r+.59*g+.11*b)/255;
+          const lm=(.3*r0+.59*g0+.11*b0)/255;
           const inside=1-sstep(.84,1,e), ring=Math.exp(-(((e-1)/.07)**2));
-          const t=sstep(.1,1,e), m=.72+.5*lum;
+          const t=sstep(.1,1,e), m=.72+.5*lm;
           let gr=255*m, gg=(246-70*t)*m, gb=(218-128*t)*m;
           const db=Math.sqrt((sx-bs[0])**2+(sy-bs[1])**2)/(P.bulbR*S), core=Math.exp(-db*db);
           gr+=255*core; gg+=250*core; gb+=238*core;
           const w=inside*.95;
-          r=r*(1-w)+gr*w; g=g*(1-w)+gg*w; b=b*(1-w)+gb*w;
-          r+=95*ring; g+=66*ring; b+=28*ring;
+          rN=rN*(1-w)+gr*w; gN=gN*(1-w)+gg*w; bN=bN*(1-w)+gb*w;
+          rN+=95*ring; gN+=66*ring; bN+=28*ring;
         }
-      } else {
-        /* a normal from the silhouette (rounded edges) and the paint (brush relief) */
-        const xl=x>0?i-1:i, xr=x<bw-1?i+1:i, yu=y>0?i-bw:i, yd=y<bh-1?i+bw:i;
-        const gx=(shape[xr]-shape[xl])*bumpS+(paint[xr]-paint[xl])*bumpP;
-        const gy=(shape[yd]-shape[yu])*bumpS+(paint[yd]-paint[yu])*bumpP;
-        let nx=-(gx*Ux+gy*Vx), ny=-(gx*Uy+gy*Vy), nz=1; const nl=Math.sqrt(nx*nx+ny*ny+1); nx/=nl; ny/=nl; nz/=nl;
-        const py=sy-c*D, R=reach(sx,py,D);
-        let E0=0, lit=0, spec=0;
-        if(R){
-          const vv=ovAt(sx,sy), ndl=nx*R.lx+ny*R.ly+nz*R.lz, wrap=Math.max(0,(ndl+P.wrap)/(1+P.wrap));
-          E0=R.E; lit=R.E*wrap*vv;
-          if(ndl>0){ const hx=R.lx, hy=R.ly, hz=R.lz+1, hl=Math.sqrt(hx*hx+hy*hy+hz*hz);
-            spec=Math.pow(Math.max(0,(nx*hx+ny*hy+nz*hz)/hl),mat.shin)*R.E*vv*mat.ks; }
-        }
-        gain(G,0,E0,lit,bounceAt(sx,sy)*.8,P.kObj*mat.kd);
-        const sr_=mat.metal?r*1.5+40:255, sg=mat.metal?g*1.45+30:236, sb=mat.metal?b*1.3+10:205;
-        r=r*G[0]+spec*sr_; g=g*G[1]+spec*sg*.92; b=b*G[2]+spec*sb*.8;
+        oN[q]=rN; oN[q+1]=gN; oN[q+2]=bN; oN[q+3]=a;
+        continue;
       }
-      od[q]=r; od[q+1]=g; od[q+2]=b; od[q+3]=a;   /* the typed array clamps */
+      /* a normal from the silhouette (rounded edges) and the paint (brush relief) */
+      const xl=x>0?i-1:i, xr=x<bw-1?i+1:i, yu=y>0?i-bw:i, yd=y<bh-1?i+bw:i;
+      const gx=(shape[xr]-shape[xl])*bumpS+(paint[xr]-paint[xl])*bumpP;
+      const gy=(shape[yd]-shape[yu])*bumpS+(paint[yd]-paint[yu])*bumpP;
+      let nx=-(gx*Ux+gy*Vx), ny=-(gx*Uy+gy*Vy), nz=1; const nl=Math.sqrt(nx*nx+ny*ny+1); nx/=nl; ny/=nl; nz/=nl;
+      const py=sy-c*D;
+      const lightBy=(lx,ly,lz,E,vv,Lt,outG)=>{   /* diffuse gain into outG, returns the specular */
+        const ndl=nx*lx+ny*ly+nz*lz, wrap=Math.max(0,(ndl+P.wrap)/(1+P.wrap));
+        gain(outG,E,E*wrap*vv,0,kd,Lt);
+        if(ndl<=0) return 0;
+        const hz=lz+1, hl=Math.sqrt(lx*lx+ly*ly+hz*hz);
+        return Math.pow(Math.max(0,(nx*lx+ny*ly+nz*hz)/hl),mat.shin)*E*vv*mat.ks;
+      };
+      /* night: lamp and moon, over the dimmed room */
+      const R=reach(sx,py,D);
+      let spL=0; if(R){ spL=lightBy(R.lx,R.ly,R.lz,R.E,gAt(ovL,sx,sy),LAMP,GL); } else gain(GL,0,0,0,kd,LAMP);
+      const bo=bounceAt(sx,sy)*.8*kd; for(let ch=0;ch<3;ch++) GL[ch]+=bo*P.tint[ch];
+      const apM=winAp(MOON,sx,py,D); let spM=0;
+      if(apM>0){ spM=lightBy(MOON.L[0],MOON.L[1],MOON.L[2],MOON.I*apM,gAt(ovM,sx,sy),MOON,GM); } else { GM[0]=GM[1]=GM[2]=1; }
+      const scN=specCol(r0,g0,b0);
+      oN[q]=r0*nt*GL[0]*GM[0]+spL*scN[0]+spM*.6*scN[0]*.8; oN[q+1]=g0*nt*GL[1]*GM[1]+spL*scN[1]+spM*.6*scN[1]*.9;
+      oN[q+2]=b0*nt*GL[2]*GM[2]+spL*scN[2]+spM*.6*scN[2]*1.1; oN[q+3]=a;
+      /* day: the sun through the window */
+      const apS=winAp(SUN,sx,py,D);
+      if(apS>0){ sunTouched=true;
+        const spS=lightBy(SUN.L[0],SUN.L[1],SUN.L[2],SUN.I*apS,gAt(ovS,sx,sy),SUN,GS);
+        oD[q]=r0*GS[0]+spS*scN[0]; oD[q+1]=g0*GS[1]+spS*scN[1]; oD[q+2]=b0*GS[2]+spS*scN[2]; }
+      else { oD[q]=r0; oD[q+1]=g0; oD[q+2]=b0; }
+      oD[q+3]=a;
     } }
-    const cv=layer('obj',bw,bh); cv.getContext('2d').putImageData(out,0,0);
-    const st=cv.style; st.left=img.offsetLeft+'px'; st.top=img.offsetTop+'px'; st.width=img.offsetWidth+'px'; st.height=img.offsetHeight+'px';
-    const tf=getComputedStyle(img).transform; if(tf&&tf!=='none'){ st.transform=tf; st.transformOrigin=getComputedStyle(img).transformOrigin; }
-    objLayers.push([img,cv]);
+    const place=(cv)=>{ const st=cv.style; st.left=img.offsetLeft+'px'; st.top=img.offsetTop+'px'; st.width=img.offsetWidth+'px'; st.height=img.offsetHeight+'px';
+      const tf=getComputedStyle(img).transform; if(tf&&tf!=='none'){ st.transform=tf; st.transformOrigin=getComputedStyle(img).transformOrigin; } };
+    const cn=layer('obj n',bw,bh); cn.getContext('2d').putImageData(outN,0,0); place(cn);
+    let cd=null; if(sunTouched){ cd=layer('obj d',bw,bh); cd.getContext('2d').putImageData(outD,0,0); place(cd); }
+    objLayers.push([img,cn,cd]);
     await pause(); if(!alive()) return false;
   }
   tm.objects=performance.now()-T0;
@@ -455,50 +537,35 @@ async function render(stage,gen){
     /* bloom: a tight core over the shade's opening, then wider, softer skirts */
     const e=ell(sx,sy), dm=Math.sqrt((sx-ms[0])**2+(sy-ms[1])**2)/S;
     const bl=P.bloom*(.5*Math.exp(-((Math.max(0,e-.5)/.5)**2))+.2*Math.exp(-((dm/90)**2))+.09/(1+(dm/150)**2));
-    /* fade out at the edges of the sheet */
     const fe=Math.min(1,Math.min(x,hw-1-x,y)/(40/hc));
     glow.data[o]=clamp(h+bl,0,1)*255*fe; glow.data[o+1]=clamp(h*.8+bl*.86,0,1)*255*fe; glow.data[o+2]=clamp(h*.55+bl*.66,0,1)*255*fe; glow.data[o+3]=255;
   } }
   tm.glow=performance.now()-T0;
-
   await pause(); if(!alive()) return false;
-  /* ---- swap the layers in. Drawn while the lamp is already on (a resize), they arrive
-     settled: the filament only warms up when someone pulls the cord ---- */
+
+  /* ---- swap the layers in. Lamp layers drawn while the lamp is already on (a resize) arrive
+     settled: the filament only warms up when someone pulls the cord. Day and moon layers
+     arrive with a soft fade. ---- */
   SETTLED=stage.classList.contains('lit');
   stage.querySelectorAll('.ll-cv').forEach(e=>e.remove());
+  stage.querySelectorAll('.ll-own').forEach(e=>e.classList.remove('ll-own'));
+  const before=stage.querySelector('.booktip');
   const toStage=(cv,sx,sy,sw,sh,z)=>{ const st=cv.style; st.left=(sx-sr.left)/k+'px'; st.top=(sy-sr.top)/k+'px';
-    st.width=sw/k+'px'; st.height=sh/k+'px'; st.zIndex=z; stage.insertBefore(cv,stage.querySelector('.booktip')); };
+    st.width=sw/k+'px'; st.height=sh/k+'px'; st.zIndex=z; stage.insertBefore(cv,before); };
   const put=(cls,id,w,h)=>{ const cv=layer(cls,w,h); cv.getContext('2d').putImageData(id,0,0); return cv; };
-  toStage(put('mul',wallMul,gw,gh),X0,Y0,gw*cell,gh*cell,0);
-  toStage(put('add',wallAdd,gw,gh),X0,Y0,gw*cell,gh*cell,0);
+  for(const [cls,id] of [['mul d',wSm],['add d',wSa],['mul m',wMm],['add m',wMa],['add n',wR],['mul n',wLm],['add n',wLa]])
+    toStage(put(cls,id,gw,gh),X0,Y0,gw*cell,gh*cell,0);
   const kl=lw.width/ledgeWrap.offsetWidth||1;
-  [put('mul',plMul,pw,ph),put('add',plAdd,pw,ph)].forEach(cv=>{ const st=cv.style;
-    st.left=(px0-lw.left)/kl+'px'; st.top='0'; st.zIndex=2; st.width=pw*pc/kl+'px'; st.height=ph*pc/kl+'px'; ledgeWrap.appendChild(cv); });
-  for(const [img,cv] of objLayers) img.after(cv);
-  /* the rest of the room settles into evening while the lamp is on: the whole page dims a
-     little (a touch cool, against the lamp's warmth), except round the lamp, where its light is */
-  const dusk=document.createElement('div'); dusk.className='ll-cv dusk'; dusk.setAttribute('aria-hidden','true');
-  const dm=[(Math.min(ms[0],pool[0])+Math.max(ms[0],pool[0]))/2-P.duskShift*S, ms[1]+P.duskDrop*S];
-  const dc=P.duskTint.map(t=>Math.round(255*(1-P.dusk*t)));
-  dusk.style.cssText='left:0;top:'+(-170)+'px;width:100%;height:calc(100% + 170px);z-index:3;'
-    +'background:radial-gradient('+(P.duskRx*S/k)+'px '+(P.duskRy*S/k)+'px at '+((dm[0]-sr.left)/k)+'px '+((dm[1]-sr.top)/k+170)+'px,'
-    +'#fff 0%,#fff 28%,rgb('+dc.join(',')+') 100%)';
-  /* ...but the two doors stay bright: they are the page's controls, not part of the room */
-  const drs=[...stage.querySelectorAll('.slot.door')].filter(d=>d.offsetWidth&&d.getClientRects().length);
-  if(drs.length){
-    const top=sr.top-170*k, imgs_=['linear-gradient(#000,#000)'], sz=['100% 100%'], pos=['0 0'];
-    for(const d of drs){ const r=d.getBoundingClientRect(), w=r.width/k, h=r.height/k, rad=parseFloat(getComputedStyle(d).borderTopLeftRadius)||0;
-      imgs_.push('url("data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'"><rect width="'+w+'" height="'+h+'" rx="'+rad+'"/></svg>')+'")');
-      sz.push(w+'px '+h+'px'); pos.push(((r.left-sr.left)/k)+'px '+((r.top-top)/k)+'px'); }
-    const st=dusk.style;
-    st.webkitMaskImage=st.maskImage=imgs_.join(',');
-    st.webkitMaskSize=st.maskSize=sz.join(','); st.webkitMaskPosition=st.maskPosition=pos.join(',');
-    st.webkitMaskRepeat=st.maskRepeat='no-repeat';
-    st.webkitMaskComposite='xor'; st.maskComposite='exclude';
-  }
-  stage.insertBefore(dusk,stage.querySelector('.booktip'));
-  toStage(put('scr',glow,hw,hh),hx0,hy0,hw*hc,hh*hc,3);
-  if(SETTLED) stage.querySelectorAll('.ll-cv').forEach(c=>c.classList.add('settled'));
+  [put('mul n',pNm,pw,ph),put('add n',pNa,pw,ph),put('mul d',pDm,pw,ph),put('add d',pDa,pw,ph)].forEach(cv=>{ const st=cv.style;
+    st.left='0'; st.top='0'; st.zIndex=2; st.width=pw*pc/kl+'px'; st.height=ph*pc/kl+'px'; ledgeWrap.appendChild(cv); });
+  ledgeWrap.classList.add('ll-own');
+  for(const [img,cn,cd] of objLayers){ if(cd) img.after(cd); img.after(cn);
+    const grp=img.closest('.bk, .prop'); if(grp) grp.classList.add('ll-own'); }
+  toStage(put('scr n',glow,hw,hh),hx0,hy0,hw*hc,hh*hc,3);
+  const all=stage.querySelectorAll('.ll-cv');
+  if(SETTLED) all.forEach(c=>{ if(c.classList.contains('n')) c.classList.add('settled'); });
+  all.forEach(c=>{ if(!c.classList.contains('n')) c.classList.add('fresh'); });
+  requestAnimationFrame(()=>requestAnimationFrame(()=>stage.querySelectorAll('.ll-cv.fresh').forEach(c=>c.classList.remove('fresh'))));
   stage.classList.add('relit');
   tm.total=performance.now()-T0;
   if(P.debug) console.log('lamp light', JSON.stringify(Object.fromEntries(Object.entries(tm).map(([a,b])=>[a,Math.round(b)]))));
