@@ -375,6 +375,13 @@ class Spent(Exception):
     pass
 
 
+def read_ledger(path):
+    try:
+        return json.load(io.open(path, encoding="utf-8"))["usd"] if os.path.exists(path) else 0.0
+    except Exception:
+        return 0.0
+
+
 def via_subscription(kind, system, items, model, chunk):
     """Run items through the Claude Code SUBSCRIPTION (headless `claude -p`, no tools, our own
     system prompt) instead of the API (Tom, 24 Sep 2026: no API credit). Items from one lesson go
@@ -397,7 +404,7 @@ def via_subscription(kind, system, items, model, chunk):
     def one(call):
         if stop: return {}
         with lock:
-            spent = json.load(io.open(ledger, encoding="utf-8"))["usd"] if os.path.exists(ledger) else 0.0
+            spent = read_ledger(ledger)
         if spent >= budget: stop.append("budget"); return {}
         ids = {"q%d" % n: k for n, (k, _) in enumerate(call)}
         prompt = ("There are %d separate items below. Do each one on its own, exactly as the instructions say; "
@@ -421,8 +428,11 @@ def via_subscription(kind, system, items, model, chunk):
         if d.get("is_error") and re.search(r"limit|quota|reset", txt, re.I):
             stop.append("usage limit: " + txt[:120]); return {}
         with lock:
-            spent = json.load(io.open(ledger, encoding="utf-8"))["usd"] if os.path.exists(ledger) else 0.0
-            json.dump({"usd": spent + float(d.get("total_cost_usd") or 0)}, io.open(ledger, "w", encoding="utf-8"))
+            try:
+                spent = read_ledger(ledger)
+                json.dump({"usd": spent + float(d.get("total_cost_usd") or 0)}, io.open(ledger, "w", encoding="utf-8"))
+            except Exception:
+                pass   # a runaway guard only: two walks writing at once must never stop either
         m = re.search(r"\{.*\}", txt, re.S)
         try: got = json.loads(m.group(0), strict=False) if m else {}
         except Exception: got = {}
@@ -496,6 +506,8 @@ APPLY_JS = r"""([t, a]) => {
   const T = e => { const c = e.cloneNode(true); c.querySelectorAll('.katex').forEach(k => { const a = k.querySelector('annotation[encoding="application/x-tex"]');
     k.replaceWith(document.createTextNode(a ? ' \\(' + a.textContent.trim() + '\\) ' : k.textContent)); }); return c.textContent; };
   const Z = s => N(s).replace(/[\s$\\(){}]/g, '');
+  const pick = (els, w, get) => { const x = String(w == null ? '' : w).trim();
+    return els.find(e => get(e).trim() === x) || els.find(e => N(get(e)) === N(x)); };
   const setv = (id, val) => { const e = document.getElementById(id); if (!e) { miss.push('no box ' + id); return; }
     e.value = String(val == null ? '' : val); e.dispatchEvent(new Event('input')); };
   if (t === 'multiple_choice') {
@@ -514,8 +526,8 @@ APPLY_JS = r"""([t, a]) => {
     setv('problem-input-sf-a', a && (a.a ?? a[0])); setv('problem-input-sf-n', a && (a.n ?? a[1]));
   } else if (t === 'vocab_match') {
     (a || []).forEach(x => {
-      const l = [...card.querySelectorAll('.vm-left:not(.vm-matched):not(.vm-correct)')].find(e => N(e.innerText) === N(x.left));
-      const r = [...card.querySelectorAll('.vm-right:not(.vm-matched):not(.vm-correct)')].find(e => N(e.innerText) === N(x.right));
+      const l = pick([...card.querySelectorAll('.vm-left:not(.vm-matched):not(.vm-correct)')], x.left, e => e.innerText);
+      const r = pick([...card.querySelectorAll('.vm-right:not(.vm-matched):not(.vm-correct)')], x.right, e => e.innerText);
       if (!l || !r) { miss.push('pair: ' + x.left + ' / ' + x.right); return; }
       vmItemClick(l); vmItemClick(r);
     });
@@ -525,12 +537,12 @@ APPLY_JS = r"""([t, a]) => {
       if (bank) {
         if (!document.getElementById('gf-gap-' + i)) { miss.push('gap ' + (i + 1)); return; }
         gfGapClick(i);
-        const c = [...card.querySelectorAll('.gf-chip:not(.gf-used)')].find(e => N(e.dataset.word) === N(w));
+        const c = pick([...card.querySelectorAll('.gf-chip:not(.gf-used)')], w, e => e.dataset.word);
         if (c) gfChipClick(c); else miss.push('bank word: ' + w);
       } else setv('gf-input-' + i, w);
     });
   } else if (t === 'sentence_builder') {
-    (a || []).forEach(w => { const tile = [...card.querySelectorAll('.sb-tile:not(.sb-used)')].find(e => N(e.innerText) === N(w));
+    (a || []).forEach(w => { const tile = pick([...card.querySelectorAll('.sb-tile:not(.sb-used)')], w, e => e.innerText);
       if (tile) sbTileClick(+tile.dataset.tileIdx); else miss.push('tile: ' + w); });
   } else if (t === 'spot_correct') {
     const W = s => N(s).replace(/[.,!?;:'"¿¡]/g, '');
@@ -562,8 +574,10 @@ APPLY_JS = r"""([t, a]) => {
   } else if (t === 'spot_error') {
     (a || []).forEach(n => { const s = card.querySelector('.spot-token[data-idx="' + n + '"]'); if (s) engSpotTog(s); else miss.push('token ' + n); });
   } else if (t === 'reorder') {
-    (a || []).forEach(x => { const it = [...card.querySelectorAll('.reorder-item')].find(e => N(e.innerText.replace(/^\d+\s*/, '')) === N(x));
-      if (it) engReorderClick(+it.dataset.idx); else miss.push('item: ' + x); });
+    const done = new Set();
+    (a || []).forEach(x => { const it = pick([...card.querySelectorAll('.reorder-item')].filter(e => !done.has(e.dataset.idx)), x,
+        e => e.innerText.replace(/^\d+\s*/, ''));
+      if (it) { done.add(it.dataset.idx); engReorderClick(+it.dataset.idx); } else miss.push('item: ' + x); });
   } else if (t === 'highlight_evidence') {
     const ws = [...card.querySelectorAll('.hw')], want = N(a).replace(/[.,;:!?"'—\-]/g, '').split(' ').filter(Boolean);
     const clean = w => N(w).replace(/[.,;:!?"'—\-]/g, '');

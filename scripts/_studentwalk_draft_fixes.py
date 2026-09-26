@@ -141,7 +141,16 @@ Reply with ONE JSON object and nothing else:
  "question": <the full corrected question object, or null for no_change>,
  "change": "one or two plain sentences saying what changed and why, for the teacher"}"""
 
-DRAFT_SYS = DRAFT_SYS_PRACTICE if SET == "practice" else DRAFT_SYS_EN
+DRAFT_SYS_WRITTEN = DRAFT_SYS_EN.replace(
+    "Keep the JSON shape exactly: same input_type, same field names, same kinds of values; you may add\n"
+    "\"categories\" (a list of every category name) to a traffic_light question.",
+    "Keep the JSON shape exactly: same input_type, same field names, same kinds of values. This is a written\n"
+    "question marked by an AI marker. When it asks about several sources but only one is on screen, the page\n"
+    "can show several: set \"passage_ids\" to the list of passage ids it needs (from PASSAGES IN THIS LESSON,\n"
+    "e.g. [\"bronze\", \"silver\", \"gold\"]); you may add \"passage_as\" (the same length, e.g. [\"Source A\",\n"
+    "\"Source B\", \"Source C\"]) so the panel labels match the question. Keep \"passage_id\" as it is.")
+assert DRAFT_SYS_WRITTEN != DRAFT_SYS_EN
+DRAFT_SYS = DRAFT_SYS_PRACTICE if SET == "practice" else DRAFT_SYS_WRITTEN if SET == "englang_written" else DRAFT_SYS_EN
 
 CHECK_SYS_EN = """You are a second, independent GCSE English Language examiner. You see a passage (if any) and one
 practice question with its answer key, after a colleague repaired it. Decide whether a careful Year 11
@@ -164,7 +173,16 @@ not only the changed ones. Be strict: a key that is arguably wrong, or a second 
 Reply with ONE JSON object and nothing else:
 {"verdict": "pass" | "fail", "why": "one or two plain sentences", "confidence": 0.0-1.0}"""
 
-CHECK_SYS = CHECK_SYS_PRACTICE if SET == "practice" else CHECK_SYS_EN
+CHECK_SYS_WRITTEN = """You are a second, independent GCSE English Language examiner. You see the passages a student will have on
+screen and one written practice question (marked by an AI marker from the mark scheme stored with it), after a
+colleague repaired it. Decide whether a careful Year 11 student could answer the question fully from what is on
+screen (every source the question names is shown and labelled as the question names it), and whether the question
+and its mark scheme agree. Be strict: a source the question needs that is missing or mislabelled is a fail.
+
+Reply with ONE JSON object and nothing else:
+{"verdict": "pass" | "fail", "why": "one or two plain sentences", "confidence": 0.0-1.0}"""
+
+CHECK_SYS = CHECK_SYS_PRACTICE if SET == "practice" else CHECK_SYS_WRITTEN if SET == "englang_written" else CHECK_SYS_EN
 
 
 def item_body(f, q):
@@ -174,7 +192,15 @@ def item_body(f, q):
               "STORED QUESTION OBJECT:\n" + json.dumps(q, ensure_ascii=False, indent=1),
               "THE STUDENT'S ATTEMPT:\n" + json.dumps(f["attempt"], ensure_ascii=False)[:3000],
               "THE EXAMINER'S RULING:\n" + json.dumps(f["ruling"], ensure_ascii=False)]
+    if SET == "englang_written" and f.get("passages"):
+        parts.append("PASSAGES IN THIS LESSON (id | label | opening):\n" + "\n".join(
+            "%s | %s | %s" % (x.get("id"), x.get("label", ""), re_strip(x.get("text", ""))[:160]) for x in f["passages"]))
     return "\n\n".join(parts)
+
+
+def re_strip(h):
+    import re
+    return re.sub(r"<[^>]+>", " ", str(h)).replace("&nbsp;", " ").strip()
 
 
 def cmd_draft():
@@ -186,6 +212,7 @@ def cmd_draft():
         lk = (f["dir"], v["unit"], v["n"])
         if lk not in cache: cache[lk] = lesson(v)
         q = cache[lk]["practice_data"]["problem_bank"][v["tier"]][v["i"]]
+        f["passages"] = cache[lk]["practice_data"].get("passages") or []
         drafts[k] = {"lesson_id": cache[lk]["id"], "tier": v["tier"], "i": v["i"], "type": v["type"],
                      "dir": f["dir"], "key": f["key"], "ruling": f["ruling"], "original": q}
         items.append((k, item_body(f, q)))
@@ -210,7 +237,7 @@ def mech(orig, new):
     p = []
     if not isinstance(new, dict): return ["not an object"]
     if new.get("input_type") != orig.get("input_type"): p.append("input_type changed")
-    extra = set(new) - set(orig) - {"categories", "tolerance"}
+    extra = set(new) - set(orig) - {"categories", "tolerance"} - ({"passage_ids", "passage_as"} if SET == "englang_written" else set())
     if extra: p.append("new fields: %s" % sorted(extra))
     missing = set(orig) - set(new)
     if missing: p.append("dropped fields: %s" % sorted(missing))
@@ -270,6 +297,14 @@ def check_body(d, v):
     if SET == "practice":
         return "SUBJECT: %s\n\nWHAT IS ON THE STUDENT'S SCREEN (before the repair):\n%s\n\nREPAIRED QUESTION WITH ITS KEY:\n%s" % (
             walk.subject_name(v["subject"]), walk.view_prompt(v), q)
+    if SET == "englang_written":
+        pd = rest("lessons?select=practice_data&id=eq.%s" % d["lesson_id"])[0]["practice_data"]
+        ids = d["draft"]["question"].get("passage_ids") or [d["draft"]["question"].get("passage_id")]
+        shown = [x for x in pd.get("passages") or [] if x.get("id") in ids]
+        return ("PASSAGES ON SCREEN AFTER THE REPAIR:\n%s\n\nWRITTEN QUESTION (AI-marked) WITH ITS MARK SCHEME:\n%s\n\n"
+                "Judge whether a student can now answer it fully from what is on screen, and whether the question and its "
+                "mark scheme agree." %
+                ("\n\n".join("[%s] %s" % (x.get("label", x.get("id")), re_strip(x.get("text", ""))[:6000]) for x in shown) or "(none)", q))
     return ("PASSAGE ON SCREEN:\n%s\n\nQUESTION WITH ITS KEY:\n%s" %
             ("\n\n".join(x for x in (v.get("panel"), v.get("highlight_text")) if x) or "(none)", q))
 
