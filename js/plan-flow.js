@@ -117,7 +117,9 @@
       el.classList.remove('svf-flash'); void el.offsetWidth; el.classList.add('svf-flash'); if (then) setTimeout(then, reduced() ? 0 : 550); return true; };
     var click = function (sel) { var b = q(sel); if (b) { b.click(); return true; } return false; };
     var ok =
-      id === 'practice-question' ? scroll(q('#practice'), function () { var t = q('#practice-answer'); if (t) t.focus({ preventScroll: true }); }) :
+      id === 'practice-question' ? (q('.sv-practice-btn')   /* the reading skin keeps the exam question in a panel */
+        ? (click('.sv-practice-btn'), setTimeout(function () { var t = q('#practice-answer'); if (t) t.focus(); }, 300), true)
+        : scroll(q('#practice'), function () { var t = q('#practice-answer'); if (t) t.focus({ preventScroll: true }); })) :
       id === 'knowledge-check' ? click('#knowledge-check-btn') :
       id === 'flashcards' ? click('#sidebar-flashcard-btn') :
       id === 'podcast' ? (click('.audio-tab[data-mode="podcast"]'), scroll(q('.audio-tab[data-mode="podcast"]'))) :
