@@ -88,6 +88,19 @@ def findings():
         for k, x in a.items():
             if k in v and wanted(v[k]["type"]) and (x or {}).get("finding") in rulings:
                 out.append({"key": k, "dir": sub, "id": dkey(sub, k), "view": v[k], "ruling": x, "attempt": at.get(k, {})})
+    if SET == "practice":
+        # questions found faulty outside the walk (e.g. a database scan) get a draft even if the walk passed them
+        extra = os.path.join(HERE, "_studentwalk_extra_findings.json")
+        have = {f["id"] for f in out}
+        for e in (json.load(io.open(extra, encoding="utf-8")) if os.path.exists(extra) else []):
+            vp = os.path.join(HERE, "_studentwalk_" + e["dir"], "views.json")
+            v = json.load(io.open(vp, encoding="utf-8")) if os.path.exists(vp) else {}
+            if dkey(e["dir"], e["key"]) in have: continue
+            if e["key"] not in v: print("  extra finding has no walk view yet:", e["dir"], e["key"]); continue
+            at = os.path.join(HERE, "_studentwalk_" + e["dir"], "attempts.json")
+            att = json.load(io.open(at, encoding="utf-8")).get(e["key"], {}) if os.path.exists(at) else {}
+            out.append({"key": e["key"], "dir": e["dir"], "id": dkey(e["dir"], e["key"]), "view": v[e["key"]],
+                        "ruling": {"finding": e["finding"], "why": e["why"], "fix": e["fix"], "source": "database scan"}, "attempt": att})
     return out
 
 

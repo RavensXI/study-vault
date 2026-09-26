@@ -1,4 +1,7 @@
-"""Tile answers the page marks wrong although the student built the key's exact text (26 Sep 2026).
+"""RETIRED 26 Sep 2026: practice.html now compares reorder and vocab-match by words (89c135eb), so this
+fault no longer happens; kept for the record of what it relabelled.
+
+Tile answers the page marks wrong although the student built the key's exact text (26 Sep 2026).
 
 reorder compares item POSITIONS (items[shuffIdx].origIdx === correct_order[pos]), and vocab_match
 ties each label to one pair id, so when two tiles show the same text ('a' and 'a', 'en' and 'en', two
