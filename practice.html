@@ -8682,7 +8682,9 @@
       if (_engState.vm.selectedLeft !== null && _engState.vm.selectedRight !== null) {
         var leftEl = document.querySelector('.vm-left[data-pair-id="' + _engState.vm.selectedLeft + '"]');
         var rightEl = document.querySelector('.vm-right[data-pair-id="' + _engState.vm.selectedRight + '"]');
-        if (_engState.vm.selectedLeft === _engState.vm.selectedRight) {
+        // a match is right when the words match: two pairs can share a word on one side
+        var vmP = _engState.vm.pairs, vmL = _engState.vm.selectedLeft, vmR = _engState.vm.selectedRight;
+        if (vmL === vmR || vmP[vmL].right === vmP[vmR].right || vmP[vmL].left === vmP[vmR].left) {
           leftEl.classList.remove('vm-selected');
           rightEl.classList.remove('vm-selected');
           leftEl.classList.add('vm-correct');
@@ -8691,12 +8693,11 @@
             leftEl.classList.add('vm-matched');
             rightEl.classList.add('vm-matched');
           }, 400);
-          var pair = _engState.vm.pairs[_engState.vm.selectedLeft];
           var listEl = document.getElementById('vm-matched-list');
           if (listEl) {
             var d = document.createElement('div');
             d.className = 'vm-matched-pair';
-            d.innerHTML = '<span class="vm-mp-left">' + pair.left + '</span><span class="vm-mp-arrow">\u2192</span><span class="vm-mp-right">' + pair.right + '</span>';
+            d.innerHTML = '<span class="vm-mp-left">' + vmP[vmL].left + '</span><span class="vm-mp-arrow">\u2192</span><span class="vm-mp-right">' + vmP[vmR].right + '</span>';
             listEl.appendChild(d);
           }
           _engState.vm.matched++;
@@ -9219,7 +9220,8 @@
         } else {
           order.forEach(function(shuffIdx,pos){
             var el=document.querySelector('.reorder-item[data-idx="'+shuffIdx+'"]');
-            if(items[shuffIdx].origIdx===problem.correct_order[pos]){el.classList.add('result-correct');}
+            // compared by the words, not the tile: two items can read the same, and either is right
+            if(items[shuffIdx].text===problem.items[problem.correct_order[pos]]){el.classList.add('result-correct');}
             else{el.classList.add('result-incorrect');correct=false;}
           });
         }
