@@ -463,6 +463,11 @@ function initPracticeQuestions() {
       var got = mm ? +mm[1] : 0, outOf = mm ? +mm[2] : +marksMatch;
       var ok = outOf > 0 && got / outOf >= 0.5;
       if (ok && window.svTickPractice) svTickPractice();
+      /* the anonymous answer pool (js/answer-pool.js): the mark only, never the writing, never who */
+      try {
+        var _pqm = location.pathname.match(/\/lesson\/([^/]+)\/([^/]+)\/(\d+)/);
+        if (mm && _pqm && window.svPool && !data.support) svPool.add(svPool.key(_pqm[1], _pqm[2], _pqm[3], 'pq', currentIndex), { got: got, of: outOf });
+      } catch (e3) {}
       if (window.__svTestoutStage === 'practice') {
         window.__svTestoutStage = null;
         var v = document.createElement('div'); v.className = 'sv-testout-verdict' + (ok ? ' ok' : '');
@@ -1884,6 +1889,13 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
   // these into shared-misconception lines ("most wrong answers chose X")
   const kcMisses = [];
   const kcStrip = h => String(h == null ? '' : h).replace(/<[^>]*>/g, '').slice(0, 90);
+  /* the anonymous answer pool (js/answer-pool.js): which option, and right or wrong; never who */
+  const kcPool = (a, ok) => {
+    try {
+      const m = location.pathname.match(/\/lesson\/([^/]+)\/([^/]+)\/(\d+)/);
+      if (m && window.svPool) svPool.add(svPool.key(m[1], m[2], m[3], 'kc', current), { chose: a, v: ok ? 'right' : 'wrong' });
+    } catch (e) {}
+  };
 
   const overlay = document.createElement('div');
   overlay.className = 'kc-overlay';
@@ -1985,6 +1997,7 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
       grid.querySelectorAll('.kc-option').forEach(b => b.classList.add('locked'));
       const correct = selected === q.correct;
       grid.children[order.indexOf(selected)].classList.add(correct ? 'correct' : 'incorrect');
+      kcPool(kcStrip(q.options[selected]), correct);
       if (!correct) {
         grid.children[order.indexOf(q.correct)].classList.add('correct');
         kcMisses.push({ q: kcStrip(q.q).slice(0, 160), chose: kcStrip(q.options[selected]), right: kcStrip(q.options[q.correct]) });
@@ -2052,6 +2065,7 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
         if (idx === q.correct) b.classList.add('correct');
         else if (b.classList.contains('selected') && !correct) b.classList.add('incorrect');
       });
+      kcPool(kcStrip(q.options[selected]), correct);
       if (correct) score++;
       else kcMisses.push({ q: kcStrip(q.q).slice(0, 160), chose: kcStrip(q.options[selected]), right: kcStrip(q.options[q.correct]) });
       addNextBtn(correct);
@@ -2115,6 +2129,7 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
           allCorrect = false;
         }
       });
+      kcPool('*', allCorrect);   /* a match-up has no single answer to count */
       if (allCorrect) score++;
       addNextBtn(allCorrect);
     });
@@ -3285,7 +3300,9 @@ function openFlashcardModal() {
     var typed = (typedIn.value || '').trim();
     if (!typed || !card) return;
     checkBtn.disabled = true; checkBtn.textContent = 'Checking\u2026'; typedIn.disabled = true;
-    svRecall.judge({ kind: card.kind, front: card.front.replace(/<[^>]+>/g, '____'), answer: card.back.replace(/<[^>]+>/g, ''), items: card.items }, typed).then(function (res) {
+    var _pm = location.pathname.match(/\/lesson\/([^/]+)\/([^/]+)\/(\d+)/), _pi = String(card.index || '');
+    var _pool = (_pm && window.svPool && /^[qr]\d+$/.test(_pi)) ? svPool.key(_pm[1], _pm[2], _pm[3], 'fc' + _pi[0], _pi.slice(1)) : null;   /* fcq = question deck, fcr = recall card */
+    svRecall.judge({ kind: card.kind, front: card.front.replace(/<[^>]+>/g, '____'), answer: card.back.replace(/<[^>]+>/g, ''), items: card.items, pool: _pool }, typed).then(function (res) {
       if (!res) {                                     /* judge unavailable: say so, then the old flow */
         checkBtn.disabled = false; checkBtn.textContent = 'Check'; typedIn.disabled = false;
         verdictEl.className = 'fc-verdict fc-verdict--off';

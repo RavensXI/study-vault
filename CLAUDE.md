@@ -167,6 +167,14 @@ R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), video on R2
   `/api/staff/rest`; `js/content-reads.js` (loaded before supabase-js) routes admin reads there
   and signs plain content fetches for signed-in users. Never offer `?sid=` links to pupils.
   Tests: `scripts/security/` (dry run, browser, live). Rollback in `supabase/migrations/`.
+- **Answer pool (26 Sep 2026):** anonymous counts of the answers pupils give, to find faulty
+  questions and improve feedback. Table `answer_pool` (service key only, RLS on, no policies):
+  question key + tidied answer or chosen option (≤60 chars) + verdict + count + ISO week first
+  seen; for AI-marked writing the MARK only. No identity, school, IP or time. Client
+  `js/answer-pool.js` (practice, lesson, dashboard pages; key formats in its header), server
+  `api/pool.js` (drops personal-looking answers). Off for staff, demo pupils, Demo High School
+  and the test schools, and for safeguarding-flagged answers. Widgets are not counted. Stated in
+  privacy.html. The old prototype table `events` and `/teach` were retired the same day.
 - **Safeguarding route (23 Sep 2026):** exam answers, tutor messages, flashcard
   answers and searches get a London-hosted check beside the marking; a flag shows
   the pupil a support panel and, for a signed-in pupil in a class at a school with

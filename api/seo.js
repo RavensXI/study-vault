@@ -20,7 +20,7 @@ const { supabase } = require('./pipeline/_lib/supabase');
  * subjects back to the home page, so a crawler would only ever see the home page.
  */
 const SITE = 'https://www.studyvault.co.uk';
-const STATIC_PAGES = ['/welcome', '/subjects', '/about', '/faq', '/teach', '/copyright.html', '/privacy.html'];
+const STATIC_PAGES = ['/welcome', '/subjects', '/about', '/faq', '/copyright.html', '/privacy.html'];   // /teach retired 26 Sep 2026 (redirects to /teacher/classes)
 
 function esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

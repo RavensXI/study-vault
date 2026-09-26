@@ -4684,6 +4684,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
   <script src="/js/timer.js"></script>
   <script src="/js/safeguard-support.js"></script>
+  <script src="/js/answer-pool.js"></script>
   <script src="/js/practice-loader.js"></script>
   <script src="/js/exam-countdown.js"></script>
   <script src="/js/score-player.js"></script>
@@ -5420,6 +5421,42 @@
     };
 
     // ===== CHECK ANSWER =====
+    // The anonymous answer pool (js/answer-pool.js): the question's place in its stored tier,
+    // the answer as given (or '*' for multi-part controls, 'q:<quality>' for AI-marked writing),
+    // and the verdict. Never who answered.
+    var _svPoolSkipNext = false;
+    function svPoolPractice(problem, tier, a, ok) {
+      try {
+        if (!window.svPool || !problem || problem._poolIdx == null) return;
+        var m = location.pathname.match(/\/practice\/([^/]+)\/([^/]+)\/(\d+)/);
+        if (!m) return;
+        var d = { v: ok ? 'right' : 'wrong' };
+        // an answer made of the site's own wording (an option, tiles, word-bank chips) is a choice;
+        // anything the pupil typed is their answer and is counted only when short
+        var t = problem.input_type;
+        var choice = t === 'multiple_choice' || t === 'sentence_builder' || (t === 'gap_fill' && problem.word_bank && problem.word_bank.length);
+        if (choice) d.chose = a; else d.a = a;
+        svPool.add(svPool.key(m[1], m[2], m[3], tier, problem._poolIdx), d);
+      } catch (e) {}
+    }
+    function svPoolEngAnswer(problem) {
+      try {
+        var t = problem.input_type, vals = [];
+        if (t === 'gap_fill') {
+          document.querySelectorAll('[id^="gf-gap-"], [id^="gf-input-"]').forEach(function (el) { vals.push((el.value != null ? el.value : el.textContent).trim()); });
+          vals = vals.filter(Boolean);
+          return vals.length ? vals.join(' / ') : '*';
+        }
+        if (t === 'spot_correct') { var sc = document.getElementById('sc-correction-input'); return sc ? sc.value : '*'; }
+        if (t === 'dictation') { var dt = document.getElementById('dt-input'); return dt ? dt.value : '*'; }
+        if (t === 'sentence_builder') {
+          document.querySelectorAll('#sb-answer-zone .sb-placed-tile').forEach(function (el) { vals.push(el.textContent.trim()); });
+          return vals.join(' ') || '*';
+        }
+      } catch (e) {}
+      return '*';
+    }
+
     function checkAnswer() {
       if (practiceState.answered) return;
 
@@ -5568,6 +5605,12 @@
 
       practiceState.answered = true;
       practiceState[tier].attempted++;
+      svPoolPractice(problem, tier,
+        inputType === 'multiple_choice' ? (problem.options ? problem.options[given[0]] : 'option ' + given[0])
+        : inputType === 'fraction' ? given[0] + '/' + given[1]
+        : inputType === 'standard_form' ? given[0] + ' x 10^' + given[1]
+        : inputType === 'single_value' || !inputType ? (inputA ? inputA.value : given.join(', '))
+        : given.join(', '), isCorrect);
 
       var card = document.getElementById('current-problem-card');
       var checkBtn = document.getElementById('problem-check-btn');
@@ -9444,6 +9487,8 @@
         if(json.improvement)feedHtml+='<p style="color:var(--accent);font-weight:600">Tip: '+json.improvement+'</p>';
         feedHtml+='</div>';
         checkBtn.textContent='Check Answer';checkBtn.disabled=false;
+        if(!(data&&data.support))svPoolPractice(problem,tier,'q:'+json.quality,ok);   // the quality band only, never the writing
+        _svPoolSkipNext=true;
         engFinishAnswer(ok,feedHtml,tier);
       }catch(e){
         checkBtn.textContent='Check Answer';checkBtn.disabled=false;
@@ -9469,6 +9514,8 @@
     // ---- Finish English Answer (shared) ----
     function engFinishAnswer(isCorrect, feedHtml, tier) {
       practiceState.answered=true;
+      if(_svPoolSkipNext)_svPoolSkipNext=false;
+      else{var _pp=(window._problemBank[tier]||[])[practiceState.currentIndex];if(_pp)svPoolPractice(_pp,tier,svPoolEngAnswer(_pp),isCorrect);}
       practiceState[tier].attempted++;
       if(isCorrect){practiceState[tier].correct++;practiceState[tier].streak++;practiceState.streak++;}
       else{practiceState[tier].streak=0;practiceState.streak=0;}

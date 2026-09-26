@@ -379,6 +379,10 @@
         }
         return a;
       }
+      // each problem remembers its place in the stored tier: the answer pool keys on it (js/answer-pool.js)
+      ['bronze', 'silver', 'gold'].forEach(function (t) {
+        (pb[t] || []).forEach(function (p, i) { if (p && typeof p === 'object') p._poolIdx = i; });
+      });
       window._problemBank = {
         bronze: seededShuffle(filterTier(pb.bronze || []), daySeed('b')),
         silver: seededShuffle(filterTier(pb.silver || []), daySeed('s')),

@@ -780,6 +780,7 @@
 <script src="js/dash-tour.js"></script>
 <script src="js/demo-students.js"></script>
 <script src="js/safeguard-support.js"></script>
+<script src="js/answer-pool.js"></script>
 <script src="js/recall.js"></script>
 <script src="dash-data.js"></script>
 <script src="sync.js"></script>
@@ -1658,7 +1659,8 @@ function fcCheckTyped(){
   const f=FC[fci], _in=document.getElementById('fctypedin'), _ck=document.getElementById('fbcheck');
   const typed=(_in.value||'').trim(); if(!typed||!f||!window.svRecall) return;
   _ck.disabled=true; _ck.textContent='Checking…'; _in.disabled=true;
-  svRecall.judge({kind:f.kind||'recall',front:f.q,answer:f.a,items:f.items},typed).then(res=>{
+  const _pk=String(f.key||'').split(':')[1]||'', _pool=(window.svPool&&f.sub&&f.unit&&f.n&&/^[qr]\d+$/.test(_pk))?svPool.key(f.sub,f.unit,f.n,'fc'+_pk[0],_pk.slice(1)):null;   /* the anonymous answer pool */
+  svRecall.judge({kind:f.kind||'recall',front:f.q,answer:f.a,items:f.items,pool:_pool},typed).then(res=>{
     if(!res){ _ck.disabled=false; _ck.textContent='Check'; _in.disabled=false;
       const v0=document.getElementById('fcverdict'); v0.className='fcverdict off'; v0.innerHTML='<b></b> '; v0.querySelector('b').textContent=svRecall.unavailable.head; v0.appendChild(document.createTextNode(svRecall.unavailable.line)); v0.hidden=false;
       const e0=document.getElementById('fctypedecho'); e0.textContent='You typed: '+typed; e0.hidden=false;

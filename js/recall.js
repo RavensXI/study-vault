@@ -25,6 +25,8 @@
       .then(function (d) {
         if (t) clearTimeout(t);
         if (d && d.support && window.svShowSupport) svShowSupport(null, d);   /* the safeguarding support panel */
+        /* the anonymous answer pool (js/answer-pool.js): the typed answer and the verdict, never who; not for a flagged answer */
+        if (d && d.verdict && !d.support && card.pool && window.svPool) svPool.add(card.pool, { a: typed, v: d.verdict });
         return (d && d.verdict) ? d : null;
       })
       .catch(function () { if (t) clearTimeout(t); return null; });
