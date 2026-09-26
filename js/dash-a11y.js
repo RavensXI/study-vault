@@ -67,6 +67,16 @@
   }
   /* ---- apply ---- */
   function applyDark(on) { document.body.classList.toggle('dark-mode', !!on); document.documentElement.classList.toggle('dark-mode', !!on); }
+  /* day and night (the classic dashboard, 25 Sep 2026): a page that sets window.svNightDefault
+     opens in dark mode after sunset (js/daynight.js) unless the student has chosen dark mode on or
+     off themselves, and its lamp cord switches for this visit only (svDashA11y.setScene), nothing
+     stored. Pages that don't set it behave exactly as before. */
+  var scene = null;
+  function effectiveDark(p) {
+    if (scene !== null) return scene;
+    if (typeof p.darkMode === 'boolean') return p.darkMode;
+    return !!window.svNightDefault;
+  }
   function applySize(step) {
     var s = Math.max(-1, Math.min(2, +step || 0));
     document.documentElement.style.fontSize = s === 0 ? '' : ({ '-1': '94%', '1': '108%', '2': '116%' })[String(s)];
@@ -87,7 +97,7 @@
   }
   function applyAll() {
     var p = prefs();
-    applyDark(p.darkMode); applySize(p.fontSize); applyFont(p.readingFont); applyOverlay(p.overlay, p.overlayIntensity);
+    applyDark(effectiveDark(p)); applySize(p.fontSize); applyFont(p.readingFont); applyOverlay(p.overlay, p.overlayIntensity);
   }
 
   /* ---- the control + sheet ---- */
@@ -111,7 +121,7 @@
     var sw = pop.querySelector('.sw'), sizes = pop.querySelectorAll('[data-size]'), fonts = pop.querySelectorAll('[data-font]'), chips = pop.querySelectorAll('[data-ov]'), range = pop.querySelector('input[type=range]');
     function sync() {
       var p = prefs();
-      sw.setAttribute('aria-checked', p.darkMode ? 'true' : 'false');
+      sw.setAttribute('aria-checked', effectiveDark(p) ? 'true' : 'false');
       var s = Math.max(-1, Math.min(2, +p.fontSize || 0));
       sizes.forEach(function (x) { x.setAttribute('aria-pressed', +x.dataset.size === s ? 'true' : 'false'); });
       var f = p.readingFont || 'default';
@@ -120,7 +130,12 @@
       chips.forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.ov === o ? 'true' : 'false'); });
       range.hidden = !o; range.value = typeof p.overlayIntensity === 'number' ? p.overlayIntensity : 45;
     }
-    sw.addEventListener('click', function () { var on = sw.getAttribute('aria-checked') !== 'true'; applyDark(on); save({ darkMode: on }); sync(); });
+    sw.addEventListener('click', function () {
+      var on = sw.getAttribute('aria-checked') !== 'true'; scene = null;
+      /* the page fades between day and evening rather than snapping (the dashboards set the timing) */
+      var flip = function () { applyDark(on); };
+      if (document.startViewTransition && !matchMedia('(prefers-reduced-motion:reduce)').matches) document.startViewTransition(flip); else flip();
+      save({ darkMode: on }); sync(); });
     sizes.forEach(function (x) { x.addEventListener('click', function () { var s = applySize(x.dataset.size); save({ fontSize: s }); sync(); }); });
     fonts.forEach(function (x) { x.addEventListener('click', function () { var k = applyFont(x.dataset.font); save({ readingFont: k }); sync(); }); });
     chips.forEach(function (x) { x.addEventListener('click', function () { var p = prefs(); applyOverlay(x.dataset.ov, p.overlayIntensity); save({ overlay: x.dataset.ov }); sync(); }); });
@@ -142,7 +157,8 @@
     build(where, before);
   }
   applyAll();
-  window.svDashA11y = { apply: applyAll, prefs: prefs, save: save };
+  window.svDashA11y = { apply: applyAll, prefs: prefs, save: save,
+    setScene: function (on) { scene = !!on; applyAll(); }, isDark: function () { return effectiveDark(prefs()); } };
   /* prefs can arrive from the account after boot (account-sync merges) — re-apply then */
   window.addEventListener('storage', function (e) { if (e.key === KEY) applyAll(); });
   document.addEventListener('sv-account-synced', applyAll);

@@ -2547,6 +2547,16 @@ function initLessonProgress() {
       var arr = roll[key] || [];
       var ix = arr.indexOf(num);
       var newlyDone = complete && ix < 0;
+      /* on a plan run (js/plan-flow.js) the lesson's progress drives the bar at the foot of the page */
+      if (window.svFlow) try {
+        /* the suggestion: the lightest single activity that would finish the lesson; if none alone
+           would, the heaviest one left (it gets closest) */
+        var avail = 0, got = 0; tasks.forEach(function (t) { var w = TASK_WEIGHTS[t.id] || 0; avail += w; if (s[t.id]) got += w; });
+        var need = avail * 0.5 - got, left = tasks.filter(function (t) { return !s[t.id] && TASK_WEIGHTS[t.id]; });
+        var fin = left.filter(function (t) { return TASK_WEIGHTS[t.id] >= need; }).sort(function (a, b) { return TASK_WEIGHTS[a.id] - TASK_WEIGHTS[b.id]; });
+        var pick = fin[0] || left.sort(function (a, b) { return TASK_WEIGHTS[b.id] - TASK_WEIGHTS[a.id]; })[0];
+        svFlow.lessonProgress({ pct: wres.pct, complete: complete, next: pick ? { id: pick.id, finishes: !!fin[0] } : null });
+      } catch (eF) {}
       if (newlyDone) { try { localStorage.setItem('sv-cards-nudge', '1'); } catch (e0) {} }
       if (complete && ix < 0) arr.push(num);
       if (!complete && ix >= 0) arr.splice(ix, 1);
@@ -2605,7 +2615,8 @@ function initLessonProgress() {
       // observable, so nobody has to guess whether the rule fired
       console.log('[sv-progress]', key, num, complete ? 'COMPLETE' : 'not complete',
         '- weighted ' + wres.pct + '% (threshold 50%)');
-      if (newlyDone) {
+      if (newlyDone && window.svFlow && svFlow.onRunLesson()) { /* on a plan run the bar says it instead */ }
+      else if (newlyDone) {
         var t = document.createElement('div');
         t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#2d5a3d;color:#fff;font-family:Inter,sans-serif;font-size:0.85rem;padding:0.65rem 1.3rem;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.2);z-index:9999;opacity:0;transition:opacity 0.3s ease;pointer-events:none;';
         t.textContent = 'Lesson complete ✓ — it’ll show on your dashboard';
