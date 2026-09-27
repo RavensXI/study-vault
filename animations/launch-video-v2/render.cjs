@@ -39,7 +39,7 @@ const srv = http.createServer((q, r) => { const p = path.join(ROOT, decodeURICom
   const out = path.join(ROOT, 'out', name);
   const ss = (from / TL.FPS).toFixed(4), dur = ((to - from + 1) / TL.FPS).toFixed(4);
   const ff = spawn('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-f', 'image2pipe', '-framerate', String(TL.FPS), '-c:v', 'mjpeg', '-i', '-',
-    '-ss', ss, '-t', dur, '-i', wav, '-af', `volume=${gain}dB,alimiter=limit=0.8:attack=1:release=50:level=disabled,aresample=192000,alimiter=limit=0.81:attack=0.5:release=40:level=disabled,aresample=48000`,
+    '-ss', ss, '-t', dur, '-i', wav, '-af', `volume=${gain}dB,alimiter=limit=0.76:attack=1:release=50:level=disabled,aresample=192000,alimiter=limit=0.77:attack=0.5:release=40:level=disabled,aresample=48000`,
     '-c:v', 'libx264', '-preset', debug ? 'veryfast' : 'slow', '-crf', debug ? '24' : '16', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-r', String(TL.FPS),
     '-c:a', 'aac', '-b:a', '256k', '-ar', '48000', '-movflags', '+faststart', '-shortest', out], { stdio: ['pipe', 'inherit', 'inherit'] });
   const t0 = Date.now();
