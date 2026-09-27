@@ -530,7 +530,7 @@ APPLY_JS = r"""([t, a]) => {
     e.value = String(val == null ? '' : val); e.dispatchEvent(new Event('input')); };
   if (t === 'multiple_choice') {
     const opts = [...card.querySelectorAll('.mc-option')];
-    const b = opts.find(e => N(T(e.querySelector('.mc-text'))) === N(a)) || opts.find(e => Z(T(e.querySelector('.mc-text'))) === Z(a))
+    const b = opts.find(e => T(e.querySelector('.mc-text')).trim() === String(a).trim()) || opts.find(e => N(T(e.querySelector('.mc-text'))) === N(a)) || opts.find(e => Z(T(e.querySelector('.mc-text'))) === Z(a))
       || opts.find(e => L(T(e.querySelector('.mc-text'))) === L(a)) || opts.find(e => L(e.querySelector('.mc-text').innerText) === L(a));
     if (b) b.click(); else miss.push('option: ' + a);
   } else if (t === 'single_value') {

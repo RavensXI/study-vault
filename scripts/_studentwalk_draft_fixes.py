@@ -384,7 +384,7 @@ def cmd_report():
 
 def cmd_apply():
     drafts = json.load(io.open(DRAFTS, encoding="utf-8"))
-    ready = {k: d for k, d in drafts.items() if status(d) == "ready" and not d.get("applied")}
+    ready = {k: d for k, d in drafts.items() if status(d) == "ready" and not d.get("applied") and not d.get("hold")}   # hold = waiting for Tom
     by_lesson = {}
     for k, d in ready.items(): by_lesson.setdefault(d["lesson_id"], []).append(d)
     backup = {}
