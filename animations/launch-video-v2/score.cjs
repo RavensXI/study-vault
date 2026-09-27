@@ -1,11 +1,12 @@
-/* score.cjs — the v2 test clip's music, synthesised from timeline.js (no samples, licence-clean).
-   112.5 BPM (16 frames a beat at 30 fps), C major, C–Am–F–G. House-style pump: the music bus is
-   side-chained to the kick; bass sits on the offbeats. Three buses (drums, music, effects) are mixed
-   separately, then a gentle saturation and a peak normalise; render.cjs sets -14 LUFS.
-   node score.cjs  ->  out/score.wav (48 kHz stereo float) */
+/* score.cjs — the launch videos' music, synthesised from timeline.js (no samples, licence-clean).
+   112.5 BPM (16 frames a beat at 30 fps), C major, C–Am–F–G one chord a bar. House-style pump: the music
+   bus is side-chained to the kick; bass on the offbeats. Each bar's arrangement comes from its kind in the
+   timeline (intro, drop, groove, build, break, stop, end); every sound effect comes from a scene cue, so it
+   lands on the frame of the thing it belongs to.   node score.cjs students|teachers -> out/score-<video>.wav */
 const fs = require('fs'), path = require('path');
-const TL = require('./timeline.js'), K = TL.K;
-const SR = 48000, LEN = TL.FRAMES / TL.FPS, N = Math.ceil(LEN * SR);
+const TL = require('./timeline.js');
+const VIDEO = process.argv[2] || 'students', V = TL.VIDEOS[VIDEO];
+const SR = 48000, LEN = V.frames / TL.FPS, N = Math.ceil(LEN * SR);
 const bus = () => [new Float32Array(N), new Float32Array(N)];
 const DR = bus(), MU = bus(), FX = bus();
 const at = f => Math.round(f / TL.FPS * SR);
@@ -78,70 +79,80 @@ function suck(len) { const n = Math.round(len * SR), b = new Float32Array(n); fo
 /* ---------- arrangement ---------- */
 const CH = { C: [60, 64, 67, 72], Am: [57, 60, 64, 69], F: [53, 57, 60, 65], G: [55, 59, 62, 67] };
 const ROOT = { C: 36, Am: 33, F: 29, G: 31 };
-const BARS = ['G', 'C', 'Am', 'F', 'G', 'Am'];                    // bar 0 is the intro (dominant into the wipe)
+const PROG = ['C', 'Am', 'F', 'G'];
+const B = TL.BEAT, BAR = TL.BAR;
 const kicks = [];
-for (let bar = 1; bar < 6; bar++) {
-  const c = BARS[bar], f0 = TL.F(bar);
-  const build = bar === 5;
-  for (let bt = 0; bt < 4; bt++) {
-    const fb = TL.F(bar, bt);
-    if (!(build && bt >= 2)) { place(DR, fb, kick()); kicks.push(fb); }          // the kick drops out for the zoom
-    if (bt === 1 || bt === 3) if (!(build && bt === 3)) place(DR, fb, clap());
-    place(DR, fb + 8, hat(true), 0.25);
-    for (let s = 0; s < 4; s++) if (s !== 2) place(DR, fb + s * 4, hat(false, s === 0 ? 0.8 : 0.55), -0.25);
-    // offbeat bass (between the kicks), octave jump on the last offbeat
-    if (!(build && bt >= 2)) place(MU, fb + 8, bass(ROOT[c] + (bt === 3 ? 12 : 0), beatS / 2 * 0.95));
+const bars = [];
+V.scenes.forEach(s => s.kinds.forEach((k, i) => bars.push({ kind: k, scene: s, i })));
+bars.forEach((bb, bar) => {
+  const f0 = bar * BAR, kind = bb.kind, c = kind === 'intro' ? 'G' : PROG[(bar + 399) % 4];
+  if (kind === 'intro') { place(MU, f0, pad(CH.G.map(m => m - 12), BAR / TL.FPS + 0.02, 260, 2400, 1.1)); return; }
+  if (kind === 'stop') {                                      // one beat of nothing, then the hit on beat 1
+    const h = f0 + B; place(DR, h, kick(1.25)); kicks.push(h); place(DR, h, crash(1.1)); place(DR, h, clap(1.0));
+    place(MU, h, supersaw(CH.C, 1.1, 3000, 1.1)); place(MU, h, bass(36, 0.9, 1.2)); place(MU, h, pad(CH.C, 3 * beatS + 0.05, 2400, 900, 0.9));
+    return;
   }
-  // chords: one bar of supersaw, pumped by the side-chain; the build opens the filter
-  place(MU, f0, supersaw(CH[c], build ? beatS * 2 : beatS * 4, build ? 2600 : 2200, 0.9), 0);
-  // arp from the card scene on
-  if (bar >= 3) { const a = [CH[c][0] + 12, CH[c][2] + 12, CH[c][1] + 12, CH[c][3] + 12];
-    for (let s = 0; s < 16; s++) { if (build && s >= 8) break; place(MU, f0 + s * 4, pluck(a[s % 4] + (s % 8 >= 4 ? 0 : 12), 0.8), s % 2 ? 0.45 : -0.45); } }
-}
-// intro: a pad that opens up, and the first sounds of the dot and the padlock
-place(MU, 0, pad(CH.G.map(m => m - 12), TL.SEC(K.wipe) + 0.02, 260, 2400, 1.1), 0);
-place(FX, K.dotIn, pluck(84, 1.1, 9), 0);                         // the dot
-place(FX, K.lockIn, impact(true), 0);                             // the padlock grows
-place(FX, K.unlock, unlockClick(), 0.1);                          // the shackle lifts
-place(FX, K.lockOut, riser(TL.SEC(K.wipe - K.lockOut), 0.9), 0);  // one beat of riser into the wipe
-// the wipe: the downbeat
-place(FX, K.wipe, impact(false), 0); place(DR, K.wipe, crash(1), 0);
-// the words, the boards
-[[K.w1, 76], [K.w2, 79], [K.w3, 84]].forEach(([f, m]) => place(FX, f, pluck(m, 1.2, 10), 0));
-[0, 1, 2, 3].forEach(i => place(FX, K.boards + i * 4, tone(1568 + i * 196, 1568 + i * 196, 0.08, 40, 0.14), i % 2 ? 0.3 : -0.3));
-place(FX, K.textOut, whoosh(0.3, 0.12), 0);
-place(FX, K.dotMove, tone(520, 880, 0.18, 12, 0.28), 0);
-// the card
-place(FX, K.cardIn, impact(true), 0); place(FX, K.cardIn, tone(660, 990, 0.1, 30, 0.2), 0);
-for (let f = K.typeFrom; f < K.check; f += 4) place(FX, f, click(0.55), 0.15);
-place(FX, K.check, click(1.3), 0);
-place(FX, K.tick, chime(), 0.05); place(DR, K.tick, crash(0.35), 0.2);
-place(FX, K.flip - 7, whoosh(0.4, 7 / TL.FPS), 0);
-// the zoom: a snare roll and a riser, then the suck into the dot, then the hit
-for (let s = 0; s < 8; s++) place(DR, K.zoom + s * 4, snare(0.4 + 0.08 * s), 0.1);
-place(FX, K.zoom, riser(TL.SEC(K.collapse - K.zoom) + 0.05, 1.1), 0);
-place(FX, K.collapse, suck(TL.SEC(K.next - K.collapse)), 0);
-place(DR, K.next, kick(1.2)); kicks.push(K.next); place(DR, K.next, crash(1.1), 0); place(FX, K.next, impact(false), 0);
-place(MU, K.next, supersaw(CH.C, 0.7, 3200, 1.1), 0); place(MU, K.next, bass(36, 0.6, 1.2));
+  if (kind === 'end') {                                       // ring out
+    place(MU, f0, pad(CH.F, 4 * beatS, 1600, 700, 0.8)); place(MU, f0, bass(29, 1.4, 0.7));
+    [0, 2, 4, 6].forEach((e, j) => place(MU, f0 + e * 8, pluck(CH.F[j % 4] + 12, 0.55, 8), j % 2 ? 0.35 : -0.35));
+    place(DR, f0, kick(0.6)); kicks.push(f0);
+    return;
+  }
+  const full = kind !== 'break', drop = kind === 'drop', build = kind === 'build';
+  for (let bt = 0; bt < 4; bt++) {
+    const fb = f0 + bt * B;
+    const kickOn = kind === 'break' ? bt === 0 : !(build && bt >= 2);
+    if (kickOn) { place(DR, fb, kick(kind === 'break' ? 0.8 : 1)); kicks.push(fb); }
+    if (full && (bt === 1 || bt === 3) && !(build && bt === 3)) place(DR, fb, clap(drop ? 1.05 : 1));
+    place(DR, fb + 8, hat(full, full ? 1 : 0.7), 0.25);
+    if (full) for (let s = 0; s < 4; s++) if (s !== 2) place(DR, fb + s * 4, hat(false, s === 0 ? 0.8 : 0.55), -0.25);
+    if (!(build && bt >= 2)) place(MU, fb + 8, bass(ROOT[c] + (bt === 3 ? 12 : 0), beatS / 2 * 0.95, kind === 'break' ? 0.7 : 1));
+  }
+  if (drop) place(DR, f0, crash(0.9), 0.1);
+  place(MU, f0, supersaw(CH[c], build ? beatS * 2 : beatS * 4, drop ? 2800 : kind === 'break' ? 1300 : 2200, kind === 'break' ? 0.7 : 0.9));
+  if (kind !== 'groove' || bb.i % 2 === 1) {
+    const a = [CH[c][0] + 12, CH[c][2] + 12, CH[c][1] + 12, CH[c][3] + 12];
+    for (let s = 0; s < 16; s++) { if (build && s >= 8) break; place(MU, f0 + s * 4, pluck(a[s % 4] + (s % 8 >= 4 ? 0 : 12), drop ? 0.9 : 0.7), s % 2 ? 0.45 : -0.45); }
+  }
+  if (build) { for (let s = 0; s < 8; s++) place(DR, f0 + 2 * B + s * 4, snare(0.4 + 0.08 * s), 0.1); place(FX, f0 + 2 * B, riser(2 * beatS + 0.03, 0.9)); }
+});
 
-/* side-chain: the music bus ducks under every kick and swells back (the pump) */
+/* ---------- cues: scene key moments -> sounds ---------- */
+const SFX = {
+  dot: () => pluck(84, 1.1, 9), word: () => pluck(79, 1.0, 11), thud: () => impact(true), unlock: () => unlockClick(),
+  swish: () => whoosh(0.3, 0.1), suck: () => suck(0.3), riser1: () => riser(beatS + 0.02, 0.9), hit: () => impact(false),
+  pop: () => tone(1046.5, 1568, 0.08, 30, 0.2), click: () => click(1.3), chime: () => chime(), flip: () => whoosh(0.38, 0.2),
+  impact: () => impact(false), impact_s: () => impact(true), buzz: () => tone(330, 260, 0.18, 14, 0.22), mail: () => tone(880, 1320, 0.14, 18, 0.22),
+  lockclick: () => unlockClick(), count: () => tone(1318.5, 1760, 0.12, 20, 0.16),
+};
+const MULTI = { board4: [4, 4, 'tick'], blocks4: [4, 8, 'pop'], tiles5: [5, 8, 'pop'], streak3: [3, 8, 'tick'], rows4: [4, 16, 'pop'], typing: [16, 2, 'key'], typing3: [3, 4, 'key'], cells: [14, 3, 'tick'] };
+V.scenes.forEach(s => (s.cues || []).forEach(([key, name]) => {
+  const f = s.f0 + (typeof key === 'number' ? key : s.keys[key]) * B;
+  if (MULTI[name]) { const [n, step, what] = MULTI[name]; for (let i = 0; i < n; i++) {
+    const g = what === 'key' ? click(0.5) : what === 'tick' ? tone(1568 + i * 98, 1568 + i * 98, 0.07, 40, 0.13) : tone(1046.5 + i * 60, 1568, 0.07, 30, 0.18);
+    place(FX, f + i * step, g, i % 2 ? 0.3 : -0.3); } return; }
+  place(FX, f, SFX[name](), 0);
+}));
+/* a whoosh that peaks on every colour-field transition */
+V.scenes.forEach(s => { if (s.enter && ['circle', 'bars', 'field', 'zoom'].includes(s.enter.type) && s.id !== 'end') place(FX, s.f0 - 8, whoosh(0.4, 8 / TL.FPS), 0); });
+/* the stop: hard silence for the first beat of the stop bar (4 ms fade), then a soft suck as the field collapses */
+V.scenes.forEach(s => s.kinds.forEach((k, i) => { if (k !== 'stop') return; const f = s.f0 + i * BAR, a = at(f), b2 = at(f + B), fade = Math.round(0.004 * SR);
+  [DR, MU, FX].forEach(Bu => { for (let j = a - fade; j < b2; j++) { const g = j < a ? (a - j) / fade : 0; Bu[0][j] *= g; Bu[1][j] *= g; } });
+  place(FX, f, suck(0.35), 0); }));
+
+/* side-chain pump */
 { const env = new Float32Array(N).fill(1);
-  kicks.forEach(f => { const s0 = at(f), rel = Math.round(0.26 * SR);
-    for (let i = 0; i < rel && s0 + i < N; i++) { const x = i / rel; env[s0 + i] = Math.min(env[s0 + i], 0.28 + 0.72 * (1 - Math.pow(1 - x, 2.4) * (1 - x > 0 ? 1 : 0))); } });
+  kicks.forEach(f => { const s0 = at(f), rel = Math.round(0.26 * SR); for (let i = 0; i < rel && s0 + i < N; i++) { const x = i / rel; env[s0 + i] = Math.min(env[s0 + i], 0.3 + 0.7 * (1 - Math.pow(1 - x, 2.4))); } });
   for (let i = 0; i < N; i++) { MU[0][i] *= env[i]; MU[1][i] *= env[i]; } }
-
-/* mix: drums, music, effects; a gentle glue saturation; a short fade at the very end */
-const L = new Float32Array(N), R = new Float32Array(N);
-const G = { dr: 0.95, mu: 0.62, fx: 0.7 };
+const L = new Float32Array(N), R = new Float32Array(N), G = { dr: 0.95, mu: 0.6, fx: 0.72 };
 for (let i = 0; i < N; i++) { L[i] = DR[0][i] * G.dr + MU[0][i] * G.mu + FX[0][i] * G.fx; R[i] = DR[1][i] * G.dr + MU[1][i] * G.mu + FX[1][i] * G.fx; }
-{ const n = Math.round(0.25 * SR); for (let i = N - n; i < N; i++) { const g = (N - i) / n; L[i] *= g; R[i] *= g; } }
-let peak = 0; for (let i = 0; i < N; i++) { L[i] = Math.tanh(L[i] * 1.2) / 1.2 * 1.2; R[i] = Math.tanh(R[i] * 1.2) / 1.2 * 1.2; peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i])); }
-const norm = Math.pow(10, -3 / 20) / peak;
-const out = Buffer.alloc(44 + N * 8);
+{ const n = Math.round(1.2 * SR); for (let i = N - n; i < N; i++) { const g = Math.pow((N - i) / n, 1.5); L[i] *= g; R[i] *= g; } }
+let peak = 0; for (let i = 0; i < N; i++) { L[i] = Math.tanh(L[i] * 1.2); R[i] = Math.tanh(R[i] * 1.2); peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i])); }
+const norm = Math.pow(10, -3 / 20) / peak, out = Buffer.alloc(44 + N * 8);
 out.write('RIFF', 0); out.writeUInt32LE(36 + N * 8, 4); out.write('WAVE', 8); out.write('fmt ', 12); out.writeUInt32LE(16, 16);
 out.writeUInt16LE(3, 20); out.writeUInt16LE(2, 22); out.writeUInt32LE(SR, 24); out.writeUInt32LE(SR * 8, 28); out.writeUInt16LE(8, 32); out.writeUInt16LE(32, 34);
 out.write('data', 36); out.writeUInt32LE(N * 8, 40);
 for (let i = 0; i < N; i++) { out.writeFloatLE(L[i] * norm, 44 + i * 8); out.writeFloatLE(R[i] * norm, 48 + i * 8); }
 fs.mkdirSync(path.join(__dirname, 'out'), { recursive: true });
-fs.writeFileSync(path.join(__dirname, 'out', 'score.wav'), out);
-console.log(`score: ${LEN.toFixed(2)} s at ${TL.BPM} BPM, ${kicks.length} kicks, peak ${peak.toFixed(3)}`);
+fs.writeFileSync(path.join(__dirname, 'out', `score-${VIDEO}.wav`), out);
+console.log(`score ${VIDEO}: ${LEN.toFixed(2)} s, ${bars.length} bars at ${TL.BPM} BPM, ${kicks.length} kicks`);
