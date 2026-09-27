@@ -86,6 +86,16 @@ def signature(q):
             json.dumps(body, ensure_ascii=False, separators=(",", ":"))[:160])
 
 
+def settle(pg):
+    """Let the card finish its transition and every image and chart finish loading before a screenshot."""
+    time.sleep(1.2)
+    for _ in range(20):
+        if pg.evaluate("""() => [...document.querySelectorAll('#current-problem-card img, #practice-passage-area img')]
+                          .every(i => i.complete && i.naturalWidth > 0)"""): break
+        time.sleep(0.5)
+    time.sleep(0.6)
+
+
 def lesson_q(sub, unit, n, select="practice_data"):
     q = ("lessons?select=id,%s,units!inner(slug,subject_id,subjects!inner(slug))&units.subjects.slug=eq.%s"
          "&units.slug=eq.%s&lesson_number=eq.%s" % (select, sub, unit, n))
@@ -330,6 +340,7 @@ def cmd_extract(args):
                         os.makedirs(SHOTS, exist_ok=True)
                         shot = os.path.join(SHOTS, re.sub(r"[^A-Za-z0-9]+", "_", key) + ".png")
                         try:
+                            settle(pg)
                             pg.evaluate("() => window.scrollTo(0, 0)")
                             box = pg.evaluate("""() => { const r = [document.getElementById('current-problem-card'), document.getElementById('practice-passage-area')]
                               .filter(e => e && getComputedStyle(e).display !== 'none' && e.offsetHeight > 0).map(e => e.getBoundingClientRect());
@@ -508,22 +519,30 @@ APPLY_JS = r"""([t, a]) => {
   const Z = s => N(s).replace(/[\s$\\(){}]/g, '');
   const pick = (els, w, get) => { const x = String(w == null ? '' : w).trim();
     return els.find(e => get(e).trim() === x) || els.find(e => N(get(e)) === N(x)); };
+  if (typeof a === 'string' && /^\s*[\[{]/.test(a)) { try { a = JSON.parse(a); } catch (e) {} }
+  const num = x => { if (x == null) return x; const s = String(x).trim();
+    if (/^-?\d+(\.\d+)?$/.test(s)) return s; const m = s.replace(/[\u2212\u2013]/g, '-').replace(/(\d),(\d{3})/g, '$1$2').match(/-?\d+(\.\d+)?/);
+    return m ? m[0] : s; };
+  const L = s => String(s == null ? '' : s).replace(/\\pounds|\\mathsterling/g, '£').replace(/\^\s*\{?\\circ\}?|\\circ|\\degree/g, '°')
+    .replace(/\\times/g, '×').replace(/\\div/g, '÷').replace(/\\leq?\b/g, '≤').replace(/\\geq?\b/g, '≥').replace(/\\%/g, '%')
+    .replace(/\\[,;!:]|\\ |\\\(|\\\)|[$\s\u2009\u202f{}]/g, '').replace(/(\d),(\d{3})/g, '$1$2').replace(/[–−]/g, '-').toLowerCase();
   const setv = (id, val) => { const e = document.getElementById(id); if (!e) { miss.push('no box ' + id); return; }
     e.value = String(val == null ? '' : val); e.dispatchEvent(new Event('input')); };
   if (t === 'multiple_choice') {
     const opts = [...card.querySelectorAll('.mc-option')];
-    const b = opts.find(e => N(T(e.querySelector('.mc-text'))) === N(a)) || opts.find(e => Z(T(e.querySelector('.mc-text'))) === Z(a));
+    const b = opts.find(e => N(T(e.querySelector('.mc-text'))) === N(a)) || opts.find(e => Z(T(e.querySelector('.mc-text'))) === Z(a))
+      || opts.find(e => L(T(e.querySelector('.mc-text'))) === L(a)) || opts.find(e => L(e.querySelector('.mc-text').innerText) === L(a));
     if (b) b.click(); else miss.push('option: ' + a);
   } else if (t === 'single_value') {
-    setv('problem-input-a', typeof a === 'object' && a !== null ? (a.value ?? a.answer ?? JSON.stringify(a)) : a);
+    setv('problem-input-a', num(typeof a === 'object' && a !== null ? (a.value ?? a.answer ?? JSON.stringify(a)) : a));
   } else if (t === 'two_solutions') {
-    const x = Array.isArray(a) ? a : [a && a[0], a && a[1]]; setv('problem-input-a', x[0]); setv('problem-input-b', x[1]);
+    const x = Array.isArray(a) ? a : [a && a[0], a && a[1]]; setv('problem-input-a', num(x[0])); setv('problem-input-b', num(x[1]));
   } else if (t === 'xy_pair') {
-    setv('problem-input-a', a && (a.x ?? a[0])); setv('problem-input-b', a && (a.y ?? a[1]));
+    setv('problem-input-a', num(a && (a.x ?? a[0]))); setv('problem-input-b', num(a && (a.y ?? a[1])));
   } else if (t === 'fraction') {
-    setv('problem-input-num', a && (a.numerator ?? a[0])); setv('problem-input-den', a && (a.denominator ?? a[1]));
+    setv('problem-input-num', num(a && (a.numerator ?? a[0]))); setv('problem-input-den', num(a && (a.denominator ?? a[1])));
   } else if (t === 'standard_form') {
-    setv('problem-input-sf-a', a && (a.a ?? a[0])); setv('problem-input-sf-n', a && (a.n ?? a[1]));
+    setv('problem-input-sf-a', num(a && (a.a ?? a[0]))); setv('problem-input-sf-n', num(a && (a.n ?? a[1])));
   } else if (t === 'vocab_match') {
     (a || []).forEach(x => {
       const l = pick([...card.querySelectorAll('.vm-left:not(.vm-matched):not(.vm-correct)')], x.left, e => e.innerText);
@@ -834,9 +853,42 @@ def cmd_report(args):
     print("auto-marked right %d / %d | findings %s" % (right, len(auto), dict(finds)))
 
 
+def cmd_reshoot(args):
+    """Retake the screenshots of chosen questions (after a shot caught a transition or an unloaded image)."""
+    from playwright.sync_api import sync_playwright
+    keys = set(json.load(io.open(args[args.index("--keys") + 1], encoding="utf-8")))
+    views = load("views", {})
+    by = {}
+    for k in keys:
+        if k in views and views[k].get("shot"): by.setdefault(k.rsplit("/", 2)[0], []).append(k)
+    with sync_playwright() as p:
+        br = p.chromium.launch()
+        for lk, ks in by.items():
+            ctx = br.new_context(viewport={"width": 1440, "height": 1500}); ctx.add_init_script(INIT); pg = ctx.new_page()
+            sub, unit, n = lk.split("/")
+            bank = get(lesson_q(sub, unit, n))[0]["practice_data"]["problem_bank"]
+            pg.goto(page_url(sub, unit, n), wait_until="commit", timeout=30000); time.sleep(8); pg.evaluate(vw.DISMISS_JS)
+            shown = pg.evaluate(SIG_JS)
+            for k in ks:
+                v = views[k]
+                d = next((i for i, s in enumerate(shown.get(v["tier"], [])) if s == signature(bank[v["tier"]][v["i"]])), None)
+                if d is None: continue
+                pg.evaluate(RENDER_JS, [v["tier"], d]); time.sleep(0.8); pg.evaluate(vw.DISMISS_JS); settle(pg)
+                pg.evaluate("() => window.scrollTo(0, 0)")
+                box = pg.evaluate("""() => { const r = [document.getElementById('current-problem-card'), document.getElementById('practice-passage-area')]
+                  .filter(e => e && getComputedStyle(e).display !== 'none' && e.offsetHeight > 0).map(e => e.getBoundingClientRect());
+                  const x = Math.min(...r.map(b => b.left)), y = Math.min(...r.map(b => b.top + window.scrollY));
+                  return { x: Math.max(0, x - 8), y: Math.max(0, y - 8), width: Math.max(...r.map(b => b.right)) - x + 16,
+                           height: Math.max(...r.map(b => b.bottom + window.scrollY)) - y + 16 }; }""")
+                pg.screenshot(path=v["shot"], clip=box, full_page=True)
+            ctx.close()
+        br.close()
+    print("reshot %d" % sum(len(v) for v in by.values()))
+
+
 if __name__ == "__main__":
     a = sys.argv[1:]
     cmds = {"extract": cmd_extract, "attempt": cmd_attempt, "attempt-sub": cmd_attempt_sub, "collect": cmd_collect, "mark": cmd_mark,
-            "adjudicate": cmd_adjudicate, "collect-adjudication": cmd_collect_adjudication, "report": cmd_report}
+            "adjudicate": cmd_adjudicate, "reshoot": cmd_reshoot, "collect-adjudication": cmd_collect_adjudication, "report": cmd_report}
     if not a or a[0] not in cmds: print(__doc__)
     else: cmds[a[0]](a)

@@ -86,6 +86,8 @@ def findings():
         at = json.load(io.open(os.path.join(d, "attempts.json"), encoding="utf-8"))
         rulings = ("unanswerable",) if SET == "englang_written" else ("key_wrong", "ambiguous", "unanswerable")
         for k, x in a.items():
+            if SET == "practice" and "LISTENING" in (v.get(k, {}).get("panel_label") or "").upper():
+                continue   # music listening: the walk cannot hear the extract, so its rulings are not evidence
             if k in v and wanted(v[k]["type"]) and (x or {}).get("finding") in rulings:
                 out.append({"key": k, "dir": sub, "id": dkey(sub, k), "view": v[k], "ruling": x, "attempt": at.get(k, {})})
     if SET == "practice":
