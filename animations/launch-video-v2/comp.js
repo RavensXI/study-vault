@@ -110,9 +110,13 @@
     const s = h / 1280; if (s <= 0) return;
     ctx.save(); ctx.translate(cx - 1023 / 2 * s, cy - 1280 / 2 * s); ctx.scale(s, s); ctx.translate(-512, -384); ctx.fillStyle = col;
     ctx.save(); ctx.translate(0, -lift); ctx.translate(PIVOT, 0); ctx.scale(Math.cos(swing * Math.PI), 1); ctx.translate(-PIVOT, 0);
-    ctx.beginPath(); ctx.rect(300, 200, 2200, 646); ctx.clip(); ctx.fill(LOCK); ctx.restore();
-    if (lift > 0) { const w = Math.abs(Math.cos(swing * Math.PI)); ctx.fillRect(PIVOT - 37.8 * Math.max(0.35, w), 845 - lift, 75.6 * Math.max(0.35, w), lift + 30); }
-    ctx.save(); ctx.beginPath(); ctx.rect(300, 845, 2200, 900); ctx.clip(); ctx.fill(LOCK); ctx.restore();
+    // only the shackle: clipped between its outer leg edges and well above the body (any clip edge near the
+    // body's top edge multiplies two soft edges into a visible hairline); the leg ends are drawn as rectangles
+    ctx.save(); ctx.beginPath(); ctx.rect(638, 200, 772, 632); ctx.clip(); ctx.fill(LOCK); ctx.restore();
+    ctx.fillRect(640.7, 826, 75.8, 19.2); ctx.fillRect(1331.4, 826, 75.8, 19.2);   // the leg ends, drawn square (a clip edge here leaves a hairline)
+    ctx.restore();
+    if (lift > 0) { const w = Math.abs(Math.cos(swing * Math.PI)); ctx.fillRect(PIVOT - 37.9 * Math.max(0.35, w), 844 - lift, 75.8 * Math.max(0.35, w), lift + 40); }
+    ctx.save(); ctx.beginPath(); ctx.rect(300, 843.9, 2200, 900); ctx.clip(); ctx.fill(LOCK); ctx.restore();
     ctx.fillStyle = hole; ctx.fill(KEYHOLE);
     ctx.restore();
   }
