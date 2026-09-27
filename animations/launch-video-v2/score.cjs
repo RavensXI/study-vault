@@ -2,10 +2,14 @@
    112.5 BPM (16 frames a beat at 30 fps), C major, C–Am–F–G one chord a bar. House-style pump: the music
    bus is side-chained to the kick; bass on the offbeats. Each bar's arrangement comes from its kind in the
    timeline (intro, drop, groove, build, break, stop, end); every sound effect comes from a scene cue, so it
-   lands on the frame of the thing it belongs to.   node score.cjs students|teachers -> out/score-<video>.wav */
+   lands on the frame of the thing it belongs to. The students' lesson scene carries ~1.5 s of the lesson's own
+   narration (media/<clip>-narr.f32) with the drums and music ducked 6 dB under it.
+   node score.cjs students|teachers [dept] -> out/score-<dept>-<video>.wav */
 const fs = require('fs'), path = require('path');
 const TL = require('./timeline.js');
-const VIDEO = process.argv[2] || 'students', V = TL.VIDEOS[VIDEO];
+const VIDEO = process.argv[2] || 'students', V = TL.VIDEOS[VIDEO], DEPT = process.argv[3] || 'general';
+const DD = JSON.parse(fs.readFileSync(path.join(__dirname, 'departments', DEPT + '.json'), 'utf8'));
+const HEADWORDS = DD.headline ? 1 + DD.headline.subject.split(' ').length : 4, HEADBOARDS = DD.headline ? DD.headline.boards.length : 4;
 const SR = 48000, LEN = V.frames / TL.FPS, N = Math.ceil(LEN * SR);
 const bus = () => [new Float32Array(N), new Float32Array(N)];
 const DR = bus(), MU = bus(), FX = bus();
@@ -125,8 +129,8 @@ const SFX = {
   impact: () => impact(false), impact_s: () => impact(true), buzz: () => tone(330, 260, 0.18, 14, 0.22), mail: () => tone(880, 1320, 0.14, 18, 0.22),
   lockclick: () => unlockClick(), count: () => tone(1318.5, 1760, 0.12, 20, 0.16),
 };
-const MULTI = { board4: [4, 4, 'tick'], blocks4: [4, 8, 'pop'], tiles5: [5, 8, 'pop'], streak3: [3, 8, 'tick'], rows4: [4, 16, 'pop'], typing: [16, 2, 'key'], typing3: [3, 4, 'key'], cells: [14, 3, 'tick'] };
-V.scenes.forEach(s => (s.cues || []).forEach(([key, name]) => {
+const MULTI = { board4: [4, 4, 'tick'], board5: [5, 4, 'tick'], board3: [3, 4, 'tick'], board6: [6, 4, 'tick'], blocks4: [4, 8, 'pop'], tiles5: [5, 8, 'pop'], streak3: [3, 8, 'tick'], rows4: [4, 16, 'pop'], typing: [16, 2, 'key'], typing3: [3, 4, 'key'], cells: [14, 3, 'tick'] };
+V.scenes.forEach(s => (s.id === 'head' ? TL.headWordBeats(HEADWORDS).map(b => [b, 'word']).concat([['stop', 'dot'], ['boards', 'board' + HEADBOARDS]]) : s.cues || []).forEach(([key, name]) => {
   const f = s.f0 + (typeof key === 'number' ? key : s.keys[key]) * B;
   if (MULTI[name]) { const [n, step, what] = MULTI[name]; for (let i = 0; i < n; i++) {
     const g = what === 'key' ? click(0.5) : what === 'tick' ? tone(1568 + i * 98, 1568 + i * 98, 0.07, 40, 0.13) : tone(1046.5 + i * 60, 1568, 0.07, 30, 0.18);
@@ -144,15 +148,25 @@ V.scenes.forEach(s => s.kinds.forEach((k, i) => { if (k !== 'stop') return; cons
 { const env = new Float32Array(N).fill(1);
   kicks.forEach(f => { const s0 = at(f), rel = Math.round(0.26 * SR); for (let i = 0; i < rel && s0 + i < N; i++) { const x = i / rel; env[s0 + i] = Math.min(env[s0 + i], 0.3 + 0.7 * (1 - Math.pow(1 - x, 2.4))); } });
   for (let i = 0; i < N; i++) { MU[0][i] *= env[i]; MU[1][i] *= env[i]; } }
+/* the lesson's own narration under the 'Hear it' strip; drums and music ducked 6 dB (x0.5) with 80 ms ramps */
+let VOICE = null, V0 = 0;
+{ const s = V.scenes.find(x => x.id === 'lesson');
+  if (s) { const b = fs.readFileSync(path.join(__dirname, 'media', DD.media.narr)); VOICE = new Float32Array(b.buffer, b.byteOffset, b.length / 4); V0 = at(s.f0 + s.keys.narr * B);
+    let pk = 0; for (const x of VOICE) pk = Math.max(pk, Math.abs(x)); const vg = 0.9 / pk; VOICE = VOICE.map(x => x * vg);
+    const ramp = Math.round(0.08 * SR), a0 = V0 - ramp, a1 = V0 + VOICE.length;
+    for (let j = Math.max(0, a0); j < Math.min(N, a1 + ramp); j++) { const g = j < V0 ? 1 - 0.5 * (j - a0) / ramp : j < a1 ? 0.5 : 0.5 + 0.5 * (j - a1) / ramp;
+      [DR, MU].forEach(Bu => { Bu[0][j] *= g; Bu[1][j] *= g; }); } } }
 const L = new Float32Array(N), R = new Float32Array(N), G = { dr: 0.95, mu: 0.6, fx: 0.72 };
 for (let i = 0; i < N; i++) { L[i] = DR[0][i] * G.dr + MU[0][i] * G.mu + FX[0][i] * G.fx; R[i] = DR[1][i] * G.dr + MU[1][i] * G.mu + FX[1][i] * G.fx; }
 { const n = Math.round(1.2 * SR); for (let i = N - n; i < N; i++) { const g = Math.pow((N - i) / n, 1.5); L[i] *= g; R[i] *= g; } }
-let peak = 0; for (let i = 0; i < N; i++) { L[i] = Math.tanh(L[i] * 1.2); R[i] = Math.tanh(R[i] * 1.2); peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i])); }
+for (let i = 0; i < N; i++) { L[i] = Math.tanh(L[i] * 1.2); R[i] = Math.tanh(R[i] * 1.2); }
+if (VOICE) for (let i = 0; i < VOICE.length && V0 + i < N; i++) { L[V0 + i] += VOICE[i]; R[V0 + i] += VOICE[i]; }   // the voice after the saturation, clean
+let peak = 0; for (let i = 0; i < N; i++) peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i]));
 const norm = Math.pow(10, -3 / 20) / peak, out = Buffer.alloc(44 + N * 8);
 out.write('RIFF', 0); out.writeUInt32LE(36 + N * 8, 4); out.write('WAVE', 8); out.write('fmt ', 12); out.writeUInt32LE(16, 16);
 out.writeUInt16LE(3, 20); out.writeUInt16LE(2, 22); out.writeUInt32LE(SR, 24); out.writeUInt32LE(SR * 8, 28); out.writeUInt16LE(8, 32); out.writeUInt16LE(32, 34);
 out.write('data', 36); out.writeUInt32LE(N * 8, 40);
 for (let i = 0; i < N; i++) { out.writeFloatLE(L[i] * norm, 44 + i * 8); out.writeFloatLE(R[i] * norm, 48 + i * 8); }
 fs.mkdirSync(path.join(__dirname, 'out'), { recursive: true });
-fs.writeFileSync(path.join(__dirname, 'out', `score-${VIDEO}.wav`), out);
-console.log(`score ${VIDEO}: ${LEN.toFixed(2)} s, ${bars.length} bars at ${TL.BPM} BPM, ${kicks.length} kicks`);
+fs.writeFileSync(path.join(__dirname, 'out', `score-${DEPT}-${VIDEO}.wav`), out);
+console.log(`score ${DEPT} ${VIDEO}: ${LEN.toFixed(2)} s, ${bars.length} bars at ${TL.BPM} BPM, ${kicks.length} kicks`);

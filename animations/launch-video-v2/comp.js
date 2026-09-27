@@ -342,22 +342,33 @@
       rr(28, y, pw - 56, 122, 14); ctx.fillStyle = SOFTBG; ctx.fill();
       dot(90, y + 61, 32, INK); ctx.fillStyle = '#fff'; ctx.fillRect(80, y + 47, 7, 28); ctx.fillRect(94, y + 47, 7, 28);
       text('Narration', 144, y + 50, font(SANS, 22, 700), INK); text('Listen while you read', 144, y + 82, font(SANS, 19, 500), MUTED);
-      const n = 34, wx = 400, ww = pw - 56 - 400 - 16, playP = clamp((f - k.hear) / (8 * BEAT));
-      for (let i = 0; i < n; i++) { const hh = 14 + 36 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.6 + 0.4)) * (0.7 + 0.3 * Math.sin((f - k.hear) / 3 + i));
+      const n = 34, wx = 400, ww = pw - 56 - 400 - 16, M = D.media, nf = M.env.length, pf = f - k.narr, playP = clamp(pf / nf);
+      const live = pf >= 0 && pf < nf ? M.env[Math.floor(pf)] : 0;      // the narration's own loudness, frame by frame
+      for (let i = 0; i < n; i++) { const near = Math.max(0, 1 - Math.abs(i / n - playP) * 6);
+        const hh = 12 + 30 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.6 + 0.4)) * (0.55 + 0.45 * Math.sin(f / 5 + i * 0.8) * live) + 20 * live * near;
         ctx.fillStyle = i / n < playP ? RUST : '#d8d1c6'; rr(wx + i * (ww / n), y + 61 - hh / 2, ww / n - 4, hh, 2); ctx.fill(); }
       ctx.restore(); }
   }
-  function videoTile(f, k) {                  // card space: a video block under the narration strip
-    if (f < k.watch) return; const a = sp(f, k.watch, 300, 17), vw = 330, vh = 186;
-    const cx = LE.w - 28 - vw / 2, cy = 540 + vh / 2;
-    text('Video overview', 44, 590, font(SANS, 22, 700), INK); text('Watch the lesson explained', 44, 622, font(SANS, 19, 500), MUTED);
+  let FRAMES_IMG = [];
+  function videoTile(f, k) {                  // card space: the lesson's own explainer, pressed and played
+    if (f < k.watch) return; const a = sp(f, k.watch, 300, 17), NF = FRAMES_IMG.length;
+    const g = sp(f, k.play, 260, 22);          // the grow, from the small tile to most of the card
+    const vw = lerp(330, LE.w - 56, g), vh = vw * 9 / 16;
+    const cx = lerp(LE.w - 28 - 330 / 2, LE.w / 2, g), cy = lerp(540 + 186 / 2, 176 + (LE.w - 56) * 9 / 32, g);
+    item(f, k.watch, () => { ctx.save(); ctx.globalAlpha *= 1 - clamp(g * 2); text('Video overview', 44, 590, font(SANS, 22, 700), INK); text('Watch the lesson explained', 44, 622, font(SANS, 19, 500), MUTED); ctx.restore(); });
+    const pf = f - k.play, img = FRAMES_IMG[Math.max(0, Math.min(NF - 1, Math.floor(pf)))];
     ctx.save(); ctx.translate(cx, cy); ctx.scale(a, a);
-    shadowOn(50, 20, 0.22); rr(-vw / 2, -vh / 2, vw, vh, 16); const g = ctx.createLinearGradient(-vw / 2, -vh / 2, vw / 2, vh / 2); g.addColorStop(0, '#3a4a5c'); g.addColorStop(1, '#1d2430'); ctx.fillStyle = g; ctx.fill(); shadowOff();
+    shadowOn(lerp(50, 70, g), lerp(20, 26, g), 0.24); rr(-vw / 2, -vh / 2, vw, vh, 16); ctx.fillStyle = '#1d2430'; ctx.fill(); shadowOff();
     ctx.save(); rr(-vw / 2, -vh / 2, vw, vh, 16); ctx.clip();
-    for (let i = 0; i < 5; i++) { ctx.fillStyle = `rgba(255,255,255,${0.04 + 0.02 * i})`; ctx.fillRect(-vw / 2 + i * 90 - ((f - k.watch) * 0.6 % 90), -vh / 2 + 120 - i * 14, 70, 200); }
-    ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(-vw / 2, vh / 2 - 54, vw, 54); ctx.restore();
-    dot(0, -18, 34, 'rgba(255,255,255,0.92)'); ctx.fillStyle = INK; ctx.beginPath(); ctx.moveTo(-9, -34); ctx.lineTo(17, -18); ctx.lineTo(-9, -2); ctx.fill();
-    text('Video', -vw / 2 + 20, vh / 2 - 20, font(SANS, 20, 700), '#fff');
+    if (img) ctx.drawImage(img, -vw / 2, -vh / 2, vw, vh);
+    const dim = 0.42 * (1 - clamp(pf / 6)); if (dim > 0) { ctx.fillStyle = `rgba(20,24,32,${dim})`; ctx.fillRect(-vw / 2, -vh / 2, vw, vh); }
+    if (pf >= 0) { const p = clamp(pf / NF); ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fillRect(-vw / 2, vh / 2 - 6, vw, 6); ctx.fillStyle = RUST; ctx.fillRect(-vw / 2, vh / 2 - 6, vw * p, 6); }
+    ctx.restore();
+    // the play button: pressed on the beat, then it gets out of the way
+    const pr = f < k.press ? 1 : f < k.press + 3 ? lerp(1, 0.82, (f - k.press) / 3) : lerp(0.82, 1.25, sp(f, k.press + 3, 420, 18));
+    const pa = 1 - clamp((f - k.press - 3) / 7);
+    if (pa > 0) { ctx.save(); ctx.globalAlpha *= pa; ctx.scale(pr, pr); dot(0, 0, 38, 'rgba(255,255,255,0.94)'); ctx.fillStyle = INK; ctx.beginPath(); ctx.moveTo(-10, -18); ctx.lineTo(19, 0); ctx.lineTo(-10, 18); ctx.fill(); ctx.restore(); }
+    if (f >= k.press && f < k.press + 16) { const rp = prog(f, k.press, 16); ctx.strokeStyle = `rgba(255,255,255,${0.7 * (1 - rp)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, lerp(40, 110, SOFT(rp)), 0, 7); ctx.stroke(); }
     ctx.restore();
   }
 
@@ -531,28 +542,51 @@
       }
     },
     head(t, S) {
-      const k = sceneKeys(S); ground();
-      const words = ['Every', 'major', 'GCSE', 'subject'], at = [k.w0, k.w1, k.w2, k.w3];
-      const size = (MODE === 'L' ? 132 : MODE === 'S' ? 112 : 128) * u, fnt = font(SERIF, size, 600), lh = size * 1.14, gap = size * 0.26, dr = size * 0.085;
-      ctx.letterSpacing = `${-0.02 * size}px`; ctx.font = fnt; const ws = words.map(w => ctx.measureText(w).width);
-      const rows = MODE === 'L' ? [[0, 1, 2, 3]] : [[0, 1], [2, 3]], pos = [];
+      const k = sceneKeys(S); ground(); const HL = D.headline;
+      const words = HL ? ['GCSE'].concat(HL.subject.split(' ')) : ['Every', 'major', 'GCSE', 'subject'];
+      const at = TL.headWordBeats(words.length).map(b => b * BEAT), last = words.length - 1;
+      const base = (MODE === 'L' ? 132 : MODE === 'S' ? 112 : 128) * u, maxW = W * (MODE === 'L' ? 0.86 : 0.84);
+      // the row split: one row when it fits near full size, else the most balanced two rows; the size then fits the widest row
+      const splits = [[words.map((_, i) => i)]];
+      if (MODE !== 'L' || words.length > 3) for (let c = 1; c < words.length; c++) splits.push([words.slice(0, c).map((_, i) => i), words.slice(c).map((_, i) => i + c)]);
+      const rowW = (r, sz) => { ctx.font = font(SERIF, sz, 600); ctx.letterSpacing = `${-0.02 * sz}px`;
+        const w = r.reduce((a2, i) => a2 + ctx.measureText(words[i]).width, 0) + sz * 0.26 * (r.length - 1) + (r[r.length - 1] === last ? sz * 0.085 * 3 : 0); ctx.letterSpacing = '0px'; return w; };
+      const fitOf = rows => Math.min(base, ...rows.map(r => base * maxW / rowW(r, base)));
+      let rows = splits[0], size = fitOf(rows);
+      if (size < base * 0.9) { let best = null;
+        splits.slice(1).forEach(c2 => { const z = fitOf(c2), bal = Math.abs(rowW(c2[0], z) - rowW(c2[1], z));
+          if (!best || z > best[1] + 0.5 || (Math.abs(z - best[1]) <= 0.5 && bal < best[2])) best = [c2, z, bal]; });
+        if (best && best[1] > size) { rows = best[0]; size = best[1]; } }
+      // the 4-word line keeps its original two-row layout on square and portrait
+      if (!HL) { rows = MODE === 'L' ? [[0, 1, 2, 3]] : [[0, 1], [2, 3]]; size = base; }
+      const fnt = font(SERIF, size, 600), lh = size * 1.14, gap = size * 0.26, dr = size * 0.085;
+      ctx.letterSpacing = `${-0.02 * size}px`; ctx.font = fnt; const ws = words.map(w => ctx.measureText(w).width), pos = [];
       const y0 = H / 2 + size * 0.3 - (rows.length - 1) * lh / 2 - 30 * u;
-      rows.forEach((r, ri) => { const tot = r.reduce((a, i) => a + ws[i], 0) + gap * (r.length - 1) + (ri === rows.length - 1 ? dr * 3 : 0); let x = W / 2 - tot / 2;
+      rows.forEach((r, ri) => { const tot = r.reduce((a2, i) => a2 + ws[i], 0) + gap * (r.length - 1) + (ri === rows.length - 1 ? dr * 3 : 0); let x = W / 2 - tot / 2;
         r.forEach(i => { pos[i] = [x, y0 + ri * lh]; x += ws[i] + gap; }); });
       words.forEach((w, i) => maskLine(w, pos[i][0], pos[i][1], fnt, INK, SOFT(prog(t, at[i], 18)), lh));
       ctx.letterSpacing = '0px';
-      const dx = pos[3][0] + ws[3] + dr * 1.6, dy = pos[3][1] - dr; dot(dx, dy, dr * sp(t, k.stop, 420, 15));
+      const dx = pos[last][0] + ws[last] + dr * 1.6, dy = pos[last][1] - dr; dot(dx, dy, dr * sp(t, k.stop, 420, 15));
       S.exit = [dx, dy];
-      const boards = ['AQA', 'Edexcel', 'OCR', 'Eduqas'], bf = font(SANS, (MODE === 'L' ? 40 : 38) * u, 600); ctx.font = bf;
-      const bg = 56 * u, bw = boards.map(b => ctx.measureText(b).width), tot = bw.reduce((a, b) => a + b, 0) + bg * 3; let x = W / 2 - tot / 2; const by = pos[3][1] + (MODE === 'L' ? 120 : 130) * u;
-      boards.forEach((b, i) => { maskLine(b, x, by, bf, mix(MUTED, INK, 0.3), SOFT(prog(t, k.boards + i * 4, 16)), 54 * u);
-        if (i < 3 && t >= k.boards + i * 4 + 6) dot(x + bw[i] + bg / 2, by - 13 * u, 4 * u * sp(t, k.boards + i * 4 + 6, 400, 15), '#cfc7bb'); x += bw[i] + bg; });
+      // the boards: one line if it fits, else two balanced lines; the size fits the widest line
+      const boards = HL ? HL.boards : ['AQA', 'Edexcel', 'OCR', 'Eduqas'], bmax = W * 0.88, bs0 = (MODE === 'L' ? 40 : 38) * u;
+      const lineW = (ls, z) => { ctx.font = font(SANS, z, 600); return ls.reduce((a2, x) => a2 + ctx.measureText(x).width, 0) + z * 1.4 * (ls.length - 1); };
+      let blines = [boards];
+      if (lineW(boards, bs0) > bmax) { let best = null;
+        for (let c = 1; c < boards.length; c++) { const d2 = Math.max(lineW(boards.slice(0, c), bs0), lineW(boards.slice(c), bs0)); if (!best || d2 < best[1]) best = [c, d2]; }
+        blines = [boards.slice(0, best[0]), boards.slice(best[0])]; }
+      const bs = Math.min(bs0, ...blines.map(ls => bs0 * bmax / lineW(ls, bs0))), bf = font(SANS, bs, 600), bg = bs * 1.4, blh = bs * 1.55;
+      const by0 = pos[last][1] + (MODE === 'L' ? 120 : 130) * u;
+      let idx = 0;
+      blines.forEach((ls, li) => { ctx.font = bf; const bw = ls.map(x => ctx.measureText(x).width); let x = W / 2 - lineW(ls, bs) / 2; const by = by0 + li * blh;
+        ls.forEach((bd, i) => { const on = k.boards + idx * 4; maskLine(bd, x, by, bf, mix(MUTED, INK, 0.3), SOFT(prog(t, on, 16)), blh);
+          if (i < ls.length - 1 && t >= on + 6) dot(x + bw[i] + bg / 2, by - bs * 0.33, 4 * u * (bs / bs0) * sp(t, on + 6, 400, 15), '#cfc7bb'); x += bw[i] + bg; idx++; }); });
       if (t < 12) { const s = SNAP(prog(t, 0, 11)), hh = lerp(5 * u, H * 1.02, s); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H / 2 - hh / 2); ctx.rect(0, H / 2 + hh / 2, W, H); ctx.fillStyle = INK; ctx.fill(); ctx.restore(); }
     },
     lesson(t, S) {
       const k = sceneKeys(S); ground(); k.in = 4;
       title([{ t: 'Read it.', at: k.read }, { t: 'Hear it.', at: k.hear, col: RUST }, { t: 'Watch it.', at: k.watch }], t);
-      const b = card(LE.w, LE.h, t, k.in, () => { lessonPanel(t, k); videoTile(t, k); }); S.exit = [b.cx, b.cy];
+      const b = card(LE.w, LE.h, t, k.in, () => { lessonPanel(t, k); videoTile(t, k); }, MODE === 'S' ? { dy: 50 * u, sc: 0.92 } : {}); S.exit = [b.cx, b.cy];   // square: clear the three-line title
     },
     flash(t, S) {
       const k = sceneKeys(S); k.in = 4; k.type = k.typeFrom; ground();
@@ -682,6 +716,8 @@
   window.FRAMES = V.frames;
   const DEPT = Q.get('dept') || 'general';
   fetch('departments/' + DEPT + '.json').then(r => r.json()).then(d => { D = d; })
+    .then(() => Promise.all(Array.from({ length: D.media.count }, (_, i) => new Promise((ok, bad) => { const im = new Image(); im.onload = () => ok(im); im.onerror = bad;
+      im.src = 'media/frames/' + D.media.frames + '/f' + String(i + 1).padStart(3, '0') + '.jpg'; }))).then(ims => { FRAMES_IMG = ims; }))
     .then(() => Promise.all([font(SERIF, 40, 600), font(SERIF, 40, 500), font(SANS, 40, 800), font(SANS, 40, 700), font(SANS, 40, 600), font(SANS, 40, 500), font(MARK, 40, 400), font('Caveat', 40, 600)].map(x => document.fonts.load(x))))
     .then(() => document.fonts.ready).then(() => { frame(0); window.READY = true; });
 })();

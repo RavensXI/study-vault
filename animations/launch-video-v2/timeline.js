@@ -28,9 +28,9 @@
 
   const students = [
     OPEN, HEAD,
-    { id: 'lesson', bars: 2, kinds: ['groove', 'groove'], enter: { type: 'circle', color: C.rust },
-      keys: { read: 0.5, hear: 2, watch: 3.5 },
-      cues: [['read', 'pop'], ['hear', 'pop'], ['watch', 'pop']] },
+    { id: 'lesson', bars: 3, kinds: ['groove', 'break', 'groove'], enter: { type: 'circle', color: C.rust },
+      keys: { read: 0.5, hear: 2, narr: 2.5, watch: 5.5, press: 6.5, play: 6.75 },
+      cues: [['read', 'pop'], ['hear', 'pop'], ['watch', 'pop'], ['press', 'click'], ['play', 'swish']] },
     { id: 'flash', bars: 3, kinds: ['groove', 'groove', 'build'], enter: { type: 'bars', color: C.ink },
       keys: { cardIn: 0.25, typeFrom: 1, check: 4, tick: 5, flip: 6.5, zoom: 11 },
       cues: [['typeFrom', 'typing'], ['check', 'click'], ['tick', 'chime'], ['flip', 'flip'], ['zoom', 'riser1']] },
@@ -78,12 +78,15 @@
     Object.assign(END('For schools.'), { enter: { type: 'circle', color: C.ink } }),
   ];
 
+  /* the opening headline's word beats: 'Every major GCSE subject' (4 words) keeps 1, 1.5, 2, 2.5; a
+     department's 'GCSE History' (2) lands on 1.5 and 2.5, 'GCSE Combined Science' (3) on 1.5, 2, 2.5 */
+  const headWordBeats = n => n >= 4 ? [1, 1.5, 2, 2.5] : n === 3 ? [1.5, 2, 2.5] : [1.5, 2.5];
   function build(scenes) {
     let bar = 0;
     const out = scenes.map(s => { const o = Object.assign({}, s, { bar0: bar, f0: bar * BAR, f1: (bar + s.bars) * BAR }); bar += s.bars; return o; });
     return { scenes: out, bars: bar, frames: bar * BAR };
   }
   const VIDEOS = { students: build(students), teachers: build(teachers) };
-  const api = { FPS, BEAT, BAR, BPM, C, VIDEOS, SEC: f => f / FPS };
+  const api = { FPS, BEAT, BAR, BPM, C, VIDEOS, headWordBeats, SEC: f => f / FPS };
   if (typeof module !== 'undefined') module.exports = api; else root.TL = api;
 })(this);

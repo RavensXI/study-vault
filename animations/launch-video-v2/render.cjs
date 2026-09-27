@@ -1,5 +1,5 @@
 /* render.cjs — frame-exact render of comp.html (NODE_PATH = global npm root).
-   node render.cjs students|teachers 16x9|9x16|1x1 [--debug] [--from N --to M]  -> out/<video>-<ar>.mp4 (with out/score-<video>.wav)
+   node render.cjs students|teachers 16x9|9x16|1x1 [--debug] [--from N --to M]  -> out/<video>-<ar>.mp4 --dept=<dept> (with out/score-<dept>-<video>.wav)
    node render.cjs students 16x9 --still <frame> --png out.png                   -> one PNG
    Frames come from canvas.toDataURL (PNG for stills, JPEG q .96 for video) piped into ffmpeg; the score is
    levelled to about -14 LUFS with one measured gain; limiting at 4x oversampling keeps the true peak under -1 dBFS after AAC. */
@@ -31,7 +31,7 @@ const srv = http.createServer((q, r) => { const p = path.join(ROOT, decodeURICom
     fs.writeFileSync(png || path.join(ROOT, 'out', `still-${dept}-${video}-${ar}-${still}.png`), Buffer.from(data.split(',')[1], 'base64'));
     console.log('wrote', png); await b.close(); srv.close(); return;
   }
-  const wav = path.join(ROOT, 'out', `score-${video}.wav`);
+  const wav = path.join(ROOT, 'out', `score-${dept}-${video}.wav`);
   const meas = execSync(`ffmpeg -hide_banner -nostats -i "${wav}" -af ebur128 -f null - 2>&1`).toString();
   const I = +meas.match(/I:\s+(-?[\d.]+) LUFS/g).pop().match(/-?[\d.]+/)[0];
   const gain = (-12.2 - I).toFixed(2);   // the limiter takes back ~1.7 dB, landing near -14 LUFS
