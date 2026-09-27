@@ -545,7 +545,7 @@
       const k = sceneKeys(S); ground(); const HL = D.headline;
       const words = HL ? ['GCSE'].concat(HL.subject.split(' ')) : ['Every', 'major', 'GCSE', 'subject'];
       const at = TL.headWordBeats(words.length).map(b => b * BEAT), last = words.length - 1;
-      const base = (MODE === 'L' ? 132 : MODE === 'S' ? 112 : 128) * u, maxW = W * (MODE === 'L' ? 0.86 : 0.84);
+      const base = (MODE === 'L' ? 132 : MODE === 'S' ? 112 : 128) * u * (HL ? 1.3 : 1), maxW = W * (MODE === 'L' ? 0.86 : 0.84);
       // the row split: one row when it fits near full size, else the most balanced two rows; the size then fits the widest row
       const splits = [[words.map((_, i) => i)]];
       if (MODE !== 'L' || words.length > 3) for (let c = 1; c < words.length; c++) splits.push([words.slice(0, c).map((_, i) => i), words.slice(c).map((_, i) => i + c)]);
@@ -569,7 +569,7 @@
       const dx = pos[last][0] + ws[last] + dr * 1.6, dy = pos[last][1] - dr; dot(dx, dy, dr * sp(t, k.stop, 420, 15));
       S.exit = [dx, dy];
       // the boards: one line if it fits, else two balanced lines; the size fits the widest line
-      const boards = HL ? HL.boards : ['AQA', 'Edexcel', 'OCR', 'Eduqas'], bmax = W * 0.88, bs0 = (MODE === 'L' ? 40 : 38) * u;
+      const boards = HL ? HL.boards : ['AQA', 'Edexcel', 'OCR', 'Eduqas'], bmax = W * 0.88, bs0 = (MODE === 'L' ? 40 : 38) * u * (HL ? 1.15 : 1);
       const lineW = (ls, z) => { ctx.font = font(SANS, z, 600); return ls.reduce((a2, x) => a2 + ctx.measureText(x).width, 0) + z * 1.4 * (ls.length - 1); };
       let blines = [boards];
       if (lineW(boards, bs0) > bmax) { let best = null;
