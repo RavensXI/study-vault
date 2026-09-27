@@ -13,6 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="sync.js"></script>
 <link rel="stylesheet" href="/css/scrollbar.css">
+<script src="/js/daynight.js"></script>
 <style>
   /* ============ THE STUDY, BEFORE YOU SIT DOWN ============
      Landing = the dashboard's world seen from the doorway, logged out.
@@ -130,6 +131,14 @@
   .prop-openbook img{height:calc(var(--bkh)*.4)}
   .prop-timer img{height:calc(var(--bkh)*.46)}
   .prop-cupboard img{height:calc(var(--bkh)*.6)}
+  /* the clock's live hands sit exactly over its painted face */
+  .prop .clockhands{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+  .clockhands .hd{fill:#241d18;stroke:#0f0b08;stroke-width:.6}
+  .clockhands .sh{fill:rgba(118,96,70,.42);filter:url(#chsoft)}
+  .clockhands .boss{fill:#231c17}
+  .clockhands .pin{fill:#8d7757}
+  .clockhands .core{fill:#5b4a36}
+  .clockhands .glint{fill:#e6d7b8;opacity:.8}
   /* every prop gets the same ground-contact shadow the books have — objects
      sit on the shelf, they don't hover over it */
   .prop::before{content:'';position:absolute;left:5%;right:5%;bottom:1px;height:12px;z-index:-1;
@@ -169,6 +178,18 @@
   body.tagul .brandslot h1::after{content:'';display:block;width:min(48%,310px);height:28px;
     margin:4px auto 0;background:url("assets/lw/shelf/underline_sketch.webp") no-repeat center/100% 100%}
   .brandslot p{font-size:1rem;color:var(--sec);margin:0 auto;max-width:560px;line-height:1.5}
+  /* the scribbled underline (a drawable element in place of the ::after) and scribbled arrows */
+  body.tagul .brandslot h1 .ulscrib{display:block;width:min(48%,310px);height:28px;margin:4px auto 0;overflow:visible}
+  body.tagul .brandslot h1:has(.ulscrib)::after{display:none}
+  .brandmid svg.arr{overflow:visible}
+  .scrib .sp{stroke-dasharray:1 1.02;stroke-dashoffset:1.01}
+  body.introgo .scrib .sp{animation:sp-draw var(--d) cubic-bezier(.42,.08,.58,.95) var(--t) both}
+  body.introdone .scrib .sp{stroke-dashoffset:0;animation:none}
+  @keyframes sp-draw{from{stroke-dashoffset:1.01}to{stroke-dashoffset:0}}
+  /* (translate, not transform: the tuning bench scales the tagline with a transform of its own) */
+  body.intro .brandslot h1,body.intro .mhero h1{opacity:0;translate:0 12px}
+  body.introgo .brandslot h1,body.introgo .mhero h1{animation:tag-in .75s cubic-bezier(.16,1,.3,1) both}
+  @keyframes tag-in{from{opacity:0;translate:0 12px;filter:blur(3px)}to{opacity:1;translate:0 0;filter:none}}
   /* doors are NOT of the scene (Tom, 12 Jul): honest floating UI over the
      painted wall — plain cards, big headings, no flavour text */
   .slot.door{width:350px;text-align:center;margin-bottom:46px;min-height:212px;
@@ -195,6 +216,118 @@
   /* cord anchor: Tom-tuned on the bench, 12 Jul 2026 (corrected values) */
   .lampwrap .pullcord{left:31.7%;top:29.2%;height:27%}
   .lampwrap:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:8px}
+  /* ---- the landing lamp's light. It can't live inside .lampwrap: the bench's saved offset gives
+     the button a transform, which isolates its children — their blend modes never reach the wall
+     and z-index:-1 can't get behind the books (that was the flat disc). So the light is two sheets
+     on the bookcase itself, placed by JS from where the lamp actually renders: --mx/--my = the
+     shade's mouth, --s = lamp scale (1 = a 330px-tall lamp), --by = the plank under the lamp.
+     BACK sheet (under the shelves): the wall warming round the lamp, the cone on the wallpaper.
+     FRONT sheet (over the shelves): the cone catching the books, the pool on the plank, the lit
+     shade. Clicking on: the bulb stutters, catches, then the room warms up. ---- */
+  .lampwrap::after,.lampwrap .bulb{display:none}
+  .bookcase.shelfstage>.lamplight{position:absolute;left:0;top:-170px;width:100%;height:calc(100% + 180px);z-index:0;   /* same reach as the wall (::before) */
+    pointer-events:none;opacity:0;transition:opacity .35s ease}
+  .bookcase.shelfstage>.lamplight.front{z-index:3}
+  .lamplight:not(.placed){display:none}
+  .shelfstage.lit>.lamplight{opacity:1;animation:lamp-catch 1.1s linear}
+  @keyframes lamp-catch{0%{opacity:0}5%{opacity:.75}9%{opacity:.1}15%{opacity:.9}19%{opacity:.35}
+    27%{opacity:1}100%{opacity:1}}
+  .lamplight>*{position:absolute;pointer-events:none}
+  /* warm the whole wall around the lamp, fading out across the room */
+  .ll-room{left:calc(var(--mx) - 900px*var(--s));top:calc(var(--my) - 640px*var(--s));
+    width:calc(1800px*var(--s));height:calc(1500px*var(--s));
+    background:radial-gradient(closest-side,rgba(255,178,84,.46),rgba(255,178,84,.2) 36%,rgba(255,178,84,.06) 66%,transparent);
+    mix-blend-mode:soft-light}
+  /* the cone: drawn pointing straight down from a virtual apex above the element, then turned
+     to follow the shade (whose mouth faces 27deg left of straight down). The conic gives soft
+     sides, the mask fades it out along its length. */
+  .ll-beam{left:calc(var(--mx) - 220px*var(--s));top:var(--my);width:calc(440px*var(--s));height:var(--bl);
+    transform-origin:50% 0;transform:rotate(27deg);
+    background:conic-gradient(from 157deg at 50% calc(-190px*var(--s)),
+      transparent 0deg,var(--bc) 13deg,var(--bc) 33deg,transparent 46deg);
+    -webkit-mask:linear-gradient(#000 0%,rgba(0,0,0,.85) 45%,rgba(0,0,0,.35) 82%,transparent);
+    mask:linear-gradient(#000 0%,rgba(0,0,0,.85) 45%,rgba(0,0,0,.35) 82%,transparent);
+    filter:blur(calc(4px*var(--s)))}
+  .lamplight:not(.front) .ll-beam{--bc:rgba(255,236,196,.95);mix-blend-mode:screen}
+  .lamplight.front .ll-beam{--bc:rgba(255,176,80,.7);mix-blend-mode:soft-light}
+  /* where the beam lands: a warm oval on the plank's top face */
+  .ll-pool{left:calc(var(--px) - 230px*var(--s));top:calc(var(--by) - 34px*var(--s));
+    width:calc(460px*var(--s));height:calc(92px*var(--s));border-radius:50%;
+    background:radial-gradient(closest-side,rgba(255,214,150,.75),rgba(255,190,110,.35) 55%,transparent);
+    mix-blend-mode:screen}
+  /* the lit shade: the dark inside of the mouth goes to a hot gold, and a halo blooms round it */
+  .ll-mouth{left:calc(var(--mx) - 52px*var(--s));top:calc(var(--my) - 21px*var(--s));
+    width:calc(104px*var(--s));height:calc(42px*var(--s));border-radius:50%;transform:rotate(27deg);
+    background:radial-gradient(closest-side,#fffbe8 0%,#ffe6a8 40%,rgba(255,196,110,.9) 70%,rgba(255,176,86,0));
+    filter:blur(calc(2px*var(--s)))}
+  .ll-bloom{left:calc(var(--mx) - 110px*var(--s));top:calc(var(--my) - 90px*var(--s));
+    width:calc(220px*var(--s));height:calc(200px*var(--s));border-radius:50%;
+    background:radial-gradient(closest-side,rgba(255,236,190,.8),rgba(255,206,130,.3) 45%,transparent);
+    mix-blend-mode:screen}
+  /* the brass catches its own light */
+  .shelfstage.lit .lampwrap .lamp{filter:drop-shadow(-8px 6px 6px rgba(40,28,12,.22)) sepia(.12) brightness(1.04)}
+  @media (prefers-reduced-motion:reduce){ .shelfstage.lit>.lamplight{animation:none} }
+  /* ---- the rendered light (js/lamp-light.js). When it has drawn, it replaces the sheets above:
+     canvases over the wall and the plank (multiply + colour-dodge = surface x gain: shadows and
+     light), a relit copy of every object laid over its own image, and a glow sheet in front.
+     The lamp comes on like a filament: a beat of dull orange, then warm white. ---- */
+  .relit>.lamplight{display:none}
+  .shelfstage.relit.lit{--bkshadow:drop-shadow(0 3px 3px rgba(28,18,8,.15))}   /* the render casts the shadows now */
+  .shelfstage.relit.lit .lampwrap .lamp{filter:drop-shadow(-8px 6px 6px rgba(40,28,12,.22))}
+  /* the pull cord hangs in the beam: the brass bob catches it */
+  .lampwrap .pullcord{transition:filter .4s ease}
+  .shelfstage.relit.lit .lampwrap .pullcord{filter:brightness(1.3) saturate(1.15) drop-shadow(0 0 3px rgba(255,200,120,.55))}
+  .ll-cv,.bookcase.shelfstage>.ll-cv{position:absolute;pointer-events:none;opacity:0;transition:opacity .38s cubic-bezier(.25,.6,.3,1)}
+  .ll-cv.mul{mix-blend-mode:multiply}
+  .ll-cv.add{mix-blend-mode:color-dodge}
+  .ll-cv.scr{mix-blend-mode:screen}
+  /* three sets: n = the lamp's (and the night it brings), m = moonlight, d = daylight */
+  .relit.lit .ll-cv.n{opacity:1;animation:ll-filament .42s cubic-bezier(.45,0,.7,.5)}
+  .relit.lit .ll-cv.n.obj,.relit.lit .ll-cv.n.mul{animation-name:ll-filament-o}
+  .ll-cv.m,.ll-cv.d{transition:opacity 1s ease}
+  .relit.night .ll-cv.m,.relit:not(.night) .ll-cv.d{opacity:1}
+  .relit .ll-cv.settled{animation:none!important;transition:none}
+  .relit .ll-cv.fresh{opacity:0!important;transition:none!important}
+  @keyframes ll-filament{0%{opacity:0;filter:hue-rotate(-18deg) saturate(2)}
+    40%{opacity:.55;filter:hue-rotate(-9deg) saturate(1.5)}100%{opacity:1;filter:none}}
+  @keyframes ll-filament-o{0%{opacity:0}40%{opacity:.5}100%{opacity:1}}
+  @media (prefers-reduced-motion:reduce){ .relit.lit .ll-cv{animation:none} }
+
+  /* ---- night. Pulling the cord on is nightfall, off is morning; the page opens at whichever it
+     is outside. The wall dims under a blue-grey sheet, everything on the shelves dims with it
+     (objects the lamp's render owns come back up as its light arrives), and the ink on the wall
+     turns to chalk so the words still read. ---- */
+  .bookcase.shelfstage>.nightwall{position:absolute;left:0;right:0;top:-170px;bottom:-10px;z-index:0;pointer-events:none;
+    mix-blend-mode:multiply;background:rgb(128,133,153);opacity:0;transition:opacity .9s ease}
+  html.mob .bookcase.shelfstage>.nightwall{top:-40px}
+  .shelfstage.night>.nightwall{opacity:1}
+  .shelfstage.night,.shelfstage.relit.lit.night{--bkshadow:drop-shadow(0 3px 3px rgba(28,18,8,.15)) brightness(.52)}
+  .shelfstage.relit.lit.night .ll-own{--bkshadow:drop-shadow(0 3px 3px rgba(28,18,8,.15))}
+  .prop{transition:filter .55s ease}
+  .caserow .ledgewrap,.bookend,.lampwrap .lamp,.boardsplaque{transition:filter .6s ease}
+  .shelfstage.night .caserow .ledgewrap{filter:drop-shadow(0 7px 8px rgba(40,28,12,.24)) brightness(.52)}
+  .shelfstage.relit.lit.night .caserow .ledgewrap.ll-own{filter:drop-shadow(0 7px 8px rgba(40,28,12,.24))}
+  .shelfstage.night .bookend{filter:drop-shadow(-7px 5px 4px rgba(40,28,12,.30)) brightness(.52)}
+  .shelfstage.night .lampwrap .lamp{filter:drop-shadow(-8px 6px 6px rgba(40,28,12,.22)) brightness(.52)}
+  .shelfstage.night:not(.lit) .lampwrap .pullcord{filter:brightness(.52)}
+  .shelfstage.night .boardsplaque{filter:brightness(.6)}
+  .brandslot h1,.mhero h1,.brandmid{transition:color .9s ease,text-shadow .9s ease}
+  /* a soft dark halo keeps the chalk words readable where the lamp's pool reaches them too */
+  .shelfstage.night .brandslot h1,.shelfstage.night .mhero h1{color:#eee4d0;text-shadow:0 0 22px rgba(28,26,40,.55),0 0 6px rgba(28,26,40,.35)}
+  .shelfstage.night .brandmid{color:#f3eadb;text-shadow:0 0 26px rgba(28,26,40,.5),0 0 7px rgba(28,26,40,.3)}
+  /* the rest of the page's words on the wall go to chalk too (paper cards stay paper) */
+  .sechead,.secsub,.secsub2,.picker-foot.embed .picker-count,.lessonlist li,.lessonlist .showme .go,.floorcta .handnote{transition:color .9s ease,text-shadow .9s ease}
+  .sechead::after,.lessonlist li::before{transition:filter .9s ease,background .9s ease}
+  .shelfstage.night .sechead{color:#eee4d0;text-shadow:0 0 22px rgba(28,26,40,.55),0 0 6px rgba(28,26,40,.35)}
+  .shelfstage.night .sechead::after{filter:brightness(0) invert(.88) sepia(.3)}
+  .shelfstage.night .secsub,.shelfstage.night .secsub2,.shelfstage.night .picker-foot.embed .picker-count{color:#d9d0c0}
+  .shelfstage.night .lessonlist li{color:#ece3d2;text-shadow:0 0 14px rgba(28,26,40,.5)}
+  .shelfstage.night .lessonlist li::before{background:#e6dcc8}
+  .shelfstage.night .lessonlist .showme .go{color:#e8c47a}
+  .shelfstage.night .lessonlist.plated .showme:hover,.shelfstage.night .lessonlist.plated .showme:focus-visible{background:rgba(255,245,225,.1)}
+  .shelfstage.night .floorcta .handnote{color:#e6dccb;text-shadow:0 0 14px rgba(28,26,40,.5)}
+  .scrib,.brandslot h1::after{transition:filter .9s ease}
+  .shelfstage.night .scrib,.shelfstage.night .brandslot h1::after{filter:brightness(0) invert(.88) sepia(.3)}
   /* landing books are scenery with a hover tip — no pull-out theatre here */
   .caserow .bk{cursor:default;pointer-events:auto}
   .bookend.mirror{transform:scaleX(-1);margin-right:0;margin-left:-6px}
@@ -594,11 +727,34 @@
   .wizstage .bk:hover,.wizstage .bk.focus,.wizstage .bk:focus-visible{transform:translateX(var(--shift,0px)) rotate(var(--lean,0deg)) translateY(-7px)}
   .wizstage .bk:focus-visible img{outline:3px solid var(--anchor);outline-offset:3px;border-radius:4px}
   .wizstage .bk.dim{opacity:.5}
+  .wizstage .bk::after{content:'';position:absolute;left:50%;top:-4px;width:26px;height:26px;margin-left:-13px;border-radius:50%;
+    background:#4e7a4a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat;
+    box-shadow:0 2px 5px rgba(0,0,0,.3);opacity:0;transform:scale(.4);transition:opacity .25s,transform .3s cubic-bezier(.3,1.4,.5,1);pointer-events:none;z-index:3}
+  .wizstage .bk.rated::after{opacity:1;transform:scale(1)}
   .wizstage .bk.out{animation:book-out .34s ease-in both;pointer-events:none}
   @keyframes book-out{to{transform:translateX(var(--shift,0px)) translateY(36px) rotate(var(--lean,0deg));opacity:0}}
   .wizstage .lamp.hot{filter:drop-shadow(-10px 8px 8px rgba(40,28,12,.22)) brightness(1.06)}
   .wizstage .lampbtn:hover ~ .pullcord{filter:brightness(1.08)}
   .wizstage .bulb{display:none}
+  /* night on the builder's shelf: a dusk sheet over the wall and books, with a warm hole round the
+     lamp's mouth (--lx/--ly from the script), a soft bloom at the shade, and the beam softened */
+  .wizstage .wiznight,.wizstage .wizbloom{position:absolute;left:0;right:0;top:-10px;bottom:0;pointer-events:none;opacity:0;
+    transition:opacity .9s ease;-webkit-mask:linear-gradient(transparent,#000 40px);mask:linear-gradient(transparent,#000 40px)}
+  .wizstage .wiznight{z-index:3;mix-blend-mode:multiply;
+    background:radial-gradient(calc(var(--lh,250px)*1.5) calc(var(--lh,250px)*1.15) at calc(var(--lx,700px) - var(--lh,250px)*.3) calc(var(--ly,80px) + 10px + var(--lh,250px)*.35),
+      rgb(255,236,205) 0%,rgb(236,214,186) 32%,rgb(150,150,168) 78%,rgb(128,133,153) 100%)}
+  .wizstage .wizbloom{z-index:6;mix-blend-mode:screen;-webkit-mask:none;mask:none;
+    background:radial-gradient(calc(var(--lh,250px)*.5) calc(var(--lh,250px)*.4) at var(--lx,700px) calc(var(--ly,80px) + 10px),
+      rgba(255,206,130,.35),transparent 70%)}
+  /* the lit inside of the shade: a hot ellipse over its opening, tilted with the shade */
+  .wizstage .wizmouth{position:absolute;z-index:6;pointer-events:none;opacity:0;transition:opacity .5s ease;
+    left:calc(var(--lx,700px) - var(--lh,250px)*.175);top:calc(var(--ly,80px) - var(--lh,250px)*.064);
+    width:calc(var(--lh,250px)*.35);height:calc(var(--lh,250px)*.128);border-radius:50%;transform:rotate(28deg);
+    background:radial-gradient(closest-side,#fffbe8 0%,#ffe6a8 40%,rgba(255,196,110,.9) 70%,rgba(255,176,86,0));filter:blur(1.5px)}
+  .wizstage .shelfstage.night .wizmouth{opacity:1}
+  .wizstage .shelfstage.night .wiznight,.wizstage .shelfstage.night .wizbloom{opacity:1}
+  .wizstage .shelfstage.night .lampglow{filter:blur(12px);opacity:.5}
+  .wizstage .shelfstage.night .lightwash{opacity:.55}
   /* anchored from the plank like the lamp is: when the shelf shrinks to fit a full set of
      books the lamp rises with it, and a top-anchored cord was left hanging below the shade */
   .wizstage .pullcord{left:auto;right:122px;top:auto;bottom:122px;height:50px}   /* starts under the shade's rim, not over the brass */
@@ -680,8 +836,22 @@
   .stepcard{max-width:780px;margin:1.7rem auto 0;text-align:center}
   /* the feel screen: one row per subject, three ink dots; a budget row */
   .feelcard{text-align:left}
-  .feelunit{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.2rem 1rem;padding:.6rem 0;border-top:1px solid var(--linel)}
-  .feelunit:first-of-type{border-top:0}
+  /* the rating grid: every topic row and the header share one set of columns, so each label and
+     its "All" sit exactly over the buttons they belong to */
+  .feelcard{--fcol:78px}
+  .feelunit,.feelhead{display:grid;grid-template-columns:1fr repeat(4,var(--fcol));align-items:center;column-gap:6px}
+  .feelunit{row-gap:.2rem;padding:.55rem 0;border-top:1px solid var(--linel)}
+  .feelhead{padding:0 0 .55rem;border-bottom:1px solid var(--line);align-items:end}
+  .feelhead .fh-t{font:600 .78rem var(--head);color:var(--mut);letter-spacing:.06em;text-transform:uppercase;align-self:end;padding-bottom:4px}
+  .feelhead .fh{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
+  .feelhead .fh span{font:700 .74rem/1.15 var(--head);color:color-mix(in srgb,var(--c) 80%,#2b2721);min-height:2.3em;display:flex;align-items:flex-end;justify-content:center}
+  .feelhead .fh button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:3px 10px;font:600 .72rem var(--head);color:var(--sec);cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+  .feelhead .fh button:hover{border-color:var(--c);color:var(--ink)}
+  .feelhead .fh button[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff}
+  .feelhead .fh.n button[aria-pressed="true"]{background:#6f685c;border-color:#6f685c}
+  .feelunit .dots{display:contents}
+  .feelunit .fu-inc{grid-column:1/-1}
+  .feelcount{font-size:.82rem;color:var(--mut);text-align:right;padding:.6rem 0 0;border-top:1px solid var(--line)}
   .fu-name{border:0;background:none;padding:0;text-align:left;font:600 1rem var(--read);color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:.4rem}
   .fu-name svg{width:12px;height:12px;flex:none;opacity:.55;transition:transform .2s}
   .fu-name[aria-expanded="true"] svg{transform:rotate(90deg)}
@@ -691,24 +861,31 @@
   .fu-inc li{break-inside:avoid;padding:.08rem 0}
   .feelcard .wait{font-size:.86rem;color:var(--mut);padding:.6rem 0;text-align:center}
   .feelsub{display:block;font-family:var(--head);font-weight:400;font-size:.9rem;color:var(--mut);margin-top:.2rem}
-  .dots{display:flex;gap:.45rem}
-  .dot{width:38px;height:38px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;position:relative;padding:0}
-  .dot::after{content:'';position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;opacity:.35}
-  .dot.r::after{background:#b5442f}.dot.a::after{background:#d19a2f}.dot.g::after{background:#4e7a4a}
-  .dot.n::after{background:none;box-shadow:inset 0 0 0 2px #8f877a}
-  .dot[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
-  .dot[aria-pressed="true"]::after{opacity:1;width:18px;height:18px;margin:-9px 0 0 -9px}
-  .dotkey{display:flex;justify-content:flex-end;gap:1.2rem;font-size:.74rem;color:var(--mut);margin:0 0 .3rem}
-  .dotkey span::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:.35rem;vertical-align:middle}
-  .dotkey .kr::before{background:#b5442f}.dotkey .ka::before{background:#d19a2f}.dotkey .kg::before{background:#4e7a4a}
-  .dotkey .kn::before{box-shadow:inset 0 0 0 1.5px #8f877a}
+  /* a rating button: a clear ring of its colour; chosen, it fills with a soft wash of that colour and
+     a solid dot, so a finished subject reads at a glance down its column */
+  .dot{justify-self:center;width:42px;height:38px;border-radius:9px;border:1.5px solid color-mix(in srgb,var(--c) 38%,var(--line));background:var(--card);
+    cursor:pointer;position:relative;padding:0;transition:background .15s,border-color .15s,transform .12s}
+  .dot::after{content:'';position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;
+    background:transparent;box-shadow:inset 0 0 0 2px var(--c);transition:all .15s}
+  .dot:hover{border-color:var(--c)}
+  .dot:active{transform:scale(.94)}
+  .dot:focus-visible{outline:3px solid var(--anchor);outline-offset:2px}
+  .dot[aria-pressed="true"]{background:color-mix(in srgb,var(--c) 16%,var(--card));border-color:var(--c)}
+  .dot[aria-pressed="true"]::after{width:16px;height:16px;margin:-8px 0 0 -8px;background:var(--c);box-shadow:none}
+  .dot.n,.fh.n{--c:#8f877a}.dot.r,.fh.r{--c:#b5442f}.dot.a,.fh.a{--c:#c98f22}.dot.g,.fh.g{--c:#4e7a4a}
+  .dot.n[aria-pressed="true"]::after{background:transparent;box-shadow:inset 0 0 0 3px var(--c)}
   .budget .bopts{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:center}
   .budget .bopts button{border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:1rem 1.6rem;font:600 1.05rem var(--head);color:var(--ink);cursor:pointer;min-width:120px}
   .budget .bopts button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
   .budget p{display:none}
   html.mob .fu-name{font-size:.95rem}
   html.mob .fu-inc ol{columns:1}
-  html.mob .feelunit .dots .dot{width:34px;height:34px}
+  html.mob .feelcard{--fcol:54px}
+  html.mob .feelunit,html.mob .feelhead{column-gap:4px}
+  html.mob .dot{width:44px;height:38px}
+  html.mob .feelhead .fh span{font-size:.64rem;letter-spacing:-.01em}
+  html.mob .fu-name{font-size:.9rem}
+  html.mob .feelhead .fh button{padding:3px 7px}
   .tprog{font-size:.76rem;font-weight:600;color:var(--mut);letter-spacing:.14em;text-transform:uppercase}
   .tsubj{display:flex;align-items:center;justify-content:center;gap:10px;margin:.7rem 0 .1rem}
   .tsubj img{height:34px;width:auto;filter:saturate(1.4) brightness(1.1)}
@@ -1278,6 +1455,10 @@
         </div>
       </div>
 
+      <!-- the lamp's light (placed by placeLampLight); kept after the rows: the rows are addressed by nth-child -->
+      <div class="lamplight" aria-hidden="true"><div class="ll-room"></div><div class="ll-beam"></div></div>
+      <div class="lamplight front" aria-hidden="true"><div class="ll-beam"></div><div class="ll-pool"></div><div class="ll-bloom"></div><div class="ll-mouth"></div></div>
+      <div class="nightwall" aria-hidden="true"></div>
       <div class="booktip" id="booktip"></div>
     </div>
 
@@ -1287,7 +1468,8 @@
   <div class="wizsentinel" id="wizsentinel" aria-hidden="true"></div>
   <div class="wizstage" id="wizstage">
     <div class="wizprog" aria-hidden="true"></div>
-    <div class="shelfstage lit" id="stage-wiz"><div class="stagewrap">
+    <div class="shelfstage" id="stage-wiz"><div class="stagewrap">
+      <div class="wiznight" aria-hidden="true"></div><div class="wizbloom" aria-hidden="true"></div><div class="wizmouth" aria-hidden="true"></div>
       <div class="shelf" id="shelf-wiz"></div>
       <img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt="">
       <div class="lightwash"></div>
@@ -1539,6 +1721,35 @@ if(BIGPROPS){ document.documentElement.classList.add('bigprops');
   [...document.querySelectorAll('#stage-landing > .caserow:not(.page):not(.mrow)')].slice(0,3).forEach((row,ri)=>{
     row.querySelectorAll(':scope > .shelf > .wing > .bks').forEach((g,wi)=>{ if(hero[ri][wi]) g.dataset.books=hero[ri][wi]; }); });
 }
+/* ---- the mantel clock keeps real time. prop_clock_face.webp is the painted clock with its hands
+   lifted off (and its see-through dial made paper again); these are drawn over it in the same
+   spade pattern, with the same soft painted shadow, in the image's own pixel space ---- */
+const CLOCK_C=[218.75,206.25];
+function spadeHand(len,w,bulbAt,bulbW){
+  const b=len*bulbAt;
+  return 'M'+(-w)+' 7 L'+(-w*.62)+' '+(-b+bulbW*.9)
+    +' C'+(-bulbW)+' '+(-b+bulbW*.55)+' '+(-bulbW*.95)+' '+(-b-bulbW*.75)+' '+(-w*.55)+' '+(-b-bulbW*1.25)
+    +' L0 '+(-len)+' L'+(w*.55)+' '+(-b-bulbW*1.25)
+    +' C'+(bulbW*.95)+' '+(-b-bulbW*.75)+' '+bulbW+' '+(-b+bulbW*.55)+' '+(w*.62)+' '+(-b+bulbW*.9)
+    +' L'+w+' 7 Z';
+}
+function clockHands(p){
+  const hour=spadeHand(80,3.3,.7,8.6), min=spadeHand(111,2.7,.74,7.4);
+  const hand=(cls,d)=>'<g class="'+cls+'"><path class="sh" d="'+d+'" transform="translate(2.5 4.5)"/><path class="hd" d="'+d+'"/></g>';
+  p.insertAdjacentHTML('beforeend','<svg class="clockhands" viewBox="0 0 438 520" aria-hidden="true">'
+    +'<defs><filter id="chsoft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.3"/></filter></defs>'
+    +'<g transform="translate('+CLOCK_C.join(' ')+')">'+hand('h',hour)+hand('m',min)
+    +'<circle r="11" class="boss"/><circle r="5.2" class="pin"/><circle r="2.4" class="core"/><circle r="1.4" cx="-1.2" cy="-1.4" class="glint"/></g></svg>');
+  tickClocks();
+}
+function tickClocks(){
+  const t=new Date(), m=t.getMinutes()+t.getSeconds()/60, h=(t.getHours()%12)+m/60;
+  document.querySelectorAll('.clockhands').forEach(svg=>{
+    svg.querySelector('.h').setAttribute('transform','rotate('+(h*30).toFixed(2)+')');
+    svg.querySelector('.m').setAttribute('transform','rotate('+(m*6).toFixed(2)+')'); });
+}
+setTimeout(()=>{ tickClocks(); setInterval(tickClocks,60000); },(60-new Date().getSeconds())*1000+50);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) tickClocks(); });
 function buildCase(){
   document.querySelectorAll('#stage-landing .bks').forEach(g=>{
     const toks=(g.dataset.books||'').split(',').filter(Boolean);
@@ -1547,12 +1758,13 @@ function buildCase(){
     let bi=0;
     /* the tiny inkwell can't hold a book up — no leaning onto it */
     const NOLEAN=n=>n==='inkwell';
-    const propFile=n=>'prop_'+n;
+    const propFile=n=>n==='clock'?'prop_clock_face':'prop_'+n;   /* the clock's hands are live (clockHands) */
     toks.forEach((tk,ti)=>{
       if(tk[0]==='@'){
         const name=tk.slice(1), p=document.createElement('span');
         p.className='prop prop-'+name;
         p.innerHTML='<img draggable="false" src="assets/lw/shelf/'+propFile(name)+'.webp" alt="">';
+        if(name==='clock') clockHands(p);
         g.appendChild(p);
         return;
       }
@@ -1566,20 +1778,87 @@ function buildCase(){
   });
 }
 buildCase();
+/* ---- first look: the tagline rises in, then its underline is scribbled under it and the two
+   arrows are scribbled under the wordmark. The pen-drawn images themselves are revealed along
+   the path the pen took (a mask stroke per pen stroke), so the ink keeps its own texture and
+   goes down in the order a hand would put it. Back/forward restores and reduced motion get
+   the finished page. ---- */
+(function(){
+  const UL='assets/lw/shelf/underline_sketch.webp', AR='assets/lw/shelf/arrow_sketch.webp';
+  const pts=a=>'M'+a.map(p=>p.join(' ')).join(' L');
+  /* pen strokes, in the images' own pixels, in drawing order: [points, brush width, seconds] */
+  const ulStrokes=[
+    [[[85,84],[12,84]],12,.04],
+    [[[12,84],[100,62],[200,48],[300,36],[400,26],[500,17],[600,13],[700,10],[800,8],[900,10],[1000,14],[1082,20]],16,.17],
+    [[[1082,20],[1000,22],[900,24],[800,27],[700,29],[600,32],[500,40],[450,47],[400,55],[300,75],[250,89],[212,99]],30,.15],
+    [[[212,99],[300,86],[400,70],[500,63],[600,56],[700,50],[800,48],[900,49],[1000,55],[1100,72],[1180,88],[1205,97],[1192,103]],16,.18]];
+  const arStrokes=[
+    [[[1238,50],[1219,88],[1194,162],[1162,238],[1112,312],[1050,375],[988,425],[900,475],[812,512],[725,540],[650,548],[588,540],[525,512],[481,481],[462,462]],36,.28],
+    [[[462,462],[525,419],[356,344],[406,512],[462,462]],26,.15]];
+  let uid=0;
+  function scribble(cls,src,w,h,strokes,start){
+    const id='scr'+(++uid); let t=start;
+    const paths=strokes.map(([p,bw,dur])=>{ const el='<path class="sp" pathLength="1" d="'+pts(p)+'" stroke-width="'+bw+'" style="--t:'+t.toFixed(3)+'s;--d:'+dur+'s"/>'; t+=dur; return el; }).join('');
+    const svg='<svg class="'+cls+' scrib" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" aria-hidden="true">'
+      +'<mask id="'+id+'" maskUnits="userSpaceOnUse" x="0" y="0" width="'+w+'" height="'+h+'"><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">'+paths+'</g></mask>'
+      +'<image href="'+src+'" width="'+w+'" height="'+h+'" preserveAspectRatio="none" mask="url(#'+id+')"/></svg>';
+    return [svg,t];
+  }
+  if(new URLSearchParams(location.search).has('snap')) return;
+  const b=document.body;
+  /* the underline was a ::after on the desktop tagline; it becomes a real, drawable element */
+  const h1=document.querySelector('.brandslot h1');
+  let t=.42;
+  if(h1&&b.classList.contains('tagul')){ const [svg,end]=scribble('ulscrib',UL,1224,111,ulStrokes,t); h1.insertAdjacentHTML('beforeend',svg); t=end; }
+  t+=.06;
+  document.querySelectorAll('.brandmid img.arr').forEach(img=>{
+    const [svg,end]=scribble(img.className,AR,1371,740,arStrokes,t); img.outerHTML=svg; t=end-.16; });
+  b.classList.add('intro');
+  const finish=()=>{ b.classList.remove('intro'); b.classList.add('introdone'); };
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches){ finish(); return; }
+  let started=false;
+  const go=()=>{ if(started) return; started=true; requestAnimationFrame(()=>b.classList.add('introgo')); setTimeout(finish,(t+.8)*1000); };
+  addEventListener('pageshow',e=>{ if(e.persisted){ started=true; finish(); } else setTimeout(go,120); });
+  setTimeout(go,2500);                                           /* never leave the tagline hidden */
+})();
 const stageL=document.getElementById('stage-landing'), cordL=document.getElementById('cord-landing');
-function lampOn(){ cordL.classList.add('tug'); setTimeout(()=>stageL.classList.add('lit'),150);
-  setTimeout(()=>cordL.classList.remove('tug'),500); }
-if(matchMedia('(prefers-reduced-motion:reduce)').matches) stageL.classList.add('lit');
-else setTimeout(lampOn,1200);                                 /* the room wakes up */
-stageL.querySelector('.lampwrap').addEventListener('click',()=>{
-  cordL.classList.add('tug'); setTimeout(()=>cordL.classList.remove('tug'),500);
-  setTimeout(()=>stageL.classList.toggle('lit'),140);
-});
-/* the phone landing: its own lamp, and the two doors are the desktop ones, cloned */
-document.querySelectorAll('.mland .lampwrap').forEach(b=>b.addEventListener('click',()=>{
-  const c=b.querySelector('.pullcord'); c.classList.add('tug'); setTimeout(()=>c.classList.remove('tug'),500);
-  setTimeout(()=>stageL.classList.toggle('lit'),140);
-}));
+/* ---- day and night. The cord is the switch: lamp on is nightfall, lamp off is morning. The page
+   opens at whichever it is outside: the sun's times for today over the UK, worked out from the
+   date (no location asked). ?time=day or ?time=night overrides, for looking at both. ---- */
+const NIGHT=window.SVDayNight?SVDayNight.isNight():false;
+const REDUCED=matchMedia('(prefers-reduced-motion:reduce)').matches;
+function tug(cord){ if(!cord) return; cord.classList.remove('tug'); void cord.offsetWidth; cord.classList.add('tug'); setTimeout(()=>cord.classList.remove('tug'),500); }
+function setLamp(on){ stageL.classList.toggle('lit',on); stageL.classList.toggle('night',on);
+  const w=document.getElementById('stage-wiz'); if(w&&window.__wizLamp) window.__wizLamp(on); }
+function pullCord(cord){ tug(cord); setTimeout(()=>setLamp(!stageL.classList.contains('lit')),140); }
+const visibleCord=()=>[...stageL.querySelectorAll('.lampwrap')].find(b=>b.offsetWidth)?.querySelector('.pullcord')||cordL;
+if(NIGHT){
+  stageL.classList.add('night');                               /* the room opens dark... */
+  if(REDUCED) stageL.classList.add('lit');
+  else setTimeout(()=>{ (window.__lampLightReady||Promise.resolve()).then(()=>{   /* ...and someone reaches for the lamp */
+    tug(visibleCord()); setTimeout(()=>stageL.classList.add('lit'),150); }); },1200);
+}
+stageL.querySelectorAll('.lampwrap').forEach(b=>b.addEventListener('click',()=>pullCord(b.querySelector('.pullcord'))));
+/* the lamp's light sheets follow wherever the lamp is drawn (desktop case, phone case, bench offsets):
+   measure the visible lamp and hand its mouth, scale and plank line to the sheets as CSS vars */
+function placeLampLight(){
+  const lamp=[...stageL.querySelectorAll('.lampwrap .lamp')].find(l=>l.offsetWidth);
+  const sheets=stageL.querySelectorAll(':scope > .lamplight'); if(!lamp||!sheets.length) return;
+  sheets[0].classList.add('placed');                   /* measurable (both sheets share one box) */
+  const sr=sheets[0].getBoundingClientRect(), k=(sr.width/sheets[0].offsetWidth)||1, r=lamp.getBoundingClientRect();
+  const x=(r.left-sr.left)/k, y=(r.top-sr.top)/k, w=r.width/k, h=r.height/k, s=h/330;
+  const mx=x+w*.25, my=y+h*.31, by=y+h*.985;          /* mouth of the shade; foot of the lamp = plank */
+  const bl=(by-my)/Math.cos(27*Math.PI/180);          /* beam runs along the shade's axis to the plank */
+  const px=mx-(by-my)*Math.tan(27*Math.PI/180);
+  sheets.forEach(el=>{ const st=el.style;
+    st.setProperty('--mx',mx+'px'); st.setProperty('--my',my+'px'); st.setProperty('--by',by+'px');
+    st.setProperty('--px',px+'px'); st.setProperty('--bl',bl*1.08+'px'); st.setProperty('--s',s.toFixed(3));
+    el.classList.add('placed'); });
+}
+placeLampLight();
+addEventListener('load',placeLampLight); addEventListener('resize',placeLampLight);
+if(window.ResizeObserver) new ResizeObserver(placeLampLight).observe(stageL);
+stageL.querySelectorAll('.lampwrap .lamp').forEach(l=>{ if(!l.complete) l.addEventListener('load',placeLampLight); });
 (function(){ const md=document.querySelector('.mdoors'); if(!md) return;
   document.querySelectorAll('#stage-landing > .caserow:nth-child(2) .slot.door').forEach(d=>md.appendChild(d.cloneNode(true))); })();
 
@@ -1890,7 +2169,7 @@ function renderWizShelf(slugs,o){
     const ref=live[i+1]; if(ref!==b) el.insertBefore(b,ref||null);
   });
   const en=document.getElementById('emptynote'); if(en) en.style.opacity=(n===0&&document.body.dataset.view==='picker')?'1':'0';
-  fitWizShelf();
+  fitWizShelf(); markRated();
 }
 function wireWizBook(b,s){
   b.tabIndex=0; b.setAttribute('role','button'); b.setAttribute('aria-label',s.name);
@@ -1919,17 +2198,27 @@ function fitWizShelf(){
   const avail=lamp.offsetLeft-shelf.offsetLeft-6;   /* the flopped last book must clear the shade */
   const f=Math.min(1,avail/natural); if(f<1) shelf.style.setProperty('--bkh',(204*f).toFixed(1)+'px');
 }
-/* the reading lamp on the wizard shelf: click it, like the dashboard's; the same remembered preference */
+/* the reading lamp on the builder's shelf: the same world as the homepage. Its cord is the same
+   switch (on is night, off is day), and it opens at whichever it is outside. The books change as
+   students pick, so this shelf is lit by CSS (a dusk sheet with a warm hole round the lamp's
+   mouth, placed from where the lamp is drawn) rather than the homepage's render. */
 (function(){
   const btn=stageW.querySelector('.lampbtn'), cord=stageW.querySelector('.pullcord'), lamp=stageW.querySelector('.lamp');
-  let on=true; try{ if(localStorage.getItem('sv-lamp-on')==='0') on=false; }catch(e){}
-  const apply=()=>{ stageW.classList.toggle('lit',on); btn.setAttribute('aria-pressed',String(on));
-    btn.setAttribute('aria-label',on?'Reading lamp \u2014 on. Click to turn off':'Reading lamp \u2014 off. Click to turn on'); };
-  apply();
-  btn.addEventListener('click',()=>{ on=!on; try{ localStorage.setItem('sv-lamp-on',on?'1':'0'); }catch(e){}
-    cord.classList.remove('tug'); void cord.offsetWidth; cord.classList.add('tug'); setTimeout(apply,140); });
+  const wrap=stageW.querySelector('.stagewrap');
+  const place=()=>{ if(!lamp.offsetWidth) return;
+    wrap.style.setProperty('--lx',(lamp.offsetLeft+lamp.offsetWidth*.232)+'px');
+    wrap.style.setProperty('--ly',(lamp.offsetTop+lamp.offsetHeight*.31)+'px');
+    wrap.style.setProperty('--lh',lamp.offsetHeight+'px'); };
+  const apply=on=>{ place(); stageW.classList.toggle('lit',on); stageW.classList.toggle('night',on);
+    btn.setAttribute('aria-pressed',String(on));
+    btn.setAttribute('aria-label',on?'Reading lamp \u2014 on (night). Click for day':'Reading lamp \u2014 off (day). Click for night'); };
+  window.__wizLamp=apply;
+  apply(stageL.classList.contains('night'));
+  if(!lamp.complete) lamp.addEventListener('load',place);
+  if(window.ResizeObserver) new ResizeObserver(place).observe(lamp);   /* measured once the builder is shown */
+  btn.addEventListener('click',()=>{ tug(cord); setTimeout(()=>setLamp(!stageW.classList.contains('night')),140); });
   btn.addEventListener('mouseenter',()=>lamp.classList.add('hot')); btn.addEventListener('mouseleave',()=>lamp.classList.remove('hot'));
-  addEventListener('resize',fitWizShelf);
+  addEventListener('resize',()=>{ fitWizShelf(); place(); });
 })();
 (function(){
   /* condense on scroll. Driven by how much of a 150px sentinel at the very top of the page is
@@ -2258,6 +2547,11 @@ function feelUnits(sl){ return (WUNITS[wSub(sl)]||[]).filter(u=>feelKeep(sl,u.sl
 function ragRoll(sl){ const sub=wSub(sl), us=feelUnits(sl); const v={n:0,r:0,a:1,g:2}; let n=0,t=0;
   us.forEach(u=>{ const x=RAG[sub+'/'+u.slug]; if(x in v){ n++; t+=v[x]; } });
   if(!n) return null; const m=t/n; return m<0.67?'r':m<1.34?'a':'g'; }
+/* a tick on each book on the builder's shelf once its topics are rated and the student has moved on */
+function feelDone(sl){ const sub=wSub(sl); if(!sub||!WUNITS[sub]) return false; const us=feelUnits(sl); return us.length>0&&us.every(u=>RAG[sub+'/'+u.slug]); }
+function markRated(){ const on=document.body.dataset.view==='feel'||document.body.dataset.view==='budget', subs=on?feelSubs():[];
+  const upto=document.body.dataset.view==='budget'?subs.length:fstep;   /* finished = rated and moved past */
+  shelfW.querySelectorAll('.bk[data-slug]').forEach(b=>{ const i=subs.indexOf(b.dataset.slug); b.classList.toggle('rated',i>=0&&i<upto&&feelDone(b.dataset.slug)); }); }
 function renderFeel(){
   renderWizShelf(picked);
   const subs=feelSubs(); if(!subs.length){ go('budget'); return; }
@@ -2265,20 +2559,35 @@ function renderFeel(){
   const sl=subs[fstep], su=SUBJECTS.find(x=>x.slug===sl), sub=wSub(sl);
   document.getElementById('feelh').innerHTML=su.name+'<span class="feelsub">'+(BOARDLBL[boards[sl]]||'')+' &middot; '+(fstep+1)+' of '+subs.length+'</span>';
   const fc=document.getElementById('feelcard'), nx=document.getElementById('feelnext');
-  const key='<div class="dotkey"><span class="kn">not started yet</span><span class="kr">struggling</span><span class="ka">getting there</span><span class="kg">confident</span></div>';
+  const LBL={n:'Not started',r:'Struggling',a:'Getting there',g:'Confident'};
+  const key='<div class="feelhead"><span class="fh-t">Topic</span>'+['n','r','a','g'].map(v=>'<div class="fh '+v+'"><span>'+LBL[v]+'</span><button type="button" data-all="'+v+'" aria-pressed="false" aria-label="Mark every topic '+LBL[v].toLowerCase()+'">All</button></div>').join('')+'</div>';
   fc.innerHTML=key+'<div class="wait">loading the topics&hellip;</div>';
   const dots=(k,cur)=>['n','r','a','g'].map(v=>'<button type="button" class="dot '+v+'" data-k="'+k+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'" aria-label="'+({n:'not started yet',r:'struggling',a:'getting there',g:'confident'})[v]+'"></button>').join('');
   const chev='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2l4 4-4 4"/></svg>';
-  const sync=()=>{ const units=feelUnits(sl); const done=units.every(u=>RAG[sub+'/'+u.slug]);
-    nx.disabled=!done; nx.style.opacity=done?'':'.45'; };
+  const sync=()=>{ const units=feelUnits(sl), n=units.filter(u=>RAG[sub+'/'+u.slug]).length, done=n===units.length;
+    markRated();
+    nx.disabled=!done; nx.style.opacity=done?'':'.45';
+    /* each column's All lights up when every topic sits in that column */
+    fc.querySelectorAll('[data-all]').forEach(b=>b.setAttribute('aria-pressed',String(!!units.length&&units.every(u=>RAG[sub+'/'+u.slug]===b.dataset.all))));
+    const c=fc.querySelector('.feelcount'); if(c) c.textContent=done?'All '+units.length+' rated':n+' of '+units.length+' rated'; };
   loadUnits(sub,()=>{
     if(feelSubs()[fstep]!==sl) return;
     const units=feelUnits(sl);
+    /* early in the course most topics are untouched: Year 9, and Year 10 before January, start with every
+       unrated topic on "Not started", so they only change the few they've done */
+    const yrs=examYear()-examYearBase(), mo=new Date().getMonth();
+    if(yrs>=2||(yrs===1&&mo>=8)){ let ch=0; units.forEach(u=>{ const k=sub+'/'+u.slug; if(!RAG[k]){ RAG[k]='n'; ch++; } });
+      if(ch){ const roll=ragRoll(sl); if(roll) RAG[sl]=roll; persist(); } }
     fc.innerHTML=key+(units.length?units.map(u=>{ const k=sub+'/'+u.slug;
         return '<div class="feelunit" data-k="'+k+'"><button type="button" class="fu-name" aria-expanded="false">'+u.name+chev+'</button>'+
           '<span class="dots">'+dots(k,RAG[k])+'</span>'+
-          '<div class="fu-inc" hidden>'+(u.subtitle?'<p>'+u.subtitle+'</p>':'')+'<ol>'+u.lessons.map(t=>'<li>'+t+'</li>').join('')+'</ol></div></div>'; }).join('')
+          '<div class="fu-inc" hidden>'+(u.subtitle?'<p>'+u.subtitle+'</p>':'')+'<ol>'+u.lessons.map(t=>'<li>'+t+'</li>').join('')+'</ol></div></div>'; }).join('')+'<div class="feelcount"></div>'
       :'<div class="wait">no topics listed yet</div>');
+    const setAll=v=>{ const us=feelUnits(sl), all=us.every(u=>RAG[sub+'/'+u.slug]===v);
+      us.forEach(u=>{ const k=sub+'/'+u.slug; if(all) delete RAG[k]; else RAG[k]=v; });   /* pressed again: clears them */
+      fc.querySelectorAll('.feelunit').forEach(r=>r.querySelectorAll('.dot').forEach(x=>x.setAttribute('aria-pressed',String(RAG[r.dataset.k]===x.dataset.v))));
+      const roll=ragRoll(sl); if(roll) RAG[sl]=roll; else delete RAG[sl]; persist(); sync(); };
+    fc.querySelectorAll('[data-all]').forEach(b=>b.onclick=()=>setAll(b.dataset.all));
     fc.querySelectorAll('.dot').forEach(b=>b.onclick=()=>{ const k=b.dataset.k, v=b.dataset.v;
       if(RAG[k]===v) delete RAG[k]; else RAG[k]=v;
       b.parentElement.querySelectorAll('.dot').forEach(x=>x.setAttribute('aria-pressed',String(RAG[k]===x.dataset.v)));
@@ -2470,7 +2779,7 @@ if(q.has('at')){ setTimeout(()=>{ document.querySelectorAll('.caserow.page').for
 /* ?snap — verification hook: skip fades/animations so headless captures are honest */
 if(q.has('snap')){ document.body.classList.add('ready');
   const st=document.createElement('style'); st.textContent='*{transition:none!important;animation:none!important}';
-  document.head.appendChild(st); stageL.classList.add('lit');
+  document.head.appendChild(st); stageL.classList.add('lit','night');
   document.querySelectorAll('.rv,.rvself').forEach(r=>r.classList.add('in')); }
 /* ?tagfont=fraunces&ul — preview a tagline font/underline straight from the URL */
 if(q.get('tagfont')!==null) document.body.dataset.tagfont=q.get('tagfont')||'';
@@ -2685,7 +2994,7 @@ if(q.has('bench')){
     }
     e.preventDefault(); apply();
   });
-  stageL.classList.add('lit');
+  stageL.classList.add('lit','night');
   apply();
 }
 
@@ -2724,6 +3033,7 @@ if(q.has('bench')){
 })();
 window.SV_LIB={SUBJECTS:SUBJECTS};
 </script>
+<script src="/js/lamp-light.js"></script>
 <script src="/js/welcome-fallback.js"></script>
 <script src="/js/welcome-live.js"></script>
 <!-- ============ THE TOY-SCALE LAYOUT + THE TUNING BENCH ============

@@ -172,6 +172,8 @@
     var REV = Array.isArray(opts.lessons);           /* the revisit slot, not the day-one warm-up */
     var LABEL = REV ? 'Revisit' : 'Warm-up';
     var goLesson = function () { close(); if (target) nav(target); };
+    /* on a plan run (js/plan-flow.js) the finished step is ticked off on a 'Lesson time' screen first */
+    var flowOn = function (then) { if (window.svFlow && svFlow.run()) { close(); svFlow.bridge('first', 'lesson', function () { if (target) nav(target); }); } else then(); };
 
     if (!document.getElementById('wu-style')) {
       var st = document.createElement('style'); st.id = 'wu-style'; st.textContent = css;
@@ -257,7 +259,7 @@
           + '<p>' + line + '</p>'
           + (target ? '<button class="wu-go">Start today’s lesson →</button>' : '') + '</div>';
         var go = card.querySelector('.wu-go');
-        if (go) go.addEventListener('click', goLesson);
+        if (go) go.addEventListener('click', function () { flowOn(goLesson); });
         if (typeof window.svWarmupDone === 'function') try { window.svWarmupDone(); } catch (e) {}
       }
 
@@ -290,7 +292,7 @@
           + '<div class="wu-sum"><div class="wu-big">' + kept + ' of ' + order.length + '</div><p>' + (kept === order.length ? 'All still secure.' : kept ? 'still secure. The rest go back into your plan as lessons.' : 'None held. They go back into your plan as lessons.') + '</p>' + rows
           + (target ? '<button class="wu-go">Start today’s lesson →</button>' : '<button class="wu-go">Back to my plan →</button>') + '</div>';
         var go = card.querySelector('.wu-go');
-        if (go) go.addEventListener('click', target ? goLesson : close);
+        if (go) go.addEventListener('click', target ? function () { flowOn(goLesson); } : close);
         if (typeof window.svWarmupDone === 'function') try { window.svWarmupDone(); } catch (e) {}
       }
 
