@@ -1,12 +1,17 @@
 """ElevenLabs narration for script.json with one voice, trimmed, plus a matching timeline file.
-   python voice_eleven.py VOICE_ID NAME   ->  voice_NAME/*.wav, timeline_NAME.js"""
+   python voice_eleven.py VOICE_ID NAME   ->  voice_NAME/*.wav, timeline_NAME.js
+   MODEL=eleven_v4 uses each line's "tagged" text from script_tags.json ([warmly], [excited]... audio
+   tags, which v4 follows as direction); the captions and label cues keep the plain text."""
 import json, os, subprocess, sys, urllib.request
 VID, NAME = sys.argv[1], sys.argv[2]
 K = os.environ.get('ELEVENLABS_API_KEY') or subprocess.run(['powershell', '-NoProfile', '-Command', "[Environment]::GetEnvironmentVariable('ELEVENLABS_API_KEY','User')"], capture_output=True, text=True).stdout.strip()
 D = f'voice_{NAME}'; os.makedirs(D, exist_ok=True)
+MODEL = os.environ.get('MODEL', 'eleven_multilingual_v2')
 lines = json.load(open('script.json', encoding='utf-8')); dur = {}
+TAGS = json.load(open('script_tags.json', encoding='utf-8')) if MODEL == 'eleven_v4' else {}
 for l in lines:
-    body = {'text': l['text'], 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.5, 'similarity_boost': 0.8, 'style': 0.2, 'use_speaker_boost': True}}
+    body = {'text': TAGS.get(l['id'], l['text']), 'model_id': MODEL}
+    if MODEL != 'eleven_v4': body['voice_settings'] = {'stability': 0.5, 'similarity_boost': 0.8, 'style': 0.2, 'use_speaker_boost': True}
     req = urllib.request.Request(f'https://api.elevenlabs.io/v1/text-to-speech/{VID}?output_format=mp3_44100_128', data=json.dumps(body).encode(), headers={'xi-api-key': K, 'Content-Type': 'application/json'})
     open(f"{D}/{l['id']}.mp3", 'wb').write(urllib.request.urlopen(req, timeout=120).read())
     subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', f"{D}/{l['id']}.mp3", '-af', 'silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.05,areverse,silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.1,areverse', '-ar', '24000', '-ac', '1', f"{D}/{l['id']}_t.wav"], check=True)
