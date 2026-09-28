@@ -139,7 +139,7 @@
     var otherType = isExam ? 'revision-technique' : 'exam-technique';
     var otherLabel = isExam ? 'Revision Techniques' : 'Exam Technique';
 
-    document.title = (isExam ? label : 'Revision techniques') + ' - ' + 'GCSE ' + subject.name + (subject.exam_board ? ' ' + subject.exam_board : '') + ' - StudyVault';   // matches api/seo.js
+    document.title = window.svSeo ? svSeo.unitTitle(isExam ? label : 'Revision techniques', subject.name, subject.exam_board) : 'Revision techniques';   // js/seo-title.js, as api/seo.js
     document.body.classList.add(bodyClass);
     document.body.dataset.unit = guideType;
     document.getElementById('header-unit-label').textContent = label;
@@ -229,7 +229,7 @@
     var otherType = isExam ? 'revision-technique' : 'exam-technique';
     var otherLabel = isExam ? 'Revision Techniques' : 'Exam Technique';
 
-    document.title = guide.title + ' - ' + 'GCSE ' + subject.name + (subject.exam_board ? ' ' + subject.exam_board : '') + ' - StudyVault';   // matches api/seo.js
+    document.title = window.svSeo ? svSeo.unitTitle(guide.title, subject.name, subject.exam_board) : guide.title;   // js/seo-title.js, as api/seo.js
     document.body.classList.add(bodyClass);
     document.getElementById('header-unit-label').textContent = label;
 

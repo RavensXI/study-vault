@@ -194,7 +194,7 @@
     if (typeof pd === 'string') { try { pd = JSON.parse(pd); } catch(e) { pd = {}; } }
 
     // Set page title
-    document.title = lesson.title + (subject.name ? ' - GCSE ' + subject.name + (subject.exam_board ? ' ' + subject.exam_board : '') : '') + ' - StudyVault';   // matches api/seo.js
+    document.title = window.svSeo ? svSeo.lessonTitle(lesson.title, unit && unit.name, subject.name, subject.exam_board) : lesson.title;   // js/seo-title.js, as api/seo.js
 
     // Set body class for unit theming
     if (unit.body_class) document.body.classList.add(unit.body_class);

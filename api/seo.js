@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { supabase } = require('./pipeline/_lib/supabase');
+const seo = require('../js/seo-title.js');   // titles shared with the page loaders
 
 /**
  * What search engines read: the sitemaps and a plain-HTML subject directory.
@@ -165,8 +166,8 @@ ${guideList.slice(1).map(g => `      <li><a href="${esc(g.path)}">${esc(g.title)
 }
 
 // ---- Page shells with real <head> tags ------------------------------------------------------
-// Same wording as the loaders' document.title (lesson-, practice- and browse-loader.js), so
-// the title does not change when the page finishes loading.
+// course() is the breadcrumb/structured-data label. Page titles come from js/seo-title.js,
+// which the loaders also use, so the title does not change when the page finishes loading.
 function course(sub) { return 'GCSE ' + sub.name + (sub.exam_board ? ' ' + sub.exam_board : ''); }
 
 const SHELLS = {};
@@ -196,9 +197,10 @@ async function headFor(t, q) {
     if (!l) return null;
     const sub = l.units.subjects;
     const path = `/${t}/${s}/${u}/${n}`;
-    const description = l.description || `${l.title}: a free ${course(sub)} revision ${t === 'practice' ? 'practice set' : 'lesson'} on ${l.units.name}.`;
+    const description = seo.lessonDescription(l.description || `${l.title}: ${l.units.name}.`,
+      t === 'practice' ? 'practice' : (l.is_listening ? 'listening' : 'lesson'));
     return {
-      title: `${l.title} - ${course(sub)} - StudyVault`, description, image: l.hero_image_url, path,
+      title: seo.lessonTitle(l.title, l.units.name, sub.name, sub.exam_board), description, image: l.hero_image_url, path,
       ld: [learningResource(l.title, description, sub, path, l.hero_image_url),
            breadcrumbs([[course(sub), `/subjects/${s}`], [l.units.name, `/browse/${s}/${u}`], [l.title, path]])],
       // the lesson's own text, for crawlers and link previews that run no JavaScript. Listening
@@ -213,7 +215,7 @@ async function headFor(t, q) {
     const sub = subs && subs[0];
     if (!sub) return null;
     if (!u) return {
-      title: `${course(sub)} revision - StudyVault`,
+      title: seo.subjectTitle(sub.name, sub.exam_board),
       description: `Free ${course(sub)} revision: every unit and lesson, written to the exam board specification.`,
       path: `/browse/${s}`,
       ld: [breadcrumbs([[course(sub), `/browse/${s}`]])]
@@ -223,7 +225,7 @@ async function headFor(t, q) {
     const unit = units && units[0];
     if (!unit) return null;
     return {
-      title: `${unit.name} - ${course(sub)} - StudyVault`,
+      title: seo.unitTitle(unit.name, sub.name, sub.exam_board),
       description: unit.subtitle || `${unit.name}: free ${course(sub)} revision lessons.`,
       image: unit.image_url, path: `/browse/${s}/${u}`,
       ld: [breadcrumbs([[course(sub), `/browse/${s}`], [unit.name, `/browse/${s}/${u}`]])]
@@ -249,7 +251,7 @@ async function headFor(t, q) {
     const crumbs = [[course(sub), `/subjects/${s}`], ['Revision techniques', hubPath]];
     if (slug !== 'index') crumbs.push([g.title, path]);
     return {
-      title: `${name} - ${course(sub)} - StudyVault`, description, path,
+      title: seo.unitTitle(name, sub.name, sub.exam_board), description, path,
       ld: [learningResource(name, description, sub, path, null), breadcrumbs(crumbs)],
       body: `<h1>${esc(name)}</h1>\n${guideLinks(g.content_html || '', s)}`
     };
@@ -305,7 +307,7 @@ function withHead(html, h) {
   <link rel="canonical" href="${esc(SITE + h.path)}">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="StudyVault">
-  <meta property="og:title" content="${esc(h.title.replace(/ - StudyVault$/, ''))}">
+  <meta property="og:title" content="${esc(h.title.replace(/ [|-] StudyVault$/, ''))}">
   <meta property="og:description" content="${esc(h.description)}">
   <meta property="og:url" content="${esc(SITE + h.path)}">${h.image ? `
   <meta property="og:image" content="${esc(h.image)}">

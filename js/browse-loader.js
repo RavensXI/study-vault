@@ -574,7 +574,7 @@
       }
     }
 
-    document.title = 'GCSE ' + subject.name + (subject.exam_board ? ' ' + subject.exam_board : '') + ' revision - StudyVault';   // matches api/seo.js
+    document.title = window.svSeo ? svSeo.subjectTitle(subject.name, subject.exam_board) : 'GCSE ' + subject.name + ' revision';   // js/seo-title.js, as api/seo.js
     document.getElementById('header-unit-label').textContent = subject.name;
 
     // Add nav links
@@ -831,7 +831,7 @@
     }
 
     var titleSubj = unit.subjects || {};
-    document.title = unit.name + (titleSubj.name ? ' - GCSE ' + titleSubj.name + (titleSubj.exam_board ? ' ' + titleSubj.exam_board : '') : '') + ' - StudyVault';   // matches api/seo.js
+    document.title = window.svSeo ? svSeo.unitTitle(unit.name, titleSubj.name, titleSubj.exam_board) : unit.name;   // js/seo-title.js, as api/seo.js
     if (unit.body_class) document.body.classList.add(unit.body_class);
     if (unit.accent) document.documentElement.style.setProperty('--accent', unit.accent);
     if (unit.accent_light) document.documentElement.style.setProperty('--accent-light', unit.accent_light);
