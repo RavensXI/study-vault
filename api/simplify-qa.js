@@ -21,9 +21,10 @@
 const { supabase } = require('./pipeline/_lib/supabase');
 
 const { callClaudeText } = require('./_lib/claude');
+const prompts = require('./_lib/simplify-prompts');
 
 const QA_MODEL = 'claude-sonnet-4-6';
-const SIMPLE_MODEL = 'claude-haiku-4-5-20251001';
+const SIMPLE_MODEL = 'claude-sonnet-4-6';   // prompt v2, 28 Sep 2026 — see api/_lib/simplify-prompts.js
 const EXPLAIN_MODEL = 'claude-sonnet-4-6';
 
 module.exports = async function handler(req, res) {
@@ -108,7 +109,7 @@ module.exports = async function handler(req, res) {
     if (!verdict.pass && (row.data.regen_count || 0) < 1) {
       var regen = cleanOutput(await generate(original, presentTerms, rowLevel));
       regenerated = true;
-      if (regen) {
+      if (regen && !(rowLevel === 'simple' && prompts.isMetaReply(regen))) {
         simplified = regen;
         verdict = await runQa(rowLevel, lessonTitle, presentTerms, original, simplified);
       }
@@ -137,20 +138,7 @@ module.exports = async function handler(req, res) {
 // --- QA ---
 
 function simpleQaSystem() {
-  return [
-    'You are a faithfulness checker for simplified GCSE revision text.',
-    'You are given a lesson title, a list of subject terms that appear in this paragraph (may be empty), the ORIGINAL paragraph, and a SIMPLIFIED rewrite.',
-    'Decide whether the simplified version is safe to show students.',
-    '',
-    'It passes only if ALL of these hold:',
-    '- Every number, date, name, place and quotation in the original is preserved exactly.',
-    '- Each listed subject term that appears in the ORIGINAL is still present in the simplified version (not swapped for an easier word). If the term list is empty, skip this check entirely — do NOT require any term.',
-    '- No new claim has been added and no existing point has been dropped.',
-    '- It reads more simply than the original (shorter sentences / commoner words).',
-    '',
-    'Reply with ONLY a JSON object, no other text:',
-    '{"pass": true|false, "reason": "<one short sentence>", "issues": ["<specific problem>", ...]}'
-  ].join('\n');
+  return prompts.QA_SIMPLE;
 }
 
 function explainQaSystem() {
@@ -221,23 +209,6 @@ function cleanOutput(s) {
     .trim();
 }
 
-function buildSimpleSystemPrompt(presentTerms) {
-  var termRule = presentTerms.length
-    ? '1. This paragraph contains these exact subject terms: ' + presentTerms.join(', ') + '. Keep each of them unchanged — simplify the sentence around them, never replace them with easier words and never define them away.'
-    : '1. Keep any specialist subject term that appears unchanged — simplify the sentence around it, never swap it for an easier word.';
-  return [
-    'You rewrite GCSE revision text into plainer English for students with a lower reading age or who are learning English as an additional language.',
-    '',
-    'Rules you must never break:',
-    termRule,
-    '2. Never change any number, date, name, place, or quotation. Never change a fact.',
-    '3. Never add a new point and never remove a point. Same information, simpler wording. If the text is an introduction, a rhetorical question, or ends with a colon pointing to a list or section, rewrite ONLY the words you are given — do not answer the question and do not fill in or list the items it introduces. That content is in other paragraphs you cannot see.',
-    '4. Use shorter sentences and everyday words. Break long sentences into two if it helps. Keep roughly the same overall length.',
-    '5. Keep a neutral, factual tone. Do not address the student ("you"), do not add encouragement, do not add commentary.',
-    '6. Output ONLY the rewritten text as plain prose. No markdown, no headings, no preamble, no notes, no quotation marks around it.'
-  ].join('\n');
-}
-
 function buildExplainSystemPrompt(presentTerms) {
   var termRule = presentTerms.length
     ? '3. Keep using these subject terms from the paragraph (do not avoid them — the student is examined on them): ' + presentTerms.join(', ') + '.'
@@ -259,7 +230,7 @@ async function generate(text, presentTerms, level) {
   if (level === 'explain') {
     return callAnthropic(buildExplainSystemPrompt(presentTerms), text, EXPLAIN_MODEL, 600, 0.6);
   }
-  return callAnthropic(buildSimpleSystemPrompt(presentTerms), text, SIMPLE_MODEL, 700, 0.2);
+  return callAnthropic(prompts.simpleSystem(presentTerms), prompts.simpleUser(text), SIMPLE_MODEL, 1200, 0.2);
 }
 
 async function callAnthropic(system, prompt, model, maxTokens, temperature) {

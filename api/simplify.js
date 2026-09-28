@@ -29,8 +29,11 @@ const { supabase } = require('./pipeline/_lib/supabase');
 // Leveling is a trivial task -> Haiku. "Explain it differently" reframes with
 // an analogy (a reasoning task) -> Sonnet.
 const { callClaudeText } = require('./_lib/claude');
+const prompts = require('./_lib/simplify-prompts');
 
-const SIMPLE_MODEL = 'claude-haiku-4-5-20251001';
+// Sonnet since 28 Sep 2026 (prompt v2): Haiku simplified boldly but guessed wrong meanings
+// ("ductility (bending without breaking)") and reworded quotations. See api/_lib/simplify-prompts.js.
+const SIMPLE_MODEL = 'claude-sonnet-4-6';
 const EXPLAIN_MODEL = 'claude-sonnet-4-6';
 const MAX_TEXT_LEN = 4000; // a single paragraph; reject anything pathological
 
@@ -71,7 +74,9 @@ module.exports = async function handler(req, res) {
   rates[ip] = (rates[ip] || []).filter(function (ts) { return now - ts < windowMs; });
   var LIMIT = 120; // per hour — generous; cache hits don't count (returned before push)
 
-  var hash = sha256(normalise(text)) ;
+  // The simple level's key carries the prompt version, so a prompt change re-simplifies paragraphs
+  // on their next request instead of serving the old rewrite for ever.
+  var hash = sha256((level === 'simple' ? prompts.SIMPLE_VERSION + '|' : '') + normalise(text));
 
   // --- Lead-in guard ---
   // Paragraphs that introduce content which follows — list intros ending in a
@@ -123,6 +128,11 @@ module.exports = async function handler(req, res) {
     // terms as "missing" and fail faithful simplifications.
     var presentTerms = termsInText(glossaryTerms, text);
     var simplified = cleanOutput(await generate(text, presentTerms, level));
+    // A reply to the paragraph instead of a rewrite of it: try once more, then serve the original.
+    if (level === 'simple' && prompts.isMetaReply(simplified)) simplified = cleanOutput(await generate(text, presentTerms, level));
+    if (level === 'simple' && prompts.isMetaReply(simplified)) {
+      return res.status(200).json({ simplified: null, hash: hash, status: 'skip', useOriginal: true, needsQa: false });
+    }
     if (!simplified) return res.status(502).json({ error: 'Empty simplification' });
     var genModel = level === 'explain' ? EXPLAIN_MODEL : SIMPLE_MODEL;
 
@@ -194,26 +204,6 @@ function sha256(s) {
   return crypto.createHash('sha256').update(s, 'utf8').digest('hex');
 }
 
-// Leveling: same facts, plainer wording. `presentTerms` are subject terms that
-// actually occur in this paragraph (already filtered), so the rule only fires
-// when there's something to preserve.
-function buildSimpleSystemPrompt(presentTerms) {
-  var termRule = presentTerms.length
-    ? '1. This paragraph contains these exact subject terms: ' + presentTerms.join(', ') + '. Keep each of them unchanged — simplify the sentence around them, never replace them with easier words and never define them away.'
-    : '1. Keep any specialist subject term that appears unchanged — simplify the sentence around it, never swap it for an easier word.';
-  return [
-    'You rewrite GCSE revision text into plainer English for students with a lower reading age or who are learning English as an additional language.',
-    '',
-    'Rules you must never break:',
-    termRule,
-    '2. Never change any number, date, name, place, or quotation. Never change a fact.',
-    '3. Never add a new point and never remove a point. Same information, simpler wording. If the text is an introduction, a rhetorical question, or ends with a colon pointing to a list or section, rewrite ONLY the words you are given — do not answer the question and do not fill in or list the items it introduces. That content is in other paragraphs you cannot see.',
-    '4. Use shorter sentences and everyday words. Break long sentences into two if it helps. Keep roughly the same overall length.',
-    '5. Keep a neutral, factual tone. Do not address the student ("you"), do not add encouragement, do not add commentary.',
-    '6. Output ONLY the rewritten text as plain prose. No markdown, no headings, no preamble, no notes, no quotation marks around it.'
-  ].join('\n');
-}
-
 // Re-teaching: explain the same idea a different way, with an everyday analogy.
 function buildExplainSystemPrompt(presentTerms) {
   var termRule = presentTerms.length
@@ -236,7 +226,7 @@ async function generate(text, glossaryTerms, level) {
   if (level === 'explain') {
     return callAnthropic(buildExplainSystemPrompt(glossaryTerms), text, EXPLAIN_MODEL, 600, 0.6);
   }
-  return callAnthropic(buildSimpleSystemPrompt(glossaryTerms), text, SIMPLE_MODEL, 700, 0.2);
+  return callAnthropic(prompts.simpleSystem(glossaryTerms), prompts.simpleUser(text), SIMPLE_MODEL, 1200, 0.2);
 }
 
 async function callAnthropic(system, prompt, model, maxTokens, temperature) {
