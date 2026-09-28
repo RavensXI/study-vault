@@ -19,4 +19,8 @@ if ($code -ne 0 -and $env:RESEND_API_KEY -and $env:NOTIFY_TO -and $env:NOTIFY_FR
       -ContentType "application/json" -Body $body | Out-Null
   } catch {}
 }
+# Google Search Console: this week vs last week, emailed every Sunday (Tom, 28 Sep 2026).
+# Its own log line; a failure here never changes the YouTube audit's exit code.
+$gsc = & python "$repo\scripts\search_console_report.py" weekly 2>&1
+Add-Content -Path "$repo\scripts\_yt_audit_runs.log" -Encoding utf8 -Value ("[{0}] search console exit {1}" -f (Get-Date -Format s), $LASTEXITCODE)
 exit $code
