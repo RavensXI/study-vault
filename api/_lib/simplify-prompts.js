@@ -17,7 +17,7 @@ const QA_SIMPLE = fs.readFileSync(path.join(__dirname, 'simplify-prompt-qa.txt')
 
 // Bump when the prompt changes: it is part of the cache key, so paragraphs are re-simplified with
 // the new prompt the next time a student asks, instead of serving the old rewrite for ever.
-const SIMPLE_VERSION = 'v3';   // v3 28 Sep: glosses are brackets of 8 words or fewer, never extra sentences
+const SIMPLE_VERSION = 'v4';   // v4 28 Sep: Sonnet 5.5 writer; prompt iterated to 30/30 on unseen paragraphs (scripts/_simplify_iterate.py)
 
 function simpleSystem(presentTerms) {
   var terms = presentTerms && presentTerms.length
@@ -38,4 +38,17 @@ function isMetaReply(s) {
   return META.test(s) || /\b(the text you'?d like me|provide the text|rewrite it for you|following your rules)\b/i.test(s);
 }
 
-module.exports = { simpleSystem, simpleUser, isMetaReply, QA_SIMPLE, SIMPLE_VERSION };
+// The one retry after a failed check: the checker's reasons go back to the writer, which fixes the
+// specific fault far more often than a blind second attempt (29/30 -> 30/30 on unseen paragraphs).
+function retryUser(text, previous, feedback) {
+  return 'Rewrite this passage:\n<passage>\n' + text + '\n</passage>\n\nA checker rejected your previous rewrite:\n' +
+    '<previous>\n' + previous + '\n</previous>\nReason: ' + feedback +
+    '\nWrite a new rewrite of the passage that fixes this, and follow every rule.';
+}
+
+// Sonnet 5.5 thinks by default: low effort keeps it quick, and a generous max_tokens stops the
+// thinking from eating the rewrite. It rejects temperature (stripped in api/_lib/claude.js).
+const SIMPLE_MODEL = 'claude-sonnet-5-5';
+const SIMPLE_PARAMS = { max_tokens: 4000, output_config: { effort: 'low' } };
+
+module.exports = { simpleSystem, simpleUser, retryUser, isMetaReply, QA_SIMPLE, SIMPLE_VERSION, SIMPLE_MODEL, SIMPLE_PARAMS };

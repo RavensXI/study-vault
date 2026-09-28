@@ -33,7 +33,7 @@ const prompts = require('./_lib/simplify-prompts');
 
 // Sonnet since 28 Sep 2026 (prompt v2): Haiku simplified boldly but guessed wrong meanings
 // ("ductility (bending without breaking)") and reworded quotations. See api/_lib/simplify-prompts.js.
-const SIMPLE_MODEL = 'claude-sonnet-4-6';
+const SIMPLE_MODEL = prompts.SIMPLE_MODEL;   // Sonnet 5.5 via the Global profile (lesson text only) — see api/_lib/simplify-prompts.js
 const EXPLAIN_MODEL = 'claude-sonnet-4-6';
 const MAX_TEXT_LEN = 4000; // a single paragraph; reject anything pathological
 
@@ -226,7 +226,8 @@ async function generate(text, glossaryTerms, level) {
   if (level === 'explain') {
     return callAnthropic(buildExplainSystemPrompt(glossaryTerms), text, EXPLAIN_MODEL, 600, 0.6);
   }
-  return callAnthropic(prompts.simpleSystem(glossaryTerms), prompts.simpleUser(text), SIMPLE_MODEL, 1200, 0.2);
+  return callClaudeText(Object.assign({ model: SIMPLE_MODEL, system: prompts.simpleSystem(glossaryTerms),
+    messages: [{ role: 'user', content: prompts.simpleUser(text) }] }, prompts.SIMPLE_PARAMS));
 }
 
 async function callAnthropic(system, prompt, model, maxTokens, temperature) {

@@ -24,7 +24,7 @@ const { callClaudeText } = require('./_lib/claude');
 const prompts = require('./_lib/simplify-prompts');
 
 const QA_MODEL = 'claude-sonnet-4-6';
-const SIMPLE_MODEL = 'claude-sonnet-4-6';   // prompt v2, 28 Sep 2026 — see api/_lib/simplify-prompts.js
+const SIMPLE_MODEL = prompts.SIMPLE_MODEL;   // Sonnet 5.5 via the Global profile (lesson text only) — see api/_lib/simplify-prompts.js
 const EXPLAIN_MODEL = 'claude-sonnet-4-6';
 
 module.exports = async function handler(req, res) {
@@ -107,7 +107,9 @@ module.exports = async function handler(req, res) {
 
     // Fail + not yet regenerated -> regenerate once and re-check
     if (!verdict.pass && (row.data.regen_count || 0) < 1) {
-      var regen = cleanOutput(await generate(original, presentTerms, rowLevel));
+      // the checker's reasons go back to the writer for the one retry
+      var fb = (verdict.reason || '') + (verdict.issues && verdict.issues.length ? ' | ' + verdict.issues.join('; ') : '');
+      var regen = cleanOutput(await generate(original, presentTerms, rowLevel, rowLevel === 'simple' ? simplified : null, fb));
       regenerated = true;
       if (regen && !(rowLevel === 'simple' && prompts.isMetaReply(regen))) {
         simplified = regen;
@@ -226,11 +228,13 @@ function buildExplainSystemPrompt(presentTerms) {
   ].join('\n');
 }
 
-async function generate(text, presentTerms, level) {
+async function generate(text, presentTerms, level, previous, feedback) {
   if (level === 'explain') {
     return callAnthropic(buildExplainSystemPrompt(presentTerms), text, EXPLAIN_MODEL, 600, 0.6);
   }
-  return callAnthropic(prompts.simpleSystem(presentTerms), prompts.simpleUser(text), SIMPLE_MODEL, 1200, 0.2);
+  var user = previous ? prompts.retryUser(text, previous, feedback || '') : prompts.simpleUser(text);
+  return callClaudeText(Object.assign({ model: SIMPLE_MODEL, system: prompts.simpleSystem(presentTerms),
+    messages: [{ role: 'user', content: user }] }, prompts.SIMPLE_PARAMS));
 }
 
 async function callAnthropic(system, prompt, model, maxTokens, temperature) {

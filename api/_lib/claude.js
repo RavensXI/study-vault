@@ -56,6 +56,11 @@ const BEDROCK_MODEL_IDS = {
   'claude-sonnet-4-6': SONNET_TIER,
   'claude-sonnet-5': SONNET_TIER,
   'claude-opus-4-8': 'anthropic.claude-opus-4-8',
+  // Sonnet 5.5 (28 Sep 2026) is served to eu-west-2 ONLY through the Global cross-region profile,
+  // which may process outside the UK. Tom's ruling (28 Sep): acceptable for Simplify wording, which
+  // sends only our own lesson text, never pupil work. No pupil-data route may use this model until
+  // Bedrock offers it in-Region or via an EU geo profile.
+  'claude-sonnet-5-5': 'global.anthropic.claude-sonnet-5-5',
 };
 
 // Sonnet 5 rejects a non-default `temperature` outright (HTTP 400,
@@ -65,6 +70,8 @@ const BEDROCK_MODEL_IDS = {
 const REJECTS_TEMPERATURE = new Set([
   'anthropic.claude-sonnet-5',
   'claude-sonnet-5',
+  'global.anthropic.claude-sonnet-5-5',
+  'claude-sonnet-5-5',
 ]);
 
 function useBedrock() {
@@ -220,6 +227,8 @@ function modelCandidates(model) {
   //   "Invocation of model ID anthropic.claude-haiku-4-5-20251001-v1:0 with
   //    on-demand throughput isn't supported. Retry your request with the ID or
   //    ARN of an inference profile that contains this model."
+  // A mapping that already names its inference profile (global.*) is used exactly as given.
+  if (/^(global|eu|us|apac)\./.test(model)) return [model];
   if (!geo) return [model];
   return [geo + model, model];
 }
