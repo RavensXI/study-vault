@@ -48,7 +48,11 @@ function retryUser(text, previous, feedback) {
 
 // Sonnet 5.5 thinks by default: low effort keeps it quick, and a generous max_tokens stops the
 // thinking from eating the rewrite. It rejects temperature (stripped in api/_lib/claude.js).
-const SIMPLE_MODEL = 'claude-sonnet-5-5';
-const SIMPLE_PARAMS = { max_tokens: 4000, output_config: { effort: 'low' } };
+// Switch to 'claude-sonnet-5-5' (+ SIMPLE_PARAMS_55) once Sonnet 5.5 is enabled for our AWS account
+// (28 Sep: Bedrock answered 403 "not available for this account" — needs model access in the console),
+// and bump SIMPLE_VERSION at the same time so paragraphs are redone by the new model.
+const SIMPLE_MODEL = 'claude-sonnet-4-6';
+const SIMPLE_PARAMS = { max_tokens: 1200 };
+const SIMPLE_PARAMS_55 = { max_tokens: 4000, output_config: { effort: 'low' } };
 
-module.exports = { simpleSystem, simpleUser, retryUser, isMetaReply, QA_SIMPLE, SIMPLE_VERSION, SIMPLE_MODEL, SIMPLE_PARAMS };
+module.exports = { simpleSystem, simpleUser, retryUser, isMetaReply, QA_SIMPLE, SIMPLE_VERSION, SIMPLE_MODEL, SIMPLE_PARAMS, SIMPLE_PARAMS_55 };
