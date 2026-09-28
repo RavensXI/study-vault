@@ -39,9 +39,17 @@ def claude(system, user, model):
     p = os.path.join(OUT, "_sys_%d.txt" % (hash(system) & 0xffffff))
     if not os.path.exists(p): open(p, "w", encoding="utf-8").write(system)
     env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
-    r = subprocess.run(["claude.cmd", "-p", "--model", model, "--output-format", "json", "--tools", "", "--strict-mcp-config",
-                        "--setting-sources", "", "--system-prompt-file", p], input=user, capture_output=True, text=True,
-                       encoding="utf-8", env=env, timeout=600)
+    import time as _t
+    for _try in range(5):   # claude.cmd briefly vanishes while Claude Code updates itself
+        try:
+            r = subprocess.run(["claude.cmd", "-p", "--model", model, "--output-format", "json", "--tools", "", "--strict-mcp-config",
+                                        "--setting-sources", "", "--system-prompt-file", p], input=user, capture_output=True, text=True,
+                               encoding="utf-8", env=env, timeout=600)
+            break
+        except FileNotFoundError:
+            _t.sleep(20)
+    else:
+        return ""
     try: return (json.loads(r.stdout).get("result") or "").strip()
     except Exception: return ""
 
@@ -90,11 +98,11 @@ def main():
     def run(r):
         o = r["original_text"]
         res = {"subject": r["subject_slug"], "original": o, "live_cached": r["simplified_text"],
-               "old_haiku": claude(OLD, o, "haiku"),
-               "new_haiku": claude(NEW, "Rewrite this passage:\n<passage>\n%s\n</passage>" % o, "haiku"),
-               "new_sonnet": claude(NEW, "Rewrite this passage:\n<passage>\n%s\n</passage>" % o, "sonnet")}
-        for k in ("new_haiku", "new_sonnet"):
-            v = claude(QA, "ORIGINAL:\n%s\n\nSIMPLIFIED:\n%s" % (o, res[k]), "sonnet")
+               "old_haiku": claude(OLD, o, "haiku") if not os.environ.get("SV_EVAL_FAST") else "",
+               "new_haiku": claude(NEW, "Rewrite this passage:\n<passage>\n%s\n</passage>" % o, "haiku") if not os.environ.get("SV_EVAL_FAST") else "",
+               "new_sonnet": claude(NEW, "Rewrite this passage:\n<passage>\n%s\n</passage>" % o, os.environ.get("SV_EVAL_SONNET", "sonnet"))}
+        for k in (("new_sonnet",) if os.environ.get("SV_EVAL_FAST") else ("new_haiku", "new_sonnet")):
+            v = claude(QA, "ORIGINAL:\n%s\n\nSIMPLIFIED:\n%s" % (o, res[k]), os.environ.get("SV_EVAL_SONNET", "sonnet"))
             m = re.search(r"\{.*\}", v, re.S)
             try: res[k + "_qa"] = json.loads(m.group(0)) if m else {"pass": None}
             except Exception: res[k + "_qa"] = {"pass": None, "raw": v[:200]}

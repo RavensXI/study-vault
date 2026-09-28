@@ -17,7 +17,7 @@ const QA_SIMPLE = fs.readFileSync(path.join(__dirname, 'simplify-prompt-qa.txt')
 
 // Bump when the prompt changes: it is part of the cache key, so paragraphs are re-simplified with
 // the new prompt the next time a student asks, instead of serving the old rewrite for ever.
-const SIMPLE_VERSION = 'v2';
+const SIMPLE_VERSION = 'v3';   // v3 28 Sep: glosses are brackets of 8 words or fewer, never extra sentences
 
 function simpleSystem(presentTerms) {
   var terms = presentTerms && presentTerms.length
