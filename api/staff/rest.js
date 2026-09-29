@@ -1,14 +1,13 @@
 /**
- * Content reads for the password-gated admin pages (24 Sep 2026).
+ * Content reads for the admin pages (24 Sep 2026; two-factor 29 Sep 2026).
  *
  * The content tables are private to each school, and unpublished lessons are private to staff
- * (supabase/migrations/20260924210000_school_content_private.sql). The admin pages sign in with
- * the shared admin password, not a database account, so their reads come here: the password is
- * checked on the server and the read runs with the service key. js/content-reads.js sends a page's
- * content reads here automatically when an admin session is present.
+ * (supabase/migrations/20260924210000_school_content_private.sql). js/content-reads.js sends an
+ * admin page's content reads here with the admin's Bearer token; the read runs with the service
+ * key only when that token belongs to a platform_admin who passed the two-factor step
+ * (requireTeacher treats a password-only platform_admin as a teacher, so this answers 403).
  *
- * GET /api/staff/rest?p=<table>?<PostgREST query>     headers: X-Admin-Password (or a platform
- *                                                       admin's Bearer token)
+ * GET /api/staff/rest?p=<table>?<PostgREST query>     headers: Authorization: Bearer <token>
  * Read-only, and only the five content tables. Teachers never need this: they read with their
  * own sign-in, which the school rules already allow.
  */

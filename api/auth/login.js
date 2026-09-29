@@ -1,11 +1,9 @@
-const { supabase } = require('../pipeline/_lib/supabase');
-
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { password, code } = req.body || {};
+  const { code } = req.body || {};
 
   // --- Student school codes: RETIRED (1 Sep 2026) ---
   // School sign-in is SSO (Microsoft / Google) with a school-email fallback.
@@ -19,16 +17,10 @@ module.exports = async (req, res) => {
     });
   }
 
-  // --- Admin / teacher password login ---
-  if (!password) {
-    return res.status(400).json({ error: 'Password or school code required' });
-  }
-
-  if (process.env.ADMIN_PASSWORD && password === process.env.ADMIN_PASSWORD) {
-    return res.json({ role: 'admin' });
-  }
-
-  // TEACHER_PASSWORD retired 6 Sep 2026: teachers sign in with their own accounts.
-
-  return res.status(401).json({ error: 'Incorrect password' });
+  // --- Admin password login: RETIRED (29 Sep 2026) ---
+  // Admin is Tom's own account with a two-factor code (api/_lib/admin-auth.js); sign in at
+  // /teacher/login. TEACHER_PASSWORD was retired on 6 Sep 2026.
+  return res.status(410).json({
+    error: 'The admin password has been retired. Sign in with your account and code at /teacher/login.',
+  });
 };

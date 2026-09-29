@@ -11,7 +11,7 @@
  *   &force=1                                          ignore the 6-answer floor and rewrite this week's read
  *
  * Auth as weekly-digest.js: Vercel Cron sends Bearer CRON_SECRET; a person
- * sends X-Admin-Password. Fails closed without either.
+ * sends an admin's two-factor Bearer token. Fails closed without either.
  *
  * The read itself lives in api/teacher/_lib/weekly-read.js (packet, prompt,
  * cost cap, storage). This file only loops, emails and reports.
@@ -21,15 +21,16 @@ const { runRead, mondayOf } = require('../teacher/_lib/weekly-read');
 const { computeClassProgress, snapshotOf } = require('../teacher/class-progress');
 const { baseSubject } = require('../teacher/_lib/scope');
 const { sendEmail, escHtml } = require('../_lib/notify');
+const { adminFromRequest } = require('../_lib/admin-auth');
 
 const BASE = 'https://www.studyvault.co.uk';
 
-function authorize(req) {
+async function authorize(req) {
   const secret = process.env.CRON_SECRET;
   const auth = req.headers['authorization'] || '';
   if (secret && auth === 'Bearer ' + secret) return { ok: true, manual: false };
-  const pw = req.headers['x-admin-password'];
-  if (pw && process.env.ADMIN_PASSWORD && pw === process.env.ADMIN_PASSWORD) return { ok: true, manual: true };
+  // A manual run: Tom signed in with his two-factor code (api/_lib/admin-auth.js).
+  if (await adminFromRequest(req)) return { ok: true, manual: true };
   return { ok: false };
 }
 
@@ -63,7 +64,7 @@ async function emailRead(cls, read) {
 }
 
 module.exports = async function handler(req, res) {
-  const a = authorize(req);
+  const a = await authorize(req);
   if (!a.ok) return res.status(401).json({ error: 'Unauthorised' });
   const q = req.query || {};
   const isMonday = new Date().getUTCDay() === 1;

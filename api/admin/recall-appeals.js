@@ -1,4 +1,5 @@
 const { supabase } = require('../pipeline/_lib/supabase');
+const { requireAdmin } = require('../_lib/admin-auth');
 
 /**
  * Typed-recall appeals: when a student presses "I think I was right?" on a card the
@@ -9,13 +10,9 @@ const { supabase } = require('../pipeline/_lib/supabase');
  *
  * GET ?kind=all|recall|term|definition|cloze&limit=100
  */
-function isAuthed(req) {
-  const adminPw = req.headers['x-admin-password'];
-  return adminPw && process.env.ADMIN_PASSWORD && adminPw === process.env.ADMIN_PASSWORD;
-}
 
 module.exports = async (req, res) => {
-  if (!isAuthed(req)) return res.status(401).json({ error: 'Unauthorised' });
+  if (!(await requireAdmin(req, res))) return;   // Tom's account + two-factor code (api/_lib/admin-auth.js)
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
   const kind = String(req.query.kind || 'all');
   const limit = Math.min(parseInt(req.query.limit, 10) || 100, 500);

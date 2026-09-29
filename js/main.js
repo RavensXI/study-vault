@@ -4114,26 +4114,14 @@ pins.forEach(function (p) {
             html = html.replace(new RegExp('(data-cid="' + cid + '"[^>]*data-t=")[^"]*(")'), '$1' + times[cid] + '$2');
           });
           var headers = { 'Content-Type': 'application/json' };
-          if (sess.pw) headers['X-Admin-Password'] = sess.pw;
+          // The signed-in staff account's token (admin needs the two-factor step; 29 Sep 2026).
+          try { var tk = (JSON.parse(localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token')) || {}).access_token; if (tk) headers['Authorization'] = 'Bearer ' + tk; } catch (e8) {}
           fetch('/api/pipeline/update-lesson', { method: 'POST', headers: headers,
             body: JSON.stringify({ lesson_id: lessonId, content_html: html }) })
             .then(function (resp) {
               if (resp.ok) { status.textContent = 'saved'; return; }
               navigator.clipboard.writeText(JSON.stringify(times));
-              if (!bar.querySelector('.sv-ap-pwrow')) {
-                var rowEl = document.createElement('span');
-                rowEl.className = 'sv-ap-tools sv-ap-pwrow';
-                rowEl.innerHTML = '<em>admin password:</em>' +
-                  '<input type="password" class="sv-ap-pw" style="width:110px">' +
-                  '<button type="button" class="sv-ap-pwgo">retry save</button>';
-                bar.appendChild(rowEl);
-                rowEl.querySelector('.sv-ap-pwgo').addEventListener('click', function () {
-                  sess.pw = rowEl.querySelector('.sv-ap-pw').value;
-                  try { sessionStorage.setItem('studyvault-auth', JSON.stringify(sess)); } catch (e9) {}
-                  save.click();
-                });
-              }
-              status.textContent = 'save blocked - enter the admin password and retry (times copied as backup)';
+              status.innerHTML = 'save blocked - <a href="/teacher/login?next=' + encodeURIComponent(location.pathname) + '">sign in again</a> and retry (times copied as backup)';
             });
         });
       });
@@ -4341,26 +4329,14 @@ allPins.forEach(function (p) {
           html2 = html2.replace(new RegExp('(data-cid="' + cid + '"[^>]*data-t=")[^"]*(")'), '$1' + times[cid] + '$2');
         });
         var headers = { 'Content-Type': 'application/json' };
-        if (sess.pw) headers['X-Admin-Password'] = sess.pw;
+        // The signed-in staff account's token (admin needs the two-factor step; 29 Sep 2026).
+        try { var tk = (JSON.parse(localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token')) || {}).access_token; if (tk) headers['Authorization'] = 'Bearer ' + tk; } catch (e8) {}
         fetch('/api/pipeline/update-lesson', { method: 'POST', headers: headers,
           body: JSON.stringify({ lesson_id: lessonId, content_html: html2 }) })
           .then(function (resp) {
             if (resp.ok) { status.textContent = 'saved'; return; }
             navigator.clipboard.writeText(JSON.stringify(times));
-            if (!bar.querySelector('.sv-ap-pwrow')) {
-              var rowEl = document.createElement('span');
-              rowEl.className = 'sv-ap-tools sv-ap-pwrow';
-              rowEl.innerHTML = '<em>admin password:</em>' +
-                '<input type="password" class="sv-ap-pw" style="width:110px">' +
-                '<button type="button" class="sv-ap-pwgo">retry save</button>';
-              bar.appendChild(rowEl);
-              rowEl.querySelector('.sv-ap-pwgo').addEventListener('click', function () {
-                sess.pw = rowEl.querySelector('.sv-ap-pw').value;
-                try { sessionStorage.setItem('studyvault-auth', JSON.stringify(sess)); } catch (e9) {}
-                save.click();
-              });
-            }
-            status.textContent = 'save blocked - enter the admin password and retry (times copied as backup)';
+            status.innerHTML = 'save blocked - <a href="/teacher/login?next=' + encodeURIComponent(location.pathname) + '">sign in again</a> and retry (times copied as backup)';
           });
       });
     });

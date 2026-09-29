@@ -5,8 +5,8 @@
    Many pages read these tables with plain fetches that carry only the public key, which the
    database now treats as a signed-out visitor. This puts the right identity on those reads:
 
-   * an admin session (shared admin password, which the database cannot see): content reads go
-     to /api/staff/rest, where the password is checked on the server;
+   * an admin session (Tom's account after the two-factor step, 29 Sep 2026): content reads go
+     to /api/staff/rest with the admin's token, which the server checks (api/_lib/admin-auth.js);
    * a signed-in user: a content read that carries no sign-in gets the user's token, so a pupil
      sees their school's lessons; if the token has expired the read is retried as a visitor,
      which still returns the free tier.
@@ -22,10 +22,17 @@
   var TOKEN_KEY = 'sb-baipckgywpnwapobwtsy-auth-token';
   var nativeFetch = window.fetch.bind(window);
 
-  var adminPw = null;
+  var isAdmin = false;
+  // The retired shared admin password (29 Sep 2026): erase any copy an older build stored.
+  try {
+    [sessionStorage, localStorage].forEach(function (st) {
+      var o = JSON.parse(st.getItem('studyvault-auth') || 'null');
+      if (o && o.pw) st.removeItem('studyvault-auth');
+    });
+  } catch (e) {}
   try {
     var s = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
-    if (s && s.pw && s.role === 'admin') adminPw = s.pw;
+    isAdmin = !!(s && s.role === 'admin');
   } catch (e) {}
 
   function userToken() {
@@ -42,11 +49,18 @@
       }
       var from = new Headers((init && init.headers) || (input && input.headers) || {});
 
-      if (adminPw) {
-        var h = { 'X-Admin-Password': adminPw };
-        PASS.forEach(function (k) { var v = from.get(k); if (v) h[k] = v; });
-        return nativeFetch('/api/staff/rest?p=' + encodeURIComponent(url.slice(BASE.length)),
-          { method: method, headers: h, signal: init && init.signal });
+      if (isAdmin && userToken()) {
+        var staffRead = function () {
+          var h = { 'Authorization': 'Bearer ' + userToken() };
+          PASS.forEach(function (k) { var v = from.get(k); if (v) h[k] = v; });
+          return nativeFetch('/api/staff/rest?p=' + encodeURIComponent(url.slice(BASE.length)),
+            { method: method, headers: h, signal: init && init.signal });
+        };
+        // An expired token (a page opened the next day): supabase-js on the page refreshes the
+        // stored one within a moment, so wait briefly and try once more.
+        return staffRead().then(function (r) {
+          return r.status !== 401 ? r : new Promise(function (ok) { setTimeout(ok, 1500); }).then(staffRead);
+        });
       }
 
       // Supabase clients already sign their requests; plain fetches carry only the apikey.

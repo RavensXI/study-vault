@@ -9,10 +9,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/brand.css">
-  <script src="/js/auth-gate.js" data-role="admin,teacher"></script>
-  <script src="/js/teacher-setup.js" defer></script>
   <script src="/js/content-reads.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/js/auth-gate.js" data-role="admin,teacher"></script>
+  <script src="/js/teacher-setup.js" defer></script>
   <style>
     .qa-layout { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
     .qa-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
@@ -137,6 +137,7 @@
             <a href="/admin/requests">Requests</a>
             <a href="/admin/bugs">Bugs</a>
             <a href="/admin/schools">Schools</a>
+            <a href="/admin/security">Security</a>
           </div>
         </div>
       </nav>
@@ -229,14 +230,7 @@
 
     function authHeaders() {
       var h = { 'Content-Type': 'application/json' };
-      if (accessToken) h['Authorization'] = 'Bearer ' + accessToken;
-      else {
-        // Fall back to admin/teacher password from auth-gate session
-        try {
-          var session = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
-          if (session && session.pw) h['X-Admin-Password'] = session.pw;
-        } catch (e) {}
-      }
+      // js/auth-gate.js adds the signed-in user's current token (fresh, not the one read at load)
       return h;
     }
 

@@ -1,11 +1,16 @@
 const { supabase } = require('./supabase');
+const { claims } = require('../../_lib/admin-auth');
 
 /**
- * Verify the request has a valid Supabase JWT or the admin/teacher password.
- * Returns { user, profile } on success, or sends an error response.
+ * Verify the request has a valid Supabase JWT for a teacher, school admin or platform admin.
+ * Returns { user, profile } on success, or sends a 401 and returns null.
+ *
+ * Two-factor rule (29 Sep 2026): a platform_admin whose session has NOT passed the two-factor
+ * step (token `aal` is not 'aal2') is treated as a teacher here: their own classes and
+ * subjects still work, but no admin power (every other school, the free tier, staff reads).
+ * The shared ADMIN_PASSWORD is no longer accepted (api/_lib/admin-auth.js).
  */
 async function requireTeacher(req, res) {
-  // 1. Try Supabase JWT (SSO users)
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.replace('Bearer ', '');
@@ -18,29 +23,11 @@ async function requireTeacher(req, res) {
         .single();
 
       if (profile && ['teacher', 'school_admin', 'platform_admin'].includes(profile.role)) {
+        if (profile.role === 'platform_admin' && claims(token).aal !== 'aal2') {
+          return { user, profile: Object.assign({}, profile, { role: 'teacher' }), mfaPending: true };
+        }
         return { user, profile };
       }
-    }
-  }
-
-  // 2. Try admin/teacher password (header or body)
-  const adminPw = req.headers['x-admin-password'] || (req.body && req.body._admin_password);
-  if (adminPw) {
-    let role = null;
-    if (process.env.ADMIN_PASSWORD && adminPw === process.env.ADMIN_PASSWORD) role = 'platform_admin';
-    // TEACHER_PASSWORD retired 6 Sep 2026: teachers sign in with their own accounts.
-
-    if (role) {
-      // Look up the school_id for Unity College (default school for admin/teacher)
-      const { data: school } = await supabase
-        .from('schools')
-        .select('id')
-        .eq('slug', 'unity-college')
-        .single();
-      return {
-        user: { id: role },
-        profile: { id: role, full_name: role === 'platform_admin' ? 'Admin' : 'Teacher', role, school_id: school?.id || null }
-      };
     }
   }
 

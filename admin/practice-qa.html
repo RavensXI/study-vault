@@ -235,6 +235,7 @@
             <a href="/admin/requests">Requests</a>
             <a href="/admin/bugs">Bugs</a>
             <a href="/admin/schools">Schools</a>
+            <a href="/admin/security">Security</a>
           </div>
         </div>
       </nav>
@@ -318,9 +319,7 @@
     // ---- Auth header ----
     function authHeaders() {
       try {
-        var session = JSON.parse(sessionStorage.getItem('studyvault-auth')) ||
-                      JSON.parse(localStorage.getItem('studyvault-auth')) || {};
-        return { 'Content-Type': 'application/json', 'X-Admin-Password': session.pw || '' };
+        return { 'Content-Type': 'application/json' };   // js/auth-gate.js adds the admin's sign-in token
       } catch (e) {
         return { 'Content-Type': 'application/json' };
       }

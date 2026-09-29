@@ -182,18 +182,17 @@
   function shortQ(q) { return String(q || '').length > 90 ? String(q).slice(0, 87) + '…' : q; }
 
   /* ---- credentials + api (unchanged from the previous screen) ---- */
-  var token = null, pw = null;
+  var token = null;
   async function credentials() {
     try { var sb = window.supabase.createClient(SUPA, ANON); var s = await sb.auth.getSession(); if (s && s.data && s.data.session) token = s.data.session.access_token; } catch (e) {}
     if (!token) { try { var raw = localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token'); if (raw) token = JSON.parse(raw).access_token || null; } catch (e) {} }
-    try { var saved = JSON.parse(sessionStorage.getItem('studyvault-auth') || localStorage.getItem('studyvault-auth') || 'null'); if (saved && saved.pw) pw = saved.pw; } catch (e) {}
-    return !!(token || pw);
+    return !!token;
   }
   async function api(path, body) {
     var headers = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = 'Bearer ' + token; else if (pw) headers['X-Admin-Password'] = pw;
+    // js/auth-gate.js adds the current (refreshed) token; the one read at load can expire.
     var opts = { headers: headers };
-    if (body !== undefined) { opts.method = 'POST'; if (pw && !token) body._admin_password = pw; opts.body = JSON.stringify(body); }
+    if (body !== undefined) { opts.method = 'POST'; opts.body = JSON.stringify(body); }
     var r = await fetch(path, opts); var d = await r.json();
     if (r.status === 401) { window.location.replace('/teacher/login'); throw new Error('Sign in to see your classes.'); }
     if (!r.ok) throw new Error(d.error || d.detail || ('Request failed (' + r.status + ')'));

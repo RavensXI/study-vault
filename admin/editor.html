@@ -232,6 +232,7 @@
             <a href="/admin/requests">Requests</a>
             <a href="/admin/bugs">Bugs</a>
             <a href="/admin/schools">Schools</a>
+            <a href="/admin/security">Security</a>
           </div>
         </div>
       </nav>
@@ -423,14 +424,7 @@
 
     function authHeaders() {
       var h = { 'Content-Type': 'application/json' };
-      if (accessToken) h['Authorization'] = 'Bearer ' + accessToken;
-      else {
-        // Fall back to admin/teacher password from auth-gate session
-        try {
-          var session = JSON.parse(sessionStorage.getItem('studyvault-auth') || 'null') || JSON.parse(localStorage.getItem('studyvault-auth') || 'null');
-          if (session && session.pw) h['X-Admin-Password'] = session.pw;
-        } catch (e) {}
-      }
+      // js/auth-gate.js adds the signed-in user's current token (fresh, not the one read at load)
       return h;
     }
 
