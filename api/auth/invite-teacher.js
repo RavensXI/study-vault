@@ -6,42 +6,15 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-/**
- * Check if the request is from an admin.
- * Accepts either ADMIN_PASSWORD header or a Supabase JWT for a platform_admin user.
- */
-async function requireAdmin(req) {
-  // 1. Check X-Admin-Password header
-  const adminPw = req.headers['x-admin-password'];
-  if (adminPw && process.env.ADMIN_PASSWORD && adminPw === process.env.ADMIN_PASSWORD) {
-    return true;
-  }
-
-  // 2. Check Supabase JWT for platform_admin role
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-    if (!error && user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-      if (profile && profile.role === 'platform_admin') {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
+// Admin only: Tom's account after the two-factor step (api/_lib/admin-auth.js). The shared
+// ADMIN_PASSWORD and a password-only admin session no longer work here.
+const { adminFromRequest } = require('../_lib/admin-auth');
 
 module.exports = async (req, res) => {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Password');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   if (req.method !== 'POST') {
@@ -49,9 +22,9 @@ module.exports = async (req, res) => {
   }
 
   // Auth check
-  const isAdmin = await requireAdmin(req);
+  const isAdmin = await adminFromRequest(req);
   if (!isAdmin) {
-    return res.status(401).json({ error: 'Admin authentication required' });
+    return res.status(401).json({ error: 'Admin sign-in with a two-factor code is required.', mfa: true });
   }
 
   const { email, school_id, subject_ids } = req.body || {};

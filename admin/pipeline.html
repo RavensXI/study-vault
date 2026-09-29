@@ -12,9 +12,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/teacher-shell.css">
   <script src="/js/teacher-shell.js" defer></script>
-  <script src="/js/auth-gate.js" data-role="admin,teacher"></script>
   <script src="/js/content-reads.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/js/auth-gate.js" data-role="admin,teacher"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script>
     // Lazy-load PDF.js only when a PDF file is encountered
@@ -267,6 +267,7 @@
             <a href="/admin/requests">Requests</a>
             <a href="/admin/bugs">Bugs</a>
             <a href="/admin/schools">Schools</a>
+            <a href="/admin/security">Security</a>
           </div>
         </div>
       </nav>
@@ -488,32 +489,18 @@
     }
 
     var accessToken = null;
-    var adminPassword = null;
     var currentJob = null;
     var pollTimer = null;
     var allSchools = [];
 
     // ---- Auth ----
     async function init() {
-      // 1. Try Supabase SSO session
+      // The signed-in session (js/auth-gate.js has already confirmed it)
       var result = await sb.auth.getSession();
-      if (result.data.session) {
-        accessToken = result.data.session.access_token;
-      } else {
-        // 2. Try admin/teacher password from sessionStorage (set by auth-gate.js)
-        try {
-          var stored = sessionStorage.getItem('studyvault-auth');
-          if (stored) {
-            var s = JSON.parse(stored);
-            if (s && s.pw) {
-              adminPassword = s.pw;
-            }
-          }
-        } catch (e) {}
-      }
+      if (result.data.session) accessToken = result.data.session.access_token;
 
-      if (!accessToken && !adminPassword) {
-        contentEl.innerHTML = '<div class="error-msg">Not logged in. <a href="/">Go to login</a> first, then come back here.</div>';
+      if (!accessToken) {
+        contentEl.innerHTML = '<div class="error-msg">Not signed in. <a href="/teacher/login?next=/admin/pipeline">Sign in</a>, then come back here.</div>';
         return;
       }
 
@@ -630,19 +617,11 @@
 
     // ---- API helper ----
     async function apiCall(endpoint, body) {
+      // js/auth-gate.js adds the signed-in user's current token to every /api/ call.
       var headers = { 'Content-Type': 'application/json' };
-      if (accessToken) {
-        headers['Authorization'] = 'Bearer ' + accessToken;
-      } else if (adminPassword) {
-        headers['X-Admin-Password'] = adminPassword;
-      }
       var opts = { headers: headers };
       if (body !== undefined) {
         opts.method = 'POST';
-        // Include password in body as fallback (header may be stripped by proxy)
-        if (adminPassword && !accessToken) {
-          body._admin_password = adminPassword;
-        }
         opts.body = JSON.stringify(body);
       }
       var resp = await fetch(endpoint, opts);

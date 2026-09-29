@@ -10,7 +10,7 @@
  * Auth:
  *   - Vercel Cron: set CRON_SECRET in env; Vercel then sends
  *     `Authorization: Bearer <CRON_SECRET>` automatically.
- *   - Manual test: GET /api/cron/weekly-digest with header X-Admin-Password.
+ *   - Manual test: GET /api/cron/weekly-digest with an admin's two-factor Bearer token.
  *
  * Reuses api/_lib/notify.js (Resend). Env: RESEND_API_KEY, NOTIFY_TO/FROM.
  */
@@ -18,15 +18,16 @@
 const { supabase } = require('../pipeline/_lib/supabase');
 const { notifyAdmin, escHtml } = require('../_lib/notify');
 const { deleteScreenshot } = require('../_lib/bug-screenshot');
+const { adminFromRequest } = require('../_lib/admin-auth');
 
 const BASE = 'https://www.studyvault.co.uk';
 
-function authorize(req) {
+async function authorize(req) {
   const secret = process.env.CRON_SECRET;
   const auth = req.headers['authorization'] || '';
   if (secret && auth === 'Bearer ' + secret) return { ok: true, manual: false };
-  const pw = req.headers['x-admin-password'];
-  if (pw && process.env.ADMIN_PASSWORD && pw === process.env.ADMIN_PASSWORD) return { ok: true, manual: true };
+  // A manual run: Tom signed in with his two-factor code (api/_lib/admin-auth.js).
+  if (await adminFromRequest(req)) return { ok: true, manual: true };
   // Fail closed: if CRON_SECRET isn't configured, nobody gets in (set it in
   // Vercel env — Vercel Cron then sends it automatically).
   return { ok: false };
@@ -68,7 +69,7 @@ function listHtml(items) {
 }
 
 module.exports = async (req, res) => {
-  const a = authorize(req);
+  const a = await authorize(req);
   if (!a.ok) return res.status(401).json({ error: 'Unauthorised' });
 
   // Daily housekeeping, before the Monday-only gate: safeguarding concerns are

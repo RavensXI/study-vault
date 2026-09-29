@@ -11,20 +11,17 @@
  *   DELETE { id }                             — purge; regenerates fresh on
  *                                               the next student view
  *
- * Auth: X-Admin-Password header === ADMIN_PASSWORD (mirrors bug-reports.js).
+ * Auth: an admin who passed the two-factor step (api/_lib/admin-auth.js).
  */
 
 const { supabase } = require('../pipeline/_lib/supabase');
+const { requireAdmin } = require('../_lib/admin-auth');
 
 const ALLOWED_STATUS = ['pass', 'pending_review'];
 
-function isAuthed(req) {
-  const adminPw = req.headers['x-admin-password'];
-  return adminPw && process.env.ADMIN_PASSWORD && adminPw === process.env.ADMIN_PASSWORD;
-}
 
 module.exports = async (req, res) => {
-  if (!isAuthed(req)) return res.status(401).json({ error: 'Unauthorised' });
+  if (!(await requireAdmin(req, res))) return;   // Tom's account + two-factor code (api/_lib/admin-auth.js)
 
   if (req.method === 'GET') {
     const status = req.query.status || 'pending_review';

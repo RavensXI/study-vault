@@ -1,14 +1,11 @@
 const { supabase } = require('../pipeline/_lib/supabase');
+const { requireAdmin } = require('../_lib/admin-auth');
 
 const ALLOWED_STATUS = ['pending', 'building', 'live', 'rejected'];
 
-function isAuthed(req) {
-  const adminPw = req.headers['x-admin-password'];
-  return adminPw && process.env.ADMIN_PASSWORD && adminPw === process.env.ADMIN_PASSWORD;
-}
 
 module.exports = async (req, res) => {
-  if (!isAuthed(req)) return res.status(401).json({ error: 'Unauthorised' });
+  if (!(await requireAdmin(req, res))) return;   // Tom's account + two-factor code (api/_lib/admin-auth.js)
 
   if (req.method === 'GET') {
     const status = req.query.status || '';
