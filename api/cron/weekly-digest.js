@@ -17,6 +17,7 @@
 
 const { supabase } = require('../pipeline/_lib/supabase');
 const { notifyAdmin, escHtml } = require('../_lib/notify');
+const { deleteScreenshot } = require('../_lib/bug-screenshot');
 
 const BASE = 'https://www.studyvault.co.uk';
 
@@ -77,6 +78,16 @@ module.exports = async (req, res) => {
     const { error: sgErr } = await supabase.from('safeguarding_alerts').delete().lt('delete_after', new Date().toISOString());
     if (sgErr) console.error('[weekly-digest] safeguarding retention failed:', sgErr.message);
   } catch (e) { console.error('[weekly-digest] safeguarding retention failed:', e.message); }
+
+  // Bug reports: a closed report's screenshot goes when it is closed (api/admin/bug-reports.js);
+  // this catches any that failed then, and deletes closed reports 30 days after closing.
+  try {
+    const { data: closed } = await supabase.from('bug_reports').select('id, screenshot_url')
+      .in('status', ['fixed', 'wontfix']).not('screenshot_url', 'is', null).limit(200);
+    for (const r of closed || []) if (await deleteScreenshot(r.screenshot_url)) await supabase.from('bug_reports').update({ screenshot_url: null }).eq('id', r.id);
+    const { error: brErr } = await supabase.from('bug_reports').delete().lt('delete_after', new Date().toISOString());
+    if (brErr) console.error('[weekly-digest] bug-report retention failed:', brErr.message);
+  } catch (e) { console.error('[weekly-digest] bug-report retention failed:', e.message); }
 
   // Weekly cadence: only send on Mondays unless manually triggered.
   const isMonday = new Date().getUTCDay() === 1;

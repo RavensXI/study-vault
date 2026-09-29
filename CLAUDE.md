@@ -156,7 +156,7 @@ R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), video on R2
     misconceptions; behaviour aggregate-only; never study habits; NO
     work-setting/assignments/due dates (vision boundary).
   - **Admin:** `ADMIN_PASSWORD` via `js/auth-gate.js`.
-- **AI routes:** all 5 run on Bedrock **eu-west-2 (London)** — verify with
+- **AI routes:** all 5 run on Bedrock **eu-west-2 (London) through the `eu.` cross-region profile, so a request may be served from any AWS EU region** — public wording is "UK and EU", never "London only" (Tom, 29 Sep 2026) — verify with
   `servedBy` on `/api/ai-mark`. Marking is marks-routed (Haiku ≤8, Sonnet >8;
   essays 2000 tokens). ⚠ open: US fallback must fail closed before any DPA
   claim.

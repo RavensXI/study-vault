@@ -1,4 +1,5 @@
 const { supabase } = require('../pipeline/_lib/supabase');
+const { deleteScreenshot, deleteAfter } = require('../_lib/bug-screenshot');
 
 const ALLOWED_STATUS = ['open', 'investigating', 'fixed', 'wontfix'];
 
@@ -38,6 +39,12 @@ module.exports = async (req, res) => {
     if (Object.keys(update).length === 0) {
       return res.status(400).json({ error: 'Nothing to update' });
     }
+    // Closing a report deletes its screenshot now and the report 30 days later; reopening keeps it.
+    if (status === 'fixed' || status === 'wontfix') {
+      const { data: row } = await supabase.from('bug_reports').select('screenshot_url').eq('id', id).maybeSingle();
+      if (row && row.screenshot_url && await deleteScreenshot(row.screenshot_url)) update.screenshot_url = null;
+      update.delete_after = deleteAfter();
+    } else if (status) update.delete_after = null;
     const { error } = await supabase.from('bug_reports').update(update).eq('id', id);
     if (error) return res.status(500).json({ error: error.message });
     return res.json({ ok: true });
@@ -46,6 +53,8 @@ module.exports = async (req, res) => {
   if (req.method === 'DELETE') {
     const { id } = req.body || {};
     if (!id) return res.status(400).json({ error: 'id required' });
+    const { data: row } = await supabase.from('bug_reports').select('screenshot_url').eq('id', id).maybeSingle();
+    if (row && row.screenshot_url) await deleteScreenshot(row.screenshot_url);
     const { error } = await supabase.from('bug_reports').delete().eq('id', id);
     if (error) return res.status(500).json({ error: error.message });
     return res.json({ ok: true });

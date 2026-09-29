@@ -107,7 +107,7 @@
     <section class="buildbar" id="buildbar" hidden>
       <div>
         <h3>Build lessons from your own resources</h3>
-        <p>Upload your schemes of work and we build lessons around them. Only the text is read, it is processed in the UK, and it is deleted once your lessons go live.</p>
+        <p>Upload your schemes of work and we build lessons around them. Only the text is read, it is never used to train AI, and it is deleted once your lessons go live.</p>
       </div>
       <a class="btn ghost" href="/teacher/upload">Start a build &rarr;</a>
     </section>
@@ -256,7 +256,7 @@
     var week = r ? new Date(r.week + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) : '';
     if (!r) return '<section class="card read"><div class="panel-h"><h2>This week&rsquo;s summary</h2><span class="n">Mondays</span></div><div class="read-b"><p class="thin">Every Monday morning, once the class has written 6 or more marked answers in a week, a short summary of those answers appears here and in your inbox: what keeps coming up, one thing to show them, which pupils to talk to, and what the quizzes show.</p></div></section>';
     return '<section class="card read"><div class="panel-h"><h2>This week&rsquo;s summary</h2><span class="n">week of ' + esc(week) + '</span></div><div class="read-b">' + mdLite(r.read_md) + '</div>' +
-      '<div class="panel-f"><span class="count">Written by AI from ' + r.answers + ' marked answers by ' + r.pupils + ' pupils, and the quiz questions they got wrong. Check it before you act on it. Processed in the UK.</span></div></section>';
+      '<div class="panel-f"><span class="count">Written by AI from ' + r.answers + ' marked answers by ' + r.pupils + ' pupils, and the quiz questions they got wrong. Check it before you act on it. Processed in the UK and EU.</span></div></section>';
   }
   function panelsHtml(d) {
     var items = (d.missedItems || []).slice(0, 3), cold = d.goingCold || [], words = d.haveAWord || [], lw = d.lastWeek;
@@ -673,7 +673,7 @@
     try {
       var d = await api('/api/teacher/pack-summary', { class_id: classId, student_id: studentId });
       if (box) { box.classList.remove('thin'); box.textContent = d.draft; }
-      if (foot) foot.textContent = d.generated ? 'Written by AI from the evidence above · check it before you say it · processed in the UK (' + d.servedBy + ')' : 'Not enough evidence to draft from.';
+      if (foot) foot.textContent = d.generated ? 'Written by AI from the evidence above · check it before you say it · processed in the UK and EU (' + d.servedBy + ')' : 'Not enough evidence to draft from.';
     } catch (e) { if (box) { box.classList.add('thin'); box.textContent = 'No draft: ' + e.message; } if (foot) foot.textContent = 'The figures above are unaffected. They come straight from the work.'; }
   }
 

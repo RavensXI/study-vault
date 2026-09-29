@@ -1,5 +1,6 @@
 /**
- * Monday morning: write each class's weekly read and email it to the teacher.
+ * Monday morning: write each class's weekly read and email the teacher a link to it (the email
+ * carries no summary text or pupil names; the teacher reads it signed in).
  *
  * Scheduled daily via vercel.json (Hobby-safe); it only runs the class loop on
  * Mondays (UTC) unless triggered by hand. Manual triggers, with the admin
@@ -32,21 +33,6 @@ function authorize(req) {
   return { ok: false };
 }
 
-/* Markdown-lite -> email HTML: **bold** headings, "- " bullets, paragraphs */
-function mdToHtml(md) {
-  const inline = function (s) { return escHtml(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>'); };
-  let out = '', para = [], list = [];
-  const flushP = function () { if (para.length) { out += '<p style="margin:0 0 1rem;line-height:1.55">' + inline(para.join(' ')) + '</p>'; para = []; } };
-  const flushL = function () { if (list.length) { out += '<ul style="margin:0 0 1rem;padding-left:1.2rem">' + list.map(function (l) { return '<li style="margin:.2rem 0">' + inline(l) + '</li>'; }).join('') + '</ul>'; list = []; } };
-  String(md || '').split('\n').forEach(function (line) {
-    if (/^\s*[-•]\s+/.test(line)) { flushP(); list.push(line.replace(/^\s*[-•]\s+/, '')); }
-    else if (!line.trim()) { flushP(); flushL(); }
-    else { flushL(); para.push(line.trim()); }
-  });
-  flushP(); flushL();
-  return out;
-}
-
 /* the Monday snapshot: what the class screen shows today, kept so next Monday can say what moved */
 async function takeSnapshot(cls) {
   let subject = null, base = '';
@@ -63,13 +49,14 @@ async function emailRead(cls, read) {
   if (!t || !t.email) return { skipped: 'no email' };
   const link = BASE + '/teacher/classes';
   const subject = cls.name + ': this week’s summary';
+  // A notice with a link, never the summary itself (Tom, 29 Sep 2026): the summary can name
+  // pupils, and email passes through Resend (US). The teacher reads it signed in, on the site.
   const html = '<div style="font-family:Georgia,serif;color:#26231e;max-width:640px;margin:0 auto;padding:8px 4px">' +
     '<p style="font-family:Helvetica,Arial,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#84806f;margin:0 0 .6rem">StudyVault &middot; ' + escHtml(cls.name) + (cls.subjectName ? ' &middot; ' + escHtml(cls.subjectName) : '') + '</p>' +
-    '<h1 style="font-size:20px;margin:0 0 1rem">This week&rsquo;s summary</h1>' +
-    mdToHtml(read.read_md) +
-    '<p style="font-family:Helvetica,Arial,sans-serif;font-size:12px;color:#84806f;border-top:1px solid #e4dfd2;padding-top:.8rem;margin-top:1.2rem">Written by AI from ' + read.answers + ' marked answers by ' + read.pupils + ' pupils this week, and the quiz questions they got wrong. Check it before you act on it. Processed in the UK. ' +
-    '<a href="' + link + '" style="color:#c06325">Open the class &rarr;</a></p></div>';
-  const text = 'This week’s summary for ' + cls.name + '\n\n' + read.read_md + '\n\nWritten by AI from ' + read.answers + ' marked answers by ' + read.pupils + ' pupils. Check it before you act on it. ' + link;
+    '<h1 style="font-size:20px;margin:0 0 1rem">This week&rsquo;s summary is ready</h1>' +
+    '<p style="margin:0 0 1.2rem">A new summary of how ' + escHtml(cls.name) + ' got on this week is waiting on your class page.</p>' +
+    '<p style="margin:0"><a href="' + link + '" style="font-family:Helvetica,Arial,sans-serif;display:inline-block;background:#c06325;color:#fff;text-decoration:none;padding:.6rem 1rem;border-radius:10px">Read the summary &rarr;</a></p></div>';
+  const text = 'This week’s summary for ' + cls.name + ' is ready on your class page: ' + link;
   const r = await sendEmail({ to: t.email, subject: subject, html: html, text: text });
   if (r && r.ok) await supabase.from('class_reads').update({ emailed_at: new Date().toISOString() }).eq('id', read.id);
   return r;
