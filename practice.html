@@ -6068,7 +6068,7 @@
           return;
         }
         var hintEl = row.querySelector('.guided-hint');
-        if (Math.abs(v - st.answer) < 0.005) {
+        if (svStepOk(v, st)) {
           input.classList.remove('guided-wrong');
           lockStep('guided-right');
           row.querySelector('.guided-tick').style.display = '';
@@ -6105,6 +6105,16 @@
       setTimeout(function() { input.focus({ preventScroll: false }); }, 120);
     }
 
+    // A typed step is exact unless it carries its own `tolerance`. A six-figure grid reference
+    // with a tolerance is checked like the main answer: within one tenth on each half.
+    function svStepOk(v, st) {
+      var tol = (typeof st.tolerance === 'number') ? st.tolerance : 0;
+      if (tol > 0 && String(Math.round(st.answer)).length === 6 && String(Math.round(v)).length === 6) {
+        var gs = String(Math.round(v)), es = String(Math.round(st.answer));
+        return Math.abs(+gs.slice(0, 3) - +es.slice(0, 3)) <= 1 && Math.abs(+gs.slice(3) - +es.slice(3)) <= 1;
+      }
+      return Math.abs(v - st.answer) < tol + 0.005;
+    }
     function wireGuidedChoices(row, st) {
       var btns = row.querySelectorAll('.guided-choice');
       var hintEl = row.querySelector('.guided-hint');
