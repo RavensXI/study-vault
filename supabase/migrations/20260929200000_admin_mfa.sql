@@ -9,6 +9,13 @@
 -- 20260929200000_admin_mfa.rollback.sql.
 
 BEGIN;
+-- Give up rather than queue: if a lock is not free within 3 s (a long query is reading classes
+-- or class_members), abort, and run it again later. Queuing behind a reader would block every
+-- later query on those tables until the reader finished, which is how a lock stalls a live
+-- database. The statements themselves take milliseconds. Run it on its own: nothing else in
+-- the transaction, never a test query inside it.
+SET LOCAL lock_timeout = '3s';
+SET LOCAL statement_timeout = '15s';
 
 CREATE OR REPLACE FUNCTION public.session_is_aal2()
 RETURNS boolean STABLE

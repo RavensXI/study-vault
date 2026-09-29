@@ -51,6 +51,15 @@
     return wrap;
   }
 
+  /* The QR arrives as an SVG behind a "data:image/svg+xml;utf-8," prefix (supabase-js adds it),
+     with the SVG unencoded. A '#' in it (a colour) ends a data address early and the image
+     breaks, so take the SVG itself and encode it properly. */
+  function qrSrc(q) {
+    q = String(q || '');
+    var i = q.search(/<(\?xml|svg)/);
+    return i < 0 ? q : 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(q.slice(i));
+  }
+
   function codeError(e) {
     var m = (e && e.message) || '';
     return /invalid|expired|code/i.test(m) ? 'That code did not work. Wait for the next code and try again.' : (m || 'That code did not work.');
@@ -84,9 +93,9 @@
         '<li>Open Microsoft Authenticator and choose <strong>Add account</strong>, then <strong>Other account</strong>.</li>' +
         '<li>Scan this QR code.</li>' +
       '</ol>' +
-      '<img class="sv-mfa-qr" alt="QR code for your authenticator app" src="' + esc(d.totp.qr_code) + '">' +
+      '<img class="sv-mfa-qr" alt="QR code for your authenticator app" src="' + esc(qrSrc(d.totp.qr_code)) + '">' +
       '<details class="sv-mfa-manual"><summary>Cannot scan it?</summary>' +
-        '<p>Choose <strong>Enter code manually</strong> in the app and type this key:</p>' +
+        '<p>In the app, choose <strong>Or enter code manually</strong> and type this key:</p>' +
         '<code class="sv-mfa-secret">' + esc(d.totp.secret.replace(/(.{4})/g, '$1 ').trim()) + '</code>' +
       '</details>' +
       '<ol class="sv-mfa-steps" start="3"><li>Type the 6-digit code the app shows.</li></ol>';
@@ -106,7 +115,8 @@
     '.sv-mfa-code{letter-spacing:.3em;font-size:1.25rem;text-align:center;font-variant-numeric:tabular-nums}' +
     '.sv-mfa-steps{margin:0 0 .9rem;padding-left:1.25rem;line-height:1.5}' +
     '.sv-mfa-steps li{margin:.25rem 0}' +
-    '.sv-mfa-qr{display:block;width:200px;height:200px;margin:0 auto 1rem;padding:10px;background:#fff;border:1px solid #e4dfd2;border-radius:16px}' +
+    '.sv-mfa-steps li::marker{font-family:inherit;font-weight:600}' +
+    '.sv-mfa-enrol img.sv-mfa-qr{display:block;width:200px;height:200px;max-width:100%;margin:0 auto 1rem;padding:10px;background:#fff;border:1px solid #e4dfd2;border-radius:16px}' +
     '.sv-mfa-manual{margin:0 0 1rem}' +
     '.sv-mfa-manual summary{cursor:pointer;font-weight:600}' +
     '.sv-mfa-secret{display:block;margin-top:.5rem;padding:.6rem .8rem;background:#f4f1ea;border-radius:10px;font-size:.95rem;word-break:break-all;letter-spacing:.05em}';

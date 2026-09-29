@@ -155,7 +155,7 @@ R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), video on R2
     `/teacher/classes`. Boundary rules: teachers SEE attainment +
     misconceptions; behaviour aggregate-only; never study habits; NO
     work-setting/assignments/due dates (vision boundary).
-  - **Admin:** `ADMIN_PASSWORD` via `js/auth-gate.js`.
+  - **Admin:** Tom's own Supabase account + a Microsoft Authenticator code (session aal2), from the admin-mfa branch (29 Sep 2026). `ADMIN_PASSWORD` is retired (`/api/auth/login` answers 410). Server check `api/_lib/admin-auth.js`; sign-in and code step at `/teacher/login` (`js/staff-mfa.js`); `/admin/security`; lock-out recovery `scripts/admin_mfa_reset.py`. A platform_admin without the code step counts as a teacher.
 - **AI routes:** all 5 run on Bedrock **eu-west-2 (London) through the `eu.` cross-region profile, so a request may be served from any AWS EU region** — public wording is "UK and EU", never "London only" (Tom, 29 Sep 2026) — verify with
   `servedBy` on `/api/ai-mark`. Marking is marks-routed (Haiku ≤8, Sonnet >8;
   essays 2000 tokens). ⚠ open: US fallback must fail closed before any DPA
@@ -277,7 +277,7 @@ All in environment variables — never commit.
 | R2 | `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ACCOUNT_ID` | Cloudflare |
 | Unsplash | `UNSPLASH_ACCESS_KEY` | hero search |
 | ElevenLabs | `ELEVENLABS_API_KEY` | unused fallback |
-| Admin auth | `ADMIN_PASSWORD` | gates /admin/* |
+| Admin auth | ~~`ADMIN_PASSWORD`~~ | RETIRED with the admin-mfa branch (29 Sep 2026): admin is Tom's account + a TOTP code; delete the Vercel var once that is live |
 | Teacher auth | ~~`TEACHER_PASSWORD`~~ | RETIRED 6 Sep 2026 — teachers use their own accounts; delete the Vercel var |
 | Resend | `RESEND_API_KEY` + `NOTIFY_TO`, `NOTIFY_FROM` | bug reports, subject requests, audit alerts |
 | AWS | (Vercel env) | Bedrock eu-west-2 for AI routes |

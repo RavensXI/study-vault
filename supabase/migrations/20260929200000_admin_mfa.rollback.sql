@@ -1,6 +1,13 @@
 -- Rollback of 20260929200000_admin_mfa.sql: platform_admin powers without the two-factor step
 -- (the definitions as they were live on 29 Sep 2026).
 BEGIN;
+-- Give up rather than queue: if a lock is not free within 3 s (a long query is reading classes
+-- or class_members), abort, and run it again later. Queuing behind a reader would block every
+-- later query on those tables until the reader finished, which is how a lock stalls a live
+-- database. The statements themselves take milliseconds. Run it on its own: nothing else in
+-- the transaction, never a test query inside it.
+SET LOCAL lock_timeout = '3s';
+SET LOCAL statement_timeout = '15s';
 
 CREATE OR REPLACE FUNCTION public.is_platform_admin()
 RETURNS boolean STABLE
@@ -75,7 +82,7 @@ CREATE POLICY class_members_own ON public.class_members FOR SELECT TO authentica
   (student_id = auth.uid()) OR (EXISTS ( SELECT 1 FROM public.classes c
     WHERE ((c.id = class_members.class_id) AND ((c.teacher_id = auth.uid()) OR (EXISTS ( SELECT 1 FROM public.profiles p
       WHERE ((p.id = auth.uid()) AND (p.role = ANY (ARRAY['school_admin'::public.user_role, 'platform_admin'::public.user_role]))
-        AND ((p.role = 'platform_admin'::public.user_role) OR (p.school_id = c.school_id))))))))))
+        AND ((p.role = 'platform_admin'::public.user_role) OR (p.school_id = c.school_id)))))))))
 );
 
 DROP FUNCTION IF EXISTS public.session_is_aal2();
