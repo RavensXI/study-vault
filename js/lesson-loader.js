@@ -1480,51 +1480,122 @@
 
   // ---- Video modal (Google Drive) ----
   /* Captions are the pupil's choice (Tom, 2 Oct 2026): off unless they turned them on before.
-     The choice is kept in 'sv-captions' ('on'/'off'), which syncs with their account. The
-     browser's own captions menu and this button stay in step through the track's change event. */
+     The choice is kept in 'sv-captions' ('on'/'off'), which syncs with their account.
+
+     Where the button goes: Chrome's own control bar has no captions button (captions sit in its
+     menu), so in Chromium browsers a CC button joins the bar at the bottom right, just left of
+     the volume icon, and shows and hides with the native controls. The native fullscreen button
+     is swapped for ours (controlsList="nofullscreen") because native fullscreen takes only the
+     bare <video>, which would leave the CC button behind; ours fullscreens the wrapper so the
+     button comes along. Firefox and Safari already show their own captions button in the bar,
+     so there ours stays out of the way and only the stored choice is applied and kept in step. */
+  var CC_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10.5 10.2a2.3 2.3 0 1 0 0 3.6M17 10.2a2.3 2.3 0 1 0 0 3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  var FS_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>';
+  var FS_EXIT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>';
+
   function wireCaptions(container) {
     var video = container.querySelector('.video-modal-player');
     if (!video || !video.textTracks) return;
+    var chromium = !!(window.chrome || (navigator.userAgentData && navigator.userAgentData.brands &&
+      navigator.userAgentData.brands.some(function (b) { return /Chromium|Google Chrome|Edge/.test(b.brand); })));
     var on = false;
     try { on = localStorage.getItem('sv-captions') === 'on'; } catch (e) {}
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'video-cc-btn';
-    btn.textContent = 'CC';
-    btn.title = 'Captions on/off';
-    btn.setAttribute('aria-label', 'Captions on/off');
-    btn.hidden = true;
-    container.appendChild(btn);
     function track() { return video.textTracks[0] || null; }
-    function show(state) {
-      btn.setAttribute('aria-pressed', state ? 'true' : 'false');
-      btn.classList.toggle('on', state);
+    function remember(state) { try { localStorage.setItem('sv-captions', state ? 'on' : 'off'); } catch (e) {} }
+
+    var wrap = null, bar = null, ccBtn = null, fsBtn = null;
+    if (chromium) {
+      wrap = document.createElement('div');
+      wrap.className = 'video-wrap';
+      video.parentNode.insertBefore(wrap, video);
+      wrap.appendChild(video);
+      var canWrapFs = !!(wrap.requestFullscreen || wrap.webkitRequestFullscreen);
+      if (canWrapFs) video.setAttribute('controlsList', 'nofullscreen');
+      bar = document.createElement('div');
+      bar.className = 'video-extra-bar' + (canWrapFs ? ' has-fs' : '');
+      bar.innerHTML =
+        '<button type="button" class="video-cc-btn" aria-pressed="false" aria-label="Captions on/off" title="Captions on/off" hidden>' + CC_ICON + '</button>' +
+        (canWrapFs ? '<button type="button" class="video-fs-btn" aria-label="Full screen" title="Full screen">' + FS_ICON + '</button>' : '');
+      wrap.appendChild(bar);
+      ccBtn = bar.querySelector('.video-cc-btn');
+      fsBtn = bar.querySelector('.video-fs-btn');
     }
-    function apply(state, remember) {
+
+    function show(state) {
+      if (!ccBtn) return;
+      ccBtn.setAttribute('aria-pressed', state ? 'true' : 'false');
+      ccBtn.classList.toggle('on', state);
+    }
+    function apply(state, store) {
       var t = track(); if (!t) return;
       t.mode = state ? 'showing' : 'hidden';
       show(state);
-      if (remember) { try { localStorage.setItem('sv-captions', state ? 'on' : 'off'); } catch (e) {} }
+      if (store) remember(state);
     }
     function ready() {
-      var t = track(); if (!t) return;
-      btn.hidden = false;
+      if (!track()) return;
+      if (ccBtn) ccBtn.hidden = false;
       apply(on, false);
     }
     if (video.textTracks.length) ready();
     video.textTracks.addEventListener('addtrack', ready);
+    /* the browser's own captions menu changed it: follow, and remember */
     video.textTracks.addEventListener('change', function () {
       var t = track(); if (!t) return;
       var showing = t.mode === 'showing';
-      if (showing !== (btn.getAttribute('aria-pressed') === 'true')) {
-        show(showing);
-        try { localStorage.setItem('sv-captions', showing ? 'on' : 'off'); } catch (e) {}
+      if (!ccBtn || showing !== (ccBtn.getAttribute('aria-pressed') === 'true')) { show(showing); remember(showing); }
+    });
+    if (!wrap) return;
+
+    ccBtn.addEventListener('click', function (e) { e.stopPropagation(); apply(ccBtn.getAttribute('aria-pressed') !== 'true', true); });
+
+    /* fullscreen the wrapper, so the CC button comes along; native controls still work inside */
+    function fsEl() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
+    function toggleFs() {
+      if (fsEl()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
+      var req = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+      if (req) { var p = req.call(wrap); if (p && p.catch) p.catch(function () {}); }
+    }
+    if (fsBtn) fsBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleFs(); });
+    video.addEventListener('dblclick', function (e) { if (fsBtn) { e.preventDefault(); toggleFs(); } });
+    function onFs() {
+      var el = fsEl();
+      if (el === video) {   /* something put the bare video in fullscreen: move it to the wrapper */
+        var ex = document.exitFullscreen || document.webkitExitFullscreen;
+        var r = ex && ex.call(document);
+        (r && r.then ? r : Promise.resolve()).then(toggleFs);
+        return;
       }
-    });
-    btn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      apply(btn.getAttribute('aria-pressed') !== 'true', true);
-    });
+      var full = el === wrap;
+      wrap.classList.toggle('is-fs', full);
+      if (fsBtn) {
+        fsBtn.innerHTML = full ? FS_EXIT : FS_ICON;
+        fsBtn.setAttribute('aria-label', full ? 'Exit full screen' : 'Full screen');
+        fsBtn.title = full ? 'Exit full screen' : 'Full screen';
+      }
+    }
+    document.addEventListener('fullscreenchange', onFs);
+    document.addEventListener('webkitfullscreenchange', onFs);
+
+    /* show and hide with the native controls: always while paused; while playing, for
+       2.5 s after the pointer moves or a tap, and while a button has focus */
+    var idle = null;
+    function visible(v) { wrap.classList.toggle('controls-on', v); }
+    function poke() {
+      visible(true);
+      clearTimeout(idle);
+      idle = setTimeout(function () {
+        if (!video.paused && !bar.contains(document.activeElement)) visible(false);
+      }, 2500);
+    }
+    ['pointermove', 'pointerdown', 'touchstart', 'keydown'].forEach(function (ev) { wrap.addEventListener(ev, poke, { passive: true }); });
+    wrap.addEventListener('mouseleave', function () { if (!video.paused && !bar.contains(document.activeElement)) { clearTimeout(idle); visible(false); } });
+    bar.addEventListener('focusin', function () { clearTimeout(idle); visible(true); });
+    bar.addEventListener('focusout', poke);
+    video.addEventListener('pause', function () { clearTimeout(idle); visible(true); });
+    video.addEventListener('ended', function () { clearTimeout(idle); visible(true); });
+    video.addEventListener('play', poke);
+    visible(true);
   }
 
   function openVideoModal(src, title, isDirectVideo) {

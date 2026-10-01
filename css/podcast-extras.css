@@ -120,13 +120,27 @@ body.dark-mode .svt-opt.wrong { background: #3b1717; color: #fca5a5; }
 }
 @media (prefers-reduced-motion: reduce) { .svt-turns { scroll-behavior: auto; } }
 
-/* Captions toggle on the explainer-video modal (js/lesson-loader.js wireCaptions) */
-.video-cc-btn {
-  position: absolute; top: 12px; left: 12px; z-index: 2;
-  font: 700 0.85rem/1 'Inter', sans-serif; letter-spacing: .04em;
-  color: #fff; background: rgba(0, 0, 0, 0.6); border: 2px solid rgba(255, 255, 255, 0.7);
-  border-radius: 8px; padding: 8px 10px; min-width: 44px; min-height: 36px; cursor: pointer;
+/* Captions + full screen in the explainer video's control row (js/lesson-loader.js wireCaptions).
+   Chrome's native row: icons on a 48 px pitch, the last centred 24 px from the right edge and
+   48 px above the bottom. Native fullscreen is off, so the row is [volume][menu]; ours sit
+   just left of the volume icon: [CC][full screen][volume][menu]. */
+.video-wrap { position: relative; width: 100%; height: 100%; background: #000; }
+.video-wrap .video-modal-player { border-radius: 0; }
+.video-wrap.is-fs .video-modal-player { width: 100%; height: 100%; }
+.video-extra-bar {
+  position: absolute; right: 102px; bottom: 30px; height: 36px;
+  display: flex; align-items: center; gap: 12px; z-index: 2;
+  opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility 0s linear .25s;
 }
-.video-cc-btn.on { background: #fff; color: #111; border-color: #fff; }
-.video-cc-btn:hover { border-color: #fff; }
-.video-cc-btn:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.video-extra-bar:not(.has-fs) { right: 150px; }   /* native fullscreen stays: [CC][volume][fullscreen][menu] */
+.video-wrap.controls-on .video-extra-bar { opacity: 1; visibility: visible; transition: opacity .15s ease, visibility 0s; }
+.video-extra-bar button {
+  width: 36px; height: 36px; display: grid; place-items: center; padding: 0;
+  color: #fff; background: none; border: 0; border-radius: 50%; cursor: pointer;
+  filter: drop-shadow(0 0 2px rgba(0,0,0,.6));
+}
+.video-extra-bar svg { width: 22px; height: 22px; }
+.video-extra-bar button:hover { background: rgba(255,255,255,.18); }
+.video-extra-bar button:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+.video-cc-btn.on svg rect { fill: #fff; stroke: #fff; }
+.video-cc-btn.on svg path { stroke: #111; }
