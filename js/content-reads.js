@@ -40,6 +40,22 @@
     catch (e) { return null; }
   }
 
+  // The admin route is only for a sign-in that has passed the two-factor step. The browser can
+  // still remember "admin" after a pupil or teacher account signs in on the same machine
+  // (1 Oct 2026: Tom's own pupil account then had every lesson read refused), so check the
+  // token itself, and forget the stale admin flag when the server says no.
+  function tokenAal(tok) {
+    try { return JSON.parse(atob(tok.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).aal || null; }
+    catch (e) { return null; }
+  }
+  function forgetAdmin() {
+    isAdmin = false;
+    try { [sessionStorage, localStorage].forEach(function (st) {
+      var o = JSON.parse(st.getItem('studyvault-auth') || 'null');
+      if (o && o.role === 'admin') st.removeItem('studyvault-auth');
+    }); } catch (e) {}
+  }
+
   window.fetch = function (input, init) {
     try {
       var url = typeof input === 'string' ? input : (input && input.url) || String(input);
@@ -49,6 +65,7 @@
       }
       var from = new Headers((init && init.headers) || (input && input.headers) || {});
 
+      if (isAdmin && userToken() && tokenAal(userToken()) !== 'aal2') forgetAdmin();
       if (isAdmin && userToken()) {
         var staffRead = function () {
           var h = { 'Authorization': 'Bearer ' + userToken() };
@@ -60,6 +77,10 @@
         // stored one within a moment, so wait briefly and try once more.
         return staffRead().then(function (r) {
           return r.status !== 401 ? r : new Promise(function (ok) { setTimeout(ok, 1500); }).then(staffRead);
+        }).then(function (r) {
+          if (r.status !== 401 && r.status !== 403) return r;
+          forgetAdmin();                                     // not an admin sign-in: read as the user
+          return window.fetch(input, init);
         });
       }
 
