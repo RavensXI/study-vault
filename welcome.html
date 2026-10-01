@@ -1930,7 +1930,9 @@ function buildGrid(host){
 }
 buildGrid(document.getElementById('sgrid'));
 buildGrid(document.getElementById('sgrid-home'));
+let DEFAULTED=false;   /* the shelf is still the untouched starter four (first visit) */
 function togglePick(slug){
+  DEFAULTED=false;
   const i=picked.indexOf(slug);
   if(i>=0) picked.splice(i,1); else picked.push(slug);
   /* Combined and Triple are the same course at two sizes: a student sits one or the
@@ -2658,7 +2660,7 @@ function persist(){ if(RESTORING) return; try{
     meta[sl]={board:su.alt&&su.alt[boards[sl]]?su.alt[boards[sl]]:(BOARDLBL[boards[sl]]||''),topics:names,
       tier:tiers[sl]||null,guessed:!!guess[sl]};
   });
-  localStorage.setItem('sv-welcome',JSON.stringify({picked:picked,boards:boards,topics:topics,meta:meta,tiers:tiers,guess:guess,rag:RAG,budget:BUDGET}));
+  localStorage.setItem('sv-welcome',JSON.stringify(Object.assign({picked:picked,boards:boards,topics:topics,meta:meta,tiers:tiers,guess:guess,rag:RAG,budget:BUDGET},DEFAULTED?{defaulted:true}:{})));
   /* the tier answer goes where every lesson and practice page already looks for it,
      keyed by the real subject slug; "not sure" and unanswered both mean Higher */
   try{
@@ -2705,8 +2707,10 @@ if(q.get('picked')!==null){
 }
 /* first visit: the core four every student sits are already on the shelf —
    they add their options (usually four). Deep links and returning shelves win. */
-if(firstVisit && q.get('picked')===null)
+if(firstVisit && q.get('picked')===null){
   ['maths','lang','lit','science'].forEach(sl=>togglePick(sl));
+  DEFAULTED=true; persist();   /* marked, so signing in to an account with real choices keeps those */
+}
 if(q.get('boards')){ boards={}; q.get('boards').split(',').forEach(pair=>{
   const kv=pair.split(':'); if(SUBJECTS.some(x=>x.slug===kv[0])&&(BOARDKEYS.includes(kv[1])||/^(edexcel|ocr) b$/.test(kv[1]))) boards[kv[0]]=kv[1]; }); }
 /* &tsel=history.0.america-opportunity-inequality,rs.0.christianity~islam —
@@ -2883,7 +2887,7 @@ if(sibtn) sibtn.onclick=async()=>{
             o[k]=bt.length>=at.length?b[k]:a[k];
           }); return o; };
         const merged={
-          picked:(loc.picked&&loc.picked.length)?loc.picked.slice():(acct.picked||[]),   /* the synced list stands; the old account copy only fills an empty device */
+          picked:(loc.picked&&loc.picked.length&&!(loc.defaulted&&acct.picked&&acct.picked.length))?loc.picked.slice():(acct.picked||[]),   /* the synced list stands; the account fills an empty device or replaces the untouched starter four */
           boards:Object.assign({},loc.boards||{},acct.boards||{}),
           topics:twoDeep(loc.topics,acct.topics),
           meta:richerMeta(loc.meta,acct.meta),

@@ -177,7 +177,9 @@ function svProgressSync() {
    holds it all — sign back in anywhere and it comes home. */
 function svSignOut() {
   var wipe = function () {
+    if (window.svSyncDetach) svSyncDetach();   /* the clean-up below must never reach the account */
     try {
+      localStorage.removeItem('sv-sync-meta');  /* no stale "newer here" times left behind */
       ['sv-user', 'sv-welcome', 'sv-lessons-done', 'sv-lessons-when', 'sv-warmup',
        'sv-flash-day', 'sv-plan-prefs'].forEach(function (k) { localStorage.removeItem(k); });
       Object.keys(localStorage).forEach(function (k) {

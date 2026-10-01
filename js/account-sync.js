@@ -88,7 +88,9 @@
     origRemove.call(this, k);
     if (this === window.localStorage && !applying && syncable(k)) noteWrite(k);
   };
+  var detached = false;           // set by svSyncDetach() at sign-out: nothing more is recorded or pushed
   function noteWrite(k) {
+    if (detached) return;
     var m = meta(); m[k] = Date.now(); setMeta(m);
     if (!session) return;
     dirty[k] = true;
@@ -130,6 +132,12 @@
       keys.forEach(function (k) { dirty[k] = true; });
     });
   }
+  /* Sign-out (sync.js svSignOut) cleans the device AFTER the last push. Without this, each
+     removeItem of the clean-up counted as a change and the page-hide push wrote null over the
+     account's subject choices and progress (journey test, 1 Oct 2026). */
+  window.svSyncDetach = function () {
+    detached = true; clearTimeout(pushTimer); dirty = {}; session = null;
+  };
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') { clearTimeout(pushTimer); push(true); }
   });
@@ -168,6 +176,9 @@
     var l = parse(localRaw), s = parse(serverRaw);
     if (l === undefined) return serverRaw;
     if (s === undefined) return localRaw;
+    /* the picker's starter shelf (the core four, nothing chosen yet) never replaces an
+       account's real choices, however new it is */
+    if (key === 'sv-welcome' && isObj(l) && l.defaulted && isObj(s) && Array.isArray(s.picked) && s.picked.length) return serverRaw;
     var ra = !!REPLACE_ARRAYS[key];
     if ((isObj(l) && isObj(s)) || (Array.isArray(l) && Array.isArray(s))) {
       var merged = localNewer ? deepMerge(s, l, ra) : deepMerge(l, s, ra);
