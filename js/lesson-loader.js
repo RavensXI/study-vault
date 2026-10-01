@@ -1479,6 +1479,54 @@
   }
 
   // ---- Video modal (Google Drive) ----
+  /* Captions are the pupil's choice (Tom, 2 Oct 2026): off unless they turned them on before.
+     The choice is kept in 'sv-captions' ('on'/'off'), which syncs with their account. The
+     browser's own captions menu and this button stay in step through the track's change event. */
+  function wireCaptions(container) {
+    var video = container.querySelector('.video-modal-player');
+    if (!video || !video.textTracks) return;
+    var on = false;
+    try { on = localStorage.getItem('sv-captions') === 'on'; } catch (e) {}
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'video-cc-btn';
+    btn.textContent = 'CC';
+    btn.title = 'Captions on/off';
+    btn.setAttribute('aria-label', 'Captions on/off');
+    btn.hidden = true;
+    container.appendChild(btn);
+    function track() { return video.textTracks[0] || null; }
+    function show(state) {
+      btn.setAttribute('aria-pressed', state ? 'true' : 'false');
+      btn.classList.toggle('on', state);
+    }
+    function apply(state, remember) {
+      var t = track(); if (!t) return;
+      t.mode = state ? 'showing' : 'hidden';
+      show(state);
+      if (remember) { try { localStorage.setItem('sv-captions', state ? 'on' : 'off'); } catch (e) {} }
+    }
+    function ready() {
+      var t = track(); if (!t) return;
+      btn.hidden = false;
+      apply(on, false);
+    }
+    if (video.textTracks.length) ready();
+    video.textTracks.addEventListener('addtrack', ready);
+    video.textTracks.addEventListener('change', function () {
+      var t = track(); if (!t) return;
+      var showing = t.mode === 'showing';
+      if (showing !== (btn.getAttribute('aria-pressed') === 'true')) {
+        show(showing);
+        try { localStorage.setItem('sv-captions', showing ? 'on' : 'off'); } catch (e) {}
+      }
+    });
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      apply(btn.getAttribute('aria-pressed') !== 'true', true);
+    });
+  }
+
   function openVideoModal(src, title, isDirectVideo) {
     // Create overlay if it doesn't exist yet
     var overlay = document.getElementById('video-modal-overlay');
@@ -1508,9 +1556,10 @@
         '<video class="video-modal-player" controls preload="metadata">' +
           '<source src="' + src + '" type="video/mp4">' +
           // captions from the transcript files, when this lesson has them (js/podcast-extras.js)
-          (window._svCaptionsUrl ? '<track kind="captions" srclang="en" label="English" default src="' + window._svCaptionsUrl + '">' : '') +
+          (window._svCaptionsUrl ? '<track kind="captions" srclang="en" label="English" src="' + window._svCaptionsUrl + '">' : '') +
           'Your browser does not support video playback.' +
         '</video>';
+      if (window._svCaptionsUrl) wireCaptions(container);
     } else {
       // Google Drive / YouTube: use iframe
       container.innerHTML =
