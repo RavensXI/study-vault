@@ -1485,7 +1485,7 @@
      Where the button goes: Chrome's own control bar has no captions button (captions sit in its
      menu), so in Chromium browsers a CC button joins the bar at the bottom right, just left of
      the volume icon, and shows and hides with the native controls. The native fullscreen button
-     is swapped for ours (controlsList="nofullscreen") because native fullscreen takes only the
+     (greyed out by controlsList="nofullscreen") is covered by ours, because native fullscreen takes only the
      bare <video>, which would leave the CC button behind; ours fullscreens the wrapper so the
      button comes along. Firefox and Safari already show their own captions button in the bar,
      so there ours stays out of the way and only the stored choice is applied and kept in step. */
