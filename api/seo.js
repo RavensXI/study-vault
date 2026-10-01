@@ -184,6 +184,19 @@ async function shell(file, req) {
 
 const SUBJECT_COLS = 'slug, name, exam_board, school_id, status';
 
+/* The lesson podcast's transcript (transcripts/<s>/<u>/lNN.json, js/podcast-extras.js), in a
+   closed <details> after the lesson body so search engines can read what the podcast says. */
+function transcriptHtml(s, u, n) {
+  if (!/^[a-z0-9-]+$/.test(s) || !/^[a-z0-9-]+$/.test(u)) return '';
+  try {
+    const f = path.join(process.cwd(), 'transcripts', s, u, 'l' + String(n).padStart(2, '0') + '.json');
+    const tr = JSON.parse(fs.readFileSync(f, 'utf8'));
+    const names = tr.speakers || { 1: 'Host A', 2: 'Host B' };
+    return '\n<details class="sv-ssr-transcript"><summary>Podcast transcript</summary>\n' +
+      (tr.turns || []).map(x => `<p><b>${esc(names[x.speaker] || 'Host')}:</b> ${esc(x.text)}</p>`).join('\n') + '\n</details>';
+  } catch (e) { return ''; }
+}
+
 async function headFor(t, q) {
   const s = String(q.s || ''), u = String(q.u || ''), n = parseInt(q.n, 10);
   if (t === 'lesson' || t === 'practice') {
@@ -205,7 +218,7 @@ async function headFor(t, q) {
            breadcrumbs([[course(sub), `/subjects/${s}`], [l.units.name, `/browse/${s}/${u}`], [l.title, path]])],
       // the lesson's own text, for crawlers and link previews that run no JavaScript. Listening
       // lessons are a player and a card deck, not prose, so they carry none.
-      body: (t === 'lesson' && !l.is_listening && l.content_html) ? `<h1>${esc(l.title)}</h1>\n${l.content_html}` : null
+      body: (t === 'lesson' && !l.is_listening && l.content_html) ? `<h1>${esc(l.title)}</h1>\n${l.content_html}${transcriptHtml(s, u, n)}` : null
     };
   }
   if (t === 'browse') {

@@ -1507,6 +1507,8 @@
       container.innerHTML =
         '<video class="video-modal-player" controls preload="metadata">' +
           '<source src="' + src + '" type="video/mp4">' +
+          // captions from the transcript files, when this lesson has them (js/podcast-extras.js)
+          (window._svCaptionsUrl ? '<track kind="captions" srclang="en" label="English" default src="' + window._svCaptionsUrl + '">' : '') +
           'Your browser does not support video playback.' +
         '</video>';
     } else {

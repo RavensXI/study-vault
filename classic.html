@@ -2008,7 +2008,33 @@ document.querySelector('.card.exam').onclick=()=>svPlannerOpen();
         });
       }).catch(function(){return [];});
     })).then(function(parts){IX=[].concat.apply([],parts);return IX;});
+    /* what the lesson podcasts say (transcripts/index.json, built from the podcast transcripts):
+       a search can land on the moment a host explains it. Only lessons in the student's subjects. */
+    var mine={}; subs.forEach(function(s){mine[s.sub]=s;});
+    var AUDP=fetch('/transcripts/index.json').then(function(r){return r.ok?r.json():[];}).catch(function(){return [];})
+      .then(function(rows){AUD=(rows||[]).filter(function(x){return mine[x.p.split('/')[2]];}).map(function(x){return {p:x.p,l:x.l,t:x.t,x:x.x,f:fold(x.x),s:mine[x.p.split('/')[2]]};});});
+    AUDP.then(function(){ if(IX&&fold(inp.value).length>=2) render(inp.value); });   /* the podcast index can land after the lesson list */
+    LOADING=Promise.all([LOADING,AUDP]).then(function(){return IX;});
     return LOADING;
+  }
+  var AUD=[];
+  function mmss(t){return Math.floor(t/60)+':'+('0'+(t%60)).slice(-2);}
+  function audioHits(q){
+    var w=words(q);
+    return AUD.map(function(a){
+      var i=a.f.indexOf(q), sc=i>=0?2:(w.length&&w.every(function(x){return a.f.indexOf(x)>=0;})?1:0);
+      if(i<0&&sc) i=a.f.indexOf(w[0]);
+      return {a:a,sc:sc,i:i};
+    }).filter(function(h){return h.sc>0;}).sort(function(x,y){return y.sc-x.sc||x.a.t-y.a.t;}).slice(0,3);
+  }
+  function audioRows(hs,q){
+    if(!hs.length)return '';
+    return '<div class="fgroup"><i style="background:#b9a98c"></i>Heard in the podcast</div>'+hs.map(function(h){
+      var a=h.a, from=Math.max(0,h.i-50), snip=(from?'…':'')+a.x.slice(from,from+150).trim()+(a.x.length>from+150?'…':'');
+      var href=a.p+'?t='+a.t+'&play=podcast';
+      return '<div class="frow" data-href="'+esc(href)+'"><div class="ft"><b>Heard in the podcast at '+mmss(a.t)+' · '+esc(a.l)+'</b><small>“'+hl(snip,q)+'”</small></div>'
+        +'<span class="facts"><button type="button" class="pri" data-go="'+esc(href)+'">Listen</button></span></div>';
+    }).join('');
   }
   function strength(l){
     if(!window.svStrength)return null;
@@ -2038,8 +2064,8 @@ document.querySelector('.card.exam').onclick=()=>svPlannerOpen();
     if(!IX){res.innerHTML='<div class="fnone">Looking through your subjects…</div>';load().then(function(){render(inp.value);});return;}
     var hits=IX.map(function(l){return {l:l,sc:score(l,q)};}).filter(function(h){return h.sc>0;})
       .sort(function(a,b){return b.sc-a.sc||a.l.s.name.localeCompare(b.l.s.name)||a.l.n-b.l.n;}).slice(0,12);
-    var h='';
-    if(!hits.length){ askJudge(q,null); return; }
+    var h='', aud=audioRows(audioHits(q),q);
+    if(!hits.length){ if(aud){ res.innerHTML=aud; askJudge(q,aud); } else askJudge(q,null); return; }
     var partial=hits[0].sc<1;                 /* only loose word hits: show them, and let the judge put its pick on top */
     var groups={},order=[];
     hits.forEach(function(x){var k=x.l.s.name||x.l.s.sub;if(!groups[k]){groups[k]=[];order.push([k,x.l.s.c]);}groups[k].push(x.l);});
@@ -2053,6 +2079,7 @@ document.querySelector('.card.exam').onclick=()=>svPlannerOpen();
           +(l.practice?'':'<button type="button" data-go="'+esc(l.href)+'?open=cards">Cards</button><button type="button" data-go="'+esc(l.href)+'?open=quiz">Quick check</button>')+'</span></div>';
       });
     });
+    h+=aud;
     res.innerHTML=h;
     if(partial) askJudge(q,h);
   }
@@ -2076,9 +2103,10 @@ document.querySelector('.card.exam').onclick=()=>svPlannerOpen();
         if(d&&d.support&&window.svShowSupport)svShowSupport(null,d);   /* the safeguarding support panel */
         if(ASK.q!==q)return;
         var l=d&&d.unit&&d.n?IX.find(function(x){return x.s.sub+'/'+x.uslug===d.unit&&x.n===d.n;}):null;
-        if(!l){ if(!below) res.innerHTML='<div class="fnone">Nothing in your subjects covers “'+esc(q)+'”.</div>'; return; }
-        res.innerHTML='<div class="fgroup"><i style="background:'+esc(l.s.c||'#b9a98c')+'"></i>Closest match</div>'+rowFor(l,q,true)+(below?below.replace(' hot',''):'');
-      }).catch(function(){ if(ASK.q===q&&!below) res.innerHTML='<div class="fnone">Nothing in your subjects is called “'+esc(q)+'”.</div>'; });
+        if(!l){ if(!below&&!res.querySelector('.frow')) res.innerHTML='<div class="fnone">Nothing in your subjects covers “'+esc(q)+'”.</div>'; return; }
+        var shown=res.querySelector('.frow')?res.innerHTML:(below||'');   /* keep podcast rows that arrived meanwhile */
+        res.innerHTML='<div class="fgroup"><i style="background:'+esc(l.s.c||'#b9a98c')+'"></i>Closest match</div>'+rowFor(l,q,true)+shown.replace(' hot','');
+      }).catch(function(){ if(ASK.q===q&&!below&&!res.querySelector('.frow')) res.innerHTML='<div class="fnone">Nothing in your subjects is called “'+esc(q)+'”.</div>'; });
     },500);
   }
   inp.addEventListener('focus',function(){load();});

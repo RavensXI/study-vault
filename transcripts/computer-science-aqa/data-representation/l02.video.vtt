@@ -1,0 +1,562 @@
+WEBVTT
+
+1
+00:00:00.200 --> 00:00:02.639
+Welcome to this explainer on character
+encoding.
+
+2
+00:00:02.920 --> 00:00:07.179
+Okay, so in our first session, we
+absolutely nailed number bases and binary
+
+3
+00:00:07.240 --> 00:00:11.900
+arithmetic. You already know exactly how
+computers crunch numbers using just ones
+
+4
+00:00:11.920 --> 00:00:16.440
+and zeros. But today, we're going to build
+on that knowledge and figure out exactly
+
+5
+00:00:16.480 --> 00:00:21.359
+how computers manage to store, sort, and
+understand the actual text you type.
+
+6
+00:00:21.800 --> 00:00:25.879
+How do we get from a letter on a screen to
+a binary number in a processor?
+
+7
+00:00:26.160 --> 00:00:29.480
+Let's find out. Here is the roadmap for
+today's revision.
+
+8
+00:00:29.960 --> 00:00:35.399
+Translating text, the ASCII standard,
+calculating codes, the Unicode solution,
+
+9
+00:00:35.880 --> 00:00:39.320
+ASCII versus Unicode, and finally, sorting
+data.
+
+10
+00:00:40.080 --> 00:00:44.159
+But before we really dive in, just look
+down at your keyboard for a second.
+
+11
+00:00:44.720 --> 00:00:49.220
+How on earth does the physical tap of a
+plastic key actually transform into those
+
+12
+00:00:49.280 --> 00:00:51.799
+electrical ones and zeros we tackled in
+lesson one?
+
+13
+00:00:52.320 --> 00:00:54.159
+There's got to be some kind of middle
+step, right?
+
+14
+00:00:54.320 --> 00:00:59.359
+A translator? Section one, translating
+text and the core problem we face.
+
+15
+00:00:59.840 --> 00:01:03.940
+Well, since computers literally only
+understand binary, we need a bulletproof,
+
+16
+00:01:04.120 --> 00:01:08.340
+universally agreed upon system to convert
+our letters, punctuation, and symbols into
+
+17
+00:01:08.480 --> 00:01:11.720
+numbers. And this is exactly what we call
+a character set.
+
+18
+00:01:12.080 --> 00:01:14.199
+You definitely want to memorize this
+definition for your exam.
+
+19
+00:01:14.480 --> 00:01:18.079
+It's the agreed list that maps each
+character to its unique binary code.
+
+20
+00:01:18.360 --> 00:01:21.639
+It's kind of like a secret decoder ring.
+Every single letter you type gets assigned
+
+21
+00:01:21.680 --> 00:01:24.399
+a unique number, which is then stored as
+its binary equivalent.
+
+22
+00:01:24.760 --> 00:01:28.019
+Without this shared set, a file you make
+on your laptop would just look like
+
+23
+00:01:28.200 --> 00:01:30.360
+absolute gibberish if you emailed it to a
+friend.
+
+24
+00:01:31.160 --> 00:01:35.120
+Moving on to section two, the ASCII
+standard, our 7-bit pioneer.
+
+25
+00:01:36.000 --> 00:01:40.279
+So early computer scientists tackled this
+exact translation problem with something
+
+26
+00:01:40.319 --> 00:01:44.519
+called the American Standard Code for
+Information Interchange, or as we all call
+
+27
+00:01:44.560 --> 00:01:49.639
+it, ASCII. It gave early computers a
+common language, and by using exactly 7
+
+28
+00:01:49.880 --> 00:01:56.280
+bits per character, it gave them exactly
+128 unique codes, ranging from 0 to 127.
+
+29
+00:01:56.760 --> 00:02:00.039
+Why 128? Well, 2 to the power of 7 is 128.
+
+30
+00:02:00.560 --> 00:02:03.159
+These 128 characters cover the basics.
+
+31
+00:02:03.520 --> 00:02:08.239
+Uppercase and lowercase alphabet, digits 0
+through 9, basic punctuation, and a few
+
+32
+00:02:08.360 --> 00:02:11.040
+control things like hitting the enter key
+for a new line.
+
+33
+00:02:11.919 --> 00:02:14.840
+Okay, listen up, because this is
+absolutely crucial.
+
+34
+00:02:15.240 --> 00:02:19.400
+You literally must memorize these three
+magic starting numbers for your exam.
+
+35
+00:02:20.000 --> 00:02:25.519
+Uppercase A is 65, lowercase A is 97, and
+the digit 0 is 48.
+
+36
+00:02:25.960 --> 00:02:29.659
+Why is this such a big deal? Because the
+whole genius behind ASCII is that the
+
+37
+00:02:29.760 --> 00:02:31.719
+codes are grouped and perfectly
+sequential.
+
+38
+00:02:32.240 --> 00:02:37.759
+If A is 65, it just naturally follows that
+B is 66, C is 67, and so on.
+
+39
+00:02:38.240 --> 00:02:42.040
+If you know one code in a group, you can
+figure out the entire rest of the set.
+
+40
+00:02:42.840 --> 00:02:48.199
+Section 3, calculating codes, or as I like
+to call it, exam detective work.
+
+41
+00:02:48.680 --> 00:02:52.920
+Because these codes are perfectly
+sequential, AQA examiners love, and I mean
+
+42
+00:02:53.200 --> 00:02:55.679
+love, asking you to calculate character
+codes.
+
+43
+00:02:56.000 --> 00:02:59.800
+It's easy points once you know the trick.
+Let's say your exam asks for the ASCII
+
+44
+00:02:59.840 --> 00:03:03.720
+code for an uppercase G. Step one,
+identify the starting code.
+
+45
+00:03:04.080 --> 00:03:07.639
+We know A is 65, right? Step two,
+calculate the offset.
+
+46
+00:03:08.080 --> 00:03:12.839
+A is the first letter, G is the seventh.
+That means G is exactly six letters away
+
+47
+00:03:12.880 --> 00:03:16.520
+from A. Step three, just add that offset
+to the starting code.
+
+48
+00:03:16.880 --> 00:03:21.080
+65 plus 6 equals 71. Boom, G is 71.
+
+49
+00:03:21.600 --> 00:03:25.800
+And you know, it works backwards too. If
+an exam says a character has the code 100,
+
+50
+00:03:26.080 --> 00:03:30.199
+just remember lowercase a is 97. 100 minus
+97 is 3.
+
+51
+00:03:30.639 --> 00:03:33.840
+Count three letters forward from a, b, c,
+d.
+
+52
+00:03:34.120 --> 00:03:38.680
+The character is lowercase d. Now this
+brings us to a notorious exam trap.
+
+53
+00:03:38.960 --> 00:03:43.139
+I see this all the time. The text
+character of a number is absolutely not
+
+54
+00:03:43.200 --> 00:03:45.280
+the same as the mathematical value of that
+number.
+
+55
+00:03:45.840 --> 00:03:50.000
+Remember earlier, the text character for
+the digit 0 starts at ASCII code 40.
+
+56
+00:03:50.720 --> 00:03:55.300
+So counting up seven spots means the text
+character seven actually has an ASCII code
+
+57
+00:03:55.340 --> 00:04:00.760
+of 55. It is completely 100% different
+from the mathematical integer seven that
+
+58
+00:04:00.800 --> 00:04:05.439
+you'd use in, say, an addition problem.
+All right, section four, the Unicode
+
+59
+00:04:05.600 --> 00:04:10.080
+solution, our modern hero. So while ASCII
+was awesome for early English-speaking
+
+60
+00:04:10.200 --> 00:04:14.460
+scientists, it had a massive flaw.
+Absolutely zero space for accented
+
+61
+00:04:14.560 --> 00:04:19.339
+letters, Chinese characters, Arabic
+script, or, you know, the emojis you use
+
+62
+00:04:19.520 --> 00:04:22.239
+every single day. ASCII just couldn't
+handle it.
+
+63
+00:04:22.839 --> 00:04:27.740
+Enter Unicode. Unicode was developed using
+more bits per character to solve exactly
+
+64
+00:04:27.800 --> 00:04:32.519
+this problem. By doing that, Unicode
+completely blew past that tiny 128
+
+65
+00:04:32.680 --> 00:04:36.800
+character limit, giving us a massive,
+mind-blowing capacity of over 1 million
+
+66
+00:04:36.880 --> 00:04:40.519
+distinct characters. That's literally
+enough for every single writing system
+
+67
+00:04:40.640 --> 00:04:44.199
+currently in use on planet Earth, plus
+dead historical scripts, obscure
+
+68
+00:04:44.240 --> 00:04:47.880
+mathematical symbols, and yes, literally
+every emoji you can think of.
+
+69
+00:04:48.880 --> 00:04:52.799
+Okay, this next concept is a massive
+keyword for AQA, so remember this:
+
+70
+00:04:53.200 --> 00:04:57.320
+backwards compatible. When they designed
+Unicode, they made a genius decision.
+
+71
+00:04:57.880 --> 00:05:02.639
+Unicode uses exactly the same codes as
+ASCII for the first 128 characters.
+
+72
+00:05:02.920 --> 00:05:07.119
+Uppercase A is still 65 in Unicode,
+exactly like it was in ASCII.
+
+73
+00:05:07.760 --> 00:05:12.480
+This backwards compatibility means an old
+ASCII text file from, say, the 1980s can
+
+74
+00:05:12.500 --> 00:05:16.899
+be read seamlessly by a modern Unicode
+system today, without any translation or
+
+75
+00:05:17.000 --> 00:05:22.579
+conversion needed whatsoever. Moving to
+section 5, ASCII versus Unicode and the
+
+76
+00:05:22.600 --> 00:05:26.839
+inevitable trade-off. Let's distill all
+this down so you can easily weigh the pros
+
+77
+00:05:26.880 --> 00:05:29.199
+and cons in your exam. It's basically a
+trade-off.
+
+78
+00:05:29.680 --> 00:05:33.279
+ASCII uses just 7 bits per character,
+which means it has very low storage
+
+79
+00:05:33.360 --> 00:05:37.339
+requirements. It's incredibly efficient if
+you literally only need basic English
+
+80
+00:05:37.400 --> 00:05:41.600
+text. Unicode, on the other hand, uses
+more bits per character to pull off its 1
+
+81
+00:05:41.680 --> 00:05:44.519
+million plus capacity. So the trade-off
+here is storage space.
+
+82
+00:05:44.960 --> 00:05:48.539
+A Unicode text file is always going to
+require more storage space per character
+
+83
+00:05:48.560 --> 00:05:52.199
+than an ASCII file. But honestly, on
+modern hardware where we have gigabytes
+
+84
+00:05:52.240 --> 00:05:56.399
+and terabytes of memory, this trade-off is
+absolutely worth it to enable true global
+
+85
+00:05:56.480 --> 00:05:59.680
+communication. And that's exactly why
+virtually every modern browser and
+
+86
+00:05:59.720 --> 00:06:02.079
+operating system just defaults to Unicode
+now.
+
+87
+00:06:02.760 --> 00:06:08.399
+Finally, section 6, sorting data,
+specifically using lexicographic order.
+
+88
+00:06:09.080 --> 00:06:12.119
+So think about when you click sort
+alphabetically in a spreadsheet.
+
+89
+00:06:12.320 --> 00:06:14.679
+What is the computer actually doing behind
+the scenes?
+
+90
+00:06:15.120 --> 00:06:17.579
+Well, computers don't inherently
+understand the alphabet.
+
+91
+00:06:17.760 --> 00:06:21.820
+They just understand numbers, right? So
+they sort text by comparing the character
+
+92
+00:06:21.920 --> 00:06:24.800
+codes numerically. We call this
+lexicographic order.
+
+93
+00:06:25.360 --> 00:06:29.439
+A comes before B for the simple fact that
+65 is less than 66.
+
+94
+00:06:29.960 --> 00:06:34.279
+But here's the crazy part. Because all
+uppercase letters are grouped from 65 to
+
+95
+00:06:34.400 --> 00:06:38.920
+90, and lowercase letters don't even start
+until 97, a simple computer sort will
+
+96
+00:06:39.040 --> 00:06:42.040
+shockingly put a capital Z before a
+lowercase A.
+
+97
+00:06:42.279 --> 00:06:45.639
+Why? Because 90 is less than 97. It's as
+simple as that.
+
+98
+00:06:46.120 --> 00:06:49.620
+And actually, this brilliantly explains
+that classic programming glitch you've
+
+99
+00:06:49.680 --> 00:06:53.720
+probably seen, where a list weirdly sorts
+to number 10 before the number 9.
+
+100
+00:06:54.279 --> 00:06:57.779
+If the computer thinks it's sorting text
+instead of math, it just looks at the very
+
+101
+00:06:57.880 --> 00:07:02.319
+first character of the string. The text
+character 1 has an ASCII code of 49.
+
+102
+00:07:02.680 --> 00:07:05.560
+The text character 9 has an ASCII code of
+57.
+
+103
+00:07:06.000 --> 00:07:10.139
+Because 49 is less than 57, the computer
+confidently just slaps 10 right at the top
+
+104
+00:07:10.180 --> 00:07:13.899
+of the list. Understanding these character
+sets explains exactly why these weird
+
+105
+00:07:13.920 --> 00:07:18.839
+little bugs happen. You know, you have now
+totally mastered how we translate simple
+
+106
+00:07:19.000 --> 00:07:22.040
+text into binary ones and zeros using
+character sets.
+
+107
+00:07:22.520 --> 00:07:26.819
+But as we look ahead to our next explainer
+in this data representation unit, I really
+
+108
+00:07:26.880 --> 00:07:28.920
+want you to start wondering about
+something big.
+
+109
+00:07:29.480 --> 00:07:33.100
+If it takes this much thought and
+processing just to turn the letter A into
+
+110
+00:07:33.140 --> 00:07:37.320
+a number, what kind of mathematical magic
+do we need to turn a vibrant million-color
+
+111
+00:07:37.400 --> 00:07:41.579
+photograph into pure binary? Keep that
+rattling around in your head, and I'll see
+
+112
+00:07:41.600 --> 00:07:44.579
+you in the next lesson where we conquer
+representing images and sound.
+
+113
+00:07:44.880 --> 00:07:45.399
+See you then.
