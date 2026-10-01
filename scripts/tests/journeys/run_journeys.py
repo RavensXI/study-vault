@@ -1,3 +1,4 @@
+import json
 """School-mode journey stress test (Tom, 1 Oct 2026). Live site, disposable users, full cleanup."""
 import asyncio, json, os, random, string, sys, time, urllib.request, urllib.error
 from playwright.async_api import async_playwright
@@ -197,7 +198,10 @@ async def main():
         # sign out and back in on device 1
         await a1.evaluate("()=>{ if(window.svSignOut) svSignOut(); }"); await a1.wait_for_timeout(5000)
         after_out = await a1.evaluate("()=>({tok:!!localStorage.getItem('%s'), w:localStorage.getItem('sv-welcome')})" % TOKEN_KEY)
-        record("J4.5 sign-out cleans the device", "no token, no sv-welcome", not after_out["tok"] and not after_out["w"], str(after_out)[:160])
+        # after sign-out /welcome shows the starter four, marked defaulted (it must never beat the account: J4.6)
+        _w = json.loads(after_out["w"]) if after_out["w"] else None
+        record("J4.5 sign-out cleans the device", "no token; device holds nothing or the marked starter shelf",
+               not after_out["tok"] and (_w is None or _w.get("defaulted") is True), str(after_out)[:160])
         await inject(a1, session(A))
         d = await look(a1, "J4.6 device 1 signs back in", A["id"], 18000)
         sp = (server_welcome(A["id"]) or {})
