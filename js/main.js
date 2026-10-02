@@ -2434,10 +2434,18 @@ function initRevisionTips() {
 
       const popup = document.createElement('div');
       popup.className = 'revision-tip-popup';
-      var tipHref = basePath + (basePath.startsWith('/guide/') ? tip.link.replace('.html', '') : tip.link);
+      // A box's own tip may name its technique (data-revision-technique, a revision-technique page
+      // slug the subject has), so the link matches the task: a "rank" task links Elaborative
+      // Interrogation, not Retrieval Practice (3 Oct 2026). Otherwise the generic link stays.
+      var TECH_LABEL = { 'elaborative-interrogation': 'Elaborative Interrogation', 'interleaving': 'Interleaving',
+                         'dual-coding': 'Dual Coding', 'retrieval-practice': 'Retrieval Practice' };
+      var ownTech = el.getAttribute('data-revision-technique');
+      var techSlug = ownTech && TECH_LABEL[ownTech] ? ownTech + '.html' : tip.link;
+      var techLabel = ownTech && TECH_LABEL[ownTech] ? TECH_LABEL[ownTech] : tip.label;
+      var tipHref = basePath + (basePath.startsWith('/guide/') ? techSlug.replace('.html', '') : techSlug);
       // Use content-specific tip if present, otherwise fall back to generic
       var tipText = el.getAttribute('data-revision-tip') || tip.text;
-      popup.innerHTML = '<p>' + tipText + '</p><a href="' + tipHref + '">' + tip.label + ' \u2192</a>';
+      popup.innerHTML = '<p>' + tipText + '</p><a href="' + tipHref + '">' + techLabel + ' \u2192</a>';
 
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
