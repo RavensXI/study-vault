@@ -19,8 +19,20 @@ AZURE_KEY = os.environ.get("AZURE_SPEECH_KEY")
 AZURE_REGION = "uksouth"
 AZURE_TTS_URL = f"https://{AZURE_REGION}.tts.speech.microsoft.com/cognitiveservices/v1"
 
-VOICE_ODD = "en-GB-OllieMultilingualNeural"   # Odd lessons
-VOICE_EVEN = "en-GB-AdaMultilingualNeural"     # Even lessons
+# Narration voices (Tom, 2 Oct 2026): Microsoft's MAI voices for all new and re-narrated lessons.
+# Odd lessons = Harry, even = Emily (British; preview voices that are not in Azure's voice list yet
+# but work). They are served by the Foundry resource (FOUNDRY_ENDPOINT / FOUNDRY_KEY), not the
+# uksouth Speech key, and the service returns occasional 502s, so they get a longer retry.
+# Language lessons (French/German/Spanish, <lang> tags) keep the multilingual neural voices,
+# which pronounce the foreign words; existing audio is NOT re-made by this change.
+VOICE_ODD = "en-GB-Harry:MAI-Voice-2.1-Flash"
+VOICE_EVEN = "en-GB-Emily:MAI-Voice-2.1-Flash"
+LEGACY_ODD = "en-GB-OllieMultilingualNeural"
+LEGACY_EVEN = "en-GB-AdaMultilingualNeural"
+_FOUNDRY = os.environ.get("FOUNDRY_ENDPOINT", "")
+MAI_TTS_URL = (re.sub(r"^https://([^.]+)\..*$", r"https://\1.cognitiveservices.azure.com", _FOUNDRY)
+               + "/tts/cognitiveservices/v1") if _FOUNDRY else None
+MAI_KEY = os.environ.get("FOUNDRY_KEY")
 
 # Language codes for multilingual SSML <lang> tags
 SUBJECT_LANG_CODES = {
@@ -386,6 +398,8 @@ def generate_audio_rest(text, voice_name, lang_code=None):
 
     Returns MP3 bytes on success, None on failure.
     """
+    if lang_code and ":MAI-" in voice_name:   # the multilingual voices pronounce the foreign words
+        voice_name = LEGACY_ODD if voice_name == VOICE_ODD else LEGACY_EVEN
     body = _build_ssml_body(text, lang_code)
     ssml = (
         f"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' "
@@ -394,15 +408,20 @@ def generate_audio_rest(text, voice_name, lang_code=None):
         f"</speak>"
     )
 
+    mai = ":MAI-" in voice_name
+    url, key, tries = (MAI_TTS_URL, MAI_KEY, 6) if mai else (AZURE_TTS_URL, AZURE_KEY, 3)
+    if mai and not (url and key):
+        raise RuntimeError("MAI voice needs FOUNDRY_ENDPOINT and FOUNDRY_KEY in the environment")
     headers = {
-        "Ocp-Apim-Subscription-Key": AZURE_KEY,
+        "Ocp-Apim-Subscription-Key": key,
         "Content-Type": "application/ssml+xml",
         "X-Microsoft-OutputFormat": "audio-24khz-96kbitrate-mono-mp3",
+        "User-Agent": "studyvault-narration",
     }
 
-    for attempt in range(3):
+    for attempt in range(tries):
         try:
-            resp = requests.post(AZURE_TTS_URL, headers=headers, data=ssml.encode("utf-8"), timeout=60)
+            resp = requests.post(url, headers=headers, data=ssml.encode("utf-8"), timeout=60)
             if resp.status_code == 200:
                 return resp.content
             elif resp.status_code == 429:
@@ -411,12 +430,12 @@ def generate_audio_rest(text, voice_name, lang_code=None):
                 time.sleep(wait)
             else:
                 print(f"      HTTP {resp.status_code}: {resp.text[:200]}")
-                if attempt < 2:
-                    time.sleep(2)
+                if attempt < tries - 1:
+                    time.sleep(2 + 3 * attempt)
         except requests.exceptions.RequestException as e:
             print(f"      Request error: {e}")
-            if attempt < 2:
-                time.sleep(2)
+            if attempt < tries - 1:
+                time.sleep(2 + 3 * attempt)
 
     return None
 
@@ -478,7 +497,7 @@ def get_mp3_duration(mp3_bytes):
 # ── Voice assignment ────────────────────────────────────────────────────
 
 def get_voice_for_lesson(lesson_number):
-    """Return (voice_name, label) for a lesson number. Odd=Ollie, Even=Ada."""
+    """Return (voice_name, label) for a lesson number. Odd=Harry, Even=Emily (Ollie/Ada for language lessons)."""
     if lesson_number % 2 == 1:
-        return VOICE_ODD, "Ollie"
-    return VOICE_EVEN, "Ada"
+        return VOICE_ODD, "Harry"
+    return VOICE_EVEN, "Emily"
