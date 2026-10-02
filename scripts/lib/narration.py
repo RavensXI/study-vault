@@ -480,6 +480,11 @@ def generate_audio_rest(text, voice_name, lang_code=None):
     text = re.sub(r"(?<=\d)\s*÷\s*(?=[\d(])", " divided by ", text)
     if lang_code and ":MAI-" in voice_name:   # the multilingual voices pronounce the foreign words
         voice_name = LEGACY_ODD if voice_name == VOICE_ODD else LEGACY_EVEN
+    if ":MAI-" in voice_name and not re.search(r"[.!?…:;][\"'”’)\]]*\s*$", text):
+        # A chunk with no closing punctuation (a heading) makes the MAI voices add a stray word at
+        # the end: "How computers store text dot" (Tom, 2 Oct 2026; Harry too, about 2 takes in 3).
+        # A full stop stopped it in every test take.
+        text = text.rstrip() + "."
     body = _build_ssml_body(text, lang_code)
     if ":MAI-" in voice_name:
         # The MAI voices are multilingual and guess the language phrase by phrase; a run of bare
