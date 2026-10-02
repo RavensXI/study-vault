@@ -1179,11 +1179,62 @@ function initNarration() {
     }
   });
 
+  // --- Podcast credit: 70% actually heard (Tom, 2 Oct 2026) ---
+  // The parts of the podcast that really played are recorded as [from, to] intervals; a seek
+  // or scrub starts a new interval and adds nothing, and a replay counts once. Stored per lesson
+  // in 'sv-podcast-heard' ({path: [[s, e], ...]}, synced with the account). The podcast task is
+  // ticked once the merged intervals cover 70% of the episode (it used to be ticked on 'ended',
+  // which dragging to the end could earn).
+  var HEARD_KEY = 'sv-podcast-heard', HEARD_SHARE = 0.7;
+  var heardSeg = null, heardTicked = false;
+  function heardAll() { try { return JSON.parse(localStorage.getItem(HEARD_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  function heardMerge(list) {
+    var a = (list || []).filter(function (x) { return x && x[1] > x[0]; })
+      .map(function (x) { return [+x[0], +x[1]]; }).sort(function (x, y) { return x[0] - y[0]; });
+    var out = [];
+    a.forEach(function (x) {
+      var last = out[out.length - 1];
+      if (last && x[0] <= last[1] + 0.5) last[1] = Math.max(last[1], x[1]); else out.push(x);
+    });
+    return out;
+  }
+  function heardCovered(list) { return list.reduce(function (t, x) { return t + (x[1] - x[0]); }, 0); }
+  function heardCheck(list) {
+    var dur = podcastDuration || audio.duration || 0;
+    if (!heardTicked && dur > 0 && heardCovered(list) >= HEARD_SHARE * dur) {
+      heardTicked = true;
+      if (window.svTickTask) svTickTask('podcast');
+    }
+  }
+  function heardCommit() {
+    if (!heardSeg) return;
+    var seg = heardSeg; heardSeg = null;
+    if (seg[1] - seg[0] < 0.25) return;
+    var all = heardAll(), key = location.pathname;
+    all[key] = heardMerge((all[key] || []).concat([seg]));
+    try { localStorage.setItem(HEARD_KEY, JSON.stringify(all)); } catch (e) {}
+    heardCheck(all[key]);
+  }
+  function heardTrack() {
+    if (playerMode !== 'podcast' || audio.paused || audio.seeking) return;
+    var t = audio.currentTime || 0, rate = audio.playbackRate || 1;
+    if (!heardSeg) { heardSeg = [t, t]; return; }
+    var step = t - heardSeg[1];
+    if (step < 0 || step > 1.5 * rate + 0.75) { heardCommit(); heardSeg = [t, t]; return; }   // a jump, not playback
+    heardSeg[1] = t;
+    if (heardSeg[1] - heardSeg[0] >= 5) { var keepT = heardSeg[1]; heardCommit(); heardSeg = [keepT, keepT]; }   // save as it goes
+  }
+  audio.addEventListener('seeking', heardCommit);
+  audio.addEventListener('pause', heardCommit);
+  audio.addEventListener('emptied', function () { heardCommit(); heardTicked = false; });
+  window.addEventListener('pagehide', heardCommit);
+
   // --- Progress ---
 
   var podcastSaveCounter = 0;
   audio.addEventListener('timeupdate', function() {
     if (playerMode === 'podcast') {
+      heardTrack();
       var dur = audio.duration || 0;
       var cur = audio.currentTime || 0;
       var pct = dur > 0 ? (cur / dur * 100) + '%' : '0%';
@@ -1231,9 +1282,12 @@ function initNarration() {
       playBtn.setAttribute('aria-label', 'Play podcast');
       fabPlay.classList.remove('playing');
       fab.classList.remove('visible');
-      // Clear saved position — they finished the episode, and that counts (Tom, 12 Sep 2026)
+      // Clear saved position — they finished the episode (Tom, 12 Sep 2026). Reaching the end
+      // only counts when 70% of it was actually heard (2 Oct 2026): heardCheck decides.
       localStorage.removeItem('sv-podcast-pos-' + location.pathname);
-      if (window.svTickTask) svTickTask('podcast');
+      if (heardSeg) heardSeg[1] = Math.max(heardSeg[1], audio.duration || heardSeg[1]);
+      heardCommit();
+      heardCheck(heardMerge(heardAll()[location.pathname] || []));
     } else if (currentIndex + 1 < manifest.length) {
       loadClip(currentIndex + 1);
       audio.play();

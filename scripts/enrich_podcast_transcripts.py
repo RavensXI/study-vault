@@ -193,6 +193,50 @@ def do_captions():
         print("captions %s/%s/%d: %d words, video %s" % (s, u, n, len(words), v[-50:]))
 
 
+ENDS_SYS = """You mark where a GCSE revision podcast (two AI hosts) finishes explaining each lesson section, so a pupil can hear a clean clip of just that part.
+You get the podcast as numbered paragraphs (turns) with start times, and for each lesson section its heading, a short extract of the lesson text, and the paragraph where the clip starts.
+For each section, choose the LAST paragraph that is still about that section's topic: the hosts have finished the point and the next paragraph moves to something else (a new person, event, idea, or a recap of a different topic). The clip must end at the end of a paragraph, never mid-sentence, and should not cut off a host who is answering the other's question. Prefer a clip of 1 to 6 minutes; if the hosts return to the topic much later, ignore that.
+Return ONLY JSON: {"ends":[{"heading":"<exact heading>","last_turn":<paragraph number>,"confidence":0.0-1.0}]}"""
+
+
+def do_ends():
+    for s, u, n, path, tr in each():
+        spath = path.replace(".json", ".study.json")
+        if not os.path.exists(spath): continue
+        study = json.load(open(spath, encoding="utf-8"))
+        turns = tr["turns"]
+        L = lesson_row(s, u, n)
+        lesson_txt = plain(L["content_html"])
+        def first_turn(t):
+            k = 0
+            for i, x in enumerate(turns):
+                if x["start"] <= t + 0.5: k = i
+            return k
+        secs_desc = []
+        for x in study.get("sections", []):
+            i = lesson_txt.find(x["heading"])
+            extract = lesson_txt[i:i + 600] if i >= 0 else ""
+            secs_desc.append("- %s (starts at paragraph %d)\n  %s" % (x["heading"], first_turn(x["start"]), extract.replace("\n", " ")))
+        numbered = "\n".join("[%d] %s %s: %s" % (i, mmss(t["start"]), "AB"[t["speaker"] - 1] if t["speaker"] in (1, 2) else "?", t["text"]) for i, t in enumerate(turns))
+        res = claude(ENDS_SYS, "LESSON SECTIONS:\n%s\n\nPODCAST PARAGRAPHS:\n%s" % ("\n".join(secs_desc), numbered)) or {"ends": []}
+        by = {e.get("heading"): e for e in res.get("ends", [])}
+        chapters = sorted(c["start"] for c in study.get("chapters", []))
+        for x in study.get("sections", []):
+            st = first_turn(x["start"])
+            e = by.get(x["heading"])
+            k = e.get("last_turn") if e else None
+            ok = isinstance(k, int) and st <= k < len(turns) and turns[k]["end"] - x["start"] >= 20 and (e.get("confidence") or 0) >= 0.5
+            if ok:
+                x["end"] = turns[k]["end"]; x["end_src"] = "claude"
+            else:   # fall back: the paragraph that ends just before the next chapter starts
+                nxt = next((c for c in chapters if c > x["start"] + 20), None)
+                kk = max([i for i, t in enumerate(turns) if nxt is None or t["start"] < nxt] or [len(turns) - 1])
+                x["end"] = turns[kk]["end"]; x["end_src"] = "next chapter"
+            print("   %-45s %s -> %s (%s)" % (x["heading"][:45], mmss(x["start"]), mmss(x["end"]), x["end_src"]))
+        json.dump(study, open(spath, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        print("ends %s/%s/%d done" % (s, u, n))
+
+
 def do_index():
     idx = []
     for s, u, n, path, tr in each():
@@ -205,6 +249,6 @@ def do_index():
 
 if __name__ == "__main__":
     what = sys.argv[1] if len(sys.argv) > 1 else "all"
-    for name, fn in (("factcheck", do_factcheck), ("study", do_study), ("captions", do_captions), ("index", do_index)):
+    for name, fn in (("factcheck", do_factcheck), ("study", do_study), ("ends", do_ends), ("captions", do_captions), ("index", do_index)):
         if what in (name, "all"): fn()
     if os.path.exists(SPEND): print("subscription ledger:", open(SPEND).read())

@@ -58,10 +58,53 @@
     function inPodcast() { return !!(audio.currentSrc || audio.src) && (audio.currentSrc || audio.src).indexOf(window.podcastUrl) !== -1; }
 
     /* play the podcast from a moment: switch tabs if needed, then seek once the file is ready */
+    /* A "Hear this explained" clip plays start -> end, fades out over the last 1.5 s, pauses,
+       and offers "Keep listening". Any other way of playing (main button, chapter, paragraph)
+       clears the clip, so only the Hear buttons ever stop early. */
+    var clip = null, ownSeek = false, raf = 0, FADE = 1.5;
+    var keep = document.createElement('button');
+    keep.type = 'button'; keep.className = 'svt-keep'; keep.hidden = true; keep.textContent = 'Keep listening';
+    var wrapEl = document.querySelector('.audio-player-wrapper');
+    wrapEl.appendChild(keep);
+    function endClip(restore) {
+      if (!clip) return;
+      cancelAnimationFrame(raf);
+      if (restore) audio.volume = clip.vol;
+      clip = null;
+    }
+    function watchClip() {
+      if (!clip) return;
+      var left = clip.end - audio.currentTime;
+      if (left <= FADE) audio.volume = Math.max(0, clip.vol * Math.max(0, left) / FADE);
+      if (left <= 0.05) {
+        var v = clip.vol;
+        audio.pause();
+        endClip(false);
+        audio.volume = v;
+        keep.hidden = false;
+        keep.focus({ preventScroll: true });
+        return;
+      }
+      raf = requestAnimationFrame(watchClip);
+    }
+    audio.addEventListener('seeking', function () { if (!ownSeek) endClip(true); });
+    audio.addEventListener('seeked', function () { ownSeek = false; });
+    audio.addEventListener('play', function () { if (clip) { cancelAnimationFrame(raf); raf = requestAnimationFrame(watchClip); } });
+    audio.addEventListener('emptied', function () { endClip(true); keep.hidden = true; });
+    keep.addEventListener('click', function () {
+      keep.hidden = true;
+      var p = audio.play(); if (p && p.catch) p.catch(function () {});
+    });
+    document.querySelector('.narration-play').addEventListener('click', function () { keep.hidden = true; }, true);
+
     function playAt(t, opts) {
       opts = opts || {};
+      endClip(true);
+      keep.hidden = true;
       function go() {
-        try { audio.currentTime = t; } catch (e) {}
+        ownSeek = true;           /* cleared on 'seeked': our own jump must not cancel the clip */
+        try { audio.currentTime = t; } catch (e) { ownSeek = false; }
+        if (opts.end && opts.end > t) clip = { end: opts.end, vol: audio.volume || 1 };
         if (!opts.cueOnly) { var p = audio.play(); if (p && p.catch) p.catch(function () {}); }
       }
       if (!inPodcast()) podTab.click();
@@ -258,7 +301,7 @@
       b.type = 'button'; b.className = 'svt-hear';
       b.setAttribute('aria-label', 'Hear this explained in the podcast, from ' + fmt(s.start));
       b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg><span>Hear this explained</span>';
-      b.addEventListener('click', function (e) { e.stopPropagation(); playAt(s.start); });
+      b.addEventListener('click', function (e) { e.stopPropagation(); playAt(s.start, { end: s.end }); });
       h.appendChild(b);
     });
 
