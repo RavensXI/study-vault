@@ -89,7 +89,7 @@ def _reauth():
     print("  [AUTH] Cookies expired — re-authenticating via saved profile...", flush=True)
     for attempt in range(1, 4):
         try:
-            result = subprocess.run(["nlm", "login"], capture_output=True, text=True,
+            result = subprocess.run(["nlm", "login", "--force"], capture_output=True, text=True,
                                     encoding="utf-8", errors="replace", env=NLM_ENV, timeout=150)
         except subprocess.TimeoutExpired:
             print(f"  [AUTH] Re-auth attempt {attempt}/3 timed out", flush=True)

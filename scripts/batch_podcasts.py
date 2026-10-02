@@ -62,7 +62,7 @@ SUBJECT_ORDER = [
 def _reauth():
     print("  [AUTH] Cookies expired — re-authenticating...")
     result = subprocess.run(
-        ["nlm", "login"], capture_output=True, text=True,
+        ["nlm", "login", "--force"], capture_output=True, text=True,
         encoding="utf-8", errors="replace", env=NLM_ENV, timeout=120
     )
     if result.returncode == 0 and "success" in (result.stdout or "").lower():
