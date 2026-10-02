@@ -398,9 +398,18 @@ def generate_audio_rest(text, voice_name, lang_code=None):
 
     Returns MP3 bytes on success, None on failure.
     """
+    # Maths signs in plain text were silent (U+2212 minus read "65 plus 7 1" for "65 + (7 − 1)").
+    text = re.sub(r"\s*−\s*", " minus ", text)
+    text = re.sub(r"(?<=\d)\s*×\s*(?=[\d(])", " times ", text)
+    text = re.sub(r"(?<=\d)\s*÷\s*(?=[\d(])", " divided by ", text)
     if lang_code and ":MAI-" in voice_name:   # the multilingual voices pronounce the foreign words
         voice_name = LEGACY_ODD if voice_name == VOICE_ODD else LEGACY_EVEN
     body = _build_ssml_body(text, lang_code)
+    if ":MAI-" in voice_name:
+        # The MAI voices are multilingual and guess the language phrase by phrase; a run of bare
+        # numbers or single letters gives them little to go on (Tom heard French numbers, 2 Oct
+        # 2026). Pinning British English made the detector certain in tests (0.93 -> 1.00).
+        body = "<lang xml:lang='en-GB'>" + body + "</lang>"
     ssml = (
         f"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' "
         f"xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-GB'>"
