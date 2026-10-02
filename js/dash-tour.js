@@ -35,8 +35,8 @@
       text: 'The number at the top is how many days until your first exam. Tap it to see your whole plan on a calendar, right up to your last exam, including your days off and holidays. You can change your revising days and how long you revise here too.' },
     { id: 'reading', title: 'Make it easier on your eyes',
       text: 'Tap the moon at the top to switch to dark mode, make the text bigger, change to an easier-to-read font, or put a colour tint over the page. Whatever you pick stays on across every page, including the lessons.' },
-    { id: 'access', title: 'Read what you cannot hear',
-      text: 'Every lesson podcast has a written version. On a lesson, tap the page icon next to the speed button on the player. You can read along, search it, or tap any line to hear it from there. The lesson videos have captions too: tap CC.' }
+    { id: 'access', title: 'Transcripts and captions',
+      text: 'Every lesson podcast is also written out, for when you would rather read or cannot listen. On a lesson, tap the page icon next to the speed button on the player. You can read along, search it, or tap any line to hear it from there. The lesson videos have captions too: tap CC.' }
   ];
 
   var dq = new URLSearchParams(location.search);
