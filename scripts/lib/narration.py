@@ -278,7 +278,7 @@ def speak_symbols(text):
     for sym, words in _SYMBOLS:
         t = t.replace(sym, words)
     t = re.sub(r"\s+", " ", t)
-    return re.sub(r"\s+([,.;:])", r"", t).strip()
+    return re.sub(r"\s+([,.;:])", r"\1", t).strip()
 
 
 class NarrationExtractor(HTMLParser):
