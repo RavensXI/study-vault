@@ -2,7 +2,8 @@
 
    Everything here hangs off files shipped in /transcripts/<subject>/<unit>/lNN.*:
      lNN.json            the transcript, turn by turn (MAI-Transcribe-2): required — no file, no feature
-     lNN.study.json      chapters, lesson-section matches, "Check you listened" quiz
+     lNN.study.json      chapters and lesson-section matches ("Check you listened" was dropped,
+                         Tom 2 Oct 2026: the lesson already has its quiz and flashcards)
      lNN.factcheck.json  moments the hosts get wrong (shown to staff only)
      lNN.video.vtt       captions for the explainer video
    The podcast plays through the page's own player (js/main.js, one <audio> shared with
@@ -53,7 +54,6 @@
     var names = tr.speakers || { 1: 'Host A', 2: 'Host B' };
     var turns = tr.turns;
     var chapters = study.chapters || [];
-    var quiz = study.quiz || [];
 
     function inPodcast() { return !!(audio.currentSrc || audio.src) && (audio.currentSrc || audio.src).indexOf(window.podcastUrl) !== -1; }
 
@@ -194,13 +194,6 @@
             esc(x.problem) + (x.lesson_says ? ' <i>Lesson: ' + esc(x.lesson_says) + '</i>' : '') + '</span>';
         }).join('') : '') + '</p>';
     }).join('') + '</div>';
-    if (quiz.length) {
-      html += '<div class="svt-quiz"><h3>Check you listened</h3><ol>' + quiz.map(function (q, qi) {
-        return '<li class="svt-q" data-q="' + qi + '"><p class="svt-qtext">' + esc(q.q) + '</p><div class="svt-opts" role="group" aria-label="Answers">' +
-          q.options.map(function (o, oi) { return '<button type="button" class="svt-opt" data-o="' + oi + '">' + esc(o) + '</button>'; }).join('') +
-          '</div><div class="svt-fb" aria-live="polite"></div></li>';
-      }).join('') + '</ol><p class="svt-score" aria-live="polite"></p></div>';
-    }
     panel.innerHTML = html;
     wrapper.parentNode.insertBefore(panel, wrapper.nextSibling);
 
@@ -216,7 +209,7 @@
     /* click or Enter on a paragraph (or a chapter) plays from there */
     panel.addEventListener('click', function (e) {
       var el = e.target.closest('[data-t]');
-      if (el && panel.contains(el) && !e.target.closest('.svt-opt')) playAt(parseFloat(el.dataset.t));
+      if (el && panel.contains(el)) playAt(parseFloat(el.dataset.t));
     });
     panel.addEventListener('keydown', function (e) {
       if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('svt-turn')) { e.preventDefault(); playAt(parseFloat(e.target.dataset.t)); }
@@ -332,31 +325,8 @@
       });
     }
 
-    /* quiz: client-side marking; a wrong answer offers the moment it was said */
-    var score = 0, answered = 0;
-    panel.querySelectorAll('.svt-q').forEach(function (li) {
-      var item = quiz[+li.dataset.q];
-      li.querySelectorAll('.svt-opt').forEach(function (b) {
-        b.addEventListener('click', function () {
-          if (li.classList.contains('done')) return;
-          li.classList.add('done'); answered++;
-          var ok = +b.dataset.o === item.answer;
-          if (ok) score++;
-          li.querySelectorAll('.svt-opt').forEach(function (x) {
-            x.disabled = true;
-            if (+x.dataset.o === item.answer) x.classList.add('right');
-          });
-          if (!ok) b.classList.add('wrong');
-          var fb = li.querySelector('.svt-fb');
-          fb.innerHTML = (ok ? 'Right. ' : 'Not quite. ') + esc(item.why || '') +
-            (ok ? '' : ' <button type="button" class="svt-again" data-t="' + item.start + '">Hear that part again (' + fmt(item.start) + ')</button>');
-          if (answered === quiz.length) panel.querySelector('.svt-score').textContent = 'You got ' + score + ' out of ' + quiz.length + '.';
-        });
-      });
-    });
-
-    /* "Hear this explained" beside lesson headings the podcast clearly covers: a small round badge
-       (a speech bubble, so it is not mistaken for the podcast's headphones). Hover or focus names
+    /* "Hear this explained" beside lesson headings the podcast clearly covers: a small rounded
+       button (a speech bubble, so it is not mistaken for the podcast's headphones). Hover or focus names
        it with the clip's length. Until a pupil has used one, the first badge also carries the
        words, since a phone has no hover; 'sv-hear-used' (account-synced) records that. */
     var hearUsed = false;

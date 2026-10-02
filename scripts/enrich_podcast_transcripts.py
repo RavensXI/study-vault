@@ -2,7 +2,7 @@
 
 For each lesson in build_podcast_transcripts.PREVIEW that has transcripts/<s>/<u>/lNN.json:
   lNN.factcheck.json  statements the hosts make that are wrong or contradict the lesson (staff only)
-  lNN.study.json      chapters (4-8), lesson-section -> podcast moment matches, 5-question "Check you listened" quiz
+  lNN.study.json      chapters (4-8), lesson-section -> podcast moment matches (no quiz: Tom, 2 Oct 2026)
   lNN.video.vtt       captions for the lesson's explainer video (R2 .mp4), from MAI-Transcribe-2 word timings
   transcripts/index.json   search-inside-audio index for the dashboard finder
 
@@ -79,10 +79,9 @@ Flag only statements a GCSE examiner would treat as WRONG or that CONTRADICT the
 Return ONLY JSON: {"flags":[{"start":"m:ss","quote":"<exact words, <=30 words>","problem":"<one sentence>","lesson_says":"<what the lesson says, or 'not in the lesson'>","severity":"major|minor"}]}. An empty list is a valid answer."""
 
 STUDY_SYS = """You build study aids from a GCSE revision podcast transcript (two AI hosts A and B, [m:ss] times) and its lesson.
-Return ONLY JSON with three keys:
+Return ONLY JSON with two keys:
 "chapters": 4 to 8 topic chapters covering the whole podcast in order: [{"start":"m:ss","title":"<plain title, max 6 words>"}]; the first starts at 0:00.
-"sections": for each lesson heading given, the podcast moment that best explains it: [{"heading":"<exact heading text>","start":"m:ss","confidence":0.0-1.0}]. Use confidence >= 0.75 only when the podcast clearly discusses that heading's content at that time; otherwise give a low confidence.
-"quiz": exactly 5 multiple-choice questions a pupil can answer only if they listened, each about something the hosts actually said that is ALSO correct according to the lesson: [{"q":"<question>","options":["<4 options>"],"answer":<index 0-3>,"start":"m:ss","why":"<one sentence, plain words>"}]. "start" is when the hosts say the answer. Plain British English, GCSE level, no trick questions, options of similar length."""
+"sections": for each lesson heading given, the podcast moment that best explains it: [{"heading":"<exact heading text>","start":"m:ss","confidence":0.0-1.0}]. Use confidence >= 0.75 only when the podcast clearly discusses that heading's content at that time; otherwise give a low confidence. Plain British English, GCSE level."""
 
 
 def secs(t):
@@ -125,14 +124,10 @@ def do_study():
         byh = {h["text"]: h for h in hs}
         sections = [{"heading": x["heading"], "id": (byh.get(x["heading"]) or {}).get("id"), "start": secs(x["start"]),
                      "confidence": x.get("confidence", 0)} for x in res.get("sections", []) if x.get("heading") in byh]
-        quiz = []
-        for q in res.get("quiz", [])[:5]:
-            if len(q.get("options", [])) == 4 and q.get("answer") in (0, 1, 2, 3):
-                q["start"] = secs(q["start"]); quiz.append(q)
-        json.dump({"chapters": chapters, "sections": sections, "quiz": quiz},
+        json.dump({"chapters": chapters, "sections": sections},
                   open(path.replace(".json", ".study.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-        print("study %s/%s/%d: %d chapters, %d/%d sections confident, %d quiz" %
-              (s, u, n, len(chapters), sum(1 for x in sections if x["confidence"] >= .75), len(hs), len(quiz)))
+        print("study %s/%s/%d: %d chapters, %d/%d sections confident" %
+              (s, u, n, len(chapters), sum(1 for x in sections if x["confidence"] >= .75), len(hs)))
 
 
 def vtt_time(t):
