@@ -19,7 +19,7 @@ from playwright.sync_api import sync_playwright
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 OUT = os.path.join(ROOT, 'assets', 'tour')
 LESSON = '/lesson/business-aqa/business-real-world/1'     # the lesson the lesson tour is filmed on: narration, podcast, video, six questions
-H = 'http://127.0.0.1:8907'
+H = os.environ.get('TOUR_HOST', 'http://127.0.0.1:8907')
 HEIGHTS = {'books': 1000, 'rings': 1000}     # desktop clips where the topics panel opens under the shelf
 SIZES = {
     'desktop': dict(viewport={'width': 1200, 'height': 780}, scale=1),
@@ -244,6 +244,32 @@ def clip_reading(c):
     c.click('.svset-pop [data-font="atkinson"]'); c.pause(1600)
     c.click('.svset-pop [data-font="default"]'); c.pause(600)
 
+def clip_access(c):
+    """the podcast transcript and the video captions, on a lesson that has both (Tom, 2 Oct 2026:
+    a deaf pupil would never try the podcast button, so the tour has to say it is there)"""
+    c.demo('amira'); c.go('/lesson/history-aqa/elizabethan-england/2', 7500)
+    c.pg.evaluate("document.querySelectorAll('.sv-tour-block,.sv-tour,.sv-tour-card,.sv-tourclips').forEach(e=>e.remove()); document.body.classList.remove('sv-tourclips-open')")
+    c.pg.evaluate("document.querySelectorAll('audio').forEach(a=>a.muted=true)")
+    c.pg.evaluate("([s,o])=>{const e=document.querySelector(s); if(e){ window.scrollTo(0, Math.max(0, e.getBoundingClientRect().top+scrollY-o)); }}", ['.audio-player-wrapper', 140 if c.phone else 160])
+    c.pause(600); c.start()
+    c.ring('.svt-open', 6); c.pause(1100)
+    c.click('.svt-open', keep=True); c.pause(700); c.unring()
+    c.pg.evaluate("document.querySelector('.svt-turns').scrollTo({top:0})")
+    c.ring('#svt-panel', 4); c.pause(1600)
+    c.move_to('.svt-turn >> nth=3'); c.pause(400)
+    c.pg.evaluate("document.querySelector('.svt-turns').scrollBy({top:220,behavior:'smooth'})"); c.pause(1600)
+    c.unring()
+    if c.phone: c.click('.mobile-menu-btn', keep=True); c.pause(900)
+    c.click('.sidebar-video, .sidebar-video-thumb'); c.pause(1800)
+    v = c.box('.video-modal-player')
+    if v:
+        c.pg.evaluate("document.querySelector('.video-modal-player').muted=true; document.querySelector('.video-modal-player').play()")
+        c.pg.mouse.move(v['x'] + v['width'] / 2, v['y'] + v['height'] / 2, steps=12); c.pause(500)
+        c.ring('.video-cc-btn', 4); c.pause(900)
+        c.click('.video-cc-btn', keep=True); c.unring()
+        c.pg.mouse.move(v['x'] + v['width'] / 2, v['y'] + v['height'] * 0.4, steps=10); c.pause(3200)
+
+
 # ---------------- the lesson clips ----------------
 def lesson_open(c):
     """a signed-in demo student on the tour lesson, page settled, no hints"""
@@ -393,7 +419,7 @@ LESSON_CLIPS = [
 CLIPS = [
     ('plan', clip_plan), ('revisit', clip_revisit), ('quickcheck', clip_quickcheck), ('books', clip_books),
     ('rings', clip_rings), ('week', clip_week), ('flashcards', clip_flashcards), ('podcast', clip_podcast),
-    ('timer', clip_timer), ('restday', clip_restday), ('planner', clip_planner), ('reading', clip_reading),
+    ('timer', clip_timer), ('restday', clip_restday), ('planner', clip_planner), ('reading', clip_reading), ('access', clip_access),
 ]
 
 

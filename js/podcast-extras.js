@@ -61,16 +61,32 @@
     /* A "Hear this explained" clip plays start -> end, fades out over the last 1.5 s, pauses,
        and offers "Keep listening". Any other way of playing (main button, chapter, paragraph)
        clears the clip, so only the Hear buttons ever stop early. */
-    var clip = null, ownSeek = false, raf = 0, FADE = 1.5;
+    var clip = null, ownSeek = false, raf = 0, FADE = 1.5, keepTimer = 0;
+    /* "Keep listening" lives in the floating player at the bottom (Tom, 2 Oct 2026): a pupil who
+       starts a clip from a heading has usually scrolled away from the main player. When the main
+       player is on screen instead, it sits in that player's control row. It goes after 10 s;
+       the ordinary play button carries on from the same place anyway. */
     var keep = document.createElement('button');
     keep.type = 'button'; keep.className = 'svt-keep'; keep.hidden = true; keep.textContent = 'Keep listening';
-    var wrapEl = document.querySelector('.audio-player-wrapper');
-    wrapEl.appendChild(keep);
+    var fab = document.querySelector('.narration-fab');
+    var fabTime = fab && fab.querySelector('.narration-fab-time');
+    var meta = wrapper.querySelector('.narration-meta');
+    function hideKeep() { clearTimeout(keepTimer); keep.hidden = true; if (fab) fab.classList.remove('svt-keeping'); }
+    function showKeep() {
+      var inFab = fab && fab.classList.contains('visible');
+      if (inFab) { fab.insertBefore(keep, fab.querySelector('.narration-fab-progress')); fab.classList.add('svt-keeping'); }
+      else meta.insertBefore(keep, meta.firstChild);
+      keep.hidden = false;
+      keep.focus({ preventScroll: true });
+      clearTimeout(keepTimer);
+      keepTimer = setTimeout(hideKeep, 10000);
+    }
     function endClip(restore) {
       if (!clip) return;
       cancelAnimationFrame(raf);
       if (restore) audio.volume = clip.vol;
       clip = null;
+      if (fab) fab.classList.remove('svt-in-clip');
     }
     function watchClip() {
       if (!clip) return;
@@ -81,30 +97,35 @@
         audio.pause();
         endClip(false);
         audio.volume = v;
-        keep.hidden = false;
-        keep.focus({ preventScroll: true });
+        showKeep();
         return;
       }
       raf = requestAnimationFrame(watchClip);
     }
+    /* while a clip plays, the floating player says how long is left of it */
+    audio.addEventListener('timeupdate', function () {
+      if (clip && fabTime) fabTime.textContent = fmt(Math.max(0, clip.end - audio.currentTime)) + ' left';
+    });
     audio.addEventListener('seeking', function () { if (!ownSeek) endClip(true); });
     audio.addEventListener('seeked', function () { ownSeek = false; });
-    audio.addEventListener('play', function () { if (clip) { cancelAnimationFrame(raf); raf = requestAnimationFrame(watchClip); } });
-    audio.addEventListener('emptied', function () { endClip(true); keep.hidden = true; });
+    audio.addEventListener('play', function () {
+      hideKeep();
+      if (clip) { cancelAnimationFrame(raf); raf = requestAnimationFrame(watchClip); }
+    });
+    audio.addEventListener('emptied', function () { endClip(true); hideKeep(); });
     keep.addEventListener('click', function () {
-      keep.hidden = true;
+      hideKeep();
       var p = audio.play(); if (p && p.catch) p.catch(function () {});
     });
-    document.querySelector('.narration-play').addEventListener('click', function () { keep.hidden = true; }, true);
 
     function playAt(t, opts) {
       opts = opts || {};
       endClip(true);
-      keep.hidden = true;
+      hideKeep();
       function go() {
         ownSeek = true;           /* cleared on 'seeked': our own jump must not cancel the clip */
         try { audio.currentTime = t; } catch (e) { ownSeek = false; }
-        if (opts.end && opts.end > t) clip = { end: opts.end, vol: audio.volume || 1 };
+        if (opts.end && opts.end > t) { clip = { end: opts.end, vol: audio.volume || 1 }; if (fab) fab.classList.add('svt-in-clip'); }
         if (!opts.cueOnly) { var p = audio.play(); if (p && p.catch) p.catch(function () {}); }
       }
       if (!inPodcast()) podTab.click();
@@ -113,16 +134,18 @@
     }
     window.svPodcastPlayAt = playAt;
 
-    /* ---- the Transcript button, beside the Narration / Lesson Podcast tabs ---- */
+    /* ---- the Transcript button: an icon in the player's control row, beside the speed.
+       Shown in both modes so a pupil who cannot hear finds it without trying the podcast first. ---- */
     var btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'svt-open';
+    btn.className = 'svt-open svt-tipped';
     btn.setAttribute('aria-expanded', 'false');
     btn.setAttribute('aria-controls', 'svt-panel');
-    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Transcript</span>';
-    var tabsEl = wrapper.querySelector('.audio-player-tabs');
-    tabsEl.classList.add('svt-has-transcript');
-    tabsEl.appendChild(btn);
+    btn.setAttribute('aria-label', 'Podcast transcript');
+    btn.dataset.tip = 'Podcast transcript';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="2.5"/><path d="M7.5 9h9M7.5 12.5h9M7.5 16h5.5"/></svg>';
+    var speed = meta.querySelector('.narration-speed');
+    meta.insertBefore(btn, speed ? speed.nextSibling : null);
 
     /* ---- the panel ---- */
     var panel = document.createElement('section');
@@ -266,6 +289,54 @@
     audio.addEventListener('emptied', marks);
     marks();
 
+    /* what the marks mean: pointing at the bar (or touching it) shows the chapter there and its
+       time, and the chapter now playing is named beside the clock */
+    function chapterAt(t) {
+      var k = -1;
+      for (var i = 0; i < chapters.length; i++) if (chapters[i].start <= t + 0.5) k = i;
+      return k;
+    }
+    var player = wrapper.querySelector('.narration-player');
+    var tip = document.createElement('div');
+    tip.className = 'svt-bartip'; tip.hidden = true; tip.setAttribute('aria-hidden', 'true');
+    player.appendChild(tip);
+    var nowEl = document.createElement('span');
+    nowEl.className = 'svt-chapnow'; nowEl.hidden = true;
+    var timeEl = meta.querySelector('.narration-time');
+    meta.insertBefore(nowEl, timeEl ? timeEl.nextSibling : null);
+    var tipTimer = 0;
+    function showTip(clientX) {
+      if (!bar || !chapters.length || !inPodcast() || !(audio.duration > 0)) { tip.hidden = true; return; }
+      var r = bar.getBoundingClientRect(), pr = player.getBoundingClientRect();
+      var f = Math.min(1, Math.max(0, (clientX - r.left) / r.width)), t = f * audio.duration, k = chapterAt(t);
+      tip.innerHTML = (k >= 0 ? '<b>' + esc(chapters[k].title) + '</b>' : '') + '<span>' + fmt(t) + '</span>';
+      tip.hidden = false;
+      var w = tip.offsetWidth, x = clientX - pr.left;
+      tip.style.left = Math.min(pr.width - w / 2 - 4, Math.max(w / 2 + 4, x)) + 'px';
+      tip.style.top = (r.top - pr.top) + 'px';
+    }
+    if (bar && chapters.length) {
+      bar.addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse') showTip(e.clientX); });
+      bar.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') tip.hidden = true; });
+      /* a touch has no hover: show it under the finger, and while it slides */
+      bar.addEventListener('pointerdown', function (e) { if (e.pointerType !== 'mouse') { clearTimeout(tipTimer); showTip(e.clientX); } });
+      bar.addEventListener('touchmove', function (e) { if (e.touches[0]) showTip(e.touches[0].clientX); }, { passive: true });
+      bar.addEventListener('pointerup', function (e) {
+        if (e.pointerType !== 'mouse') { clearTimeout(tipTimer); tipTimer = setTimeout(function () { tip.hidden = true; }, 1500); }
+      });
+    }
+    var nowK = -2;
+    function chapterNow() {
+      var k = (chapters.length && inPodcast() && audio.duration > 0) ? chapterAt(audio.currentTime) : -1;
+      if (k === nowK) return;
+      nowK = k;
+      nowEl.hidden = k < 0;
+      nowEl.textContent = k >= 0 ? chapters[k].title : '';
+    }
+    audio.addEventListener('timeupdate', chapterNow);
+    audio.addEventListener('loadedmetadata', chapterNow);
+    audio.addEventListener('emptied', chapterNow);
+
     /* quiz: client-side marking; a wrong answer offers the moment it was said */
     var score = 0, answered = 0;
     panel.querySelectorAll('.svt-q').forEach(function (li) {
@@ -289,7 +360,14 @@
       });
     });
 
-    /* "Hear this explained" beside lesson headings the podcast clearly covers */
+    /* "Hear this explained" beside lesson headings the podcast clearly covers: a small round badge
+       (a speech bubble, so it is not mistaken for the podcast's headphones). Hover or focus names
+       it with the clip's length. Until a pupil has used one, the first badge also carries the
+       words, since a phone has no hover; 'sv-hear-used' (account-synced) records that. */
+    var hearUsed = false;
+    try { hearUsed = localStorage.getItem('sv-hear-used') === '1'; } catch (e) {}
+    var HEAR_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/><path d="M10.2 6.9v5.2l4.3-2.6z" fill="currentColor" stroke="none"/></svg>';
+    var firstHear = true;
     (study.sections || []).forEach(function (s) {
       if (!(s.confidence >= 0.75)) return;
       var hs = document.querySelectorAll('.study-notes h2, .study-notes h3'), h = null;
@@ -298,10 +376,18 @@
       }
       if (!h || h.querySelector('.svt-hear')) return;
       var b = document.createElement('button');
-      b.type = 'button'; b.className = 'svt-hear';
-      b.setAttribute('aria-label', 'Hear this explained in the podcast, from ' + fmt(s.start));
-      b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg><span>Hear this explained</span>';
-      b.addEventListener('click', function (e) { e.stopPropagation(); playAt(s.start, { end: s.end }); });
+      var len = s.end > s.start ? ' · ' + fmt(s.end - s.start) : '';
+      b.type = 'button'; b.className = 'svt-hear svt-tipped' + (!hearUsed && firstHear ? ' svt-hear-labelled' : '');
+      firstHear = false;
+      b.setAttribute('aria-label', 'Hear this explained in the podcast' + (len ? ', ' + fmt(s.end - s.start) + ' long' : ''));
+      b.dataset.tip = 'Hear this explained' + len;
+      b.innerHTML = HEAR_ICON + '<span class="svt-hear-words">Hear this explained</span>';
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        try { localStorage.setItem('sv-hear-used', '1'); } catch (x) {}
+        document.querySelectorAll('.svt-hear-labelled').forEach(function (x) { x.classList.remove('svt-hear-labelled'); });
+        playAt(s.start, { end: s.end });
+      });
       h.appendChild(b);
     });
 

@@ -1,13 +1,4 @@
 /* Podcast transcript, chapters, quiz and "Hear this explained" (js/podcast-extras.js). */
-.audio-player-tabs.svt-has-transcript { display: flex !important; align-items: center; gap: 10px; flex-wrap: wrap; }
-.svt-open {
-  display: inline-flex; align-items: center; gap: 6px; margin-left: auto;
-  font: 600 0.85rem/1 'Inter', sans-serif; color: var(--text-primary);
-  background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 10px;
-  padding: 8px 12px; cursor: pointer;
-}
-.svt-open svg { width: 16px; height: 16px; }
-.svt-open:hover, .svt-open.on { border-color: var(--text-primary); }
 .svt-open:focus-visible, .svt-panel button:focus-visible, .svt-turn:focus-visible, .svt-hear:focus-visible {
   outline: 2px solid var(--text-primary); outline-offset: 2px;
 }
@@ -80,8 +71,9 @@ body.dark-mode .svt-turn mark { background: #a16207; color: #fff; }
 
 .narration-progress { position: relative; }
 .svt-mark {
-  position: absolute; top: 50%; width: 3px; height: 12px; transform: translate(-50%, -50%);
-  background: var(--bg-card); border-radius: 2px; pointer-events: none; box-shadow: 0 0 0 1px var(--text-secondary);
+  /* a gap in the timeline at each chapter start, as on YouTube */
+  position: absolute; top: -2px; bottom: -2px; width: 3px; transform: translateX(-50%);
+  background: var(--bg-card); pointer-events: none; z-index: 1;
 }
 
 .svt-quiz { margin-top: 18px; border-top: 1px solid var(--border-lighter); padding-top: 14px; }
@@ -104,18 +96,9 @@ body.dark-mode .svt-opt.wrong { background: #3b1717; color: #fca5a5; }
 }
 .svt-score { font: 600 0.95rem 'Inter', sans-serif; margin: 12px 0 0; }
 
-.svt-hear {
-  display: inline-flex; align-items: center; gap: 5px; margin-left: 10px; vertical-align: middle;
-  font: 500 0.75rem/1 'Inter', sans-serif; color: var(--text-secondary); letter-spacing: 0;
-  background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 10px; padding: 5px 8px; cursor: pointer;
-}
-.svt-hear svg { width: 13px; height: 13px; }
-.svt-hear:hover { color: var(--text-primary); border-color: var(--text-primary); }
-
 @media (max-width: 600px) {
   .svt-panel { padding: 12px; }
   .svt-turns { max-height: 55vh; }
-  .svt-open { margin-left: 0; }
 
 }
 @media (prefers-reduced-motion: reduce) { .svt-turns { scroll-behavior: auto; } }
@@ -124,7 +107,8 @@ body.dark-mode .svt-opt.wrong { background: #3b1717; color: #fca5a5; }
    Chrome's native row (measured): icons on a 48 px pitch, centred 48 px above the bottom, with
    the menu 24 px, full screen 72 px and volume 120 px from the right edge. controlsList=
    "nofullscreen" leaves its full-screen icon in place but greyed out, so ours sits exactly on that
-   slot, and CC takes the next slot left of volume: [CC][volume][full screen][menu]. */
+   slot. Hovering volume opens Chrome's slider leftwards to about 212 px from the right edge, so CC
+   sits just clear of it (Tom, 2 Oct 2026: it was covering the slider): [CC] .. [volume][full screen][menu]. */
 .video-wrap { position: relative; width: 100%; height: 100%; background: #000; }
 .video-wrap .video-modal-player { border-radius: 0; }
 .video-wrap.is-fs .video-modal-player { width: 100%; height: 100%; }
@@ -137,7 +121,9 @@ body.dark-mode .svt-opt.wrong { background: #3b1717; color: #fca5a5; }
   position: absolute; top: 0; width: 36px; height: 36px; display: grid; place-items: center; padding: 0;
   color: #fff; background: none; border: 0; border-radius: 50%; cursor: pointer; pointer-events: auto;
 }
-.video-extra-bar .video-cc-btn { right: 150px; }
+.video-extra-bar .video-cc-btn { right: 222px; }
+/* touch screens have no hover volume slider, and their row keeps the clock on the left: keep CC beside volume */
+@media (hover: none) { .video-extra-bar .video-cc-btn { right: 150px; } }
 .video-extra-bar .video-fs-btn { right: 54px; }
 .video-extra-bar svg { width: 22px; height: 22px; }
 .video-extra-bar button:hover { background: rgba(255,255,255,.18); }
@@ -145,11 +131,72 @@ body.dark-mode .svt-opt.wrong { background: #3b1717; color: #fca5a5; }
 .video-cc-btn.on svg rect { fill: #fff; stroke: #fff; }
 .video-cc-btn.on svg path { stroke: #111; }
 
-/* "Keep listening" after a Hear this explained clip stops (js/podcast-extras.js) */
-.svt-keep {
-  display: inline-flex; align-items: center; gap: 6px; margin: 10px 0 0;
-  font: 600 0.85rem/1 'Inter', sans-serif; color: var(--text-primary);
-  background: var(--bg-card); border: 1px solid var(--text-primary); border-radius: 10px; padding: 8px 12px; cursor: pointer;
+/* Transcript: an icon button in the player's control row, beside the speed (js/podcast-extras.js) */
+.svt-open {
+  display: inline-grid; place-items: center; width: 32px; height: 32px; padding: 0;
+  color: var(--text-secondary); background: none; border: 1px solid transparent; border-radius: 8px; cursor: pointer;
 }
+.svt-open svg { width: 18px; height: 18px; }
+.svt-open:hover { color: var(--text-primary); border-color: var(--border-light); }
+.svt-open.on { color: var(--text-primary); border-color: var(--text-primary); }
+
+/* hover / focus name for the icon-only buttons */
+.svt-tipped { position: relative; }
+.svt-tipped::after {
+  content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  font: 500 0.75rem/1.2 'Inter', sans-serif; letter-spacing: 0; text-transform: none; white-space: nowrap;
+  color: var(--bg-card); background: var(--text-primary); border-radius: 6px; padding: 5px 8px;
+  opacity: 0; pointer-events: none; transition: opacity .12s ease; z-index: 30;
+}
+.svt-tipped:hover::after, .svt-tipped:focus-visible::after { opacity: 1; transition-delay: .25s; }
+.svt-hear.svt-hear-labelled::after { display: none; }
+
+/* "Hear this explained": a small round badge after the heading; the first one carries the words
+   until the pupil has used one */
+.svt-hear {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  margin-left: 10px; vertical-align: middle; height: 28px; min-width: 28px; padding: 0;
+  color: var(--text-secondary); background: var(--bg-card); border: 1px solid var(--border-light);
+  border-radius: 50%; cursor: pointer; font: 500 0.75rem/1 'Inter', sans-serif; letter-spacing: 0;
+}
+.svt-hear svg { width: 15px; height: 15px; flex: none; }
+.svt-hear-words { display: none; }
+.svt-hear.svt-hear-labelled { border-radius: 14px; padding: 0 10px 0 8px; }
+.svt-hear.svt-hear-labelled .svt-hear-words { display: inline; }
+.svt-hear:hover { color: var(--text-primary); border-color: var(--text-primary); }
+
+/* the chapter now playing, beside the clock */
+.svt-chapnow {
+  font: 500 0.8rem/1.2 'Inter', sans-serif; color: var(--text-secondary);
+  max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* the chapter under the pointer, above the timeline */
+.narration-player { position: relative; }
+.svt-bartip {
+  position: absolute; transform: translate(-50%, calc(-100% - 10px)); z-index: 30; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: 2px; max-width: 260px;
+  font: 400 0.75rem/1.25 'Inter', sans-serif; color: var(--bg-card); background: var(--text-primary);
+  border-radius: 8px; padding: 6px 9px; text-align: center; box-shadow: var(--shadow-sm);
+}
+.svt-bartip b { font-weight: 600; font-size: 0.8rem; }
+.svt-bartip span { font-variant-numeric: tabular-nums; opacity: .8; }
+.svt-bartip[hidden] { display: none; }
+
+/* "Keep listening" after a Hear this explained clip stops: in the floating player, or in the
+   main player's control row when that is on screen */
+.svt-keep {
+  display: inline-flex; align-items: center; gap: 6px; flex: none; white-space: nowrap;
+  font: 600 0.85rem/1 'Inter', sans-serif; color: #fff; background: var(--accent);
+  border: 0; border-radius: 10px; padding: 8px 12px; cursor: pointer;
+}
+.svt-keep[hidden] { display: none; }
 .svt-keep::before { content: ''; border-style: solid; border-width: 5px 0 5px 8px; border-color: transparent transparent transparent currentColor; }
 .svt-keep:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+.narration-fab.svt-keeping .narration-fab-play { display: none; }
+.narration-fab.svt-in-clip .narration-fab-time { color: var(--text-primary); font-weight: 600; }
+
+@media (max-width: 600px) {
+  .narration-meta { flex-wrap: wrap; row-gap: 4px; column-gap: 0.55rem; }
+  .svt-chapnow { order: 10; flex-basis: 100%; max-width: none; text-align: center; }
+  .svt-tipped::after { display: none; }
+}

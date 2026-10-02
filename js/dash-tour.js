@@ -34,7 +34,9 @@
     { id: 'planner', title: 'Your exam countdown',
       text: 'The number at the top is how many days until your first exam. Tap it to see your whole plan on a calendar, right up to your last exam, including your days off and holidays. You can change your revising days and how long you revise here too.' },
     { id: 'reading', title: 'Make it easier on your eyes',
-      text: 'Tap the moon at the top to switch to dark mode, make the text bigger, change to an easier-to-read font, or put a colour tint over the page. Whatever you pick stays on across every page, including the lessons.' }
+      text: 'Tap the moon at the top to switch to dark mode, make the text bigger, change to an easier-to-read font, or put a colour tint over the page. Whatever you pick stays on across every page, including the lessons.' },
+    { id: 'access', title: 'Read what you cannot hear',
+      text: 'Every lesson podcast has a written version. On a lesson, tap the page icon next to the speed button on the player. You can read along, search it, or tap any line to hear it from there. The lesson videos have captions too: tap CC.' }
   ];
 
   var dq = new URLSearchParams(location.search);
@@ -58,9 +60,20 @@
     doors();
     if (dq.get('tour') === '1') { setTimeout(function () { open(0); }, 900); return; }
     if (dq.get('demo') || dq.get('arrange') || dq.get('tour') === '0') return;
-    if (g(KEY)) return;
+    var ACCESS = 'sv-dash-tour-access';
+    function s(k) { try { localStorage.setItem(k, '1'); } catch (e) {} }
+    if (g(KEY)) {
+      /* the transcript + captions step came later (2 Oct 2026): a pupil who has already been
+         shown round sees just that step, once */
+      if (!g(ACCESS)) setTimeout(function () {
+        if (g(ACCESS)) return;
+        s(ACCESS);
+        for (var i = 0; i < STEPS.length; i++) if (STEPS[i].id === 'access') return open(i);
+      }, 1600);
+      return;
+    }
     /* first dashboard visit: let the page settle, then show them round once */
-    setTimeout(function () { if (!g(KEY)) open(0); }, 1600);
+    setTimeout(function () { if (!g(KEY)) { s(ACCESS); open(0); } }, 1600);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

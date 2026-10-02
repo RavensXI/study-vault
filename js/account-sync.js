@@ -32,7 +32,7 @@
   var KEYS = [
     // identity of the student's course
     'studyvault-subjects', 'studyvault-free-prefs', 'sv-welcome',
-    'studyvault-exam-year', 'studyvault-tiers', 'sv-school', 'sv-school-carried', 'sv-class-subjects', 'sv-recall-appeals', 'sv-captions', 'sv-podcast-heard',   // class-derived school routing + progress carry-over (js/school-session.js)
+    'studyvault-exam-year', 'studyvault-tiers', 'sv-school', 'sv-school-carried', 'sv-class-subjects', 'sv-recall-appeals', 'sv-captions', 'sv-podcast-heard', 'sv-hear-used',   // class-derived school routing + progress carry-over (js/school-session.js)
     // progress and logs (dict-like: deep-merged)
     'studyvault-visited', 'sv-lessons-done', 'sv-lessons-when',
     'sv-kc-log', 'sv-practice-log', 'sv-flash-log', 'sv-flash-day',
@@ -45,7 +45,7 @@
     // preferences
     'studyvault-a11y', 'sv-focus-mode', 'sv-hl-enabled', 'sv-dash-view',
     // one-time hints (so a new device doesn't replay every tutorial)
-    'sv-reader-tour-v1', 'sv-lesson-tutorial-done', 'sv-dash-tour-v1', 'sv-lesson-tour-v2',
+    'sv-reader-tour-v1', 'sv-lesson-tutorial-done', 'sv-dash-tour-v1', 'sv-dash-tour-access', 'sv-lesson-tour-v2',
     'sv-flashcard-tutorial-done', 'sv-highlight-tutorial-done',
     'sv_collapsible_hint'
   ];
