@@ -6,14 +6,14 @@ diagram problems are reported as unverifiable, not guessed at.
 
 | | |
 |---|---|
-| quant-problems | 7037 |
-| A-scaffold-checked | 7031 |
+| quant-problems | 7573 |
+| A-scaffold-checked | 7566 |
 | A-mismatch | 0 |
-| B-steps-checked | 8373 |
+| B-steps-checked | 8905 |
 | B-mismatch | 0 |
 | C-expressions-checked | 143 |
 | C-mismatch | 0 |
-| not-machine-checkable | 6 |
+| not-machine-checkable | 7 |
 
 ## Coverage by family (A=scaffold, C=expression, skip=unverifiable)
 
@@ -22,8 +22,8 @@ diagram problems are reported as unverifiable, not guessed at.
 | geography | 972 | 0 | 0 |
 | maths | 2955 | 143 | 5 |
 | science | 1298 | 0 | 0 |
-| separate-sciences | 1563 | 0 | 1 |
-| statistics | 243 | 0 | 0 |
+| separate-sciences | 1834 | 0 | 1 |
+| statistics | 507 | 0 | 1 |
 
 ## Mismatches (0)
 

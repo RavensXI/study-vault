@@ -5,19 +5,19 @@ answer *correctness* (Phase 1, sympy) is not attempted here.
 
 | | |
 |---|---|
-| Lessons checked | 925 |
-| Problems checked | 18175 |
+| Lessons checked | 1067 |
+| Problems checked | 20701 |
 | **Errors** (lie to a student) | **0** |
-| Warnings (a human should look) | 65 |
+| Warnings (a human should look) | 79 |
 
 ## By check
 
 | Severity | Check | Count |
 |---|---|---|
-| WARN | lesson-size | 35 |
-| WARN | no-tier-descriptions | 19 |
-| WARN | chart-no-question | 7 |
-| WARN | board-name | 3 |
+| WARN | no-tier-descriptions | 38 |
+| WARN | lesson-size | 36 |
+| WARN | chart-no-question | 2 |
+| WARN | board-name | 2 |
 | WARN | markscheme-language | 1 |
 
 ## By family
@@ -25,61 +25,60 @@ answer *correctness* (Phase 1, sympy) is not attempted here.
 | Family | Errors | Warnings |
 |---|---|---|
 | english-language | 0 | 3 |
-| maths | 0 | 3 |
-| music | 0 | 1 |
+| maths | 0 | 2 |
 | science | 0 | 14 |
 | separate-sciences | 0 | 21 |
-| statistics | 0 | 23 |
+| statistics | 0 | 39 |
 
 ## Worst lessons by findings
 
-- 3 finding(s) — Scatter Diagrams, Population Pyramids and Choropleth Maps (statistics)  
-  https://www.studyvault.co.uk/practice/statistics-aqa/representing-data/6
-- 2 finding(s) — Frequency Polygons, Time Series and Line Charts (statistics)  
-  https://www.studyvault.co.uk/practice/statistics-aqa/representing-data/3
-- 2 finding(s) — Scatter Diagrams, Line of Best Fit and Regression (statistics)  
-  https://www.studyvault.co.uk/practice/statistics-aqa/numerical-measures/6
+- 2 finding(s) — Binomial and Normal Distributions and Standardising Data (statistics)  
+  https://www.studyvault.co.uk/practice/statistics-edexcel/probability-comparing-distributions/5
+- 1 finding(s) — Tally Charts, Tabulation and Pictograms (statistics)  
+  https://www.studyvault.co.uk/practice/statistics-aqa/representing-data/1
 - 1 finding(s) — Representing Data (maths)  
   https://www.studyvault.co.uk/practice/maths-edexcel/probability-statistics/3
 - 1 finding(s) — Relative Formula Mass and Moles (science)  
   https://www.studyvault.co.uk/practice/science-ocr-b/chemistry-calculations/1
 - 1 finding(s) — Relative Formula Mass and Moles (separate-sciences)  
   https://www.studyvault.co.uk/practice/separate-sciences-ocr-b/chemistry-calculations/1
-- 1 finding(s) — Sampling, Mean and Percentage Change (separate-sciences)  
-  https://www.studyvault.co.uk/practice/separate-sciences-ocr-b/biology-data-skills/3
-- 1 finding(s) — Transformers, Power Transmission and Moments Drill (separate-sciences)  
-  https://www.studyvault.co.uk/practice/separate-sciences-edexcel/higher-calculations/6
-- 1 finding(s) — Electrical Power and Energy Bills (science)  
-  https://www.studyvault.co.uk/practice/science-ocr-b/physics-calculations/4
-- 1 finding(s) — Literary Terminology for Prose Analysis (english-language)  
-  https://www.studyvault.co.uk/practice/english-language-ocr/component-2-reading/12
-- 1 finding(s) — Speed, Acceleration and Graphs (separate-sciences)  
-  https://www.studyvault.co.uk/practice/separate-sciences-ocr-b/physics-calculations/7
-- 1 finding(s) — Quality Control Charts, Population Estimates and Capture-Recapture (statistics)  
-  https://www.studyvault.co.uk/practice/statistics-aqa/probability-comparing-distributions/6
-- 1 finding(s) — Bond Energy Calculations (science)  
-  https://www.studyvault.co.uk/practice/science-ocr-b/chemistry-calculations/3
-- 1 finding(s) — Magnification and Unit Conversions (science)  
-  https://www.studyvault.co.uk/practice/science-ocr-b/biology-data-skills/1
-- 1 finding(s) — Histograms and Frequency Density (statistics)  
-  https://www.studyvault.co.uk/practice/statistics-aqa/representing-data/4
-- 1 finding(s) — Bar Charts, Pie Charts and Stem-and-Leaf Diagrams (statistics)  
-  https://www.studyvault.co.uk/practice/statistics-aqa/representing-data/2
 - 1 finding(s) — Cumulative Frequency, Box Plots & Histograms (maths)  
   https://www.studyvault.co.uk/practice/maths-aqa/probability-statistics/5
-- 1 finding(s) — Cumulative Frequency, Box Plots & Histograms (maths)  
-  https://www.studyvault.co.uk/practice/maths-eduqas/probability-statistics/5
-- 1 finding(s) — Titrations, Concentrations and the Mole (separate-sciences)  
-  https://www.studyvault.co.uk/practice/separate-sciences-edexcel/higher-calculations/3
 - 1 finding(s) — Spearman's Rank Correlation Coefficient (statistics)  
   https://www.studyvault.co.uk/practice/statistics-aqa/numerical-measures/7
+- 1 finding(s) — Scatter Diagrams, Line of Best Fit and Regression (statistics)  
+  https://www.studyvault.co.uk/practice/statistics-aqa/numerical-measures/6
+- 1 finding(s) — Speed, Acceleration and Graphs (separate-sciences)  
+  https://www.studyvault.co.uk/practice/separate-sciences-ocr-b/physics-calculations/7
 - 1 finding(s) — Spelling, Punctuation and Grammar (english-language)  
   https://www.studyvault.co.uk/practice/english-language-edexcel/paper-1-writing/10
-- 1 finding(s) — Forces, Work Done and Elasticity (separate-sciences)  
-  https://www.studyvault.co.uk/practice/separate-sciences-ocr-b/physics-calculations/6
-- 1 finding(s) — Standard Deviation and Interpercentile Range (statistics)  
-  https://www.studyvault.co.uk/practice/statistics-aqa/numerical-measures/5
-- 1 finding(s) — Newton's Laws, Momentum and Waves (separate-sciences)  
-  https://www.studyvault.co.uk/practice/separate-sciences-ocr-b/physics-calculations/8
+- 1 finding(s) — Mode, Median and Mean for Ungrouped Data (statistics)  
+  https://www.studyvault.co.uk/practice/statistics-edexcel/numerical-measures/1
+- 1 finding(s) — Quality Control Charts, Population Estimates and Capture–Recapture (statistics)  
+  https://www.studyvault.co.uk/practice/statistics-edexcel/probability-comparing-distributions/6
+- 1 finding(s) — Range, Quartiles and Interquartile Range (statistics)  
+  https://www.studyvault.co.uk/practice/statistics-aqa/numerical-measures/4
+- 1 finding(s) — Paper 1 Writing — Exam Practice (english-language)  
+  https://www.studyvault.co.uk/practice/english-language-edexcel/paper-1-writing/12
+- 1 finding(s) — Literary Terminology for Prose Analysis (english-language)  
+  https://www.studyvault.co.uk/practice/english-language-ocr/component-2-reading/12
+- 1 finding(s) — Sampling, Mean and Percentage Change (separate-sciences)  
+  https://www.studyvault.co.uk/practice/separate-sciences-ocr-b/biology-data-skills/3
+- 1 finding(s) — Moments, Levers and Gears (separate-sciences)  
+  https://www.studyvault.co.uk/practice/separate-sciences-ocr/higher-calculations/3
+- 1 finding(s) — Pressure in Fluids (separate-sciences)  
+  https://www.studyvault.co.uk/practice/separate-sciences-ocr/higher-calculations/4
+- 1 finding(s) — Sampling, Mean and Percentage Change (science)  
+  https://www.studyvault.co.uk/practice/science-ocr-b/biology-data-skills/3
+- 1 finding(s) — Speed, Acceleration and Graphs (science)  
+  https://www.studyvault.co.uk/practice/science-ocr-b/physics-calculations/7
+- 1 finding(s) — Averages from Frequency Tables and Grouped Data (statistics)  
+  https://www.studyvault.co.uk/practice/statistics-aqa/numerical-measures/2
+- 1 finding(s) — Punnett Squares and Genetic Probability (separate-sciences)  
+  https://www.studyvault.co.uk/practice/separate-sciences-ocr-b/biology-data-skills/2
+- 1 finding(s) — Quality Control Charts, Population Estimates and Capture-Recapture (statistics)  
+  https://www.studyvault.co.uk/practice/statistics-aqa/probability-comparing-distributions/6
 - 1 finding(s) — Cumulative Frequency and Box Plots (statistics)  
   https://www.studyvault.co.uk/practice/statistics-aqa/representing-data/5
+- 1 finding(s) — Comparing Data Sets in Context (statistics)  
+  https://www.studyvault.co.uk/practice/statistics-aqa/probability-comparing-distributions/4

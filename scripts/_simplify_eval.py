@@ -102,7 +102,7 @@ def main():
                "new_haiku": claude(NEW, "Rewrite this passage:\n<passage>\n%s\n</passage>" % o, "haiku") if not os.environ.get("SV_EVAL_FAST") else "",
                "new_sonnet": claude(NEW, "Rewrite this passage:\n<passage>\n%s\n</passage>" % o, os.environ.get("SV_EVAL_SONNET", "sonnet"))}
         for k in (("new_sonnet",) if os.environ.get("SV_EVAL_FAST") else ("new_haiku", "new_sonnet")):
-            v = claude(QA, "ORIGINAL:\n%s\n\nSIMPLIFIED:\n%s" % (o, res[k]), os.environ.get("SV_EVAL_SONNET", "sonnet"))
+            v = claude(QA, "ORIGINAL:\n%s\n\nSIMPLIFIED:\n%s" % (o, res[k]), os.environ.get("SV_EVAL_QA", os.environ.get("SV_EVAL_SONNET", "sonnet")))
             m = re.search(r"\{.*\}", v, re.S)
             try: res[k + "_qa"] = json.loads(m.group(0)) if m else {"pass": None}
             except Exception: res[k + "_qa"] = {"pass": None, "raw": v[:200]}
