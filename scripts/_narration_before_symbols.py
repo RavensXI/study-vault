@@ -19,20 +19,8 @@ AZURE_KEY = os.environ.get("AZURE_SPEECH_KEY")
 AZURE_REGION = "uksouth"
 AZURE_TTS_URL = f"https://{AZURE_REGION}.tts.speech.microsoft.com/cognitiveservices/v1"
 
-# Narration voices (Tom, 2 Oct 2026): Microsoft's MAI voices for all new and re-narrated lessons.
-# Odd lessons = Harry, even = Emily (British; preview voices that are not in Azure's voice list yet
-# but work). They are served by the Foundry resource (FOUNDRY_ENDPOINT / FOUNDRY_KEY), not the
-# uksouth Speech key, and the service returns occasional 502s, so they get a longer retry.
-# Language lessons (French/German/Spanish, <lang> tags) keep the multilingual neural voices,
-# which pronounce the foreign words; existing audio is NOT re-made by this change.
-VOICE_ODD = "en-GB-Harry:MAI-Voice-2.1-Flash"
-VOICE_EVEN = "en-GB-Emily:MAI-Voice-2.1-Flash"
-LEGACY_ODD = "en-GB-OllieMultilingualNeural"
-LEGACY_EVEN = "en-GB-AdaMultilingualNeural"
-_FOUNDRY = os.environ.get("FOUNDRY_ENDPOINT", "")
-MAI_TTS_URL = (re.sub(r"^https://([^.]+)\..*$", r"https://\1.cognitiveservices.azure.com", _FOUNDRY)
-               + "/tts/cognitiveservices/v1") if _FOUNDRY else None
-MAI_KEY = os.environ.get("FOUNDRY_KEY")
+VOICE_ODD = "en-GB-OllieMultilingualNeural"   # Odd lessons
+VOICE_EVEN = "en-GB-AdaMultilingualNeural"     # Even lessons
 
 # Language codes for multilingual SSML <lang> tags
 SUBJECT_LANG_CODES = {
@@ -226,72 +214,6 @@ def latex_to_spoken(text):
 
 # ── HTML Parser ─────────────────────────────────────────────────────────
 
-_SUPER_DIGITS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺", "0123456789-+")
-_SUB_DIGITS = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
-_SYMBOLS = [
-    ("≤", " less than or equal to "), ("≥", " greater than or equal to "), ("≠", " not equal to "),
-    ("≈", " approximately "), ("±", " plus or minus "), ("∝", " is proportional to "),
-    ("∞", " infinity "), ("√", " the square root of "), ("∑", " the sum of "), ("Σ", " the sum of "),
-    ("Δ", " change in "), ("π", " pi "), ("θ", " theta "), ("λ", " lambda "), ("Ω", " ohms "),
-    ("µ", " micro"), ("μ", " micro"), ("½", " one half "), ("¼", " one quarter "), ("¾", " three quarters "),
-    ("⅓", " one third "), ("⅔", " two thirds "), ("⇌", " is in equilibrium with "),
-    ("∴", " therefore "), ("∠", " angle "), ("△", " triangle "), ("∥", " is parallel to "), ("⊥", " is perpendicular to "),
-]
-
-
-def _power_words(p):
-    p = p.strip().replace("−", "-")
-    if p == "2": return " squared"
-    if p == "3": return " cubed"
-    if p.startswith("-"): return " to the power of minus " + p[1:].strip()
-    return " to the power of " + p
-
-
-def speak_symbols(text):
-    """Read maths and science notation aloud: powers, subscripts, signs, Greek letters, fractions."""
-    if not text:
-        return text
-    t = text
-    # marked superscripts/subscripts from the HTML
-    t = re.sub(r"\s*\{\{SUP\}\}\s*(.*?)\s*\{\{/SUP\}\}", lambda m: _power_words(m.group(1)) + " ", t)
-    t = re.sub(r"\s*\{\{SUB\}\}\s*([0-9]+)\s*\{\{/SUB\}\}", r"\1", t)            # CO2, H2O: say the digit
-    t = re.sub(r"\s*\{\{SUB\}\}\s*(.*?)\s*\{\{/SUB\}\}", r" sub \1 ", t)          # x sub n
-    t = t.replace("{{SUP}}", "").replace("{{/SUP}}", "").replace("{{SUB}}", "").replace("{{/SUB}}", "")
-    # Unicode superscripts: 10⁸, x², s⁻¹
-    t = re.sub(r"([⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺]+)", lambda m: _power_words(m.group(1).translate(_SUPER_DIGITS)) + " ", t)
-    # maths signs between numbers or brackets
-    t = re.sub(r"\s*−\s*", " minus ", t)
-    t = re.sub(r"(?<=[\d)])\s*[×✕]\s*(?=[\d(])", " times ", t)
-    t = re.sub(r"(?<=[\d)])\s*÷\s*(?=[\d(])", " divided by ", t)
-    # comparison signs only when written as maths ("x < 5", "3<4"), never inside code such as <b>
-    for sign, words in (("<=", " less than or equal to "), (">=", " greater than or equal to "),
-                        ("<", " less than "), (">", " greater than ")):
-        e = re.escape(sign)
-        t = re.sub(r"(?<=[\w)])\s+" + e + r"\s+(?=[\w(\-])", words, t)
-        t = re.sub(r"(?<=\d)" + e + r"(?=[\d\-])", words, t)
-    t = t.translate(_SUB_DIGITS)                                              # H₂O -> H2O
-    t = re.sub(r"(\d)\s*°\s*C\b", r"\1 degrees Celsius", t)
-    t = re.sub(r"(\d)\s*°", r"\1 degrees", t)
-    # A single letter in quotes ('n', ‘F’) is a character being talked about. On its own it made the
-    # MAI voice switch to French for the numbers that followed (Tom, 2 Oct 2026), so name it.
-    # "8: 0" in a table row is a pair of values, not a time (Ollie read "8 o'clock")
-    t = re.sub(r"(?<=\d):\s+(?=\d)", ", ", t)
-    t = re.sub(r"(?<![A-Za-z])[‘’'\"“”](?!I[‘’'\"“”])([A-Za-z])[‘’'\"“”](?![A-Za-z])", r"the letter \1", t)
-    # number ranges with an en dash: "0–127" is "0 to 127" (it was once read "0, 2, 127")
-    t = re.sub(r"(\d)\s*–\s*(\d)", lambda m: m.group(1) + " to " + m.group(2), t)
-    # equals signs as words, so a run of digits and symbols reads as an English sentence
-    t = re.sub(r"\s*==\s*", " is equal to ", t)
-    t = re.sub(r"\s*!=\s*", " is not equal to ", t)
-    t = re.sub(r"(?<=[\w)’'])\s*=\s*(?=[\w(‘'\-])", " equals ", t)
-    # arrows: before a quotation (a translation or example) just pause; elsewhere it is a chain of causes
-    t = re.sub(r"\s*→\s*(?=[“\"‘'¿¡«])", ": ", t)
-    t = t.replace("→", ", which leads to ")
-    for sym, words in _SYMBOLS:
-        t = t.replace(sym, words)
-    t = re.sub(r"\s+", " ", t)
-    return re.sub(r"\s+([,.;:])", r"\1", t).strip()
-
-
 class NarrationExtractor(HTMLParser):
     """Extract text from elements with data-narration-id attributes.
 
@@ -326,9 +248,6 @@ class NarrationExtractor(HTMLParser):
         # Skip content inside these tags
         if tag in ("svg", "button", "script", "style"):
             self._skip_depth += 1
-        # Superscripts and subscripts were flattened ("2<sup>7</sup>" was read "2 7")
-        if self._current_id and tag in ("sup", "sub"):
-            self._current_text.append("{{%s}}" % tag.upper())
         # Track <em> and <strong> for foreign language marking
         if tag in ("em", "strong") and self._lang_code and self._current_id:
             if not self._in_foreign:
@@ -341,8 +260,6 @@ class NarrationExtractor(HTMLParser):
     def handle_endtag(self, tag):
         if tag in ("svg", "button", "script", "style"):
             self._skip_depth = max(0, self._skip_depth - 1)
-        if self._current_id and tag in ("sup", "sub"):
-            self._current_text.append("{{/%s}}" % tag.upper())
         # Close foreign language marker
         if tag in ("em", "strong") and self._in_foreign:
             self._foreign_depth -= 1
@@ -367,7 +284,6 @@ class NarrationExtractor(HTMLParser):
             text = " ".join(self._current_text).strip()
             text = re.sub(r"\s+", " ", text)
             text = latex_to_spoken(text)
-            text = speak_symbols(text)
             if text:
                 self.chunks.append((self._current_id, text))
         self._current_id = None
@@ -386,10 +302,6 @@ class NarrationExtractor(HTMLParser):
             "ndash": "-", "hellip": "...", "nbsp": " ",
             "rarr": " to ", "larr": " to ", "bull": ", ",
             "pound": "pounds", "euro": "euros",
-            "lt": " less than ", "gt": " greater than ", "le": " less than or equal to ",
-            "ge": " greater than or equal to ", "ne": " not equal to ", "times": " times ",
-            "divide": " divided by ", "minus": " minus ", "plusmn": " plus or minus ",
-            "deg": " degrees ", "micro": " micro", "pi": " pi ", "radic": " the square root of ",
         }
         if self._current_id:
             self._current_text.append(entities.get(name, ""))
@@ -474,18 +386,7 @@ def generate_audio_rest(text, voice_name, lang_code=None):
 
     Returns MP3 bytes on success, None on failure.
     """
-    # Maths signs in plain text were silent (U+2212 minus read "65 plus 7 1" for "65 + (7 − 1)").
-    text = re.sub(r"\s*−\s*", " minus ", text)
-    text = re.sub(r"(?<=\d)\s*×\s*(?=[\d(])", " times ", text)
-    text = re.sub(r"(?<=\d)\s*÷\s*(?=[\d(])", " divided by ", text)
-    if lang_code and ":MAI-" in voice_name:   # the multilingual voices pronounce the foreign words
-        voice_name = LEGACY_ODD if voice_name == VOICE_ODD else LEGACY_EVEN
     body = _build_ssml_body(text, lang_code)
-    if ":MAI-" in voice_name:
-        # The MAI voices are multilingual and guess the language phrase by phrase; a run of bare
-        # numbers or single letters gives them little to go on (Tom heard French numbers, 2 Oct
-        # 2026). Pinning British English made the detector certain in tests (0.93 -> 1.00).
-        body = "<lang xml:lang='en-GB'>" + body + "</lang>"
     ssml = (
         f"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' "
         f"xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-GB'>"
@@ -493,20 +394,15 @@ def generate_audio_rest(text, voice_name, lang_code=None):
         f"</speak>"
     )
 
-    mai = ":MAI-" in voice_name
-    url, key, tries = (MAI_TTS_URL, MAI_KEY, 6) if mai else (AZURE_TTS_URL, AZURE_KEY, 3)
-    if mai and not (url and key):
-        raise RuntimeError("MAI voice needs FOUNDRY_ENDPOINT and FOUNDRY_KEY in the environment")
     headers = {
-        "Ocp-Apim-Subscription-Key": key,
+        "Ocp-Apim-Subscription-Key": AZURE_KEY,
         "Content-Type": "application/ssml+xml",
         "X-Microsoft-OutputFormat": "audio-24khz-96kbitrate-mono-mp3",
-        "User-Agent": "studyvault-narration",
     }
 
-    for attempt in range(tries):
+    for attempt in range(3):
         try:
-            resp = requests.post(url, headers=headers, data=ssml.encode("utf-8"), timeout=60)
+            resp = requests.post(AZURE_TTS_URL, headers=headers, data=ssml.encode("utf-8"), timeout=60)
             if resp.status_code == 200:
                 return resp.content
             elif resp.status_code == 429:
@@ -515,12 +411,12 @@ def generate_audio_rest(text, voice_name, lang_code=None):
                 time.sleep(wait)
             else:
                 print(f"      HTTP {resp.status_code}: {resp.text[:200]}")
-                if attempt < tries - 1:
-                    time.sleep(2 + 3 * attempt)
+                if attempt < 2:
+                    time.sleep(2)
         except requests.exceptions.RequestException as e:
             print(f"      Request error: {e}")
-            if attempt < tries - 1:
-                time.sleep(2 + 3 * attempt)
+            if attempt < 2:
+                time.sleep(2)
 
     return None
 
@@ -582,7 +478,7 @@ def get_mp3_duration(mp3_bytes):
 # ── Voice assignment ────────────────────────────────────────────────────
 
 def get_voice_for_lesson(lesson_number):
-    """Return (voice_name, label) for a lesson number. Odd=Harry, Even=Emily (Ollie/Ada for language lessons)."""
+    """Return (voice_name, label) for a lesson number. Odd=Ollie, Even=Ada."""
     if lesson_number % 2 == 1:
-        return VOICE_ODD, "Harry"
-    return VOICE_EVEN, "Emily"
+        return VOICE_ODD, "Ollie"
+    return VOICE_EVEN, "Ada"
