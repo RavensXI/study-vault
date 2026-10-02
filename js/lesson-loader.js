@@ -6,6 +6,19 @@
 (function () {
   'use strict';
 
+  /* Preview (Tom, 2 Oct 2026): a lesson can ship a re-voiced narration manifest in
+     /transcripts/<subject>/<unit>/lNN.narration-mai.json (Microsoft MAI voices). Fetched straight
+     away, so it is in hand before the lesson row arrives; when the file is absent nothing changes. */
+  var narrOverride = null;
+  (function () {
+    var m = location.pathname.match(/^\/lesson\/([a-z0-9-]+)\/([a-z0-9-]+)\/(\d+)\/?$/);
+    if (!m) return;
+    fetch('/transcripts/' + m[1] + '/' + m[2] + '/l' + ('0' + m[3]).slice(-2) + '.narration-mai.json')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (Array.isArray(j) && j.length) narrOverride = j; })
+      .catch(function () {});
+  })();
+
   // ---- Supabase client ----
   var sb = window.supabase.createClient(
     'https://baipckgywpnwapobwtsy.supabase.co',
@@ -495,7 +508,7 @@
     }
 
     // Set window globals for main.js init functions
-    window.narrationManifest = lesson.narration_manifest || [];
+    window.narrationManifest = narrOverride || lesson.narration_manifest || [];
     window.practiceQuestions = lesson.practice_questions || [];
     window.knowledgeCheck = lesson.knowledge_checks || [];
     window._lessonGlossary = lesson.glossary_terms || [];
