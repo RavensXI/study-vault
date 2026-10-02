@@ -272,6 +272,15 @@ def speak_symbols(text):
     t = t.translate(_SUB_DIGITS)                                              # H₂O -> H2O
     t = re.sub(r"(\d)\s*°\s*C\b", r"\1 degrees Celsius", t)
     t = re.sub(r"(\d)\s*°", r"\1 degrees", t)
+    # A single letter in quotes ('n', ‘F’) is a character being talked about. On its own it made the
+    # MAI voice switch to French for the numbers that followed (Tom, 2 Oct 2026), so name it.
+    t = re.sub(r"[‘’'\"“”](?!I[‘’'\"“”])([A-Za-z])[‘’'\"“”]", r"the letter \1", t)
+    # number ranges with an en dash: "0–127" is "0 to 127" (it was once read "0, 2, 127")
+    t = re.sub(r"(\d)\s*–\s*(\d)", lambda m: m.group(1) + " to " + m.group(2), t)
+    # equals signs as words, so a run of digits and symbols reads as an English sentence
+    t = re.sub(r"\s*==\s*", " is equal to ", t)
+    t = re.sub(r"\s*!=\s*", " is not equal to ", t)
+    t = re.sub(r"(?<=[\w)’'])\s*=\s*(?=[\w(‘'\-])", " equals ", t)
     # arrows: before a quotation (a translation or example) just pause; elsewhere it is a chain of causes
     t = re.sub(r"\s*→\s*(?=[“\"‘'¿¡«])", ": ", t)
     t = t.replace("→", ", which leads to ")
