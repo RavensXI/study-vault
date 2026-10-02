@@ -290,7 +290,8 @@
     marks();
 
     /* what the marks mean: pointing at the bar (or touching it) shows the chapter there and its
-       time, and the chapter now playing is named beside the clock */
+       time. (The chapter now playing was named beside the clock too; Tom took it out, 2 Oct 2026:
+       a chapter title alone in the player read as nonsense.) */
     function chapterAt(t) {
       var k = -1;
       for (var i = 0; i < chapters.length; i++) if (chapters[i].start <= t + 0.5) k = i;
@@ -300,10 +301,6 @@
     var tip = document.createElement('div');
     tip.className = 'svt-bartip'; tip.hidden = true; tip.setAttribute('aria-hidden', 'true');
     player.appendChild(tip);
-    var nowEl = document.createElement('span');
-    nowEl.className = 'svt-chapnow'; nowEl.hidden = true;
-    var timeEl = meta.querySelector('.narration-time');
-    meta.insertBefore(nowEl, timeEl ? timeEl.nextSibling : null);
     var tipTimer = 0;
     function showTip(clientX) {
       if (!bar || !chapters.length || !inPodcast() || !(audio.duration > 0)) { tip.hidden = true; return; }
@@ -325,17 +322,6 @@
         if (e.pointerType !== 'mouse') { clearTimeout(tipTimer); tipTimer = setTimeout(function () { tip.hidden = true; }, 1500); }
       });
     }
-    var nowK = -2;
-    function chapterNow() {
-      var k = (chapters.length && inPodcast() && audio.duration > 0) ? chapterAt(audio.currentTime) : -1;
-      if (k === nowK) return;
-      nowK = k;
-      nowEl.hidden = k < 0;
-      nowEl.textContent = k >= 0 ? chapters[k].title : '';
-    }
-    audio.addEventListener('timeupdate', chapterNow);
-    audio.addEventListener('loadedmetadata', chapterNow);
-    audio.addEventListener('emptied', chapterNow);
 
     /* quiz: client-side marking; a wrong answer offers the moment it was said */
     var score = 0, answered = 0;
