@@ -88,8 +88,12 @@
       clip = null;
       if (fab) fab.classList.remove('svt-in-clip');
     }
-    function watchClip() {
-      if (!clip) return;
+    /* Returns true when the clip has ended. Driven by animation frames for a smooth fade, and
+       checked again on every timeupdate: if the podcast was already playing when the badge was
+       pressed there is no 'play' event to start the frames (Tom, 2 Oct 2026: the clip ran on),
+       and a background tab gets no frames at all. */
+    function checkClip() {
+      if (!clip) return true;
       var left = clip.end - audio.currentTime;
       if (left <= FADE) audio.volume = Math.max(0, clip.vol * Math.max(0, left) / FADE);
       if (left <= 0.05) {
@@ -98,19 +102,23 @@
         endClip(false);
         audio.volume = v;
         showKeep();
-        return;
+        return true;
       }
-      raf = requestAnimationFrame(watchClip);
+      return false;
     }
+    function watchClip() { if (!checkClip() && !audio.paused) raf = requestAnimationFrame(watchClip); }
+    function startWatch() { cancelAnimationFrame(raf); raf = requestAnimationFrame(watchClip); }
     /* while a clip plays, the floating player says how long is left of it */
     audio.addEventListener('timeupdate', function () {
-      if (clip && fabTime) fabTime.textContent = fmt(Math.max(0, clip.end - audio.currentTime)) + ' left';
+      if (!clip) return;
+      if (checkClip()) return;
+      if (fabTime) fabTime.textContent = fmt(Math.max(0, clip.end - audio.currentTime)) + ' left';
     });
     audio.addEventListener('seeking', function () { if (!ownSeek) endClip(true); });
     audio.addEventListener('seeked', function () { ownSeek = false; });
     audio.addEventListener('play', function () {
       hideKeep();
-      if (clip) { cancelAnimationFrame(raf); raf = requestAnimationFrame(watchClip); }
+      if (clip) startWatch();
     });
     audio.addEventListener('emptied', function () { endClip(true); hideKeep(); });
     keep.addEventListener('click', function () {
@@ -127,6 +135,7 @@
         try { audio.currentTime = t; } catch (e) { ownSeek = false; }
         if (opts.end && opts.end > t) { clip = { end: opts.end, vol: audio.volume || 1 }; if (fab) fab.classList.add('svt-in-clip'); }
         if (!opts.cueOnly) { var p = audio.play(); if (p && p.catch) p.catch(function () {}); }
+        if (clip) startWatch();
       }
       if (!inPodcast()) podTab.click();
       if (audio.readyState >= 1 && inPodcast()) go();
