@@ -40,6 +40,7 @@ sys.path.insert(0, SCRIPT_DIR)
 
 from lib.supabase_client import get_client
 from lib.r2 import get_r2_client, VIDEO_BUCKET, VIDEO_PUBLIC_URL
+from lib import nlm_pool          # the shared Gemini Notebook allowance (3 Oct 2026)
 
 STATE_FILE = os.path.join(SCRIPT_DIR, "_batch_explainer_state.json")
 DOWNLOAD_DIR = os.path.join(SCRIPT_DIR, "_explainer_videos")
@@ -237,6 +238,20 @@ def cmd_generate(args):
         print("No lessons pending explainer video generation!")
         return
 
+    # The shared allowance (3 Oct 2026, lib/nlm_pool.py): explainers keep first claim, but a launch
+    # beyond Google's 5-hour window or weekly limit is only queued by Google past this run's polling,
+    # so a run launches what fits and the rest waits for the next run. Dry runs are not limited (the
+    # wrapper's "queue empty?" probe reads the full count).
+    if not args.dry_run:
+        room, why = nlm_pool.explainer_budget()
+        print(f"Allowance: {why} - room for {room} explainer(s) now")
+        if room < len(pending):
+            print(f"  launching {room} of {len(pending)}; the rest wait for the next run")
+            pending = pending[:room]
+        if not pending:
+            print("Allowance full - nothing launched this run.")
+            return
+
     print(f"Generating explainer videos for {len(pending)} lessons")
     print("=" * 60)
 
@@ -356,6 +371,7 @@ def cmd_generate(args):
             # further create in this run is wasted quota: save this job for a re-fire and stop.
             if "RESOURCE_EXHAUSTED" in str(e) or "Rate limited" in str(e):
                 rate_limited = True
+                print(f"  allowance: Google refused - treated as the {nlm_pool.record_limit('explainer RESOURCE_EXHAUSTED on create')} limit")
         time.sleep(2)
 
         # The notebooklm_tools CLI occasionally crashes inside its own studio_status
@@ -494,6 +510,13 @@ def cmd_refire_missing(args):
     _sweep_exhausted(state, now)
     if not candidates:
         print("No jobs need a re-fire.")
+        return
+    room, why = nlm_pool.explainer_budget()
+    if room < len(candidates):
+        print(f"Allowance: {why} - re-firing {room} of {len(candidates)} now")
+        candidates = candidates[:room]
+    if not candidates:
+        print("Allowance full - no re-fires this pass.")
         return
     print(f"Re-firing {len(candidates)} artifact-less jobs...")
     for job in candidates:

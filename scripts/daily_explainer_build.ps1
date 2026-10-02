@@ -134,7 +134,13 @@ try {
 
 # Phase 1: launch up to 180 new generations
 Write-Log "Phase 1: launching (free tier)..."
-Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--daily-cap", "100") | Out-Null
+$p1 = Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--daily-cap", "100")
+# Shared allowance full (3 Oct 2026, scripts\lib\nlm_pool.py): nothing launched, so clear the launch
+# stamp and let the next hourly heartbeat try again instead of waiting out the 24h cooldown.
+if ($p1 -match "Allowance full - nothing launched") {
+    Write-Log "Allowance full - nothing launched; next hour tries again."
+    Remove-Item $lastLaunchFile -ErrorAction SilentlyContinue
+}
 
 # Phase 1b: the schools. Without this pass a school's new lessons were never swept at
 # all - five Unity lessons sat with no video and no podcast (Tom, 20 Sep 2026).
