@@ -226,6 +226,60 @@ def latex_to_spoken(text):
 
 # ── HTML Parser ─────────────────────────────────────────────────────────
 
+_SUPER_DIGITS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺", "0123456789-+")
+_SUB_DIGITS = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
+_SYMBOLS = [
+    ("≤", " less than or equal to "), ("≥", " greater than or equal to "), ("≠", " not equal to "),
+    ("≈", " approximately "), ("±", " plus or minus "), ("∝", " is proportional to "),
+    ("∞", " infinity "), ("√", " the square root of "), ("∑", " the sum of "), ("Σ", " the sum of "),
+    ("Δ", " change in "), ("π", " pi "), ("θ", " theta "), ("λ", " lambda "), ("Ω", " ohms "),
+    ("µ", " micro"), ("μ", " micro"), ("½", " one half "), ("¼", " one quarter "), ("¾", " three quarters "),
+    ("⅓", " one third "), ("⅔", " two thirds "), ("⇌", " is in equilibrium with "),
+    ("∴", " therefore "), ("∠", " angle "), ("△", " triangle "), ("∥", " is parallel to "), ("⊥", " is perpendicular to "),
+]
+
+
+def _power_words(p):
+    p = p.strip().replace("−", "-")
+    if p == "2": return " squared"
+    if p == "3": return " cubed"
+    if p.startswith("-"): return " to the power of minus " + p[1:].strip()
+    return " to the power of " + p
+
+
+def speak_symbols(text):
+    """Read maths and science notation aloud: powers, subscripts, signs, Greek letters, fractions."""
+    if not text:
+        return text
+    t = text
+    # marked superscripts/subscripts from the HTML
+    t = re.sub(r"\s*\{\{SUP\}\}\s*(.*?)\s*\{\{/SUP\}\}", lambda m: _power_words(m.group(1)) + " ", t)
+    t = re.sub(r"\s*\{\{SUB\}\}\s*([0-9]+)\s*\{\{/SUB\}\}", r"\1", t)            # CO2, H2O: say the digit
+    t = re.sub(r"\s*\{\{SUB\}\}\s*(.*?)\s*\{\{/SUB\}\}", r" sub \1 ", t)          # x sub n
+    t = t.replace("{{SUP}}", "").replace("{{/SUP}}", "").replace("{{SUB}}", "").replace("{{/SUB}}", "")
+    # Unicode superscripts: 10⁸, x², s⁻¹
+    t = re.sub(r"([⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺]+)", lambda m: _power_words(m.group(1).translate(_SUPER_DIGITS)) + " ", t)
+    # maths signs between numbers or brackets
+    t = re.sub(r"\s*−\s*", " minus ", t)
+    t = re.sub(r"(?<=[\d)])\s*[×✕]\s*(?=[\d(])", " times ", t)
+    t = re.sub(r"(?<=[\d)])\s*÷\s*(?=[\d(])", " divided by ", t)
+    # comparison signs only when written as maths ("x < 5", "3<4"), never inside code such as <b>
+    for sign, words in (("<=", " less than or equal to "), (">=", " greater than or equal to "),
+                        ("<", " less than "), (">", " greater than ")):
+        e = re.escape(sign)
+        t = re.sub(r"(?<=[\w)])\s+" + e + r"\s+(?=[\w(\-])", words, t)
+        t = re.sub(r"(?<=\d)" + e + r"(?=[\d\-])", words, t)
+    t = t.translate(_SUB_DIGITS)                                              # H₂O -> H2O
+    t = re.sub(r"(\d)\s*°\s*C\b", r"\1 degrees Celsius", t)
+    t = re.sub(r"(\d)\s*°", r"\1 degrees", t)
+    # arrows: before a quotation (a translation or example) just pause; elsewhere it is a chain of causes
+    t = re.sub(r"\s*→\s*(?=[“\"‘'¿¡«])", ": ", t)
+    t = t.replace("→", ", which leads to ")
+    for sym, words in _SYMBOLS:
+        t = t.replace(sym, words)
+    return re.sub(r"\s+", " ", t).strip()
+
+
 class NarrationExtractor(HTMLParser):
     """Extract text from elements with data-narration-id attributes.
 
@@ -260,6 +314,9 @@ class NarrationExtractor(HTMLParser):
         # Skip content inside these tags
         if tag in ("svg", "button", "script", "style"):
             self._skip_depth += 1
+        # Superscripts and subscripts were flattened ("2<sup>7</sup>" was read "2 7")
+        if self._current_id and tag in ("sup", "sub"):
+            self._current_text.append("{{%s}}" % tag.upper())
         # Track <em> and <strong> for foreign language marking
         if tag in ("em", "strong") and self._lang_code and self._current_id:
             if not self._in_foreign:
@@ -272,6 +329,8 @@ class NarrationExtractor(HTMLParser):
     def handle_endtag(self, tag):
         if tag in ("svg", "button", "script", "style"):
             self._skip_depth = max(0, self._skip_depth - 1)
+        if self._current_id and tag in ("sup", "sub"):
+            self._current_text.append("{{/%s}}" % tag.upper())
         # Close foreign language marker
         if tag in ("em", "strong") and self._in_foreign:
             self._foreign_depth -= 1
@@ -296,6 +355,7 @@ class NarrationExtractor(HTMLParser):
             text = " ".join(self._current_text).strip()
             text = re.sub(r"\s+", " ", text)
             text = latex_to_spoken(text)
+            text = speak_symbols(text)
             if text:
                 self.chunks.append((self._current_id, text))
         self._current_id = None
@@ -314,6 +374,10 @@ class NarrationExtractor(HTMLParser):
             "ndash": "-", "hellip": "...", "nbsp": " ",
             "rarr": " to ", "larr": " to ", "bull": ", ",
             "pound": "pounds", "euro": "euros",
+            "lt": " less than ", "gt": " greater than ", "le": " less than or equal to ",
+            "ge": " greater than or equal to ", "ne": " not equal to ", "times": " times ",
+            "divide": " divided by ", "minus": " minus ", "plusmn": " plus or minus ",
+            "deg": " degrees ", "micro": " micro", "pi": " pi ", "radic": " the square root of ",
         }
         if self._current_id:
             self._current_text.append(entities.get(name, ""))
