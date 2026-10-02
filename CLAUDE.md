@@ -291,7 +291,7 @@ All in environment variables — never commit.
 - **Content:** 6 practice + 5 KCs + a flashcard deck of ≤14 (12–15 curated cards plus typed-recall cards, judged down to 14) per lesson; GCSE age 15–16
   readability. `*_html` fields use entities; plain-text fields use unicode
   (validator enforces). Fact-check BEFORE narration.
-- **Narration:** Azure, Ollie (odd) / Ada (even lessons), MP3 96kbps 24kHz
+- **Narration:** MAI voices since 2 Oct 2026 — Harry (odd) / Emily (even), `en-GB-…:MAI-Voice-2.1-Flash` via the Foundry resource (FOUNDRY_ENDPOINT/KEY); language lessons keep Ollie/Ada multilingual; older audio stays Ollie/Ada until re-narrated (Unity in one batch before its launch). MP3 96kbps 24kHz
   mono; languages use multilingual voices + SSML `<lang>` (foreign text in
   `<em>`/`<strong>`). See `docs/NARRATION_PIPELINE.md`.
 - **PPTs:** `python -m markitdown "file.pptx"`.
