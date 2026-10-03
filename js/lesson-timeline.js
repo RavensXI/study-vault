@@ -136,6 +136,7 @@
       if (level <= had || level === 0 || startPct >= (level === 2 ? 100 : 50)) return;
       all[location.pathname] = level; try { localStorage.setItem(SEEN_KEY, JSON.stringify(all)); } catch (e) {}
       section.classList.remove('svtl-pulse'); void section.offsetWidth; section.classList.add('svtl-pulse');
+      if (window.svSound) svSound.play(level === 2 ? 'explored' : 'done');
       var drawerMode = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
       if (drawerMode) toast(level);
     }

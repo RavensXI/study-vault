@@ -14,6 +14,8 @@
   var actx = null;
   function unlock() { try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) {} }
   function chime() {
+    if (window.svSound && svSound.play('timer', { force: true })) return;   // js/sounds.js, unlocked on every page
+    unlock();
     if (!actx) return;
     var t0 = actx.currentTime;
     [587.33, 783.99].forEach(function (freq, i) {
@@ -85,6 +87,7 @@
     tick(); setInterval(tick, 1000);
     return b;
   }
+  ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) { document.addEventListener(ev, unlock, { capture: true, passive: true }); });
   window.svTimer = { read: read, set: set, stop: stop, chime: chime, unlock: unlock, mount: mount };
   /* mount points: the classic top bar (before the podcast player); lesson and practice headers (before Next Lesson).
      The desk has its own wristwatch and mounts nothing. */

@@ -892,7 +892,19 @@
     var fonts = document.createElement('div'); fonts.className = 'a11y-rd-fonts';
     s3.appendChild(fonts);
 
-    pop.appendChild(s1); pop.appendChild(s2); pop.appendChild(s3);
+    // SOUNDS — the quiet result sounds (js/sounds.js), on unless switched off
+    var s4 = document.createElement('div'); s4.className = 'a11y-rd-section a11y-rd-sounds';
+    s4.innerHTML = '<span class="a11y-rd-label">Sounds</span><div class="a11y-rd-seg" role="group" aria-label="Sounds">' +
+      '<button type="button" data-snd="on">On</button><button type="button" data-snd="off">Off</button></div>';
+    function sndShow() { var on = !window.svSound || svSound.enabled(); s4.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String((b.dataset.snd === 'on') === on)); }); }
+    s4.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-snd]'); if (!b || !window.svSound) return;
+      svSound.setEnabled(b.dataset.snd === 'on'); sndShow();
+      if (b.dataset.snd === 'on') svSound.play('right', { force: true });   // a sample, so they know what they turned on
+    });
+    sndShow();
+
+    pop.appendChild(s1); pop.appendChild(s2); pop.appendChild(s3); pop.appendChild(s4);
     document.body.appendChild(pop);
 
     // ---- spacing wiring ----

@@ -2054,6 +2054,7 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
       grid.querySelectorAll('.kc-option').forEach(b => b.classList.add('locked'));
       const correct = selected === q.correct;
       grid.children[order.indexOf(selected)].classList.add(correct ? 'correct' : 'incorrect');
+      if (window.svSound) svSound.play(correct ? 'right' : 'wrong');
       kcPool(kcStrip(q.options[selected]), correct);
       if (!correct) {
         grid.children[order.indexOf(q.correct)].classList.add('correct');
@@ -2117,6 +2118,7 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
       const correct = selected === q.correct;
       const blank = body.querySelector('#kc-blank');
       blank.classList.add(correct ? 'correct' : 'incorrect');
+      if (window.svSound) svSound.play(correct ? 'right' : 'wrong');
       opts.querySelectorAll('.kc-fill-btn').forEach(b => {
         const idx = q.options.indexOf(b.textContent);
         if (idx === q.correct) b.classList.add('correct');
@@ -2186,6 +2188,7 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
           allCorrect = false;
         }
       });
+      if (window.svSound) svSound.play(allCorrect ? 'right' : 'wrong');
       kcPool('*', allCorrect);   /* a match-up has no single answer to count */
       if (allCorrect) score++;
       addNextBtn(allCorrect);
@@ -3035,6 +3038,7 @@ function initLessonProgress() {
   // marking handler calls this once it has parsed the mark.
   if (practiceBtn && tasks.some(function (t) { return t.id === 'practice-question'; })) {
     window.svTickPractice = function () {
+      if (window.svSound) svSound.play('right');   // half marks or better
       if (!state['practice-question']) {
         state['practice-question'] = true;
         saveState(state);
@@ -3478,6 +3482,7 @@ function openFlashcardModal() {
         flipCard(); setCardHeight(); return;
       }
       judged = res.verdict; lastTyped = typed;
+      if (window.svSound) svSound.play(res.verdict === 'right' ? 'right' : res.verdict === 'partly' ? 'partly' : 'wrong');
       var w = svRecall.words(res.verdict);
       if (res.verdict === 'right') {
         /* a tick on the card, the answer under it, and the next card deals itself: no buttons */
