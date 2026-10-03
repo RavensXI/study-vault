@@ -2470,6 +2470,40 @@ function initRevisionTips() {
 
   let openPopup = null;
 
+  /* "I've had a go" (Tom, 3 Oct 2026). Every lightbulb task ends with this button: tapping it ticks
+     the lesson's revision task (it used to be a box pupils ticked themselves) and, when the box has
+     a "check your thinking" note (data-revision-note), opens it. The note is written in advance with
+     the task, so no AI runs per pupil: it gives the answer where there is one, or the points a strong
+     answer weighs where it is a judgement. Pen and paper first, then the note. */
+  var anchorList = [];
+  function renderTipPopup(popup, el, tipText, tipHref, techLabel) {
+    var note = el.getAttribute('data-revision-note');
+    popup.innerHTML = '<p class="rt-task"></p><button type="button" class="rt-tried">I’ve had a go</button>' +
+      (note ? '<div class="rt-note" hidden><span class="rt-note-label">Check your thinking</span><p></p></div>' : '') +
+      '<a href="' + tipHref + '">' + techLabel + ' →</a>';
+    popup.querySelector('.rt-task').textContent = tipText;
+    if (note) popup.querySelector('.rt-note p').textContent = note;
+    var tried = popup.querySelector('.rt-tried');
+    tried.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (window.svTickTask) window.svTickTask('revision-task');
+      tried.textContent = note ? 'Ticked for this lesson' : 'Ticked for this lesson ✓';
+      tried.classList.add('done'); tried.disabled = true;
+      var n = popup.querySelector('.rt-note');
+      if (n) { n.hidden = false; if (popup.scrollIntoView) popup.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }   // whole popup, clear of the sticky header (scroll-margin)
+    });
+    popup.addEventListener('click', function (e) { e.stopPropagation(); });   // reading the note must not close it
+  }
+  // The box each tip belongs to, named as the tip builder names them (scripts/revision_tips): kf1.. in
+  // page order for key facts, then the first diagram, section and timeline.
+  function anchorId(el) {
+    if (el.classList.contains('key-fact')) return 'kf' + (Array.prototype.indexOf.call(article.querySelectorAll('.key-fact'), el) + 1);
+    if (el.matches('figure.diagram')) return 'dg1';
+    if (el.classList.contains('collapsible')) return 'cs1';
+    if (el.classList.contains('timeline')) return 'tl1';
+    return null;
+  }
+
   tips.forEach(function (tip) {
     const els = article.querySelectorAll(tip.selector);
     const limit = tip.maxPerPage || Infinity;
@@ -2499,7 +2533,8 @@ function initRevisionTips() {
       var tipHref = basePath + (basePath.startsWith('/guide/') ? techSlug.replace('.html', '') : techSlug);
       // Use content-specific tip if present, otherwise fall back to generic
       var tipText = el.getAttribute('data-revision-tip') || tip.text;
-      popup.innerHTML = '<p>' + tipText + '</p><a href="' + tipHref + '">' + techLabel + ' \u2192</a>';
+      renderTipPopup(popup, el, tipText, tipHref, techLabel);
+      anchorList.push({ el: el, popup: popup, tip: tip });
 
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -2536,6 +2571,33 @@ function initRevisionTips() {
       el.appendChild(popup);
     });
   });
+
+  /* PREVIEW (podcast-transcripts branch, 3 Oct 2026): the canary's rewritten tips and notes ship as
+     /revision-tips/<subject>/<unit>/lNN.json rather than in the database. When the lesson has a file,
+     its tips, techniques and notes replace the ones in the page. Live, they will be attributes on the
+     boxes themselves and this fetch goes. */
+  var pm = location.pathname.match(/^\/lesson\/([^/]+)\/([^/]+)\/(\d+)/);
+  if (pm && anchorList.length) {
+    fetch('/revision-tips/' + pm[1] + '/' + pm[2] + '/l' + ('0' + pm[3]).slice(-2) + '.json', { cache: 'no-cache' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data || !data.tips) return;
+        anchorList.forEach(function (a) {
+          var t = data.tips[anchorId(a.el)];
+          if (!t || !t.tip) return;
+          a.el.setAttribute('data-revision-tip', t.tip);
+          if (t.technique) a.el.setAttribute('data-revision-technique', t.technique);
+          if (t.note) a.el.setAttribute('data-revision-note', t.note); else a.el.removeAttribute('data-revision-note');
+          var TL = { 'elaborative-interrogation': 'Elaborative Interrogation', 'interleaving': 'Interleaving',
+                     'dual-coding': 'Dual Coding', 'retrieval-practice': 'Retrieval Practice' };
+          var slug = t.technique && TL[t.technique] ? t.technique : a.tip.link.replace('.html', '');
+          var label = t.technique && TL[t.technique] ? TL[t.technique] : a.tip.label;
+          var href = basePath + (basePath.startsWith('/guide/') ? slug : slug + '.html');
+          renderTipPopup(a.popup, a.el, t.tip, href, label);
+        });
+      })
+      .catch(function () {});
+  }
 
   // Close on outside click
   document.addEventListener('click', function () {
@@ -2762,7 +2824,9 @@ function initLessonProgress() {
   // Revision task — not on listening pages, which have no lightbulbs; it
   // would sit in the denominator as a task the student can never do.
   if (!document.querySelector('.sv-listening')) {
-    tasks.push({ id: 'revision-task', label: 'Complete a revision task', icon: icons.revision, iconClass: 'lesson-progress-icon--revision', auto: false });
+    // Ticks when the pupil taps "I've had a go" on a lightbulb task (initRevisionTips), not by hand
+    // (Tom, 3 Oct 2026: pupils could tick it off without doing anything).
+    tasks.push({ id: 'revision-task', label: 'Try a lightbulb revision task', icon: icons.revision, iconClass: 'lesson-progress-icon--revision', auto: true });
   }
 
   // Highlight mode — clicking enters mode (sets sv-hl-mode flag, switches
