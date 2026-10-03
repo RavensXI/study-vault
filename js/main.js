@@ -42,6 +42,9 @@ function svMediaMeta(title, sub) {
 window.svMediaMeta = svMediaMeta;
 document.addEventListener('play', function (e) {
   var el = e.target; if (!el || !/^(AUDIO|VIDEO)$/.test(el.tagName)) return;
+  // one sound at a time (Tom, 3 Oct 2026): starting the video stopped nothing, so the podcast
+  // played on underneath it. Whatever starts, everything else on the page pauses.
+  document.querySelectorAll('audio, video').forEach(function (m) { if (m !== el && !m.paused) m.pause(); });
   var t = (document.getElementById('lesson-title') || {}).textContent || '';
   svMediaMeta(t.trim(), el.tagName === 'VIDEO' ? 'Video' : '');
 }, true);
