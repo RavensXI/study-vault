@@ -1,0 +1,103 @@
+/* The lesson timeline (js/lesson-timeline.js): the progress row is the controls. */
+
+/* the big tiles and the old icon row go; their buttons stay in the page (the timeline clicks them) */
+body.has-svtl .sv-panel > .sidebar-section.sidebar-knowledge-check,
+body.has-svtl .sv-panel > .sidebar-section.sidebar-flashcard-section,
+body.has-svtl .sv-panel > .sidebar-section.tile-practice{ display:none !important; }
+body.has-svtl .lesson-progress-item{ display:none !important; }
+body.has-svtl .sv-panel{ grid-template-rows:auto auto; }
+body.has-svtl .sv-panel > .sidebar-media{ grid-area:2 / 1 / 3 / 4; }
+body.has-svtl .sv-panel > .tile-tutor{ grid-area:2 / 4 / 3 / 7; }
+body.has-svtl .lesson-progress-bar{ margin-bottom:0 !important; }
+
+.svtl{ position:relative; margin-top:1.15rem; font-family:var(--font-ui, system-ui, sans-serif); }
+
+/* ---- the row: equal columns, one line through the node centres ---- */
+.svtl-row{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(var(--n,6), 1fr); }
+.svtl-step{ position:relative; min-width:0; }
+.svtl-step::before, .svtl-step::after{ content:''; position:absolute; top:21px; height:2px; background:var(--border-light, #e6e4e0); }
+.svtl-step::before{ left:0; right:50%; }
+.svtl-step::after{ left:50%; right:0; }
+.svtl-step:first-child::before, .svtl-step:last-child::after{ display:none; }
+/* the core three sit on a heavier line */
+.svtl-step.is-core::before, .svtl-step.is-core:has(+ .is-core)::after{ height:3px; top:20.5px; }
+/* a segment fills when the step on its right is done */
+.svtl-step.is-done::before, .svtl-step:has(+ .svtl-step.is-done)::after{ background:var(--accent); }
+
+.svtl-btn{
+  position:relative; z-index:1; width:100%; display:flex; flex-direction:column; align-items:center; gap:.35rem;
+  padding:0; border:0; background:none; cursor:pointer; font:inherit; color:inherit; text-align:center;
+}
+.svtl-node{
+  width:44px; height:44px; border-radius:50%; display:grid; place-items:center; flex:none;
+  background:var(--bg-card, #fff); border:2px solid var(--border-light, #e6e4e0); color:var(--text-muted, #7f7c75);
+  transition:transform .2s cubic-bezier(.16,1,.3,1), border-color .2s, background-color .2s, color .2s, box-shadow .2s;
+}
+.svtl-node svg{ width:19px; height:19px; }
+.svtl-node .svtl-tick{ display:none; }
+.svtl-step.is-core .svtl-node{ border-color:color-mix(in srgb, var(--accent) 35%, var(--border-light, #e6e4e0)); color:var(--accent); }
+.svtl-btn:hover .svtl-node{ transform:translateY(-3px); border-color:var(--accent); color:var(--accent);
+  box-shadow:0 8px 16px -8px color-mix(in srgb, var(--accent) 70%, transparent); }
+.svtl-btn:active .svtl-node{ transform:translateY(0); }
+.svtl-btn:focus-visible{ outline:none; }
+.svtl-btn:focus-visible .svtl-node{ outline:2px solid var(--accent); outline-offset:3px; }
+.svtl-name{ font-size:.76rem; font-weight:700; line-height:1.1; white-space:nowrap; }
+.svtl-worth{ font-size:.7rem; color:var(--text-muted, #7f7c75); font-variant-numeric:tabular-nums; margin-top:-.2rem; }
+.svtl-btn:hover .svtl-name{ color:var(--accent); }
+
+.svtl-step.is-done .svtl-node{ background:var(--accent); border-color:var(--accent); color:#fff; }
+body.dark-mode .svtl-step.is-done .svtl-node{ color:#171614; }
+.svtl-step.is-done .svtl-ic{ display:none; }
+.svtl-step.is-done .svtl-tick{ display:block; stroke-width:3; }
+.svtl-step.is-done .svtl-worth{ color:var(--accent); font-weight:600; }
+.svtl-step.is-next .svtl-node{ border-color:var(--accent); color:var(--accent); box-shadow:0 0 0 5px color-mix(in srgb, var(--accent) 13%, transparent); }
+
+/* hover names the action (desktop) */
+.svtl-btn::after{
+  content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:50%; transform:translate(-50%, 4px);
+  white-space:nowrap; font-size:.72rem; font-weight:600; color:var(--bg-card, #fff); background:var(--text-primary, #2d2a26);
+  border-radius:5px; padding:.3rem .5rem; opacity:0; pointer-events:none; transition:opacity .15s, transform .15s; z-index:5;
+}
+.svtl-btn:hover::after{ opacity:1; transform:translate(-50%, 0); transition-delay:.2s; }
+.svtl-step:first-child .svtl-btn::after{ left:0; transform:translate(0, 4px); }
+.svtl-step:first-child .svtl-btn:hover::after{ transform:translate(0, 0); }
+.svtl-step:last-child .svtl-btn::after{ left:auto; right:0; transform:translate(0, 4px); }
+.svtl-step:last-child .svtl-btn:hover::after{ transform:translate(0, 0); }
+@media (hover:none){ .svtl-btn::after{ display:none; } }
+
+/* ---- the one button: the quickest road to 50% ---- */
+.svtl-next{
+  margin:1.05rem 0 0; width:100%; display:flex; align-items:center; justify-content:center; gap:.45rem;
+  padding:.75rem 1rem; border:0; border-radius:6px; cursor:pointer; font:inherit; font-size:.88rem; font-weight:700;
+  color:#fff; background:var(--accent);
+  box-shadow:0 1px 0 color-mix(in srgb, var(--accent) 60%, #000), 0 8px 18px -10px color-mix(in srgb, var(--accent) 80%, transparent);
+  transition:filter .15s, transform .15s cubic-bezier(.16,1,.3,1);
+}
+.svtl-next small{ font-size:.78rem; font-weight:600; opacity:.8; }
+.svtl-next .svtl-arrow{ transition:transform .2s cubic-bezier(.16,1,.3,1); }
+.svtl-next:hover{ filter:brightness(1.07); }
+.svtl-next:hover .svtl-arrow{ transform:translateX(3px); }
+.svtl-next:active{ transform:translateY(1px); }
+.svtl-next[hidden]{ display:none; }
+body.dark-mode .svtl-next{ color:#171614; }
+
+/* phones, once: the steps can be tapped */
+.svtl.show-hint{ margin-top:2.4rem; }   /* room for the hint above the row, clear of the bar */
+.svtl.show-hint::before{
+  content:'Tap any step'; position:absolute; top:-1.95rem; left:50%; transform:translateX(-50%); white-space:nowrap;
+  font-size:.72rem; font-weight:700; color:#fff; background:var(--accent); border-radius:5px; padding:.25rem .55rem;
+  animation:svtl-bob 1.6s ease-in-out infinite; z-index:6;
+}
+body.dark-mode .svtl.show-hint::before{ color:#171614; }
+@keyframes svtl-bob{ 50%{ transform:translate(-50%, -3px); } }
+
+@media (max-width:600px){
+  .svtl-node{ width:38px; height:38px; }
+  .svtl-node svg{ width:17px; height:17px; }
+  .svtl-step::before, .svtl-step::after{ top:18px; }
+  .svtl-step.is-core::before, .svtl-step.is-core:has(+ .is-core)::after{ top:17.5px; }
+  .svtl-name{ font-size:.7rem; }
+  .svtl-next{ font-size:.82rem; padding:.7rem .7rem; white-space:nowrap; }
+  .svtl-next small{ display:none; }   /* the worth is already under the step */
+}
+@media (prefers-reduced-motion:reduce){ .svtl-node, .svtl-next, .svtl-btn::after{ transition:none; } .svtl.show-hint::before{ animation:none; } }
