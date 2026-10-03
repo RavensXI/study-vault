@@ -101,3 +101,57 @@ body.dark-mode .svtl.show-hint::before{ color:#171614; }
   .svtl-next small{ display:none; }   /* the worth is already under the step */
 }
 @media (prefers-reduced-motion:reduce){ .svtl-node, .svtl-next, .svtl-btn::after{ transition:none; } .svtl.show-hint::before{ animation:none; } }
+
+/* ---- the two done states (Tom, 3 Oct 2026) ---- */
+#nav-unit-overview{ display:none !important; }   /* off the lesson header: its space goes to the unit name */
+
+/* 50%: the header turns, the dashed done-line becomes a tick */
+.sidebar-progress-section.is-lesson-done .lesson-progress-summary{ color:var(--accent) !important; font-weight:700; }
+.sidebar-progress-section.is-lesson-done .lesson-progress-bar::after{
+  top:-8px; bottom:auto; width:18px; height:18px; margin-left:-9px; border-radius:50%; opacity:1;
+  background:var(--accent) url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E") center/11px no-repeat;
+  box-shadow:0 0 0 3px var(--bg-card, #fff);
+}
+/* 100%: a filled badge before the words */
+.sidebar-progress-section.is-explored .lesson-progress-summary{
+  background:var(--accent); color:#fff !important; padding:.15rem .55rem; border-radius:4px; top:.8rem !important;
+}
+body.dark-mode .sidebar-progress-section.is-explored .lesson-progress-summary{ color:#171614 !important; }
+
+/* the moment, once per lesson */
+.sidebar-progress-section.svtl-pulse .lesson-progress-summary{ animation:svtl-pop .9s cubic-bezier(.16,1,.3,1); }
+.sidebar-progress-section.svtl-pulse .lesson-progress-bar::after{ animation:svtl-pop .9s cubic-bezier(.16,1,.3,1) .1s; }
+@keyframes svtl-pop{ 0%{ transform:scale(1); } 35%{ transform:scale(1.18); } 100%{ transform:scale(1); } }
+
+/* the quiet second choice under "Next lesson" */
+.svtl-further{
+  display:block; margin:.6rem auto 0; padding:.2rem .4rem; border:0; background:none; cursor:pointer;
+  font:inherit; font-size:.8rem; font-weight:600; color:var(--accent); text-decoration:underline; text-underline-offset:3px;
+  text-decoration-color:color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.svtl-further:hover{ text-decoration-color:var(--accent); }
+.svtl-further[hidden]{ display:none; }
+
+/* phones: the panel is in a closed drawer, so the news comes up from the bottom, once */
+.svtl-toast{
+  position:fixed; left:12px; right:12px; bottom:calc(14px + env(safe-area-inset-bottom, 0px)); z-index:9000;
+  display:flex; align-items:center; gap:.6rem; padding:.7rem .75rem .7rem .9rem; border-radius:10px;
+  background:var(--text-primary, #2d2a26); color:var(--bg-card, #fff); font-family:var(--font-ui, system-ui, sans-serif);
+  box-shadow:0 12px 30px rgba(0,0,0,.28); transform:translateY(140%); transition:transform .45s cubic-bezier(.16,1,.3,1);
+}
+.svtl-toast.is-in{ transform:translateY(0); }
+.svtl-toast-tick{ width:24px; height:24px; border-radius:50%; display:grid; place-items:center; background:var(--accent); color:#fff; font-weight:700; font-size:.8rem; flex:none; }
+.svtl-toast-text{ font-weight:700; font-size:.9rem; flex:1; }
+.svtl-toast-go{ color:var(--bg-card, #fff); font-weight:700; font-size:.88rem; text-decoration:none; white-space:nowrap; padding:.35rem .6rem; border-radius:6px; background:color-mix(in srgb, var(--bg-card, #fff) 14%, transparent); }
+.svtl-toast-x{ border:0; background:none; color:inherit; font-size:1.2rem; line-height:1; padding:.2rem .35rem; cursor:pointer; opacity:.7; }
+@media (prefers-reduced-motion:reduce){ .svtl-toast{ transition:none; } .sidebar-progress-section.svtl-pulse .lesson-progress-summary, .sidebar-progress-section.svtl-pulse .lesson-progress-bar::after{ animation:none; } }
+
+/* the unit name gets the room Unit Overview left (it was capped at 260 px and cut off) */
+@media (min-width:1100px){ body[data-skin="reader"] .header-unit-label{ max-width:min(30vw, 440px); } }
+/* the nav keeps its width; the unit name takes what is left and truncates only when it truly runs out */
+@media (min-width:1100px){
+  body[data-skin="reader"] .header-nav{ flex-shrink:0; }
+  body[data-skin="reader"] .header-pills{ flex:1 1 auto; min-width:0; display:flex; align-items:center; }
+  body[data-skin="reader"] .header-pills .header-unit-label{ flex:0 1 auto; min-width:0; max-width:none; }
+  body[data-skin="reader"] .header-pills .header-lesson-label{ flex:none; }
+}

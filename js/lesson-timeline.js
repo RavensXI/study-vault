@@ -13,7 +13,7 @@
 (function () {
   'use strict';
   if (!/^\/lesson\//.test(location.pathname)) return;
-  var HINT_KEY = 'sv-timeline-hint';
+  var HINT_KEY = 'sv-timeline-hint';   // + 'sv-lesson-done-seen' below
 
   var STEPS = [
     { id: 'knowledge-check', name: 'Quiz', verb: 'Take the quick quiz', core: true },
@@ -72,6 +72,7 @@
 
   waitFor(function (section) {
     if (section.querySelector('.svtl')) return;
+    var ul = q('.header-unit-label'); if (ul && ul.textContent) ul.title = ul.textContent.trim();   // the full unit name on hover when it is truncated
     var W = window.svTaskWeights || {};
     function item(id) { return section.querySelector('.lesson-progress-item[data-task="' + id + '"]'); }
     var steps = STEPS.filter(function (s) { return item(s.id); });
@@ -87,7 +88,8 @@
             '<span class="svtl-name">' + esc(s.name) + '</span><span class="svtl-worth">' + (W[s.id] || 0) + '%</span>' +
           '</button></li>';
       }).join('') + '</ol>' +
-      '<button type="button" class="svtl-next"></button>';
+      '<button type="button" class="svtl-next"></button>' +
+      '<button type="button" class="svtl-further" hidden></button>';
     var card = section.querySelector('.lesson-progress-card');
     (card && card.parentNode === section ? card : section.lastChild).after(root);
     document.body.classList.add('has-svtl');
@@ -104,16 +106,59 @@
         if (!d && (!next || (W[s.id] || 0) > (W[next.id] || 0))) next = s;   // heaviest not done = quickest road to 50%
       });
       root.querySelectorAll('.svtl-step').forEach(function (li) { li.classList.toggle('is-next', !!next && li.dataset.id === next.id); });
-      if (next) {
-        nextBtn.hidden = false; nextBtn.dataset.id = next.id;
-        nextBtn.innerHTML = '<span>Next: ' + esc(next.verb.charAt(0).toLowerCase() + next.verb.slice(1)) + '</span><small>· ' + (W[next.id] || 0) + '%</small><span class="svtl-arrow">→</span>';
+      var p = +section.dataset.svPct || 0, left = steps.filter(function (s) { return !done(s.id); }).length;
+      var further = root.querySelector('.svtl-further');
+      if (p >= 50) {
+        // done: the button's job becomes moving on; going further is the quiet second choice
+        var nl = q('#nav-next-lesson'), hasNext = nl && nl.getAttribute('href') && nl.getAttribute('href') !== '#' && nl.style.display !== 'none';
+        nextBtn.hidden = false; nextBtn.dataset.id = 'next-lesson'; nextBtn.dataset.href = hasNext ? nl.getAttribute('href') : '/';
+        nextBtn.innerHTML = '<span>' + (hasNext ? 'Next lesson' : 'Back to your dashboard') + '</span><span class="svtl-arrow">\u2192</span>';
+        if (left && next) {
+          further.hidden = false; further.dataset.id = next.id;
+          further.textContent = 'Or go further: ' + left + ' step' + (left > 1 ? 's' : '') + ' left';
+        } else further.hidden = true;
+      } else if (next) {
+        further.hidden = true;
+        nextBtn.hidden = false; nextBtn.dataset.id = next.id; delete nextBtn.dataset.href;
+        nextBtn.innerHTML = '<span>Next: ' + esc(next.verb.charAt(0).toLowerCase() + next.verb.slice(1)) + '</span><small>\u00b7 ' + (W[next.id] || 0) + '%</small><span class="svtl-arrow">\u2192</span>';
       } else nextBtn.hidden = true;
+      celebrate(p);
+    }
+
+    /* the moment, once per lesson: when this visit takes the lesson past 50% (and again, smaller, at 100%)
+       the header pulses and, on phones where the panel is in a closed drawer, a bar slides up.
+       'sv-lesson-done-seen' ({path: 1 | 2}, account-synced) keeps it from repeating on later visits. */
+    var SEEN_KEY = 'sv-lesson-done-seen', startPct = null;
+    function seenAll() { try { return JSON.parse(localStorage.getItem(SEEN_KEY) || '{}') || {}; } catch (e) { return {}; } }
+    function celebrate(p) {
+      if (startPct === null) { startPct = p; return; }        // the state on arrival is not news
+      var level = p >= 100 ? 2 : p >= 50 ? 1 : 0, all = seenAll(), had = all[location.pathname] || 0;
+      if (level <= had || level === 0 || startPct >= (level === 2 ? 100 : 50)) return;
+      all[location.pathname] = level; try { localStorage.setItem(SEEN_KEY, JSON.stringify(all)); } catch (e) {}
+      section.classList.remove('svtl-pulse'); void section.offsetWidth; section.classList.add('svtl-pulse');
+      var drawerMode = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
+      if (drawerMode) toast(level);
+    }
+    function toast(level) {
+      var old = q('.svtl-toast'); if (old) old.remove();
+      var nl = q('#nav-next-lesson'), href = nl && nl.getAttribute('href') && nl.getAttribute('href') !== '#' ? nl.getAttribute('href') : null;
+      var t = document.createElement('div');
+      t.className = 'svtl-toast'; t.setAttribute('role', 'status');
+      t.innerHTML = '<span class="svtl-toast-tick">\u2713</span><span class="svtl-toast-text">' + (level === 2 ? 'Fully explored' : 'Lesson done') + '</span>' +
+        (href ? '<a class="svtl-toast-go" href="' + esc(href) + '">Next lesson \u2192</a>' : '') +
+        '<button type="button" class="svtl-toast-x" aria-label="Close">\u00d7</button>';
+      document.body.appendChild(t);
+      requestAnimationFrame(function () { t.classList.add('is-in'); });
+      function close() { t.classList.remove('is-in'); setTimeout(function () { t.remove(); }, 400); }
+      t.querySelector('.svtl-toast-x').addEventListener('click', close);
+      setTimeout(close, 9000);
     }
     new MutationObserver(render).observe(section, { subtree: true, attributes: true, attributeFilter: ['class'] });
     render();
 
     root.addEventListener('click', function (e) {
-      var b = e.target.closest('.svtl-btn, .svtl-next'); if (!b) return;
+      var b = e.target.closest('.svtl-btn, .svtl-next, .svtl-further'); if (!b) return;
+      if (b.dataset.href) { location.href = b.dataset.href; return; }
       var id = (b.closest('[data-id]') || b).dataset.id;
       if (ACT[id]) ACT[id]();
       dismissHint();

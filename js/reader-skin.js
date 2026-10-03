@@ -694,7 +694,12 @@
       var done = items.filter(function (it) { return it.classList.contains('completed'); }).length;
       var wp = section.dataset.svPct;
       // the percentage and the target, not a count of icons (panel option C, Tom 3 Oct 2026)
-      var want = wp !== undefined ? wp + '% · done at 50%' : done + ' of ' + total + ' complete';
+      // two states (Tom, 3 Oct 2026): from 50% the lesson is done and can be left; 100% is 'fully explored'
+      // (the completion spec's word: doing everything is not the same as mastering it)
+      var wpn = +wp;
+      var want = wp === undefined ? done + ' of ' + total + ' complete'
+        : wpn >= 100 ? '\u2713 Fully explored' : wpn >= 50 ? '\u2713 Lesson done \u00b7 ' + wpn + '%' : wpn + '% \u00b7 done at 50%';
+      section.classList.toggle('is-lesson-done', wpn >= 50); section.classList.toggle('is-explored', wpn >= 100);
       if (summary.textContent !== want) summary.textContent = want;
       if (!section.dataset.doneTip) { section.dataset.doneTip = '1';
         var bar0 = section.querySelector('.lesson-progress-bar');
