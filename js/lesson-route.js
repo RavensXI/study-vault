@@ -35,10 +35,10 @@
 
   // the route's four stages, then the extras; only those this lesson has are shown
   var MAIN = [
-    { id: 'read', name: 'Read the lesson', verb: 'Keep reading' },
-    { id: 'knowledge-check', name: 'Quick quiz', verb: 'Start the quiz' },
-    { id: 'flashcards', name: 'Flashcards', verb: 'Practise the cards' },
-    { id: 'practice-question', name: 'Exam question', verb: 'Answer one' }
+    { id: 'read', name: 'Read', verb: 'Read the lesson' },
+    { id: 'knowledge-check', name: 'Quiz', verb: 'Take the quick quiz' },
+    { id: 'flashcards', name: 'Flashcards', verb: 'Practise the flashcards' },
+    { id: 'practice-question', name: 'Exam Q', verb: 'Answer an exam question' }
   ];
   var EXTRA = [
     { id: 'podcast', name: 'Podcast' }, { id: 'video', name: 'Video' },
@@ -107,21 +107,23 @@
     root.className = 'svr';
     root.setAttribute('aria-label', 'Lesson route');
     root.innerHTML =
-      '<header class="svr-head"><span class="svr-title">Lesson progress</span><span class="svr-pct" aria-live="polite"></span></header>' +
-      '<div class="svr-bar"><i></i></div>' +
-      '<ol class="svr-route">' + main.map(function (s) {
-        return '<li class="svr-stage" data-id="' + s.id + '"><button type="button" class="svr-row">' +
-          '<span class="svr-node">' + svg(s.id, 'svr-ic') + svg('tick', 'svr-tick') + '</span>' +
-          '<span class="svr-text"><span class="svr-name">' + esc(s.name) + '</span><span class="svr-meta"></span></span>' +
-          '<span class="svr-go">' + esc(s.verb) + ' →</span></button></li>';
-      }).join('') + '</ol>' +
-      (extra.length ? '<div class="svr-extras"><span class="svr-label">Also counts</span><div class="svr-chips">' + extra.map(function (s) {
+      '<div class="svr-sec">' +
+        '<header class="svr-head"><span class="svr-title">Lesson progress</span><span class="svr-pct" aria-live="polite"></span></header>' +
+        '<div class="svr-bar"><i></i></div>' +
+        '<ol class="svr-route" style="--n:' + main.length + '">' + main.map(function (s) {
+          return '<li class="svr-stage" data-id="' + s.id + '"><button type="button" class="svr-step" aria-label="' + esc(s.verb) + '">' +
+            '<span class="svr-node">' + svg(s.id, 'svr-ic') + svg('tick', 'svr-tick') + '</span>' +
+            '<span class="svr-name">' + esc(s.name) + '</span><span class="svr-meta"></span></button></li>';
+        }).join('') + '</ol>' +
+        '<button type="button" class="svr-next"></button>' +
+      '</div>' +
+      (extra.length ? '<div class="svr-sec"><span class="svr-label">Also counts</span><div class="svr-extras" style="--m:' + extra.length + '">' + extra.map(function (s) {
         return '<button type="button" class="svr-chip" data-id="' + s.id + '">' + svg(s.id, 'svr-ic') + svg('tick', 'svr-tick') +
           '<span>' + esc(s.name) + '</span><b>' + (W[s.id] || 0) + '%</b></button>';
       }).join('') + '</div></div>' : '') +
-      '<nav class="svr-contents" aria-label="In this lesson"><span class="svr-label">In this lesson</span><ol>' + headings.map(function (h, i) {
-        return '<li><a href="#" data-i="' + i + '"><span class="svr-dot"></span><span class="svr-h">' + esc(h.textContent.replace(/\s+/g, ' ').trim()) + '</span></a></li>';
-      }).join('') + '</ol></nav>' +
+      (headings.length ? '<nav class="svr-sec svr-contents" aria-label="In this lesson"><span class="svr-label">In this lesson</span><ol>' + headings.map(function (h, i) {
+        return '<li><a href="#" data-i="' + i + '">' + esc(h.textContent.replace(/\s+/g, ' ').trim()) + '</a></li>';
+      }).join('') + '</ol></nav>' : '') +
       '<footer class="svr-foot"></footer>';
 
     // Related media and the tutor keep their own buttons (and behaviour), moved into the route's foot
@@ -142,17 +144,22 @@
       pctEl.innerHTML = '<b>' + p + '%</b> · ' + (p >= 50 ? 'lesson done' : 'done at 50%');
       bar.style.width = p + '%';
       root.classList.toggle('is-complete', p >= 50);
-      var nextSet = false;
+      var next = null;
       main.forEach(function (s) {
         var li = root.querySelector('.svr-stage[data-id="' + s.id + '"]');
         var d = done(s.id);
         li.classList.toggle('is-done', d);
-        var isNext = !d && !nextSet; if (isNext) nextSet = true;
-        li.classList.toggle('is-next', isNext);
-        var meta = li.querySelector('.svr-meta');
-        if (s.id === 'read') meta.textContent = readCount() + ' of ' + headings.length + ' sections';
-        else meta.textContent = (d ? 'Done · ' : 'Worth ') + (W[s.id] || 0) + '%';
+        if (!d && !next) next = s;
+        li.classList.toggle('is-next', !d && next === s);
+        li.querySelector('.svr-meta').textContent = s.id === 'read'
+          ? readCount() + ' of ' + headings.length
+          : (d ? 'Done' : (W[s.id] || 0) + '%');
       });
+      var nb = root.querySelector('.svr-next');
+      if (next) {
+        nb.hidden = false; nb.dataset.id = next.id;
+        nb.innerHTML = '<span>' + esc(next.verb) + '</span>' + (next.id !== 'read' ? '<small>\u00b7 ' + (W[next.id] || 0) + '%</small>' : '') + '<span class="svr-arrow">\u2192</span>';
+      } else nb.hidden = true;
       extra.forEach(function (s) {
         var c = root.querySelector('.svr-chip[data-id="' + s.id + '"]');
         if (c) c.classList.toggle('is-done', done(s.id));
@@ -164,7 +171,7 @@
 
     /* ---- actions: every stage, any time, in any order ---- */
     root.addEventListener('click', function (e) {
-      var row = e.target.closest('.svr-row, .svr-chip');
+      var row = e.target.closest('.svr-step, .svr-chip, .svr-next');
       if (row) { var id = (row.closest('[data-id]') || row).dataset.id; if (ACT[id]) ACT[id](); return; }
       var a = e.target.closest('.svr-contents a');
       if (a) { e.preventDefault(); scrollTo(headings[+a.dataset.i]); }
@@ -185,6 +192,16 @@
       });
       if (changed) { saveRead(); render(); }
     }
+    // the live behaviour: the column scrolls with the page until its foot is in view, then stays there;
+    // its sticking point comes from its own height, so it is never cut off and never scrolls inside
+    function stickPoint() {
+      var h = sidebar.getBoundingClientRect().height, top = 80;
+      var t = Math.min(top, window.innerHeight - h - 16);
+      document.body.style.setProperty('--svr-top', t + 'px');
+    }
+    stickPoint();
+    window.addEventListener('resize', stickPoint);
+    if (window.ResizeObserver) new ResizeObserver(stickPoint).observe(sidebar);
     var ticking = false;
     window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(function () { ticking = false; onScroll(); }); } }, { passive: true });
     onScroll();
