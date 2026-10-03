@@ -2479,6 +2479,23 @@ function initRevisionTips() {
      the task, so no AI runs per pupil: it gives the answer where there is one, or the points a strong
      answer weighs where it is a judgement. Pen and paper first, then the note. */
   var anchorList = [];
+  /* which lightbulbs this pupil has tried, per lesson (Tom, 3 Oct 2026: a ticked revision task with no
+     sign of which task did it). 'sv-tips-tried' = {path: [anchor ids]}, account-synced. A tried bulb is
+     filled with a tick, and its popup opens straight on "Done" with the note showing. */
+  var TRIED_KEY = 'sv-tips-tried';
+  function triedAll() { try { return JSON.parse(localStorage.getItem(TRIED_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  function isTried(el) { var id = anchorId(el); return !!id && (triedAll()[location.pathname] || []).indexOf(id) !== -1; }
+  function setTried(el) {
+    var id = anchorId(el); if (!id) return;
+    var all = triedAll(), list = all[location.pathname] || [];
+    if (list.indexOf(id) === -1) list.push(id);
+    all[location.pathname] = list;
+    try { localStorage.setItem(TRIED_KEY, JSON.stringify(all)); } catch (e) {}
+  }
+  function markBulb(el) {
+    var b = el.querySelector(':scope > .revision-tip-btn');
+    if (b) { var t = isTried(el); b.classList.toggle('is-tried', t); b.setAttribute('aria-label', t ? 'Revision task (done)' : 'Revision task'); }
+  }
   function renderTipPopup(popup, el, tipText, tipHref, techLabel) {
     var note = el.getAttribute('data-revision-note');
     popup.innerHTML = '<p class="rt-task"></p><button type="button" class="rt-tried">I’ve had a go</button>' +
@@ -2487,8 +2504,13 @@ function initRevisionTips() {
     popup.querySelector('.rt-task').textContent = tipText;
     if (note) popup.querySelector('.rt-note p').textContent = note;
     var tried = popup.querySelector('.rt-tried');
+    if (isTried(el)) {   // tried before: say so, and show the note straight away
+      tried.textContent = '\u2713 Done'; tried.classList.add('done'); tried.disabled = true;
+      var n0 = popup.querySelector('.rt-note'); if (n0) n0.hidden = false;
+    }
     tried.addEventListener('click', function (e) {
       e.stopPropagation();
+      setTried(el); markBulb(el);
       if (window.svTickTask) window.svTickTask('revision-task');
       tried.textContent = '✓ Ticked for this lesson';
       tried.classList.add('done'); tried.disabled = true;
@@ -2572,6 +2594,7 @@ function initRevisionTips() {
 
       el.appendChild(btn);
       el.appendChild(popup);
+      markBulb(el);
     });
   });
 
