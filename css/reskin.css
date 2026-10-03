@@ -2864,3 +2864,71 @@ body[data-skin="reader"] .rm-launcher-count{ margin-left:0; }
   body[data-skin="reader"] .sv-tool-label{ font-size:.85rem; white-space:nowrap; }
   body[data-skin="reader"] .sv-tool-btn, body[data-skin="reader"] .rm-launcher{ padding-inline:.5rem !important; }
 }
+
+/* option C, round 2 (Tom, 3 Oct 2026: "they still don't really feel like buttons"): each tile is a
+   raised card inside its cell, with a verb in the accent colour, and lifts on hover. A done tile keeps
+   its card (you can go again) but its verb goes quiet. */
+/* (.sidebar-section.x outranks the older ':not(.sidebar-progress-section)' rule that zeroes the padding) */
+body[data-skin="reader"] .sv-panel > .sidebar-section.sidebar-knowledge-check,
+body[data-skin="reader"] .sv-panel > .sidebar-section.sidebar-flashcard-section,
+body[data-skin="reader"] .sv-panel > .sidebar-section.tile-practice{ padding:.5rem .4rem .55rem !important; background:var(--bg-card) !important; }
+body[data-skin="reader"] .knowledge-check-btn,
+body[data-skin="reader"] #sidebar-flashcard-btn,
+body[data-skin="reader"] .sidebar-flashcard-btn,
+body[data-skin="reader"] .sv-practice-btn{
+  background:var(--bg-card) !important;
+  border:1px solid color-mix(in srgb,var(--accent) 30%,var(--border-light)) !important;
+  border-radius:6px !important;
+  box-shadow:0 1px 0 color-mix(in srgb,var(--accent) 22%,transparent), 0 3px 8px -4px rgba(29,28,26,.18) !important;
+  padding:.7rem .35rem .65rem !important; gap:.3rem !important;
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease !important;
+}
+body[data-skin="reader"] .knowledge-check-btn:hover,
+body[data-skin="reader"] #sidebar-flashcard-btn:hover,
+body[data-skin="reader"] .sidebar-flashcard-btn:hover,
+body[data-skin="reader"] .sv-practice-btn:hover{
+  border-color:var(--accent) !important; transform:translateY(-1px);
+  box-shadow:0 2px 0 color-mix(in srgb,var(--accent) 35%,transparent), 0 8px 16px -8px rgba(29,28,26,.28) !important;
+}
+body[data-skin="reader"] .knowledge-check-btn:active,
+body[data-skin="reader"] #sidebar-flashcard-btn:active,
+body[data-skin="reader"] .sv-practice-btn:active{ transform:translateY(0); box-shadow:0 1px 0 color-mix(in srgb,var(--accent) 22%,transparent) !important; }
+body[data-skin="reader"] .knowledge-check-btn:focus-visible,
+body[data-skin="reader"] #sidebar-flashcard-btn:focus-visible,
+body[data-skin="reader"] .sv-practice-btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+/* the verb */
+body[data-skin="reader"] .knowledge-check-btn::after,
+body[data-skin="reader"] #sidebar-flashcard-btn::after,
+body[data-skin="reader"] .sv-practice-btn::after{
+  display:block; margin-top:.1rem; font-family:var(--font-ui); font-size:.78rem; font-weight:700; color:var(--accent);
+}
+body[data-skin="reader"] .knowledge-check-btn::after{ content:'Start quiz \2192'; }
+body[data-skin="reader"] #sidebar-flashcard-btn::after{ content:'Practise \2192'; }
+body[data-skin="reader"] .sv-practice-btn::after{ content:'Answer one \2192'; }
+body[data-skin="reader"] .knowledge-check-btn.is-done::after{ content:'Try again \2192'; color:var(--text-muted); font-weight:600; }
+body[data-skin="reader"] #sidebar-flashcard-btn.is-done::after{ content:'Practise again \2192'; color:var(--text-muted); font-weight:600; }
+body[data-skin="reader"] .sv-practice-btn.is-done::after{ content:'Try another \2192'; color:var(--text-muted); font-weight:600; }
+/* bottom row: the arrow comes back, inline after the words */
+body[data-skin="reader"] .rm-launcher-count::after,
+body[data-skin="reader"] .sv-tool-label::after{ content:' \2192'; color:var(--accent); font-weight:700; }
+body[data-skin="reader"] .rm-launcher, body[data-skin="reader"] .sv-tool-btn,
+body[data-skin="reader"] .rm-launcher-count, body[data-skin="reader"] .rm-launcher-label{ white-space:nowrap; }
+body[data-skin="reader"] .sv-tool-btn:hover .sv-tool-label,
+body[data-skin="reader"] .rm-launcher:hover .rm-launcher-label{ color:var(--accent); }
+@media (max-width:600px){
+  body[data-skin="reader"] .knowledge-check-btn::after,
+  body[data-skin="reader"] #sidebar-flashcard-btn::after,
+  body[data-skin="reader"] .sv-practice-btn::after{ font-size:.72rem; white-space:nowrap; }
+}
+@media (max-width:600px){
+  body[data-skin="reader"] .sv-panel > .sidebar-section.sidebar-knowledge-check,
+  body[data-skin="reader"] .sv-panel > .sidebar-section.sidebar-flashcard-section,
+  body[data-skin="reader"] .sv-panel > .sidebar-section.tile-practice{ padding:.4rem .25rem .45rem !important; }
+  body[data-skin="reader"] .knowledge-check-label,
+  body[data-skin="reader"] #sidebar-flashcard-btn > span,
+  body[data-skin="reader"] .sv-practice-btn > span{ font-size:.76rem; }
+  body[data-skin="reader"] .rm-launcher-label, body[data-skin="reader"] .sv-tool-label,
+  body[data-skin="reader"] .rm-launcher-count{ font-size:.8rem; }
+  body[data-skin="reader"] .rm-launcher, body[data-skin="reader"] .sv-tool-btn{ gap:.35rem; padding-inline:.35rem !important; }
+  body[data-skin="reader"] .rm-launcher svg, body[data-skin="reader"] .sv-tool-btn svg{ width:16px !important; height:16px !important; }
+}
