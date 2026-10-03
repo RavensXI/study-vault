@@ -544,6 +544,69 @@
       }
     }
 
+
+  /* Video credit (Tom, 3 Oct 2026): the lesson's video ticks itself once 70% has actually been
+     watched, and pupils can no longer tick it by hand. Same rule as the podcast: only stretches
+     that really played count ([from, to] intervals in seconds); skipping ahead adds nothing and a
+     replay counts once. Stored per lesson in 'sv-video-watched' ({path: [[s, e], ...]},
+     account-synced). Fed by our own videos (the pop-up player) and by YouTube (the panel's
+     embedded player, through the YouTube player API). */
+  window.svVideoCredit = window.svVideoCredit || (function () {
+    var KEY = 'sv-video-watched', SHARE = 0.7, path = location.pathname, ticked = false, seg = null, lastDur = 0;
+    function all() { try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; } }
+    function merge(list) {
+      var a = (list || []).filter(function (x) { return x && x[1] > x[0]; })
+        .map(function (x) { return [+x[0], +x[1]]; }).sort(function (x, y) { return x[0] - y[0]; });
+      var out = [];
+      a.forEach(function (x) { var l = out[out.length - 1]; if (l && x[0] <= l[1] + 0.5) l[1] = Math.max(l[1], x[1]); else out.push(x); });
+      return out;
+    }
+    function covered(list) { return list.reduce(function (t, x) { return t + (x[1] - x[0]); }, 0); }
+    function check(list, dur) {
+      if (!ticked && dur > 0 && covered(list) >= SHARE * dur) { ticked = true; if (window.svTickTask) window.svTickTask('video'); }
+    }
+    function commit(dur) {
+      dur = dur || lastDur;
+      if (!seg) return;
+      var a = all(); var l = merge((a[path] || []).concat([seg])); seg = null;
+      a[path] = l; try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (e) {}
+      check(l, dur);
+    }
+    var lastAt = 0;
+    function at(t, dur, playing, rate) {
+      if (dur > 0) lastDur = dur;
+      var now = Date.now(), since = lastAt ? (now - lastAt) / 1000 : 0; lastAt = now;
+      if (!playing || !(t >= 0)) { commit(dur); return; }
+      // a gap the playback itself explains (real time since the last report x the speed) is watching;
+      // anything bigger is a skip
+      var allowed = since * (rate || 1) + 1.5;
+      if (seg && t >= seg[1] - 0.25 && t - seg[1] <= allowed) seg[1] = t;    // still playing on from where it was
+      else { commit(dur); seg = [t, t]; }                               // a jump: the old stretch is banked, a new one starts
+      var a = all(); check(merge((a[path] || []).concat([seg])), dur);
+    }
+    function trackYouTube(iframe) {
+      if (!iframe || iframe.dataset.svTracked) return;
+      iframe.dataset.svTracked = '1';
+      if (!iframe.id) iframe.id = 'sv-yt-' + Date.now();
+      function start() {
+        var player = new window.YT.Player(iframe.id, { events: { onReady: function () {
+          setInterval(function () {
+            var st = player.getPlayerState && player.getPlayerState();
+            at(player.getCurrentTime ? player.getCurrentTime() : 0, player.getDuration ? player.getDuration() : 0, st === 1, player.getPlaybackRate ? player.getPlaybackRate() : 1);
+          }, 1000);
+        } } });
+      }
+      if (window.YT && window.YT.Player) return start();
+      var prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = function () { if (prev) prev(); start(); };
+      if (!document.getElementById('sv-yt-api')) {
+        var sc = document.createElement('script'); sc.id = 'sv-yt-api'; sc.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(sc);
+      }
+    }
+    window.addEventListener('pagehide', function () { commit(); });   // closing the tab mid-video keeps what was watched
+    return { at: at, commit: commit, trackYouTube: trackYouTube };
+  })();
+
     // Video overview (YouTube ID, Google Drive URL, or direct MP4 URL)
     if (lesson.youtube_video_id && lesson.youtube_video_id !== 'practice-only') {
       var videoSection = document.getElementById('sidebar-video-section');
@@ -584,8 +647,10 @@
         });
         // AI-video disclosure lives in the footer "Disclaimers" popup (js/legal.js).
       } else {
-        iframe.src = embedSrc;
+        // the player API lets the watch tracker read the time (enablejsapi + origin)
+        iframe.src = embedSrc + (embedSrc.indexOf('?') === -1 ? '?' : '&') + 'enablejsapi=1&origin=' + encodeURIComponent(location.origin);
         iframe.title = lesson.title;
+        window.svVideoCredit.trackYouTube(iframe);
       }
       videoSection.style.display = '';
     }
@@ -1644,6 +1709,12 @@
           'Your browser does not support video playback.' +
         '</video>';
       if (window._svCaptionsUrl) wireCaptions(container);
+      var vp = container.querySelector('.video-modal-player');
+      if (vp && window.svVideoCredit) {
+        var feed = function () { window.svVideoCredit.at(vp.currentTime, vp.duration, !vp.paused && !vp.ended, vp.playbackRate); };
+        vp.addEventListener('timeupdate', feed);
+        ['pause', 'ended', 'seeking'].forEach(function (ev) { vp.addEventListener(ev, function () { window.svVideoCredit.commit(vp.duration); }); });
+      }
     } else {
       // Google Drive / YouTube: use iframe
       container.innerHTML =
@@ -1658,6 +1729,7 @@
   function closeVideoModal() {
     var overlay = document.getElementById('video-modal-overlay');
     if (!overlay) return;
+    if (window.svVideoCredit) window.svVideoCredit.commit();
     overlay.classList.remove('active');
     // Stop playback after transition
     setTimeout(function () {

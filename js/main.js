@@ -2779,13 +2779,15 @@ function initLessonProgress() {
 
   // Check for podcast — either in the tabbed player or in sidebar media
   if (window.podcastUrl || sidebar.innerHTML.toLowerCase().indexOf('podcast') !== -1) {
-    tasks.push({ id: 'podcast', label: 'Listen to podcast', icon: icons.podcast, iconClass: 'lesson-progress-icon--podcast', auto: false });
+    // ticks itself at 70% of the episode actually heard (Tom, 3 Oct 2026: no more hand ticks)
+    tasks.push({ id: 'podcast', label: 'Listen to most of the podcast', icon: icons.podcast, iconClass: 'lesson-progress-icon--podcast', auto: true });
   }
 
   // Check for video
   var videoSection = document.getElementById('sidebar-video-section');
   if (videoSection && videoSection.style.display !== 'none') {
-    tasks.push({ id: 'video', label: 'Watch the video', icon: icons.video, iconClass: 'lesson-progress-icon--video', auto: false });
+    // ticks itself at 70% of the video actually watched (js/lesson-loader.js svVideoCredit)
+    tasks.push({ id: 'video', label: 'Watch most of the video', icon: icons.video, iconClass: 'lesson-progress-icon--video', auto: true });
   }
 
   // Full listen — the docked study-piece player reports 85% of the piece heard
