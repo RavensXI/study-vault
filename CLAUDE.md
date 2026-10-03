@@ -239,9 +239,14 @@ batch logs.
   platform duration re-measure (nice-to-have).
 - **3-lesson widget band** (48 clusters) — APPROVED and now unblocked (its
   retro fact-check gate was met 6 Sep).
-- **NLM shared budget**: sandbox shorts job runs on the shared allowance
-  (`scripts/lib/nlm_pool.py`, 24 Sep); the explainer wrapper on platform still
-  uses its own `--daily-cap 100` — bring it onto the same ledger.
+- **NLM shared budget**: DONE 3 Oct 2026 (49fe4edd platform, 01452ff8 sandbox): explainers launch and
+  re-fire within `scripts/lib/nlm_pool.py`; ONE ledger at `scripts/_nlm_pool.json` (main checkout) for
+  every stream; a held-back short signals a limit once (one stuck notebook had cut the caps 6 times).
+- **Science Key Takeaways shown twice (8 lessons)**: fix DRAFTED, awaiting Tom's go —
+  `scripts/_keytakeaways_dedup_2026-10-03_review.md`, apply with `--apply`.
+- **Revision tips (lightbulbs)**: canary built 3 Oct 2026 (`scripts/revision_tips/`, review page
+  https://claude.ai/artifact/3ggzZiFWfGPZuGSwiGp6bi); awaiting Tom. Then: CONTENT_PROMPT.md tip rules,
+  full run (~25k boxes), write data-revision-tip + data-revision-technique (main.js reads both, 2f4b5149).
 - **English Literature debt**: 3 duplicate-content clusters left (flashcards
   regenerated and placeholders closed 30 Aug).
 - **Prescribed-works register**: Media AQA CSPs — blocked on the 2027 booklet
