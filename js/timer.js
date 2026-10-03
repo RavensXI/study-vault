@@ -40,16 +40,22 @@
     + '.svtimer-pop.open{display:flex}'
     + '.svtimer-pop button{font:600 .82rem Inter,system-ui,sans-serif;color:#2d2a26;background:#faf8f5;border:1px solid #e4dfd2;border-radius:4px;padding:.4rem .7rem;cursor:pointer;white-space:nowrap}'
     + '.svtimer-pop button:hover{border-color:#c06325;color:#c06325}.svtimer-pop button.stop{color:#9a3a25}'
-    + '@media (max-width:700px){.svtimer .left{font-size:.76rem}}';
+    + '@media (max-width:700px){.svtimer .left{font-size:.76rem}}'
+    /* lesson + practice headers (Tom, 3 Oct 2026, timer option 2): a labelled link like its neighbours, not a lone icon.
+       Idle it reads Timer; running, the time left in the accent colour. */
+    + '.svtimer.labelled{font:inherit;color:inherit;padding:0;gap:.35rem}'
+    + '.svtimer.labelled .dial{width:16px;height:16px}.svtimer.labelled .dial .stopwatch{width:100%;height:100%;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}'
+    + '.svtimer.labelled .dial .arcsvg{display:none}.svtimer.labelled .left{display:inline}'
+    + '.svtimer.labelled.running,.svtimer.labelled:hover{color:var(--accent,#3f5e78)!important}';
 
   function mount(where, opts) {
     if (!where || document.querySelector('.svtimer')) return null;
     opts = opts || {};
     if (!document.getElementById('svtimer-css')) { var st = document.createElement('style'); st.id = 'svtimer-css'; st.textContent = CSS; document.head.appendChild(st); }
     var wrap = document.createElement('span'); wrap.style.position = 'relative'; wrap.style.display = 'inline-flex'; wrap.className = 'svtimer-wrap';
-    var b = document.createElement('button'); b.type = 'button'; b.className = 'svtimer' + (opts.icon ? ' icon' : ''); b.setAttribute('aria-label', 'Revision timer');
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'svtimer' + (opts.icon || opts.label ? ' icon' : '') + (opts.label ? ' labelled' : ''); b.setAttribute('aria-label', 'Revision timer');
     var R = opts.icon ? 7.6 : 9.6, C = 2 * Math.PI * R;
-    var face = opts.icon
+    var face = (opts.icon || opts.label)
       ? '<svg class="stopwatch" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="8"/><path d="M10 2.5h4M12 2.5v3M18.5 6.5l1.5-1.5"/></svg>'
       : '<img src="/assets/lw/shelf/prop_timer.webp" alt="">';
     b.innerHTML = '<span class="dial" aria-hidden="true">' + face
@@ -58,15 +64,19 @@
     pop.innerHTML = '<button data-min="15">15 min</button><button data-min="25">25 min</button><button data-min="45">45 min</button><button class="stop" data-min="0">Stop</button>';
     wrap.appendChild(b); wrap.appendChild(pop);
     where.parentNode ? where.parentNode.insertBefore(wrap, where) : document.body.appendChild(wrap);
+    if (opts.label) {   // dressed exactly like the header link it sits beside
+      var cs = getComputedStyle(where);
+      ['fontFamily', 'fontSize', 'fontWeight', 'letterSpacing', 'color'].forEach(function (k) { b.style[k] = cs[k]; });
+    }
     var arc = b.querySelector('.arc'), left = b.querySelector('.left'), fired = false;
     function tick() {
       var t = read();
-      if (!t) { arc.style.strokeDashoffset = C; left.textContent = ''; pop.querySelector('.stop').style.display = 'none';
+      if (!t) { arc.style.strokeDashoffset = C; left.textContent = opts.label ? 'Timer' : ''; b.classList.remove('running'); pop.querySelector('.stop').style.display = 'none';
         try { if (localStorage.getItem(KEY) && !fired) { fired = true; b.classList.add('flash'); chime(); stop(); setTimeout(function () { b.classList.remove('flash'); }, 2000); } } catch (e) {}
         return; }
       fired = false; pop.querySelector('.stop').style.display = '';
       var frac = (t.end - Date.now()) / t.total; arc.style.strokeDashoffset = (C * (1 - Math.max(0, Math.min(1, frac)))).toFixed(2);
-      left.textContent = mmss(t.end - Date.now());
+      left.textContent = mmss(t.end - Date.now()); b.classList.add('running');
     }
     b.addEventListener('click', function (e) { e.stopPropagation(); pop.classList.toggle('open'); });
     pop.querySelectorAll('button').forEach(function (x) { x.addEventListener('click', function (e) { e.stopPropagation(); var m = +x.dataset.min; if (m) set(m); else stop(); pop.classList.remove('open'); tick(); }); });
@@ -82,7 +92,11 @@
     if (document.getElementById('watch')) return;
     var pod = document.querySelector('.top .podbar');
     if (pod) mount(pod);
-    else { var nx = document.getElementById('nav-next-lesson'); if (nx) mount(nx, { icon: true }); }
+    else {
+      // lesson/practice header: a labelled link before Previous Lesson (option 2); before Next if there is no Previous
+      var pv = document.getElementById('nav-prev-lesson'), nx = document.getElementById('nav-next-lesson');
+      if (pv || nx) mount(pv || nx, { label: true });
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auto); else auto();
 })();

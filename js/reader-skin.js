@@ -693,7 +693,8 @@
       var total = items.length;
       var done = items.filter(function (it) { return it.classList.contains('completed'); }).length;
       var wp = section.dataset.svPct;
-      var want = done + ' of ' + total + (wp !== undefined ? ' · ' + wp + '%' : ' complete');
+      // the percentage and the target, not a count of icons (panel option C, Tom 3 Oct 2026)
+      var want = wp !== undefined ? wp + '% · done at 50%' : done + ' of ' + total + ' complete';
       if (summary.textContent !== want) summary.textContent = want;
       if (!section.dataset.doneTip) { section.dataset.doneTip = '1';
         var bar0 = section.querySelector('.lesson-progress-bar');
@@ -1061,7 +1062,7 @@
     sec.className = 'sidebar-section tile-practice';
     var b = document.createElement('button');
     b.className = 'sv-practice-btn'; b.type = 'button';
-    b.innerHTML = ICONS.practice + '<span>Practice Questions</span>';
+    b.innerHTML = ICONS.practice + '<span>Exam question</span>';   // one is enough for its 40% (Tom, 3 Oct 2026)
     sec.appendChild(b);
     var panel = sidebar.querySelector('.sv-panel');
     (panel || sidebar).appendChild(sec);
@@ -1450,9 +1451,37 @@
       if (!el || !d[1] || el.querySelector('.sv-weight-tag')) return;
       var t = document.createElement('span');
       t.className = 'sv-weight-tag';
-      t.textContent = '· ' + d[1] + '%';
+      // the three tiles say it as a line of its own ("Worth 40%"); the podcast tab and video keep "· 10%"
+      var tile = /knowledge-check|flashcard|practice/.test(d[0]);
+      t.textContent = tile ? 'Worth ' + d[1] + '%' : '· ' + d[1] + '%';
+      if (tile) t.dataset.w = d[1];
       el.appendChild(t);
     });
+    syncTileDone();
+  }
+
+  // Panel option C (Tom, 3 Oct 2026): each tile shows its state as well as its worth. A tile whose
+  // progress item is ticked reads "Done" and takes the done colour; driven by the progress items'
+  // own 'completed' class, so it can never disagree with Lesson Progress.
+  function syncTileDone() {
+    var section = document.querySelector('.sidebar-progress-section');
+    if (!section) return;
+    function apply() {
+      [['.knowledge-check-btn', 'knowledge-check'], ['#sidebar-flashcard-btn', 'flashcards'], ['.sv-practice-btn', 'practice-question']]
+        .forEach(function (d) {
+          var b = document.querySelector(d[0]); if (!b) return;
+          var it = section.querySelector('.lesson-progress-item[data-task="' + d[1] + '"]');
+          var on = !!(it && it.classList.contains('completed'));
+          b.classList.toggle('is-done', on);
+          var tag = b.querySelector('.sv-weight-tag[data-w]');
+          if (tag) { var want = on ? '\u2713 Done' : 'Worth ' + tag.dataset.w + '%'; if (tag.textContent !== want) tag.textContent = want; }
+        });
+    }
+    apply();
+    if (!section.dataset.tileDone) {
+      section.dataset.tileDone = '1';
+      new MutationObserver(apply).observe(section, { subtree: true, attributes: true, attributeFilter: ['class'] });
+    }
   }
 
   // Relocate the floating Highlight + Ask-the-tutor buttons into the sidebar as tiles
