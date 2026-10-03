@@ -2487,7 +2487,7 @@ function initRevisionTips() {
     tried.addEventListener('click', function (e) {
       e.stopPropagation();
       if (window.svTickTask) window.svTickTask('revision-task');
-      tried.textContent = note ? 'Ticked for this lesson' : 'Ticked for this lesson ✓';
+      tried.textContent = '✓ Ticked for this lesson';
       tried.classList.add('done'); tried.disabled = true;
       var n = popup.querySelector('.rt-note');
       if (n) { n.hidden = false; if (popup.scrollIntoView) popup.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }   // whole popup, clear of the sticky header (scroll-margin)
