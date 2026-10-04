@@ -158,8 +158,8 @@
 
       <div class="q">
         <div class="qhead"><span class="qnum">1</span><span class="qtext">What do you want covered?</span></div>
-        <div class="qhint">A subject means one GCSE course family — English Language and Literature count as one, as do Combined and Triple Science, and the three languages.</div>
-        <div class="opts three" id="qCover" role="group" aria-label="What do you want covered"></div>
+        <div class="qhint">A subject means one GCSE course family — English Language and Literature count as one, as do Combined and Separate Sciences, and the modern languages.</div>
+        <div class="opts two" id="qCover" role="group" aria-label="What do you want covered"></div>
       </div>
 
       <div class="q">
@@ -248,7 +248,7 @@
   </div>
 
   <footer>
-    Prices are final — StudyVault is not registered for VAT, so none is added. Licences run to 31 August and renew each September at the same price. A subject means one GCSE course family. Tiers are levels, not stackable bundles.<br>
+    Prices are final — StudyVault is not registered for VAT, so none is added. Licences run to 31 August and renew each September at the same price. A subject means one GCSE course family. A school can hold several subject licences; what it pays in a year counts towards a whole-school licence.<br>
     StudyVault is an independent revision platform and is not affiliated with, or endorsed by, AQA, Pearson Edexcel, OCR, WJEC or Eduqas. Exam board names are used only to identify specification coverage.
   </footer>
 </div>
@@ -267,10 +267,9 @@
     foundingCapPerTrust: 3,                 // one trust may never take more than this
     standard: {
       one:   [195, 265, 345],               // small / medium / large
-      three: [495, 665, 865],
       whole: [1995, 2995, 3995]
     },
-    founding: { one: 95, three: 245, whole: 995 },   // flat, any school size
+    founding: { one: 95, whole: 995 },   // flat, any school size
     trustShare: 2 / 3,                      // of each school's own band
     trustMin: 3,
     contact: "t.shaun@studyvault.co.uk"
@@ -278,7 +277,6 @@
 
   var COVER = [
     { id:"one",   label:"One subject",      hint:"A single department" },
-    { id:"three", label:"Up to three",      hint:"Split across departments" },
     { id:"whole", label:"The whole school", hint:"Every subject we cover" }
   ];
   var SIZE = [
@@ -385,6 +383,7 @@
     } else {
       out.notes.push("Invoiced now, running to 31 August.");
     }
+    if (A.cover === "one") out.notes.push("Adding departments later? What you have paid for subjects this year counts towards a whole-school licence.");
     out.notes.push("Introduce another school that takes a licence and your next renewal is at two-thirds price.");
     return out;
   }
