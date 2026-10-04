@@ -1,249 +1,214 @@
-<meta charset="utf-8">
-<title>StudyVault — What would it cost us?</title>
-<link rel="stylesheet" href="/css/scrollbar.css">
-<style>
-  :root {
-    --bg: #faf8f5; --panel: #fffdfa; --ink: #2d2a26; --muted: #6e675e; --faint: #938b80;
-    --line: rgba(45, 42, 38, 0.14); --accent: #16a34a;
-    --accent-soft: rgba(22, 163, 74, 0.09); --accent-line: rgba(22, 163, 74, 0.32);
-    --serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
-    --sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#211e1b; --panel:#2a2622; --ink:#ede7de; --muted:#a79e92; --faint:#8b8277;
-      --line:rgba(237,231,222,.15); --accent:#6cba86;
-      --accent-soft:rgba(108,186,134,.12); --accent-line:rgba(108,186,134,.34); }
-  }
-  :root[data-theme="dark"] { --bg:#211e1b; --panel:#2a2622; --ink:#ede7de; --muted:#a79e92;
-    --faint:#8b8277; --line:rgba(237,231,222,.15); --accent:#6cba86;
-    --accent-soft:rgba(108,186,134,.12); --accent-line:rgba(108,186,134,.34); }
-  :root[data-theme="light"] { --bg:#faf8f5; --panel:#fffdfa; --ink:#2d2a26; --muted:#6e675e;
-    --faint:#938b80; --line:rgba(45,42,38,.14); --accent:#16a34a;
-    --accent-soft:rgba(22,163,74,.09); --accent-line:rgba(22,163,74,.32); }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prices for schools - StudyVault</title>
+  <meta name="description" content="What StudyVault costs a school or trust: every price on one page, worked out in four questions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Young+Serif&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="stylesheet" href="/css/scrollbar.css">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#2d2a26">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+  <style>
+    /* The quote page: the reading pages' paper, type and brand (css/pages.css), with a
+       price card beside the questions. Rust is the only accent, as on every public page. */
+    .wrap.quote { max-width: 1000px; }
+    .qgrid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 22px; align-items: start; }
+    @media (max-width: 860px) { .qgrid { grid-template-columns: 1fr; } }
+    .qgrid .page { max-width: none; margin: 0; }
+    .page .lede { max-width: 58ch; }
 
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
-    font-size:15px; line-height:1.55; }
-  .wrap { max-width: 940px; margin: 0 auto; padding: 34px 22px 80px; }
+    .q { margin-top: 1.7rem; }
+    .q h2 { margin: 0 0 .7rem; display: flex; gap: .55rem; align-items: baseline; }
+    .qnum { font: 600 1.15rem var(--hand); color: var(--rust); min-width: 1ch; }
+    .opts { display: grid; gap: .5rem; }
+    .opts.two { grid-template-columns: 1fr 1fr; }
+    .opts.three { grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 560px) { .opts.two, .opts.three { grid-template-columns: 1fr; } }
+    .opt { font: 600 .95rem var(--head); color: var(--ink); text-align: left; cursor: pointer;
+      background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: .75rem .9rem;
+      transition: border-color .15s ease, background .15s ease; }
+    .opt b { font-weight: 600; }
+    .opt span { display: none; }
+    .opt:hover { border-color: #b9a98c; }
+    .opt[aria-pressed="true"] { background: var(--card); border-color: var(--rust); box-shadow: inset 0 0 0 1px var(--rust); }
+    .opt:focus-visible, .page input:focus-visible, .btn:focus-visible { outline: 2px solid var(--rust); outline-offset: 2px; }
 
-  .masthead { display:flex; align-items:baseline; justify-content:space-between; gap:16px;
-    padding-bottom:16px; border-bottom:1px solid var(--line); margin-bottom:28px; }
-  .wordmark { font-family:var(--serif); font-size:27px; font-weight:600; letter-spacing:-.01em; }
-  .wordmark svg { width:.5em; height:.5em; vertical-align:.01em; margin-left:.08em; fill:currentColor; }
-  .mast-right { text-align:right; color:var(--muted); font-size:12px; line-height:1.45; }
-  .mast-right b { color:var(--ink); font-weight:600; }
+    details.fam { margin: 0 0 .7rem; }
+    details.fam > summary { cursor: pointer; font: 600 .9rem var(--head); color: var(--sec); }
+    details.fam ul { list-style: none; padding: 0; margin: .6rem 0 .4rem; display: grid; grid-template-columns: 1fr 1fr; gap: .15rem 1.2rem; }
+    @media (max-width: 560px) { details.fam ul { grid-template-columns: 1fr; } }
+    details.fam li { font-size: .9rem; line-height: 1.45; margin: 0; }
+    details.fam p { font-size: .9rem; margin: .2rem 0 0; }
 
-  h1 { font-family:var(--serif); font-size:clamp(26px,4.4vw,36px); font-weight:600;
-    margin:0 0 8px; letter-spacing:-.01em; text-wrap:balance; }
-  .standfirst { color:var(--muted); max-width:60ch; margin:0 0 28px; }
-  .standfirst b { color:var(--ink); font-weight:600; }
+    .trustrow { display: flex; gap: .9rem; flex-wrap: wrap; align-items: center; margin-top: .3rem; }
+    .trustrow label { font: 600 .9rem var(--head); color: var(--sec); display: flex; gap: .45rem; align-items: center; }
+    .page input[type="number"], .page input[type="text"], .page input[type="email"], .page input:not([type]) {
+      font: 500 .95rem var(--head); color: var(--ink); background: var(--paper);
+      border: 1px solid var(--line); border-radius: 4px; padding: .5rem .6rem; }
+    .trustrow input { width: 64px; text-align: right; }
 
-  .layout { display:grid; grid-template-columns: 1fr 340px; gap:26px; align-items:start; }
-  @media (max-width: 880px) { .layout { grid-template-columns:1fr; } }
+    .founding { margin-top: 1.9rem; background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 1rem 1.1rem; }
+    .founding label { display: grid; grid-template-columns: auto 1fr; gap: .7rem; cursor: pointer; align-items: start; }
+    .founding input { width: 18px; height: 18px; margin: .2rem 0 0; accent-color: var(--rust); }
+    .founding h3 { margin: 0; font: 600 1.05rem var(--read); }
+    .founding .left { font: 600 1.1rem var(--hand); color: var(--rust); margin-left: .4rem; }
+    .founding p, .founding li { font-size: .92rem; line-height: 1.55; }
+    .founding p { margin: .3rem 0 .4rem; }
+    .founding ul { margin: 0 0 0 2.05rem; padding-left: 1rem; }
+    .founding li { margin-bottom: .15rem; }
+    .fdrop { margin: .5rem 0 0 2.05rem; font: 600 .95rem var(--head); color: var(--ink); }
 
-  .q { margin-bottom:26px; }
-  .q > .qhead { display:flex; align-items:baseline; gap:10px; margin-bottom:11px; }
-  .qnum { font-family:var(--serif); font-size:14px; font-weight:600; color:var(--accent);
-    min-width:1.4em; }
-  .qtext { font-size:16.5px; font-weight:600; }
-  .qhint { font-size:13px; color:var(--muted); margin:-6px 0 11px 26px; }
-  .opts { display:grid; gap:9px; margin-left:26px; }
-  .fam { margin:0 0 11px 26px; font-size:13px; color:var(--muted); }
-  .fam summary { cursor:pointer; color:var(--ink); font-weight:600; }
-  .fam ul { list-style:none; padding:0; margin:8px 0 6px; display:grid; grid-template-columns:1fr 1fr; gap:3px 20px; }
-  .fam b { color:var(--ink); font-weight:600; margin-right:3px; }
-  @media (max-width:600px){ .fam ul{ grid-template-columns:1fr; } }
-  .opts.two { grid-template-columns:1fr 1fr; }
-  .opts.three { grid-template-columns:repeat(3,1fr); }
-  @media (max-width:600px){ .opts.two,.opts.three{ grid-template-columns:1fr; } }
+    .incl { columns: 2; column-gap: 1.6rem; padding-left: 1.1rem; }
+    @media (max-width: 560px) { .incl { columns: 1; } }
+    .incl li { break-inside: avoid; }
 
-  .opt { text-align:left; font:inherit; color:inherit; cursor:pointer;
-    background:var(--panel); border:1px solid var(--line); border-radius:12px;
-    padding:11px 14px; transition:border-color .12s, background .12s; }
-  .opt:hover { border-color:var(--accent-line); }
-  .opt[aria-pressed="true"] { border-color:var(--accent); background:var(--accent-soft); }
-  .opt b { display:block; font-weight:600; font-size:14.5px; }
-  .opt span { display:block; font-size:12.5px; color:var(--muted); margin-top:1px; }
-  .opt:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    .formal .fields { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin: .8rem 0 1rem; }
+    @media (max-width: 560px) { .formal .fields { grid-template-columns: 1fr; } }
+    .formal label { display: block; font: 600 .85rem var(--head); color: var(--sec); margin-bottom: .25rem; }
+    .formal input { width: 100%; }
+    .actions { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .btn { font: 700 .95rem var(--head); border-radius: 4px; padding: .65rem 1.1rem; cursor: pointer; text-decoration: none; border: 1px solid #3a2615; }
+    .page a.btn { border-bottom: 1px solid #3a2615; }
+    .btn.primary { background: #4a3726; color: #fff8ee; }
+    .btn.primary:hover { background: #3a2a1c; }
+    .btn.quiet { background: var(--card); color: var(--ink); border-color: var(--line); }
+    .btn.quiet:hover { border-color: #b9a98c; }
+    .smallprint { font-size: .85rem !important; color: var(--mut) !important; margin-top: .9rem; }
 
-  .trustrow { margin-left:26px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  .trustrow input[type="number"] { width:70px; font:inherit; font-size:14px; padding:5px 8px;
-    border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink);
-    text-align:right; }
-  .trustrow label { font-size:13.5px; color:var(--muted); }
+    /* the price card */
+    .price { position: sticky; top: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 4px;
+      box-shadow: 0 1px 0 rgba(60,40,20,.05); padding: 1.3rem 1.3rem 1.4rem; }
+    .price .kicker { font: 700 .74rem var(--head); text-transform: uppercase; letter-spacing: .1em; color: var(--mut); }
+    .figure { font: 400 2.7rem/1.05 'Young Serif', Georgia, serif; color: var(--ink); margin: .45rem 0 .1rem; font-variant-numeric: tabular-nums; }
+    .figure small { display: block; font: 500 .9rem var(--head); color: var(--sec); margin-top: .35rem; }
+    .badge { font: 600 1.15rem var(--hand); color: var(--rust); }
+    .was { font: 400 .92rem/1.5 var(--read); color: var(--sec); margin-top: .5rem; }
+    .rlines { margin-top: .9rem; border-top: 1px solid var(--linel); }
+    .rline { display: flex; justify-content: space-between; gap: .8rem; padding: .45rem 0; border-bottom: 1px solid var(--linel); font: 500 .88rem var(--head); color: var(--sec); }
+    .rline b { color: var(--ink); text-align: right; font-weight: 700; }
+    .rnote { margin-top: .9rem; font: 400 .9rem/1.55 var(--read); color: var(--sec); }
+    .rnote b { color: var(--ink); }
+    .terms { max-width: 1000px; margin: 1.2rem auto 0; font-size: .8rem; line-height: 1.6; color: var(--mut); text-align: center; padding: 0 clamp(16px,4vw,32px); }
 
-  /* result */
-  .result { position:sticky; top:20px; background:var(--panel); border:1px solid var(--line);
-    border-radius:16px; padding:20px 22px; }
-  .result .kicker { font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
-    color:var(--faint); font-weight:700; margin-bottom:8px; }
-  .figure { font-family:var(--serif); font-size:44px; font-weight:600; line-height:1.05;
-    letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
-  .figure small { display:block; font-family:var(--sans); font-size:13px; font-weight:500;
-    color:var(--muted); letter-spacing:0; margin-top:5px; }
-  .was { color:var(--muted); font-size:13.5px; margin-top:9px; }
-  .was s { color:var(--faint); }
-  .badge { display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.08em;
-    text-transform:uppercase; color:var(--accent); background:var(--accent-soft);
-    border:1px solid var(--accent-line); padding:3px 9px; border-radius:999px; margin-bottom:12px; }
-  .rlines { margin:16px 0 0; padding:15px 0 0; border-top:1px solid var(--line); }
-  .rline { display:flex; justify-content:space-between; gap:12px; font-size:13px;
-    color:var(--muted); padding:3px 0; }
-  .rline b { color:var(--ink); font-weight:600; text-align:right; }
-  .rnote { font-size:13px; color:var(--muted); margin-top:14px; padding-top:14px;
-    border-top:1px solid var(--line); }
-  .rnote b { color:var(--ink); font-weight:600; }
+    /* phones: the price card sits below the form, so a bar at the foot of the screen keeps the price in view */
+    .mprice { display: none; }
+    @media (max-width: 860px) {
+      .mprice { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: flex; align-items: baseline; gap: .6rem;
+        background: var(--card); border-top: 1px solid var(--line); box-shadow: 0 -6px 18px -12px rgba(60,40,20,.35);
+        padding: .7rem clamp(16px,4vw,32px) calc(.7rem + env(safe-area-inset-bottom, 0px)); }
+      .mprice[hidden] { display: none; }
+      .mprice b { font: 400 1.6rem/1 'Young Serif', Georgia, serif; color: var(--ink); }
+      .mprice span { font: 500 .85rem var(--head); color: var(--sec); flex: 1; }
+      .mprice a { font: 700 .85rem var(--head); color: var(--rust); text-decoration: none; white-space: nowrap; }
+      body.has-mprice { padding-bottom: 4.5rem; }
+    }
+    @media print {
+      .top, .q, .founding, .formal, .legalrow, .incl-wrap { display: none !important; }
+      .qgrid { grid-template-columns: 1fr; }
+      .price { position: static; box-shadow: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+<div class="top">
+  <a class="brand" href="/">StudyVault<img class="brandlock" src="/assets/studyvault-lock-rust.svg" alt=""></a>
+  <span class="sp"></span>
+  <nav class="pnav" aria-label="Pages"><a href="/about">About</a><a href="/faq">FAQ</a><a href="/copyright.html">Copyright &amp; IP</a><a href="/privacy.html">Privacy</a></nav>
+  <a class="mine" href="/classic">My StudyVault &#8599;</a>
+</div>
 
-  .incl { margin-top:26px; }
-  .incl h2, .next h2 { font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
-    color:var(--faint); font-weight:700; margin:0 0 11px; }
-  .incl ul { list-style:none; margin:0; padding:0; display:grid;
-    grid-template-columns:1fr 1fr; gap:6px 22px; }
-  @media (max-width:600px){ .incl ul{ grid-template-columns:1fr; } }
-  .incl li { font-size:13.5px; color:var(--muted); padding-left:19px; position:relative; }
-  .incl li::before { content:"✓"; position:absolute; left:0; color:var(--accent); font-weight:700; }
-  .incl li b { color:var(--ink); font-weight:600; }
+<div class="wrap quote">
+  <div class="qgrid">
+    <main class="page">
+      <h1>What would StudyVault cost us?</h1>
+      <p class="lede">Four questions and you have the price. There is no email address to give and no sales call to book: every price we charge is on this page.</p>
 
-  .next { margin-top:26px; background:var(--panel); border:1px solid var(--line);
-    border-radius:16px; padding:18px 20px; }
-  .fields { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
-  @media (max-width:600px){ .fields{ grid-template-columns:1fr; } }
-  .fields label { display:block; font-size:12px; color:var(--muted); margin-bottom:3px; }
-  .fields input { width:100%; font:inherit; font-size:14px; padding:7px 10px;
-    border:1px solid var(--line); border-radius:9px; background:var(--bg); color:var(--ink); }
-  .fields input:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
-  .wide { grid-column:1/-1; }
-  .actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-  .btn { font:600 14px var(--sans); padding:9px 18px; border-radius:999px; cursor:pointer;
-    border:1px solid var(--accent); background:var(--accent); color:var(--bg); text-decoration:none;
-    display:inline-block; }
-  .btn.ghost { background:transparent; color:var(--muted); border-color:var(--line); }
-  .btn.ghost:hover { border-color:var(--accent); color:var(--accent); }
-  .btn:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }
-  .smallprint { font-size:12px; color:var(--faint); margin-top:12px; }
-
-  /* founding offer */
-  .founding-offer { border:1px solid var(--accent-line); background:var(--accent-soft);
-    border-radius:14px; padding:16px 18px; margin-bottom:26px; }
-  .fbox { display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:start; cursor:pointer; }
-  .fbox input { width:19px; height:19px; margin:2px 0 0; accent-color:var(--accent); cursor:pointer; }
-  .fbox b { display:block; font-size:16px; font-weight:600; margin-bottom:3px; }
-  .fbox em { font-style:normal; font-size:11px; font-weight:700; letter-spacing:.08em;
-    text-transform:uppercase; color:var(--accent); margin-left:8px; }
-  .fbox .fwhy { display:block; font-size:13.5px; color:var(--muted); }
-  .fterms { margin:12px 0 0 31px; padding:0; list-style:none; }
-  .fterms li { font-size:13px; color:var(--muted); padding-left:17px; position:relative; margin:3px 0; }
-  .fterms li::before { content:"·"; position:absolute; left:5px; color:var(--accent); font-weight:700; }
-  .fdrop { margin:11px 0 0 31px; font-size:13.5px; color:var(--ink); font-weight:600; }
-
-  footer { margin-top:34px; padding-top:16px; border-top:1px solid var(--line);
-    color:var(--faint); font-size:11.5px; line-height:1.6; }
-
-  @media print {
-    .q, .next, .masthead .mast-right, .standfirst { display:none; }
-    .layout { grid-template-columns:1fr; }
-    .result { position:static; border:none; padding:0; }
-    body { font-size:12px; }
-  }
-  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
-</style>
-
-<div class="wrap">
-
-  <div class="masthead">
-    <div class="wordmark">StudyVault<svg viewBox="0 0 2048 2048" aria-hidden="true"><path fill="currentColor" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/><path d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></div>
-    <div class="mast-right"><b>GCSE revision, complete.</b><br>www.studyvault.co.uk</div>
-  </div>
-
-  <h1>What would StudyVault cost us?</h1>
-  <p class="standfirst">Four questions and you have the number — <b>no email address, no "request a quote", no sales call</b>. Every price we charge is on this page.</p>
-
-  <div class="layout">
-    <div>
-
-      <div class="q">
-        <div class="qhead"><span class="qnum">1</span><span class="qtext">What do you want covered?</span></div>
-        <div class="qhint">A subject means one department&rsquo;s GCSE family &mdash; English Language and Literature count as one, as do Combined and Separate Sciences, and the modern languages.</div>
-        <details class="fam"><summary>What counts as one subject</summary><ul><li><b>English</b> Language and Literature</li><li><b>Maths</b> Mathematics and Statistics</li><li><b>Science</b> Combined and Separate Sciences</li><li><b>Languages</b> French, German and Spanish</li><li><b>Computing</b> Computer Science, IT, Creative iMedia</li><li><b>PE</b> PE and the vocational sport courses</li><li><b>Design &amp; Technology</b> D&amp;T, Engineering, Electronics, Construction</li><li><b>Food</b> Food Preparation, Hospitality &amp; Catering</li><li><b>Business</b> Business, Economics, Enterprise &amp; Marketing</li><li><b>Music</b> Music and Music Technology</li><li><b>Media</b> Media Studies and Film Studies</li><li><b>Social sciences</b> Psychology and Sociology</li><li><b>Care</b> Health &amp; Social Care, Child Development</li><li><b>Classics</b> Latin and Classical Civilisation</li></ul>History, Geography, Religious Studies, Drama, Citizenship, Astronomy and Geology each count as one on their own.</details>
+      <section class="q">
+        <h2><span class="qnum">1</span>What do you want covered?</h2>
+        <details class="fam"><summary>What counts as one subject</summary>
+          <ul><li><strong>English</strong> Language and Literature</li><li><strong>Maths</strong> Mathematics and Statistics</li><li><strong>Science</strong> Combined and Separate Sciences</li><li><strong>Languages</strong> French, German and Spanish</li><li><strong>Computing</strong> Computer Science, IT, Creative iMedia</li><li><strong>PE</strong> PE and the vocational sport courses</li><li><strong>Design &amp; Technology</strong> D&amp;T, Engineering, Electronics, Construction</li><li><strong>Food</strong> Food Preparation, Hospitality &amp; Catering</li><li><strong>Business</strong> Business, Economics, Enterprise &amp; Marketing</li><li><strong>Music</strong> Music and Music Technology</li><li><strong>Media</strong> Media Studies and Film Studies</li><li><strong>Social sciences</strong> Psychology and Sociology</li><li><strong>Care</strong> Health &amp; Social Care, Child Development</li><li><strong>Classics</strong> Latin and Classical Civilisation</li></ul>
+          <p>History, Geography, Religious Studies, Drama, Citizenship, Astronomy and Geology each count as one on their own.</p>
+        </details>
         <div class="opts two" id="qCover" role="group" aria-label="What do you want covered"></div>
-      </div>
+      </section>
 
-      <div class="q">
-        <div class="qhead"><span class="qnum"></span><span class="qtext">Is this for one school or a trust?</span></div>
-        <div class="qhint">A trust means three or more schools buying together, on one agreement and one invoice.</div>
-        <div class="opts two" id="qTrust" role="group" aria-label="One school or a trust" style="margin-bottom:10px"></div>
+      <section class="q">
+        <h2><span class="qnum"></span>One school, or a trust of three or more?</h2>
+        <div class="opts two" id="qTrust" role="group" aria-label="One school or a trust"></div>
         <div id="trustCount" hidden>
-          <div class="qhint" style="margin-left:26px">Schools in a trust are rarely the same size, and each one is charged for its own size rather than a trust average. How many of each?</div>
+          <p style="margin:.9rem 0 .2rem">How many of your schools are in each size band? Each school pays for its own size.</p>
           <div class="trustrow">
-            <label for="n0">Under 600</label><input type="number" id="n0" min="0" max="60" value="0">
-            <label for="n1">600–1,200</label><input type="number" id="n1" min="0" max="60" value="3">
-            <label for="n2">Over 1,200</label><input type="number" id="n2" min="0" max="60" value="0">
+            <label for="n0">Under 600 <input type="number" id="n0" min="0" max="60" value="0"></label>
+            <label for="n1">600–1,200 <input type="number" id="n1" min="0" max="60" value="3"></label>
+            <label for="n2">Over 1,200 <input type="number" id="n2" min="0" max="60" value="0"></label>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="q" id="qSizeBlock">
-        <div class="qhead"><span class="qnum"></span><span class="qtext">How big is your school?</span></div>
-        <div class="qhint">Total pupils on roll, as published — we never count your students, this only sets the band.</div>
-        <div class="opts three" id="qSize" role="group" aria-label="How big is your school"></div>
-      </div>
+      <section class="q" id="qSizeBlock">
+        <h2><span class="qnum"></span>How many pupils are on your roll?</h2>
+        <div class="opts three" id="qSize" role="group" aria-label="How many pupils are on your roll"></div>
+      </section>
 
-      <div class="q">
-        <div class="qhead"><span class="qnum"></span><span class="qtext">When would you want to start?</span></div>
-        <div class="qhint">Licences always run to 31 August and renew each September.</div>
-        <div class="opts two" id="qWhen" role="group" aria-label="When would you want to start"></div>
-      </div>
+      <section class="q">
+        <h2><span class="qnum"></span>When would you start?</h2>
+        <div class="opts two" id="qWhen" role="group" aria-label="When would you start"></div>
+      </section>
 
-      <div class="founding-offer" id="foundingBlock" hidden>
-        <label class="fbox" for="foundingTick">
+      <div class="founding" id="foundingBlock" hidden>
+        <label for="foundingTick">
           <input type="checkbox" id="foundingTick">
           <span>
-            <b>Join as a Founding School<em id="placesLeft"></em></b>
-            <span class="fwhy">Roughly half price, fixed for as long as your subscription continues — it never rises, whatever standard pricing does. In return you agree to help shape the platform:</span>
+            <h3>Join as a Founding School<span class="left" id="placesLeft"></span></h3>
+            <p>About half price, fixed for as long as your subscription continues. In return, you help shape the platform:</p>
           </span>
         </label>
-        <ul class="fterms">
-          <li>A short feedback call each half-term, around your calendar</li>
-          <li>A named case study and a written testimonial, after a full term — you approve the wording before anything is published</li>
-          <li>Willing to be a reference for two or three interested schools a year</li>
+        <ul>
+          <li>a short feedback call each half-term, around your calendar</li>
+          <li>a named case study and a written testimonial after a full term, with your approval of the wording</li>
+          <li>a reference for two or three interested schools a year</li>
         </ul>
         <div class="fdrop" id="fDrop"></div>
       </div>
 
-      <div class="incl">
+      <div class="incl-wrap">
         <h2>Every licence includes</h2>
-        <ul>
-          <li><b>Unlimited students and staff</b> — no per-pupil counting, ever</li>
-          <li><b>Specification-matched content</b> for your exact board and options</li>
-          <li><b>Audio narration and revision podcasts</b> for every lesson</li>
-          <li><b>AI marking</b> with instant feedback on written answers</li>
-          <li><b>Your own resources built in</b> as bespoke content, at no extra cost</li>
-          <li><b>Updated automatically</b> when specifications change</li>
-          <li><b>UK-hosted student data</b> and a signed Data Processing Agreement</li>
-          <li><b>Direct support</b> from the founder — a serving teacher</li>
+        <ul class="incl">
+          <li><strong>Unlimited students and staff.</strong> We never count pupils.</li>
+          <li><strong>Specification-matched content</strong> for your exact boards and options.</li>
+          <li><strong>Audio narration and revision podcasts</strong> for every lesson.</li>
+          <li><strong>AI marking</strong> with instant feedback on written answers.</li>
+          <li><strong>Your own resources built in</strong> as bespoke content, at no extra cost.</li>
+          <li><strong>Automatic updates</strong> when specifications change.</li>
+          <li><strong>UK-hosted student data</strong> and a signed Data Processing Agreement.</li>
+          <li><strong>Direct support</strong> from the founder, a serving teacher.</li>
         </ul>
       </div>
 
-      <div class="next">
+      <div class="formal">
         <h2>Want this as a formal quote?</h2>
-        <p style="font-size:13.5px;color:var(--muted);margin:0 0 13px">Enough to raise a purchase order against. It comes back the same day, on letterhead, with a Data Processing Agreement attached.</p>
+        <p>One you can raise a purchase order against. It comes back the same day, on letterhead, with a Data Processing Agreement attached.</p>
         <div class="fields">
           <div><label for="fName">Your name</label><input id="fName" autocomplete="name"></div>
           <div><label for="fSchool">School</label><input id="fSchool" autocomplete="organization"></div>
           <div><label for="fEmail">Work email</label><input id="fEmail" type="email" autocomplete="email"></div>
-          <div><label for="fRef">Who told you about StudyVault?</label><input id="fRef" placeholder="Optional"></div>
+          <div><label for="fRef">Who told you about StudyVault? (optional)</label><input id="fRef"></div>
         </div>
         <div class="actions">
-          <a class="btn" id="sendBtn" href="#">Email me this quote</a>
-          <button class="btn ghost" id="printBtn" type="button">Print it</button>
+          <a class="btn primary" id="sendBtn" href="#">Email me this quote</a>
+          <button class="btn quiet" id="printBtn" type="button">Print it</button>
         </div>
-        <p class="smallprint">Your details go straight to the founder's inbox and nowhere else. No mailing list, no follow-up sequence.</p>
+        <p class="smallprint">Your details go to the founder's inbox and nowhere else: no mailing list and no follow-up sequence.</p>
       </div>
+    </main>
 
-    </div>
-
-    <!-- ============ RESULT ============ -->
-    <aside class="result" aria-live="polite">
+    <aside class="price" id="priceCard" aria-live="polite">
       <div id="badge"></div>
       <div class="kicker" id="rKicker">Your price</div>
       <div class="figure" id="rFigure">—<small id="rUnit">answer the questions</small></div>
@@ -252,12 +217,12 @@
       <div class="rnote" id="rNote"></div>
     </aside>
   </div>
-
-  <footer>
-    Prices are final — StudyVault is not registered for VAT, so none is added. Licences run to 31 August and renew each September at the same price. A subject means one GCSE course family. A school can hold several subject licences; what it pays in a year counts towards a whole-school licence.<br>
-    StudyVault is an independent revision platform and is not affiliated with, or endorsed by, AQA, Pearson Edexcel, OCR, WJEC or Eduqas. Exam board names are used only to identify specification coverage.
-  </footer>
 </div>
+
+<div class="mprice" id="mPrice" hidden><b id="mFig"></b><span id="mUnit"></span><a href="#priceCard">Breakdown</a></div>
+
+<p class="terms">Prices are final: StudyVault is not registered for VAT, so none is added. Licences run to 31 August and renew each September at the same price. A school can hold several subject licences, and what it pays in a year counts towards a whole-school licence. StudyVault is an independent revision platform and is not affiliated with, or endorsed by, AQA, Pearson Edexcel, OCR, WJEC or Eduqas.</p>
+<p class="legalrow"><a href="/about">About</a> &middot; <a href="/faq">FAQ</a> &middot; <a href="/copyright.html">Copyright &amp; IP</a> &middot; <a href="/privacy.html">Privacy</a> &middot; <a href="mailto:studyvault.info@gmail.com">Contact</a> &middot; &copy; 2026 StudyVault</p>
 
 <script>
 (function () {
@@ -313,7 +278,7 @@
     items.forEach(function (it) {
       var b = document.createElement("button");
       b.type = "button"; b.className = "opt"; b.setAttribute("aria-pressed", "false");
-      b.innerHTML = "<b>" + it.label + "</b>" + (it.hint ? "<span>" + it.hint + "</span>" : "");
+      b.innerHTML = "<b>" + it.label + "</b>";
       b.onclick = function () {
         A[key] = it.id;
         [].forEach.call(host.children, function (o) { o.setAttribute("aria-pressed", "false"); });
@@ -411,8 +376,7 @@
     var live = P.foundingPlacesLeft > 0;
     $("foundingBlock").hidden = !live;
     if (!live) { A.founding = false; $("foundingTick").checked = false; return; }
-    $("placesLeft").textContent = P.foundingPlacesLeft
-      + (P.foundingPlacesLeft === 1 ? " place left" : " of 10 places left");
+    $("placesLeft").textContent = P.foundingPlacesLeft + (P.foundingPlacesLeft === 1 ? " place left" : " of 10 places left");
     if (!r) { $("fDrop").textContent = ""; return; }
     if (A.founding) {
       $("fDrop").textContent = "Applied — down from " + money(r.standardTotal)
@@ -434,11 +398,14 @@
       $("rFigure").innerHTML = "—<small>answer the questions</small>";
       $("rWas").textContent = ""; $("rLines").innerHTML = ""; $("rNote").innerHTML = "";
       $("badge").innerHTML = ""; $("rKicker").textContent = "Your price";
+      $("mPrice").hidden = true; document.body.classList.remove("has-mprice");
       return;
     }
     $("badge").innerHTML = r.badge ? '<span class="badge">' + r.badge + "</span>" : "";
     $("rKicker").textContent = r.kicker;
     $("rFigure").innerHTML = money(r.headline) + "<small>" + r.unit + "</small>";
+    $("mFig").textContent = money(r.headline); $("mUnit").textContent = r.unit;
+    $("mPrice").hidden = false; document.body.classList.add("has-mprice");
     $("rWas").innerHTML = r.was ? r.was : "";
     $("rLines").innerHTML = r.lines.map(function (l) {
       return '<div class="rline"><span>' + l[0] + "</span><b>" + l[1] + "</b></div>";
@@ -487,3 +454,5 @@
   render();
 })();
 </script>
+</body>
+</html>
