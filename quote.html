@@ -272,11 +272,14 @@
                                             //   Set to 0 and the whole offer disappears.
     foundingCapPerTrust: 3,                 // one trust may never take more than this
     standard: {
-      one:   [195, 265, 345],               // small / medium / large
+      one:   [195, 295, 395],               // small / medium / large — a department is a tenth of the whole school
       whole: [1995, 2995, 3995]
     },
     founding: { one: 95, whole: 995 },   // flat, any school size
-    trustShare: 2 / 3,                      // of each school's own band
+    trust: {                                // two-thirds of each school's own band, rounded (4 Oct 2026)
+      one:   [130, 195, 265],
+      whole: [1330, 1995, 2665]
+    },
     trustMin: 3,
     contact: "t.shaun@studyvault.co.uk"
   };
@@ -344,7 +347,7 @@
       schools.forEach(function (b, i) {
         solo += P.standard[A.cover][b];
         if (i < nFound) { total += fPrice; }
-        else { total += Math.round(P.standard[A.cover][b] * P.trustShare); trustByBand[b]++; }
+        else { total += P.trust[A.cover][b]; trustByBand[b]++; }
       });
       out.standardTotal = solo;
       out.headline = total;
@@ -353,7 +356,7 @@
       if (nFound) out.lines.push([nFound + " × founding place", money(fPrice) + " each"]);
       SIZE.forEach(function (s, b) {
         if (trustByBand[b]) out.lines.push([trustByBand[b] + " × " + s.label.toLowerCase(),
-          money(Math.round(P.standard[A.cover][b] * P.trustShare)) + " each"]);
+          money(P.trust[A.cover][b]) + " each"]);
       });
       out.was = solo ? "They would pay " + money(solo) + " between them as separate schools." : "";
       out.notes.push("One agreement, one invoice. Each school pays for its own size — a small school never picks up part of a bigger one's bill, and you can recharge it school by school.");
@@ -380,7 +383,7 @@
       out.lines.push(["Full-year price", money(annual)]);
       out.lines.push(["Spring start", "two-thirds"]);
       out.notes.push("Spring joiners pay two-thirds for the rest of this year. It renews each September at "
-        + money(annual) + (P.foundingPlacesLeft > 0 && A.trust !== "yes" ? ", locked permanently." : "."));
+        + money(annual) + (onFounding && A.trust !== "yes" ? ", locked permanently." : "."));
     } else if (A.when === "summer") {
       out.lines.push(["This summer", "included"]);
       out.notes.push("Sign for September and start straight away — the rest of this year is included, and you pay from your new budget.");
